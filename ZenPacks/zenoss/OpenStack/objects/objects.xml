@@ -46,7 +46,7 @@ True
 poll_openstack.py '${here/zOpenStackAuthUrl}' '${here/zCommandUsername}' '${here/zCommandPassword}'
 </property>
 <property type="int" id="cycletime" mode="w" >
-60
+300
 </property>
 <property type="boolean" id="usessh" mode="w" >
 False
@@ -1089,7 +1089,6 @@ if device and evt.component:
         if evt.imageStatus != image.imageStatus:
             image.serverStatus = evt.imageStatus
             txnCommit()
-
 </property>
 <property type="string" id="eventClassKey" mode="w" >
 openstackImageStatus
@@ -1114,7 +1113,6 @@ if device and evt.component:
         if evt.serverStatus != server.serverStatus:
             server.serverStatus = evt.serverStatus
             txnCommit()
-
 </property>
 <property type="string" id="eventClassKey" mode="w" >
 openstackServerStatus
