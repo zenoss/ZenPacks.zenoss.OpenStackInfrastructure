@@ -17,24 +17,24 @@ var addOpenStack = new Zenoss.Action({
                 border: false,
                 items: [{
                     xtype: 'textfield',
-                    name: 'title',
-                    fieldLabel: _t('Name'),
+                    name: 'hostname',
+                    fieldLabel: _t('Hostname or IP'),
                     id: "openstackTitleField",
-                    width: 200,
+                    width: 260,
                     allowBlank: false
                 }, {
                     xtype: 'textfield',
                     name: 'authUrl',
                     fieldLabel: _t('Auth URL'),
                     id: "openstackAuthUrlField",
-                    width: 200,
+                    width: 260,
                     allowBlank: false
                 }, {
                     xtype: 'textfield',
                     name: 'username',
                     fieldLabel: _t('Username'),
                     id: "openstackUsernameField",
-                    width: 200,
+                    width: 260,
                     allowBlank: false
                 }, {
                     xtype: 'textfield',
@@ -42,7 +42,7 @@ var addOpenStack = new Zenoss.Action({
                     inputType: 'password',
                     fieldLabel: _t('API Key'),
                     id: "openstackApiKeyField",
-                    width: 200,
+                    width: 260,
                     allowBlank: false
                 }],
                 buttons: [{

@@ -25,7 +25,7 @@ class OpenStackLoader(object):
     """
     implements(IDeviceLoader)
 
-    def load_device(self, dmd, title, authUrl, username, apiKey):
+    def load_device(self, dmd, hostname, authUrl, username, apiKey):
         return getFacade('cloudfoundry', dmd).addOpenStack(
-            title, authUrl, username, apiKey)
+            hostname, authUrl, username, apiKey)
 

@@ -27,15 +27,15 @@ OPENSTACK_DEVICE_PATH = "/Devices/OpenStack"
 class OpenStackFacade(ZuulFacade):
     implements(IOpenStackFacade)
 
-    def addOpenStack(self, title, authUrl, username, apiKey):
+    def addOpenStack(self, hostname, authUrl, username, apiKey):
         """
         Handles adding a new OpenStack endpoint to the system.
         """
         # Verify that this device does not already exist.
         deviceRoot = self._dmd.getDmdRoot("Devices")
-        device = deviceRoot.findDeviceByIdExact(title)
+        device = deviceRoot.findDeviceByIdExact(hostname)
         if device:
-            return False, _t("A device named %s already exists." % title)
+            return False, _t("A device named %s already exists." % hostname)
 
         zProperties = {
             'zOpenStackAuthUrl': authUrl,
@@ -45,9 +45,8 @@ class OpenStackFacade(ZuulFacade):
 
         perfConf = self._dmd.Monitors.getPerformanceMonitor('localhost')
         jobStatus = perfConf.addDeviceCreationJob(
-            deviceName=authUrl,
+            deviceName=hostname,
             devicePath=OPENSTACK_DEVICE_PATH,
-            title=title,
             discoverProto='python',
             zProperties=zProperties)
 
