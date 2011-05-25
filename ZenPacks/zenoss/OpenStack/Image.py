@@ -13,6 +13,7 @@
 
 from Products.ZenModel.DeviceComponent import DeviceComponent
 from Products.ZenModel.ManagedEntity import ManagedEntity
+from Products.ZenModel.ZenossSecurity import ZEN_CHANGE_DEVICE
 from Products.ZenRelations.RelSchema import ToMany, ToManyCont, ToOne
 
 class Image(DeviceComponent, ManagedEntity):
@@ -38,6 +39,15 @@ class Image(DeviceComponent, ManagedEntity):
             ),
         ),
     )
+
+    factory_type_information = ({
+        'actions': ({ 
+            'id': 'perfConf', 
+            'name': 'Template', 
+            'action': 'objTemplates', 
+            'permissions': (ZEN_CHANGE_DEVICE,), 
+        },), 
+    },)
 
     def device(self):
         return self.endpoint()

@@ -33,7 +33,7 @@ class OpenStack(PythonPlugin):
         client = novaclient.OpenStack(
             device.zCommandUsername,
             device.zCommandPassword,
-            #device.zOpenStackAuthUrl,
+            device.zOpenStackAuthUrl,
         )
 
         results = {}
@@ -58,7 +58,7 @@ class OpenStack(PythonPlugin):
             flavors.append(ObjectMap(data=dict(
                 id=str(flavor.id), #1
                 title=flavor.name, # 256 server
-                flavorRAM=flavor.ram * 1024 * 1024,  # 256
+                flavorRAM=flavor.ram * 1024 * 1024, # 256
                 flavorDisk=flavor.disk * 1024 * 1024 * 1024, # 10
             )))
 

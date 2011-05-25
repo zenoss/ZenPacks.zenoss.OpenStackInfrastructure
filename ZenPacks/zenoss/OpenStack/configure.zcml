@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+    <!-- Import directRouter Directive -->
+    <include package="Products.ZenUtils.extdirect.zope" file="meta.zcml"/>
+
+    <!-- Define the Router and Facade -->
+    <browser:directRouter
+        name="openstack_router"
+        for="*"
+        class=".routers.OpenStackRouter"
+        namespace="Zenoss.remote"
+        permission="zenoss.View"
+        />
+
+    <adapter factory=".facades.OpenStackFacade"
+        provides=".interfaces.IOpenStackFacade"
+        name="openstack"
+        for="*"
+        />
+
+    <!-- Define Device Loader -->
+    <utility component=".deviceloaders.OpenStackLoader"
+        name="openstack"
+        provides="Products.ZenModel.interfaces.IDeviceLoader"
+        />
+
+    <!-- Info Adapters -->
+    <adapter
+        factory=".info.FlavorInfo"
+        for=".Flavor.Flavor"
+        provides=".interfaces.IFlavorInfo"
+        />
+
+    <adapter
+        factory=".info.ImageInfo"
+        for=".Image.Image"
+        provides=".interfaces.IImageInfo"
+        />
+
+    <adapter
+        factory=".info.ServerInfo"
+        for=".Server.Server"
+        provides=".interfaces.IServerInfo"
+        />
+
+    <!-- Include Browser Code -->
+    <include package=".browser"/>		
+
+</configure>
+

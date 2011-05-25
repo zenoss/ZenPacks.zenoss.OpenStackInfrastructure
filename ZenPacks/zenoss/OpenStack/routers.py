@@ -11,3 +11,20 @@
 #
 ###########################################################################
 
+from Products.ZenUtils.Ext import DirectRouter, DirectResponse
+from Products import Zuul
+
+class OpenStackRouter(DirectRouter):
+    def _getFacade(self):
+        return Zuul.getFacade('openstack', self.context)
+
+    def addOpenStack(self, title, authUrl, username, apiKey):
+        facade = self._getFacade()
+        success, message = facade.addOpenStack(
+            title, authUrl, username, apiKey)
+        
+        if success:
+            return DirectResponse.succeed(jobId=message)
+        else:
+            return DirectResponse.fail(message)
+

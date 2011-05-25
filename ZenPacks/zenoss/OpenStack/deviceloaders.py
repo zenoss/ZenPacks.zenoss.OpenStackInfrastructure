@@ -11,3 +11,21 @@
 #
 ###########################################################################
 
+import logging
+log = logging.getLogger('zen.OpenStackLoader')
+
+from zope.interface import implements
+
+from Products.Zuul import getFacade
+from Products.ZenModel.interfaces import IDeviceLoader
+
+class OpenStackLoader(object):
+    """
+    Loader for the OpenStack ZenPack.
+    """
+    implements(IDeviceLoader)
+
+    def load_device(self, dmd, title, authUrl, username, apiKey):
+        return getFacade('cloudfoundry', dmd).addOpenStack(
+            title, authUrl, username, apiKey)
+

@@ -1,0 +1,84 @@
+###########################################################################
+#
+# This program is part of Zenoss Core, an open source monitoring platform.
+# Copyright (C) 2011, Zenoss Inc.
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 or (at your
+# option) any later version as published by the Free Software Foundation.
+#
+# For complete information please visit: http://www.zenoss.com/oss/
+#
+###########################################################################
+
+from zope.component import adapts
+from zope.interface import implements
+
+from Products.ZenUtils.Utils import convToUnits
+from Products.Zuul.decorators import info
+from Products.Zuul.infos import ProxyProperty
+from Products.Zuul.infos.component import ComponentInfo
+
+from .Flavor import Flavor
+from .Image import Image
+from .Server import Server
+
+from .interfaces import IFlavorInfo, IImageInfo, IServerInfo
+
+class OpenStackComponentInfo(ComponentInfo):
+    @property
+    def entity(self):
+        return {
+            'uid': self._object.getPrimaryUrlPath(),
+            'name': self._object.titleOrId(),
+            }
+
+class FlavorInfo(OpenStackComponentInfo):
+    implements(IFlavorInfo)
+    adapts(Flavor)
+
+    @property
+    def flavorRAM(self):
+        return convToUnits(self._object.flavorRAM, 1024, 'B')
+
+    @property
+    def flavorDisk(self):
+        return convToUnits(self._object.flavorDisk, 1024, 'B')
+
+    @property
+    def serverCount(self):
+        return self._object.servers.countObjects()
+
+class ImageInfo(OpenStackComponentInfo):
+    implements(IImageInfo)
+    adapts(Image)
+
+    imageStatus = ProxyProperty('imageStatus')
+    imageUpdated = ProxyProperty('imageUpdated')
+
+    @property
+    def serverCount(self):
+        return self._object.servers.countObjects()
+
+class ServerInfo(OpenStackComponentInfo):
+    implements(IServerInfo)
+    adapts(Server)
+
+    serverStatus = ProxyProperty('serverStatus')
+    publicIp = ProxyProperty('publicIp')
+    privateIp = ProxyProperty('privateIp')
+    serverBackupEnabled = ProxyProperty('serverBackupEnabled')
+    serverBackupDaily = ProxyProperty('serverBackupDaily')
+    serverBackupWeekly = ProxyProperty('serverBackupWeekly')
+    hostId = ProxyProperty('hostId')
+
+    @property
+    @info
+    def flavor(self):
+        return self._object.flavor()
+
+    @property
+    @info
+    def image(self):
+        return self._object.image()
+
