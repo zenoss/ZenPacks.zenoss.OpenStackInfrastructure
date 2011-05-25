@@ -43,4 +43,5 @@ class IServerInfo(IComponentInfo):
     serverBackupDaily = schema.Text(title=_t(u"Server Backup Daily"))
     serverBackupWeekly = schema.Text(title=_t(u"Server Backup Weekly"))
     hostId = schema.Text(title=_t(u"Host ID"))
+    guestDevice = schema.Entity(title=_t(u"Guest Device"))
 

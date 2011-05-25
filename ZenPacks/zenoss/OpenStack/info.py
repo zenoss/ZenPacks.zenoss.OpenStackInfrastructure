@@ -86,3 +86,8 @@ class ServerInfo(OpenStackComponentInfo):
     def image(self):
         return self._object.image()
 
+    @property
+    @info
+    def guestDevice(self):
+        return self._object.getGuestDevice()
+

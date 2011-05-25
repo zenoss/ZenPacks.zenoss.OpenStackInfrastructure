@@ -94,3 +94,14 @@ class Server(DeviceComponent, ManagedEntity):
 
         return None
 
+    def getGuestDevice(self):
+        if self.publicIp:
+            device = self.dmd.Devices.findDeviceByIdOrIp(self.publicIp)
+            if device:
+                return device
+
+            ip = self.dmd.Networks.findIp(self.publicIp)
+            return ip.device()
+
+        return None
+

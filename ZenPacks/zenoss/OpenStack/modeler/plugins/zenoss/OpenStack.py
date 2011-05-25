@@ -73,7 +73,7 @@ class OpenStack(PythonPlugin):
             images.append(ObjectMap(data=dict(
                 id='image{0}'.format(image.id),
                 title=image.name, # Red Hat Enterprise Linux 5.5
-                imageId=str(image.id), # 55
+                imageId=image.id, # 55
                 imageStatus=image.status, # ACTIVE
                 imageCreated=image.created, # 2010-09-17T07:19:20-05:00
                 imageUpdated=image.updated, # 2010-09-17T07:19:20-05:00
@@ -89,7 +89,7 @@ class OpenStack(PythonPlugin):
             servers.append(ObjectMap(data=dict(
                 id='server{0}'.format(server.id),
                 title=server.name, # cloudserver01
-                serverId=str(server.id), # 847424
+                serverId=server.id, # 847424
                 serverStatus=server.status, # ACTIVE
                 serverBackupEnabled=server.backup_schedule.enabled, # False
                 serverBackupDaily=server.backup_schedule.daily, # DISABLED
