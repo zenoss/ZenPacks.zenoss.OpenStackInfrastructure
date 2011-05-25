@@ -14,10 +14,14 @@
 import logging
 log = logging.getLogger('zen.OpenStack')
 
+import copy
 import os
 
+from Products.ZenEvents.EventManagerBase import EventManagerBase
+from Products.ZenModel.Device import Device
 from Products.ZenModel.ZenPack import ZenPack as ZenPackBase
-from Products.ZenUtils.Utils import zenPath
+from Products.ZenUtils.Utils import monkeypatch, zenPath
+from Products.Zuul.interfaces import ICatalogTool
 
 class ZenPack(ZenPackBase):
     packZProperties = [
@@ -45,8 +49,30 @@ class ZenPack(ZenPackBase):
         os.system('rm -f {0}'.format(zenPath('libexec', 'poll_openstack.py')))
 
 # We need to filter OpenStack components by id instead of name.
-from Products.ZenEvents.EventManagerBase import EventManagerBase
 EventManagerBase.ComponentIdWhere = (
     "\"(device = '%s' and component = '%s')\""
     " % (me.device().getDmdKey(), me.id)")
+
+@monkeypatch('Products.ZenModel.Device.Device')
+def getOpenStackServer(self):
+    catalog = ICatalogTool(self.dmd)
+    for record in catalog.search('ZenPacks.zenoss.OpenStack.Server.Server'):
+        server = record.getObject()
+        if server.publicIp == self.manageIp:
+            return server
+
+# This would be much cleaner with the new "original" method support in
+# Avalon's monkeypatch decorator. For now we have to do it manually.
+orig_getExpandedLinks = copy.copy(Device.getExpandedLinks.im_func)
+def openstack_getExpandedLinks(self):
+    links = orig_getExpandedLinks(self)
+    server = self.getOpenStackServer()
+    if server:
+        links = '<a href="{0}">OpenStack Server {1} on {2}</a><br/>{3}' \
+            .format(server.getPrimaryUrlPath(), server.titleOrId(),
+                server.endpoint().titleOrId(), links)
+
+    return links
+
+Device.getExpandedLinks = openstack_getExpandedLinks
 
