@@ -164,7 +164,26 @@ class OpenStackPoller(object):
         return data
 
     def printJSON(self):
-        print json.dumps(self.getData())
+        data = None
+        try:
+            data = self.getData()
+            data['events'].append(dict(
+                severity=0,
+                summary='OpenStack connectivity restored',
+                eventKey='openStackFailure',
+                eventClassKey='openStackRestored',
+            ))
+        except Exception, ex:
+            data = dict(
+                events=[dict(
+                    severity=5,
+                    summary='OpenStack failure: {0}'.format(ex),
+                    eventKey='openStackFailure',
+                    eventClassKey='openStackFailure',
+                )]
+            )
+
+        print json.dumps(data)
 
 if __name__ == '__main__':
     authUrl = username = apiKey = None
