@@ -21,7 +21,7 @@ True
 ZenPacks.zenoss.OpenStack.Endpoint
 </property>
 <property visible="True" type="float" id="zCommandCommandTimeout" >
-50.0
+240.0
 </property>
 <tomanycont id='rrdTemplates'>
 <object id='OpenStackEndpoint' module='Products.ZenModel.RRDTemplate' class='RRDTemplate'>
@@ -1125,5 +1125,35 @@ server status is RESCUE
 </property>
 </object>
 </tomanycont>
+</object>
+<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackFailure') -->
+<object id='/zport/dmd/Events/Status/instances/openStackFailure' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+openStackFailure
+</property>
+<property type="int" id="sequence" mode="w" >
+7
+</property>
+<property type="string" id="example" mode="w" >
+OpenStack failure: reason
+</property>
+<property visible="True" type="int" id="zEventSeverity" >
+5
+</property>
+</object>
+<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackRestored') -->
+<object id='/zport/dmd/Events/Status/instances/openStackRestored' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+openStackRestored
+</property>
+<property type="int" id="sequence" mode="w" >
+7
+</property>
+<property type="string" id="example" mode="w" >
+OpenStack connectivity restored
+</property>
+<property visible="True" type="int" id="zEventSeverity" >
+0
+</property>
 </object>
 </objects>
