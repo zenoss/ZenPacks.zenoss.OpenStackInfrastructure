@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <configure
     xmlns="http://namespaces.zope.org/zope"
-    xmlns:browser="http://namespaces.zope.org/browser">
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:zcml="http://namespaces.zope.org/zcml">
 
     <!-- Import directRouter Directive -->
     <include package="Products.ZenUtils.extdirect.zope" file="meta.zcml"/>
@@ -15,19 +16,27 @@
         permission="zenoss.View"
         />
 
-    <adapter factory=".facades.OpenStackFacade"
-        provides=".interfaces.IOpenStackFacade"
+    <adapter
         name="openstack"
+        provides=".interfaces.IOpenStackFacade"
         for="*"
+        factory=".facades.OpenStackFacade"
         />
 
     <!-- Define Device Loader -->
-    <utility component=".deviceloaders.OpenStackLoader"
+    <utility
         name="openstack"
         provides="Products.ZenModel.interfaces.IDeviceLoader"
+        component=".deviceloaders.OpenStackLoader"
         />
 
     <!-- Info Adapters -->
+    <adapter
+        factory=".info.EndpointInfo"
+        for=".Endpoint.Endpoint"
+        provides=".interfaces.IEndpointInfo"
+        />
+
     <adapter
         factory=".info.FlavorInfo"
         for=".Flavor.Flavor"
@@ -48,6 +57,12 @@
 
     <!-- Include Browser Code -->
     <include package=".browser"/>		
+
+    <!-- Include Dynamic View Adapters -->
+    <include
+        zcml:condition="installed ZenPacks.zenoss.DynamicView"
+        package=".dynamicview"
+        />
 
 </configure>
 

@@ -17,13 +17,15 @@ from zope.interface import implements
 from Products.ZenUtils.Utils import convToUnits
 from Products.Zuul.decorators import info
 from Products.Zuul.infos import ProxyProperty
+from Products.Zuul.infos.device import DeviceInfo
 from Products.Zuul.infos.component import ComponentInfo
 
+from .Endpoint import Endpoint
 from .Flavor import Flavor
 from .Image import Image
 from .Server import Server
 
-from .interfaces import IFlavorInfo, IImageInfo, IServerInfo
+from .interfaces import IEndpointInfo, IFlavorInfo, IImageInfo, IServerInfo
 
 class OpenStackComponentInfo(ComponentInfo):
     @property
@@ -32,6 +34,30 @@ class OpenStackComponentInfo(ComponentInfo):
             'uid': self._object.getPrimaryUrlPath(),
             'name': self._object.titleOrId(),
             }
+
+class EndpointInfo(DeviceInfo):
+    implements(IEndpointInfo)
+    adapts(Endpoint)
+
+    @property
+    def authUrl(self):
+        return self._object.primaryAq().zOpenStackAuthUrl
+
+    @property
+    def username(self):
+        return self._object.primaryAq().zCommandUsername
+
+    @property
+    def flavorCount(self):
+        return self._object.flavors.countObjects()
+
+    @property
+    def imageCount(self):
+        return self._object.images.countObjects()
+
+    @property
+    def serverCount(self):
+        return self._object.servers.countObjects()
 
 class FlavorInfo(OpenStackComponentInfo):
     implements(IFlavorInfo)

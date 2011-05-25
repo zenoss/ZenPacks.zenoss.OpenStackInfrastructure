@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configure xmlns="http://namespaces.zope.org/zope">
+
+    <!-- IRelatable Adapters -->
+    <adapter
+        provides="ZenPacks.zenoss.DynamicView.interfaces.IRelatable"
+        for="..Endpoint.Endpoint"
+        factory=".adapters.EndpointRelatable"
+        />
+
+    <adapter
+        provides="ZenPacks.zenoss.DynamicView.interfaces.IRelatable"
+        for="..Server.Server"
+        factory=".adapters.ServerRelatable"
+        />
+
+    <!-- IRelationsProvider Subscribers -->
+    <subscriber
+        provides="ZenPacks.zenoss.DynamicView.interfaces.IRelationsProvider"
+        for="..Endpoint.Endpoint"
+        factory=".adapters.EndpointRelationsProvider"
+        />
+
+    <subscriber
+        provides="ZenPacks.zenoss.DynamicView.interfaces.IRelationsProvider"
+        for="..Server.Server"
+        factory=".adapters.ServerRelationsProvider"
+        />
+
+    <subscriber
+        provides="ZenPacks.zenoss.DynamicView.interfaces.IRelationsProvider"
+        for="Products.ZenModel.Device.Device"
+        factory=".adapters.DeviceRelationsProvider"
+        />
+
+    <!-- Dynamic View -->
+    <include package="ZenPacks.zenoss.DynamicView" file="meta.zcml"/>
+
+    <relatableGroup
+        name="OpenStack"
+        groupType="cloud"
+        icon="/++resource++openstack/img/openstack.png"
+        weight="11"
+        />
+
+    <dynamicViewToGroup
+        view="service_view"
+        group="OpenStack"
+        weight="550"
+        />
+
+    <dynamicViewToGroup
+        view="component_view"
+        group="OpenStack"
+        weight="215"
+        />
+
+</configure>
+

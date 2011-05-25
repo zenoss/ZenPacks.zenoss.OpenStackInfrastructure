@@ -97,5 +97,48 @@ Zenoss.extensions.adddevice = Zenoss.extensions.adddevice instanceof Array ?
                               Zenoss.extensions.adddevice : [];
 Zenoss.extensions.adddevice.push(addOpenStack);
 
+/*
+ * Inspectors.
+ */
+var NS = Ext.namespace('Zenoss.zenpacks.OpenStack');
+
+NS.OpenStackEndpointInspector = Ext.extend(Zenoss.inspector.DeviceInspector, {
+    constructor: function(config) {
+        NS.OpenStackEndpointInspector.superclass.constructor.call(this, config);
+        this.addPropertyTpl(_t('Authentication URL'), '{values.authUrl}');
+        this.addPropertyTpl(_t('Username'), '{values.username}');
+        this.addPropertyTpl(_t('Total Servers'), '{values.serverCount}');
+        this.addPropertyTpl(_t('Total Flavors'), '{values.flavorCount}');
+        this.addPropertyTpl(_t('Total Images'), '{values.imageCount}');
+    }
+});
+
+Ext.reg('OpenStackEndpointInspector', NS.OpenStackEndpointInspector);
+Zenoss.inspector.registerInspector(
+    'OpenStackEndpoint', 'OpenStackEndpointInspector');
+
+NS.OpenStackServerInspector = Ext.extend(Zenoss.inspector.ComponentInspector, {
+    constructor: function(config) {
+        NS.OpenStackServerInspector.superclass.constructor.call(this, config);
+        this.addPropertyTpl(_t('Guest Device'),
+            '{[Zenoss.render.link(values.guestDevice)]}');
+
+        this.addPropertyTpl(_t('Server Status'), '{values.serverStatus}');
+        this.addPropertyTpl(_t('Public IP'), '{values.publicIp}');
+        this.addPropertyTpl(_t('Private IP'), '{values.privateIp}');
+        this.addPropertyTpl(_t('Flavor'),
+            '{[Zenoss.render.link(values.flavor)]}');
+
+        this.addPropertyTpl(_t('Image'),
+            '{[Zenoss.render.link(values.image)]}');
+
+        this.addPropertyTpl(_t('Host ID'), '{values.hostId}');
+    }
+});
+
+Ext.reg('OpenStackServerInspector', NS.OpenStackServerInspector);
+Zenoss.inspector.registerInspector(
+    'OpenStackServer', 'OpenStackServerInspector');
+
 }());
 

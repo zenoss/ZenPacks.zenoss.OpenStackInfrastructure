@@ -13,6 +13,7 @@
 
 from Products.Zuul.form import schema
 from Products.Zuul.interfaces import IFacade
+from Products.Zuul.interfaces import IDeviceInfo
 from Products.Zuul.interfaces.component import IComponentInfo
 from Products.Zuul.utils import ZuulMessageFactory as _t
 
@@ -21,6 +22,13 @@ class IOpenStackFacade(IFacade):
         """
         Add OpenStack Endpoint.
         """
+
+class IEndpointInfo(IDeviceInfo):
+    authUrl = schema.Text(title=_t(u"Authentication URL"))
+    username = schema.Text(title=_t(u"Username"))
+    serverCount = schema.Int(title=_t(u"Total Servers"))
+    flavorCount = schema.Int(title=_t(u"Total Flavors"))
+    imageCount = schema.Int(title=_t(u"Total Images"))
 
 class IFlavorInfo(IComponentInfo):
     flavorRAMString = schema.Text(title=_t(u"Flavor RAM"))
