@@ -19,6 +19,7 @@ from Products.ZenRelations.RelSchema import ToMany, ToManyCont, ToOne
 class Server(DeviceComponent, ManagedEntity):
     meta_type = portal_type = "OpenStackServer"
 
+    serverId = None             # 847424
     serverStatus = None         # ACTIVE
     serverBackupEnabled = None  # False
     serverBackupDaily = None    # DISABLED
@@ -28,6 +29,7 @@ class Server(DeviceComponent, ManagedEntity):
     hostId = None               # a84303c0021aa53c7e749cbbbfac265f
 
     _properties = ManagedEntity._properties + (
+        {'id': 'serverId', 'type': 'int', 'mode': ''},
         {'id': 'serverStatus', 'type': 'string', 'mode': ''},
         {'id': 'serverBackupEnabled', 'type': 'boolean', 'mode': ''},
         {'id': 'serverBackupDaily', 'type': 'string', 'mode': ''},
@@ -69,23 +71,23 @@ class Server(DeviceComponent, ManagedEntity):
 
     def setFlavorId(self, flavorId):
         for flavor in self.endpoint.flavors():
-            if flavor.id == flavorId:
+            if flavorId == flavor.flavorId:
                 self.flavor.addRelation(flavor)
 
     def getFlavorId(self):
         if self.flavor():
-            return self.flavor().id
+            return self.flavor().flavorId
 
         return None
 
     def setImageId(self, imageId):
         for image in self.endpoint.images():
-            if image.id == str(imageId):
+            if imageId == image.imageId:
                 self.image.addRelation(image)
 
     def getImageId(self):
         if self.image():
-            return self.image().id
+            return self.image().imageId
 
         return None
 

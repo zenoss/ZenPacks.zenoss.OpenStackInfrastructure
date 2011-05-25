@@ -37,12 +37,15 @@ class FlavorInfo(OpenStackComponentInfo):
     implements(IFlavorInfo)
     adapts(Flavor)
 
+    flavorRAM = ProxyProperty('flavorRAM')
+    flavorDisk = ProxyProperty('flavorDisk')
+
     @property
-    def flavorRAM(self):
+    def flavorRAMString(self):
         return convToUnits(self._object.flavorRAM, 1024, 'B')
 
     @property
-    def flavorDisk(self):
+    def flavorDiskString(self):
         return convToUnits(self._object.flavorDisk, 1024, 'B')
 
     @property
@@ -54,6 +57,7 @@ class ImageInfo(OpenStackComponentInfo):
     adapts(Image)
 
     imageStatus = ProxyProperty('imageStatus')
+    imageCreated = ProxyProperty('imageCreated')
     imageUpdated = ProxyProperty('imageUpdated')
 
     @property

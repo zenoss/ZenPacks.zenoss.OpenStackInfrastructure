@@ -56,8 +56,9 @@ class OpenStack(PythonPlugin):
         flavors = []
         for flavor in results['flavors']:
             flavors.append(ObjectMap(data=dict(
-                id=str(flavor.id), #1
+                id='flavor{0}'.format(flavor.id),
                 title=flavor.name, # 256 server
+                flavorId=flavor.id, # 1
                 flavorRAM=flavor.ram * 1024 * 1024, # 256
                 flavorDisk=flavor.disk * 1024 * 1024 * 1024, # 10
             )))
@@ -70,10 +71,12 @@ class OpenStack(PythonPlugin):
         images = []
         for image in results['images']:
             images.append(ObjectMap(data=dict(
-                id=str(image.id), # 55
+                id='image{0}'.format(image.id),
                 title=image.name, # Red Hat Enterprise Linux 5.5
+                imageId=str(image.id), # 55
                 imageStatus=image.status, # ACTIVE
-                imageUpdated=image.updated, # 010-09-17T07:19:20-05:00
+                imageCreated=image.created, # 2010-09-17T07:19:20-05:00
+                imageUpdated=image.updated, # 2010-09-17T07:19:20-05:00
             )))
 
         imagesMap = RelationshipMap(
@@ -84,16 +87,17 @@ class OpenStack(PythonPlugin):
         servers = []
         for server in results['servers']:
             servers.append(ObjectMap(data=dict(
-                id=str(server.id), # 847424
+                id='server{0}'.format(server.id),
                 title=server.name, # cloudserver01
+                serverId=str(server.id), # 847424
                 serverStatus=server.status, # ACTIVE
                 serverBackupEnabled=server.backup_schedule.enabled, # False
                 serverBackupDaily=server.backup_schedule.daily, # DISABLED
                 serverBackupWeekly=server.backup_schedule.weekly, # DISABLED
                 publicIp=server.public_ip, # 50.57.74.222
                 privateIp=server.private_ip, # 10.182.13.13
-                setFlavorId=str(server.flavorId), # 1
-                setImageId=str(server.imageId), # 55
+                setFlavorId=server.flavorId, # 1
+                setImageId=server.imageId, # 55
 
                 # a84303c0021aa53c7e749cbbbfac265f
                 hostId=server.hostId,

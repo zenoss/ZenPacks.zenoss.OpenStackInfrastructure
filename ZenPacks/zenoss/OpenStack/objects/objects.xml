@@ -1,3 +1,53 @@
 <?xml version="1.0"?>
 <objects>
+<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'Image') -->
+<object id='/zport/dmd/Events/Status/Image' module='Products.ZenEvents.EventClass' class='EventClass'>
+<tomanycont id='instances'>
+<object id='openstackImageStatus' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+if device and evt.component:
+    image = device.images._getOb(evt.component, None)
+    if image:
+        if evt.imageStatus != image.imageStatus:
+            image.serverStatus = evt.imageStatus
+            txnCommit()
+
+</property>
+<property type="string" id="eventClassKey" mode="w" >
+openstackImageStatus
+</property>
+<property type="int" id="sequence" mode="w" >
+7
+</property>
+<property type="string" id="example" mode="w" >
+image status is FAILED
+</property>
+</object>
+</tomanycont>
+</object>
+<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'VM') -->
+<object id='/zport/dmd/Events/Status/VM' module='Products.ZenEvents.EventClass' class='EventClass'>
+<tomanycont id='instances'>
+<object id='openstackServerStatus' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+if device and evt.component:
+    server = device.servers._getOb(evt.component, None)
+    if server:
+        if evt.serverStatus != server.serverStatus:
+            server.serverStatus = evt.serverStatus
+            txnCommit()
+
+</property>
+<property type="string" id="eventClassKey" mode="w" >
+openstackServerStatus
+</property>
+<property type="int" id="sequence" mode="w" >
+7
+</property>
+<property type="string" id="example" mode="w" >
+server status is RESCUE
+</property>
+</object>
+</tomanycont>
+</object>
 </objects>

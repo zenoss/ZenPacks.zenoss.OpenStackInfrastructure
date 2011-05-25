@@ -109,6 +109,10 @@ ZC.OpenStackFlavorPanel = Ext.extend(ZC.OpenStackComponentGridPanel, {
         config = Ext.applyIf(config||{}, {
             autoExpandColumn: 'entity',
             componentType: 'OpenStackFlavor',
+            sortInfo: {
+                field: 'flavorRAM',
+                direction: 'ASC'
+            },
             fields: [
                 {name: 'uid'},
                 {name: 'name'},
@@ -137,12 +141,14 @@ ZC.OpenStackFlavorPanel = Ext.extend(ZC.OpenStackComponentGridPanel, {
                 id: 'flavorRAM',
                 dataIndex: 'flavorRAM',
                 header: _t('RAM'),
+                renderer: Zenoss.render.bytesString,
                 sortable: true,
                 width: 70
             },{
                 id: 'flavorDisk',
                 dataIndex: 'flavorDisk',
                 header: _t('Disk'),
+                renderer: Zenoss.render.bytesString,
                 sortable: true,
                 width: 70
             },{
@@ -180,6 +186,7 @@ ZC.OpenStackImagePanel = Ext.extend(ZC.OpenStackComponentGridPanel, {
                 {name: 'severity'},
                 {name: 'entity'},
                 {name: 'imageStatus'},
+                {name: 'imageCreated'},
                 {name: 'imageUpdated'},
                 {name: 'serverCount'},
                 {name: 'monitor'},
@@ -204,6 +211,12 @@ ZC.OpenStackImagePanel = Ext.extend(ZC.OpenStackComponentGridPanel, {
                 header: _t('Status'),
                 sortable: true,
                 width: 80
+            },{
+                id: 'imageCreated',
+                dataIndex: 'imageCreated',
+                header: _t('Created'),
+                sortable: true,
+                width: 155
             },{
                 id: 'imageUpdated',
                 dataIndex: 'imageUpdated',

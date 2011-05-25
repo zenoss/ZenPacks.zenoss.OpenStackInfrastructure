@@ -23,12 +23,13 @@ class IOpenStackFacade(IFacade):
         """
 
 class IFlavorInfo(IComponentInfo):
-    flavorRAM = schema.Text(title=_t(u"Flavor RAM"))
-    flavorDisk = schema.Text(title=_t(u"Flavor Disk"))
+    flavorRAMString = schema.Text(title=_t(u"Flavor RAM"))
+    flavorDiskString = schema.Text(title=_t(u"Flavor Disk"))
     serverCount = schema.Int(title=_t(u"Server Count"))
 
 class IImageInfo(IComponentInfo):
     imageStatus = schema.Text(title=_t(u"Image Status"))
+    imageCreated = schema.Text(title=_t(u"Image Created"))
     imageUpdated = schema.Text(title=_t(u"Image Updated"))
     serverCount = schema.Int(title=_t(u"Server Count"))
 

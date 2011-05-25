@@ -35,12 +35,12 @@ class ZenPack(ZenPackBase):
         super(ZenPack, self).remove(app, leaveObjects=leaveObjects)
 
     def symlinkPlugin(self):
-        log.info('Linking poll_openstack plugin into $ZENHOME/libexec/')
+        log.info('Linking poll_openstack.py plugin into $ZENHOME/libexec/')
         os.system('ln -sf {0} {1}'.format(
-            self.path('poll_openstack'),
-            zenPath('libexec', 'poll_openstack')))
+            self.path('poll_openstack.py'),
+            zenPath('libexec', 'poll_openstack.py')))
 
     def removePluginSymlink(self):
-        log.info('Removing poll_openstack link from $ZENHOME/libexec/')
-        os.system('rm -f {0}'.format(zenPath('libexec', 'poll_openstack')))
+        log.info('Removing poll_openstack.py link from $ZENHOME/libexec/')
+        os.system('rm -f {0}'.format(zenPath('libexec', 'poll_openstack.py')))
 
