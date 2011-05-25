@@ -1,0 +1,3 @@
+[submodule "src/python-novaclient"]
+	path = src/python-novaclient
+	url = https://github.com/rackspace/python-novaclient.git
