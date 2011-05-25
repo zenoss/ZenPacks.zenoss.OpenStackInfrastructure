@@ -51,6 +51,9 @@ class Flavor(DeviceComponent, ManagedEntity):
         },), 
     },)
 
+    # Query for events by id instead of name.
+    event_key = "ComponentId"
+
     def device(self):
         return self.endpoint()
 

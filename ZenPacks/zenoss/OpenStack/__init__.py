@@ -44,3 +44,9 @@ class ZenPack(ZenPackBase):
         log.info('Removing poll_openstack.py link from $ZENHOME/libexec/')
         os.system('rm -f {0}'.format(zenPath('libexec', 'poll_openstack.py')))
 
+# We need to filter OpenStack components by id instead of name.
+from Products.ZenEvents.EventManagerBase import EventManagerBase
+EventManagerBase.ComponentIdWhere = (
+    "\"(device = '%s' and component = '%s')\""
+    " % (me.device().getDmdKey(), me.id)")
+
