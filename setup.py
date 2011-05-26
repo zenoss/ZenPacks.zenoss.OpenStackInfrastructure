@@ -30,6 +30,14 @@ PREV_ZENPACK_NAME = ""
 
 from setuptools import setup, find_packages
 
+# make build
+import subprocess
+p = subprocess.Popen('make build', shell=True)
+if p.poll() == None:
+        p.wait()
+if p.returncode != 0:
+    raise Exception('make exited with an error: %s' % p.returncode)
+
 setup(
     # This ZenPack metadata should usually be edited with the Zenoss
     # ZenPack edit page.  Whenever the edit page is submitted it will

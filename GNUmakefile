@@ -25,6 +25,8 @@ egg:
 	python setup.py bdist_egg
 
 build:
+	git submodule init ; \
+	git submodule update ; \
 	cd $(NOVACLIENT_DIR) ; \
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" \
 		$(PYTHON) setup.py install \
