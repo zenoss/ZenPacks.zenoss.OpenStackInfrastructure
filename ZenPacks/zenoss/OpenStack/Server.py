@@ -105,3 +105,19 @@ class Server(DeviceComponent, ManagedEntity):
 
         return None
 
+    def getDefaultGraphDefs(self, drange=None):
+        """
+        Currently no metrics are collected directly from servers. Pull in the
+        graphs from the associated guest device if it is known.
+        """
+        graphs = []
+
+        guestDevice = self.getGuestDevice()
+        if guestDevice:
+            for guest_graph in guestDevice.getDefaultGraphDefs(drange):
+                graphs.append(dict(
+                    title='{0} (Guest Device)'.format(guest_graph['title']),
+                    url=guest_graph['url']))
+
+        return graphs
+
