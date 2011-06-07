@@ -94,7 +94,7 @@ class OpenStack(PythonPlugin):
                 serverBackupEnabled=server.backup_schedule.enabled, # False
                 serverBackupDaily=server.backup_schedule.daily, # DISABLED
                 serverBackupWeekly=server.backup_schedule.weekly, # DISABLED
-                setPublicIp=server.public_ip, # 50.57.74.222
+                publicIp=server.public_ip, # 50.57.74.222
                 privateIp=server.private_ip, # 10.182.13.13
                 setFlavorId=server.flavorId, # 1
                 setImageId=server.imageId, # 55

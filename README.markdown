@@ -26,7 +26,7 @@ versions are supported. You can download the free Core version of Zenoss from
 Download the [latest OpenStack ZenPack][]. Copy this file to your Zenoss
 server and run the following commands as the zenoss user.
 
-    zenpack --install ZenPacks.zenoss.OpenStack-1.0.0-py2.6.egg
+    zenpack --install ZenPacks.zenoss.OpenStack-1.0.1-py2.6.egg
     zenoss restart
 
 ### Developer Installation (link mode)
@@ -96,6 +96,6 @@ when the graphs option is chosen for the OpenStack server.
 
 
 [Zenoss]: <http://www.zenoss.com/>
-[latest OpenStack ZenPack]: <https://github.com/downloads/zenoss/ZenPacks.zenoss.OpenStack/ZenPacks.zenoss.OpenStack-1.0.0-py2.6.egg>
+[latest OpenStack ZenPack]: <https://github.com/downloads/zenoss/ZenPacks.zenoss.OpenStack/ZenPacks.zenoss.OpenStack-1.0.1-py2.6.egg>
 [git repository]: <https://github.com/zenoss/ZenPacks.zenoss.OpenStack>
 [OpenStack]: <http://www.openstack.org/>
