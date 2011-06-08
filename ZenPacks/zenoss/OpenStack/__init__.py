@@ -40,9 +40,10 @@ class ZenPack(ZenPackBase):
 
     def symlinkPlugin(self):
         log.info('Linking poll_openstack.py plugin into $ZENHOME/libexec/')
+        plugin_path = zenPath('libexec', 'poll_openstack.py')
         os.system('ln -sf {0} {1}'.format(
-            self.path('poll_openstack.py'),
-            zenPath('libexec', 'poll_openstack.py')))
+            self.path('poll_openstack.py'), plugin_path))
+        os.system('chmod 0755 {0}'.format(plugin_path))
 
     def removePluginSymlink(self):
         log.info('Removing poll_openstack.py link from $ZENHOME/libexec/')
