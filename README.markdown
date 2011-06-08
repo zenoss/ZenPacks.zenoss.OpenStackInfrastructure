@@ -1,4 +1,6 @@
 # ZenPacks.zenoss.OpenStack
+Please watch the [Monitoring OpenStack][] video for a quick introduction that
+covers most of the details below.
 
 ## About
 This project is a [Zenoss][] extension (ZenPack) that allows for monitoring of
@@ -95,6 +97,7 @@ within the server Zenoss will present the graphs for that operating system
 when the graphs option is chosen for the OpenStack server.
 
 
+[Monitoring OpenStack]: <http://www.youtube.com/watch?v=-43gnQLbX9g>
 [Zenoss]: <http://www.zenoss.com/>
 [latest OpenStack ZenPack]: <https://github.com/downloads/zenoss/ZenPacks.zenoss.OpenStack/ZenPacks.zenoss.OpenStack-1.0.2-py2.6.egg>
 [git repository]: <https://github.com/zenoss/ZenPacks.zenoss.OpenStack>
