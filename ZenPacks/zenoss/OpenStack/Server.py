@@ -101,7 +101,8 @@ class Server(DeviceComponent, ManagedEntity):
                 return device
 
             ip = self.dmd.Networks.findIp(self.publicIp)
-            return ip.device()
+            if ip:
+                return ip.device()
 
         return None
 
