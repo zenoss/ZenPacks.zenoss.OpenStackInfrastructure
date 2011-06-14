@@ -35,6 +35,11 @@ class OpenStackComponentInfo(ComponentInfo):
             'name': self._object.titleOrId(),
             }
 
+    @property
+    def icon(self):
+        return self._object.getIconPath()
+
+
 class EndpointInfo(DeviceInfo):
     implements(IEndpointInfo)
     adapts(Endpoint)

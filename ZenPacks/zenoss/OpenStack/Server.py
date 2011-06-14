@@ -94,6 +94,9 @@ class Server(DeviceComponent, ManagedEntity):
 
         return None
 
+    def getIconPath(self):
+        return '/++resource++openstack/img/openstack.png'
+
     def getGuestDevice(self):
         if self.publicIp:
             device = self.dmd.Devices.findDeviceByIdOrIp(self.publicIp)
