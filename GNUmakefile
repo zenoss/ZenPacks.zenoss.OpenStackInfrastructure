@@ -26,7 +26,7 @@ egg:
 
 build:
 	git submodule init ; \
-	git submodule update ; \
+	GIT_SSL_NO_VERIFY=true git submodule update ; \
 	cd $(NOVACLIENT_DIR) ; \
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" \
 		$(PYTHON) setup.py install \
