@@ -6,6 +6,7 @@ ZenPacks/zenoss/OpenStack/bin/nova
 ZenPacks/zenoss/OpenStack/lib/argparse-1.2.1-py2.6.egg
 ZenPacks/zenoss/OpenStack/lib/easy-install.pth
 ZenPacks/zenoss/OpenStack/lib/httplib2-0.6.0-py2.6.egg
+ZenPacks/zenoss/OpenStack/lib/httplib2-0.7.1-py2.6.egg
 ZenPacks/zenoss/OpenStack/lib/prettytable-0.5-py2.6.egg
 ZenPacks/zenoss/OpenStack/lib/python_novaclient-2.4.2-py2.6.egg
 ZenPacks/zenoss/OpenStack/lib/site.py
