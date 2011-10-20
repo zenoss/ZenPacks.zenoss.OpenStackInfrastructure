@@ -5,8 +5,8 @@ covers most of the details below.
 ## About
 This project is a [Zenoss][] extension (ZenPack) that allows for monitoring of
 OpenStack. This means that you can monitor the flavors, images and servers
-a user or consumer perspective. OpenStack Compute v1.1 (Cactus) is known to be
-supported. Specifically this means that Rackspace's CloudServers can be
+from a user or consumer perspective. OpenStack Compute v1.1 (Cactus) is known
+to be supported. Specifically this means that Rackspace's CloudServers can be
 monitored.
 
 In the future it is likely that support for monitoring OpenStack Storage
