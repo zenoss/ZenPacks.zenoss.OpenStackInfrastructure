@@ -37,4 +37,6 @@ clean:
 	rm -rf build dist *.egg-info
 	find . -name '*.pyc' | xargs rm
 	cd $(NOVACLIENT_DIR) ; rm -rf build dist *.egg-info
+	rm -f $(BIN_DIR)/nova
+	cd $(LIB_DIR) ; rm -Rf *.egg site.py easy-install.pth
 

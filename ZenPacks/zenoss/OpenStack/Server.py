@@ -16,6 +16,7 @@ from Products.ZenModel.ManagedEntity import ManagedEntity
 from Products.ZenModel.ZenossSecurity import ZEN_CHANGE_DEVICE
 from Products.ZenRelations.RelSchema import ToMany, ToManyCont, ToOne
 
+
 class Server(DeviceComponent, ManagedEntity):
     meta_type = portal_type = "OpenStackServer"
 
@@ -24,8 +25,8 @@ class Server(DeviceComponent, ManagedEntity):
     serverBackupEnabled = None  # False
     serverBackupDaily = None    # DISABLED
     serverBackupWeekly = None   # DISABLED
-    publicIp = None             # 50.57.74.222
-    privateIp = None            # 10.182.13.13
+    publicIps = []              # ['50.57.74.222']
+    privateIps = []             # ['10.182.13.13']
     hostId = None               # a84303c0021aa53c7e749cbbbfac265f
 
     _properties = ManagedEntity._properties + (
@@ -34,8 +35,8 @@ class Server(DeviceComponent, ManagedEntity):
         {'id': 'serverBackupEnabled', 'type': 'boolean', 'mode': ''},
         {'id': 'serverBackupDaily', 'type': 'string', 'mode': ''},
         {'id': 'serverBackupWeekly', 'type': 'string', 'mode': ''},
-        {'id': 'publicIp', 'type': 'string', 'mode': ''},
-        {'id': 'privateIp', 'type': 'string', 'mode': ''},
+        {'id': 'publicIps', 'type': 'lines', 'mode': ''},
+        {'id': 'privateIps', 'type': 'lines', 'mode': ''},
         {'id': 'hostId', 'type': 'string', 'mode': ''},
     )
 
@@ -58,12 +59,12 @@ class Server(DeviceComponent, ManagedEntity):
     )
 
     factory_type_information = ({
-        'actions': ({ 
-            'id': 'perfConf', 
-            'name': 'Template', 
-            'action': 'objTemplates', 
-            'permissions': (ZEN_CHANGE_DEVICE,), 
-        },), 
+        'actions': ({
+            'id': 'perfConf',
+            'name': 'Template',
+            'action': 'objTemplates',
+            'permissions': (ZEN_CHANGE_DEVICE,),
+        },),
     },)
 
     # Query for events by id instead of name.
@@ -98,14 +99,15 @@ class Server(DeviceComponent, ManagedEntity):
         return '/++resource++openstack/img/openstack.png'
 
     def getGuestDevice(self):
-        if self.publicIp:
-            device = self.dmd.Devices.findDeviceByIdOrIp(self.publicIp)
-            if device:
-                return device
+        if len(self.publicIps) > 0:
+            for public_ip in self.publicIps:
+                device = self.dmd.Devices.findDeviceByIdOrIp(public_ip)
+                if device:
+                    return device
 
-            ip = self.dmd.Networks.findIp(self.publicIp)
-            if ip:
-                return ip.device()
+                ip = self.dmd.Networks.findIp(public_ip)
+                if ip:
+                    return ip.device()
 
         return None
 
@@ -124,4 +126,3 @@ class Server(DeviceComponent, ManagedEntity):
                     url=guest_graph['url']))
 
         return graphs
-

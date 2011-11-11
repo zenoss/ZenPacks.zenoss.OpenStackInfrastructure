@@ -261,8 +261,8 @@ ZC.OpenStackServerPanel = Ext.extend(ZC.OpenStackComponentGridPanel, {
                 {name: 'serverStatus'},
                 {name: 'flavor'},
                 {name: 'image'},
-                {name: 'publicIp'},
-                {name: 'privateIp'},
+                {name: 'publicIps'},
+                {name: 'privateIps'},
                 {name: 'serverBackupEnabled'},
                 {name: 'monitor'},
                 {name: 'monitored'}
@@ -309,16 +309,14 @@ ZC.OpenStackServerPanel = Ext.extend(ZC.OpenStackComponentGridPanel, {
                 renderer: Zenoss.render.entityLinkFromGrid,
                 width: 140
             },{
-                id: 'publicIp',
-                dataIndex: 'publicIp',
-                header: _t('Public IP'),
-                sortable: true,
+                id: 'publicIps',
+                dataIndex: 'publicIps',
+                header: _t('Public IPs'),
                 width: 85
             },{
-                id: 'privateIp',
-                dataIndex: 'privateIp',
-                header: _t('Private IP'),
-                sortable: true,
+                id: 'privateIps',
+                dataIndex: 'privateIps',
+                header: _t('Private IPs'),
                 width: 85
             },{
                 id: 'serverBackupEnabled',

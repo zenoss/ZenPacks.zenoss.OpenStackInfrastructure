@@ -18,21 +18,31 @@ import sys
 from util import addLocalLibPath
 addLocalLibPath()
 
-import novaclient
+from novaclient.v1_0.client import Client as v1_0_Client
+from novaclient.v1_1.client import Client as v1_1_Client
+
 
 class OpenStackPoller(object):
-    _authUrl = None
-    _username = None
-    _key = None
-
-    def __init__(self, authUrl, username, key):
-        self._authUrl = authUrl
+    def __init__(self, username, api_key, project_id, auth_url, region_name):
         self._username = username
-        self._key = key
+        self._api_key = api_key
+        self._project_id = project_id
+        self._auth_url = auth_url
+        self._region_name = region_name
 
     def getData(self):
-        client = novaclient.OpenStack(
-            self._username, self._key, self._authUrl)
+        client_class = None
+        if 'v1.1' in self._auth_url:
+            client_class = v1_1_Client
+        else:
+            client_class = v1_0_Client
+
+        client = client_class(
+            self._username,
+            self._api_key,
+            self._project_id,
+            self._auth_url,
+            region_name=self._region_name or None)
 
         data = {}
         data['events'] = []
@@ -80,7 +90,7 @@ class OpenStackPoller(object):
                 summary='image status is {0}'.format(image.status),
                 component='image{0}'.format(image.id),
                 eventKey='imageStatus',
-                eventClassKey = 'openstackImageStatus',
+                eventClassKey='openstackImageStatus',
                 imageStatus=image.status,
             ))
 
@@ -157,7 +167,7 @@ class OpenStackPoller(object):
                 summary='server status is {0}'.format(server.status),
                 component='server{0}'.format(server.id),
                 eventKey='serverStatus',
-                eventClassKey = 'openstackServerStatus',
+                eventClassKey='openstackServerStatus',
                 serverStatus=server.status,
             ))
 
@@ -177,7 +187,7 @@ class OpenStackPoller(object):
             data = dict(
                 events=[dict(
                     severity=5,
-                    summary='OpenStack failure: {0}'.format(ex),
+                    summary='OpenStack failure: %s' % ex,
                     eventKey='openStackFailure',
                     eventClassKey='openStackFailure',
                 )]
@@ -186,15 +196,18 @@ class OpenStackPoller(object):
         print json.dumps(data)
 
 if __name__ == '__main__':
-    authUrl = username = apiKey = None
+    username = api_key = project_id = auth_url = region_name = None
     try:
-        authUrl, username, apiKey = sys.argv[1:4]
+        username, api_key, project_id, auth_url, region_name = sys.argv[1:6]
     except ValueError:
-        print >> sys.stderr, "Usage: {0} <authUrl> <username> <api_key>" \
-            .format(sys.argv[0])
+        print >> sys.stderr, (
+            "Usage: %s <username> <api_key> <project_id> <auth_url> "
+            "<region_name>"
+            ) % sys.argv[0]
 
         sys.exit(1)
 
-    poller = OpenStackPoller(authUrl, username, apiKey)
-    poller.printJSON()
+    poller = OpenStackPoller(
+        username, api_key, project_id, auth_url, region_name)
 
+    poller.printJSON()

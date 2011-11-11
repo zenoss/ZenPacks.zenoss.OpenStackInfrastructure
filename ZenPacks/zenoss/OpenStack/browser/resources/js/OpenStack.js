@@ -17,33 +17,40 @@ var addOpenStack = new Zenoss.Action({
                 border: false,
                 items: [{
                     xtype: 'textfield',
-                    name: 'hostname',
-                    fieldLabel: _t('Hostname or IP'),
-                    id: "openstackTitleField",
-                    width: 260,
-                    allowBlank: false
-                }, {
-                    xtype: 'textfield',
-                    name: 'authUrl',
-                    fieldLabel: _t('Auth URL'),
-                    id: "openstackAuthUrlField",
-                    width: 260,
-                    allowBlank: false
-                }, {
-                    xtype: 'textfield',
                     name: 'username',
                     fieldLabel: _t('Username'),
-                    id: "openstackUsernameField",
+                    id: "openstack_username",
                     width: 260,
                     allowBlank: false
                 }, {
                     xtype: 'textfield',
-                    name: 'apiKey',
-                    inputType: 'password',
+                    name: 'api_key',
                     fieldLabel: _t('API Key'),
-                    id: "openstackApiKeyField",
+                    id: "openstack_api_key",
                     width: 260,
                     allowBlank: false
+                }, {
+                    xtype: 'textfield',
+                    name: 'project_id',
+                    fieldLabel: _t('Project ID'),
+                    id: "openstack_project_id",
+                    width: 260,
+                    allowBlank: true
+                }, {
+                    xtype: 'textfield',
+                    name: 'auth_url',
+                    fieldLabel: _t('Auth URL'),
+                    id: "openstack_auth_url",
+                    width: 260,
+                    allowBlank: true,
+                    value: 'https://auth.api.rackspacecloud.com/v1.0'
+                }, {
+                    xtype: 'textfield',
+                    name: 'region_name',
+                    fieldLabel: _t('Region Name'),
+                    id: "openstack_region_name",
+                    width: 260,
+                    allowBlank: true
                 }],
                 buttons: [{
                     xtype: 'DialogButton',
@@ -105,8 +112,10 @@ var NS = Ext.namespace('Zenoss.zenpacks.OpenStack');
 NS.OpenStackEndpointInspector = Ext.extend(Zenoss.inspector.DeviceInspector, {
     constructor: function(config) {
         NS.OpenStackEndpointInspector.superclass.constructor.call(this, config);
-        this.addPropertyTpl(_t('Authentication URL'), '{values.authUrl}');
         this.addPropertyTpl(_t('Username'), '{values.username}');
+        this.addPropertyTpl(_t('Project ID'), '{values.project_id}');
+        this.addPropertyTpl(_t('Auth URL'), '{values.auth_url}');
+        this.addPropertyTpl(_t('Region Name'), '{values.region_name}');
         this.addPropertyTpl(_t('Total Servers'), '{values.serverCount}');
         this.addPropertyTpl(_t('Total Flavors'), '{values.flavorCount}');
         this.addPropertyTpl(_t('Total Images'), '{values.imageCount}');
@@ -124,8 +133,8 @@ NS.OpenStackServerInspector = Ext.extend(Zenoss.inspector.ComponentInspector, {
             '{[Zenoss.render.link(values.guestDevice)]}');
 
         this.addPropertyTpl(_t('Server Status'), '{values.serverStatus}');
-        this.addPropertyTpl(_t('Public IP'), '{values.publicIp}');
-        this.addPropertyTpl(_t('Private IP'), '{values.privateIp}');
+        this.addPropertyTpl(_t('Public IPs'), '{values.publicIps}');
+        this.addPropertyTpl(_t('Private IPs'), '{values.privateIps}');
         this.addPropertyTpl(_t('Flavor'),
             '{[Zenoss.render.link(values.flavor)]}');
 
@@ -139,6 +148,4 @@ NS.OpenStackServerInspector = Ext.extend(Zenoss.inspector.ComponentInspector, {
 Ext.reg('OpenStackServerInspector', NS.OpenStackServerInspector);
 Zenoss.inspector.registerInspector(
     'OpenStackServer', 'OpenStackServerInspector');
-
 }());
-

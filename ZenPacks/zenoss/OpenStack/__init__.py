@@ -23,9 +23,13 @@ from Products.ZenModel.ZenPack import ZenPack as ZenPackBase
 from Products.ZenUtils.Utils import monkeypatch, zenPath
 from Products.Zuul.interfaces import ICatalogTool
 
+
 class ZenPack(ZenPackBase):
     packZProperties = [
         ('zOpenStackAuthUrl', '', 'string'),
+        ('zOpenStackProjectId', '', 'string'),
+        ('zOpenStackInsecure', False, 'boolean'),
+        ('zOpenStackRegionName', '', 'string'),
     ]
 
     def install(self, app):
@@ -54,17 +58,20 @@ EventManagerBase.ComponentIdWhere = (
     "\"(device = '%s' and component = '%s')\""
     " % (me.device().getDmdKey(), me.id)")
 
+
 @monkeypatch('Products.ZenModel.Device.Device')
 def getOpenStackServer(self):
     catalog = ICatalogTool(self.dmd)
     for record in catalog.search('ZenPacks.zenoss.OpenStack.Server.Server'):
         server = record.getObject()
-        if server.publicIp == self.manageIp:
+        if server.publicIps:
             return server
 
 # This would be much cleaner with the new "original" method support in
 # Avalon's monkeypatch decorator. For now we have to do it manually.
 orig_getExpandedLinks = copy.copy(Device.getExpandedLinks.im_func)
+
+
 def openstack_getExpandedLinks(self):
     links = orig_getExpandedLinks(self)
     server = self.getOpenStackServer()
@@ -76,4 +83,3 @@ def openstack_getExpandedLinks(self):
     return links
 
 Device.getExpandedLinks = openstack_getExpandedLinks
-

@@ -21,7 +21,10 @@ True
 ZenPacks.zenoss.OpenStack.Endpoint
 </property>
 <property visible="True" type="float" id="zCommandCommandTimeout" >
-240.0
+300.0
+</property>
+<property visible="True" type="int" id="zCommandCycleTime" >
+300
 </property>
 <tomanycont id='rrdTemplates'>
 <object id='OpenStackEndpoint' module='Products.ZenModel.RRDTemplate' class='RRDTemplate'>
@@ -43,7 +46,7 @@ True
 4
 </property>
 <property type="string" id="commandTemplate" mode="w" >
-poll_openstack.py '${here/zOpenStackAuthUrl}' '${here/zCommandUsername}' '${here/zCommandPassword}'
+poll_openstack.py '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}' '${here/zOpenStackAuthUrl}' '${here/zOpenStackRegionName}'
 </property>
 <property type="int" id="cycletime" mode="w" >
 300

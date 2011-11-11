@@ -14,12 +14,14 @@
 import logging
 log = logging.getLogger('zen.OpenStackFacade')
 
+from urlparse import urlparse
+
 from zope.interface import implements
 
 from Products.Zuul.facades import ZuulFacade
 from Products.Zuul.utils import ZuulMessageFactory as _t
 
-from .interfaces import IOpenStackFacade
+from ZenPacks.zenoss.OpenStack.interfaces import IOpenStackFacade
 
 OPENSTACK_DEVICE_PATH = "/Devices/OpenStack"
 
@@ -27,10 +29,12 @@ OPENSTACK_DEVICE_PATH = "/Devices/OpenStack"
 class OpenStackFacade(ZuulFacade):
     implements(IOpenStackFacade)
 
-    def addOpenStack(self, hostname, authUrl, username, apiKey):
-        """
-        Handles adding a new OpenStack endpoint to the system.
-        """
+    def addOpenStack(self, username, api_key, project_id, auth_url,
+                     region_name=None):
+        """Add a new OpenStack endpoint to the system."""
+        parsed_url = urlparse(auth_url)
+        hostname = parsed_url.hostname
+
         # Verify that this device does not already exist.
         deviceRoot = self._dmd.getDmdRoot("Devices")
         device = deviceRoot.findDeviceByIdExact(hostname)
@@ -38,9 +42,11 @@ class OpenStackFacade(ZuulFacade):
             return False, _t("A device named %s already exists." % hostname)
 
         zProperties = {
-            'zOpenStackAuthUrl': authUrl,
             'zCommandUsername': username,
-            'zCommandPassword': apiKey,
+            'zCommandPassword': api_key,
+            'zOpenStackProjectId': project_id,
+            'zOpenStackAuthUrl': auth_url,
+            'zOpenStackRegionName': region_name or '',
             }
 
         perfConf = self._dmd.Monitors.getPerformanceMonitor('localhost')
@@ -51,4 +57,3 @@ class OpenStackFacade(ZuulFacade):
             zProperties=zProperties)
 
         return True, jobStatus.id
-

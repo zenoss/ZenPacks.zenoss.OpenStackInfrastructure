@@ -19,13 +19,15 @@ from zope.interface import implements
 from Products.Zuul import getFacade
 from Products.ZenModel.interfaces import IDeviceLoader
 
+
 class OpenStackLoader(object):
     """
     Loader for the OpenStack ZenPack.
     """
     implements(IDeviceLoader)
 
-    def load_device(self, dmd, hostname, authUrl, username, apiKey):
-        return getFacade('openstack', dmd).addOpenStack(
-            hostname, authUrl, username, apiKey)
+    def load_device(self, dmd, username, api_key, project_id, auth_url,
+                    region_name=None):
 
+        return getFacade('openstack', dmd).addOpenStack(
+            username, api_key, project_id, auth_url, region_name=region_name)

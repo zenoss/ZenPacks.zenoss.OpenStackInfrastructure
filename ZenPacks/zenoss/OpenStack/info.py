@@ -27,6 +27,7 @@ from .Server import Server
 
 from .interfaces import IEndpointInfo, IFlavorInfo, IImageInfo, IServerInfo
 
+
 class OpenStackComponentInfo(ComponentInfo):
     @property
     def entity(self):
@@ -45,12 +46,20 @@ class EndpointInfo(DeviceInfo):
     adapts(Endpoint)
 
     @property
-    def authUrl(self):
+    def username(self):
+        return self._object.primaryAq().zCommandUsername
+
+    @property
+    def project_id(self):
+        return self._object.primaryAq().zOpenStackProjectId
+
+    @property
+    def auth_url(self):
         return self._object.primaryAq().zOpenStackAuthUrl
 
     @property
-    def username(self):
-        return self._object.primaryAq().zCommandUsername
+    def region_name(self):
+        return self._object.primaryAq().zOpenStackRegionName
 
     @property
     def flavorCount(self):
@@ -63,6 +72,7 @@ class EndpointInfo(DeviceInfo):
     @property
     def serverCount(self):
         return self._object.servers.countObjects()
+
 
 class FlavorInfo(OpenStackComponentInfo):
     implements(IFlavorInfo)
@@ -83,6 +93,7 @@ class FlavorInfo(OpenStackComponentInfo):
     def serverCount(self):
         return self._object.servers.countObjects()
 
+
 class ImageInfo(OpenStackComponentInfo):
     implements(IImageInfo)
     adapts(Image)
@@ -95,13 +106,14 @@ class ImageInfo(OpenStackComponentInfo):
     def serverCount(self):
         return self._object.servers.countObjects()
 
+
 class ServerInfo(OpenStackComponentInfo):
     implements(IServerInfo)
     adapts(Server)
 
     serverStatus = ProxyProperty('serverStatus')
-    publicIp = ProxyProperty('publicIp')
-    privateIp = ProxyProperty('privateIp')
+    publicIps = ProxyProperty('publicIps')
+    privateIps = ProxyProperty('privateIps')
     serverBackupEnabled = ProxyProperty('serverBackupEnabled')
     serverBackupDaily = ProxyProperty('serverBackupDaily')
     serverBackupWeekly = ProxyProperty('serverBackupWeekly')
@@ -121,4 +133,3 @@ class ServerInfo(OpenStackComponentInfo):
     @info
     def guestDevice(self):
         return self._object.getGuestDevice()
-

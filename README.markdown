@@ -1,16 +1,16 @@
 # ZenPacks.zenoss.OpenStack
-Please watch the [Monitoring OpenStack][] video for a quick introduction that
+Please watch the [Monitoring OpenStack][]* video for a quick introduction that
 covers most of the details below.
+
+**\*** The video is of an early version of the ZenPack that doesn't have as
+many options when adding an OpenStack endpoint. See the usage notes below for
+help with the new fields available on the *Add OpenStack* dialog.
 
 ## About
 This project is a [Zenoss][] extension (ZenPack) that allows for monitoring of
 OpenStack. This means that you can monitor the flavors, images and servers
-from a user or consumer perspective. OpenStack Compute v1.1 (Cactus) is known
-to be supported. Specifically this means that Rackspace's CloudServers can be
-monitored.
-
-In the future it is likely that support for monitoring OpenStack Storage
-(Swift) will be added.
+from a user or consumer perspective. OpenStack API versions 1.0 and 1.1 are
+supported.
 
 [OpenStack][] is a global collaboration of developers and cloud computing
 technologists producing the ubiquitous open source cloud computing platform
@@ -28,7 +28,7 @@ versions are supported. You can download the free Core version of Zenoss from
 Download the [latest OpenStack ZenPack][]. Copy this file to your Zenoss
 server and run the following commands as the zenoss user.
 
-    zenpack --install ZenPacks.zenoss.OpenStack-1.0.2-py2.6.egg
+    zenpack --install ZenPacks.zenoss.OpenStack-1.1.0-py2.6.egg
     zenoss restart
 
 ### Developer Installation (link mode)
@@ -48,10 +48,11 @@ You'll find a new option labeled, "Add OpenStack."
 Choose that option and you'll be presented with a dialog asking for the
 following inputs.
 
- 1. Hostname or IP - An example would be rackspacecloud.com.
- 2. Auth URL - For Rackspace this would be https://auth.api.rackspacecloud.com/v1.0
- 3. Username - Same username used to login to OpenStack web interface
- 4. API Key - Can be found by going to "Your Account/API Access"
+  1. Username - Same username used to login to OpenStack web interface
+  2. API Key - Can be found by going to "Your Account/API Access"
+  3. Project ID - This can be left blank if you don't know what it is
+  4. Auth URL - For Rackspace this would be https://auth.api.rackspacecloud.com/v1.0
+  5. Region Name - This can be left blank if you don't know what it is
 
 Once you click Add, Zenoss will contact the OpenStack API and discover
 servers, images and flavors. Once it is complete you'll find a new device in
@@ -99,6 +100,6 @@ when the graphs option is chosen for the OpenStack server.
 
 [Monitoring OpenStack]: <http://www.youtube.com/watch?v=-43gnQLbX9g>
 [Zenoss]: <http://www.zenoss.com/>
-[latest OpenStack ZenPack]: <https://github.com/downloads/zenoss/ZenPacks.zenoss.OpenStack/ZenPacks.zenoss.OpenStack-1.0.2-py2.6.egg>
+[latest OpenStack ZenPack]: <https://github.com/downloads/zenoss/ZenPacks.zenoss.OpenStack/ZenPacks.zenoss.OpenStack-1.1.0-py2.6.egg>
 [git repository]: <https://github.com/zenoss/ZenPacks.zenoss.OpenStack>
 [OpenStack]: <http://www.openstack.org/>

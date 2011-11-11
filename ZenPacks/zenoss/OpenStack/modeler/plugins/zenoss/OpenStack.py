@@ -14,6 +14,8 @@
 import logging
 log = logging.getLogger('zen.OpenStack')
 
+import types
+
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
 
@@ -21,29 +23,41 @@ from ZenPacks.zenoss.OpenStack.util import addLocalLibPath
 addLocalLibPath()
 
 import novaclient
+from novaclient.v1_0.client import Client as v1_0_Client
+from novaclient.v1_1.client import Client as v1_1_Client
 
 
 class OpenStack(PythonPlugin):
     deviceProperties = PythonPlugin.deviceProperties + (
-        'zOpenStackAuthUrl',
         'zCommandUsername',
         'zCommandPassword',
+        'zOpenStackProjectId',
+        'zOpenStackAuthUrl',
+        'zOpenStackRegionName',
     )
 
     def collect(self, device, unused):
-        client = novaclient.OpenStack(
+        client_class = None
+        if 'v1.1' in device.zOpenStackAuthUrl:
+            client_class = v1_1_Client
+        else:
+            client_class = v1_0_Client
+
+        region_name = None
+        if device.zOpenStackRegionName:
+            region_name = device.zOpenStackRegionName
+
+        client = client_class(
             device.zCommandUsername,
             device.zCommandPassword,
+            device.zOpenStackProjectId,
             device.zOpenStackAuthUrl,
-        )
+            region_name=region_name)
 
         results = {}
 
-        try:
-            log.info('Requesting flavors')
-            results['flavors'] = client.flavors.list()
-        except Exception, ex:
-            raise ex
+        log.info('Requesting flavors')
+        results['flavors'] = client.flavors.list()
 
         log.info('Requesting images')
         results['images'] = client.images.list()
@@ -71,12 +85,15 @@ class OpenStack(PythonPlugin):
 
         images = []
         for image in results['images']:
+            # Sometimes there's no created timestamp for an image.
+            created = getattr(image, 'created', '')
+
             images.append(ObjectMap(data=dict(
                 id='image{0}'.format(image.id),
                 title=image.name,  # Red Hat Enterprise Linux 5.5
                 imageId=image.id,  # 55
                 imageStatus=image.status,  # ACTIVE
-                imageCreated=image.created,  # 2010-09-17T07:19:20-05:00
+                imageCreated=created,  # 2010-09-17T07:19:20-05:00
                 imageUpdated=image.updated,  # 2010-09-17T07:19:20-05:00
             )))
 
@@ -101,21 +118,27 @@ class OpenStack(PythonPlugin):
                 backup_schedule_daily = 'DISABLED'
                 backup_schedule_weekly = 'DISABLED'
 
-            # IPs may not exist.
-            public_ip = None
-            private_ip = None
+            # IPs may not exist. They may also be either strings or lists.
+            public_ips = None
+            private_ips = None
 
             try:
-                public_ip = server.public_ip
+                public_ips = server.public_ip
             except KeyError:
-                public_ip = ''
+                public_ips = []
 
             try:
-                private_ip = server.private_ip
+                private_ips = server.private_ip
             except KeyError:
-                private_ip = ''
+                private_ips = []
 
-            # Flavor and Image IDs could be specified in two ways.
+            if isinstance(public_ips, types.StringTypes):
+                public_ips = [public_ips]
+
+            if isinstance(private_ips, types.StringTypes):
+                private_ips = [private_ips]
+
+            # Flavor and Image IDs could be specified two different ways.
             flavor_id = None
             if hasattr(server, 'flavorId'):
                 flavor_id = int(server.flavorId)
@@ -136,8 +159,8 @@ class OpenStack(PythonPlugin):
                 serverBackupEnabled=backup_schedule_enabled,  # False
                 serverBackupDaily=backup_schedule_daily,  # DISABLED
                 serverBackupWeekly=backup_schedule_weekly,  # DISABLED
-                publicIp=public_ip,  # 50.57.74.222
-                privateIp=private_ip,  # 10.182.13.13
+                publicIps=public_ips,  # 50.57.74.222
+                privateIps=private_ips,  # 10.182.13.13
                 setFlavorId=flavor_id,  # 1
                 setImageId=image_id,  # 55
 

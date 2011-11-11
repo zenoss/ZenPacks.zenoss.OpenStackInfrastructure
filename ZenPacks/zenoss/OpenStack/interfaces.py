@@ -17,23 +17,27 @@ from Products.Zuul.interfaces import IDeviceInfo
 from Products.Zuul.interfaces.component import IComponentInfo
 from Products.Zuul.utils import ZuulMessageFactory as _t
 
+
 class IOpenStackFacade(IFacade):
     def addEndpoint(self, target, email, password, collector):
-        """
-        Add OpenStack Endpoint.
-        """
+        """Add OpenStack Endpoint."""
+
 
 class IEndpointInfo(IDeviceInfo):
-    authUrl = schema.Text(title=_t(u"Authentication URL"))
     username = schema.Text(title=_t(u"Username"))
+    project_id = schema.Text(title=_t(u"Project ID"))
+    auth_url = schema.Text(title=_t(u"Auth URL"))
+    region_name = schema.Text(title=_t(u"Region Name"))
     serverCount = schema.Int(title=_t(u"Total Servers"))
     flavorCount = schema.Int(title=_t(u"Total Flavors"))
     imageCount = schema.Int(title=_t(u"Total Images"))
+
 
 class IFlavorInfo(IComponentInfo):
     flavorRAMString = schema.Text(title=_t(u"Flavor RAM"))
     flavorDiskString = schema.Text(title=_t(u"Flavor Disk"))
     serverCount = schema.Int(title=_t(u"Server Count"))
+
 
 class IImageInfo(IComponentInfo):
     imageStatus = schema.Text(title=_t(u"Image Status"))
@@ -41,10 +45,11 @@ class IImageInfo(IComponentInfo):
     imageUpdated = schema.Text(title=_t(u"Image Updated"))
     serverCount = schema.Int(title=_t(u"Server Count"))
 
+
 class IServerInfo(IComponentInfo):
     serverStatus = schema.Text(title=_t(u"Server Status"))
-    publicIp = schema.Text(title=_t(u"Public IP"))
-    privateIp = schema.Text(title=_t(u"Private IP"))
+    publicIps = schema.List(title=_t(u"Public IPs"))
+    privateIps = schema.List(title=_t(u"Private IPs"))
     flavor = schema.Entity(title=_t(u"Server Flavor"))
     image = schema.Entity(title=_t(u"Server Image"))
     serverBackupEnabled = schema.Bool(title=_t(u"Server Backup Enabled"))
@@ -52,4 +57,3 @@ class IServerInfo(IComponentInfo):
     serverBackupWeekly = schema.Text(title=_t(u"Server Backup Weekly"))
     hostId = schema.Text(title=_t(u"Host ID"))
     guestDevice = schema.Entity(title=_t(u"Guest Device"))
-
