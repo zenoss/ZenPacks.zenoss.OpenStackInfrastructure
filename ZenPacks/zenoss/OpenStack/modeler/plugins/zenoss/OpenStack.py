@@ -87,18 +87,59 @@ class OpenStack(PythonPlugin):
 
         servers = []
         for server in results['servers']:
+            # Backup support is optional. Guard against it not existing.
+            backup_schedule_enabled = None
+            backup_schedule_daily = None
+            backup_schedule_weekly = None
+
+            try:
+                backup_schedule_enabled = server.backup_schedule.enabled
+                backup_schedule_daily = server.backup_schedule.daily
+                backup_schedule_weekly = server.backup_schedule.weekly
+            except novaclient.exceptions.NotFound:
+                backup_schedule_enabled = False
+                backup_schedule_daily = 'DISABLED'
+                backup_schedule_weekly = 'DISABLED'
+
+            # IPs may not exist.
+            public_ip = None
+            private_ip = None
+
+            try:
+                public_ip = server.public_ip
+            except KeyError:
+                public_ip = ''
+
+            try:
+                private_ip = server.private_ip
+            except KeyError:
+                private_ip = ''
+
+            # Flavor and Image IDs could be specified in two ways.
+            flavor_id = None
+            if hasattr(server, 'flavorId'):
+                flavor_id = int(server.flavorId)
+            else:
+                flavor_id = int(server.flavor['id'])
+
+            image_id = None
+            if hasattr(server, 'imageId'):
+                image_id = int(server.imageId)
+            else:
+                image_id = int(server.image['id'])
+
             servers.append(ObjectMap(data=dict(
                 id='server{0}'.format(server.id),
                 title=server.name,  # cloudserver01
                 serverId=server.id,  # 847424
                 serverStatus=server.status,  # ACTIVE
-                serverBackupEnabled=server.backup_schedule.enabled,  # False
-                serverBackupDaily=server.backup_schedule.daily,  # DISABLED
-                serverBackupWeekly=server.backup_schedule.weekly,  # DISABLED
-                publicIp=server.public_ip,  # 50.57.74.222
-                privateIp=server.private_ip,  # 10.182.13.13
-                setFlavorId=server.flavorId,  # 1
-                setImageId=server.imageId,  # 55
+                serverBackupEnabled=backup_schedule_enabled,  # False
+                serverBackupDaily=backup_schedule_daily,  # DISABLED
+                serverBackupWeekly=backup_schedule_weekly,  # DISABLED
+                publicIp=public_ip,  # 50.57.74.222
+                privateIp=private_ip,  # 10.182.13.13
+                setFlavorId=flavor_id,  # 1
+                setImageId=image_id,  # 55
 
                 # a84303c0021aa53c7e749cbbbfac265f
                 hostId=server.hostId,
@@ -110,4 +151,3 @@ class OpenStack(PythonPlugin):
             objmaps=servers)
 
         return (flavorsMap, imagesMap, serversMap)
-
