@@ -113,7 +113,7 @@ class OpenStack(PythonPlugin):
                 backup_schedule_enabled = server.backup_schedule.enabled
                 backup_schedule_daily = server.backup_schedule.daily
                 backup_schedule_weekly = server.backup_schedule.weekly
-            except novaclient.exceptions.NotFound:
+            except (novaclient.exceptions.NotFound, AttributeError):
                 backup_schedule_enabled = False
                 backup_schedule_daily = 'DISABLED'
                 backup_schedule_weekly = 'DISABLED'
@@ -124,12 +124,12 @@ class OpenStack(PythonPlugin):
 
             try:
                 public_ips = server.public_ip
-            except KeyError:
+            except (AttributeError, KeyError):
                 public_ips = []
 
             try:
                 private_ips = server.private_ip
-            except KeyError:
+            except (AttributeError, KeyError):
                 private_ips = []
 
             if isinstance(public_ips, types.StringTypes):
