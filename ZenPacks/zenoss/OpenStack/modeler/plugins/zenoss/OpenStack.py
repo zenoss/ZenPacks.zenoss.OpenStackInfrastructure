@@ -73,7 +73,7 @@ class OpenStack(PythonPlugin):
             flavors.append(ObjectMap(data=dict(
                 id='flavor{0}'.format(flavor.id),
                 title=flavor.name,  # 256 server
-                flavorId=flavor.id,  # 1
+                flavorId=int(flavor.id),  # 1
                 flavorRAM=flavor.ram * 1024 * 1024,  # 256
                 flavorDisk=flavor.disk * 1024 * 1024 * 1024,  # 10
             )))
@@ -91,7 +91,7 @@ class OpenStack(PythonPlugin):
             images.append(ObjectMap(data=dict(
                 id='image{0}'.format(image.id),
                 title=image.name,  # Red Hat Enterprise Linux 5.5
-                imageId=image.id,  # 55
+                imageId=int(image.id),  # 55
                 imageStatus=image.status,  # ACTIVE
                 imageCreated=created,  # 2010-09-17T07:19:20-05:00
                 imageUpdated=image.updated,  # 2010-09-17T07:19:20-05:00
