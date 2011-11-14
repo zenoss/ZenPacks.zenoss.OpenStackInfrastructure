@@ -118,25 +118,36 @@ class OpenStack(PythonPlugin):
                 backup_schedule_daily = 'DISABLED'
                 backup_schedule_weekly = 'DISABLED'
 
-            # IPs may not exist. They may also be either strings or lists.
-            public_ips = None
-            private_ips = None
+            # The methods for accessing a server's IP addresses have changed a
+            # lot. We'll try as many as we know.
+            public_ips = set()
+            private_ips = set()
 
-            try:
-                public_ips = server.public_ip
-            except (AttributeError, KeyError):
-                public_ips = []
+            if hasattr(server, 'public_ip') and server.public_ip:
+                if isinstance(server.public_ip, types.StringTypes):
+                    public_ips.add(server.public_ip)
+                elif isinstance(server.public_ip, types.ListType):
+                    public_ips.update(server.public_ip)
 
-            try:
-                private_ips = server.private_ip
-            except (AttributeError, KeyError):
-                private_ips = []
+            if hasattr(server, 'private_ip') and server.private_ip:
+                if isinstance(server.private_ip, types.StringTypes):
+                    private_ips.add(server.private_ip)
+                elif isinstance(server.private_ip, types.ListType):
+                    private_ips.update(server.private_ip)
 
-            if isinstance(public_ips, types.StringTypes):
-                public_ips = [public_ips]
+            if hasattr(server, 'accessIPv4') and server.accessIPv4:
+                public_ips.add(server.accessIPv4)
 
-            if isinstance(private_ips, types.StringTypes):
-                private_ips = [private_ips]
+            if hasattr(server, 'accessIPv6') and server.accessIPv6:
+                public_ips.add(server.accessIPv6)
+
+            if hasattr(server, 'addresses') and server.addresses:
+                for network_name, addresses in server.addresses.items():
+                    for address in addresses:
+                        if 'public' in network_name.lower():
+                            public_ips.add(address)
+                        else:
+                            private_ips.add(address)
 
             # Flavor and Image IDs could be specified two different ways.
             flavor_id = None
@@ -159,8 +170,8 @@ class OpenStack(PythonPlugin):
                 serverBackupEnabled=backup_schedule_enabled,  # False
                 serverBackupDaily=backup_schedule_daily,  # DISABLED
                 serverBackupWeekly=backup_schedule_weekly,  # DISABLED
-                publicIps=public_ips,  # 50.57.74.222
-                privateIps=private_ips,  # 10.182.13.13
+                publicIps=list(public_ips),  # 50.57.74.222
+                privateIps=list(private_ips),  # 10.182.13.13
                 setFlavorId=flavor_id,  # 1
                 setImageId=image_id,  # 55
 
