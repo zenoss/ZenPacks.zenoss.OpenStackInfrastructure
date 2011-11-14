@@ -145,9 +145,15 @@ class OpenStack(PythonPlugin):
                 for network_name, addresses in server.addresses.items():
                     for address in addresses:
                         if 'public' in network_name.lower():
-                            public_ips.add(address['addr'])
+                            if isinstance(address, types.DictionaryType):
+                                public_ips.add(address['addr'])
+                            elif isinstance(address, types.StringTypes):
+                                public_ips.add(address)
                         else:
-                            private_ips.add(address['addr'])
+                            if isinstance(address, types.DictionaryType):
+                                private_ips.add(address['addr'])
+                            elif isinstance(address, types.StringTypes):
+                                private_ips.add(address)
 
             # Flavor and Image IDs could be specified two different ways.
             flavor_id = None
