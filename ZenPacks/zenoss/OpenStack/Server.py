@@ -43,7 +43,7 @@ class Server(DeviceComponent, ManagedEntity):
     _relations = ManagedEntity._relations + (
         ('endpoint', ToOne(ToManyCont,
             'ZenPacks.zenoss.OpenStack.Endpoint.Endpoint',
-            'images',
+            'servers',
             ),
         ),
         ('flavor', ToOne(ToMany,
