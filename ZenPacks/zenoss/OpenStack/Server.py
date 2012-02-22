@@ -1,7 +1,7 @@
 ###########################################################################
 #
 # This program is part of Zenoss Core, an open source monitoring platform.
-# Copyright (C) 2011, Zenoss Inc.
+# Copyright (C) 2011, 2012, Zenoss Inc.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 or (at your
@@ -99,15 +99,22 @@ class Server(DeviceComponent, ManagedEntity):
         return '/++resource++openstack/img/openstack.png'
 
     def getGuestDevice(self):
-        if len(self.publicIps) > 0:
-            for public_ip in self.publicIps:
-                device = self.dmd.Devices.findDeviceByIdOrIp(public_ip)
-                if device:
-                    return device
+        server_ips = []
 
-                ip = self.dmd.Networks.findIp(public_ip)
-                if ip:
-                    return ip.device()
+        if len(self.publicIps) > 0:
+            server_ips.extend(self.publicIps)
+
+        if len(self.privateIps) > 0:
+            server_ips.extend(self.privateIps)
+
+        for server_ip in server_ips:
+            device = self.dmd.Devices.findDeviceByIdOrIp(server_ip)
+            if device:
+                return device
+
+            ip = self.dmd.Networks.findIp(server_ip)
+            if ip:
+                return ip.device()
 
         return None
 

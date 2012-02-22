@@ -1,7 +1,7 @@
 ###########################################################################
 #
 # This program is part of Zenoss Core, an open source monitoring platform.
-# Copyright (C) 2011, Zenoss Inc.
+# Copyright (C) 2011, 2012, Zenoss Inc.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 or (at your
@@ -61,10 +61,26 @@ EventManagerBase.ComponentIdWhere = (
 
 @monkeypatch('Products.ZenModel.Device.Device')
 def getOpenStackServer(self):
+    device_ips = set()
+    if self.manageIp:
+        device_ips.add(self.manageIp)
+
+    for iface in self.os.interfaces():
+        for ip in iface.getIpAddresses():
+            device_ips.add(ip.split('/')[0])
+
     catalog = ICatalogTool(self.dmd)
     for record in catalog.search('ZenPacks.zenoss.OpenStack.Server.Server'):
         server = record.getObject()
+        server_ips = set()
+
         if server.publicIps:
+            server_ips.update(server.publicIps)
+
+        if server.privateIps:
+            server_ips.update(server.privateIps)
+
+        if server_ips.intersection(device_ips):
             return server
 
 # This would be much cleaner with the new "original" method support in
