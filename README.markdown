@@ -107,7 +107,7 @@ when the graphs option is chosen for the OpenStack server.
 
 [Monitoring OpenStack]: <http://www.youtube.com/watch?v=-43gnQLbX9g>
 [Zenoss]: <http://www.zenoss.com/>
-[Latest Package for Python 2.7]: <https://github.com/downloads/zenoss/ZenPacks.zenoss.OpenStack/ZenPacks.zenoss.OpenStack-1.1.1-py2.7.egg>
-[Latest Package for Python 2.6]: <https://github.com/downloads/zenoss/ZenPacks.zenoss.OpenStack/ZenPacks.zenoss.OpenStack-1.1.1-py2.6.egg>
+[Latest Package for Python 2.7]: <https://github.com/downloads/zenoss/ZenPacks.zenoss.OpenStack/ZenPacks.zenoss.OpenStack-1.1.2-py2.7.egg>
+[Latest Package for Python 2.6]: <https://github.com/downloads/zenoss/ZenPacks.zenoss.OpenStack/ZenPacks.zenoss.OpenStack-1.1.2-py2.6.egg>
 [git repository]: <https://github.com/zenoss/ZenPacks.zenoss.OpenStack>
 [OpenStack]: <http://www.openstack.org/>
