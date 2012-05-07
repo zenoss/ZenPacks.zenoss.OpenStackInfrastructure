@@ -18,7 +18,7 @@
 NAME = "ZenPacks.zenoss.OpenStack"
 VERSION = "1.1.2"
 AUTHOR = "Zenoss"
-LICENSE = ""
+LICENSE = "GPLv2"
 NAMESPACE_PACKAGES = ['ZenPacks', 'ZenPacks.zenoss']
 PACKAGES = ['ZenPacks', 'ZenPacks.zenoss', 'ZenPacks.zenoss.OpenStack']
 INSTALL_REQUIRES = []
