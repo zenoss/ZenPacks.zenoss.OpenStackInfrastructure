@@ -30,13 +30,6 @@ from .interfaces import IEndpointInfo, IFlavorInfo, IImageInfo, IServerInfo
 
 class OpenStackComponentInfo(ComponentInfo):
     @property
-    def entity(self):
-        return {
-            'uid': self._object.getPrimaryUrlPath(),
-            'name': self._object.titleOrId(),
-            }
-
-    @property
     def icon(self):
         return self._object.getIconPath()
 
