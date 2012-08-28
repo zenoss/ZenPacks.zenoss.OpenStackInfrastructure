@@ -64,30 +64,17 @@ var addOpenStack = new Zenoss.Action({
                         Zenoss.remote.OpenStackRouter.addOpenStack(opts,
                         function(response) {
                             if (response.success) {
-                                new Zenoss.dialog.SimpleMessageDialog({
-                                    message: _t('Add OpenStack job submitted.'),
-                                    buttons: [{
-                                        xtype: 'DialogButton',
-                                        text: _t('OK')
-                                    }, {
-                                        xtype: 'button',
-                                        text: _t('View Job Log'),
-                                        handler: function() {
-                                            window.location =
-                                                '/zport/dmd/JobManager/jobs/' +
-                                                response.jobId + '/viewlog';
-                                        }
-                                    }]
-                                }).show();
+                                if (Zenoss.JobsWidget) {
+                                    Zenoss.message.success(_t('Add OpenStack job submitted.'));
+                                } else {
+                                    Zenoss.message.success(
+                                        _t('Add OpenStack job submitted. <a href="/zport/dmd/JobManager/jobs/{0}/viewlog">View Job Log</a>'),
+                                        response.jobId);
+                                }
                             }
                             else {
-                                new Zenoss.dialog.SimpleMessageDialog({
-                                    message: response.msg,
-                                    buttons: [{
-                                        xtype: 'DialogButton',
-                                        text: _t('OK')
-                                    }]
-                                }).show();
+                                Zenoss.message.error(_t('Error adding OpenStack: {0}'),
+                                    response.msg);
                             }
                         });
                     }
