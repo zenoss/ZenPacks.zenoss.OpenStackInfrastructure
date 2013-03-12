@@ -51,6 +51,32 @@ var addOpenStack = new Zenoss.Action({
                     id: "openstack_region_name",
                     width: 260,
                     allowBlank: true
+                }, {
+                    xtype: 'combo',
+                    width: 260,
+                    name: 'collector',
+                    fieldLabel: _t('Collector'),
+                    id: 'openstack_collector',
+                    mode: 'local',
+                    store: new Ext.data.ArrayStore({
+                        data: Zenoss.env.COLLECTORS,
+                        fields: ['name']
+                    }),
+                    valueField: 'name',
+                    displayField: 'name',
+                    forceSelection: true,
+                    editable: false,
+                    allowBlank: false,
+                    triggerAction: 'all',
+                    selectOnFocus: false,
+                    listeners: {
+                        'afterrender': function(component) {
+                            var index = component.store.find('name', 'localhost');
+                            if (index >= 0) {
+                                component.setValue('localhost');
+                            }
+                        }
+                    }
                 }],
                 buttons: [{
                     xtype: 'DialogButton',

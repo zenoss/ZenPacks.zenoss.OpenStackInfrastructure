@@ -30,7 +30,7 @@ class OpenStackFacade(ZuulFacade):
     implements(IOpenStackFacade)
 
     def addOpenStack(self, username, api_key, project_id, auth_url,
-                     region_name=None):
+                     region_name=None, collector='localhost'):
         """Add a new OpenStack endpoint to the system."""
         parsed_url = urlparse(auth_url)
         hostname = parsed_url.hostname
@@ -54,6 +54,7 @@ class OpenStackFacade(ZuulFacade):
             deviceName=hostname,
             devicePath=OPENSTACK_DEVICE_PATH,
             discoverProto='python',
+            performanceMonitor=collector,
             zProperties=zProperties)
 
         return True, jobStatus.id

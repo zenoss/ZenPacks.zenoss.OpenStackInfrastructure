@@ -9,11 +9,17 @@ Ext.onReady(function() {
         box.removeField('memory');
     });
 
+    var DEVICE_OVERVIEW_IDSUMMARY = 'deviceoverviewpanel_idsummary';
+    Ext.ComponentMgr.onAvailable(DEVICE_OVERVIEW_IDSUMMARY, function(){
+        var box = Ext.getCmp(DEVICE_OVERVIEW_IDSUMMARY);
+        box.removeField('tagNumber');
+        box.removeField('serialNumber');
+    });
+
     var DEVICE_OVERVIEW_DESCRIPTION = 'deviceoverviewpanel_descriptionsummary';
     Ext.ComponentMgr.onAvailable(DEVICE_OVERVIEW_DESCRIPTION, function(){
         var box = Ext.getCmp(DEVICE_OVERVIEW_DESCRIPTION);
         box.removeField('rackSlot');
-        box.removeField('collector');
         box.removeField('hwManufacturer');
         box.removeField('hwModel');
         box.removeField('osManufacturer');
