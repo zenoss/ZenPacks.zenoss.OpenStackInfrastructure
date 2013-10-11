@@ -43,7 +43,7 @@ var addOpenStack = new Zenoss.Action({
                     id: "openstack_auth_url",
                     width: 260,
                     allowBlank: true,
-                    value: 'https://auth.api.rackspacecloud.com/v1.0'
+                    value: 'https://auth.api.rackspacecloud.com/v2.0'
                 }, {
                     xtype: 'textfield',
                     name: 'region_name',
