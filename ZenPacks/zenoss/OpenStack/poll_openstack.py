@@ -18,7 +18,7 @@ import sys
 from util import addLocalLibPath
 addLocalLibPath()
 
-from novaclient.v1_0.client import Client as v1_0_Client
+from novaclient.v3.client import Client as v3_Client
 from novaclient.v1_1.client import Client as v1_1_Client
 
 
@@ -31,18 +31,22 @@ class OpenStackPoller(object):
         self._region_name = region_name
 
     def getData(self):
-        client_class = None
-        if 'v1.1' in self._auth_url:
-            client_class = v1_1_Client
+        client_class = v1.1_Client
+
+        if (log.isEnabledFor(logging.DEBUG)):
+            http_log_debug = True
+            logging.getLogger('novaclient.client').setLevel(logging.DEBUG)
         else:
-            client_class = v1_0_Client
+            http_log_debug = False
 
         client = client_class(
             self._username,
             self._api_key,
             self._project_id,
             self._auth_url,
-            region_name=self._region_name or None)
+            region_name=self._region_name or None,
+            http_log_debug=http_log_debug        
+        )
 
         data = {}
         data['events'] = []

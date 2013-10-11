@@ -23,7 +23,7 @@ from ZenPacks.zenoss.OpenStack.util import addLocalLibPath
 addLocalLibPath()
 
 import novaclient
-from novaclient.v1_0.client import Client as v1_0_Client
+from novaclient.v3.client import Client as v3_Client
 from novaclient.v1_1.client import Client as v1_1_Client
 
 
@@ -37,22 +37,26 @@ class OpenStack(PythonPlugin):
     )
 
     def collect(self, device, unused):
-        client_class = None
-        if 'v1.1' in device.zOpenStackAuthUrl:
-            client_class = v1_1_Client
-        else:
-            client_class = v1_0_Client
+        client_class = v1_1_Client
 
         region_name = None
         if device.zOpenStackRegionName:
             region_name = device.zOpenStackRegionName
+
+        if (log.isEnabledFor(logging.DEBUG)):
+            http_log_debug = True
+            logging.getLogger('novaclient.client').setLevel(logging.DEBUG)
+        else:
+            http_log_debug = False
 
         client = client_class(
             device.zCommandUsername,
             device.zCommandPassword,
             device.zOpenStackProjectId,
             device.zOpenStackAuthUrl,
-            region_name=region_name)
+            region_name=region_name,
+            http_log_debug=http_log_debug
+        )
 
         results = {}
 
