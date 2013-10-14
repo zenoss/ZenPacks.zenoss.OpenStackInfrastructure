@@ -22,10 +22,7 @@ from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
 from ZenPacks.zenoss.OpenStack.util import addLocalLibPath
 addLocalLibPath()
 
-import novaclient
-from novaclient.v3.client import Client as v3_Client
-from novaclient.v1_1.client import Client as v1_1_Client
-
+from novaclient import client as novaclient
 
 class OpenStack(PythonPlugin):
     deviceProperties = PythonPlugin.deviceProperties + (
@@ -34,11 +31,10 @@ class OpenStack(PythonPlugin):
         'zOpenStackProjectId',
         'zOpenStackAuthUrl',
         'zOpenStackRegionName',
+        'zOpenstackComputeApiVersion'
     )
 
     def collect(self, device, unused):
-        client_class = v1_1_Client
-
         region_name = None
         if device.zOpenStackRegionName:
             region_name = device.zOpenStackRegionName
@@ -49,7 +45,8 @@ class OpenStack(PythonPlugin):
         else:
             http_log_debug = False
 
-        client = client_class(
+        client = novaclient.Client(
+            device.zOpenstackComputeApiVersion,
             device.zCommandUsername,
             device.zCommandPassword,
             device.zOpenStackProjectId,

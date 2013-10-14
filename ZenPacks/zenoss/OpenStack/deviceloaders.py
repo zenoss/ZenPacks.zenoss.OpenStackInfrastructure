@@ -30,5 +30,5 @@ class OpenStackLoader(object):
                     region_name=None, collector='localhost'):
 
         return getFacade('openstack', dmd).addOpenStack(
-            username, api_key, project_id, auth_url,
+            username, api_key, project_id, auth_url, api_version, 
             region_name=region_name, collector=collector)

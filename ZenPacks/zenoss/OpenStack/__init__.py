@@ -27,6 +27,7 @@ from Products.Zuul.interfaces import ICatalogTool
 class ZenPack(ZenPackBase):
     packZProperties = [
         ('zOpenStackAuthUrl', '', 'string'),
+        ('zOpenstackComputeApiVersion', '', 'string'),
         ('zOpenStackProjectId', '', 'string'),
         ('zOpenStackInsecure', False, 'boolean'),
         ('zOpenStackRegionName', '', 'string'),

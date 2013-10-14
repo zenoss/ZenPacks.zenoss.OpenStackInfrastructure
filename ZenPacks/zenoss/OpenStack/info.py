@@ -51,6 +51,10 @@ class EndpointInfo(DeviceInfo):
         return self._object.primaryAq().zOpenStackAuthUrl
 
     @property
+    def api_version(self):
+        return self._object.primaryAq().zOpenstackComputeApiVersion
+
+    @property
     def region_name(self):
         return self._object.primaryAq().zOpenStackRegionName
 
