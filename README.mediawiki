@@ -14,7 +14,7 @@ Choose that option and you'll be presented with a dialog asking for the followin
 # Username - Same username used to login to OpenStack web interface
 # API Key - Can be found by going to "Your Account/API Access"
 # Project ID - This can be left blank if you don't know what it is
-# Auth URL - For Rackspace this would be https://auth.api.rackspacecloud.com/v1.0
+# Auth URL - For Rackspace this would be https://auth.api.rackspacecloud.com/v2.0
 # Region Name - This can be left blank if you don't know what it is
 
 Once you click Add, Zenoss will contact the OpenStack API and discover servers, images and flavors. Once it is complete you'll find a new device in the OpenStack device class with the same name as the hostname or IP you entered into the dialog. Click into this new device to see everything that was discovered.

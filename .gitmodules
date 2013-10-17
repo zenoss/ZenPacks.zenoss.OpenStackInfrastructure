@@ -1,3 +1,0 @@
-[submodule "src/python-novaclient"]
-	path = src/python-novaclient
-	url = git://github.com/openstack/python-novaclient.git

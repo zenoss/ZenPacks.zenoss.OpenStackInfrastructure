@@ -8,3 +8,4 @@ ZenPacks/zenoss/OpenStack/bin/nova
 ZenPacks/zenoss/OpenStack/lib/easy-install.pth
 ZenPacks/zenoss/OpenStack/lib/*.egg
 ZenPacks/zenoss/OpenStack/lib/site.py
+.DS_Store
