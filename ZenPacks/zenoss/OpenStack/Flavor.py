@@ -27,9 +27,9 @@ class Flavor(LogicalComponent):
 
     Klasses = [LogicalComponent]
 
-    flavorId = None     # 1
-    flavorRAM = None    # Stored as bytes
-    flavorDisk = None   # Stored as bytes
+    flavorDisk = None              # bytes
+    flavorId = None                # 1
+    flavorRAM = None               # bytes
 
     _properties = ()
     for Klass in Klasses:

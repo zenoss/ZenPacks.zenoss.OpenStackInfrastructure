@@ -27,14 +27,14 @@ class Server(LogicalComponent):
 
     Klasses = [LogicalComponent]
 
-    serverId = None             # 847424
-    serverStatus = None         # ACTIVE
-    serverBackupEnabled = None  # False
-    serverBackupDaily = None    # DISABLED
-    serverBackupWeekly = None   # DISABLED
-    publicIps = []              # ['50.57.74.222']
-    privateIps = []             # ['10.182.13.13']
-    hostId = None               # a84303c0021aa53c7e749cbbbfac265f
+    hostId = None                  # a84303c0021aa53c7e749cbbbfac265f
+    serverBackupEnabled = None     # False
+    privateIps = None              # ['10.182.13.13']
+    serverBackupDaily = None       # DISABLED
+    publicIps = None               # ['50.57.74.222']
+    serverStatus = None            # ACTIVE
+    serverBackupWeekly = None      # DISABLED
+    serverId = None                # 847424
 
     _properties = ()
     for Klass in Klasses:

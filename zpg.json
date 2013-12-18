@@ -157,15 +157,18 @@
                     "properties": [
                         {
                             "name": "flavorId",
-                            "type": "int"
+                            "type": "int",
+                            "comment": "1"
                         },
                         {
                             "name": "flavorRAM",
-                            "type": "int"
+                            "type": "int",
+                            "comment": "bytes"
                         },
                         {
                             "name": "flavorDisk",
-                            "type": "int"
+                            "type": "int",
+                            "comment": "bytes"                            
                         }
                     ]
                 },
@@ -195,29 +198,37 @@
                     "properties": [
                         {
                             "name": "serverId",
-                            "type": "int"
+                            "type": "int",
+                            "comment": "847424"
                         },
                         {
-                            "name": "serverStatus"
+                            "name": "serverStatus",
+                            "comment": "ACTIVE"
                         },
                         {
                             "name": "serverBackupEnabled",
-                            "type": "boolean"
+                            "type": "boolean",
+                            "comment": "False"
                         },
                         {
-                            "name": "serverBackupDaily"
+                            "name": "serverBackupDaily",
+                            "comment": "DISABLED"
                         },
                         {
-                            "name": "serverBackupWeekly"
+                            "name": "serverBackupWeekly",
+                            "comment": "DISABLED"
                         },
                         {
-                            "name": "publicIps"
+                            "name": "publicIps",
+                            "comment": "['50.57.74.222']"                            
                         },
                         {
-                            "name": "privateIps"
+                            "name": "privateIps",
+                            "comment": "['10.182.13.13']"
                         },
                         {
-                            "name": "hostId"
+                            "name": "hostId",
+                            "comment": "a84303c0021aa53c7e749cbbbfac265f"
                         }
                     ]
                 },

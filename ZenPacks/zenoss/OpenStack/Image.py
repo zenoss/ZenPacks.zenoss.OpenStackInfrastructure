@@ -27,10 +27,10 @@ class Image(LogicalComponent):
 
     Klasses = [LogicalComponent]
 
-    imageId = None      # 346eeba5-a122-42f1-94e7-06cb3c53f690
-    imageStatus = None  # ACTIVE
-    imageCreated = None # 010-09-17T07:19:20-05:00
-    imageUpdated = None # 010-09-17T07:19:20-05:00
+    imageUpdated = None
+    imageCreated = None
+    imageStatus = None
+    imageId = None
 
     _properties = ()
     for Klass in Klasses:
