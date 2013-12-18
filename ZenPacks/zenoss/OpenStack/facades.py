@@ -29,7 +29,7 @@ OPENSTACK_DEVICE_PATH = "/Devices/OpenStack"
 class OpenStackFacade(ZuulFacade):
     implements(IOpenStackFacade)
 
-    def addOpenStack(self, username, api_key, project_id, auth_url,
+    def addOpenStack(self, username, api_key, project_id, auth_url, api_version, 
                      region_name=None, collector='localhost'):
         """Add a new OpenStack endpoint to the system."""
         parsed_url = urlparse(auth_url)
@@ -46,6 +46,7 @@ class OpenStackFacade(ZuulFacade):
             'zCommandPassword': api_key,
             'zOpenStackProjectId': project_id,
             'zOpenStackAuthUrl': auth_url,
+            'zOpenstackComputeApiVersion': api_version,
             'zOpenStackRegionName': region_name or '',
             }
 

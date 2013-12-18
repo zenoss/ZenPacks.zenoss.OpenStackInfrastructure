@@ -19,13 +19,13 @@ from Products.ZenRelations.RelSchema import ToMany, ToManyCont, ToOne
 class Image(DeviceComponent, ManagedEntity):
     meta_type = portal_type = "OpenStackImage"
 
-    imageId = None      # 55
+    imageId = None      # 346eeba5-a122-42f1-94e7-06cb3c53f690
     imageStatus = None  # ACTIVE
     imageCreated = None # 010-09-17T07:19:20-05:00
     imageUpdated = None # 010-09-17T07:19:20-05:00
 
     _properties = ManagedEntity._properties + (
-        {'id': 'imageId', 'type': 'int', 'mode': ''},
+        {'id': 'imageId', 'type': 'string', 'mode': ''},
         {'id': 'imageStatus', 'type': 'string', 'mode': ''},
         {'id': 'imageCreated', 'type': 'string', 'mode': ''},
         {'id': 'imageUpdated', 'type': 'string', 'mode': ''},

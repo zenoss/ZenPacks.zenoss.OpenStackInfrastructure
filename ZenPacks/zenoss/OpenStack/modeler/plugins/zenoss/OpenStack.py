@@ -22,10 +22,7 @@ from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
 from ZenPacks.zenoss.OpenStack.util import addLocalLibPath
 addLocalLibPath()
 
-import novaclient
-from novaclient.v1_0.client import Client as v1_0_Client
-from novaclient.v1_1.client import Client as v1_1_Client
-
+from novaclient import client as novaclient
 
 class OpenStack(PythonPlugin):
     deviceProperties = PythonPlugin.deviceProperties + (
@@ -34,25 +31,29 @@ class OpenStack(PythonPlugin):
         'zOpenStackProjectId',
         'zOpenStackAuthUrl',
         'zOpenStackRegionName',
+        'zOpenstackComputeApiVersion'
     )
 
     def collect(self, device, unused):
-        client_class = None
-        if 'v1.1' in device.zOpenStackAuthUrl:
-            client_class = v1_1_Client
-        else:
-            client_class = v1_0_Client
-
         region_name = None
         if device.zOpenStackRegionName:
             region_name = device.zOpenStackRegionName
 
-        client = client_class(
+        if (log.isEnabledFor(logging.DEBUG)):
+            http_log_debug = True
+            logging.getLogger('novaclient.client').setLevel(logging.DEBUG)
+        else:
+            http_log_debug = False
+
+        client = novaclient.Client(
+            device.zOpenstackComputeApiVersion,
             device.zCommandUsername,
             device.zCommandPassword,
             device.zOpenStackProjectId,
             device.zOpenStackAuthUrl,
-            region_name=region_name)
+            region_name=region_name,
+            http_log_debug=http_log_debug
+        )
 
         results = {}
 
@@ -91,7 +92,7 @@ class OpenStack(PythonPlugin):
             images.append(ObjectMap(data=dict(
                 id='image{0}'.format(image.id),
                 title=image.name,  # Red Hat Enterprise Linux 5.5
-                imageId=int(image.id),  # 55
+                imageId=image.id,  # 346eeba5-a122-42f1-94e7-06cb3c53f690
                 imageStatus=image.status,  # ACTIVE
                 imageCreated=created,  # 2010-09-17T07:19:20-05:00
                 imageUpdated=image.updated,  # 2010-09-17T07:19:20-05:00
@@ -133,7 +134,11 @@ class OpenStack(PythonPlugin):
                 if isinstance(server.private_ip, types.StringTypes):
                     private_ips.add(server.private_ip)
                 elif isinstance(server.private_ip, types.ListType):
-                    private_ips.update(server.private_ip)
+                	if isinstance(server.private_ip[0], types.StringTypes):
+	                    private_ips.update(server.private_ip)
+	                else:
+	                	for address in server.private_ip:
+	                		private_ips.add(address['addr'])
 
             if hasattr(server, 'accessIPv4') and server.accessIPv4:
                 public_ips.add(server.accessIPv4)
@@ -164,9 +169,9 @@ class OpenStack(PythonPlugin):
 
             image_id = None
             if hasattr(server, 'imageId'):
-                image_id = int(server.imageId)
+                image_id = server.imageId
             else:
-                image_id = int(server.image['id'])
+                image_id = server.image['id']
 
             servers.append(ObjectMap(data=dict(
                 id='server{0}'.format(server.id),
@@ -179,7 +184,7 @@ class OpenStack(PythonPlugin):
                 publicIps=list(public_ips),  # 50.57.74.222
                 privateIps=list(private_ips),  # 10.182.13.13
                 setFlavorId=flavor_id,  # 1
-                setImageId=image_id,  # 55
+                setImageId=image_id,  # 346eeba5-a122-42f1-94e7-06cb3c53f690
 
                 # a84303c0021aa53c7e749cbbbfac265f
                 hostId=server.hostId,
