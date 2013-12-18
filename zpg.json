@@ -1,0 +1,287 @@
+{
+    "id": "ZenPacks.zenoss.OpenStack",
+    "author": "Zenoss",
+    "version": "2.0.0dev",
+    "license": "GPLv2",
+    "compat_zenoss_vers": ">=3",
+    "zProperties": [
+        {
+            "name": "zOpenStackAuthUrl",
+            "type": "string"
+        },
+        {
+            "name": "zOpenstackComputeApiVersion",
+            "type": "string"
+        },
+        {
+            "name": "zOpenStackProjectId",
+            "type": "string"
+        },
+        {
+            "name": "zOpenStackInsecure",
+            "type": "boolean",
+            "default": false
+        },
+        {
+            "name": "zOpenStackRegionName",
+            "type": "string"
+        }
+    ],
+
+    "relationships": [
+                {
+                    "componentA": "Endpoint",
+                    "relnameA": "components",
+                    "componentB": "OpenstackComponent",
+                    "relnameB": "endpoint",
+                    "type": "1-M",
+                    "contained": false
+                },
+                {
+                    "componentA": "OrgComponent",
+                    "relnameA": "childOrgs",
+                    "componentB": "OrgComponent",
+                    "relnameB": "parentOrg",
+                    "type": "1-M",
+                    "contained": false
+                },
+                {
+                    "componentA": "NodeComponent",
+                    "relnameA": "hostedSoftware",
+                    "componentB": "SoftwareComponent",
+                    "relnameB": "hostedOnNode",
+                    "type": "1-M",
+                    "contained": false
+                },
+                {
+                    # org / nodeComponents
+                    "componentA": "OrgComponent",
+                    "componentB": "NodeComponent",
+                    "type": "1-M",
+                    "contained": false
+                },
+                {
+                    # org / nodeComponents
+                    "componentA": "OrgComponent",
+                    "componentB": "SoftwareComponent",
+                    "type": "1-M",
+                    "contained": false
+                },
+                {
+                    "componentA": "Flavor",
+                    "componentB": "Server",
+                    "type": "1-M",
+                    "contained": false
+                },
+                {
+                    "componentA": "Image",
+                    "componentB": "Server",
+                    "type": "1-M",
+                    "contained": false
+                },
+                {
+                    "componentA": "Server",
+                    "componentB": "Hypervisor",
+                    "type": "1-M",
+                    "contained": false
+                }                
+    ],
+
+    "deviceClasses": [
+        {
+            "deviceType": {
+                "name": "Endpoint",
+                "properties": [ ],
+                "meta_type": "OpenStackEndpoint"
+            },
+            "path": "Devices/OpenStack",
+            "zPythonClass": "Endpoint",
+
+            "componentTypes": [
+
+                # abstract base component classes
+                {
+                    "name": "OpenstackComponent",                    
+                    "abstract": true
+                },
+                {
+                    "name": "DeviceProxyComponent",
+                    "meta_type": "OpenStackDeviceProxyComponent",
+                    "klasses": ["OpenstackComponent"],
+                    "abstract": true
+                },
+                {
+                    "name": "OrgComponent",
+                    "meta_type": "OpenStackOrgComponent",                    
+                    "klasses": ["OpenstackComponent"],
+                    "abstract": true
+                },
+                {
+                    "name": "SoftwareComponent",
+                    "meta_type": "OpenStackSoftwareComponent",                    
+                    "klasses": ["OpenstackComponent"],
+                    "abstract": true
+                },
+                {
+                    "name": "NodeComponent",
+                    "meta_type": "OpenStackNodeComponent",                    
+                    "klasses": ["DeviceProxyComponent"],
+                    "abstract": true
+                },
+                {
+                    "name": "LogicalComponent",
+                    "meta_type": "OpenStackLogicalComponent",
+                    "klasses": ["OpenstackComponent"],
+                    "abstract": true
+                },
+                
+                # device classes
+                {
+                    "name": "KeystoneEndpoint",
+                    "meta_type": "OpenStackKeystoneEndpoint",
+                    "klasses": ["Endpoint"],
+                    "device": true
+                },
+                {
+                    "name": "NovaEndpoint",
+                    "meta_type": "OpenStackNovaEndpoint",
+                    "klasses": ["Endpoint"],
+                    "device": true
+                },
+
+                # devicecomponent classes
+                {
+                    "name": "Flavor",
+                    "meta_type": "OpenStackFlavor",
+                    "klasses": ["LogicalComponent"],
+                    "properties": [
+                        {
+                            "name": "flavorId",
+                            "type": "int"
+                        },
+                        {
+                            "name": "flavorRAM",
+                            "type": "int"
+                        },
+                        {
+                            "name": "flavorDisk",
+                            "type": "int"
+                        }
+                    ]
+                },
+                {
+                    "name": "Image",
+                    "meta_type": "OpenStackImage",
+                    "klasses": ["LogicalComponent"],                    
+                    "properties": [                        
+                        {
+                            "name": "imageId"
+                        },
+                        {
+                            "name": "imageStatus"
+                        },
+                        {
+                            "name": "imageCreated"
+                        },
+                        {
+                            "name": "imageUpdated"
+                        }
+                    ]
+                },
+                {
+                    "name": "Server",
+                    "meta_type": "OpenStackServer",                    
+                    "klasses": ["LogicalComponent"],                    
+                    "properties": [
+                        {
+                            "name": "serverId",
+                            "type": "int"
+                        },
+                        {
+                            "name": "serverStatus"
+                        },
+                        {
+                            "name": "serverBackupEnabled",
+                            "type": "boolean"
+                        },
+                        {
+                            "name": "serverBackupDaily"
+                        },
+                        {
+                            "name": "serverBackupWeekly"
+                        },
+                        {
+                            "name": "publicIps"
+                        },
+                        {
+                            "name": "privateIps"
+                        },
+                        {
+                            "name": "hostId"
+                        }
+                    ]
+                },
+
+                {
+                    "name": "Region",
+                    "meta_type": "OpenStackRegion",
+                    "klasses": ["OrgComponent"]                                       
+                },
+                {
+                    "name": "Cell",
+                    "meta_type": "OpenStackCell",                    
+                    "klasses": ["OrgComponent"]                                       
+                },
+                {
+                    "name": "AvailabilityZone",
+                    "meta_type": "OpenStackAvailabilityZone",                    
+                    "klasses": ["OrgComponent"]                                       
+                },
+
+                {
+                    "name": "ControllerNode",
+                    "meta_type": "OpenStackControllerNode",                    
+                    "klasses": ["NodeComponent"]                                       
+                },
+                {
+                    "name": "ComputeNode",
+                    "meta_type": "OpenStackComputeNode",                    
+                    "klasses": ["NodeComponent"]                                       
+                },
+
+                {
+                    "name": "NovaApi",
+                    "meta_type": "OpenStackNovaApi",                                        
+                    "klasses": ["SoftwareComponent"]                                       
+                },
+                {
+                    "name": "NovaConductor",
+                    "meta_type": "OpenStackNovaConductor",                                        
+                    "klasses": ["SoftwareComponent"]                                       
+                },
+                {
+                    "name": "NovaScheduler",
+                    "meta_type": "OpenStackNovaScheduler",                                        
+                    "klasses": ["SoftwareComponent"]                                       
+                },
+                {
+                    "name": "NovaCompute",
+                    "meta_type": "OpenStackNovaCompute",                                        
+                    "klasses": ["SoftwareComponent"]                                       
+                },
+                {
+                    "name": "NovaDatabase",
+                    "meta_type": "OpenStackNovaDatabase",                                        
+                    "klasses": ["SoftwareComponent", "DeviceProxyComponent"]                                       
+                },
+                {
+                    "name": "Hypervisor",
+                    "meta_type": "OpenStackHypervisor",                                        
+                    "klasses": ["SoftwareComponent"]                                       
+                }
+
+            ]           
+        }
+    ]
+}
+
