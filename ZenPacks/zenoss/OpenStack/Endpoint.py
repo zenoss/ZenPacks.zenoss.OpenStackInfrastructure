@@ -21,7 +21,7 @@ from ZenPacks.zenoss.OpenStack.utils import updateToMany
 
 
 class Endpoint(Device):
-    meta_type = portal_type = 'Endpoint'
+    meta_type = portal_type = 'OpenStackEndpoint'
 
     Klasses = [Device]
 
