@@ -4,6 +4,61 @@
     xmlns:browser="http://namespaces.zope.org/browser"
     xmlns:zcml="http://namespaces.zope.org/zcml">
 
+    <!-- API: Info Adapters -->
+  
+    <adapter
+        provides=".Endpoint.IEndpointInfo"
+        for=".Endpoint.Endpoint"
+        factory=".Endpoint.EndpointInfo"
+        />
+
+    <adapter
+        provides=".Flavor.IFlavorInfo"
+        for=".Flavor.Flavor"
+        factory=".Flavor.FlavorInfo"
+        />
+
+    <adapter
+        provides=".Image.IImageInfo"
+        for=".Image.Image"
+        factory=".Image.ImageInfo"
+        />
+
+    <adapter
+        provides=".Server.IServerInfo"
+        for=".Server.Server"
+        factory=".Server.ServerInfo"
+        />
+
+    <!-- Browser Resources -->
+    <browser:resourceDirectory
+        name="ZenPacks_zenoss_OpenStack"
+        directory="resources"
+        />
+
+    <!-- JavaScript needed for all Zenoss pages. -->
+    <browser:viewlet
+        name="js-ZenPacks_zenoss_OpenStack"
+        paths="/++resource++ZenPacks_zenoss_OpenStack/js/ZenPacks_zenoss_OpenStack.js"
+        for="*"
+        weight="20"
+        manager="Products.ZenUI3.browser.interfaces.IJavaScriptSrcManager"
+        class="Products.ZenUI3.browser.javascript.JavaScriptSrcBundleViewlet"
+        permission="zope2.Public"
+        />
+
+    <!-- JavaScript needed only for devices. -->
+
+    <browser:viewlet
+        name="js-ZenPacks_zenoss_OpenStack_Endpoint"
+        paths="/++resource++ZenPacks_zenoss_OpenStack/js/ZenPacks_zenoss_OpenStack_Endpoint.js"
+        for="ZenPacks.zenoss.OpenStack.Endpoint.Endpoint"
+        weight="20"
+        manager="Products.ZenUI3.browser.interfaces.IJavaScriptSrcManager"
+        class="Products.ZenUI3.browser.javascript.JavaScriptSrcBundleViewlet"
+        permission="zope2.Public"
+        />
+
     <!-- Import directRouter Directive -->
     <include package="Products.ZenUtils.extdirect.zope" file="meta.zcml"/>
 
@@ -11,16 +66,16 @@
     <browser:directRouter
         name="openstack_router"
         for="*"
-        class=".routers.OpenStackRouter"
+        class=".api.OpenStackRouter"
         namespace="Zenoss.remote"
         permission="zenoss.View"
         />
 
     <adapter
         name="openstack"
-        provides=".interfaces.IOpenStackFacade"
+        provides=".api.IOpenStackFacade"
         for="*"
-        factory=".facades.OpenStackFacade"
+        factory=".api.OpenStackFacade"
         />
 
     <!-- Define Device Loader -->
@@ -30,39 +85,6 @@
         component=".deviceloaders.OpenStackLoader"
         />
 
-    <!-- Info Adapters -->
-    <adapter
-        factory=".info.EndpointInfo"
-        for=".Endpoint.Endpoint"
-        provides=".interfaces.IEndpointInfo"
-        />
-
-    <adapter
-        factory=".info.FlavorInfo"
-        for=".Flavor.Flavor"
-        provides=".interfaces.IFlavorInfo"
-        />
-
-    <adapter
-        factory=".info.ImageInfo"
-        for=".Image.Image"
-        provides=".interfaces.IImageInfo"
-        />
-
-    <adapter
-        factory=".info.ServerInfo"
-        for=".Server.Server"
-        provides=".interfaces.IServerInfo"
-        />
-
-    <!-- Include Browser Code -->
-    <include package=".browser"/>		
-
-    <!-- Include Dynamic View Adapters -->
-    <include
-        zcml:condition="installed ZenPacks.zenoss.DynamicView"
-        package=".dynamicview"
-        />
 
 </configure>
 

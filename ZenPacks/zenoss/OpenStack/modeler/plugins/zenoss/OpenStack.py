@@ -19,8 +19,8 @@ import types
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
 
-from ZenPacks.zenoss.OpenStack.util import addLocalLibPath
-addLocalLibPath()
+from ZenPacks.zenoss.OpenStack.utils import add_local_lib_path
+add_local_lib_path()
 
 from novaclient import client as novaclient
 

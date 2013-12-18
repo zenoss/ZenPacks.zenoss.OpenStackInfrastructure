@@ -15,8 +15,8 @@
 import json
 import sys
 
-from util import addLocalLibPath
-addLocalLibPath()
+from utils import add_local_lib_path
+add_local_lib_path()
 
 from novaclient import client as novaclient
 
