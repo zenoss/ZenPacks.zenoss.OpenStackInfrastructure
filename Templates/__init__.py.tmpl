@@ -1,0 +1,138 @@
+## Source Template /home/jwilmes/dev/git/ZenPackGenerator/zpg/Templates/root_init.tmpl 
+$zenpack.license.header
+
+import logging
+LOG = logging.getLogger('zen.${zenpack.id}')
+
+import os
+import Globals
+
+from Products.ZenModel.Device import Device
+from Products.ZenModel.ZenPack import ZenPack as ZenPackBase
+from Products.ZenRelations.RelSchema import ToManyCont, ToOne
+from Products.ZenRelations.zPropertyCategory import setzPropertyCategory
+from Products.CMFCore.DirectoryView import registerDirectory
+from Products.Zuul.interfaces import ICatalogTool
+from Products.ZenUtils.Utils import unused, zenPath
+
+unused(Globals)
+
+ZENPACK_NAME = '${zenpack.id}'
+#if $components
+
+# Modules containing model classes. Used by zenchkschema to validate
+# bidirectional integrity of defined relationships.
+productNames = (
+#for $c in $components
+#if $c.componentInZenPackNameSpace
+    '${c.shortklass}',
+#end if
+#end for
+    )
+#end if
+
+# Define new device relations.
+NEW_DEVICE_RELATIONS = (
+#for $c in $devChildren.keys
+    ('$devChildren[$c].relname($c)', '${c.unique_name}'),
+#end for
+    )
+
+NEW_COMPONENT_TYPES = (
+#for $c in $devChildren.keys
+    '${c.id}.${c.klass}',
+#end for
+    )
+
+# Add new relationships to Device if they don't already exist.
+for relname, modname in NEW_DEVICE_RELATIONS:
+    if relname not in (x[0] for x in Device._relations):
+        Device._relations += (
+            (relname, ToManyCont(
+                ToOne,
+                '.'.join((ZENPACK_NAME, modname)),
+                '%s_host' % modname)),
+            )
+
+# Useful to avoid making literal string references to module and class names
+# throughout the rest of the ZenPack.
+MODULE_NAME = {}
+CLASS_NAME = {}
+#if $components
+
+for product_name in productNames:
+    MODULE_NAME[product_name] = '.'.join([ZENPACK_NAME, product_name])
+    CLASS_NAME[product_name] = '.'.join([ZENPACK_NAME, product_name, product_name])
+#end if
+
+_PACK_Z_PROPS = [
+#for $zprop in $zenpack.zproperties.values
+    ('${zprop[0]}', ${zprop[1]}, '${zprop[2]}'),
+#end for
+    ]
+
+#for $zprop in $zenpack.zproperties.values
+#if $zprop[3]
+setzPropertyCategory('${zprop[0]}', '${zprop[3]}')
+#end if
+#end for
+
+_plugins = (
+##    'poll_device.py'
+    )
+
+
+class ZenPack(ZenPackBase):
+    packZProperties = _PACK_Z_PROPS
+
+    def install(self, app):
+        super(ZenPack, self).install(app)
+        LOG.info('Adding ${zenpack.id} relationships to existing devices')
+
+        self._buildDeviceRelations()
+        self.symlink_plugins()
+
+    def symlink_plugins(self):
+        libexec = os.path.join(os.environ.get('ZENHOME'), 'libexec')
+        if not os.path.isdir(libexec):
+            # Stack installs might not have a \$ZENHOME/libexec directory.
+            os.mkdir(libexec)
+
+        for plugin in _plugins:
+            LOG.info('Linking %s plugin into \$ZENHOME/libexec/', plugin)
+            plugin_path = zenPath('libexec', plugin)
+            os.system('ln -sf "%s" "%s"' % (self.path(plugin), plugin_path))
+            os.system('chmod 0755 %s' % plugin_path)
+
+    def remove_plugin_symlinks(self):
+        for plugin in _plugins:
+            LOG.info('Removing %s link from \$ZENHOME/libexec/', plugin)
+            os.system('rm -f "%s"' % zenPath('libexec', plugin))
+
+    def remove(self, app, leaveObjects=False):
+        if not leaveObjects:
+            self.remove_plugin_symlinks()
+
+            LOG.info('Removing ${zenpack.id} components')
+            cat = ICatalogTool(app.zport.dmd)
+
+            # Search the catalog for components of this zenpacks type.
+            if NEW_COMPONENT_TYPES:
+                for brain in cat.search(types=NEW_COMPONENT_TYPES):
+                    component = brain.getObject()
+                    component.getPrimaryParent()._delObject(component.id)
+
+            # Remove our Device relations additions.
+            Device._relations = tuple(
+                [x for x in Device._relations
+                    if x[0] not in NEW_DEVICE_RELATIONS])
+
+            LOG.info('Removing ${zenpack.id} relationships from existing devices')
+            self._buildDeviceRelations()
+
+        super(ZenPack, self).remove(app, leaveObjects=leaveObjects)
+
+    def _buildDeviceRelations(self):
+        if len(NEW_DEVICE_RELATIONS) > 0:
+            for d in self.dmd.Devices.getSubDevicesGen():
+                d.buildRelations()
