@@ -19,7 +19,7 @@ ZC.registerName('OpenStackFlavor', _t('Flavor'), _t('Flavors'));
 ZC.registerName('OpenStackNovaCompute', _t('NovaCompute'), _t('NovaComputes'));
 ZC.registerName('OpenstackComponent', _t('OpenstackComponent'), _t('OpenstackComponents'));
 ZC.registerName('OpenStackNodeComponent', _t('NodeComponent'), _t('NodeComponents'));
-ZC.registerName('Endpoint', _t('Endpoint'), _t('Endpoints'));
+ZC.registerName('OpenStackEndpoint', _t('Endpoint'), _t('Endpoints'));
 ZC.registerName('OpenStackNovaApi', _t('NovaApi'), _t('NovaApis'));
 ZC.registerName('OpenStackServer', _t('Server'), _t('Servers'));
 ZC.registerName('OpenStackAvailabilityZone', _t('AvailabilityZone'), _t('AvailabilityZones'));
