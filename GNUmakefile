@@ -42,6 +42,9 @@ build:
 	cd $(SRC_DIR)/iso8601-0.1.4 && \
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
+	cd $(SRC_DIR)/simplejson-3.3.1 && \
+		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
+			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
 	cd $(SRC_DIR)/python-novaclient-2.15.0 && \
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
