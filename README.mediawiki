@@ -46,3 +46,11 @@ Status monitoring is performed on servers and images with the following mapping 
 : Active == Clear
 
 If you are also using Zenoss to monitor the guest operating system running within the server Zenoss will present the graphs for that operating system when the graphs option is chosen for the OpenStack server.
+
+== Changes ==
+
+;1.2.0
+* Add support for compute API versions 2 and 3. Still support version 1.
+* Add zOpenstackComputeApiVersion configuration property.
+* Update python-novaclient to 2.15.0.
+* Support uuid format for image identifier.
