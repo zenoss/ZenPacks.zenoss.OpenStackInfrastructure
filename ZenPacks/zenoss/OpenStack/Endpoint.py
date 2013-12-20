@@ -59,7 +59,7 @@ class Endpoint(Device):
         Used by modeling.
         '''
 
-        return sorted([components.id for components in self.components.objectValuesGen()])
+        return sorted([component.id for component in self.components.objectValuesGen()])
 
     def setComponentIds(self, ids):
         '''
