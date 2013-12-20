@@ -51,24 +51,24 @@ class Endpoint(Device):
         return self
 
 
-    def getOpenstackComponentIds(self):
+    def getComponentIds(self):
         '''
-        Return a sorted list of each openstackcomponent id related to this
+        Return a sorted list of each id from the components relationship
         Aggregate.
 
         Used by modeling.
         '''
 
-        return sorted([openstackcomponent.id for openstackcomponent in self.openstackcomponents.objectValuesGen()])
+        return sorted([components.id for components in self.components.objectValuesGen()])
 
-    def setOpenstackComponentIds(self, ids):
+    def setComponentIds(self, ids):
         '''
-        Update OpenstackComponent relationship given ids.
+        Update components relationship given ids.
 
         Used by modeling.
         '''
         updateToMany(
-            relationship=self.openstackcomponents,
+            relationship=self.components,
             root=self.device(),
             type_='ZenPacks.zenoss.OpenStack.OpenstackComponent',
             ids=ids)

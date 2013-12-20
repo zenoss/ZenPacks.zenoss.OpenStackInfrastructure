@@ -113,7 +113,7 @@ class Server(LogicalComponent):
             if REQUEST is not None:
                 REQUEST['RESPONSE'].redirect(url)
 
-    def getflavorId(self):
+    def getFlavorId(self):
         '''
         Return flavor id or None.
 
@@ -123,7 +123,7 @@ class Server(LogicalComponent):
         if obj:
             return obj.id
 
-    def setflavorId(self, id_):
+    def setFlavorId(self, id_):
         '''
         Set flavor by id.
 
@@ -135,7 +135,7 @@ class Server(LogicalComponent):
             type_='ZenPacks.zenoss.OpenStack.Flavor',
             id_=id_)
 
-    def getimageId(self):
+    def getImageId(self):
         '''
         Return image id or None.
 
@@ -145,7 +145,7 @@ class Server(LogicalComponent):
         if obj:
             return obj.id
 
-    def setimageId(self, id_):
+    def setImageId(self, id_):
         '''
         Set image by id.
 
@@ -159,7 +159,7 @@ class Server(LogicalComponent):
 
     def getHypervisorIds(self):
         '''
-        Return a sorted list of each hypervisor id related to this
+        Return a sorted list of each id from the hypervisors relationship
         Aggregate.
 
         Used by modeling.
@@ -169,7 +169,7 @@ class Server(LogicalComponent):
 
     def setHypervisorIds(self, ids):
         '''
-        Update Hypervisor relationship given ids.
+        Update hypervisors relationship given ids.
 
         Used by modeling.
         '''

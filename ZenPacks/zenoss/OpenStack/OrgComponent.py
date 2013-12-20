@@ -60,41 +60,41 @@ class OrgComponent(OpenstackComponent):
                         obj, exc, self))
 
 
-    def getOrgComponentIds(self):
+    def getChildOrgIds(self):
         '''
-        Return a sorted list of each orgcomponent id related to this
+        Return a sorted list of each id from the childOrgs relationship
         Aggregate.
 
         Used by modeling.
         '''
 
-        return sorted([orgcomponent.id for orgcomponent in self.orgcomponents.objectValuesGen()])
+        return sorted([childOrgs.id for childOrgs in self.childOrgs.objectValuesGen()])
 
-    def setOrgComponentIds(self, ids):
+    def setChildOrgIds(self, ids):
         '''
-        Update OrgComponent relationship given ids.
+        Update childOrgs relationship given ids.
 
         Used by modeling.
         '''
         updateToMany(
-            relationship=self.orgcomponents,
+            relationship=self.childOrgs,
             root=self.device(),
             type_='ZenPacks.zenoss.OpenStack.OrgComponent',
             ids=ids)
 
-    def getNodeComponentIds(self):
+    def getNodecomponentIds(self):
         '''
-        Return a sorted list of each nodecomponent id related to this
+        Return a sorted list of each id from the nodecomponents relationship
         Aggregate.
 
         Used by modeling.
         '''
 
-        return sorted([nodecomponent.id for nodecomponent in self.nodecomponents.objectValuesGen()])
+        return sorted([nodecomponents.id for nodecomponents in self.nodecomponents.objectValuesGen()])
 
-    def setNodeComponentIds(self, ids):
+    def setNodecomponentIds(self, ids):
         '''
-        Update NodeComponent relationship given ids.
+        Update nodecomponents relationship given ids.
 
         Used by modeling.
         '''
@@ -104,19 +104,19 @@ class OrgComponent(OpenstackComponent):
             type_='ZenPacks.zenoss.OpenStack.NodeComponent',
             ids=ids)
 
-    def getSoftwareComponentIds(self):
+    def getSoftwarecomponentIds(self):
         '''
-        Return a sorted list of each softwarecomponent id related to this
+        Return a sorted list of each id from the softwarecomponents relationship
         Aggregate.
 
         Used by modeling.
         '''
 
-        return sorted([softwarecomponent.id for softwarecomponent in self.softwarecomponents.objectValuesGen()])
+        return sorted([softwarecomponents.id for softwarecomponents in self.softwarecomponents.objectValuesGen()])
 
-    def setSoftwareComponentIds(self, ids):
+    def setSoftwarecomponentIds(self, ids):
         '''
-        Update SoftwareComponent relationship given ids.
+        Update softwarecomponents relationship given ids.
 
         Used by modeling.
         '''

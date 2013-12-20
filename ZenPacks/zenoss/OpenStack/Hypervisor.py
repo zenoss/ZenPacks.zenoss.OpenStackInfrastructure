@@ -78,7 +78,7 @@ class Hypervisor(SoftwareComponent):
             if REQUEST is not None:
                 REQUEST['RESPONSE'].redirect(url)
 
-    def getserverId(self):
+    def getServerId(self):
         '''
         Return server id or None.
 
@@ -88,7 +88,7 @@ class Hypervisor(SoftwareComponent):
         if obj:
             return obj.id
 
-    def setserverId(self, id_):
+    def setServerId(self, id_):
         '''
         Set server by id.
 

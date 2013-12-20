@@ -57,29 +57,29 @@ class SoftwareComponent(OpenstackComponent):
                         obj, exc, self))
 
 
-    def getnodecomponentId(self):
+    def getHostedOnNodeId(self):
         '''
-        Return nodecomponent id or None.
+        Return hostedOnNode id or None.
 
         Used by modeling.
         '''
-        obj = self.nodecomponent()
+        obj = self.hostedOnNode()
         if obj:
             return obj.id
 
-    def setnodecomponentId(self, id_):
+    def setHostedOnNodeId(self, id_):
         '''
-        Set nodecomponent by id.
+        Set hostedOnNode by id.
 
         Used by modeling.
         '''
         updateToOne(
-            relationship=self.nodecomponent,
+            relationship=self.hostedOnNode,
             root=self.device(),
             type_='ZenPacks.zenoss.OpenStack.NodeComponent',
             id_=id_)
 
-    def getorgcomponentId(self):
+    def getOrgcomponentId(self):
         '''
         Return orgcomponent id or None.
 
@@ -89,7 +89,7 @@ class SoftwareComponent(OpenstackComponent):
         if obj:
             return obj.id
 
-    def setorgcomponentId(self, id_):
+    def setOrgcomponentId(self, id_):
         '''
         Set orgcomponent by id.
 

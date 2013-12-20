@@ -55,7 +55,7 @@ class OpenstackComponent(DeviceComponent, ManagedEntity):
                         obj, exc, self))
 
 
-    def getendpointId(self):
+    def getEndpointId(self):
         '''
         Return endpoint id or None.
 
@@ -65,7 +65,7 @@ class OpenstackComponent(DeviceComponent, ManagedEntity):
         if obj:
             return obj.id
 
-    def setendpointId(self, id_):
+    def setEndpointId(self, id_):
         '''
         Set endpoint by id.
 

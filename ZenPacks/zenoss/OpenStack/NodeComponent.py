@@ -57,7 +57,7 @@ class NodeComponent(DeviceProxyComponent):
                         obj, exc, self))
 
 
-    def getorgcomponentId(self):
+    def getOrgcomponentId(self):
         '''
         Return orgcomponent id or None.
 
@@ -67,7 +67,7 @@ class NodeComponent(DeviceProxyComponent):
         if obj:
             return obj.id
 
-    def setorgcomponentId(self, id_):
+    def setOrgcomponentId(self, id_):
         '''
         Set orgcomponent by id.
 
@@ -79,24 +79,24 @@ class NodeComponent(DeviceProxyComponent):
             type_='ZenPacks.zenoss.OpenStack.OrgComponent',
             id_=id_)
 
-    def getSoftwareComponentIds(self):
+    def getHostedSoftwareIds(self):
         '''
-        Return a sorted list of each softwarecomponent id related to this
+        Return a sorted list of each id from the hostedSoftware relationship
         Aggregate.
 
         Used by modeling.
         '''
 
-        return sorted([softwarecomponent.id for softwarecomponent in self.softwarecomponents.objectValuesGen()])
+        return sorted([hostedSoftware.id for hostedSoftware in self.hostedSoftware.objectValuesGen()])
 
-    def setSoftwareComponentIds(self, ids):
+    def setHostedSoftwareIds(self, ids):
         '''
-        Update SoftwareComponent relationship given ids.
+        Update hostedSoftware relationship given ids.
 
         Used by modeling.
         '''
         updateToMany(
-            relationship=self.softwarecomponents,
+            relationship=self.hostedSoftware,
             root=self.device(),
             type_='ZenPacks.zenoss.OpenStack.SoftwareComponent',
             ids=ids)

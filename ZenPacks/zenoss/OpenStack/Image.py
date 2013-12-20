@@ -101,7 +101,7 @@ class Image(LogicalComponent):
 
     def getServerIds(self):
         '''
-        Return a sorted list of each server id related to this
+        Return a sorted list of each id from the servers relationship
         Aggregate.
 
         Used by modeling.
@@ -111,7 +111,7 @@ class Image(LogicalComponent):
 
     def setServerIds(self, ids):
         '''
-        Update Server relationship given ids.
+        Update servers relationship given ids.
 
         Used by modeling.
         '''
