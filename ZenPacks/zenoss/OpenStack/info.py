@@ -75,6 +75,7 @@ class FlavorInfo(OpenStackComponentInfo):
     implements(IFlavorInfo)
     adapts(Flavor)
 
+    flavorId = ProxyProperty('flavorId')
     flavorRAM = ProxyProperty('flavorRAM')
     flavorDisk = ProxyProperty('flavorDisk')
 
@@ -95,6 +96,7 @@ class ImageInfo(OpenStackComponentInfo):
     implements(IImageInfo)
     adapts(Image)
 
+    imageId = ProxyProperty('imageId')
     imageStatus = ProxyProperty('imageStatus')
     imageCreated = ProxyProperty('imageCreated')
     imageUpdated = ProxyProperty('imageUpdated')

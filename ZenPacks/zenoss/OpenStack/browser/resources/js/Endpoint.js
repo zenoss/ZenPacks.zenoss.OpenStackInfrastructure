@@ -43,13 +43,6 @@ Ext.onReady(function() {
 var ZC = Ext.ns('Zenoss.component');
 
 /*
- * Friendly names for the components.
- */
-ZC.registerName('OpenStackFlavor', _t('Flavor'), _t('Flavors'));
-ZC.registerName('OpenStackImage', _t('Image'), _t('Images'));
-ZC.registerName('OpenStackServer', _t('Server'), _t('Servers'));
-
-/*
  * Endpoint-local custom renderers.
  */
 Ext.apply(Zenoss.render, {
@@ -354,13 +347,13 @@ ZC.OpenStackServerPanel = Ext.extend(ZC.OpenStackComponentGridPanel, {
                 dataIndex: 'flavor',
                 header: _t('Flavor'),
                 renderer: Zenoss.render.OpenStack_entityLinkFromGrid,
-                width: 85
+                width: 160
             },{
                 id: 'image',
                 dataIndex: 'image',
                 header: _t('Image'),
                 renderer: Zenoss.render.OpenStack_entityLinkFromGrid,
-                width: 140
+                width: 180
             },{
                 id: 'publicIps',
                 dataIndex: 'publicIps',
