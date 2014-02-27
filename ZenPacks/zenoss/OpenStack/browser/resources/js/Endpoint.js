@@ -347,13 +347,13 @@ ZC.OpenStackServerPanel = Ext.extend(ZC.OpenStackComponentGridPanel, {
                 dataIndex: 'flavor',
                 header: _t('Flavor'),
                 renderer: Zenoss.render.OpenStack_entityLinkFromGrid,
-                width: 85
+                width: 160
             },{
                 id: 'image',
                 dataIndex: 'image',
                 header: _t('Image'),
                 renderer: Zenoss.render.OpenStack_entityLinkFromGrid,
-                width: 140
+                width: 180
             },{
                 id: 'publicIps',
                 dataIndex: 'publicIps',
