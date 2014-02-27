@@ -134,11 +134,11 @@ class OpenStack(PythonPlugin):
                 if isinstance(server.private_ip, types.StringTypes):
                     private_ips.add(server.private_ip)
                 elif isinstance(server.private_ip, types.ListType):
-                	if isinstance(server.private_ip[0], types.StringTypes):
-	                    private_ips.update(server.private_ip)
-	                else:
-	                	for address in server.private_ip:
-	                		private_ips.add(address['addr'])
+                    if isinstance(server.private_ip[0], types.StringTypes):
+                        private_ips.update(server.private_ip)
+                    else:
+                        for address in server.private_ip:
+                            private_ips.add(address['addr'])
 
             if hasattr(server, 'accessIPv4') and server.accessIPv4:
                 public_ips.add(server.accessIPv4)
