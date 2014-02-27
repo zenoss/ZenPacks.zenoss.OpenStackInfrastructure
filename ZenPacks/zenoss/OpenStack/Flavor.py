@@ -19,12 +19,12 @@ from Products.ZenRelations.RelSchema import ToMany, ToManyCont, ToOne
 class Flavor(DeviceComponent, ManagedEntity):
     meta_type = portal_type = "OpenStackFlavor"
 
-    flavorId = None     # 1
+    flavorId = None     # performance1-1
     flavorRAM = None    # Stored as bytes
     flavorDisk = None   # Stored as bytes
 
     _properties = ManagedEntity._properties + (
-        {'id': 'flavorId', 'type': 'int', 'mode': ''},
+        {'id': 'flavorId', 'type': 'string', 'mode': ''},
         {'id': 'flavorRAM', 'type': 'int', 'mode': ''},
         {'id': 'flavorDisk', 'type': 'int', 'mode': ''},
     )
