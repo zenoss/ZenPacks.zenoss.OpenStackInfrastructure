@@ -43,13 +43,6 @@ Ext.onReady(function() {
 var ZC = Ext.ns('Zenoss.component');
 
 /*
- * Friendly names for the components.
- */
-ZC.registerName('OpenStackFlavor', _t('Flavor'), _t('Flavors'));
-ZC.registerName('OpenStackImage', _t('Image'), _t('Images'));
-ZC.registerName('OpenStackServer', _t('Server'), _t('Servers'));
-
-/*
  * Endpoint-local custom renderers.
  */
 Ext.apply(Zenoss.render, {
