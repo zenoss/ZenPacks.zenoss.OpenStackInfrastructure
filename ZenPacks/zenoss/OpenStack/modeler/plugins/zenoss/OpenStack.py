@@ -74,7 +74,7 @@ class OpenStack(PythonPlugin):
             flavors.append(ObjectMap(data=dict(
                 id='flavor{0}'.format(flavor.id),
                 title=flavor.name,  # 256 server
-                flavorId=int(flavor.id),  # 1
+                flavorId=flavor.id,  # performance1-1
                 flavorRAM=flavor.ram * 1024 * 1024,  # 256
                 flavorDisk=flavor.disk * 1024 * 1024 * 1024,  # 10
             )))
@@ -134,11 +134,11 @@ class OpenStack(PythonPlugin):
                 if isinstance(server.private_ip, types.StringTypes):
                     private_ips.add(server.private_ip)
                 elif isinstance(server.private_ip, types.ListType):
-                	if isinstance(server.private_ip[0], types.StringTypes):
-	                    private_ips.update(server.private_ip)
-	                else:
-	                	for address in server.private_ip:
-	                		private_ips.add(address['addr'])
+                    if isinstance(server.private_ip[0], types.StringTypes):
+                        private_ips.update(server.private_ip)
+                    else:
+                        for address in server.private_ip:
+                            private_ips.add(address['addr'])
 
             if hasattr(server, 'accessIPv4') and server.accessIPv4:
                 public_ips.add(server.accessIPv4)
@@ -163,9 +163,9 @@ class OpenStack(PythonPlugin):
             # Flavor and Image IDs could be specified two different ways.
             flavor_id = None
             if hasattr(server, 'flavorId'):
-                flavor_id = int(server.flavorId)
+                flavor_id = server.flavorId
             else:
-                flavor_id = int(server.flavor['id'])
+                flavor_id = server.flavor['id']
 
             image_id = None
             if hasattr(server, 'imageId'):
@@ -183,7 +183,7 @@ class OpenStack(PythonPlugin):
                 serverBackupWeekly=backup_schedule_weekly,  # DISABLED
                 publicIps=list(public_ips),  # 50.57.74.222
                 privateIps=list(private_ips),  # 10.182.13.13
-                setFlavorId=flavor_id,  # 1
+                setFlavorId=flavor_id,  # performance1-1
                 setImageId=image_id,  # 346eeba5-a122-42f1-94e7-06cb3c53f690
 
                 # a84303c0021aa53c7e749cbbbfac265f

@@ -42,6 +42,12 @@ build:
 	cd $(SRC_DIR)/iso8601-0.1.4 && \
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
+	cd $(SRC_DIR)/simplejson-3.3.1 && \
+		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
+			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"	
+	# convince novaclient not to try to download any dependencies. We have already taken
+	# care of them above.
+	cp /dev/null $(SRC_DIR)/python-novaclient-2.15.0/requirements.txt
 	cd $(SRC_DIR)/python-novaclient-2.15.0 && \
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
