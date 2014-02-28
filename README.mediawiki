@@ -49,6 +49,9 @@ If you are also using Zenoss to monitor the guest operating system running withi
 
 == Changes ==
 
+;1.2.2
+* Fix bug that could prevent data collection.
+
 ;1.2.1
 * Fix bug in handling of flavor ID. ([https://jira.zenoss.com/browse/ZEN-10333 ZEN-10333])
 
