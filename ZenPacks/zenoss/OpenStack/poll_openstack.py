@@ -20,6 +20,7 @@ addLocalLibPath()
 
 from novaclient import client as novaclient
 
+
 class OpenStackPoller(object):
     def __init__(self, username, api_key, project_id, auth_url, api_version, region_name):
         self._username = username
@@ -30,12 +31,6 @@ class OpenStackPoller(object):
         self._region_name = region_name
 
     def getData(self):
-        if (log.isEnabledFor(logging.DEBUG)):
-            http_log_debug = True
-            logging.getLogger('novaclient.client').setLevel(logging.DEBUG)
-        else:
-            http_log_debug = False
-
         client = novaclient.Client(
             self._api_version,
             self._username,
@@ -43,8 +38,7 @@ class OpenStackPoller(object):
             self._project_id,
             self._auth_url,
             region_name=self._region_name or None,
-            http_log_debug=http_log_debug        
-        )
+            http_log_debug=False)
 
         data = {}
         data['events'] = []
@@ -198,18 +192,18 @@ class OpenStackPoller(object):
         print json.dumps(data)
 
 if __name__ == '__main__':
-    username = api_key = project_id = auth_url = region_name = None
+    username = api_key = project_id = auth_url = api_version = region_name = None
     try:
-        username, api_key, project_id, auth_url, region_name = sys.argv[1:6]
+        username, api_key, project_id, auth_url, api_version, region_name = sys.argv[1:7]
     except ValueError:
         print >> sys.stderr, (
             "Usage: %s <username> <api_key> <project_id> <auth_url> "
-            "<region_name>"
+            "<api_version> <region_name>"
             ) % sys.argv[0]
 
         sys.exit(1)
 
     poller = OpenStackPoller(
-        username, api_key, project_id, auth_url, region_name)
+        username, api_key, project_id, auth_url, api_version, region_name)
 
     poller.printJSON()
