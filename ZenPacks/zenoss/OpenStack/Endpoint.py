@@ -16,8 +16,7 @@ from Products.Zuul.utils import ZuulMessageFactory as _t
 from Products.ZenModel.Device import Device
 from Products.Zuul.infos.device import DeviceInfo
 from Products.Zuul.interfaces import IDeviceInfo
-from Products.ZenRelations.RelSchema import ToMany, ToOne
-from ZenPacks.zenoss.OpenStack.utils import updateToMany
+from Products.ZenRelations.RelSchema import ToManyCont, ToOne
 
 
 class Endpoint(Device):
@@ -30,7 +29,7 @@ class Endpoint(Device):
         _relations = _relations + getattr(Klass, '_relations', ())
 
     _relations = _relations + (
-        ('components', ToMany(
+        ('components', ToManyCont(
             ToOne, 'ZenPacks.zenoss.OpenStack.OpenstackComponent', 'endpoint',
         )),
     )
@@ -51,51 +50,26 @@ class Endpoint(Device):
         return self
 
 
-    def getComponentIds(self):
-        '''
-        Return a sorted list of each id from the components relationship
-        Aggregate.
-
-        Used by modeling.
-        '''
-
-        return sorted([component.id for component in self.components.objectValuesGen()])
-
-    def setComponentIds(self, ids):
-        '''
-        Update components relationship given ids.
-
-        Used by modeling.
-        '''
-        updateToMany(
-            relationship=self.components,
-            root=self.device(),
-            type_='ZenPacks.zenoss.OpenStack.OpenstackComponent',
-            ids=ids)
-
 
 class IEndpointInfo(IDeviceInfo):
-    openstackcomponent_count = schema.Int(title=_t(u'Number of OpenstackComponents'))
-
+    components_count = schema.Int(title=_t(u'Number of Components'))
     username = schema.Text(title=_t(u"Username"))
     project_id = schema.Text(title=_t(u"Project ID"))
     auth_url = schema.Text(title=_t(u"Auth URL"))
     region_name = schema.Text(title=_t(u"Region Name"))
-    server_count = schema.Int(title=_t(u"Total Servers"))
-    flavor_count = schema.Int(title=_t(u"Total Flavors"))
-    image_count = schema.Int(title=_t(u"Total Images"))
+    api_version = schema.Text(title=_t(u"Openstack Compute API Version"))
 
 class EndpointInfo(DeviceInfo):
     implements(IEndpointInfo)
 
     @property
-    def openstackcomponent_count(self):
+    def components_count(self):
         # Using countObjects is fast.
         try:
-            return self._object.openstackcomponents.countObjects()
+            return self._object.components.countObjects()
         except:
             # Using len on the results of calling the relationship is slow.
-            return len(self._object.openstackcomponents())
+            return len(self._object.components())
 
     @property
     def username(self):
@@ -116,15 +90,3 @@ class EndpointInfo(DeviceInfo):
     @property
     def region_name(self):
         return self._object.primaryAq().zOpenStackRegionName
-
-    @property
-    def flavor_count(self):
-        return self._object.flavors.countObjects()
-
-    @property
-    def image_count(self):
-        return self._object.images.countObjects()
-
-    @property
-    def server_count(self):
-        return self._object.servers.countObjects()

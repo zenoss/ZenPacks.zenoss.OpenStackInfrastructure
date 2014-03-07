@@ -17,8 +17,7 @@ from Products.Zuul.infos import ProxyProperty
 from Products.Zuul.utils import ZuulMessageFactory as _t
 from Products.ZenModel.DeviceComponent import DeviceComponent
 from Products.ZenModel.ManagedEntity import ManagedEntity
-from Products.ZenRelations.RelSchema import ToMany, ToOne
-from ZenPacks.zenoss.OpenStack.utils import updateToOne
+from Products.ZenRelations.RelSchema import ToManyCont, ToOne
 
 
 class OpenstackComponent(DeviceComponent, ManagedEntity):
@@ -32,7 +31,7 @@ class OpenstackComponent(DeviceComponent, ManagedEntity):
 
     _relations = _relations + (
         ('endpoint', ToOne(
-            ToMany, 'ZenPacks.zenoss.OpenStack.Endpoint', 'components',
+            ToManyCont, 'ZenPacks.zenoss.OpenStack.Endpoint', 'components',
         )),
     )
 
@@ -54,25 +53,3 @@ class OpenstackComponent(DeviceComponent, ManagedEntity):
                     'while getting device for %s' % (
                         obj, exc, self))
 
-
-    def getEndpointId(self):
-        '''
-        Return endpoint id or None.
-
-        Used by modeling.
-        '''
-        obj = self.endpoint()
-        if obj:
-            return obj.id
-
-    def setEndpointId(self, id_):
-        '''
-        Set endpoint by id.
-
-        Used by modeling.
-        '''
-        updateToOne(
-            relationship=self.endpoint,
-            root=self.device(),
-            type_='ZenPacks.zenoss.OpenStack.Endpoint',
-            id_=id_)

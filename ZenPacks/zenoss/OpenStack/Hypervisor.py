@@ -16,6 +16,7 @@ from Products.Zuul.form import schema
 from Products.Zuul.infos import ProxyProperty
 from Products.Zuul.utils import ZuulMessageFactory as _t
 from ZenPacks.zenoss.OpenStack.SoftwareComponent import SoftwareComponent
+from Products.Zuul.catalog.paths import DefaultPathReporter, relPath
 from Products.ZenRelations.RelSchema import ToMany, ToOne
 from ZenPacks.zenoss.OpenStack.utils import updateToOne
 
@@ -30,8 +31,8 @@ class Hypervisor(SoftwareComponent):
         _relations = _relations + getattr(Klass, '_relations', ())
 
     _relations = _relations + (
-        ('server', ToOne(
-            ToMany, 'ZenPacks.zenoss.OpenStack.Server', 'hypervisors',
+        ('servers', ToMany(
+            ToOne, 'ZenPacks.zenoss.OpenStack.Server', 'hypervisor',
         )),
     )
 
@@ -99,3 +100,14 @@ class Hypervisor(SoftwareComponent):
             root=self.device(),
             type_='ZenPacks.zenoss.OpenStack.Server',
             id_=id_)
+
+
+class HypervisorPathReporter(DefaultPathReporter):
+    def getPaths(self):
+        paths = super(HypervisorPathReporter, self).getPaths()
+
+        obj = self.context.hypervisors()
+        if obj:
+            paths.extend(relPath(obj, 'components'))
+
+        return paths

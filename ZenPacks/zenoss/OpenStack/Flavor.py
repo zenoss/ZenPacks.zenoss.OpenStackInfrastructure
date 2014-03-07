@@ -20,7 +20,7 @@ from Products.Zuul.infos.component import ComponentInfo
 from Products.Zuul.interfaces.component import IComponentInfo
 from Products.ZenRelations.RelSchema import ToMany, ToOne
 from ZenPacks.zenoss.OpenStack.utils import updateToMany
-from Products.ZenUtils.Utils import convToUnits
+
 
 class Flavor(LogicalComponent):
     meta_type = portal_type = 'OpenStackFlavor'
@@ -59,9 +59,6 @@ class Flavor(LogicalComponent):
             'permissions': (ZEN_CHANGE_DEVICE,),
             },),
         },)
-
-    # Query for events by id instead of name.
-    event_key = "ComponentId"
 
     def device(self):
         '''
@@ -121,14 +118,11 @@ class Flavor(LogicalComponent):
 
 
 class IFlavorInfo(IComponentInfo):
-    server_count = schema.Int(title=_t(u'Number of Servers'))
+    servers_count = schema.Int(title=_t(u'Number of Servers'))
 
-    flavorDisk = schema.Int(title=_t(u'flavorDisks'), readonly=True)
-    flavorId = schema.Int(title=_t(u'flavorIds'), readonly=True)
-    flavorRAM = schema.Int(title=_t(u'flavorRAMs'), readonly=True)
-
-    flavorRAMString = schema.Text(title=_t(u"Flavor RAM"))
     flavorDiskString = schema.Text(title=_t(u"Flavor Disk"))
+    flavorId = schema.Int(title=_t(u'flavorIds'), readonly=True)
+    flavorRAMString = schema.Text(title=_t(u"Flavor RAM"))
 
 class FlavorInfo(ComponentInfo):
     implements(IFlavorInfo)
@@ -138,18 +132,18 @@ class FlavorInfo(ComponentInfo):
     flavorRAM = ProxyProperty('flavorRAM')
 
     @property
-    def server_count(self):
+    def flavorDiskString(self):
+        return convToUnits(self._object.flavorDisk, 1024, 'B')
+
+    @property
+    def flavorRAMString(self):
+        return convToUnits(self._object.flavorRAM, 1024, 'B')
+
+    @property
+    def servers_count(self):
         # Using countObjects is fast.
         try:
             return self._object.servers.countObjects()
         except:
             # Using len on the results of calling the relationship is slow.
             return len(self._object.servers())
-
-    def flavorRAMString(self):
-        return convToUnits(self._object.flavorRAM, 1024, 'B')
-
-    @property
-    def flavorDiskString(self):
-        return convToUnits(self._object.flavorDisk, 1024, 'B')
-

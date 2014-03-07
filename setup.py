@@ -18,6 +18,7 @@ from setuptools import setup, find_packages
 # make build
 import subprocess
 p = subprocess.Popen('make build', shell=True)
+
 if p.poll() == None:
     p.wait()
 if p.returncode != 0:

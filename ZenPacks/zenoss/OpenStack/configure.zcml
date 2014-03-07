@@ -2,10 +2,29 @@
 <configure
     xmlns="http://namespaces.zope.org/zope"
     xmlns:browser="http://namespaces.zope.org/browser"
-    xmlns:zcml="http://namespaces.zope.org/zcml">
+    >
+
+    <!-- API: Routers -->
+    <include package="Products.ZenUtils.extdirect.zope" file="meta.zcml"/>
+
+    <browser:directRouter
+        name="openstack_router"
+        for="*"
+        class=".api.OpenStackRouter"
+        namespace="Zenoss.remote"
+        permission="zenoss.View"
+        />
+
+    <!-- API: Facades -->
+    <adapter
+        name="openstack"
+        provides=".api.IOpenStackFacade"
+        for="*"
+        factory=".api.OpenStackFacade"
+        />
 
     <!-- API: Info Adapters -->
-  
+
     <adapter
         provides=".Endpoint.IEndpointInfo"
         for=".Endpoint.Endpoint"
@@ -28,6 +47,33 @@
         provides=".Server.IServerInfo"
         for=".Server.Server"
         factory=".Server.ServerInfo"
+        />
+
+
+    <!-- Custom Path Reporters -->
+
+    <adapter
+        provides="Products.Zuul.catalog.interfaces.IPathReporter"
+        for=".Hypervisor.Hypervisor"
+        factory=".Hypervisor.HypervisorPathReporter"
+        />
+
+    <adapter
+        provides="Products.Zuul.catalog.interfaces.IPathReporter"
+        for=".SoftwareComponent.SoftwareComponent"
+        factory=".SoftwareComponent.SoftwareComponentPathReporter"
+        />
+
+    <adapter
+        provides="Products.Zuul.catalog.interfaces.IPathReporter"
+        for=".NodeComponent.NodeComponent"
+        factory=".NodeComponent.NodeComponentPathReporter"
+        />
+
+    <adapter
+        provides="Products.Zuul.catalog.interfaces.IPathReporter"
+        for=".Server.Server"
+        factory=".Server.ServerPathReporter"
         />
 
     <!-- Browser Resources -->
@@ -59,32 +105,4 @@
         permission="zope2.Public"
         />
 
-    <!-- Import directRouter Directive -->
-    <include package="Products.ZenUtils.extdirect.zope" file="meta.zcml"/>
-
-    <!-- Define the Router and Facade -->
-    <browser:directRouter
-        name="openstack_router"
-        for="*"
-        class=".api.OpenStackRouter"
-        namespace="Zenoss.remote"
-        permission="zenoss.View"
-        />
-
-    <adapter
-        name="openstack"
-        provides=".api.IOpenStackFacade"
-        for="*"
-        factory=".api.OpenStackFacade"
-        />
-
-    <!-- Define Device Loader -->
-    <utility
-        name="openstack"
-        provides="Products.ZenModel.interfaces.IDeviceLoader"
-        component=".deviceloaders.OpenStackLoader"
-        />
-
-
 </configure>
-

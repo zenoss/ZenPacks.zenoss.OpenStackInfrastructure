@@ -71,37 +71,31 @@ class OpenStack(PythonPlugin):
     def process(self, devices, results, unused):
         flavors = []
         for flavor in results['flavors']:
-            flavors.append(ObjectMap(data=dict(
-                id='flavor{0}'.format(flavor.id),
-                title=flavor.name,  # 256 server
-                flavorId=int(flavor.id),  # 1
-                flavorRAM=flavor.ram * 1024 * 1024,  # 256
-                flavorDisk=flavor.disk * 1024 * 1024 * 1024,  # 10
+            flavors.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.Flavor',
+                data=dict(
+                    id='flavor{0}'.format(flavor.id),
+                    title=flavor.name,  # 256 server
+                    flavorId=int(flavor.id),  # 1
+                    flavorRAM=flavor.ram * 1024 * 1024,  # 256
+                    flavorDisk=flavor.disk * 1024 * 1024 * 1024,  # 10
             )))
-
-        flavorsMap = RelationshipMap(
-            relname='flavors',
-            modname='ZenPacks.zenoss.OpenStack.Flavor',
-            objmaps=flavors)
 
         images = []
         for image in results['images']:
             # Sometimes there's no created timestamp for an image.
             created = getattr(image, 'created', '')
 
-            images.append(ObjectMap(data=dict(
-                id='image{0}'.format(image.id),
-                title=image.name,  # Red Hat Enterprise Linux 5.5
-                imageId=image.id,  # 346eeba5-a122-42f1-94e7-06cb3c53f690
-                imageStatus=image.status,  # ACTIVE
-                imageCreated=created,  # 2010-09-17T07:19:20-05:00
-                imageUpdated=image.updated,  # 2010-09-17T07:19:20-05:00
-            )))
-
-        imagesMap = RelationshipMap(
-            relname='images',
-            modname='ZenPacks.zenoss.OpenStack.Image',
-            objmaps=images)
+            images.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.Image',
+                data=dict(
+                    id='image{0}'.format(image.id),
+                    title=image.name,  # Red Hat Enterprise Linux 5.5
+                    imageId=image.id,  # 346eeba5-a122-42f1-94e7-06cb3c53f690
+                    imageStatus=image.status,  # ACTIVE
+                    imageCreated=created,  # 2010-09-17T07:19:20-05:00
+                    imageUpdated=image.updated,  # 2010-09-17T07:19:20-05:00
+            )))    
 
         servers = []
         for server in results['servers']:
@@ -173,26 +167,27 @@ class OpenStack(PythonPlugin):
             else:
                 image_id = server.image['id']
 
-            servers.append(ObjectMap(data=dict(
-                id='server{0}'.format(server.id),
-                title=server.name,  # cloudserver01
-                serverId=server.id,  # 847424
-                serverStatus=server.status,  # ACTIVE
-                serverBackupEnabled=backup_schedule_enabled,  # False
-                serverBackupDaily=backup_schedule_daily,  # DISABLED
-                serverBackupWeekly=backup_schedule_weekly,  # DISABLED
-                publicIps=list(public_ips),  # 50.57.74.222
-                privateIps=list(private_ips),  # 10.182.13.13
-                setFlavorId=flavor_id,  # 1
-                setImageId=image_id,  # 346eeba5-a122-42f1-94e7-06cb3c53f690
+            servers.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.Server',
+                data=dict(
+                    id='server{0}'.format(server.id),
+                    title=server.name,  # cloudserver01
+                    serverId=server.id,  # 847424
+                    serverStatus=server.status,  # ACTIVE
+                    serverBackupEnabled=backup_schedule_enabled,  # False
+                    serverBackupDaily=backup_schedule_daily,  # DISABLED
+                    serverBackupWeekly=backup_schedule_weekly,  # DISABLED
+                    publicIps=list(public_ips),  # 50.57.74.222
+                    privateIps=list(private_ips),  # 10.182.13.13
+                    setFlavorId=flavor_id,  # 1
+                    setImageId=image_id,  # 346eeba5-a122-42f1-94e7-06cb3c53f690
 
-                # a84303c0021aa53c7e749cbbbfac265f
-                hostId=server.hostId,
+                    # a84303c0021aa53c7e749cbbbfac265f
+                    hostId=server.hostId,
             )))
 
-        serversMap = RelationshipMap(
-            relname='servers',
-            modname='ZenPacks.zenoss.OpenStack.Server',
-            objmaps=servers)
+        componentsMap = RelationshipMap(relname='components')
+        for objmap in flavors + images + servers:
+            componentsMap.append(objmap)
 
-        return (flavorsMap, imagesMap, serversMap)
+        return (componentsMap)

@@ -29,14 +29,15 @@
     ],
 
     "relationships": [
-                {
-                    "componentA": "Endpoint",
-                    "relnameA": "components",
-                    "componentB": "OpenstackComponent",
-                    "relnameB": "endpoint",
-                    "type": "1-M",
-                    "contained": false
-                },
+                // this is created implicitly (with a default relname of 'openstackcomponents', unfortunately)
+                // {
+                //     "componentA": "Endpoint",
+                //     "relnameA": "components",
+                //     "componentB": "OpenstackComponent",
+                //     "relnameB": "endpoint",
+                //     "type": "1-M",
+                //     "contained": true
+                // },
                 {
                     "componentA": "OrgComponent",
                     "relnameA": "childOrgs",
@@ -80,8 +81,8 @@
                     "contained": false
                 },
                 {
-                    "componentA": "Server",
-                    "componentB": "Hypervisor",
+                    "componentA": "Hypervisor",
+                    "componentB": "Server",
                     "type": "1-M",
                     "contained": false
                 }                

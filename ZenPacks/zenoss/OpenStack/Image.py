@@ -62,9 +62,6 @@ class Image(LogicalComponent):
             },),
         },)
 
-    # Query for events by id instead of name.
-    event_key = "ComponentId"
-
     def device(self):
         '''
         Return device under which this component/device is contained.
@@ -123,10 +120,12 @@ class Image(LogicalComponent):
 
 
 class IImageInfo(IComponentInfo):
-    server_count = schema.Int(title=_t(u'Number of Servers'))
-    imageStatus = schema.Text(title=_t(u"Image Status"))
-    imageCreated = schema.Text(title=_t(u"Image Created"))
+    servers_count = schema.Int(title=_t(u'Number of Servers'))
+
     imageUpdated = schema.Text(title=_t(u"Image Updated"))
+    imageCreated = schema.Text(title=_t(u"Image Created"))
+    imageStatus = schema.Text(title=_t(u"Image Status"))
+    imageId = schema.TextLine(title=_t(u'imageIds'), readonly=True)
 
 
 class ImageInfo(ComponentInfo):
@@ -138,7 +137,7 @@ class ImageInfo(ComponentInfo):
     imageId = ProxyProperty('imageId')
 
     @property
-    def server_count(self):
+    def servers_count(self):
         # Using countObjects is fast.
         try:
             return self._object.servers.countObjects()

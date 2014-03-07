@@ -17,6 +17,7 @@ from Products.Zuul.infos import ProxyProperty
 from Products.Zuul.utils import ZuulMessageFactory as _t
 from ZenPacks.zenoss.OpenStack.LogicalComponent import LogicalComponent
 from Products.Zuul.infos.component import ComponentInfo
+from Products.Zuul.catalog.paths import DefaultPathReporter, relPath
 from Products.Zuul.interfaces.component import IComponentInfo
 from Products.ZenRelations.RelSchema import ToMany, ToOne
 from ZenPacks.zenoss.OpenStack.utils import updateToMany,updateToOne
@@ -59,8 +60,8 @@ class Server(LogicalComponent):
         ('flavor', ToOne(
             ToMany, 'ZenPacks.zenoss.OpenStack.Flavor', 'servers',
         )),
-        ('hypervisors', ToMany(
-            ToOne, 'ZenPacks.zenoss.OpenStack.Hypervisor', 'server',
+        ('hypervisor', ToOne(
+            ToMany, 'ZenPacks.zenoss.OpenStack.Hypervisor', 'servers',
         )),
         ('image', ToOne(
             ToMany, 'ZenPacks.zenoss.OpenStack.Image', 'servers',
@@ -75,9 +76,6 @@ class Server(LogicalComponent):
             'permissions': (ZEN_CHANGE_DEVICE,),
             },),
         },)
-
-    # Query for events by id instead of name.
-    event_key = "ComponentId"
 
     def device(self):
         '''
@@ -221,17 +219,16 @@ class Server(LogicalComponent):
 
 
 class IServerInfo(IComponentInfo):
-    hypervisor_count = schema.Int(title=_t(u'Number of Hypervisors'))
+    hypervisors_count = schema.Int(title=_t(u'Number of Hypervisors'))
 
-    serverStatus = schema.Text(title=_t(u"Server Status"))
-    publicIps = schema.List(title=_t(u"Public IPs"))
-    privateIps = schema.List(title=_t(u"Private IPs"))
-    flavor = schema.Entity(title=_t(u"Server Flavor"))
-    image = schema.Entity(title=_t(u"Server Image"))
-    serverBackupEnabled = schema.Bool(title=_t(u"Server Backup Enabled"))
-    serverBackupDaily = schema.Text(title=_t(u"Server Backup Daily"))
-    serverBackupWeekly = schema.Text(title=_t(u"Server Backup Weekly"))
-    hostId = schema.Text(title=_t(u"Host ID"))
+    hostId = schema.TextLine(title=_t(u'Host ID'), readonly=True)
+    serverBackupEnabled = schema.Bool(title=_t(u'Server Backup Enabled'), readonly=True)
+    privateIps = schema.TextLine(title=_t(u'Private IPs'), readonly=True)
+    serverBackupDaily = schema.TextLine(title=_t(u'Server Backup Daily'), readonly=True)
+    publicIps = schema.TextLine(title=_t(u'Public IP'), readonly=True)
+    serverStatus = schema.TextLine(title=_t(u'Server Status'), readonly=True)
+    serverBackupWeekly = schema.TextLine(title=_t(u'Server Backup Weekly'), readonly=True)
+    serverId = schema.Int(title=_t(u'Server ID'), readonly=True)
     guestDevice = schema.Entity(title=_t(u"Guest Device"))
 
 
@@ -240,15 +237,15 @@ class ServerInfo(ComponentInfo):
 
     hostId = ProxyProperty('hostId')
     serverBackupEnabled = ProxyProperty('serverBackupEnabled')
-    privateIps = ProxyProperty('privateIps')
+    privateIps = ProxyProperty('Private IPs')
     serverBackupDaily = ProxyProperty('serverBackupDaily')
-    publicIps = ProxyProperty('publicIps')
+    publicIps = ProxyProperty('Public IPs')
     serverStatus = ProxyProperty('serverStatus')
     serverBackupWeekly = ProxyProperty('serverBackupWeekly')
     serverId = ProxyProperty('serverId')
 
     @property
-    def hypervisor_count(self):
+    def hypervisors_count(self):
         # Using countObjects is fast.
         try:
             return self._object.hypervisors.countObjects()
@@ -258,16 +255,16 @@ class ServerInfo(ComponentInfo):
 
     @property
     @info
-    def flavor(self):
-        return self._object.flavor()
-
-    @property
-    @info
-    def image(self):
-        return self._object.image()
-
-    @property
-    @info
     def guestDevice(self):
         return self._object.getGuestDevice()
 
+
+class ServerPathReporter(DefaultPathReporter):
+    def getPaths(self):
+        paths = super(ServerPathReporter, self).getPaths()
+
+        obj = self.context.servers()
+        if obj:
+            paths.extend(relPath(obj, 'components'))
+
+        return paths

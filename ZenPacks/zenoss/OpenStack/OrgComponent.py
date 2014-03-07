@@ -68,7 +68,7 @@ class OrgComponent(OpenstackComponent):
         Used by modeling.
         '''
 
-        return sorted([childOrgs.id for childOrgs in self.childOrgs.objectValuesGen()])
+        return sorted([childOrg.id for childOrg in self.childOrgs.objectValuesGen()])
 
     def setChildOrgIds(self, ids):
         '''
@@ -90,7 +90,7 @@ class OrgComponent(OpenstackComponent):
         Used by modeling.
         '''
 
-        return sorted([nodecomponents.id for nodecomponents in self.nodecomponents.objectValuesGen()])
+        return sorted([nodecomponent.id for nodecomponent in self.nodecomponents.objectValuesGen()])
 
     def setNodecomponentIds(self, ids):
         '''
@@ -112,7 +112,7 @@ class OrgComponent(OpenstackComponent):
         Used by modeling.
         '''
 
-        return sorted([softwarecomponents.id for softwarecomponents in self.softwarecomponents.objectValuesGen()])
+        return sorted([softwarecomponent.id for softwarecomponent in self.softwarecomponents.objectValuesGen()])
 
     def setSoftwarecomponentIds(self, ids):
         '''

@@ -16,6 +16,7 @@ from Products.Zuul.form import schema
 from Products.Zuul.infos import ProxyProperty
 from Products.Zuul.utils import ZuulMessageFactory as _t
 from ZenPacks.zenoss.OpenStack.OpenstackComponent import OpenstackComponent
+from Products.Zuul.catalog.paths import DefaultPathReporter, relPath
 from Products.ZenRelations.RelSchema import ToMany, ToOne
 from ZenPacks.zenoss.OpenStack.utils import updateToOne
 
@@ -100,3 +101,17 @@ class SoftwareComponent(OpenstackComponent):
             root=self.device(),
             type_='ZenPacks.zenoss.OpenStack.OrgComponent',
             id_=id_)
+
+
+class SoftwareComponentPathReporter(DefaultPathReporter):
+    def getPaths(self):
+        paths = super(SoftwareComponentPathReporter, self).getPaths()
+
+        obj = self.context.hostedSoftware()
+        if obj:
+            paths.extend(relPath(obj, 'components'))
+        obj = self.context.softwarecomponents()
+        if obj:
+            paths.extend(relPath(obj, 'components'))
+
+        return paths

@@ -16,6 +16,7 @@ from Products.Zuul.form import schema
 from Products.Zuul.infos import ProxyProperty
 from Products.Zuul.utils import ZuulMessageFactory as _t
 from ZenPacks.zenoss.OpenStack.DeviceProxyComponent import DeviceProxyComponent
+from Products.Zuul.catalog.paths import DefaultPathReporter, relPath
 from Products.ZenRelations.RelSchema import ToMany, ToOne
 from ZenPacks.zenoss.OpenStack.utils import updateToMany,updateToOne
 
@@ -100,3 +101,14 @@ class NodeComponent(DeviceProxyComponent):
             root=self.device(),
             type_='ZenPacks.zenoss.OpenStack.SoftwareComponent',
             ids=ids)
+
+
+class NodeComponentPathReporter(DefaultPathReporter):
+    def getPaths(self):
+        paths = super(NodeComponentPathReporter, self).getPaths()
+
+        obj = self.context.nodecomponents()
+        if obj:
+            paths.extend(relPath(obj, 'components'))
+
+        return paths
