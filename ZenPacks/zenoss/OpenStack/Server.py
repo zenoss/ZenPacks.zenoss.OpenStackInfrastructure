@@ -130,7 +130,7 @@ class Server(LogicalComponent):
         updateToOne(
             relationship=self.flavor,
             root=self.device(),
-            type_='ZenPacks.zenoss.OpenStack.Flavor',
+            type_='ZenPacks.zenoss.OpenStack.Flavor.Flavor',
             id_=id_)
 
     def getImageId(self):
@@ -152,7 +152,7 @@ class Server(LogicalComponent):
         updateToOne(
             relationship=self.image,
             root=self.device(),
-            type_='ZenPacks.zenoss.OpenStack.Image',
+            type_='ZenPacks.zenoss.OpenStack.Image.Image',
             id_=id_)
 
     def getHypervisorIds(self):
@@ -174,7 +174,7 @@ class Server(LogicalComponent):
         updateToMany(
             relationship=self.hypervisors,
             root=self.device(),
-            type_='ZenPacks.zenoss.OpenStack.Hypervisor',
+            type_='ZenPacks.zenoss.OpenStack.Hypervisor.Hypervisor',
             ids=ids)
 
     def getIconPath(self):

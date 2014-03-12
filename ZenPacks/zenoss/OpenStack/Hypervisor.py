@@ -98,7 +98,7 @@ class Hypervisor(SoftwareComponent):
         updateToOne(
             relationship=self.server,
             root=self.device(),
-            type_='ZenPacks.zenoss.OpenStack.Server',
+            type_='ZenPacks.zenoss.OpenStack.Server.Server',
             id_=id_)
 
 

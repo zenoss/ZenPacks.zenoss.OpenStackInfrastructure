@@ -101,7 +101,7 @@ class OrgComponent(OpenstackComponent):
         updateToMany(
             relationship=self.nodecomponents,
             root=self.device(),
-            type_='ZenPacks.zenoss.OpenStack.NodeComponent',
+            type_='ZenPacks.zenoss.OpenStack.NodeComponent.NodeComponent',
             ids=ids)
 
     def getSoftwarecomponentIds(self):
@@ -123,5 +123,5 @@ class OrgComponent(OpenstackComponent):
         updateToMany(
             relationship=self.softwarecomponents,
             root=self.device(),
-            type_='ZenPacks.zenoss.OpenStack.SoftwareComponent',
+            type_='ZenPacks.zenoss.OpenStack.SoftwareComponent.SoftwareComponent',
             ids=ids)

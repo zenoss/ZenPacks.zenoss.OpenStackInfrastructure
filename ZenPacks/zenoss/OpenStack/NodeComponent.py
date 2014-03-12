@@ -77,7 +77,7 @@ class NodeComponent(DeviceProxyComponent):
         updateToOne(
             relationship=self.orgcomponent,
             root=self.device(),
-            type_='ZenPacks.zenoss.OpenStack.OrgComponent',
+            type_='ZenPacks.zenoss.OpenStack.OrgComponent.OrgComponent',
             id_=id_)
 
     def getHostedSoftwareIds(self):
@@ -99,7 +99,7 @@ class NodeComponent(DeviceProxyComponent):
         updateToMany(
             relationship=self.hostedSoftware,
             root=self.device(),
-            type_='ZenPacks.zenoss.OpenStack.SoftwareComponent',
+            type_='ZenPacks.zenoss.OpenStack.SoftwareComponent.SoftwareComponent',
             ids=ids)
 
 

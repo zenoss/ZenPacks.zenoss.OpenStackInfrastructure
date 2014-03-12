@@ -77,7 +77,7 @@ class SoftwareComponent(OpenstackComponent):
         updateToOne(
             relationship=self.hostedOnNode,
             root=self.device(),
-            type_='ZenPacks.zenoss.OpenStack.NodeComponent',
+            type_='ZenPacks.zenoss.OpenStack.NodeComponent.NodeComponent',
             id_=id_)
 
     def getOrgcomponentId(self):
@@ -99,7 +99,7 @@ class SoftwareComponent(OpenstackComponent):
         updateToOne(
             relationship=self.orgcomponent,
             root=self.device(),
-            type_='ZenPacks.zenoss.OpenStack.OrgComponent',
+            type_='ZenPacks.zenoss.OpenStack.OrgComponent.OrgComponent',
             id_=id_)
 
 
