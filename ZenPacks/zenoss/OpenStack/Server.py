@@ -119,14 +119,16 @@ class Server(LogicalComponent):
         '''
         obj = self.flavor()
         if obj:
-            return obj.id
+            return obj.flavorId
 
-    def setFlavorId(self, id_):
+    def setFlavorId(self, flavorId):
         '''
         Set flavor by id.
 
         Used by modeling.
         '''
+
+        id_ = 'flavor{0}'.format(flavorId)
         updateToOne(
             relationship=self.flavor,
             root=self.device(),
@@ -141,14 +143,16 @@ class Server(LogicalComponent):
         '''
         obj = self.image()
         if obj:
-            return obj.id
+            return obj.imageId
 
-    def setImageId(self, id_):
+    def setImageId(self, imageId):
         '''
         Set image by id.
 
         Used by modeling.
         '''
+        id_ = 'image{0}'.format(imageId)
+
         updateToOne(
             relationship=self.image,
             root=self.device(),
