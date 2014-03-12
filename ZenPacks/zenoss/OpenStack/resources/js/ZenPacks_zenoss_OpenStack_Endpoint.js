@@ -299,8 +299,8 @@ ZC.OpenStackFlavorPanel = Ext.extend(ZC.ComponentGridPanel, {
             componentType: 'OpenStackFlavor',
             autoExpandColumn: 'name',
             sortInfo: {
-                field: 'name',
-                direction: 'asc',
+                field: 'flavorRAM',
+                direction: 'ASC'
             },
             fields: [
                 {name: 'uid'},
@@ -314,6 +314,7 @@ ZC.OpenStackFlavorPanel = Ext.extend(ZC.ComponentGridPanel, {
                 {name: 'flavorId'},
                 {name: 'flavorRAM'},
                 {name: 'flavorDisk'},
+                {name: 'servers_count'},
                 {name: 'locking'}
             ],
             columns: [{
@@ -329,23 +330,25 @@ ZC.OpenStackFlavorPanel = Ext.extend(ZC.ComponentGridPanel, {
                 header: _t('Name'),
                 sortable: true
             },{
-                dataIndex: 'flavorId',
-                header: _t('flavorId'),
-                sortable: true,
-                width: 10,
-                id: 'flavorId'
-            },{
                 dataIndex: 'flavorRAM',
-                header: _t('flavorRAM'),
+                header: _t('RAM'),
+                renderer: Zenoss.render.bytesString,                
                 sortable: true,
-                width: 10,
+                width: 70,
                 id: 'flavorRAM'
             },{
                 dataIndex: 'flavorDisk',
-                header: _t('flavorDisk'),
+                header: _t('Disk'),
+                renderer: Zenoss.render.bytesString,                
                 sortable: true,
-                width: 10,
+                width: 70,
                 id: 'flavorDisk'
+            },{
+                id: 'servers_count',
+                dataIndex: 'servers_count',
+                header: _t('# Servers'),
+                sortable: true,
+                width: 70
             },{
                 id: 'monitored',
                 dataIndex: 'monitored',

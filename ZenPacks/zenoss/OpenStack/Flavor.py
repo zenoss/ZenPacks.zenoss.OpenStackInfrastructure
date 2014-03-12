@@ -20,6 +20,7 @@ from Products.Zuul.infos.component import ComponentInfo
 from Products.Zuul.interfaces.component import IComponentInfo
 from Products.ZenRelations.RelSchema import ToMany, ToOne
 from ZenPacks.zenoss.OpenStack.utils import updateToMany
+from Products.ZenUtils.Utils import convToUnits
 
 
 class Flavor(LogicalComponent):
@@ -28,7 +29,7 @@ class Flavor(LogicalComponent):
     Klasses = [LogicalComponent]
 
     flavorDisk = None              # bytes
-    flavorId = None                # 1
+    flavorId = None                # performance1-1
     flavorRAM = None               # bytes
 
     _properties = ()
@@ -37,7 +38,7 @@ class Flavor(LogicalComponent):
 
     _properties = _properties + (
         {'id': 'flavorDisk', 'type': 'int', 'mode': 'w'},
-        {'id': 'flavorId', 'type': 'int', 'mode': 'w'},
+        {'id': 'flavorId', 'type': 'string', 'mode': 'w'},
         {'id': 'flavorRAM', 'type': 'int', 'mode': 'w'},
         )
 
@@ -118,17 +119,17 @@ class Flavor(LogicalComponent):
 
 
 class IFlavorInfo(IComponentInfo):
-    servers_count = schema.Int(title=_t(u'Number of Servers'))
+    flavorId = schema.TextLine(title=_t(u"Flavor ID"))
+    flavorDiskString = schema.TextLine(title=_t(u"Flavor Disk"))
+    flavorRAMString = schema.TextLine(title=_t(u"Flavor RAM"))
+    servers_count = schema.Int(title=_t(u"Server Count"))
 
-    flavorDiskString = schema.Text(title=_t(u"Flavor Disk"))
-    flavorId = schema.Int(title=_t(u'flavorIds'), readonly=True)
-    flavorRAMString = schema.Text(title=_t(u"Flavor RAM"))
 
 class FlavorInfo(ComponentInfo):
     implements(IFlavorInfo)
 
-    flavorDisk = ProxyProperty('flavorDisk')
     flavorId = ProxyProperty('flavorId')
+    flavorDisk = ProxyProperty('flavorDisk')
     flavorRAM = ProxyProperty('flavorRAM')
 
     @property
