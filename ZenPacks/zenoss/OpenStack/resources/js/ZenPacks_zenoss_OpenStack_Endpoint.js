@@ -456,15 +456,15 @@ ZC.OpenStackImagePanel = Ext.extend(ZC.ComponentGridPanel, {
                 {name: 'uid'},
                 {name: 'name'},
                 {name: 'meta_type'},
-                {name: 'status'},
+                {name: 'status'},   
                 {name: 'severity'},
                 {name: 'usesMonitorAttribute'},
                 {name: 'monitor'},
                 {name: 'monitored'},
-                {name: 'imageId'},
                 {name: 'imageStatus'},
                 {name: 'imageCreated'},
                 {name: 'imageUpdated'},
+                {name: 'servers_count'},
                 {name: 'locking'}
             ],
             columns: [{
@@ -480,29 +480,29 @@ ZC.OpenStackImagePanel = Ext.extend(ZC.ComponentGridPanel, {
                 header: _t('Name'),
                 sortable: true
             },{
-                dataIndex: 'imageId',
-                header: _t('imageId'),
-                sortable: true,
-                width: 10,
-                id: 'imageId'
-            },{
                 dataIndex: 'imageStatus',
-                header: _t('imageStatus'),
+                header: _t('Status'),
                 sortable: true,
-                width: 10,
+                width: 80,
                 id: 'imageStatus'
             },{
                 dataIndex: 'imageCreated',
-                header: _t('imageCreated'),
+                header: _t('Created'),
                 sortable: true,
-                width: 10,
+                width: 155,
                 id: 'imageCreated'
             },{
                 dataIndex: 'imageUpdated',
-                header: _t('imageUpdated'),
+                header: _t('Updated'),
                 sortable: true,
-                width: 10,
+                width: 155,
                 id: 'imageUpdated'
+            },{
+                id: 'servers_count',
+                dataIndex: 'servers_count',
+                header: _t('# Servers'),
+                sortable: true,
+                width: 70
             },{
                 id: 'monitored',
                 dataIndex: 'monitored',

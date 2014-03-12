@@ -120,13 +120,11 @@ class Image(LogicalComponent):
 
 
 class IImageInfo(IComponentInfo):
-    servers_count = schema.Int(title=_t(u'Number of Servers'))
-
-    imageUpdated = schema.Text(title=_t(u"Image Updated"))
-    imageCreated = schema.Text(title=_t(u"Image Created"))
-    imageStatus = schema.Text(title=_t(u"Image Status"))
-    imageId = schema.TextLine(title=_t(u'imageIds'), readonly=True)
-
+    imageId = schema.TextLine(title=_t(u"Image ID"))
+    imageStatus = schema.TextLine(title=_t(u"Image Status"))
+    imageCreated = schema.TextLine(title=_t(u"Image Created"))
+    imageUpdated = schema.TextLine(title=_t(u"Image Updated"))
+    servers_count = schema.Int(title=_t(u'Server Count'))
 
 class ImageInfo(ComponentInfo):
     implements(IImageInfo)
