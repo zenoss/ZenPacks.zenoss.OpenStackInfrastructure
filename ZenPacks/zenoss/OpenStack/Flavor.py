@@ -114,7 +114,7 @@ class Flavor(LogicalComponent):
         updateToMany(
             relationship=self.servers,
             root=self.device(),
-            type_='ZenPacks.zenoss.OpenStack.Server',
+            type_='ZenPacks.zenoss.OpenStack.Server.Server',
             ids=ids)
 
 
