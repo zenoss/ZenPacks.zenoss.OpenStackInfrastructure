@@ -69,6 +69,8 @@ def updateToMany(relationship, root, type_, ids):
     for id_ in new_ids.symmetric_difference(current_ids):
         obj = obj_map.get(id_)
         if not obj:
+            LOG.error(
+                "updateToMany: No targets found matching id=%s", id_)
             continue
 
         if id_ in new_ids:
@@ -124,6 +126,8 @@ def updateToOne(relationship, root, type_, id_):
         # yet.
         new_obj.index_object()
 
+    LOG.error("updateToOne: No target found matching id=%s", id_)
+    
     return
 
 @transact
