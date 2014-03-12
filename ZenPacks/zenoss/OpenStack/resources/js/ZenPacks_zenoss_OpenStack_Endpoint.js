@@ -104,7 +104,8 @@ ZC.OpenStackAvailabilityZonePanel = Ext.extend(ZC.ComponentGridPanel, {
                 id: 'name',
                 dataIndex: 'name',
                 header: _t('Name'),
-                sortable: true
+                renderer: ZenPacks_zenoss_OpenStack_Endpoint_entityLinkFromGrid,                
+                sortable: true                
             },{
                 id: 'monitored',
                 dataIndex: 'monitored',
@@ -929,14 +930,13 @@ ZC.OpenStackServerPanel = Ext.extend(ZC.ComponentGridPanel, {
                 {name: 'usesMonitorAttribute'},
                 {name: 'monitor'},
                 {name: 'monitored'},
-                {name: 'serverId'},
+                {name: 'guestDevice'},
                 {name: 'serverStatus'},
-                {name: 'serverBackupEnabled'},
-                {name: 'serverBackupDaily'},
-                {name: 'serverBackupWeekly'},
+                {name: 'serverBackupEnabled'},                
                 {name: 'publicIps'},
                 {name: 'privateIps'},
-                {name: 'hostId'},
+                {name: 'flavor'},
+                {name: 'image'},                
                 {name: 'locking'}
             ],
             columns: [{
@@ -952,53 +952,51 @@ ZC.OpenStackServerPanel = Ext.extend(ZC.ComponentGridPanel, {
                 header: _t('Name'),
                 sortable: true
             },{
-                dataIndex: 'serverId',
-                header: _t('serverId'),
+                dataIndex: 'guestDevice',
+                header: _t('Guest Device'),
+                renderer: function(obj) {
+                    if (obj && obj.uid && obj.name) {
+                        return Zenoss.render.link(obj.uid, undefined, obj.name);
+                    }
+                },
                 sortable: true,
-                width: 10,
-                id: 'serverId'
+                width: 160,
+                id: 'guestDevice'
             },{
                 dataIndex: 'serverStatus',
-                header: _t('serverStatus'),
+                header: _t('Status'),
                 sortable: true,
-                width: 10,
+                width: 80,
                 id: 'serverStatus'
             },{
-                dataIndex: 'serverBackupEnabled',
-                header: _t('serverBackupEnabled'),
-                sortable: true,
-                width: 10,
-                id: 'serverBackupEnabled'
+                id: 'flavor',
+                dataIndex: 'flavor',
+                header: _t('Flavor'),
+                renderer: Zenoss.render.OpenStack_entityLinkFromGrid,
+                width: 160
             },{
-                dataIndex: 'serverBackupDaily',
-                header: _t('serverBackupDaily'),
-                sortable: true,
-                width: 10,
-                id: 'serverBackupDaily'
+                id: 'image',
+                dataIndex: 'image',
+                header: _t('Image'),
+                renderer: Zenoss.render.OpenStack_entityLinkFromGrid,
+                width: 180
             },{
-                dataIndex: 'serverBackupWeekly',
-                header: _t('serverBackupWeekly'),
-                sortable: true,
-                width: 10,
-                id: 'serverBackupWeekly'
-            },{
+                id: 'publicIps',
                 dataIndex: 'publicIps',
-                header: _t('publicIps'),
-                sortable: true,
-                width: 10,
-                id: 'publicIps'
+                header: _t('Public IPs'),
+                width: 85
             },{
+                id: 'privateIps',
                 dataIndex: 'privateIps',
-                header: _t('privateIps'),
-                sortable: true,
-                width: 10,
-                id: 'privateIps'
+                header: _t('Private IPs'),
+                width: 85
             },{
-                dataIndex: 'hostId',
-                header: _t('hostId'),
+                id: 'serverBackupEnabled',
+                dataIndex: 'serverBackupEnabled',
+                header: _t('Backup'),
+                renderer: Zenoss.render.checkbox,
                 sortable: true,
-                width: 10,
-                id: 'hostId'
+                width: 55
             },{
                 id: 'monitored',
                 dataIndex: 'monitored',
