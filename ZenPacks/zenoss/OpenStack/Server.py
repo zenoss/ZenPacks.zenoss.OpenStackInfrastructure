@@ -267,8 +267,16 @@ class ServerPathReporter(DefaultPathReporter):
     def getPaths(self):
         paths = super(ServerPathReporter, self).getPaths()
 
-        obj = self.context.servers()
+        obj = self.context.flavor()
         if obj:
-            paths.extend(relPath(obj, 'components'))
+            paths.extend(relPath(obj, 'endpoint'))
+
+        obj = self.context.hypervisor()
+        if obj:
+            paths.extend(relPath(obj, 'endpoint'))
+
+        obj = self.context.image()
+        if obj:
+            paths.extend(relPath(obj, 'endpoint'))
 
         return paths

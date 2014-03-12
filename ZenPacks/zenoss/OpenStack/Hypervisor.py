@@ -106,8 +106,8 @@ class HypervisorPathReporter(DefaultPathReporter):
     def getPaths(self):
         paths = super(HypervisorPathReporter, self).getPaths()
 
-        obj = self.context.hypervisors()
+        obj = self.context.servers()
         if obj:
-            paths.extend(relPath(obj, 'components'))
+            paths.extend(relPath(obj, 'endpoint'))
 
         return paths

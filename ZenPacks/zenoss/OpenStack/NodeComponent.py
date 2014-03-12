@@ -107,8 +107,11 @@ class NodeComponentPathReporter(DefaultPathReporter):
     def getPaths(self):
         paths = super(NodeComponentPathReporter, self).getPaths()
 
-        obj = self.context.nodecomponents()
+        obj = self.context.hostedSoftware()
         if obj:
-            paths.extend(relPath(obj, 'components'))
+            paths.extend(relPath(obj, 'endpoint'))
+        obj = self.context.orgcomponent()
+        if obj:
+            paths.extend(relPath(obj, 'endpoint'))
 
         return paths
