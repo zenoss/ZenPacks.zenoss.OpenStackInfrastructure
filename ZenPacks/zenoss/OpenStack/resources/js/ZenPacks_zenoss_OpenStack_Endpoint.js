@@ -104,7 +104,7 @@ ZC.OpenStackAvailabilityZonePanel = Ext.extend(ZC.ComponentGridPanel, {
                 id: 'name',
                 dataIndex: 'name',
                 header: _t('Name'),
-                renderer: ZenPacks_zenoss_OpenStack_Endpoint_entityLinkFromGrid,                
+                renderer: Zenoss.render.ZenPacks_zenoss_OpenStack_Endpoint_entityLinkFromGrid,                
                 sortable: true                
             },{
                 id: 'monitored',
@@ -160,6 +160,7 @@ ZC.OpenStackCellPanel = Ext.extend(ZC.ComponentGridPanel, {
                 id: 'name',
                 dataIndex: 'name',
                 header: _t('Name'),
+                renderer: Zenoss.render.ZenPacks_zenoss_OpenStack_Endpoint_entityLinkFromGrid,                                
                 sortable: true
             },{
                 id: 'monitored',
@@ -215,6 +216,7 @@ ZC.OpenStackComputeNodePanel = Ext.extend(ZC.ComponentGridPanel, {
                 id: 'name',
                 dataIndex: 'name',
                 header: _t('Name'),
+                renderer: Zenoss.render.ZenPacks_zenoss_OpenStack_Endpoint_entityLinkFromGrid,                
                 sortable: true
             },{
                 id: 'monitored',
@@ -270,6 +272,7 @@ ZC.OpenStackControllerNodePanel = Ext.extend(ZC.ComponentGridPanel, {
                 id: 'name',
                 dataIndex: 'name',
                 header: _t('Name'),
+                renderer: Zenoss.render.ZenPacks_zenoss_OpenStack_Endpoint_entityLinkFromGrid,                
                 sortable: true
             },{
                 id: 'monitored',
@@ -329,6 +332,7 @@ ZC.OpenStackFlavorPanel = Ext.extend(ZC.ComponentGridPanel, {
                 id: 'name',
                 dataIndex: 'name',
                 header: _t('Name'),
+                renderer: Zenoss.render.ZenPacks_zenoss_OpenStack_Endpoint_entityLinkFromGrid,                
                 sortable: true
             },{
                 dataIndex: 'flavorRAM',
@@ -404,6 +408,7 @@ ZC.OpenStackHypervisorPanel = Ext.extend(ZC.ComponentGridPanel, {
                 id: 'name',
                 dataIndex: 'name',
                 header: _t('Name'),
+                renderer: Zenoss.render.ZenPacks_zenoss_OpenStack_Endpoint_entityLinkFromGrid,                
                 sortable: true
             },{
                 id: 'monitored',
@@ -479,6 +484,7 @@ ZC.OpenStackImagePanel = Ext.extend(ZC.ComponentGridPanel, {
                 id: 'name',
                 dataIndex: 'name',
                 header: _t('Name'),
+                renderer: Zenoss.render.ZenPacks_zenoss_OpenStack_Endpoint_entityLinkFromGrid,                
                 sortable: true
             },{
                 dataIndex: 'imageStatus',
@@ -558,6 +564,7 @@ ZC.OpenStackNovaApiPanel = Ext.extend(ZC.ComponentGridPanel, {
                 id: 'name',
                 dataIndex: 'name',
                 header: _t('Name'),
+                renderer: Zenoss.render.ZenPacks_zenoss_OpenStack_Endpoint_entityLinkFromGrid,                
                 sortable: true
             },{
                 id: 'monitored',
@@ -613,6 +620,7 @@ ZC.OpenStackNovaComputePanel = Ext.extend(ZC.ComponentGridPanel, {
                 id: 'name',
                 dataIndex: 'name',
                 header: _t('Name'),
+                renderer: Zenoss.render.ZenPacks_zenoss_OpenStack_Endpoint_entityLinkFromGrid,                
                 sortable: true
             },{
                 id: 'monitored',
@@ -668,6 +676,7 @@ ZC.OpenStackNovaConductorPanel = Ext.extend(ZC.ComponentGridPanel, {
                 id: 'name',
                 dataIndex: 'name',
                 header: _t('Name'),
+                renderer: Zenoss.render.ZenPacks_zenoss_OpenStack_Endpoint_entityLinkFromGrid,                
                 sortable: true
             },{
                 id: 'monitored',
@@ -723,6 +732,7 @@ ZC.OpenStackNovaDatabasePanel = Ext.extend(ZC.ComponentGridPanel, {
                 id: 'name',
                 dataIndex: 'name',
                 header: _t('Name'),
+                renderer: Zenoss.render.ZenPacks_zenoss_OpenStack_Endpoint_entityLinkFromGrid,                
                 sortable: true
             },{
                 id: 'monitored',
@@ -778,6 +788,7 @@ ZC.OpenStackNovaDatabasePanel = Ext.extend(ZC.ComponentGridPanel, {
                 id: 'name',
                 dataIndex: 'name',
                 header: _t('Name'),
+                renderer: Zenoss.render.ZenPacks_zenoss_OpenStack_Endpoint_entityLinkFromGrid,                
                 sortable: true
             },{
                 id: 'monitored',
@@ -833,6 +844,7 @@ ZC.OpenStackNovaSchedulerPanel = Ext.extend(ZC.ComponentGridPanel, {
                 id: 'name',
                 dataIndex: 'name',
                 header: _t('Name'),
+                renderer: Zenoss.render.ZenPacks_zenoss_OpenStack_Endpoint_entityLinkFromGrid,                
                 sortable: true
             },{
                 id: 'monitored',
@@ -888,6 +900,7 @@ ZC.OpenStackRegionPanel = Ext.extend(ZC.ComponentGridPanel, {
                 id: 'name',
                 dataIndex: 'name',
                 header: _t('Name'),
+                renderer: Zenoss.render.ZenPacks_zenoss_OpenStack_Endpoint_entityLinkFromGrid,                
                 sortable: true
             },{
                 id: 'monitored',
@@ -950,6 +963,7 @@ ZC.OpenStackServerPanel = Ext.extend(ZC.ComponentGridPanel, {
                 id: 'name',
                 dataIndex: 'name',
                 header: _t('Name'),
+                renderer: Zenoss.render.ZenPacks_zenoss_OpenStack_Endpoint_entityLinkFromGrid,                
                 sortable: true
             },{
                 dataIndex: 'guestDevice',
