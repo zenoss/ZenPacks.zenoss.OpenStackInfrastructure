@@ -79,27 +79,27 @@ class Hypervisor(SoftwareComponent):
             if REQUEST is not None:
                 REQUEST['RESPONSE'].redirect(url)
 
-    def getServerId(self):
+    def getServerIds(self):
         '''
-        Return server id or None.
+        Return a sorted list of each id from the servers relationship
+        Aggregate.
 
         Used by modeling.
         '''
-        obj = self.server()
-        if obj:
-            return obj.id
 
-    def setServerId(self, id_):
+        return sorted([server.id for server in self.servers.objectValuesGen()])
+
+    def setServerIds(self, ids):
         '''
-        Set server by id.
+        Update servers relationship given ids.
 
         Used by modeling.
         '''
-        updateToOne(
-            relationship=self.server,
+        updateToMany(
+            relationship=self.servers,
             root=self.device(),
             type_='ZenPacks.zenoss.OpenStack.Server.Server',
-            id_=id_)
+            ids=ids)
 
 
 class HypervisorPathReporter(DefaultPathReporter):

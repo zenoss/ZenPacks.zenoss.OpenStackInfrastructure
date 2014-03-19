@@ -66,6 +66,9 @@ class OpenStack(PythonPlugin):
         log.info('Requesting servers')
         results['servers'] = client.servers.list()
 
+        log.info('Requesting hypervisors')
+        results['hypervisors'] = client.hypervisors.search('%', servers=True)
+
         return results
 
     def process(self, devices, results, unused):
@@ -186,8 +189,21 @@ class OpenStack(PythonPlugin):
                     hostId=server.hostId,
             )))
 
+        hypervisors = []
+        for hypervisor in results['hypervisors']:
+            hypervisors.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.Hypervisor',
+                data=dict(
+                    id='hypervisor{0}'.format(hypervisor.id),
+                    title='{0}.{1}'.format(hypervisor.hypervisor_hostname, hypervisor.id),
+                    hypervisorId=hypervisor.id,  # 1
+                    hypervisorHostname=hypervisor.hypervisor_hostname,  # devstack1
+                    setServerIds=['server{0}'.format(x['uuid']) for x in hypervisor.servers],
+                    setHypervisorHostname=hypervisor.hypervisor_hostname
+            )))    
+
         componentsMap = RelationshipMap(relname='components')
-        for objmap in flavors + images + servers:
+        for objmap in flavors + images + servers + hypervisors:
             componentsMap.append(objmap)
 
         return (componentsMap)
