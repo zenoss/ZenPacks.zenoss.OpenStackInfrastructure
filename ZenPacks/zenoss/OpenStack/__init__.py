@@ -1,149 +1,230 @@
 ##############################################################################
 #
-# GPLv2
+# Copyright (C) Zenoss, Inc. 2013-2014, all rights reserved.
 #
-# You should have received a copy of the GNU General Public License
-# along with this ZenPack. If not, see <http://www.gnu.org/licenses/>.
+# This content is made available according to terms specified in
+# License.zenoss under the directory where your Zenoss product is installed.
 #
 ##############################################################################
 
+"""ZenPacks.zenoss.OpenStack - OpenStack monitoring for Zenoss.
 
-import logging
-LOG = logging.getLogger('zen.ZenPacks.zenoss.OpenStack')
+This module contains initialization code for the ZenPack. Everything in
+the module scope will be executed at startup by all Zenoss Python
+processes.
 
-import os
-import Globals
+The initialization order for ZenPacks is defined by
+$ZENHOME/ZenPacks/easy-install.pth.
 
-from Products.ZenModel.Device import Device
-from Products.ZenModel.ZenPack import ZenPack as ZenPackBase
-from Products.ZenRelations.RelSchema import ToManyCont, ToOne
-from Products.ZenRelations.zPropertyCategory import setzPropertyCategory
-from Products.CMFCore.DirectoryView import registerDirectory
-from Products.Zuul.interfaces import ICatalogTool
-from Products.ZenUtils.Utils import unused, zenPath
+"""
 
-unused(Globals)
-
-ZENPACK_NAME = 'ZenPacks.zenoss.OpenStack'
-
-# Modules containing model classes. Used by zenchkschema to validate
-# bidirectional integrity of defined relationships.
-productNames = (
-    'LogicalComponent',
-    'Cell',
-    'ControllerNode',
-    'NovaScheduler',
-    'OrgComponent',
-    'NovaDatabase',
-    'Hypervisor',
-    'SoftwareComponent',
-    'NovaConductor',
-    'ComputeNode',
-    'KeystoneEndpoint',
-    'Region',
-    'Image',
-    'Flavor',
-    'NovaCompute',
-    'OpenstackComponent',
-    'NodeComponent',
-    'Endpoint',
-    'NovaApi',
-    'Server',
-    'AvailabilityZone',
-    'NovaEndpoint',
-    'DeviceProxyComponent',
-    )
-
-# Define new device relations.
-NEW_DEVICE_RELATIONS = (
-    )
-
-NEW_COMPONENT_TYPES = (
-    )
-
-# Add new relationships to Device if they don't already exist.
-for relname, modname in NEW_DEVICE_RELATIONS:
-    if relname not in (x[0] for x in Device._relations):
-        Device._relations += (
-            (relname, ToManyCont(
-                ToOne,
-                '.'.join((ZENPACK_NAME, modname)),
-                '%s_host' % modname)),
-            )
-
-# Useful to avoid making literal string references to module and class names
-# throughout the rest of the ZenPack.
-MODULE_NAME = {}
-CLASS_NAME = {}
-
-for product_name in productNames:
-    MODULE_NAME[product_name] = '.'.join([ZENPACK_NAME, product_name])
-    CLASS_NAME[product_name] = '.'.join([ZENPACK_NAME, product_name, product_name])
-
-_PACK_Z_PROPS = [
-    ('zOpenstackComputeApiVersion', '', 'string'),
-    ('zOpenStackInsecure', False, 'boolean'),
-    ('zOpenStackProjectId', '', 'string'),
-    ('zOpenStackAuthUrl', '', 'string'),
-    ('zOpenStackRegionName', '', 'string'),
-    ]
+from . import zenpacklib
 
 
-_plugins = (
-    )
+RELATIONSHIPS_YUML = """
+// containing
+[Endpoint]components ++- endpoint[OpenstackComponent]
+// non-containing
+[OrgComponent]parentOrg 1-.-* childOrgs[OrgComponent]
+[NodeComponent]hostedSoftware 1-.-* hostedOnNode[SoftwareComponent]
+[OrgComponent]1-.-*[NodeComponent]
+[OrgComponent]1-.-*[SoftwareComponent]
+[Flavor]1-.-*[Server]
+[Image]1-.-*[Server]
+[Hypervisor]1-.-*[Server]
+"""
 
 
-class ZenPack(ZenPackBase):
-    packZProperties = _PACK_Z_PROPS
+CFG = zenpacklib.ZenPackSpec(
+    name=__name__,
 
-    def install(self, app):
-        super(ZenPack, self).install(app)
-        LOG.info('Adding ZenPacks.zenoss.OpenStack relationships to existing devices')
+    zProperties={
+        'DEFAULTS': {'category': 'OpenStack', 
+                     'type': 'string'},
 
-        self._buildDeviceRelations()
-        self.symlink_plugins()
+        'zOpenstackComputeApiVersion': { },
+        'zOpenStackInsecure':          { 'type': 'boolean', 'default': False },
+        'zOpenStackProjectId':         { },
+        'zOpenStackAuthUrl':           { },
+        'zOpenStackRegionName':        { }
+    },
 
-    def symlink_plugins(self):
-        libexec = os.path.join(os.environ.get('ZENHOME'), 'libexec')
-        if not os.path.isdir(libexec):
-            # Stack installs might not have a $ZENHOME/libexec directory.
-            os.mkdir(libexec)
+    classes={
+        ## Device Types ###############################################
 
-        for plugin in _plugins:
-            LOG.info('Linking %s plugin into $ZENHOME/libexec/', plugin)
-            plugin_path = zenPath('libexec', plugin)
-            os.system('ln -sf "%s" "%s"' % (self.path(plugin), plugin_path))
-            os.system('chmod 0755 %s' % plugin_path)
+        'Endpoint': {
+            'base': zenpacklib.Device,
+            'meta_type': 'OpenStackEndpoint',
+            'label': 'OpenStack Endpoint'
+        },
 
-    def remove_plugin_symlinks(self):
-        for plugin in _plugins:
-            LOG.info('Removing %s link from $ZENHOME/libexec/', plugin)
-            os.system('rm -f "%s"' % zenPath('libexec', plugin))
+        'KeystoneEndpoint': {
+            'base': 'Endpoint',
+            'meta_type': 'OpenStackKeystoneEndpoint',
+            'label': 'Keystone Endpoint'            
+        },
 
-    def remove(self, app, leaveObjects=False):
-        if not leaveObjects:
-            self.remove_plugin_symlinks()
+        'NovaEndpoint': {
+            'base': 'Endpoint',
+            'meta_type': 'OpenStackNovaEndpoint',
+            'label': 'Nova Endpoint'
+        },
 
-            LOG.info('Removing ZenPacks.zenoss.OpenStack components')
-            cat = ICatalogTool(app.zport.dmd)
+        ## Component Base Types #######################################
+        'OpenstackComponent': {
+            'base': zenpacklib.Component,
+        },
 
-            # Search the catalog for components of this zenpacks type.
-            if NEW_COMPONENT_TYPES:
-                for brain in cat.search(types=NEW_COMPONENT_TYPES):
-                    component = brain.getObject()
-                    component.getPrimaryParent()._delObject(component.id)
+        'DeviceProxyComponent': {
+            'base': 'OpenstackComponent'
+        },
 
-            # Remove our Device relations additions.
-            Device._relations = tuple(
-                [x for x in Device._relations
-                    if x[0] not in NEW_DEVICE_RELATIONS])
+        'OrgComponent': {
+            'base': 'OpenstackComponent'
+        },
+                
+        'SoftwareComponent': {
+            'base': 'OpenstackComponent'
+        },
+                
+        'NodeComponent': {
+            'base': 'DeviceProxyComponent'
+        },
+                
+        'LogicalComponent': {
+            'base': 'OpenstackComponent'
+        },
 
-            LOG.info('Removing ZenPacks.zenoss.OpenStack relationships from existing devices')
-            self._buildDeviceRelations()
+        ## Component Types ############################################
 
-        super(ZenPack, self).remove(app, leaveObjects=leaveObjects)
+        'Flavor': {
+            'base': 'LogicalComponent',
+            'meta_type': 'OpenStackFlavor',
+            'label': 'Flavor',
+            'order': 1,
+            'properties': {
+                'flavorId':   { 'grid_display': False },                 # 1
+                'flavorRAM':  { 'type_': 'int',
+                                'renderer': 'Zenoss.render.bytesString',
+                                'label': 'RAM' },                        # bytes
+                'flavorDisk': { 'type_': 'int',
+                                'renderer': 'Zenoss.render.bytesString',
+                                'label': 'Disk' }                        # bytes
+            }
+        },
 
-    def _buildDeviceRelations(self):
-        if len(NEW_DEVICE_RELATIONS) > 0:
-            for d in self.dmd.Devices.getSubDevicesGen():
-                d.buildRelations()
+        'Image': {
+            'base': 'LogicalComponent',
+            'meta_type': 'OpenStackImage',
+            'label': 'Image',
+            'order': 2,            
+            'properties': {
+                'imageId':      { 'grid_display': False },
+                'imageStatus':  { 'label': 'Status' },
+                'imageCreated': { 'label': 'Created' },
+                'imageUpdated': { 'label': 'Updated' },
+            }
+        },
+
+        'Server': {
+            'base': 'LogicalComponent',
+            'meta_type': 'OpenStackServer',
+            'label': 'Server',
+            'order': 3,                        
+            'properties': {
+                'serverId':            { 'grid_display': False },   # 847424
+                'serverStatus':        { 'label': 'Status' },   # ACTIVE
+                'serverBackupEnabled': { 'type_': 'boolean', 
+                                         'label': 'Backup'},    # False
+                'serverBackupDaily':   { 'grid_display': False },   # DISABLED
+                'serverBackupWeekly':  { 'grid_display': False },   # DISABLED
+                'publicIps':           { 'type_': 'lines', 
+                                         'label': 'Public IPs' },  # ['50.57.74.222']
+                'privateIps':          { 'type_': 'lines',
+                                         'label': 'Private IPs' }, # ['10.182.13.13']
+                'hostId':              { 'grid_display': False },    # a84303c0021aa53c7e749cbbbfac265f
+            }
+        },
+
+        'Region': {
+            'base': 'OrgComponent',
+            'meta_type': 'OpenStackRegion',
+            'label': 'Region',
+            'order': 4        
+        },
+        
+        'Cell': {
+            'base': 'OrgComponent',
+            'meta_type': 'OpenStackCell',
+            'label': 'Cell',
+            'order': 5            
+        },
+
+        'AvailabilityZone': {
+            'base': 'OrgComponent',
+            'meta_type': 'OpenStackAvailabilityZone',
+            'label': 'Availability Zone',
+            'order': 6            
+        },
+
+        'ControllerNode': {
+            'base': 'NodeComponent',
+            'meta_type': 'OpenStackControllerNode', 
+            'label': 'Controller Node',
+            'order': 7            
+        },
+
+        'ComputeNode': {
+            'base': 'NodeComponent',
+            'meta_type': 'OpenStackComputeNode',
+            'label': 'Compute Node',            
+            'order': 8                        
+        },
+
+        'NovaApi': {
+            'base': 'SoftwareComponent',
+            'meta_type': 'OpenStackNovaApi',
+            'label': 'NovaApi',
+            'order': 9
+        },
+
+        'NovaConductor': {
+            'base': 'SoftwareComponent',        
+            'meta_type': 'OpenStackNovaConductor',
+            'label': 'NovaConductor',
+            'order': 10                                                             
+        },
+
+        'NovaScheduler': {
+            'base': 'SoftwareComponent',        
+            'meta_type': 'OpenStackNovaScheduler',
+            'label': 'NovaScheduler',
+            'order': 11                                                             
+        },
+
+        'NovaCompute': {
+            'base': 'SoftwareComponent',        
+            'meta_type': 'OpenStackNovaCompute',
+            'label': 'NovaCompute',
+            'order': 12                                                             
+        },
+
+        'NovaDatabase': {
+            'base': ['SoftwareComponent', 'DeviceProxyComponent'],        
+            'meta_type': 'OpenStackNovaDatabase',                                        
+            'label': 'NovaDatabase',
+            'order': 13                                                           
+        },
+
+        'Hypervisor': {
+            'base': 'SoftwareComponent',
+            'meta_type': 'OpenStackHypervisor',                                        
+            'label': 'Hypervisor',
+            'order': 14 
+        }
+    },
+
+    class_relationships=zenpacklib.relationships_from_yuml(RELATIONSHIPS_YUML),
+)
+
+CFG.create()

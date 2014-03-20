@@ -29,7 +29,8 @@ OPENSTACK_DEVICE_PATH = "/Devices/OpenStack"
 
 
 class IOpenStackFacade(IFacade):
-    def addEndpoint(self, target, email, password, collector):
+    def addOpenStack(self, username, api_key, project_id, auth_url, api_version, 
+                     region_name=None, collector='localhost'):
         """Add OpenStack Endpoint."""
 
 
@@ -40,6 +41,10 @@ class OpenStackFacade(ZuulFacade):
                      region_name=None, collector='localhost'):
         """Add a new OpenStack endpoint to the system."""
         parsed_url = urlparse(auth_url)
+
+        if parsed_url.scheme == "" or parsed_url.hostname is None:
+            return False, _t("'%s' is not a valid URL." % auth_url)
+
         hostname = parsed_url.hostname
 
         # Verify that this device does not already exist.
@@ -56,6 +61,7 @@ class OpenStackFacade(ZuulFacade):
             'zOpenstackComputeApiVersion': api_version,
             'zOpenStackRegionName': region_name or '',
             }
+
 
         perfConf = self._dmd.Monitors.getPerformanceMonitor('localhost')
         jobStatus = perfConf.addDeviceCreationJob(
