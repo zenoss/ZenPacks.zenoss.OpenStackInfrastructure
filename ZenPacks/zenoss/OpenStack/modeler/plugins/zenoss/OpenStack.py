@@ -15,9 +15,11 @@ import logging
 log = logging.getLogger('zen.OpenStack')
 
 import types
+from collections import defaultdict
 
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
+from Products.ZenUtils.Utils import prepId
 
 from ZenPacks.zenoss.OpenStack.utils import add_local_lib_path
 add_local_lib_path()
@@ -66,6 +68,9 @@ class OpenStack(PythonPlugin):
         log.info('Requesting servers')
         results['servers'] = client.servers.list()
 
+        log.info('Requesting hosts')
+        results['hosts'] = client.hosts.list()
+
         log.info('Requesting hypervisors')
         results['hypervisors'] = client.hypervisors.search('%', servers=True)
 
@@ -77,7 +82,7 @@ class OpenStack(PythonPlugin):
             flavors.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStack.Flavor',
                 data=dict(
-                    id='flavor{0}'.format(flavor.id),
+                    id='flavor-{0}'.format(flavor.id),
                     title=flavor.name,  # 256 server
                     flavorId=flavor.id,  # performance1-1
                     flavorRAM=flavor.ram * 1024 * 1024,  # 256
@@ -92,7 +97,7 @@ class OpenStack(PythonPlugin):
             images.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStack.Image',
                 data=dict(
-                    id='image{0}'.format(image.id),
+                    id='image-{0}'.format(image.id),
                     title=image.name,  # Red Hat Enterprise Linux 5.5
                     imageId=image.id,  # 346eeba5-a122-42f1-94e7-06cb3c53f690
                     imageStatus=image.status,  # ACTIVE
@@ -131,11 +136,11 @@ class OpenStack(PythonPlugin):
                 if isinstance(server.private_ip, types.StringTypes):
                     private_ips.add(server.private_ip)
                 elif isinstance(server.private_ip, types.ListType):
-                	if isinstance(server.private_ip[0], types.StringTypes):
-	                    private_ips.update(server.private_ip)
-	                else:
-	                	for address in server.private_ip:
-	                		private_ips.add(address['addr'])
+                    if isinstance(server.private_ip[0], types.StringTypes):
+                        private_ips.update(server.private_ip)
+                    else:
+                        for address in server.private_ip:
+                            private_ips.add(address['addr'])
 
             if hasattr(server, 'accessIPv4') and server.accessIPv4:
                 public_ips.add(server.accessIPv4)
@@ -173,37 +178,52 @@ class OpenStack(PythonPlugin):
             servers.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStack.Server',
                 data=dict(
-                    id='server{0}'.format(server.id),
-                    title=server.name,  # cloudserver01
-                    serverId=server.id,  # 847424
+                    id='server-{0}'.format(server.id),
+                    title=server.name,  # cloudserver01                
+                    serverId=server.id, # 847424
                     serverStatus=server.status,  # ACTIVE
                     serverBackupEnabled=backup_schedule_enabled,  # False
-                    serverBackupDaily=backup_schedule_daily,  # DISABLED
-                    serverBackupWeekly=backup_schedule_weekly,  # DISABLED
-                    publicIps=list(public_ips),  # 50.57.74.222
-                    privateIps=list(private_ips),  # 10.182.13.13
-                    setFlavorId=flavor_id,  # performance1-1
-                    setImageId=image_id,  # 346eeba5-a122-42f1-94e7-06cb3c53f690
+                    serverBackupDaily=backup_schedule_daily,   # DISABLED
+                    serverBackupWeekly=backup_schedule_weekly, # DISABLED
+                    publicIps=list(public_ips),   # 50.57.74.222
+                    privateIps=list(private_ips), # 10.182.13.13
+                    set_flavor='flavor-{0}'.format(flavor_id),  # flavor-performance1-1
+                    set_image='image-{0}'.format(image_id),     # image-346eeba5-a122-42f1-94e7-06cb3c53f690
+                    hostId=server.hostId,  # a84303c0021aa53c7e749cbbbfac265f
+                    hostName=server.name   # cloudserver01
+            )))
 
-                    # a84303c0021aa53c7e749cbbbfac265f
-                    hostId=server.hostId,
+        hosts = []
+        host_services = defaultdict(set)
+        for host in results['hosts']:
+            host_services[host.host_name].update([host.service])
+
+        for hostname in host_services:
+            host_id = prepId("host-{0}".format(hostname))
+
+            hosts.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.Host',
+                data=dict(
+                    id=host_id,
+                    title=hostname,
             )))
 
         hypervisors = []
-        for hypervisor in results['hypervisors']:
+        for hypervisor in results['hypervisors']: 
+            host_id = prepId("host-{0}".format(hypervisor.hypervisor_hostname))
+
             hypervisors.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStack.Hypervisor',
                 data=dict(
-                    id='hypervisor{0}'.format(hypervisor.id),
+                    id='hypervisor-{0}'.format(hypervisor.id),
                     title='{0}.{1}'.format(hypervisor.hypervisor_hostname, hypervisor.id),
                     hypervisorId=hypervisor.id,  # 1
-                    hypervisorHostname=hypervisor.hypervisor_hostname,  # devstack1
-                    setServerIds=['server{0}'.format(x['uuid']) for x in hypervisor.servers],
-                    setHypervisorHostname=hypervisor.hypervisor_hostname
+                    set_servers=['server-{0}'.format(x['uuid']) for x in hypervisor.servers],
+                    set_host=host_id
             )))    
 
         componentsMap = RelationshipMap(relname='components')
-        for objmap in flavors + images + servers + hypervisors:
+        for objmap in flavors + images + servers + hosts + hypervisors:
             componentsMap.append(objmap)
 
         return (componentsMap)
