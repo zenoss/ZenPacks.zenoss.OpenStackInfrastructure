@@ -23,15 +23,17 @@ from . import zenpacklib
 
 RELATIONSHIPS_YUML = """
 // containing
-[Endpoint]components ++- endpoint[OpenstackComponent]
-// non-containing
-[OrgComponent]parentOrg 1-.-* childOrgs[OrgComponent]
-[NodeComponent]hostedSoftware 1-.-* hostedOnNode[SoftwareComponent]
-[OrgComponent]1-.-*[NodeComponent]
+[Endpoint]components ++-endpoint[OpenstackComponent]
+// non-containing 1:M
+[OrgComponent]parentOrg 1-.-*childOrgs[OrgComponent]
+[Host]hostedSoftware 1-.-*hostedOn[SoftwareComponent]
+[OrgComponent]1-.-*[Host]
 [OrgComponent]1-.-*[SoftwareComponent]
 [Flavor]1-.-*[Server]
 [Image]1-.-*[Server]
 [Hypervisor]1-.-*[Server]
+// non-containing 1:1
+[Hypervisor]1-.-1[Host]
 """
 
 
@@ -87,10 +89,6 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'OpenstackComponent'
         },
                 
-        'NodeComponent': {
-            'base': 'DeviceProxyComponent'
-        },
-                
         'LogicalComponent': {
             'base': 'OpenstackComponent'
         },
@@ -139,11 +137,17 @@ CFG = zenpacklib.ZenPackSpec(
                 'serverBackupDaily':   { 'grid_display': False },   # DISABLED
                 'serverBackupWeekly':  { 'grid_display': False },   # DISABLED
                 'publicIps':           { 'type_': 'lines', 
-                                         'label': 'Public IPs' },  # ['50.57.74.222']
+                                         'label': 'Public IPs' },   # ['50.57.74.222']
                 'privateIps':          { 'type_': 'lines',
-                                         'label': 'Private IPs' }, # ['10.182.13.13']
-                'hostId':              { 'grid_display': False },    # a84303c0021aa53c7e749cbbbfac265f
+                                         'label': 'Private IPs' },  # ['10.182.13.13']                                         
+                'hostId':              { 'grid_display': False },   # a84303c0021aa53c7e749cbbbfac265f
+                'hostName':            { 'grid_display': False, 
+                                         'index_type': 'field' },   # devstack1
             }
+
+            # Note: By (nova) design, hostId is a hash of the actual underlying host and project, and
+            # is designed to allow users of a specific project to tell if two VMs are on the same host, nothing
+            # more.  It is not a unique identifier of hosts (compute nodes).
         },
 
         'Region': {
@@ -166,18 +170,11 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Availability Zone',
             'order': 6            
         },
-
-        'ControllerNode': {
-            'base': 'NodeComponent',
-            'meta_type': 'OpenStackControllerNode', 
-            'label': 'Controller Node',
-            'order': 7            
-        },
-
-        'ComputeNode': {
-            'base': 'NodeComponent',
-            'meta_type': 'OpenStackComputeNode',
-            'label': 'Compute Node',            
+        
+        'Host': {
+            'base': 'DeviceProxyComponent',
+            'meta_type': 'OpenStackHost',
+            'label': 'Host',            
             'order': 8                        
         },
 
@@ -217,10 +214,13 @@ CFG = zenpacklib.ZenPackSpec(
         },
 
         'Hypervisor': {
-            'base': 'SoftwareComponent',
+            'base': 'OpenstackComponent',   # SoftwareComponent
             'meta_type': 'OpenStackHypervisor',                                        
             'label': 'Hypervisor',
-            'order': 14 
+            'order': 14,
+            'properties': {
+                'hypervisorId':      { 'grid_display': False }
+            }            
         }
     },
 
