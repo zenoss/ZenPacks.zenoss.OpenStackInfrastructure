@@ -205,7 +205,7 @@ class OpenStack(PythonPlugin):
                 modname='ZenPacks.zenoss.OpenStack.Host',
                 data=dict(
                     id=host_id,
-                    title=hostname,
+                    title=hostname
             )))
 
         hypervisors = []
@@ -222,23 +222,33 @@ class OpenStack(PythonPlugin):
                     set_host=host_id
             )))    
 
-        services = []            
+        services = []
+        zones = {}            
         for service in results['services']:
             title = '{0}@{1} ({2})'.format(service.binary, service.host, service.zone)
             service_id = prepId('service-{0}-{1}-{2}'.format(service.binary, service.host, service.zone))
             host_id = prepId("host-{0}".format(service.host))
+            zone_id = prepId("zone-{0}".format(service.zone))
+
+            zones.setdefault(zone_id, ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.AvailabilityZone',
+                data=dict(
+                    id=zone_id,
+                    title=service.zone
+                )))
 
             services.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStack.NovaService',
                 data=dict(
                     id=service_id,
                     title=title,
-                    binary=service.binary, 
-                    set_host=host_id
+                    binary=service.binary,
+                    set_host=host_id,
+                    set_orgComponent=zone_id
                 )))
 
         componentsMap = RelationshipMap(relname='components')
-        for objmap in flavors + images + servers + hosts + hypervisors + services:
+        for objmap in flavors + images + servers + hosts + hypervisors + zones.values() + services:
             componentsMap.append(objmap)
 
         return (componentsMap)
