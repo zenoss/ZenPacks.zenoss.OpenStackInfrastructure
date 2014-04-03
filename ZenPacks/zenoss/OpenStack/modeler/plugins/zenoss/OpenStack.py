@@ -68,8 +68,8 @@ class OpenStack(PythonPlugin):
         log.info('Requesting servers')
         results['servers'] = client.servers.list()
 
-        log.info('Requesting hosts')
-        results['hosts'] = client.hosts.list()
+        log.info('Requesting services')
+        results['services'] = client.services.list()
 
         log.info('Requesting hypervisors')
         results['hypervisors'] = client.hypervisors.search('%', servers=True)
@@ -194,11 +194,11 @@ class OpenStack(PythonPlugin):
             )))
 
         hosts = []
-        host_services = defaultdict(set)
-        for host in results['hosts']:
-            host_services[host.host_name].update([host.service])
+        hostnames = set()
+        for service in results['services']:
+            hostnames.add(service.host)
 
-        for hostname in host_services:
+        for hostname in hostnames:
             host_id = prepId("host-{0}".format(hostname))
 
             hosts.append(ObjectMap(
@@ -222,8 +222,23 @@ class OpenStack(PythonPlugin):
                     set_host=host_id
             )))    
 
+        services = []            
+        for service in results['services']:
+            title = '{0}@{1} ({2})'.format(service.binary, service.host, service.zone)
+            service_id = prepId('service-{0}-{1}-{2}'.format(service.binary, service.host, service.zone))
+            host_id = prepId("host-{0}".format(service.host))
+
+            services.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.NovaService',
+                data=dict(
+                    id=service_id,
+                    title=title,
+                    binary=service.binary, 
+                    set_host=host_id
+                )))
+
         componentsMap = RelationshipMap(relname='components')
-        for objmap in flavors + images + servers + hosts + hypervisors:
+        for objmap in flavors + images + servers + hosts + hypervisors + services:
             componentsMap.append(objmap)
 
         return (componentsMap)

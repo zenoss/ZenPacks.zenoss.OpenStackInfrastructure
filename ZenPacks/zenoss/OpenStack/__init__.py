@@ -86,7 +86,10 @@ CFG = zenpacklib.ZenPackSpec(
         },
                 
         'SoftwareComponent': {
-            'base': 'OpenstackComponent'
+            'base': 'OpenstackComponent',
+            'properties': {
+                'binary':   { 'label': 'Binary' },
+            }
         },
                 
         'LogicalComponent': {
@@ -178,32 +181,18 @@ CFG = zenpacklib.ZenPackSpec(
             'order': 8                        
         },
 
+        'NovaService': {
+            'base': 'SoftwareComponent',
+            'meta_type': 'OpenStackNovaService',
+            'label': 'Nova Service',
+            'order': 10                    
+        },
+
         'NovaApi': {
             'base': 'SoftwareComponent',
             'meta_type': 'OpenStackNovaApi',
             'label': 'NovaApi',
             'order': 9
-        },
-
-        'NovaConductor': {
-            'base': 'SoftwareComponent',        
-            'meta_type': 'OpenStackNovaConductor',
-            'label': 'NovaConductor',
-            'order': 10                                                             
-        },
-
-        'NovaScheduler': {
-            'base': 'SoftwareComponent',        
-            'meta_type': 'OpenStackNovaScheduler',
-            'label': 'NovaScheduler',
-            'order': 11                                                             
-        },
-
-        'NovaCompute': {
-            'base': 'SoftwareComponent',        
-            'meta_type': 'OpenStackNovaCompute',
-            'label': 'NovaCompute',
-            'order': 12                                                             
         },
 
         'NovaDatabase': {
