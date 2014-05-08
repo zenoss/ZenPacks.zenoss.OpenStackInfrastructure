@@ -212,15 +212,20 @@ class OpenStack(PythonPlugin):
         for hypervisor in results['hypervisors']: 
             host_id = prepId("host-{0}".format(hypervisor.hypervisor_hostname))
 
+            hypervisor_servers = []
+            if hasattr(hypervisor, 'servers'):
+                hypervisor_servers = ['server-{0}'.format(x['uuid']) for x in hypervisor.servers]
+
             hypervisors.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStack.Hypervisor',
                 data=dict(
                     id='hypervisor-{0}'.format(hypervisor.id),
                     title='{0}.{1}'.format(hypervisor.hypervisor_hostname, hypervisor.id),
                     hypervisorId=hypervisor.id,  # 1
-                    set_servers=['server-{0}'.format(x['uuid']) for x in hypervisor.servers],
+                    set_servers=hypervisor_servers,
                     set_host=host_id
-            )))    
+            )))
+
 
         services = []
         zones = {}            
