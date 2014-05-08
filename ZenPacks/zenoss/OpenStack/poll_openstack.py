@@ -14,6 +14,8 @@
 
 import json
 import sys
+import logging
+log = logging.getLogger('ZenPacks.zenoss.OpenStack.poll_openstack')
 
 from utils import add_local_lib_path
 add_local_lib_path()
@@ -29,28 +31,7 @@ class OpenStackPoller(object):
         self._api_version = api_version
         self._region_name = region_name
 
-    def getData(self):
-        if (log.isEnabledFor(logging.DEBUG)):
-            http_log_debug = True
-            logging.getLogger('novaclient.client').setLevel(logging.DEBUG)
-        else:
-            http_log_debug = False
-
-        client = novaclient.Client(
-            self._api_version,
-            self._username,
-            self._api_key,
-            self._project_id,
-            self._auth_url,
-            region_name=self._region_name or None,
-            http_log_debug=http_log_debug        
-        )
-
-        data = {}
-        data['events'] = []
-
-        data['flavorTotalCount'] = len(client.flavors.list())
-
+    def _populateImageData(self, client, data):
         data['imageTotalCount'] = 0
         data['imageSavingCount'] = 0
         data['imageUnknownCount'] = 0
@@ -96,6 +77,7 @@ class OpenStackPoller(object):
                 imageStatus=image.status,
             ))
 
+    def _populateServerData(self, client, data):
         data['serverTotalCount'] = 0
         data['serverActiveCount'] = 0
         data['serverBuildCount'] = 0
@@ -173,6 +155,32 @@ class OpenStackPoller(object):
                 serverStatus=server.status,
             ))
 
+    def getData(self):
+        if (log.isEnabledFor(logging.DEBUG)):
+            http_log_debug = True
+            logging.getLogger('novaclient.client').setLevel(logging.DEBUG)
+        else:
+            log.setLevel(logging.DEBUG)
+            http_log_debug = True
+
+        client = novaclient.Client(
+            self._api_version,
+            self._username,
+            self._api_key,
+            self._project_id,
+            self._auth_url,
+            region_name=self._region_name or None,
+            http_log_debug=http_log_debug,
+        )
+
+        data = {}
+        data['events'] = []
+
+        data['flavorTotalCount'] = len(client.flavors.list())
+
+        self._populateImageData(client, data)
+        self._populateServerData(client, data)
+
         return data
 
     def printJSON(self):
@@ -200,7 +208,7 @@ class OpenStackPoller(object):
 if __name__ == '__main__':
     username = api_key = project_id = auth_url = region_name = None
     try:
-        username, api_key, project_id, auth_url, region_name = sys.argv[1:6]
+        username, api_key, project_id, auth_url, api_version, region_name = sys.argv[1:7]
     except ValueError:
         print >> sys.stderr, (
             "Usage: %s <username> <api_key> <project_id> <auth_url> "
@@ -210,6 +218,6 @@ if __name__ == '__main__':
         sys.exit(1)
 
     poller = OpenStackPoller(
-        username, api_key, project_id, auth_url, region_name)
+        username, api_key, project_id, auth_url, api_version, region_name)
 
     poller.printJSON()
