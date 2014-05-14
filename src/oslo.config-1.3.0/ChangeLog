@@ -1,0 +1,264 @@
+CHANGES
+=======
+
+1.3.0
+-----
+
+* Include the 'meta' trove classifiers for python versions
+* Do substitution on overrides and defaults too
+* Follow style guide for help strings
+* Updated from global requirements
+* Convert to oslo.test
+* Fix a whitespace in a comment
+* Fix docstring of parsing order
+* Switch over to oslosphinx
+* Remove extraneous vim configuration comments
+* Fix misspellings in oslo.config
+* Add py33 trove classifier
+* Support building wheels (PEP-427)
+* Add Style Guide for help of config options
+* Add docs for types
+* Throw exception if --config-dir doesn't exist
+* Remove copyright from empty files
+* Implemented support for custom opt types
+* Fix for parsing error with Dollar Sign ($) in values
+* Utilizes assertIsNone and assertIsNotNone
+* Fix spelling errors in docstrings and comments
+* Added support of operator '=='
+* Updated from global requirements
+* Updated from global requirements
+* Fix to make ConfigOpts no longer obscure IOErrors
+* Replace assertEquals with assertEqual
+* Updated from global requirements
+* Add the ability to validate default options value
+
+1.3.0a0
+-------
+
+* Updated from global requirements
+
+1.2.1
+-----
+
+* Fix subparsers add_parser() regression
+* Expand DeprecatedOpt documentation
+
+1.2.0
+-----
+
+* Release notes for 1.2.0
+* Raises error if duplicate keys found in DictOpt
+* Fix DictOpt to split only the first colon
+* Update requirements
+* Release notes for 1.2.0a4
+* Remove explicit version from setup.cfg
+
+1.2.0a4
+-------
+
+* Fix first param in  __eq__ impl to be self
+* Bump hacking to 0.7.0
+* Add auto-create support for OptGroup instances
+* NoSuchOptError should be used not AttributeError
+* Fixes six imports
+* Fix python 3.3 test configuration
+* Allow use of hacking 0.6.0 and fix min version
+* Add eclipse project files to .gitignore
+* Add Python 3 support
+* Raise an exception when _oparser is not initialized
+* Hook docstrings into the published docs
+* Use oslo.sphinx and remove local copy of doc theme
+
+1.2.0a3
+-------
+
+* Add release notes for 1.2.0a3
+* Ensure namespace package is installed
+* Add reload_config_files function
+* Modify __clear_cache function
+* Use assertEqual() rather than assertEquals()
+* python3: Fix traceback while running tests
+* Tar up .testr.conf as well
+* Rename tools/(pip|test)-requires to *requirements.txt
+* python3: Fix traceback while running tests
+* python3: Fix traceback while running tests
+* python3: More python3 compat updates
+* python3: Remove mox support from oslo.config
+* Fix config help order to be alphabetical
+* Enable pep8 E125 check (w/o any changes)
+* python3: Introduce py33 to tox.ini
+* Fix the priority of CLI args vs config file values
+* Parse config files in an argparse callback
+* Revert additions to ConfigParser public APIs
+* Refactor type conversion
+* Adds group name normalization tests
+* Simplify help string for --config-file
+* Add release notes for 1.2.0a2
+* Add release notes for 1.1.1
+
+1.2.0a2
+-------
+
+* Restrict StrOpt to just a few allowed values
+* Fix MultiConfigParser API breakage
+* Add release notes for 1.2.0a1
+
+1.2.0a1
+-------
+
+* Allow Multiple sets of deprecated name/group for options
+* Add CLI vs config file priority test
+* Add test cases for default_config_files
+* Move --config-dir tests into their own test case
+* Remove some redundant code for bool opt actions
+* Normalizes non lowercase option group names in conf files
+* Switch to flake8/hacking instead of pep8+pyflakes
+* Made a couple minor textual documentation / typo fixes
+* Re-work test_cli to use testscenarios
+* Upgrade testing to use testr
+* Update build to use pbr
+* Add python3 compatability support
+* Use builtin startswith and endswith methods in iniparser
+* Fixes OptGroup title set typo
+* Remove debug print statements from tests
+* Python 3.x compatibility
+* Support for Dictionary Options
+* set_defaults does not work for more than one kwarg
+* Adds pylint section in tox.ini in oslo.config to check for unused imports
+* Removes unused imports in the oslo.config.tests module
+* Improve test cases for boolean values
+* Rename oslo-config to oslo.config
+* Fix copyright - from LLC to Foundation
+* Add Environment::OpenStack classifier
+* Open 1.2.x development
+
+1.1.0
+-----
+
+* Copyright rename LLC to Foundation
+* Correct some typos in docstrings in cfg.py
+
+1.1.0b1
+-------
+
+* Change the name of the project to oslo.config
+* Switch to semantic versioning
+* Explicitly set ConfigOpts._args to sys.argv[1:]
+
+2013.1b5
+--------
+
+* Add deprecated_group Opt kwarg
+* Add AUTHORS and ChangeLog to .gitignore
+* Add missing files to the tarball
+
+2013.1b4
+--------
+
+* Make sure to install the oslo package as well
+* Add LICENSE file
+
+2013.1b3
+--------
+
+* Fix setup.py to install the correct package
+* Allow MultiConfigParser get from mutliple sections
+* Refactor _cparser_get_with_deprecated()
+
+2013.1b2
+--------
+
+* sort options to make --help output prettier
+
+2013.1b1
+--------
+
+* Implements import_group
+* Fixes "is not", "not in" syntax usage
+* Add sphinx documentation
+* Fix version to 2013.1
+* Start using fixtures and testtools
+* Sync latest setup code from oslo-incubator
+* Move logging config options into the log module
+* Add setuptools magic
+* Add oslo-config project infrastructure
+* Move files to new locations for oslo-config
+* Fixes import order errors
+* Make tox run doctests
+* Verbose should not enable debug level logging
+* Fix pep8 E125 errors
+* Revert "Support lookup of value using "group.key""
+* Support lookup of value using "group.key"
+* Add deprecated --logdir common opt
+* Add deprecated --logfile common opt
+* Allow nova and others to override some logging defaults
+* Fixing the trim for ListOp when reading from config file
+* Fix set_default() with boolean CLI options
+* Improve cfg's argparse sub-parsers support
+* Fix regression with cfg CLI arguments
+* Fix ListOpt to trim whitespace
+* Add another duplicate opt test case
+* Hide the GroupAttr conf and group attributes
+* Fix broken --help with CommonConfigOpts
+* updating sphinx documentation
+* Don't reference argparse._StoreAction
+* Fix minor coding style issue
+* Remove ConfigCliParser class
+* Add support for positional arguments
+* Use stock argparse behaviour for optional args
+* Use stock argparse --usage behaviour
+* Use stock argparse --version behaviour
+* Remove add_option() method
+* Completely remove cfg's disable_interspersed_args()
+* argparse support for cfg
+* Add a missing comma in a docstring
+* cfg: fix required if option has a dash
+* cfg: clean up None value handling
+* Allow set_default and set_override to use None
+* Tilde expansion for --config-file and --config-dir
+* Add import_opt() method to ConfigOpts
+* Modifies _is_opt_registered fcn to check for duplicate opts
+* cfg: allow empty config values
+* cfg: Fix typo in documentation
+* Update common code to support pep 1.3. bug 1014216
+* Use 'is not None' instead of '!= None'
+* Fix a pep8 error
+* Adds support for bol and eol spaces to ini files
+* Add support to include config aliases
+* Fix pep8 errors
+* cfg: add a global CONF object
+* cfg: add generators for iterating over all options
+* cfg: move constructor args to __call__() args
+* Run pep8 on tests
+* Alphabetize imports in openstack/common/cfg.py
+* cfg: make reset() clear defaults and overrides
+* cfg: automatically create option groups
+* cfg: allow options to be marked as required
+* cfg: use a list comprehension instead of map()
+* New ConfigOpts.find_file() for locating conf files
+* Support for directory source of config files
+* Provide file extension when when looking for files
+* Some refactoring of the cfg cache
+* Add caching to openstack.common.cfg
+* Typofix, OptionGroup should be OptGroup
+* Use absolute import for iniparser
+* Finish implementing MultiStrOpt
+* Avoid leaking secrets into config logging
+* Fix bug 954488
+* fix restructuredtext formatting in docstrings
+* Add ConfigOpts.print_help()
+* cfg: fix a small comment typo
+* cfg: unneeded multiple inheritance
+* PEP8 cleanup (openstack-common)
+* Backslash continuations (misc.)
+* Disable ConfigParser interpolation (lp#930270)
+* Implements blueprint separate-nova-volumeapi
+* Makes common/cfg.py raise AttributeError
+* PEP8 type comparison cleanup
+* Add the Mapping interface to cfg.ConfigOpts
+* Add cfg test case for recursive substitution
+* Add support to cfg for disabling interspersed args
+* Get cfg test cases to 100%
+* Add cfg test case for exceptions' __str__ methods
+* Fix some cfg test case naming conflicts
+* Add new cfg module

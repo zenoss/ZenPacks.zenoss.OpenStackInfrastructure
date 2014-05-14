@@ -15,6 +15,11 @@ PREV_ZENPACK_NAME = ""
 
 from setuptools import setup, find_packages
 
+import os
+os.system('echo PYTHONPATH=' + os.getcwd() + '/ZenPacks/zenoss/OpenStack/lib:$PYTHONPATH >> /home/zenoss/.bash_profile')
+os.system('echo export PYTHONPATH >> /home/zenoss/.bash_profile')
+os.system('source /home/zenoss/.bash_profile')
+
 # make build
 import subprocess
 p = subprocess.Popen('make build', shell=True)
@@ -23,6 +28,7 @@ if p.poll() == None:
     p.wait()
 if p.returncode != 0:
     raise Exception('make exited with an error: %s' % p.returncode)
+
 
 setup(
     # This ZenPack metadata should usually be edited with the Zenoss
