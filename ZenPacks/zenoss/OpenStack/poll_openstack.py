@@ -22,8 +22,6 @@ from utils import add_local_lib_path
 add_local_lib_path()
 
 from novaclient import client as novaclient
-from keystoneclient.v2_0.client import Client as keystoneclient
-from ceilometerclient.v2.client import Client as ceilometerclient
 from apiclients.ceilometerapiclient import CeilometerAPIClient
 
 class OpenStackPoller(object):
@@ -196,28 +194,9 @@ class OpenStackPoller(object):
         )
 
         data['statistics'] = {}
-        data['statistics']['cpu'] = ceiloclient.get_statistics('cpu')
-        data['statistics']['cpu-util'] = ceiloclient.get_statistics('cpu_util')
-        data['statistics']['disk-read-bytes'] = ceiloclient.get_statistics('disk.read.bytes')
-        data['statistics']['disk-read-bytes-rate'] = ceiloclient.get_statistics('disk.read.bytes.rate')
-        data['statistics']['disk-read-requests'] = ceiloclient.get_statistics('disk.read.requests')
-        data['statistics']['disk-read-requests-rate'] = ceiloclient.get_statistics('disk.read.requests.rate')
-        data['statistics']['disk-write-bytes'] = ceiloclient.get_statistics('disk.write.bytes')
-        data['statistics']['disk-write-bytes-rate'] = ceiloclient.get_statistics('disk.write.bytes.rate')
-        data['statistics']['disk-write-requests'] = ceiloclient.get_statistics('disk.write.requests')
-        data['statistics']['disk-write-requests-rate'] = ceiloclient.get_statistics('disk.write.requests.rate')
-        data['statistics']['image'] = ceiloclient.get_statistics('image')
-        data['statistics']['image-size'] = ceiloclient.get_statistics('image.size')
-        data['statistics']['instance'] = ceiloclient.get_statistics('instance')
-        data['statistics']['instance-m1-nano'] = ceiloclient.get_statistics('instance:m1.nano')
-        data['statistics']['network-incoming-bytes'] = ceiloclient.get_statistics('network.incoming.bytes')
-        data['statistics']['network-incoming-bytes-rate'] = ceiloclient.get_statistics('network.incoming.bytes.rate')
-        data['statistics']['network-incoming-packets'] = ceiloclient.get_statistics('network.incoming.packets')
-        data['statistics']['network-incoming-packets-rate'] = ceiloclient.get_statistics('network.incoming.packets.rate')
-        data['statistics']['network-outgoing-bytes'] = ceiloclient.get_statistics('network.outgoing.bytes')
-        data['statistics']['network-outgoing-bytes-rate'] = ceiloclient.get_statistics('network.outgoing.bytes.rate')
-        data['statistics']['network-outgoing-packets'] = ceiloclient.get_statistics('network.outgoing.packets')
-        data['statistics']['network-outgoing-packets-rate'] = ceiloclient.get_statistics('network.outgoing.packets.rate')
+        meternames = ceiloclient.get_meternames()
+        for name in meternames:
+            data['statistics'][name] = ceiloclient.get_statistics(name)
         data['meters-list'] = ceiloclient.get_meters()
         data['events-list'] = ceiloclient.get_events()
         data['alarms-list'] = ceiloclient.get_alarms()

@@ -71,32 +71,35 @@ class CeilometerAPIClient(object):
             meter['user_id'] = m.user_id
             self._meters.append(meter)
 
+    def get_meternames(self):
+        if len(self._meters) == 0:
+            self._get_meters()
+
+        return [meter['name'] for meter in self._meters if len(meter['name']) > 0]
+
     def get_statistics(self, meter_name = ''):
         if len(meter_name) == 0:
             return None
-        meternames = [meter['name'] for meter in self._meters if len(meter['name']) > 0]
+        meternames = self.get_meternames()
         if meter_name not in meternames:
             return None
 
-        return self._client.statistics.list(meter_name)
+        return self._client.statistics.list(meter_name)[0].to_dict()
 
     def get_meters(self):
-        return self._client.meters.list()
+        return [meter.to_dict() for meter in self._client.meters.list()]
 
     def get_events(self):
-        return self._client.events.list()
+        return [event.to_dict() for event in self._client.events.list()]
 
     def get_alarms(self):
-        return self._client.alarms.list()
+        return [alarm.to_dict() for alarm in self._client.alarms.list()]
 
     def get_resources(self):
-        return self._client.resources.list()
+        return [resource.to_dict() for resource in self._client.resources.list()]
 
     def get_samples(self):
-        return self._client.samples.list()
-
-    def get_meters(self):
-        return self._client.meters.list()
+        return [sample.to_dict() for sample in self._client.samples.list()]
 
 #       query1 = [
 #           {'field':'metadata.event_type',
