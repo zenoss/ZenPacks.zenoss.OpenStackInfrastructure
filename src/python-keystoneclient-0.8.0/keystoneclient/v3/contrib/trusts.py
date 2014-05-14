@@ -37,14 +37,27 @@ class TrustManager(base.CrudManager):
 
     def create(self, trustee_user, trustor_user, role_names=None,
                project=None, impersonation=False, expires_at=None,
+<<<<<<< HEAD
                **kwargs):
         """Create a Trust.
+=======
+               remaining_uses=None, **kwargs):
+        """Create a Trust.
+
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
         :param string trustee_user: user who is capable of consuming the trust
         :param string trustor_user: user who's authorization is being delegated
         :param string role_names: subset of trustor's roles to be granted
         :param string project: project which the trustor is delegating
         :param boolean impersonation: enable explicit impersonation
         :param datetime.datetime expires_at: expiry time
+<<<<<<< HEAD
+=======
+        :param integer remaining_uses: how many times this trust can be used
+                                       to generate a token. None means
+                                       unlimited tokens.
+
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
         """
         # Convert role_names list into list-of-dict API format
         if role_names:
@@ -62,6 +75,10 @@ class TrustManager(base.CrudManager):
             expires_at=expires_str,
             impersonation=impersonation,
             project_id=base.getid(project),
+<<<<<<< HEAD
+=======
+            remaining_uses=remaining_uses,
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
             roles=roles,
             trustee_user_id=base.getid(trustee_user),
             trustor_user_id=base.getid(trustor_user),

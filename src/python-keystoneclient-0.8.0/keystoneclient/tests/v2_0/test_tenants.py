@@ -79,7 +79,11 @@ class TenantTests(utils.TestCase):
             req_body['tenant']['description'],
             req_body['tenant']['enabled'],
             extravalue01=req_body['tenant']['extravalue01'],
+<<<<<<< HEAD
             name="dont overwrite priors")
+=======
+            name="don't overwrite priors")
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
         self.assertIsInstance(tenant, tenants.Tenant)
         self.assertEqual(tenant.id, 4)
         self.assertEqual(tenant.name, "tenantX")
@@ -188,7 +192,11 @@ class TenantTests(utils.TestCase):
             req_body['tenant']['description'],
             req_body['tenant']['enabled'],
             extravalue01=req_body['tenant']['extravalue01'],
+<<<<<<< HEAD
             name="dont overwrite priors")
+=======
+            name="don't overwrite priors")
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
         self.assertIsInstance(tenant, tenants.Tenant)
         self.assertRequestBodyIs(json=req_body)
         self.assertEqual(tenant.id, 4)

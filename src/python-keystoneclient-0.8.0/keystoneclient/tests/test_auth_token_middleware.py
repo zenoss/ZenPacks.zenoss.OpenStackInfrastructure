@@ -250,7 +250,11 @@ class BaseAuthTokenMiddlewareTest(testtools.TestCase):
     All the tests allow for running with auth_token
     configured for receiving v2 or v3 tokens, with the
     choice being made by passing configuration data into
+<<<<<<< HEAD
     Setup().
+=======
+    setUp().
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
     The base class will, by default, run all the tests
     expecting v2 token formats.  Child classes can override
@@ -275,7 +279,11 @@ class BaseAuthTokenMiddlewareTest(testtools.TestCase):
         self.response_status = None
         self.response_headers = None
 
+<<<<<<< HEAD
     def set_middleware(self, fake_app=None, expected_env=None, conf=None):
+=======
+    def set_middleware(self, expected_env=None, conf=None):
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
         """Configure the class ready to call the auth_token middleware.
 
         Set up the various fake items needed to run the middleware.
@@ -286,6 +294,7 @@ class BaseAuthTokenMiddlewareTest(testtools.TestCase):
         if conf:
             self.conf.update(conf)
 
+<<<<<<< HEAD
         if not fake_app:
             fake_app = self.fake_app
 
@@ -294,6 +303,13 @@ class BaseAuthTokenMiddlewareTest(testtools.TestCase):
 
         self.middleware = auth_token.AuthProtocol(fake_app(self.expected_env),
                                                   self.conf)
+=======
+        if expected_env:
+            self.expected_env.update(expected_env)
+
+        self.middleware = auth_token.AuthProtocol(
+            self.fake_app(self.expected_env), self.conf)
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
         self.middleware._iso8601 = iso8601
 
         with tempfile.NamedTemporaryFile(dir=self.middleware.signing_dirname,
@@ -318,6 +334,7 @@ class BaseAuthTokenMiddlewareTest(testtools.TestCase):
             self.assertIsInstance(httpretty.last_request(),
                                   httpretty.core.HTTPrettyRequestEmpty)
 
+<<<<<<< HEAD
 if tuple(sys.version_info)[0:2] < (2, 7):
 
     # 2.6 doesn't have the assert dict equals so make sure that it exists
@@ -345,6 +362,8 @@ if tuple(sys.version_info)[0:2] < (2, 7):
 
     BaseAuthTokenMiddlewareTest = AdjustedBaseAuthTokenMiddlewareTest
 
+=======
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
 class MultiStepAuthTokenMiddlewareTest(BaseAuthTokenMiddlewareTest,
                                        testresources.ResourcedTestCase):
@@ -519,8 +538,15 @@ class CommonAuthTokenMiddlewareTest(object):
         self.assertIn('keystone.token_info', req.environ)
 
     def test_valid_uuid_request(self):
+<<<<<<< HEAD
         self.assert_valid_request_200(self.token_dict['uuid_token_default'])
         self.assert_valid_last_url(self.token_dict['uuid_token_default'])
+=======
+        for _ in range(2):  # Do it twice because first result was cached.
+            token = self.token_dict['uuid_token_default']
+            self.assert_valid_request_200(token)
+            self.assert_valid_last_url(token)
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
     def test_valid_uuid_request_with_auth_fragments(self):
         del self.conf['identity_uri']
@@ -532,11 +558,41 @@ class CommonAuthTokenMiddlewareTest(object):
         self.assert_valid_request_200(self.token_dict['uuid_token_default'])
         self.assert_valid_last_url(self.token_dict['uuid_token_default'])
 
+<<<<<<< HEAD
     def test_valid_signed_request(self):
         self.assert_valid_request_200(
             self.token_dict['signed_token_scoped'])
         #ensure that signed requests do not generate HTTP traffic
         self.assertLastPath(None)
+=======
+    def _test_cache_revoked(self, token, revoked_form=None):
+        # When the token is cached and revoked, 401 is returned.
+        self.middleware.check_revocations_for_cached = True
+
+        req = webob.Request.blank('/')
+        req.headers['X-Auth-Token'] = token
+
+        # Token should be cached as ok after this.
+        self.middleware(req.environ, self.start_fake_response)
+        self.assertEqual(200, self.response_status)
+
+        # Put it in revocation list.
+        self.middleware.token_revocation_list = self.get_revocation_list_json(
+            token_ids=[revoked_form or token])
+        self.middleware(req.environ, self.start_fake_response)
+        self.assertEqual(401, self.response_status)
+
+    def test_cached_revoked_uuid(self):
+        # When the UUID token is cached and revoked, 401 is returned.
+        self._test_cache_revoked(self.token_dict['uuid_token_default'])
+
+    def test_valid_signed_request(self):
+        for _ in range(2):  # Do it twice because first result was cached.
+            self.assert_valid_request_200(
+                self.token_dict['signed_token_scoped'])
+            #ensure that signed requests do not generate HTTP traffic
+            self.assertLastPath(None)
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
     def test_revoked_token_receives_401(self):
         self.middleware.token_revocation_list = self.get_revocation_list_json()
@@ -545,6 +601,15 @@ class CommonAuthTokenMiddlewareTest(object):
         self.middleware(req.environ, self.start_fake_response)
         self.assertEqual(self.response_status, 401)
 
+<<<<<<< HEAD
+=======
+    def test_cached_revoked_pki(self):
+        # When the PKI token is cached and revoked, 401 is returned.
+        token = self.token_dict['signed_token_scoped']
+        revoked_form = cms.cms_hash_token(token)
+        self._test_cache_revoked(token, revoked_form)
+
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
     def get_revocation_list_json(self, token_ids=None):
         if token_ids is None:
             token_ids = [self.token_dict['revoked_token_hash']]
@@ -1278,7 +1343,11 @@ class v2AuthTokenMiddlewareTest(BaseAuthTokenMiddlewareTest,
       tenant
 
     The tests below were originally part of the generic AuthTokenMiddlewareTest
+<<<<<<< HEAD
     class, but now, since they really are v2 specifc, they are included here.
+=======
+    class, but now, since they really are v2 specific, they are included here.
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
     """
 
@@ -1440,7 +1509,11 @@ class v3AuthTokenMiddlewareTest(BaseAuthTokenMiddlewareTest,
     """Test auth_token middleware with v3 tokens.
 
     Re-execute the AuthTokenMiddlewareTest class tests, but with the
+<<<<<<< HEAD
     the auth_token middleware configured to expect v3 tokens back from
+=======
+    auth_token middleware configured to expect v3 tokens back from
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
     a keystone server.
 
     This is done by configuring the AuthTokenMiddlewareTest class via

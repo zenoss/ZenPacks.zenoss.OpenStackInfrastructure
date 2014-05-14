@@ -25,7 +25,11 @@ class KeystoneClientTest(utils.TestCase):
 
     @httpretty.activate
     def test_unscoped_init(self):
+<<<<<<< HEAD
         self.stub_auth(json=client_fixtures.UNSCOPED_TOKEN)
+=======
+        self.stub_auth(json=client_fixtures.unscoped_token())
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
         c = client.Client(user_domain_name='exampledomain',
                           username='exampleuser',
@@ -39,7 +43,11 @@ class KeystoneClientTest(utils.TestCase):
 
     @httpretty.activate
     def test_domain_scoped_init(self):
+<<<<<<< HEAD
         self.stub_auth(json=client_fixtures.DOMAIN_SCOPED_TOKEN)
+=======
+        self.stub_auth(json=client_fixtures.domain_scoped_token())
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
         c = client.Client(user_id='c4da488862bd435c9e6c0275a0d0e49a',
                           password='password',
@@ -55,7 +63,11 @@ class KeystoneClientTest(utils.TestCase):
 
     @httpretty.activate
     def test_project_scoped_init(self):
+<<<<<<< HEAD
         self.stub_auth(json=client_fixtures.PROJECT_SCOPED_TOKEN),
+=======
+        self.stub_auth(json=client_fixtures.project_scoped_token()),
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
         c = client.Client(user_id='c4da488862bd435c9e6c0275a0d0e49a',
                           password='password',
@@ -72,7 +84,11 @@ class KeystoneClientTest(utils.TestCase):
 
     @httpretty.activate
     def test_auth_ref_load(self):
+<<<<<<< HEAD
         self.stub_auth(json=client_fixtures.PROJECT_SCOPED_TOKEN)
+=======
+        self.stub_auth(json=client_fixtures.project_scoped_token())
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
         c = client.Client(user_id='c4da488862bd435c9e6c0275a0d0e49a',
                           password='password',
@@ -92,8 +108,13 @@ class KeystoneClientTest(utils.TestCase):
     def test_auth_ref_load_with_overridden_arguments(self):
         new_auth_url = 'https://newkeystone.com/v3'
 
+<<<<<<< HEAD
         self.stub_auth(json=client_fixtures.PROJECT_SCOPED_TOKEN)
         self.stub_auth(json=client_fixtures.PROJECT_SCOPED_TOKEN,
+=======
+        self.stub_auth(json=client_fixtures.project_scoped_token())
+        self.stub_auth(json=client_fixtures.project_scoped_token(),
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
                        base_url=new_auth_url)
 
         c = client.Client(user_id='c4da488862bd435c9e6c0275a0d0e49a',
@@ -114,7 +135,11 @@ class KeystoneClientTest(utils.TestCase):
 
     @httpretty.activate
     def test_trust_init(self):
+<<<<<<< HEAD
         self.stub_auth(json=client_fixtures.TRUST_TOKEN)
+=======
+        self.stub_auth(json=client_fixtures.trust_token())
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
         c = client.Client(user_domain_name='exampledomain',
                           username='exampleuser',
@@ -169,12 +194,20 @@ class KeystoneClientTest(utils.TestCase):
 
     @httpretty.activate
     def test_management_url_is_updated_with_project(self):
+<<<<<<< HEAD
         self._management_url_is_updated(client_fixtures.PROJECT_SCOPED_TOKEN,
+=======
+        self._management_url_is_updated(client_fixtures.project_scoped_token(),
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
                                         project_name='exampleproject')
 
     @httpretty.activate
     def test_management_url_is_updated_with_domain(self):
+<<<<<<< HEAD
         self._management_url_is_updated(client_fixtures.DOMAIN_SCOPED_TOKEN,
+=======
+        self._management_url_is_updated(client_fixtures.domain_scoped_token(),
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
                                         domain_name='exampledomain')
 
     @httpretty.activate
@@ -182,7 +215,11 @@ class KeystoneClientTest(utils.TestCase):
         # NOTE(jamielennox): this is deprecated behaviour that should be
         # removed ASAP, however must remain compatible.
 
+<<<<<<< HEAD
         self.stub_auth(json=client_fixtures.AUTH_RESPONSE_BODY)
+=======
+        self.stub_auth(json=client_fixtures.auth_response_body())
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
         cl = client.Client(username='exampleuser',
                            password='password',

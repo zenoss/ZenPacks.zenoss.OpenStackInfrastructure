@@ -65,7 +65,11 @@ def print_list(objs, fields, formatters={}, order_by=None):
 
 
 def _word_wrap(string, max_length=0):
+<<<<<<< HEAD
     """wrap long strings to be no longer then max_length."""
+=======
+    """wrap long strings to be no longer than max_length."""
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
     if max_length <= 0:
         return string
     return '\n'.join([string[i:i + max_length] for i in

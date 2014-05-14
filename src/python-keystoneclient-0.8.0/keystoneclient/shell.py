@@ -383,7 +383,15 @@ class OpenStackIdentityShell(object):
             return 0
 
         if args.debug:
+<<<<<<< HEAD
             logging.basicConfig(level=logging.DEBUG)
+=======
+            logging_level = logging.DEBUG
+        else:
+            logging_level = logging.WARNING
+
+        logging.basicConfig(level=logging_level)
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
         # TODO(heckj): supporting backwards compatibility with environment
         # variables. To be removed after DEVSTACK is updated, ideally in

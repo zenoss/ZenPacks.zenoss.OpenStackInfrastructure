@@ -14,6 +14,10 @@ import logging
 
 import six
 
+<<<<<<< HEAD
+=======
+from keystoneclient import _discover
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 from keystoneclient import exceptions
 from keystoneclient import session as client_session
 from keystoneclient.v2_0 import client as v2_client
@@ -23,6 +27,7 @@ from keystoneclient.v3 import client as v3_client
 _logger = logging.getLogger(__name__)
 
 
+<<<<<<< HEAD
 class _KeystoneVersion(object):
     """A factory object that holds all the information to create a client.
 
@@ -172,6 +177,21 @@ def available_versions(url, session=None, **kwargs):
 
 
 class Discover(object):
+=======
+_CLIENT_VERSIONS = {2: v2_client.Client,
+                    3: v3_client.Client}
+
+
+def available_versions(url, session=None, **kwargs):
+    """Retrieve raw version data from a url."""
+    if not session:
+        session = client_session.Session.construct(kwargs)
+
+    return _discover.get_version_data(session, url)
+
+
+class Discover(_discover.Discover):
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
     """A means to discover and create clients depending on the supported API
     versions on the server.
 
@@ -239,13 +259,28 @@ class Discover(object):
             session = client_session.Session.construct(kwargs)
         kwargs['session'] = session
 
+<<<<<<< HEAD
         url = kwargs.get('endpoint') or kwargs.get('auth_url')
+=======
+        url = None
+        endpoint = kwargs.pop('endpoint', None)
+        auth_url = kwargs.pop('auth_url', None)
+
+        if endpoint:
+            self._use_endpoint = True
+            url = endpoint
+        elif auth_url:
+            self._use_endpoint = False
+            url = auth_url
+
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
         if not url:
             raise exceptions.DiscoveryFailure('Not enough information to '
                                               'determine URL. Provide either '
                                               'auth_url or endpoint')
 
         self._client_kwargs = kwargs
+<<<<<<< HEAD
         self._available_versions = available_versions(url, session=session)
 
     def _get_client_constructor_kwargs(self, kwargs_dict={}, **kwargs):
@@ -261,17 +296,58 @@ class Discover(object):
         associated with them.
 
         :param bool unstable: Accept endpoints not marked 'stable'. (optional)
+=======
+        super(Discover, self).__init__(session, url)
+
+    def available_versions(self, **kwargs):
+        """Return a list of identity APIs available on the server and the data
+        associated with them.
+
+        DEPRECATED: use raw_version_data()
+
+        :param bool unstable: Accept endpoints not marked 'stable'. (optional)
+                              DEPRECTED. Equates to setting allow_experimental
+                              and allow_unknown to True.
+        :param bool allow_experimental: Allow experimental version endpoints.
+        :param bool allow_deprecated: Allow deprecated version endpoints.
+        :param bool allow_unknown: Allow endpoints with an unrecognised status.
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
         :returns: A List of dictionaries as presented by the server. Each dict
                   will contain the version and the URL to use for the version.
                   It is a direct representation of the layout presented by the
                   identity API.
+<<<<<<< HEAD
+=======
+        """
+        return self.raw_version_data(**kwargs)
+
+    def raw_version_data(self, unstable=False, **kwargs):
+        """Get raw version information from URL.
+
+        Raw data indicates that only minimal validation processing is performed
+        on the data, so what is returned here will be the data in the same
+        format it was received from the endpoint.
+
+        :param bool unstable: (deprecated) equates to setting
+                              allow_experimental and allow_unknown.
+        :param bool allow_experimental: Allow experimental version endpoints.
+        :param bool allow_deprecated: Allow deprecated version endpoints.
+        :param bool allow_unknown: Allow endpoints with an unrecognised status.
+
+        :returns list: The endpoints returned from the server that match the
+                       criteria.
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
         Example::
 
             >>> from keystoneclient import discover
             >>> disc = discover.Discovery(auth_url='http://localhost:5000')
+<<<<<<< HEAD
             >>> disc.available_versions()
+=======
+            >>> disc.raw_version_data()
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
                 [{'id': 'v3.0',
                     'links': [{'href': u'http://127.0.0.1:5000/v3/',
                                'rel': u'self'}],
@@ -297,6 +373,7 @@ class Discover(object):
                   'updated': '2013-03-06T00:00:00Z'}]
         """
         if unstable:
+<<<<<<< HEAD
             # no need to determine the stable endpoints, just return everything
             return self._available_versions
 
@@ -401,6 +478,59 @@ class Discover(object):
         return versions
 
     def create_client(self, version=None, **kwargs):
+=======
+            kwargs.setdefault('allow_experimental', True)
+            kwargs.setdefault('allow_unknown', True)
+
+        return super(Discover, self).raw_version_data(**kwargs)
+
+    def _calculate_version(self, version, unstable):
+        version_data = None
+
+        if version:
+            version_data = self.data_for(version)
+        else:
+            # if no version specified pick the latest one
+            all_versions = self.version_data(unstable=unstable)
+            if all_versions:
+                version_data = all_versions[-1]
+
+        if not version_data:
+            msg = 'Could not find a suitable endpoint'
+
+            if version:
+                msg += ' for client version: %s' % str(version)
+
+            raise exceptions.VersionNotAvailable(msg)
+
+        return version_data
+
+    def _create_client(self, version_data, **kwargs):
+        # Get the client for the version requested that was returned
+        try:
+            client_class = _CLIENT_VERSIONS[version_data['version'][0]]
+        except KeyError:
+            version = '.'.join(str(v) for v in version_data['version'])
+            msg = 'No client available for version: %s' % version
+            raise exceptions.DiscoveryFailure(msg)
+
+        # kwargs should take priority over stored kwargs.
+        for k, v in six.iteritems(self._client_kwargs):
+            kwargs.setdefault(k, v)
+
+        # restore the url to either auth_url or endpoint depending on what
+        # was initially given
+        if self._use_endpoint:
+            kwargs['auth_url'] = None
+            kwargs['endpoint'] = version_data['url']
+        else:
+            kwargs['auth_url'] = version_data['url']
+            kwargs['endpoint'] = None
+
+        return client_class(**kwargs)
+
+    def create_client(self, version=None, unstable=False, **kwargs):
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
         """Factory function to create a new identity service client.
 
         :param tuple version: The required version of the identity API. If
@@ -418,6 +548,7 @@ class Discover(object):
         :raises: DiscoveryFailure if the server response is invalid
         :raises: VersionNotAvailable if a suitable client cannot be found.
         """
+<<<<<<< HEAD
         versions = self._available_clients(**kwargs)
         chosen = None
 
@@ -455,3 +586,7 @@ class Discover(object):
             raise exceptions.VersionNotAvailable(msg)
 
         return chosen.create_client()
+=======
+        version_data = self._calculate_version(version, unstable)
+        return self._create_client(version_data, **kwargs)
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15

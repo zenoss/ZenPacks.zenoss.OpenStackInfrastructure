@@ -70,7 +70,11 @@ class IdentityProviderTests(utils.TestCase, utils.CrudTests):
 
         # req_ref argument allows you to specify a different
         # signature for the request when the manager does some
+<<<<<<< HEAD
         # conversion before doing the request (e.g converting
+=======
+        # conversion before doing the request (e.g. converting
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
         # from datetime object to timestamp string)
         req_ref = (req_ref or ref).copy()
         req_ref.pop('id')
@@ -110,7 +114,11 @@ class MappingTests(utils.TestCase, utils.CrudTests):
 
         # req_ref argument allows you to specify a different
         # signature for the request when the manager does some
+<<<<<<< HEAD
         # conversion before doing the request (e.g converting
+=======
+        # conversion before doing the request (e.g. converting
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
         # from datetime object to timestamp string)
         req_ref = (req_ref or ref).copy()
 

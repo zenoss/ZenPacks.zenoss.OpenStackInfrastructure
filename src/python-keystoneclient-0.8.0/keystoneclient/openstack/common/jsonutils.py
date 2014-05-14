@@ -35,6 +35,7 @@ import datetime
 import functools
 import inspect
 import itertools
+<<<<<<< HEAD
 import json
 try:
     import xmlrpclib
@@ -47,6 +48,22 @@ except ImportError:
     import xmlrpc.client as xmlrpclib
 
 import six
+=======
+import sys
+
+if sys.version_info < (2, 7):
+    # On Python <= 2.6, json module is not C boosted, so try to use
+    # simplejson module if available
+    try:
+        import simplejson as json
+    except ImportError:
+        import json
+else:
+    import json
+
+import six
+import six.moves.xmlrpc_client as xmlrpclib
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
 from keystoneclient.openstack.common import gettextutils
 from keystoneclient.openstack.common import importutils

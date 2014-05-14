@@ -40,6 +40,17 @@ class TrustTests(utils.TestCase, utils.CrudTests):
         ref['impersonation'] = False
         super(TrustTests, self).test_create(ref=ref)
 
+<<<<<<< HEAD
+=======
+    def test_create_limited_uses(self):
+        ref = self.new_ref()
+        ref['trustor_user_id'] = uuid.uuid4().hex
+        ref['trustee_user_id'] = uuid.uuid4().hex
+        ref['impersonation'] = False
+        ref['remaining_uses'] = 5
+        super(TrustTests, self).test_create(ref=ref)
+
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
     def test_create_roles(self):
         ref = self.new_ref()
         ref['trustor_user_id'] = uuid.uuid4().hex
