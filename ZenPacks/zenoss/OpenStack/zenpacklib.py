@@ -730,7 +730,8 @@ class ZenPackSpec(object):
 
             # Merge class_relationships.
             if class_relationships:
-                classdata['relationships'].update(
+                update(
+                    classdata['relationships'],
                     class_relationships.get(classname, {}))
 
             self.classes[classname] = ClassSpec(self, classname, **classdata)
@@ -1103,8 +1104,9 @@ class ClassSpec(object):
 
         self.relationships = {}
 
-        for name, schema in relationships.iteritems():
-            self.relationships[name] = ClassRelationshipSpec(self, name, schema)
+        for name, reldata in relationships.iteritems():
+            self.relationships[name] = ClassRelationshipSpec(
+                self, name, **reldata)
 
         # Impact.
         self.impacts = impacts
@@ -1264,14 +1266,20 @@ class ClassSpec(object):
 
     def create_iinfo_class(self):
         """Create and return IInfo subclass."""
-        if self.is_device:
-            base = IBaseDeviceInfo
-        elif self.is_component:
-            base = IBaseComponentInfo
-        elif self.is_hardware_component:
-            base = IHardwareComponentInfo
-        else:
-            base = IInfo
+        bases = []        
+        for base_classname in self.zenpack.classes[self.name].bases:
+            if base_classname in self.zenpack.classes:
+                bases.append(self.zenpack.classes[base_classname].iinfo_class)
+
+        if not bases:
+            if self.is_device:
+                bases = [IBaseDeviceInfo]
+            elif self.is_component:
+                bases = [IBaseComponentInfo]
+            elif self.is_hardware_component:
+                bases = [IHardwareComponentInfo]
+            else:
+                bases = [IInfo]
 
         attributes = {}
 
@@ -1292,7 +1300,7 @@ class ClassSpec(object):
             get_symbol_name(self.zenpack.name, self.name),
             get_symbol_name(self.zenpack.name, 'schema'),
             'I{}Info'.format(self.name),
-            (base,),
+            tuple(bases),
             attributes)
 
     @property
@@ -1302,14 +1310,20 @@ class ClassSpec(object):
 
     def create_info_class(self):
         """Create and return Info subclass."""
-        if self.is_device:
-            base = BaseDeviceInfo
-        elif self.is_component:
-            base = BaseComponentInfo
-        elif self.is_hardware_component:
-            base = HardwareComponentInfo
-        else:
-            base = InfoBase
+        bases = []        
+        for base_classname in self.zenpack.classes[self.name].bases:
+            if base_classname in self.zenpack.classes:
+                bases.append(self.zenpack.classes[base_classname].info_class)
+
+        if not bases:
+            if self.is_device:
+                bases = [BaseDeviceInfo]
+            elif self.is_component:
+                bases = [BaseComponentInfo]
+            elif self.is_hardware_component:
+                bases = [HardwareComponentInfo]
+            else:
+                bases = [InfoBase]
 
         attributes = {}
 
@@ -1327,7 +1341,7 @@ class ClassSpec(object):
             get_symbol_name(self.zenpack.name, self.name),
             get_symbol_name(self.zenpack.name, 'schema'),
             '{}Info'.format(self.name),
-            (base,),
+            tuple(bases),
             attributes)
 
         classImplements(info_class, self.iinfo_class)
@@ -1508,7 +1522,9 @@ class ClassSpec(object):
             ordered_columns.extend(spec.js_columns)
 
         return (
-            "ZC.{meta_type}Panel = Ext.extend(ZC.ZPLComponentGridPanel, {{\n"
+            "Ext.define('Zenoss.component.{meta_type}Panel', {{\n"
+            "    alias: ['widget.{meta_type}Panel'],\n"
+            "    extend: 'Zenoss.component.ZPLComponentGridPanel',\n"
             "    constructor: function(config) {{\n"
             "        config = Ext.applyIf(config||{{}}, {{\n"
             "            componentType: '{meta_type}',\n"
@@ -1519,7 +1535,6 @@ class ClassSpec(object):
             "        ZC.{meta_type}Panel.superclass.constructor.call(this, config);\n"
             "    }}\n"
             "}});\n"
-            "Ext.reg('{meta_type}Panel', ZC.{meta_type}Panel);\n"
             .format(
                 meta_type=self.meta_type,
                 auto_expand_column=self.auto_expand_column,
@@ -1603,6 +1618,7 @@ class ClassPropertySpec(object):
             grid_display=True,
             renderer=None,
             order=None,
+            editable=False,
             ):
         """TODO."""
         self.class_spec = class_spec
@@ -1617,6 +1633,7 @@ class ClassPropertySpec(object):
         self.details_display = details_display
         self.grid_display = grid_display
         self.renderer = renderer
+        self.editable = bool(editable)
 
         # Force properties into the 4.0 - 4.9 order range.
         if not order:
@@ -1667,6 +1684,7 @@ class ClassPropertySpec(object):
         return {
             self.name: schema_map[self.type_](
                 title=_t(self.label),
+                alwaysEditable=self.editable,
                 order=self.order)
             }
 
@@ -1722,11 +1740,28 @@ class ClassRelationshipSpec(object):
             self,
             class_,
             name,
-            schema,
+            schema=None,
+            label=None,
+            short_label=None,
+            label_width=None,
+            content_width=None,
+            display=True,
+            details_display=True,
+            grid_display=True,
+            renderer=None,
+            order=None,
             ):
         """TODO."""
         self.class_ = class_
         self.name = name
+
+        # Schema
+        if not schema:
+            LOG.error(
+                "no schema specified for %s relationship on %s",
+                class_.name, name)
+
+            return
 
         # Qualify unqualified classnames.
         if '.' not in schema.remoteClass:
@@ -1734,6 +1769,15 @@ class ClassRelationshipSpec(object):
                 self.class_.zenpack.name, schema.remoteClass)
 
         self.schema = schema
+        self.label = label
+        self.short_label = short_label
+        self.label_width = label_width
+        self.content_width = content_width
+        self.display = display
+        self.details_display = details_display
+        self.grid_display = grid_display
+        self.renderer = renderer
+        self.order = order
 
     @property
     def zenrelations_tuple(self):
@@ -1751,15 +1795,15 @@ class ClassRelationshipSpec(object):
 
         if isinstance(self.schema, (ToOne)):
             schemas[self.name] = schema.Entity(
-                title=_t(remote_spec.label),
+                title=_t(self.label or remote_spec.label),
                 group="Relationships",
-                order=3.0)
+                order=self.order or 3.0)
         else:
             relname_count = '{}_count'.format(self.name)
             schemas[relname_count] = schema.Int(
-                title=_t(u'Number of {}'.format(remote_spec.plural_label)),
+                title=_t(u'Number of {}'.format(self.label or remote_spec.plural_label)),
                 group="Relationships",
-                order=6.0)
+                order=self.order or 6.0)
 
         return schemas
 
@@ -1817,16 +1861,16 @@ class ClassRelationshipSpec(object):
 
         if isinstance(self.schema, ToOne):
             fieldname = self.name
-            header = remote_spec.short_label
-            renderer = 'Zenoss.render.zenpacklib_entityLinkFromGrid'
+            header = self.short_label or self.label or remote_spec.short_label
+            renderer = self.renderer or 'Zenoss.render.zenpacklib_entityLinkFromGrid'
             width = max(
-                remote_spec.content_width + 14,
-                remote_spec.label_width + 20)
+                (self.content_width or remote_spec.content_width) + 14,
+                (self.label_width or remote_spec.label_width) + 20)
         else:
             fieldname = '{}_count'.format(self.name)
-            header = remote_spec.plural_short_label
-            renderer = None
-            width = remote_spec.plural_label_width + 20
+            header = self.short_label or self.label or remote_spec.plural_short_label
+            renderer = self.renderer or None
+            width = (self.label_width or remote_spec.plural_label_width) + 20
 
         column_fields = [
             "id: '{}'".format(fieldname),
@@ -1840,7 +1884,7 @@ class ClassRelationshipSpec(object):
 
         return [
             OrderAndValue(
-                order=remote_spec.order,
+                order=self.order or remote_spec.order,
                 value='{{{}}}'.format(','.join(column_fields))),
             ]
 
@@ -1874,7 +1918,14 @@ def enableTesting():
 
             zenpack_module_name = '.'.join(self.__module__.split('.')[:-2])
             zenpack_module = importlib.import_module(zenpack_module_name)
-            zenpack_module.CFG.test_setup()
+
+            zenpackspec = getattr(zenpack_module, 'CFG', None)
+            if not zenpackspec:
+                raise NameError(
+                    "name {!r} is not defined"
+                    .format('.'.join((zenpack_module_name, 'CFG'))))
+
+            zenpackspec.test_setup()
 
 
 def ucfirst(text):
@@ -1936,9 +1987,13 @@ def relationships_from_yuml(yuml):
 
     match_line = re.compile(
         r'\[(?P<left_classname>[^\]]+)\]'
-        r'(?P<left_relationship>[^\-]*)'
+        r'(?P<left_cardinality>[\.\*\+\d]*)'
+        r'(?P<left_relname>[a-zA-Z_]*)'
+        r'\s*?'
         r'(?P<relationship_separator>[\-\.]+)'
-        r'(?P<right_relationship>[^\[]*)'
+        r'(?P<right_relname>[a-zA-Z_]*)'
+        r'\s*?'
+        r'(?P<right_cardinality>[\.\*\+\d]*)'
         r'\[(?P<right_classname>[^\]]+)\]'
         ).search
 
@@ -1952,39 +2007,40 @@ def relationships_from_yuml(yuml):
 
         left_class = match.group('left_classname')
         right_class = match.group('right_classname')
-        left_relationship = match.group('left_relationship')
-        right_relationship = match.group('right_relationship')
+        left_relname = match.group('left_relname')
+        left_cardinality = match.group('left_cardinality')
+        right_relname = match.group('right_relname')
+        right_cardinality = match.group('right_cardinality')
 
-        if '++' in left_relationship:
+        if '++' in left_cardinality:
             left_type = ToManyCont
-        elif '*' in right_relationship:
+        elif '*' in right_cardinality:
             left_type = ToMany
         else:
             left_type = ToOne
 
-        if '++' in right_relationship:
+        if '++' in right_cardinality:
             right_type = ToManyCont
-        elif '*' in left_relationship:
+        elif '*' in left_cardinality:
             right_type = ToMany
         else:
             right_type = ToOne
 
-        left_parts = left_relationship.split(' ', 1)
-        if len(left_parts) > 1:
-            left_name = left_parts[0]
-        else:
-            left_name = relname_from_classname(
+        if not left_relname:
+            left_relname = relname_from_classname(
                 right_class, plural=left_type != ToOne)
 
-        right_parts = right_relationship.split(' ', 1)
-        if len(right_parts) > 1:
-            right_name = right_parts[0]
-        else:
-            right_name = relname_from_classname(
+        if not right_relname:
+            right_relname = relname_from_classname(
                 left_class, plural=right_type != ToOne)
 
-        classes[left_class][left_name] = left_type(right_type, right_class, right_name)
-        classes[right_class][right_name] = right_type(left_type, left_class, left_name)
+        classes[left_class][left_relname] = {
+            'schema': left_type(right_type, right_class, right_relname),
+            }
+
+        classes[right_class][right_relname] = {
+            'schema': right_type(left_type, left_class, left_relname),
+            }
 
     return classes
 
@@ -2093,6 +2149,17 @@ def fix_kwargs(kwargs):
     return new_kwargs
 
 
+def update(d, u):
+    """Return dict d updated with nested data from dict u."""
+    for k, v in u.iteritems():
+        if isinstance(v, collections.Mapping):
+            r = update(d.get(k, {}), v)
+            d[k] = r
+        else:
+            d[k] = u[k]
+    return d
+
+
 def apply_defaults(dictionary, default_defaults=None):
     """Modify dictionary to put values from DEFAULTS key into other keys.
 
@@ -2187,9 +2254,10 @@ def create_class(module, schema_module, classname, bases, attributes):
     else:
         class_factory = type
 
-    schema_class = class_factory(classname, tuple(bases), attributes)
-    schema_class.__module__ = schema_module.__name__
-    setattr(schema_module, classname, schema_class)
+    if not hasattr(schema_module, classname):
+        schema_class = class_factory(classname, tuple(bases), attributes)
+        schema_class.__module__ = schema_module.__name__
+        setattr(schema_module, classname, schema_class)
 
     if isinstance(module, basestring):
         module = create_module(module)
@@ -2293,7 +2361,7 @@ if IMPACT_INSTALLED:
 
 JS_LINK_FROM_GRID = """
 Ext.apply(Zenoss.render, {
-    zenpacklib_entityLinkFromGrid: function(obj, col, record) {
+    zenpacklib_entityLinkFromGrid: function(obj, metaData, record, rowIndex, colIndex) {
         if (!obj)
             return;
 
@@ -2307,7 +2375,7 @@ Ext.apply(Zenoss.render, {
 
         if (this.refName == 'componentgrid') {
             // Zenoss >= 4.2 / ExtJS4
-            if (this.subComponentGridPanel || this.componentType != obj.meta_type)
+            if (colIndex != 1 || this.subComponentGridPanel)
                 isLink = true;
         } else {
             // Zenoss < 4.2 / ExtJS3
@@ -2323,7 +2391,10 @@ Ext.apply(Zenoss.render, {
     }
 });
 
-ZC.ZPLComponentGridPanel = Ext.extend(ZC.ComponentGridPanel, {
+Ext.define("Zenoss.component.ZPLComponentGridPanel", {
+    alias: ["widget.ZPLComponentGridPanel"],
+    extend: "Zenoss.component.ComponentGridPanel",
+
     subComponentGridPanel: false,
 
     jumpToEntity: function(uid, meta_type) {
