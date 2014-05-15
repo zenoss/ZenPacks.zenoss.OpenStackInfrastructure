@@ -16,9 +16,6 @@ PREV_ZENPACK_NAME = ""
 from setuptools import setup, find_packages
 
 import os
-os.system('echo PYTHONPATH=' + os.getcwd() + '/ZenPacks/zenoss/OpenStack/lib:$PYTHONPATH >> /home/zenoss/.bash_profile')
-os.system('echo export PYTHONPATH >> /home/zenoss/.bash_profile')
-os.system('source /home/zenoss/.bash_profile')
 
 # make build
 import subprocess
