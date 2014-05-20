@@ -48,9 +48,6 @@ build:
 	cd $(SRC_DIR)/simplejson-3.3.1 && \
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"	
-	cd $(SRC_DIR)/netaddr-0.7.11 && \
-		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
-			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"	
 	cd $(SRC_DIR)/six-1.6.1 && \
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"	
