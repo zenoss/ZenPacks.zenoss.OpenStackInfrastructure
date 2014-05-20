@@ -43,6 +43,7 @@ def add_local_lib_path():
     os.environ['PBR_VERSION'] = '1.2.3.4.5'
 
     site.addsitedir(os.path.join(os.path.dirname(__file__), 'lib'))
+    site.addsitedir(os.path.join(os.path.dirname(__file__), 'apiclients'))
 
 add_local_lib_path()
 

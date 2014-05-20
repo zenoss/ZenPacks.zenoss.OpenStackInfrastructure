@@ -12,7 +12,8 @@
 #
 ###########################################################################
 
-import pdb
+from ZenPacks.zenoss.OpenStack.utils import add_local_lib_path
+add_local_lib_path()
 
 from keystoneclient.v2_0.client import Client as keystoneclient
 from ceilometerclient.v2.client import Client as ceilometerclient
@@ -89,9 +90,6 @@ class CeilometerAPIClient(object):
     def get_meters(self):
         return [meter.to_dict() for meter in self._client.meters.list()]
 
-    def get_events(self):
-        return [event.to_dict() for event in self._client.events.list()]
-
     def get_alarms(self):
         return [alarm.to_dict() for alarm in self._client.alarms.list()]
 
@@ -100,6 +98,7 @@ class CeilometerAPIClient(object):
 
     def get_samples(self):
         return [sample.to_dict() for sample in self._client.samples.list()]
+
 
 #       query1 = [
 #           {'field':'metadata.event_type',
