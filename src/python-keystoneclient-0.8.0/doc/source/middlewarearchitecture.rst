@@ -121,27 +121,6 @@ a WSGI component. Example for the auth_token middleware::
 
     [filter:authtoken]
     paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
-<<<<<<< HEAD
-    auth_host = 127.0.0.1
-    auth_port = 35357
-    auth_protocol = http
-    admin_token = Super999Sekret888Password777
-    admin_user = admin
-    admin_password = SuperSekretPassword
-    admin_tenant_name = service
-    ;Uncomment next line to use Swift MemcacheRing
-    ;cache = swift.cache
-    ;Uncomment next line and check ip:port to use memcached to cache tokens
-    ;memcached_servers = 127.0.0.1:11211
-    ;Uncomment next 2 lines to turn on memcache protection
-    ;memcache_security_strategy = ENCRYPT
-    ;memcache_secret_key = change_me
-    ;Uncomment next 2 lines if Keystone server is validating client cert
-    ;certfile = <path to middleware public cert>
-    ;keyfile = <path to middleware private cert>
-    ;Uncomment next line to opt-out of service catalog
-    ;include_service_catalog = False
-=======
 
     # Prefix to prepend at the beginning of the path (string
     # value)
@@ -260,7 +239,6 @@ a WSGI component. Example for the auth_token middleware::
     # binding method that must be present in tokens. (string
     # value)
     #enforce_token_bind=permissive
->>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
 For services which have a separate paste-deploy ini file, auth_token middleware
 can be alternatively configured in [keystone_authtoken] section in the main
@@ -283,10 +261,7 @@ and set in nova.conf::
     admin_user = admin
     admin_password = SuperSekretPassword
     admin_tenant_name = service
-<<<<<<< HEAD
-=======
     # Any of the options that could be set in api-paste.ini can be set here.
->>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
 Note that middleware parameters in paste config take priority, they must be
 removed to use values in [keystone_authtoken] section.

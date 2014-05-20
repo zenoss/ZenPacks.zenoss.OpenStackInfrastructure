@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-import six
-=======
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -17,5 +14,4 @@ import six
 import six
 
 
->>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 six.add_move(six.MovedModule('mox', 'mox', 'mox3.mox'))

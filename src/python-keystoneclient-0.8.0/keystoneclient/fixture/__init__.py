@@ -23,11 +23,6 @@ testing.
 
 from keystoneclient.fixture.exception import FixtureValidationError  # noqa
 from keystoneclient.fixture.v2 import Token as V2Token  # noqa
-<<<<<<< HEAD
-
-__all__ = ['V2Token', 'FixtureValidationError']
-=======
 from keystoneclient.fixture.v3 import Token as V3Token  # noqa
 
 __all__ = ['V2Token', 'V3Token', 'FixtureValidationError']
->>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15

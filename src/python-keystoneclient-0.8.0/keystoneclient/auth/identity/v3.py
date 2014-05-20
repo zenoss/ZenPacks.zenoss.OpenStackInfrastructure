@@ -108,10 +108,6 @@ class Auth(base.BaseIdentityPlugin):
 
         resp = session.post(self.token_url, json=body, headers=headers,
                             authenticated=False)
-<<<<<<< HEAD
-        return access.AccessInfoV3(resp.headers['X-Subject-Token'],
-                                   **resp.json()['token'])
-=======
 
         try:
             resp_data = resp.json()['token']
@@ -120,7 +116,6 @@ class Auth(base.BaseIdentityPlugin):
 
         return access.AccessInfoV3(resp.headers['X-Subject-Token'],
                                    **resp_data)
->>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
     @staticmethod
     def _factory(auth_url, **kwargs):
@@ -254,11 +249,7 @@ class TokenMethod(AuthMethod):
     _method_parameters = ['token']
 
     def __init__(self, **kwargs):
-<<<<<<< HEAD
-        """Construct a Auth plugin to fetch a token from a token.
-=======
         """Construct an Auth plugin to fetch a token from a token.
->>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
         :param string token: Token for authentication.
         """

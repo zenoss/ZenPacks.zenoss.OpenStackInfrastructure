@@ -21,15 +21,9 @@ from keystoneclient.tests.v3 import utils
 TOKEN_RESPONSE = utils.TestResponse({
     "headers": client_fixtures.AUTH_RESPONSE_HEADERS
 })
-<<<<<<< HEAD
-UNSCOPED_TOKEN = client_fixtures.UNSCOPED_TOKEN
-DOMAIN_SCOPED_TOKEN = client_fixtures.DOMAIN_SCOPED_TOKEN
-PROJECT_SCOPED_TOKEN = client_fixtures.PROJECT_SCOPED_TOKEN
-=======
 UNSCOPED_TOKEN = client_fixtures.unscoped_token()
 DOMAIN_SCOPED_TOKEN = client_fixtures.domain_scoped_token()
 PROJECT_SCOPED_TOKEN = client_fixtures.project_scoped_token()
->>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
 
 class AccessInfoTest(utils.TestCase):
@@ -39,12 +33,7 @@ class AccessInfoTest(utils.TestCase):
 
         self.assertTrue(auth_ref)
         self.assertIn('methods', auth_ref)
-<<<<<<< HEAD
-        self.assertIn('catalog', auth_ref)
-        self.assertFalse(auth_ref['catalog'])
-=======
         self.assertNotIn('catalog', auth_ref)
->>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
         self.assertEqual(auth_ref.auth_token,
                          '3e2813b7ba0b4006840c3825860b86ed')

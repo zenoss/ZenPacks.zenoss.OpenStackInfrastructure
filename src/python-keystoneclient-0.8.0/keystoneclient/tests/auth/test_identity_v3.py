@@ -366,8 +366,6 @@ class V3IdentityPlugin(utils.TestCase):
                      endpoint_filter={'service_type': 'compute'})
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.text, 'SUCCESS')
-<<<<<<< HEAD
-=======
 
     @httpretty.activate
     def test_invalid_auth_response_dict(self):
@@ -390,4 +388,3 @@ class V3IdentityPlugin(utils.TestCase):
 
         self.assertRaises(exceptions.InvalidResponse, s.get, 'http://any',
                           authenticated=True)
->>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
