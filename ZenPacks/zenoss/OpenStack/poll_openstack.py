@@ -198,7 +198,6 @@ class OpenStackPoller(object):
         for name in meternames:
             data['statistics'][name] = ceiloclient.get_statistics(name)
         data['meters-list'] = ceiloclient.get_meters()
-        data['events-list'] = ceiloclient.get_events()
         data['alarms-list'] = ceiloclient.get_alarms()
         data['resources-list'] = ceiloclient.get_resources()
         data['samples-list'] = ceiloclient.get_samples()
