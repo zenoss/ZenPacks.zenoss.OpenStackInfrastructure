@@ -61,7 +61,11 @@ def split_path(path, minsegs=1, maxsegs=None, rest_with_last=False):
     :param rest_with_last: If True, trailing data will be returned as part
                            of last segment.  If False, and there is
                            trailing data, raises ValueError.
+<<<<<<< HEAD
+    :returns: list of segments with a length of maxsegs (non-existant
+=======
     :returns: list of segments with a length of maxsegs (non-existent
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
               segments will return as None)
     :raises: ValueError if given an invalid path
     """
@@ -183,7 +187,11 @@ class S3Token(object):
         token = req.headers.get('X-Auth-Token',
                                 req.headers.get('X-Storage-Token'))
         if not token:
+<<<<<<< HEAD
+            msg = 'You did not specify a auth or a storage token. skipping.'
+=======
             msg = 'You did not specify an auth or a storage token. skipping.'
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
             self.logger.debug(msg)
             return self.app(environ, start_response)
 

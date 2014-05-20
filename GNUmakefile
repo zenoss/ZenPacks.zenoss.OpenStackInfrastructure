@@ -71,6 +71,13 @@ build:
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
 
+	# convince keystoneclient not to try to download any dependencies. We have already taken
+	# care of them above.
+	cp /dev/null $(SRC_DIR)/python-keystoneclient-0.8.0/requirements.txt
+	cd $(SRC_DIR)/python-keystoneclient-0.8.0 && \
+		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
+			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
+
 clean:
 	rm -rf build dist *.egg-info
 	cd $(NOVACLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)

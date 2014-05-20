@@ -30,7 +30,11 @@ class ServiceCatalog(object):
 
     @classmethod
     def factory(cls, resource_dict, token=None, region_name=None):
+<<<<<<< HEAD
+        """Create ServiceCatalog object given a auth token."""
+=======
         """Create ServiceCatalog object given an auth token."""
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
         if ServiceCatalogV3.is_valid(resource_dict):
             return ServiceCatalogV3(token, resource_dict, region_name)
         elif ServiceCatalogV2.is_valid(resource_dict):
@@ -205,7 +209,11 @@ class ServiceCatalog(object):
         :param string endpoint_type: Type of endpoint.
         :param string region_name: Region of the endpoint.
         :param string service_name: The assigned name of the service.
+<<<<<<< HEAD
+        :
+=======
 
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
         """
         if not self.get_data():
             raise exceptions.EmptyCatalog('The service catalog is empty.')

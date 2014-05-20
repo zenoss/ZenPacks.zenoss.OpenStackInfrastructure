@@ -221,7 +221,11 @@ opts = [
                default=None,
                help='Complete admin Identity API endpoint. This should '
                     'specify the unversioned root endpoint '
+<<<<<<< HEAD
+                    'eg. https://localhost:35357/'),
+=======
                     'e.g. https://localhost:35357/'),
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
     cfg.StrOpt('auth_version',
                default=None,
                help='API version of the admin Identity API endpoint'),
@@ -240,12 +244,18 @@ opts = [
                ' communicating with Identity API Server.'),
     cfg.StrOpt('admin_token',
                secret=True,
+<<<<<<< HEAD
+               help='Single shared secret with the Keystone configuration'
+               ' used for bootstrapping a Keystone installation, or otherwise'
+               ' bypassing the normal authentication process.'),
+=======
                help='This option is deprecated and may be removed in a future'
                ' release. Single shared secret with the Keystone configuration'
                ' used for bootstrapping a Keystone installation, or otherwise'
                ' bypassing the normal authentication process. This option'
                ' should not be used, use `admin_user` and `admin_password`'
                ' instead.'),
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
     cfg.StrOpt('admin_user',
                help='Keystone account username'),
     cfg.StrOpt('admin_password',
@@ -280,7 +290,11 @@ opts = [
                ' configurable duration (in seconds). Set to -1 to disable'
                ' caching completely.'),
     cfg.IntOpt('revocation_cache_time',
+<<<<<<< HEAD
+               default=300,
+=======
                default=10,
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
                help='Determines the frequency at which the list of revoked'
                ' tokens is retrieved from the Identity service (in seconds). A'
                ' high number of revocation events combined with a low cache'
@@ -315,10 +329,13 @@ opts = [
                ' unknown the token will be rejected. "required" any form of'
                ' token binding is needed to be allowed. Finally the name of a'
                ' binding method that must be present in tokens.'),
+<<<<<<< HEAD
+=======
     cfg.BoolOpt('check_revocations_for_cached', default=False,
                 help='If true, the revocation list will be checked for cached'
                 ' tokens. This requires that PKI tokens are configured on the'
                 ' Keystone server.'),
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 ]
 
 CONF = cfg.CONF
@@ -427,9 +444,14 @@ class AuthProtocol(object):
         # are backwards. We need to do it this way so that we can handle the
         # same deprecation strategy for CONF and the conf variable.
         if not self.identity_uri:
+<<<<<<< HEAD
+            self.LOG.warning("Configuring admin URI using auth fragments. "
+                             "This is deprecated, use 'identity_uri' instead.")
+=======
             self.LOG.warning('Configuring admin URI using auth fragments. '
                              'This is deprecated, use \'identity_uri\''
                              ' instead.')
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
             auth_host = self._conf_get('auth_host')
             auth_port = int(self._conf_get('auth_port'))
@@ -487,12 +509,15 @@ class AuthProtocol(object):
         # Credentials used to verify this component with the Auth service since
         # validating tokens is a privileged call
         self.admin_token = self._conf_get('admin_token')
+<<<<<<< HEAD
+=======
         if self.admin_token:
             self.LOG.warning(
                 "The admin_token option in the auth_token middleware is "
                 "deprecated and should not be used. The admin_user and "
                 "admin_password options should be used instead. The "
                 "admin_token option may be removed in a future release.")
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
         self.admin_token_expiry = None
         self.admin_user = self._conf_get('admin_user')
         self.admin_password = self._conf_get('admin_password')
@@ -526,9 +551,12 @@ class AuthProtocol(object):
         self.include_service_catalog = self._conf_get(
             'include_service_catalog')
 
+<<<<<<< HEAD
+=======
         self.check_revocations_for_cached = self._conf_get(
             'check_revocations_for_cached')
 
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
     def _assert_valid_memcache_protection_config(self):
         if self._memcache_security_strategy:
             if self._memcache_security_strategy not in ('MAC', 'ENCRYPT'):
@@ -589,8 +617,13 @@ class AuthProtocol(object):
         versions = []
         response, data = self._json_request('GET', '/')
         if response.status_code == 501:
+<<<<<<< HEAD
+            self.LOG.warning("Old keystone installation found...assuming v2.0")
+            versions.append("v2.0")
+=======
             self.LOG.warning('Old keystone installation found...assuming v2.0')
             versions.append('v2.0')
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
         elif response.status_code != 300:
             self.LOG.error('Unable to get version info from keystone: %s',
                            response.status_code)
@@ -692,9 +725,15 @@ class AuthProtocol(object):
             return token
         else:
             if not self.delay_auth_decision:
+<<<<<<< HEAD
+                self.LOG.warn("Unable to find authentication token"
+                              " in headers")
+                self.LOG.debug("Headers: %s", env)
+=======
                 self.LOG.warn('Unable to find authentication token'
                               ' in headers')
                 self.LOG.debug('Headers: %s', env)
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
             raise InvalidUserToken('Unable to find token in headers')
 
     def _reject_request(self, env, start_response):
@@ -740,7 +779,11 @@ class AuthProtocol(object):
         :raise ServerError when unable to communicate with keystone
 
         """
+<<<<<<< HEAD
+        url = "%s/%s" % (self.identity_uri, path.lstrip('/'))
+=======
         url = '%s/%s' % (self.identity_uri, path.lstrip('/'))
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
         kwargs.setdefault('timeout', self.http_connect_timeout)
         if self.cert_file and self.key_file:
@@ -839,16 +882,28 @@ class AuthProtocol(object):
             return (token, timeutils.normalize_time(datetime_expiry))
         except (AssertionError, KeyError):
             self.LOG.warn(
+<<<<<<< HEAD
+                "Unexpected response from keystone service: %s", data)
+=======
                 'Unexpected response from keystone service: %s', data)
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
             raise ServiceError('invalid json response')
         except (ValueError):
             data['access']['token']['id'] = '<SANITIZED>'
             self.LOG.warn(
+<<<<<<< HEAD
+                "Unable to parse expiration time from token: %s", data)
+            raise ServiceError('invalid json response')
+
+    def _validate_user_token(self, user_token, env, retry=True):
+        """Authenticate user using PKI
+=======
                 'Unable to parse expiration time from token: %s', data)
             raise ServiceError('invalid json response')
 
     def _validate_user_token(self, user_token, env, retry=True):
         """Authenticate user token
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
         :param user_token: user's token id
         :param retry: Ignored, as it is not longer relevant
@@ -863,6 +918,10 @@ class AuthProtocol(object):
             token_id = cms.cms_hash_token(user_token)
             cached = self._cache_get(token_id)
             if cached:
+<<<<<<< HEAD
+                return cached
+            if cms.is_asn1_token(user_token):
+=======
                 data = cached
 
                 if self.check_revocations_for_cached:
@@ -877,6 +936,7 @@ class AuthProtocol(object):
                             'Token authorization failed')
 
             elif cms.is_asn1_token(user_token):
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
                 verified = self.verify_signed_token(user_token)
                 data = jsonutils.loads(verified)
             else:
@@ -887,13 +947,21 @@ class AuthProtocol(object):
             return data
         except NetworkError:
             self.LOG.debug('Token validation failure.', exc_info=True)
+<<<<<<< HEAD
+            self.LOG.warn("Authorization failed for token")
+=======
             self.LOG.warn('Authorization failed for token')
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
             raise InvalidUserToken('Token authorization failed')
         except Exception:
             self.LOG.debug('Token validation failure.', exc_info=True)
             if token_id:
                 self._cache_store_invalid(token_id)
+<<<<<<< HEAD
+            self.LOG.warn("Authorization failed for token")
+=======
             self.LOG.warn('Authorization failed for token')
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
             raise InvalidUserToken('Token authorization failed')
 
     def _build_user_headers(self, token_info):
@@ -907,7 +975,11 @@ class AuthProtocol(object):
 
         """
         auth_ref = access.AccessInfo.factory(body=token_info)
+<<<<<<< HEAD
+        roles = ",".join(auth_ref.role_names)
+=======
         roles = ','.join(auth_ref.role_names)
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
         if _token_is_v2(token_info) and not auth_ref.project_id:
             raise InvalidUserToken('Unable to determine tenancy.')
@@ -933,8 +1005,13 @@ class AuthProtocol(object):
             'X-Role': roles,
         }
 
+<<<<<<< HEAD
+        self.LOG.debug("Received request from user: %s with project_id : %s"
+                       " and roles: %s ",
+=======
         self.LOG.debug('Received request from user: %s with project_id : %s'
                        ' and roles: %s ',
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
                        auth_ref.user_id, auth_ref.project_id, roles)
 
         if self.include_service_catalog and auth_ref.has_service_catalog():
@@ -1099,7 +1176,11 @@ class AuthProtocol(object):
                 # no bind provided and none required
                 return
             else:
+<<<<<<< HEAD
+                self.LOG.info("No bind information present in token.")
+=======
                 self.LOG.info('No bind information present in token.')
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
                 self._invalid_user_token()
 
         # get the named mode if bind_mode is not one of the predefined
@@ -1109,12 +1190,32 @@ class AuthProtocol(object):
             name = bind_mode
 
         if name and name not in bind:
+<<<<<<< HEAD
+            self.LOG.info("Named bind mode %s not in bind information", name)
+=======
             self.LOG.info('Named bind mode %s not in bind information', name)
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
             self._invalid_user_token()
 
         for bind_type, identifier in six.iteritems(bind):
             if bind_type == BIND_MODE.KERBEROS:
                 if not env.get('AUTH_TYPE', '').lower() == 'negotiate':
+<<<<<<< HEAD
+                    self.LOG.info("Kerberos credentials required and "
+                                  "not present.")
+                    self._invalid_user_token()
+
+                if not env.get('REMOTE_USER') == identifier:
+                    self.LOG.info("Kerberos credentials do not match "
+                                  "those in bind.")
+                    self._invalid_user_token()
+
+                self.LOG.debug("Kerberos bind authentication successful.")
+
+            elif bind_mode == BIND_MODE.PERMISSIVE:
+                self.LOG.debug("Ignoring Unknown bind for permissive mode: "
+                               "%(bind_type)s: %(identifier)s.",
+=======
                     self.LOG.info('Kerberos credentials required and '
                                   'not present.')
                     self._invalid_user_token()
@@ -1129,12 +1230,18 @@ class AuthProtocol(object):
             elif bind_mode == BIND_MODE.PERMISSIVE:
                 self.LOG.debug('Ignoring Unknown bind for permissive mode: '
                                '%(bind_type)s: %(identifier)s.',
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
                                {'bind_type': bind_type,
                                 'identifier': identifier})
 
             else:
+<<<<<<< HEAD
+                self.LOG.info("Couldn't verify unknown bind: %(bind_type)s: "
+                              "%(identifier)s.",
+=======
                 self.LOG.info('Couldn`t verify unknown bind: %(bind_type)s: '
                               '%(identifier)s.',
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
                               {'bind_type': bind_type,
                                'identifier': identifier})
                 self._invalid_user_token()
@@ -1191,7 +1298,11 @@ class AuthProtocol(object):
         if response.status_code == 200:
             return data
         if response.status_code == 404:
+<<<<<<< HEAD
+            self.LOG.warn("Authorization failed for token")
+=======
             self.LOG.warn('Authorization failed for token')
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
             raise InvalidUserToken('Token authorization failed')
         if response.status_code == 401:
             self.LOG.info(
@@ -1204,12 +1315,31 @@ class AuthProtocol(object):
             self.LOG.info('Retrying validation')
             return self.verify_uuid_token(user_token, False)
         else:
+<<<<<<< HEAD
+            self.LOG.warn("Invalid user token. Keystone response: %s", data)
+=======
             self.LOG.warn('Invalid user token. Keystone response: %s', data)
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
             raise InvalidUserToken()
 
     def is_signed_token_revoked(self, signed_text):
         """Indicate whether the token appears in the revocation list."""
+<<<<<<< HEAD
+        revocation_list = self.token_revocation_list
+        revoked_tokens = revocation_list.get('revoked', [])
+        if not revoked_tokens:
+            return
+        revoked_ids = (x['id'] for x in revoked_tokens)
+        if isinstance(signed_text, six.text_type):
+            signed_text = signed_text.encode('utf-8')
+        token_id = utils.hash_signed_token(signed_text)
+        for revoked_id in revoked_ids:
+            if token_id == revoked_id:
+                self.LOG.debug('Token is marked as having been revoked')
+                return True
+        return False
+=======
         if isinstance(signed_text, six.text_type):
             signed_text = signed_text.encode('utf-8')
         token_id = utils.hash_signed_token(signed_text)
@@ -1227,6 +1357,7 @@ class AuthProtocol(object):
 
         revoked_ids = (x['id'] for x in revoked_tokens)
         return token_id in revoked_ids
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
     def cms_verify(self, data):
         """Verifies the signature of the provided data's IAW CMS syntax.
@@ -1236,9 +1367,14 @@ class AuthProtocol(object):
         """
         def verify():
             try:
+<<<<<<< HEAD
+                return cms.cms_verify(data, self.signing_cert_file_name,
+                                      self.signing_ca_file_name)
+=======
                 return cms.cms_verify(
                     data, self.signing_cert_file_name,
                     self.signing_ca_file_name).decode('utf-8')
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
             except cms.subprocess.CalledProcessError as err:
                 self.LOG.warning('Verify error: %s', err)
                 raise

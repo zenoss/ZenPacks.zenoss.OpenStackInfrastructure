@@ -330,7 +330,10 @@ class Examples(fixtures.Fixture):
                 'access': {
                     'token': {
                         'id': self.SIGNED_TOKEN_SCOPED_KEY,
+<<<<<<< HEAD
+=======
                         'expires': '2020-01-01T00:00:10.000123Z',
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
                     },
                     'user': {
                         'id': 'user_id1',
@@ -348,7 +351,10 @@ class Examples(fixtures.Fixture):
                 'access': {
                     'token': {
                         'id': self.SIGNED_TOKEN_UNSCOPED_KEY,
+<<<<<<< HEAD
+=======
                         'expires': '2020-01-01T00:00:10.000123Z',
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
                     },
                     'user': {
                         'id': 'user_id1',
@@ -362,7 +368,11 @@ class Examples(fixtures.Fixture):
             },
             self.SIGNED_v3_TOKEN_SCOPED_KEY: {
                 'token': {
+<<<<<<< HEAD
+                    'expires': '2020-01-01T00:00:10.000123Z',
+=======
                     'expires_at': '2020-01-01T00:00:10.000123Z',
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
                     'methods': ['password'],
                     'user': {
                         'id': 'user_id1',

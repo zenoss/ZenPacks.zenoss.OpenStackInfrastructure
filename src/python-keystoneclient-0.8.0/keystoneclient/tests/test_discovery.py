@@ -14,7 +14,10 @@ import httpretty
 import six
 from testtools import matchers
 
+<<<<<<< HEAD
+=======
 from keystoneclient import _discover
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 from keystoneclient import client
 from keystoneclient import discover
 from keystoneclient import exceptions
@@ -465,7 +468,16 @@ class ClientDiscoveryTests(utils.TestCase):
         self.assertDiscoveryFailure(auth_url=BASE_URL)
 
     def test_discovery_ignore_invalid(self):
+<<<<<<< HEAD
+        resp = [{'id': '3.99',  # without a leading v
+                 'links': [{'href': V3_URL, 'rel': 'self'}],
+                 'media-types': V3_MEDIA_TYPES,
+                 'status': 'stable',
+                 'updated': UPDATED},
+                {'id': 'v3.0',
+=======
         resp = [{'id': 'v3.0',
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
                  'links': [1, 2, 3, 4],  # invalid links
                  'media-types': V3_MEDIA_TYPES,
                  'status': 'stable',
@@ -542,6 +554,8 @@ class ClientDiscoveryTests(utils.TestCase):
         self.assertEqual(client.username, 'foo')
         self.assertEqual(client.password, 'bar')
 
+<<<<<<< HEAD
+=======
     def test_available_versions(self):
         httpretty.register_uri(httpretty.GET, BASE_URL, status=300,
                                body=V3_VERSION_ENTRY)
@@ -763,16 +777,25 @@ class DiscoverQueryTests(utils.TestCase):
         versions = disc.version_data()
         self.assertEqual(1, len(versions))
 
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
 
 class DiscoverUtils(utils.TestCase):
 
     def test_version_number(self):
         def assertVersion(inp, out):
+<<<<<<< HEAD
+            self.assertEqual(discover._normalize_version_number(inp), out)
+
+        def versionRaises(inp):
+            self.assertRaises(TypeError,
+                              discover._normalize_version_number,
+=======
             self.assertEqual(out, _discover.normalize_version_number(inp))
 
         def versionRaises(inp):
             self.assertRaises(TypeError,
                               _discover.normalize_version_number,
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
                               inp)
 
         assertVersion('v1.2', (1, 2))
@@ -787,4 +810,28 @@ class DiscoverUtils(utils.TestCase):
 
         versionRaises('hello')
         versionRaises('1.a')
+<<<<<<< HEAD
+        versionRaises('vaccuum')
+
+    def test_keystone_version_objects(self):
+        v31s = discover._KeystoneVersion((3, 1), 'stable')
+        v20s = discover._KeystoneVersion((2, 0), 'stable')
+        v30s = discover._KeystoneVersion((3, 0), 'stable')
+
+        v31a = discover._KeystoneVersion((3, 1), 'alpha')
+        v31b = discover._KeystoneVersion((3, 1), 'beta')
+
+        self.assertTrue(v31s > v30s)
+        self.assertTrue(v30s > v20s)
+
+        self.assertTrue(v31s > v31a)
+        self.assertFalse(v31s < v31a)
+        self.assertTrue(v31b > v31a)
+        self.assertTrue(v31a < v31b)
+        self.assertTrue(v31b > v30s)
+
+        self.assertNotEqual(v31s, v31b)
+        self.assertEqual(v31s, discover._KeystoneVersion((3, 1), 'stable'))
+=======
         versionRaises('vacuum')
+>>>>>>> 77d63f4a7a5aeaf331e82ab5c713c86b5ddbee15
