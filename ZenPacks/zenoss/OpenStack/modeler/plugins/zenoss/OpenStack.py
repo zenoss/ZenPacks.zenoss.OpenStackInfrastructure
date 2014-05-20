@@ -74,25 +74,6 @@ class OpenStack(PythonPlugin):
         log.info('Requesting hypervisors')
         results['hypervisors'] = client.hypervisors.search('%', servers=True)
 
-        # Ceilometer
-        ceiloclient = CeilometerAPIClient(
-            username=device.zCommandUsername,
-            api_key=device.zCommandPassword,
-            project_id=device.zOpenStackProjectId,
-            auth_url=device.zOpenStackAuthUrl,
-            api_version=device.zOpenstackComputeApiVersion,
-            region_name=region_name
-        )
-
-        results['statistics'] = {}
-        meternames = ceiloclient.get_meternames()
-        for name in meternames:
-            results['statistics'][name] = ceiloclient.get_statistics(name)
-        results['meters-list'] = ceiloclient.get_meters()
-        results['alarms-list'] = ceiloclient.get_alarms()
-        results['resources-list'] = ceiloclient.get_resources()
-        results['samples-list'] = ceiloclient.get_samples()
-
         return results
 
     def process(self, devices, results, unused):
