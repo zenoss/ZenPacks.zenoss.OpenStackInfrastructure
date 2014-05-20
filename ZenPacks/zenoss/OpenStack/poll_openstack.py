@@ -25,12 +25,12 @@ from novaclient import client as novaclient
 from apiclients.ceilometerapiclient import CeilometerAPIClient
 
 class OpenStackPoller(object):
-    def __init__(self, username, api_key, project_id, auth_url, api_version, region_name):
+    def __init__(self, username, api_key, project_id, auth_url, region_name):
         self._username = username
         self._api_key = api_key
         self._project_id = project_id
         self._auth_url = auth_url
-        self._api_version = api_version
+        self._api_version = 2
         self._region_name = region_name
 
     def _populateImageData(self, client, data):
@@ -230,7 +230,7 @@ class OpenStackPoller(object):
 if __name__ == '__main__':
     username = api_key = project_id = auth_url = region_name = None
     try:
-        username, api_key, project_id, auth_url, api_version, region_name = sys.argv[1:7]
+        username, api_key, project_id, auth_url, region_name = sys.argv[1:7]
     except ValueError:
         print >> sys.stderr, (
             "Usage: %s <username> <api_key> <project_id> <auth_url> "
@@ -240,6 +240,6 @@ if __name__ == '__main__':
         sys.exit(1)
 
     poller = OpenStackPoller(
-        username, api_key, project_id, auth_url, api_version, region_name)
+        username, api_key, project_id, auth_url, region_name)
 
     poller.printJSON()

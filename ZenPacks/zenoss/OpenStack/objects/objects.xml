@@ -46,7 +46,7 @@ True
 4
 </property>
 <property type="string" id="commandTemplate" mode="w" >
-poll_openstack.py '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}' '${here/zOpenStackAuthUrl}' '${here/zOpenstackComputeApiVersion}' '${here/zOpenStackRegionName}'
+poll_openstack.py '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}' '${here/zOpenStackAuthUrl}' '${here/zOpenStackRegionName}'
 </property>
 <property type="int" id="cycletime" mode="w" >
 300

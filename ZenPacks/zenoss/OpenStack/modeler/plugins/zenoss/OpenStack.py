@@ -32,8 +32,7 @@ class OpenStack(PythonPlugin):
         'zCommandPassword',
         'zOpenStackProjectId',
         'zOpenStackAuthUrl',
-        'zOpenStackRegionName',
-        'zOpenstackComputeApiVersion'
+        'zOpenStackRegionName'
     )
 
     def collect(self, device, unused):
@@ -48,7 +47,7 @@ class OpenStack(PythonPlugin):
             http_log_debug = False
 
         client = novaclient.Client(
-            device.zOpenstackComputeApiVersion,
+            2,  # API version 2
             device.zCommandUsername,
             device.zCommandPassword,
             device.zOpenStackProjectId,

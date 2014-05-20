@@ -44,7 +44,6 @@ CFG = zenpacklib.ZenPackSpec(
         'DEFAULTS': {'category': 'OpenStack', 
                      'type': 'string'},
 
-        'zOpenstackComputeApiVersion': { },
         'zOpenStackInsecure':          { 'type': 'boolean', 'default': False },
         'zOpenStackProjectId':         { },
         'zOpenStackAuthUrl':           { },

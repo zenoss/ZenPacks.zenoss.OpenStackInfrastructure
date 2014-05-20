@@ -29,7 +29,7 @@ OPENSTACK_DEVICE_PATH = "/Devices/OpenStack"
 
 
 class IOpenStackFacade(IFacade):
-    def addOpenStack(self, username, api_key, project_id, auth_url, api_version, 
+    def addOpenStack(self, username, api_key, project_id, auth_url,
                      region_name=None, collector='localhost'):
         """Add OpenStack Endpoint."""
 
@@ -37,7 +37,7 @@ class IOpenStackFacade(IFacade):
 class OpenStackFacade(ZuulFacade):
     implements(IOpenStackFacade)
 
-    def addOpenStack(self, username, api_key, project_id, auth_url, api_version, 
+    def addOpenStack(self, username, api_key, project_id, auth_url, 
                      region_name=None, collector='localhost'):
         """Add a new OpenStack endpoint to the system."""
         parsed_url = urlparse(auth_url)
@@ -58,7 +58,6 @@ class OpenStackFacade(ZuulFacade):
             'zCommandPassword': api_key,
             'zOpenStackProjectId': project_id,
             'zOpenStackAuthUrl': auth_url,
-            'zOpenstackComputeApiVersion': api_version,
             'zOpenStackRegionName': region_name or '',
             }
 
@@ -78,12 +77,12 @@ class OpenStackRouter(DirectRouter):
     def _getFacade(self):
         return Zuul.getFacade('openstack', self.context)
 
-    def addOpenStack(self, username, api_key, project_id, auth_url, api_version,
+    def addOpenStack(self, username, api_key, project_id, auth_url,
                      region_name=None, collector='localhost'):
 
         facade = self._getFacade()
         success, message = facade.addOpenStack(
-            username, api_key, project_id, auth_url, api_version,
+            username, api_key, project_id, auth_url,
             region_name=region_name, collector=collector)
 
         if success:

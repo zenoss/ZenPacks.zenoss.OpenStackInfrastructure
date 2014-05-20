@@ -82,29 +82,6 @@ var addOpenStack = new Zenoss.Action({
                 }, {
                     xtype: 'container',
                     layout: 'hbox',
-                    items: [{
-                        xtype: 'combo',
-                        width: 260,
-                        name: 'api_version',
-                        fieldLabel: _t('Compute API Version'),
-                        id: "openstack_api_version",
-                        mode: 'local',
-                        store: [['1.1', '1.1'], ['2', '2'], ['3', '3']],
-                        value: '2',
-                        forceSelection: true,
-                        editable: false,
-                        allowBlank: false,
-                        triggerAction: 'all',
-                        selectOnFocus: false,
-                    },{
-                        xtype: 'label',
-                        style: 'font-style: italic',                        
-                        text: '(NOVA_VERSION)',
-                        margin: '0 0 0 10'
-                    }]
-                }, {
-                    xtype: 'container',
-                    layout: 'hbox',
                     items: [{                    
                         xtype: 'textfield',
                         name: 'region_name',
