@@ -24,6 +24,8 @@ from Products.Zuul.facades import ZuulFacade
 from Products.Zuul.interfaces import IFacade
 from Products.Zuul.utils import ZuulMessageFactory as _t
 
+from ZenPacks.zenoss.OpenStack.utils import add_local_lib_path
+add_local_lib_path()
 
 OPENSTACK_DEVICE_PATH = "/Devices/OpenStack"
 
@@ -38,7 +40,7 @@ class OpenStackFacade(ZuulFacade):
     implements(IOpenStackFacade)
 
     def addOpenStack(self, username, api_key, project_id, auth_url, 
-                     region_name=None, collector='localhost'):
+                     region_name, collector='localhost'):
         """Add a new OpenStack endpoint to the system."""
         parsed_url = urlparse(auth_url)
 
@@ -58,7 +60,7 @@ class OpenStackFacade(ZuulFacade):
             'zCommandPassword': api_key,
             'zOpenStackProjectId': project_id,
             'zOpenStackAuthUrl': auth_url,
-            'zOpenStackRegionName': region_name or '',
+            'zOpenStackRegionName': region_name
             }
 
 
@@ -72,13 +74,31 @@ class OpenStackFacade(ZuulFacade):
 
         return True, jobStatus.id
 
+    def getRegions(self, username, api_key, project_id, auth_url):
+        from keystoneclient.v2_0.client import Client as keystoneclient
+
+        client = keystoneclient(
+            username=username,
+            password=api_key,
+            tenant_name=project_id,
+            auth_url=auth_url,
+        )
+
+        regions = set()
+        endpoints = client.service_catalog.get_endpoints()
+        for (service, service_endpoints) in endpoints.iteritems():
+            for endpoint in service_endpoints:
+                regions.add(endpoint['region'])
+
+        return [{'key': c, 'label': c} for c in sorted(regions)]
+
 
 class OpenStackRouter(DirectRouter):
     def _getFacade(self):
         return Zuul.getFacade('openstack', self.context)
 
     def addOpenStack(self, username, api_key, project_id, auth_url,
-                     region_name=None, collector='localhost'):
+                     region_name, collector='localhost'):
 
         facade = self._getFacade()
         success, message = facade.addOpenStack(
@@ -89,3 +109,9 @@ class OpenStackRouter(DirectRouter):
             return DirectResponse.succeed(jobId=message)
         else:
             return DirectResponse.fail(message)
+
+    def getRegions(self, username, api_key, project_id, auth_url):
+        facade = self._getFacade()
+
+        data = facade.getRegions(username, api_key, project_id, auth_url)
+        return DirectResponse(success=True, data=data)

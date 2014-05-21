@@ -5,11 +5,21 @@ var addOpenStack = new Zenoss.Action({
     id: 'addopenstack-item',
     permission: 'Manage DMD',
     handler: function(btn, e){
+        // store for the region dropdown
+        regionStore = new Zenoss.NonPaginatedStore({
+            fields: ['key', 'label'],
+            root: 'data',            
+            directFn: Zenoss.remote.OpenStackRouter.getRegions,
+            remoteFilter: false,
+            autoload: false
+        });
+
         var win = new Zenoss.dialog.CloseDialog({
             width: 450,
             title: _t('Add OpenStack'),
             items: [{
                 xtype: 'form',
+                id: 'addopenstack-form',
                 buttonAlign: 'left',
                 monitorValid: true,
                 labelAlign: 'top',
@@ -24,7 +34,11 @@ var addOpenStack = new Zenoss.Action({
                         fieldLabel: _t('Username'),
                         id: "openstack_username",
                         width: 260,
-                        allowBlank: false   
+                        allowBlank: false,
+                        listeners: {
+                            blur: this.updateRegions,
+                            scope: this
+                        }                         
                     },{
                         xtype: 'label',
                         style: 'font-style: italic',
@@ -40,7 +54,11 @@ var addOpenStack = new Zenoss.Action({
                         fieldLabel: _t('API Key'),
                         id: "openstack_api_key",
                         width: 260,
-                        allowBlank: false
+                        allowBlank: false,
+                        listeners: {
+                            blur: this.updateRegions,
+                            scope: this
+                        }                        
                     },{
                         xtype: 'label',
                         style: 'font-style: italic',                        
@@ -56,7 +74,11 @@ var addOpenStack = new Zenoss.Action({
                         fieldLabel: _t('Project/Tenant ID'),
                         id: "openstack_project_id",
                         width: 260,
-                        allowBlank: true
+                        allowBlank: false,
+                        listeners: {
+                            blur: this.updateRegions,
+                            scope: this
+                        }                        
                     },{
                         xtype: 'label',
                         style: 'font-style: italic',                        
@@ -72,7 +94,11 @@ var addOpenStack = new Zenoss.Action({
                         fieldLabel: _t('Auth URL'),
                         id: "openstack_auth_url",
                         width: 260,
-                        allowBlank: true,
+                        allowBlank: false,
+                        listeners: {
+                            blur: this.updateRegions,
+                            scope: this
+                        }
                     },{
                         xtype: 'label',
                         style: 'font-style: italic',                        
@@ -82,13 +108,22 @@ var addOpenStack = new Zenoss.Action({
                 }, {
                     xtype: 'container',
                     layout: 'hbox',
-                    items: [{                    
-                        xtype: 'textfield',
+                    items: [{  
+                        xtype: 'combo',
+                        width: 260,
                         name: 'region_name',
                         fieldLabel: _t('Region Name'),
-                        id: "openstack_region_name",
-                        width: 260,
-                        allowBlank: true
+                        id: 'region_name',
+                        triggerAction: 'all',                       
+                        queryMode: 'local',
+                        valueField: 'key',
+                        displayField: 'label',
+                        store: regionStore,
+                        forceSelection: true,
+                        editable: false,
+                        allowBlank: false,
+                        triggerAction: 'all',
+                        selectOnFocus: false                        
                     },{
                         xtype: 'label',
                         style: 'font-style: italic',                        
@@ -150,9 +185,30 @@ var addOpenStack = new Zenoss.Action({
                     }
                 }, Zenoss.dialog.CANCEL]
             }]
-        });
+        }); 
+
         win.show();
-    }
+    },
+    
+    updateRegions: function () {
+        form = Ext.getCmp('addopenstack-form').getForm();
+        formvalues = form.getFieldValues();
+        combo = Ext.getCmp('region_name');
+        store = combo.getStore();
+
+        if (formvalues.username && formvalues.api_key && formvalues.project_id && formvalues.auth_url) {
+            store.load({
+               params: {
+                   username: formvalues.username,
+                   api_key: formvalues.api_key,
+                   project_id: formvalues.project_id,
+                   auth_url: formvalues.auth_url
+               }        
+            });  
+        } else {
+            store.removeAll()
+        }
+    }           
 });
 
 // Push the addOpenStack action to the adddevice button
