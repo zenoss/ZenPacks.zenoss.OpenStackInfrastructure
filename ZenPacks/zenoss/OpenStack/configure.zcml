@@ -2,6 +2,7 @@
 <configure
     xmlns="http://namespaces.zope.org/zope"
     xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
     >
 
     <!-- API: Routers -->
@@ -22,5 +23,15 @@
         for="*"
         factory=".api.OpenStackFacade"
         />
+
+    <!-- Device Links -->
+    <configure zcml:condition="have zenoss:IExpandedLinkProvider">
+        <subscriber
+            provides='Products.ZenModel.interfaces.IExpandedLinkProvider'
+            for='Products.ZenModel.Device.Device'
+            factory='.DeviceProxyComponent.DeviceLinkProvider'
+            />
+
+    </configure>
 
 </configure>

@@ -256,4 +256,11 @@ class OpenStack(PythonPlugin):
         for objmap in flavors + images + servers + hosts + hypervisors + zones.values() + services:
             componentsMap.append(objmap)
 
-        return (componentsMap)
+        endpointObjMap = ObjectMap(
+            modname='ZenPacks.zenoss.OpenStack.Endpoint',
+            data=dict(
+                set_maintain_proxydevices=True
+            )
+        )
+
+        return (componentsMap, endpointObjMap)

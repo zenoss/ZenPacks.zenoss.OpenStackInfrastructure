@@ -46,7 +46,8 @@ CFG = zenpacklib.ZenPackSpec(
         'zOpenStackInsecure':          { 'type': 'boolean', 'default': False },
         'zOpenStackProjectId':         { },
         'zOpenStackAuthUrl':           { },
-        'zOpenStackRegionName':        { }
+        'zOpenStackRegionName':        { },
+        'zOpenStackHostDeviceClass':   { 'default': '/Server/SSH/Linux/NovaHost' }
     },
 
     classes={
@@ -75,8 +76,14 @@ CFG = zenpacklib.ZenPackSpec(
             'base': zenpacklib.Component,
         },
 
-        'DeviceProxyComponent': {
-            'base': 'OpenstackComponent'
+       'DeviceProxyComponent': {
+            'base': 'OpenstackComponent',
+            'properties': {
+                'proxy_device': { 'label': 'Device',
+                                  'type_': 'entity',
+                                  'api_only': True,
+                                  'api_backendtype': 'method' }
+            }            
         },
 
         'OrgComponent': {
@@ -183,6 +190,9 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'SoftwareComponent',
             'meta_type': 'OpenStackNovaService',
             'label': 'Nova Service',
+            'properties': {
+                'binary':   { 'label': 'Binary' },
+            },
             'order': 10                    
         },
 
@@ -190,13 +200,19 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'SoftwareComponent',
             'meta_type': 'OpenStackNovaApi',
             'label': 'NovaApi',
+            'properties': {
+                'binary':   { 'label': 'Binary' },
+            },            
             'order': 9
         },
 
         'NovaDatabase': {
-            'base': ['SoftwareComponent', 'DeviceProxyComponent'],        
+            'base': 'SoftwareComponent',
             'meta_type': 'OpenStackNovaDatabase',                                        
             'label': 'NovaDatabase',
+            'properties': {
+                'binary':   { 'label': 'Binary' },
+            },                        
             'order': 13                                                           
         },
 
