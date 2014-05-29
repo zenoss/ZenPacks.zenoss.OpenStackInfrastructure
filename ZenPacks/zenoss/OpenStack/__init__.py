@@ -23,10 +23,10 @@ from . import zenpacklib
 
 RELATIONSHIPS_YUML = """
 // containing
-[Endpoint]components ++-endpoint[OpenstackComponent]
+[Endpoint]++components-endpoint1[OpenstackComponent]
 // non-containing 1:M
-[OrgComponent]parentOrg 1-.-*childOrgs[OrgComponent]
-[Host]hostedSoftware 1-.-*hostedOn[SoftwareComponent]
+[OrgComponent]1parentOrg-childOrgs*[OrgComponent]
+[Host]1hostedSoftware-hostedOn*[SoftwareComponent]
 [OrgComponent]1-.-*[Host]
 [OrgComponent]1-.-*[SoftwareComponent]
 [Flavor]1-.-*[Server]
@@ -35,7 +35,6 @@ RELATIONSHIPS_YUML = """
 // non-containing 1:1
 [Hypervisor]1-.-1[Host]
 """
-
 
 CFG = zenpacklib.ZenPackSpec(
     name=__name__,
