@@ -59,8 +59,10 @@ from Products.Zuul.catalog.interfaces import IIndexableWrapper, IPathReporter
 from Products.Zuul.catalog.paths import DefaultPathReporter, relPath
 from Products.Zuul.decorators import info, memoize
 from Products.Zuul.form import schema
+from Products.Zuul.form.interfaces import IFormBuilder
 from Products.Zuul.infos import InfoBase, ProxyProperty
 from Products.Zuul.infos.component import ComponentInfo as BaseComponentInfo
+from Products.Zuul.infos.component import ComponentFormBuilder as BaseComponentFormBuilder
 from Products.Zuul.infos.device import DeviceInfo as BaseDeviceInfo
 from Products.Zuul.interfaces import IInfo
 from Products.Zuul.interfaces.component import IComponentInfo as IBaseComponentInfo
@@ -442,6 +444,13 @@ class ComponentBase(ModelBase):
         """
         return os.path.join('Devices', self.device().id, self.id)
 
+    def getRRDTemplateName(self):
+        """Return name of primary template to bind to this component."""
+        if self._templates:
+            return self._templates[0]
+
+        return ''
+
     def getRRDTemplates(self):
         """Return list of templates to bind to this component.
 
@@ -554,6 +563,35 @@ class ComponentPathReporter(DefaultPathReporter):
 
 
 GSM.registerAdapter(ComponentPathReporter, (ComponentBase,), IPathReporter)
+
+
+class ComponentFormBuilder(BaseComponentFormBuilder):
+    """
+    Base class for all custom FormBuilders.   Adds support for renderers in the Component
+    Details form.
+    """
+
+    implements(IFormBuilder)
+    adapts(IInfo)
+
+    def render(self, **kwargs):
+        rendered = super(ComponentFormBuilder, self).render(kwargs)
+        self.zpl_decorate(rendered)    
+        return rendered
+
+    def zpl_decorate(self, item):
+        if 'items' in item:
+            for item in item['items']:
+                self.zpl_decorate(item)
+            return
+
+        if 'xtype' in item and 'name' in item:
+            if item['name'] in self.renderer:
+                renderer = self.renderer[item['name']]
+
+                if renderer:
+                    item['xtype'] = 'ZPLRenderableDisplayField'
+                    item['renderer'] = renderer
 
 
 def DeviceTypeFactory(name, bases):
@@ -1125,6 +1163,8 @@ class ClassSpec(object):
         self.create_model_class()
         self.create_iinfo_class()
         self.create_info_class()
+        if self.is_component:
+            self.create_formbuilder_class()            
         self.register_impact_adapters()
 
     @property
@@ -1145,6 +1185,28 @@ class ClassSpec(object):
                 resolved_bases.append(base_spec.model_class)
 
         return tuple(resolved_bases)
+
+    def base_class_specs(self, recursive=False):
+        """Return tuple of base ClassSpecs.
+
+        Iterates over ClassSpec.bases (possibly recursively) and returns
+        instances of the ClassSpec objects for them.
+        """
+        base_specs = []
+        for base in self.bases:
+            if isinstance(base, type):
+                # bases will contain classes rather than class names when referring
+                # to a class outside of this zenpack specification.  Ignore
+                # these.
+                continue
+
+            class_spec = self.zenpack.classes[base]
+            base_specs.append(class_spec)
+
+            if recursive:
+                base_specs.extend(class_spec.base_class_specs())
+
+        return tuple(base_specs)
 
     def is_a(self, type_):
         """Return True if this class is a subclass of type_."""
@@ -1217,7 +1279,9 @@ class ClassSpec(object):
         # Add local properties and catalog indexes.
         for name, spec in self.properties.iteritems():
             attributes[name] = None
-            properties.append(spec.ofs_dict)
+
+            if spec.ofs_dict:
+                properties.append(spec.ofs_dict)
 
             pindexes = spec.catalog_indexes
             if pindexes:
@@ -1348,6 +1412,37 @@ class ClassSpec(object):
         GSM.registerAdapter(info_class, (self.model_class,), self.iinfo_class)
 
         return info_class
+
+    @property
+    def formbuilder_class(self):
+        """Return FormBuilder subclass."""
+        return self.create_formbuilder_class()
+
+    def create_formbuilder_class(self):
+        """Create and return FormBuilder subclass with rendering hints for ComponentFormBuilder."""
+
+        bases = (ComponentFormBuilder,)
+        attributes = {}
+
+        renderer = {}
+        for class_spec in self.base_class_specs(recursive=True):
+            for propname, spec in self.properties.iteritems():
+                renderer[propname] = spec.renderer
+
+        attributes['renderer'] = renderer
+
+        formbuilder = create_class(
+            get_symbol_name(self.zenpack.name, self.name),
+            get_symbol_name(self.zenpack.name, 'schema'),
+            '{}FormBuilder'.format(self.name),
+            tuple(bases),
+            attributes)
+
+        classImplements(formbuilder, IFormBuilder)
+        GSM.registerAdapter(formbuilder, (self.info_class,), IFormBuilder)
+
+        return formbuilder
+
 
     def register_impact_adapters(self):
         """Register Impact adapters."""
@@ -1619,6 +1714,8 @@ class ClassPropertySpec(object):
             renderer=None,
             order=None,
             editable=False,
+            api_only=False,
+            api_backendtype='property',
             ):
         """TODO."""
         self.class_spec = class_spec
@@ -1634,6 +1731,13 @@ class ClassPropertySpec(object):
         self.grid_display = grid_display
         self.renderer = renderer
         self.editable = bool(editable)
+        self.api_only = bool(api_only)
+        self.api_backendtype = api_backendtype
+
+        if self.api_backendtype not in ('property', 'method'):
+            raise TypeError(
+                "Property '%s': api_backendtype must be 'property' or 'method', not '%s'"
+                    % (name, self.api_backendtype))
 
         # Force properties into the 4.0 - 4.9 order range.
         if not order:
@@ -1644,6 +1748,10 @@ class ClassPropertySpec(object):
     @property
     def ofs_dict(self):
         """Return OFS _properties dictionary."""
+
+        if self.api_only:
+            return None
+
         return {
             'id': self.name,
             'label': self.label,
@@ -1673,6 +1781,7 @@ class ClassPropertySpec(object):
             'lines': schema.Text,
             'string': schema.TextLine,
             'password': schema.Password,
+            'entity': schema.Entity
             }
 
         if self.type_ not in schema_map:
@@ -1691,9 +1800,14 @@ class ClassPropertySpec(object):
     @property
     def info_properties(self):
         """Return Info properties dict."""
-        return {
-            self.name: ProxyProperty(self.name),
-            }
+        if self.api_backendtype == 'method':
+            return {
+                self.name: MethodInfoProperty(self.name),
+                }
+        else:
+            return {
+                self.name: ProxyProperty(self.name),
+                }
 
     @property
     def js_fields(self):
@@ -1957,17 +2071,17 @@ def relationships_from_yuml(yuml):
     (http://yuml.me). See the following example:
 
         // Containing relationships.
-        [APIC]++-[FabricPod]
-        [APIC]++-[FvTenant]
-        [FvTenant]++-[VzBrCP]
-        [FvTenant]++-[FvAp]
-        [FvAp]++-[FvAEPg]
-        [FvAEPg]++-[FvRsProv]
-        [FvAEPg]++-[FvRsCons]
+        [APIC]++ -[FabricPod]
+        [APIC]++ -[FvTenant]
+        [FvTenant]++ -[VzBrCP]
+        [FvTenant]++ -[FvAp]
+        [FvAp]++ -[FvAEPg]
+        [FvAEPg]++ -[FvRsProv]
+        [FvAEPg]++ -[FvRsCons]
         // Non-containing relationships.
-        [FvBD]1-.-*[FvAEPg]
-        [VzBrCP]1-.-*[FvRsProv]
-        [VzBrCP]1-.-*[FvRsCons]
+        [FvBD]1 -.- *[FvAEPg]
+        [VzBrCP]1 -.- *[FvRsProv]
+        [VzBrCP]1 -.- *[FvRsCons]
 
     The created relationships are given default names that orginarily
     should be used. However, in some cases such as when one class has
@@ -1975,15 +2089,16 @@ def relationships_from_yuml(yuml):
     explicitly named. That would be done as in the following example:
 
         // Explicitly-Named Relationships
-        [Pool]default_sr *-default_for_pools 1[SR]
-        [Pool]suspend_image_sr *-suspend_image_for_pools[SR]
-        [Pool]crash_dump_sr *-crash_dump_for_pools[SR]
+        [Pool]*default_sr -.-default_for_pools 0..1[SR]
+        [Pool]*suspend_image_sr -.-suspend_image_for_pools *[SR]
+        [Pool]*crash_dump_sr -.-crash_dump_for_pools *[SR]
 
     The yuml parameter can be specified either as a newline-delimited
     string, or as a tuple or list of relationships.
 
     """
     classes = collections.defaultdict(dict)
+    match_comment = re.compile(r'^\s*//').search
 
     match_line = re.compile(
         r'\[(?P<left_classname>[^\]]+)\]'
@@ -2001,8 +2116,12 @@ def relationships_from_yuml(yuml):
         yuml_lines = yuml.strip().splitlines()
 
     for line in yuml_lines:
+        if match_comment(line):
+            continue
+
         match = match_line(line)
         if not match:
+            LOG.error("parse error in relationships_from_yuml at %s" % line)
             continue
 
         left_class = match.group('left_classname')
@@ -2044,6 +2163,16 @@ def relationships_from_yuml(yuml):
 
     return classes
 
+def MethodInfoProperty(method_name):
+    """Return a property with the Infos for object(s) returned by a method.
+
+    A list of Info objects is returned for methods returning a list, or a single 
+    one for those returning a single value.
+    """
+    def getter(self):
+        return Zuul.info(getattr(self._object, method_name)())
+
+    return property(getter)  
 
 def RelationshipInfoProperty(relationship_name):
     """Return a property with the Infos for object(s) in the relationship.
@@ -2443,4 +2572,16 @@ Ext.define("Zenoss.component.ZPLComponentGridPanel", {
         }
     }
 });
+
+Ext.define("Zenoss.ZPLRenderableDisplayField", {
+    extend: "Ext.form.DisplayField",
+    alias: ['widget.ZPLRenderableDisplayField'],
+    constructor: function(config) {   
+        if (typeof(config.renderer) == 'string') {
+          config.renderer = eval(config.renderer)
+        }
+        Zenoss.ZPLRenderableDisplayField.superclass.constructor.call(this, config);
+    }
+});
+
 """.strip()
