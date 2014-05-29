@@ -248,7 +248,7 @@ class OpenStack(PythonPlugin):
                     id=service_id,
                     title=title,
                     binary=service.binary,
-                    set_host=host_id,
+                    set_hostedOn=host_id,
                     set_orgComponent=zone_id
                 )))
 
