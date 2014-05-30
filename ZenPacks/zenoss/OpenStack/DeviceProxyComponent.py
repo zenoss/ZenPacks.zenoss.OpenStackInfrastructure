@@ -28,6 +28,10 @@ from Products.Zuul.utils import ZuulMessageFactory as _t
 class DeviceProxyComponent(schema.DeviceProxyComponent):
 
     @classmethod
+    def deviceproxy_meta_types(cls):
+        return [x.meta_type for x in DeviceProxyComponent.__subclasses__()]
+
+    @classmethod
     def component_for_proxy_device(cls, device):
         '''
         Given any device in the system, check if it has a DeviceProxyComponent associated with
