@@ -76,7 +76,15 @@ class OpenStack(PythonPlugin):
 
         return results
 
-    def process(self, devices, results, unused):
+    def process(self, device, results, unused):
+        region_id = prepId("region-{0}".format(device.zOpenStackRegionName))
+        region = ObjectMap(
+            modname='ZenPacks.zenoss.OpenStack.Region',
+                data=dict(
+                    id=region_id,
+                    title=device.zOpenStackRegionName
+            ))
+
         flavors = []
         for flavor in results['flavors']:
             flavors.append(ObjectMap(
@@ -210,7 +218,8 @@ class OpenStack(PythonPlugin):
 
         hypervisors = []
         for hypervisor in results['hypervisors']: 
-            host_id = prepId("host-{0}".format(hypervisor.hypervisor_hostname))
+            hypervisor_id = prepId("hypervisor-{0}".format(hypervisor.id))
+            host_id       = prepId("host-{0}".format(hypervisor.hypervisor_hostname))
 
             hypervisor_servers = []
             if hasattr(hypervisor, 'servers'):
@@ -219,7 +228,7 @@ class OpenStack(PythonPlugin):
             hypervisors.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStack.Hypervisor',
                 data=dict(
-                    id='hypervisor-{0}'.format(hypervisor.id),
+                    id=hypervisor_id,
                     title='{0}.{1}'.format(hypervisor.hypervisor_hostname, hypervisor.id),
                     hypervisorId=hypervisor.id,  # 1
                     set_servers=hypervisor_servers,
@@ -239,7 +248,8 @@ class OpenStack(PythonPlugin):
                 modname='ZenPacks.zenoss.OpenStack.AvailabilityZone',
                 data=dict(
                     id=zone_id,
-                    title=service.zone
+                    title=service.zone,
+                    set_parentOrg=region_id
                 )))
 
             services.append(ObjectMap(
@@ -252,8 +262,9 @@ class OpenStack(PythonPlugin):
                     set_orgComponent=zone_id
                 )))
 
+
         componentsMap = RelationshipMap(relname='components')
-        for objmap in flavors + images + servers + hosts + hypervisors + zones.values() + services:
+        for objmap in [region] + flavors + images + servers + hosts + hypervisors + zones.values() + services:
             componentsMap.append(objmap)
 
         endpointObjMap = ObjectMap(
