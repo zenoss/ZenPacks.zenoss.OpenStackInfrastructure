@@ -25,7 +25,7 @@ RELATIONSHIPS_YUML = """
 // containing
 [Endpoint]++components-endpoint1[OpenstackComponent]
 // non-containing 1:M
-[OrgComponent]1parentOrg-childOrgs*[OrgComponent]
+[OrgComponent]*parentOrg-childOrgs1[OrgComponent]
 [Host]1hostedSoftware-hostedOn*[SoftwareComponent]
 [OrgComponent]1-.-*[Host]
 [OrgComponent]1-.-*[SoftwareComponent]
@@ -87,7 +87,12 @@ CFG = zenpacklib.ZenPackSpec(
         },
 
         'OrgComponent': {
-            'base': 'OpenstackComponent'
+            'base': 'OpenstackComponent',
+            'relationships': {
+                # Provide better contextual naming for the relationships in the UI.
+                'parentOrg': {'label': 'Parent', 'order': 1.0},
+                'childOrgs': {'label': 'Children', 'order': 1.1},
+            }
         },
                 
         'SoftwareComponent': {
