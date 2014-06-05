@@ -195,9 +195,6 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'SoftwareComponent',
             'meta_type': 'OpenStackNovaService',
             'label': 'Nova Service',
-            'properties': {
-                'binary':   { 'label': 'Binary' },
-            },
             'order': 10                    
         },
 
@@ -205,9 +202,6 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'SoftwareComponent',
             'meta_type': 'OpenStackNovaApi',
             'label': 'NovaApi',
-            'properties': {
-                'binary':   { 'label': 'Binary' },
-            },            
             'order': 9
         },
 
@@ -215,9 +209,6 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'SoftwareComponent',
             'meta_type': 'OpenStackNovaDatabase',                                        
             'label': 'NovaDatabase',
-            'properties': {
-                'binary':   { 'label': 'Binary' },
-            },                        
             'order': 13                                                           
         },
 

@@ -1208,6 +1208,28 @@ class ClassSpec(object):
 
         return tuple(base_specs)
 
+    def inherited_properties(self):
+        properties = {}
+        for base in self.bases:
+            if not isinstance(base, type):
+                class_spec = self.zenpack.classes[base]
+                properties.update(class_spec.properties)
+
+        properties.update(self.properties)
+
+        return properties
+
+    def inherited_relationships(self):
+        relationships = {}
+        for base in self.bases:
+            if not isinstance(base, type):
+                class_spec = self.zenpack.classes[base]
+                relationships.update(class_spec.relationships)
+
+        relationships.update(self.relationships)
+
+        return relationships
+
     def is_a(self, type_):
         """Return True if this class is a subclass of type_."""
         return issubclass(self.model_class, type_)
@@ -1347,7 +1369,7 @@ class ClassSpec(object):
 
         attributes = {}
 
-        for spec in self.properties.itervalues():
+        for spec in self.inherited_properties().itervalues():
             attributes.update(spec.iinfo_schemas)
 
         for i, spec in enumerate(self.containing_components):
@@ -1357,7 +1379,7 @@ class ClassSpec(object):
                 group="Relationships",
                 order=3 + i / 100.0)
 
-        for spec in self.relationships.itervalues():
+        for spec in self.inherited_relationships().itervalues():
             attributes.update(spec.iinfo_schemas)
 
         return create_class(
@@ -1395,10 +1417,10 @@ class ClassSpec(object):
             attr = relname_from_classname(spec.name)
             attributes[attr] = RelationshipInfoProperty(attr)
 
-        for spec in self.properties.itervalues():
+        for spec in self.inherited_properties().itervalues():
             attributes.update(spec.info_properties)
 
-        for spec in self.relationships.itervalues():
+        for spec in self.inherited_relationships().itervalues():
             attributes.update(spec.info_properties)
 
         info_class = create_class(
@@ -1491,8 +1513,8 @@ class ClassSpec(object):
                 continue
 
             remote_classname = relschema.remoteClass.split('.')[-1]
-            remote_spec = self.zenpack.classes.get(remote_classname)
-            if not remote_spec or remote_spec.is_device:
+            remote_spec = self.zenpack.classes.get(remote_classname)        
+            if not remote_spec or remote_spec.is_device:                
                 continue
 
             faceting_specs.append(remote_spec)
@@ -1608,11 +1630,11 @@ class ClassSpec(object):
         fields = []
         ordered_columns = []
 
-        for spec in self.properties.itervalues():
+        for spec in self.inherited_properties().itervalues():
             fields.extend(spec.js_fields)
             ordered_columns.extend(spec.js_columns)
 
-        for spec in self.relationships.itervalues():
+        for spec in self.inherited_relationships().itervalues():
             fields.extend(spec.js_fields)
             ordered_columns.extend(spec.js_columns)
 
