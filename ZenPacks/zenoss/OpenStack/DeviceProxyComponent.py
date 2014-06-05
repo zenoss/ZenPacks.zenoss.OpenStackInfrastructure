@@ -23,6 +23,8 @@ from Products.Zuul.interfaces import ICatalogTool
 from Products.AdvancedQuery import Eq
 from Products.Zuul.form import schema as formschema
 from Products.Zuul.utils import ZuulMessageFactory as _t
+from Products.ZenUtils.guid.interfaces import IGlobalIdentifier
+from Products.ZenUtils.guid.guid import GUIDManager
 
 
 class DeviceProxyComponent(schema.DeviceProxyComponent):
@@ -34,40 +36,15 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
     @classmethod
     def component_for_proxy_device(cls, device):
         '''
-        Given any device in the system, check if it has a DeviceProxyComponent associated with
-        it, and if it does, return that component.
+        Given any device in the system, check if it has a DeviceProxyComponent
+        associated with it, and if it does, return that component.
         '''
 
-        dmd = device.dmd
-        for class_ in DeviceProxyComponent.__subclasses__():
-            classname = class_.__module__ + '.' + class_.__name__
-
-            results = ICatalogTool(dmd.Devices).search(
-                types=(classname,),
-                query=class_.componentsearch_query(device)
-            )
-
-            for brain in results:
-                possible_match = brain.getObject()
-                if device.id == possible_match.proxy_device().id:
-                    return possible_match
+        uuid = getattr(device, 'openstackProxyComponentUUID', None)
+        if uuid:
+            return GUIDManager(device.dmd).getObject(uuid)
 
         return None
-
-    @classmethod
-    def componentsearch_query(cls, device):
-        '''
-        Given a device, return a query that will match it against the set of
-        components of this types which it could potentially be a proxy
-        device for.
-
-        This is used by component_for_proxy_device (and the devicelinkprovider)
-        to know when a device has an associated DeviceProxyComponent.  It may
-        be called on any device in the system.
-
-        Default is to return any with a matching name.
-        '''
-        return Eq('name', device.name())
 
     def proxy_deviceclass_zproperty(self):
         '''
@@ -80,8 +57,8 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
 
     def proxy_deviceclass(self):
         '''
-        Return the device class object identified by proxy_deviceclass_zproperty,
-        creating it if necessary.
+        Return the device class object identified by 
+        proxy_deviceclass_zproperty, creating it if necessary.
         '''       
         if self.proxy_deviceclass_zproperty() is None:
             raise ValueError("proxy_deviceclass_zproperty is not defined for %s" % self.meta_type)
@@ -109,13 +86,14 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         return True
 
     def proxy_device(self):
-        '''
+        '''        
         Return this component's corresponding proxy device, creating
         it in the proxy_deviceclass if it does not exist.
 
         Default assumes that the names must match.
         '''
-        device = self.dmd.Devices.findDevice(self.name())
+
+        device = GUIDManager(self.dmd).getObject(getattr(self, 'openstackProxyDeviceUUID', None))
         if device:
             return device
         else:
@@ -137,11 +115,15 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         device = self.proxy_deviceclass().createInstance(device_name)
         device.setProdState(self.productionState)
         device.setPerformanceMonitor(self.getPerformanceServer().id)
+        device.openstackProxyComponentUUID = IGlobalIdentifier(self).getGUID()
+
         device.index_object()
         notify(IndexingEvent(device))
 
         LOG.info('Scheduling modeling job for %s' % device_name)
         device.collectDevice(setlog=False, background=True)
+
+        self.openstackProxyDeviceUUID = IGlobalIdentifier(device).getGUID()
 
         return device
 
