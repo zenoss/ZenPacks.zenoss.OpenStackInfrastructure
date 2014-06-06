@@ -412,8 +412,12 @@ class ComponentBase(ModelBase):
 
         return faceting_relnames
 
-    def get_facets(self):
+    def get_facets(self, seen=None):
         """Generate non-containing related objects for faceting."""
+
+        if seen is None:
+            seen = set()
+
         for relname in self.get_faceting_relnames():
             rel = getattr(self, relname, None)
             if not rel or not callable(rel):
@@ -425,10 +429,17 @@ class ComponentBase(ModelBase):
 
             if isinstance(rel, ToOneRelationship):
                 # This is really a single object.
-                yield relobjs
-            else:
-                for obj in relobjs:
-                    yield obj
+                relobjs = [relobjs]
+
+            for obj in relobjs:
+                if obj in seen:
+                    continue
+
+                yield obj
+                seen.add(obj)
+                for facet in obj.get_facets(seen=seen):
+                    yield facet
+
 
     def rrdPath(self):
         """Return filesystem path for RRD files for this component.
@@ -1208,6 +1219,15 @@ class ClassSpec(object):
 
         return tuple(base_specs)
 
+    def subclass_specs(self):
+        subclass_specs = []
+        for class_spec in self.zenpack.classes.values():
+            if self in class_spec.base_class_specs(recursive=True):
+                subclass_specs.append(class_spec)
+
+        return subclass_specs
+
+
     def inherited_properties(self):
         properties = {}
         for base in self.bases:
@@ -1513,11 +1533,11 @@ class ClassSpec(object):
                 continue
 
             remote_classname = relschema.remoteClass.split('.')[-1]
-            remote_spec = self.zenpack.classes.get(remote_classname)        
-            if not remote_spec or remote_spec.is_device:                
-                continue
-
-            faceting_specs.append(remote_spec)
+            remote_spec = self.zenpack.classes.get(remote_classname)
+            if remote_spec:
+                for class_spec in [ remote_spec ] + remote_spec.subclass_specs():                    
+                    if class_spec and not class_spec.is_device:
+                        faceting_specs.append(class_spec)
 
         return faceting_specs
 
