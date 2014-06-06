@@ -29,7 +29,8 @@ class Host(schema.Host):
         # instances of ZenPacks.zenoss.OpenStack.OSProcess instead of
         # the default one.
         plugins = device.getZ('zCollectorPlugins')
-        plugins.remove('zenoss.cmd.linux.process')    
+        if 'zenoss.cmd.linux.process' in plugins:
+            plugins.remove('zenoss.cmd.linux.process')    
         if 'zenoss.cmd.linux.openstack.process' not in plugins:
             plugins.append('zenoss.cmd.linux.openstack.process')
         device.setZenProperty('zCollectorPlugins', plugins)
