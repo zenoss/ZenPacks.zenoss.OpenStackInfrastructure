@@ -35,6 +35,9 @@ class IOpenStackFacade(IFacade):
                      region_name=None, collector='localhost'):
         """Add OpenStack Endpoint."""
 
+    def getRegions(self, username, api_key, project_id, auth_url):
+        """Get a list of available regions, given a keystone endpoint and credentials."""
+
 
 class OpenStackFacade(ZuulFacade):
     implements(IOpenStackFacade)
@@ -75,6 +78,8 @@ class OpenStackFacade(ZuulFacade):
         return True, jobStatus.id
 
     def getRegions(self, username, api_key, project_id, auth_url):
+        """Get a list of available regions, given a keystone endpoint and credentials."""
+
         from keystoneclient.v2_0.client import Client as keystoneclient
 
         client = keystoneclient(
