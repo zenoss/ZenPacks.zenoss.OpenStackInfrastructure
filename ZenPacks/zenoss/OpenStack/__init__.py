@@ -74,10 +74,12 @@ CFG = zenpacklib.ZenPackSpec(
         # Component Base Types #######################################
         'OpenstackComponent': {
             'base': zenpacklib.Component,
+            'filter_display': False,
         },
 
         'DeviceProxyComponent': {
             'base': 'OpenstackComponent',
+            'filter_display': False,
             'properties': {
                 'proxy_device': {'label': 'Device',
                                  'type_': 'entity',
@@ -88,6 +90,7 @@ CFG = zenpacklib.ZenPackSpec(
 
         'OrgComponent': {
             'base': 'OpenstackComponent',
+            'filter_display': False,
             'relationships': {
                 # Provide better contextual naming for the relationships in the UI.
                 'parentOrg': {'label': 'Parent', 'order': 1.0},
@@ -97,13 +100,15 @@ CFG = zenpacklib.ZenPackSpec(
 
         'SoftwareComponent': {
             'base': 'OpenstackComponent',
+            'filter_display': False,
             'properties': {
                 'binary':   {'label': 'Binary'},
             }
         },
 
         'LogicalComponent': {
-            'base': 'OpenstackComponent'
+            'base': 'OpenstackComponent',
+            'filter_display': False,
         },
 
         # Component Types ############################################
