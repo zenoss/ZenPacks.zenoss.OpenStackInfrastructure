@@ -34,4 +34,17 @@
 
     </configure>
 
+    <!-- DeviceProxyComponent cleanup -->
+    <subscriber
+        for="Products.ZenModel.Device.Device
+             OFS.interfaces.IObjectWillBeMovedEvent"
+        handler=".DeviceProxyComponent.onDeviceDeleted"
+        />
+
+    <subscriber
+        for=".DeviceProxyComponent.DeviceProxyComponent
+             OFS.interfaces.IObjectWillBeMovedEvent"
+        handler=".DeviceProxyComponent.onDeviceProxyComponentDeleted"
+        />
+
 </configure>

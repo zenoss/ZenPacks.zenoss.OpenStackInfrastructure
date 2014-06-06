@@ -16,7 +16,7 @@ LOG = logging.getLogger('zen.OpenStackDeviceProxyComponent')
 from zope.event import notify
 
 from ZODB.transact import transact
-
+from OFS.interfaces import IObjectWillBeAddedEvent
 from Products.Zuul.decorators import info, memoize
 from Products.Zuul.catalog.events import IndexingEvent
 from Products.Zuul.interfaces import ICatalogTool
@@ -25,6 +25,28 @@ from Products.Zuul.form import schema as formschema
 from Products.Zuul.utils import ZuulMessageFactory as _t
 from Products.ZenUtils.guid.interfaces import IGlobalIdentifier
 from Products.ZenUtils.guid.guid import GUIDManager
+from Products.ZenHub.zodb import onDelete
+from Products.ZenModel.Device import Device
+
+def onDeviceDeleted(object, event):
+    '''
+    Clean up the dangling reference to a device if that device has been removed.
+    (Note: we may re-create the device automatically next time someone tries to access
+    self.proxy_device, though)
+    '''
+    if not IObjectWillBeAddedEvent.providedBy(event):
+        if hasattr(object, 'openstackProxyComponentUUID'):
+            component = GUIDManager(object.dmd).getObject(getattr(object, 'openstackProxyComponentUUID', None))
+            if component:
+                component.release_proxy_device()
+            object.openstackProxyComponentUUID = None
+
+def onDeviceProxyComponentDeleted(object, event):
+    '''
+    Clean up the dangling reference from a device if the component has been removed.
+    '''
+    if not IObjectWillBeAddedEvent.providedBy(event):
+        object.release_proxy_device()
 
 
 class DeviceProxyComponent(schema.DeviceProxyComponent):
@@ -96,6 +118,12 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         device = GUIDManager(self.dmd).getObject(getattr(self, 'openstackProxyDeviceUUID', None))
         if device:
             return device
+
+        # Does a device with a matching name exist?  Claim that one.
+        device = self.dmd.Devices.findDevice(self.name())
+        if device:
+            self.claim_proxy_device(device)
+            return device
         else:
             return self.create_proxy_device()
 
@@ -115,7 +143,6 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         device = self.proxy_deviceclass().createInstance(device_name)
         device.setProdState(self.productionState)
         device.setPerformanceMonitor(self.getPerformanceServer().id)
-        device.openstackProxyComponentUUID = IGlobalIdentifier(self).getGUID()
 
         device.index_object()
         notify(IndexingEvent(device))
@@ -123,14 +150,28 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         LOG.info('Scheduling modeling job for %s' % device_name)
         device.collectDevice(setlog=False, background=True)
 
-        self.openstackProxyDeviceUUID = IGlobalIdentifier(device).getGUID()
+        self.claim_proxy_device(device)
 
         return device
 
+    def claim_proxy_device(self, device):
+        LOG.info("%s component '%s' is now linked to device '%s'" % (self.meta_type, self.name(), device.name()))
+        device.openstackProxyComponentUUID = IGlobalIdentifier(self).getGUID()
+        self.openstackProxyDeviceUUID = IGlobalIdentifier(device).getGUID()
+
+    def release_proxy_device(self):
+        device = GUIDManager(self.dmd).getObject(getattr(self, 'openstackProxyDeviceUUID', None))
+        if device:
+            LOG.info("device %s is now detached from %s component '%s'" % (device.name(), self.meta_type, self.name()))
+            device.openstackProxyComponentUUID = None
+
+        self.openstackProxyDeviceUUID = None
+        LOG.info("%s component '%s' is now detached from any devices" % (self.meta_type, self.name()))
+
     def devicelink_descr(self):
         '''
-        The description to put on the proxy device's expanded links section when linking
-        back to this component.
+        The description to put on the proxy device's expanded links section when
+        linking back to this component.
         '''    
         return '"%s "%s" at %s' % (
             self.meta_type,
