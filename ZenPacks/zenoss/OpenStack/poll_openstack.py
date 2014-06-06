@@ -18,11 +18,15 @@ import logging
 log = logging.getLogger('ZenPacks.zenoss.OpenStack.poll_openstack')
 
 import Globals
+from Products.ZenUtils.Utils import unused
+unused(Globals)
+
 from utils import add_local_lib_path
 add_local_lib_path()
 
 from novaclient import client as novaclient
 from apiclients.ceilometerapiclient import CeilometerAPIClient
+
 
 class OpenStackPoller(object):
     def __init__(self, username, api_key, project_id, auth_url, region_name):

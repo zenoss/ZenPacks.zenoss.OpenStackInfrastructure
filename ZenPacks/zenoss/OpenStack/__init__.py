@@ -40,18 +40,18 @@ CFG = zenpacklib.ZenPackSpec(
     name=__name__,
 
     zProperties={
-        'DEFAULTS': {'category': 'OpenStack', 
+        'DEFAULTS': {'category': 'OpenStack',
                      'type': 'string'},
 
-        'zOpenStackInsecure':          { 'type': 'boolean', 'default': False },
-        'zOpenStackProjectId':         { },
-        'zOpenStackAuthUrl':           { },
-        'zOpenStackRegionName':        { },
-        'zOpenStackHostDeviceClass':   { 'default': '/Server/SSH/Linux/NovaHost' }
+        'zOpenStackInsecure':          {'type': 'boolean', 'default': False},
+        'zOpenStackProjectId':         {},
+        'zOpenStackAuthUrl':           {},
+        'zOpenStackRegionName':        {},
+        'zOpenStackHostDeviceClass':   {'default': '/Server/SSH/Linux/NovaHost'}
     },
 
     classes={
-        ## Device Types ###############################################
+        # Device Types ###############################################
 
         'Endpoint': {
             'base': zenpacklib.Device,
@@ -62,7 +62,7 @@ CFG = zenpacklib.ZenPackSpec(
         'KeystoneEndpoint': {
             'base': 'Endpoint',
             'meta_type': 'OpenStackKeystoneEndpoint',
-            'label': 'Keystone Endpoint'            
+            'label': 'Keystone Endpoint'
         },
 
         'NovaEndpoint': {
@@ -71,19 +71,19 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Nova Endpoint'
         },
 
-        ## Component Base Types #######################################
+        # Component Base Types #######################################
         'OpenstackComponent': {
             'base': zenpacklib.Component,
         },
 
-       'DeviceProxyComponent': {
+        'DeviceProxyComponent': {
             'base': 'OpenstackComponent',
             'properties': {
-                'proxy_device': { 'label': 'Device',
-                                  'type_': 'entity',
-                                  'api_only': True,
-                                  'api_backendtype': 'method' }
-            }            
+                'proxy_device': {'label': 'Device',
+                                 'type_': 'entity',
+                                 'api_only': True,
+                                 'api_backendtype': 'method'}
+            }
         },
 
         'OrgComponent': {
@@ -94,19 +94,19 @@ CFG = zenpacklib.ZenPackSpec(
                 'childOrgs': {'label': 'Children', 'order': 1.1},
             }
         },
-                
+
         'SoftwareComponent': {
             'base': 'OpenstackComponent',
             'properties': {
-                'binary':   { 'label': 'Binary' },
+                'binary':   {'label': 'Binary'},
             }
         },
-                
+
         'LogicalComponent': {
             'base': 'OpenstackComponent'
         },
 
-        ## Component Types ############################################
+        # Component Types ############################################
 
         'Flavor': {
             'base': 'LogicalComponent',
@@ -114,13 +114,13 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Flavor',
             'order': 1,
             'properties': {
-                'flavorId':   { 'grid_display': False },                 # 1
-                'flavorRAM':  { 'type_': 'int',
-                                'renderer': 'Zenoss.render.bytesString',
-                                'label': 'RAM' },                        # bytes
-                'flavorDisk': { 'type_': 'int',
-                                'renderer': 'Zenoss.render.bytesString',
-                                'label': 'Disk' }                        # bytes
+                'flavorId':   {'grid_display': False},                 # 1
+                'flavorRAM':  {'type_': 'int',
+                               'renderer': 'Zenoss.render.bytesString',
+                               'label': 'RAM'},                        # bytes
+                'flavorDisk': {'type_': 'int',
+                               'renderer': 'Zenoss.render.bytesString',
+                               'label': 'Disk'}                        # bytes
             }
         },
 
@@ -128,12 +128,12 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'LogicalComponent',
             'meta_type': 'OpenStackImage',
             'label': 'Image',
-            'order': 2,            
+            'order': 2,
             'properties': {
-                'imageId':      { 'grid_display': False },
-                'imageStatus':  { 'label': 'Status' },
-                'imageCreated': { 'label': 'Created' },
-                'imageUpdated': { 'label': 'Updated' },
+                'imageId':      {'grid_display': False},
+                'imageStatus':  {'label': 'Status'},
+                'imageCreated': {'label': 'Created'},
+                'imageUpdated': {'label': 'Updated'},
             }
         },
 
@@ -141,21 +141,21 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'LogicalComponent',
             'meta_type': 'OpenStackServer',
             'label': 'Server',
-            'order': 3,                        
+            'order': 3,
             'properties': {
-                'serverId':            { 'grid_display': False },   # 847424
-                'serverStatus':        { 'label': 'Status' },   # ACTIVE
-                'serverBackupEnabled': { 'type_': 'boolean', 
-                                         'label': 'Backup'},    # False
-                'serverBackupDaily':   { 'grid_display': False },   # DISABLED
-                'serverBackupWeekly':  { 'grid_display': False },   # DISABLED
-                'publicIps':           { 'type_': 'lines', 
-                                         'label': 'Public IPs' },   # ['50.57.74.222']
-                'privateIps':          { 'type_': 'lines',
-                                         'label': 'Private IPs' },  # ['10.182.13.13']                                         
-                'hostId':              { 'grid_display': False },   # a84303c0021aa53c7e749cbbbfac265f
-                'hostName':            { 'grid_display': False, 
-                                         'index_type': 'field' },   # devstack1
+                'serverId':            {'grid_display': False},   # 847424
+                'serverStatus':        {'label': 'Status'},   # ACTIVE
+                'serverBackupEnabled': {'type_': 'boolean',
+                                        'label': 'Backup'},    # False
+                'serverBackupDaily':   {'grid_display': False},   # DISABLED
+                'serverBackupWeekly':  {'grid_display': False},   # DISABLED
+                'publicIps':           {'type_': 'lines',
+                                        'label': 'Public IPs'},   # ['50.57.74.222']
+                'privateIps':          {'type_': 'lines',
+                                        'label': 'Private IPs'},  # ['10.182.13.13']
+                'hostId':              {'grid_display': False},   # a84303c0021aa53c7e749cbbbfac265f
+                'hostName':            {'grid_display': False,
+                                        'index_type': 'field'},   # devstack1
             }
 
             # Note: By (nova) design, hostId is a hash of the actual underlying host and project, and
@@ -167,35 +167,35 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'OrgComponent',
             'meta_type': 'OpenStackRegion',
             'label': 'Region',
-            'order': 4        
+            'order': 4
         },
-        
+
         'Cell': {
             'base': 'OrgComponent',
             'meta_type': 'OpenStackCell',
             'label': 'Cell',
-            'order': 5            
+            'order': 5
         },
 
         'AvailabilityZone': {
             'base': 'OrgComponent',
             'meta_type': 'OpenStackAvailabilityZone',
             'label': 'Availability Zone',
-            'order': 6            
+            'order': 6
         },
-        
+
         'Host': {
             'base': 'DeviceProxyComponent',
             'meta_type': 'OpenStackHost',
-            'label': 'Host',            
-            'order': 8                        
+            'label': 'Host',
+            'order': 8
         },
 
         'NovaService': {
             'base': 'SoftwareComponent',
             'meta_type': 'OpenStackNovaService',
             'label': 'Nova Service',
-            'order': 10                    
+            'order': 10
         },
 
         'NovaApi': {
@@ -207,19 +207,19 @@ CFG = zenpacklib.ZenPackSpec(
 
         'NovaDatabase': {
             'base': 'SoftwareComponent',
-            'meta_type': 'OpenStackNovaDatabase',                                        
+            'meta_type': 'OpenStackNovaDatabase',
             'label': 'NovaDatabase',
-            'order': 13                                                           
+            'order': 13
         },
 
         'Hypervisor': {
             'base': 'OpenstackComponent',   # SoftwareComponent
-            'meta_type': 'OpenStackHypervisor',                                        
+            'meta_type': 'OpenStackHypervisor',
             'label': 'Hypervisor',
             'order': 14,
             'properties': {
-                'hypervisorId':      { 'grid_display': False }
-            }            
+                'hypervisorId':      {'grid_display': False}
+            }
         }
     },
 

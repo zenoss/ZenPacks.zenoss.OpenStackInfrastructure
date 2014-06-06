@@ -18,6 +18,7 @@ add_local_lib_path()
 from keystoneclient.v2_0.client import Client as keystoneclient
 from ceilometerclient.v2.client import Client as ceilometerclient
 
+
 class CeilometerAPIClient(object):
 
     def __init__(self, username, api_key, project_id,
@@ -43,10 +44,10 @@ class CeilometerAPIClient(object):
     def _get_token(self):
         # token expires in 3600 seconds
         token = ''
-        if  len(self._username) > 0 and \
-            len(self._api_key) > 0 and \
-            len(self._project_id) > 0 and \
-            len(self._auth_url) > 0:
+        if len(self._username) > 0 and \
+           len(self._api_key) > 0 and \
+           len(self._project_id) > 0 and \
+           len(self._auth_url) > 0:
             client = keystoneclient(
                 username=self._username,
                 password=self._api_key,
@@ -78,7 +79,7 @@ class CeilometerAPIClient(object):
 
         return [meter['name'] for meter in self._meters if len(meter['name']) > 0]
 
-    def get_statistics(self, meter_name = ''):
+    def get_statistics(self, meter_name=''):
         if len(meter_name) == 0:
             return None
         meternames = self.get_meternames()
@@ -132,5 +133,3 @@ class CeilometerAPIClient(object):
 #       data['samples-list'] = ceiloclient.samples.list()
 #       pdb.set_trace()
 #       data['statistics-list'] = ceiloclient.statistics.list()
-
-

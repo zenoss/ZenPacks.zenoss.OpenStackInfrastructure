@@ -17,16 +17,17 @@ __doc__ = """process
 Linux command plugin for parsing ps command output and modeling processes for Openstack environments
 """
 
+
 class process(base_process):
     modname = "ZenPacks.zenoss.OpenStack.OSProcess"
 
     def process(self, device, results, log):
-    	rm = super(process, self).process(device, results, log)
+        rm = super(process, self).process(device, results, log)
 
-    	if rm is None:
-    		return None
+        if rm is None:
+            return None
 
-    	# TODO:  If the device is a proxy for an openstack component, force the appropriate processes
-    	# into this relationshipmap even if they were not found running via process discovery.
+        # TODO:  If the device is a proxy for an openstack component, force the appropriate processes
+        # into this relationshipmap even if they were not found running via process discovery.
 
         return rm

@@ -13,8 +13,6 @@
 
 from Products.ZenModel.OSProcess import OSProcess as BaseOSProcess
 
-class OSProcess(BaseOSProcess):
-	pass
-	
 
-    
+class OSProcess(BaseOSProcess):
+    pass

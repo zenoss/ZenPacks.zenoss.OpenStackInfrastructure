@@ -10,14 +10,11 @@
 
 import re
 
-from Products.AdvancedQuery import And, Eq, Or
+from Products.AdvancedQuery import And, Eq
 from ZODB.transact import transact
 
-from Products.ZenUtils.Utils import prepId
 from Products.Zuul.interfaces import ICatalogTool
 
-from zope.event import notify
-from Products.Zuul.catalog.events import IndexingEvent
 from Products.ZenUtils.guid.interfaces import IGlobalIdentifier
 import functools
 import importlib
@@ -100,12 +97,14 @@ def string_to_int(value):
 
     return i
 
+
 def guid(obj):
     '''
     Return GUID for obj.
     '''
 
     return IGlobalIdentifier(obj).getGUID()
+
 
 def require_zenpack(zenpack_name, default=None):
     '''
@@ -140,7 +139,8 @@ def require_zenpack(zenpack_name, default=None):
 
     return wrap
 
-def lookup_enum(enum_obj,key, default='unknown'):
+
+def lookup_enum(enum_obj, key, default='unknown'):
     '''Take an enumeration dictionary and lookup the value given a key'''
 
     return enum_obj.get(string_to_int(key), default)

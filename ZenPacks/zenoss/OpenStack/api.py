@@ -42,7 +42,7 @@ class IOpenStackFacade(IFacade):
 class OpenStackFacade(ZuulFacade):
     implements(IOpenStackFacade)
 
-    def addOpenStack(self, username, api_key, project_id, auth_url, 
+    def addOpenStack(self, username, api_key, project_id, auth_url,
                      region_name, collector='localhost'):
         """Add a new OpenStack endpoint to the system."""
         parsed_url = urlparse(auth_url)
@@ -65,7 +65,6 @@ class OpenStackFacade(ZuulFacade):
             'zOpenStackAuthUrl': auth_url,
             'zOpenStackRegionName': region_name
             }
-
 
         perfConf = self._dmd.Monitors.getPerformanceMonitor('localhost')
         jobStatus = perfConf.addDeviceCreationJob(

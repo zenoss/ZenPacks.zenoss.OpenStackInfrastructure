@@ -17,16 +17,10 @@ from zope.event import notify
 
 from ZODB.transact import transact
 from OFS.interfaces import IObjectWillBeAddedEvent
-from Products.Zuul.decorators import info, memoize
 from Products.Zuul.catalog.events import IndexingEvent
-from Products.Zuul.interfaces import ICatalogTool
-from Products.AdvancedQuery import Eq
-from Products.Zuul.form import schema as formschema
-from Products.Zuul.utils import ZuulMessageFactory as _t
 from Products.ZenUtils.guid.interfaces import IGlobalIdentifier
 from Products.ZenUtils.guid.guid import GUIDManager
-from Products.ZenHub.zodb import onDelete
-from Products.ZenModel.Device import Device
+
 
 def onDeviceDeleted(object, event):
     '''
@@ -40,6 +34,7 @@ def onDeviceDeleted(object, event):
             if component:
                 component.release_proxy_device()
             object.openstackProxyComponentUUID = None
+
 
 def onDeviceProxyComponentDeleted(object, event):
     '''
@@ -70,7 +65,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
 
     def proxy_deviceclass_zproperty(self):
         '''
-        Return the name of the zProperty that contains the proxy device 
+        Return the name of the zProperty that contains the proxy device
         class name.
 
         Default is 'z<meta type>DeviceClass'
@@ -79,9 +74,9 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
 
     def proxy_deviceclass(self):
         '''
-        Return the device class object identified by 
+        Return the device class object identified by
         proxy_deviceclass_zproperty, creating it if necessary.
-        '''       
+        '''
         if self.proxy_deviceclass_zproperty() is None:
             raise ValueError("proxy_deviceclass_zproperty is not defined for %s" % self.meta_type)
 
@@ -101,14 +96,14 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         '''
         # Technically his does not need to retrieve the device, just
         # verify that it is there.  (Default is to retrieving it,
-        # but this can be made more efficient by querying the 
+        # but this can be made more efficient by querying the
         # catalog more intelligently)
         self.proxy_device()
 
         return True
 
     def proxy_device(self):
-        '''        
+        '''
         Return this component's corresponding proxy device, creating
         it in the proxy_deviceclass if it does not exist.
 
@@ -172,7 +167,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         '''
         The description to put on the proxy device's expanded links section when
         linking back to this component.
-        '''    
+        '''
         return '"%s "%s" at %s' % (
             self.meta_type,
             self.name(),
@@ -197,5 +192,3 @@ class DeviceLinkProvider(object):
             )]
 
         return []
-
-   

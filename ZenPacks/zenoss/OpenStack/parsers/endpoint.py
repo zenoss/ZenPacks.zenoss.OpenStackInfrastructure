@@ -15,6 +15,7 @@ import json
 
 from Products.ZenRRD.CommandParser import CommandParser
 
+
 class endpoint(CommandParser):
     def processResults(self, cmd, result):
         data = json.loads(cmd.result.output)
@@ -29,4 +30,3 @@ class endpoint(CommandParser):
                 # Keys must be converted from unicode to str.
                 event = dict((str(k), v) for k, v in event.iteritems())
                 result.events.append(event)
-

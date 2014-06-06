@@ -13,18 +13,16 @@ from . import schema
 import logging
 LOG = logging.getLogger('zen.OpenStackEndpoint')
 
+
 class Endpoint(schema.Endpoint):
 
-	def get_maintain_proxydevices(self):
-		return False
+    def get_maintain_proxydevices(self):
+        return False
 
-	def set_maintain_proxydevices(self, arg):
-		from ZenPacks.zenoss.OpenStack.DeviceProxyComponent import DeviceProxyComponent
-		for meta_type in DeviceProxyComponent.deviceproxy_meta_types():
-			for component in self.getDeviceComponents(type=meta_type):
-				component.ensure_proxy_device()
+    def set_maintain_proxydevices(self, arg):
+        from ZenPacks.zenoss.OpenStack.DeviceProxyComponent import DeviceProxyComponent
+        for meta_type in DeviceProxyComponent.deviceproxy_meta_types():
+            for component in self.getDeviceComponents(type=meta_type):
+                component.ensure_proxy_device()
 
-		return True
-
-
-
+        return True
