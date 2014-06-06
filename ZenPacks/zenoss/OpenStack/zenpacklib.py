@@ -1087,6 +1087,7 @@ class ClassSpec(object):
             impacts=None,
             impacted_by=None,
             monitoring_templates=None,
+            filter_display=True,
             ):
         """TODO."""
         self.zenpack = zenpack
@@ -1168,6 +1169,9 @@ class ClassSpec(object):
             self.monitoring_templates = [monitoring_templates]
         else:
             self.monitoring_templates = list(monitoring_templates)
+
+        self.filter_display = filter_display
+
 
     def create(self):
         """Implement specification."""
@@ -1544,6 +1548,9 @@ class ClassSpec(object):
     @property
     def filterable_by(self):
         """Return meta_types by which this class can be filtered."""
+        if not self.filter_display:
+            return []
+
         containing = {x.meta_type for x in self.containing_components}
         faceting = {x.meta_type for x in self.faceting_components}
         return list(containing | faceting)
