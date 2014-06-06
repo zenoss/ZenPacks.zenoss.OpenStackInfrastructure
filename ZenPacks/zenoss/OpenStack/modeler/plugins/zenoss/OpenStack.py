@@ -15,7 +15,6 @@ import logging
 log = logging.getLogger('zen.OpenStack')
 
 import types
-from collections import defaultdict
 
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
@@ -25,7 +24,7 @@ from ZenPacks.zenoss.OpenStack.utils import add_local_lib_path
 add_local_lib_path()
 
 from novaclient import client as novaclient
-from ceilometerapiclient import CeilometerAPIClient
+
 
 class OpenStack(PythonPlugin):
     deviceProperties = PythonPlugin.deviceProperties + (
@@ -80,9 +79,9 @@ class OpenStack(PythonPlugin):
         region_id = prepId("region-{0}".format(device.zOpenStackRegionName))
         region = ObjectMap(
             modname='ZenPacks.zenoss.OpenStack.Region',
-                data=dict(
-                    id=region_id,
-                    title=device.zOpenStackRegionName
+            data=dict(
+                id=region_id,
+                title=device.zOpenStackRegionName
             ))
 
         flavors = []
@@ -95,7 +94,7 @@ class OpenStack(PythonPlugin):
                     flavorId=flavor.id,  # performance1-1
                     flavorRAM=flavor.ram * 1024 * 1024,  # 256
                     flavorDisk=flavor.disk * 1024 * 1024 * 1024,  # 10
-            )))
+                )))
 
         images = []
         for image in results['images']:
@@ -111,7 +110,7 @@ class OpenStack(PythonPlugin):
                     imageStatus=image.status,  # ACTIVE
                     imageCreated=created,  # 2010-09-17T07:19:20-05:00
                     imageUpdated=image.updated,  # 2010-09-17T07:19:20-05:00
-            )))    
+                )))
 
         servers = []
         for server in results['servers']:
@@ -187,62 +186,33 @@ class OpenStack(PythonPlugin):
                 modname='ZenPacks.zenoss.OpenStack.Server',
                 data=dict(
                     id='server-{0}'.format(server.id),
-                    title=server.name,  # cloudserver01                
-                    serverId=server.id, # 847424
+                    title=server.name,   # cloudserver01
+                    serverId=server.id,  # 847424
                     serverStatus=server.status,  # ACTIVE
                     serverBackupEnabled=backup_schedule_enabled,  # False
-                    serverBackupDaily=backup_schedule_daily,   # DISABLED
-                    serverBackupWeekly=backup_schedule_weekly, # DISABLED
-                    publicIps=list(public_ips),   # 50.57.74.222
-                    privateIps=list(private_ips), # 10.182.13.13
-                    set_flavor='flavor-{0}'.format(flavor_id),  # flavor-performance1-1
-                    set_image='image-{0}'.format(image_id),     # image-346eeba5-a122-42f1-94e7-06cb3c53f690
-                    hostId=server.hostId,  # a84303c0021aa53c7e749cbbbfac265f
-                    hostName=server.name   # cloudserver01
-            )))
-
-        hosts = []
-        hostnames = set()
-        for service in results['services']:
-            hostnames.add(service.host)
-
-        for hostname in hostnames:
-            host_id = prepId("host-{0}".format(hostname))
-
-            hosts.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStack.Host',
-                data=dict(
-                    id=host_id,
-                    title=hostname
-            )))
-
-        hypervisors = []
-        for hypervisor in results['hypervisors']: 
-            hypervisor_id = prepId("hypervisor-{0}".format(hypervisor.id))
-            host_id       = prepId("host-{0}".format(hypervisor.hypervisor_hostname))
-
-            hypervisor_servers = []
-            if hasattr(hypervisor, 'servers'):
-                hypervisor_servers = ['server-{0}'.format(x['uuid']) for x in hypervisor.servers]
-
-            hypervisors.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStack.Hypervisor',
-                data=dict(
-                    id=hypervisor_id,
-                    title='{0}.{1}'.format(hypervisor.hypervisor_hostname, hypervisor.id),
-                    hypervisorId=hypervisor.id,  # 1
-                    set_servers=hypervisor_servers,
-                    set_host=host_id
-            )))
-
+                    serverBackupDaily=backup_schedule_daily,      # DISABLED
+                    serverBackupWeekly=backup_schedule_weekly,    # DISABLED
+                    publicIps=list(public_ips),                   # 50.57.74.222
+                    privateIps=list(private_ips),                 # 10.182.13.13
+                    set_flavor='flavor-{0}'.format(flavor_id),    # flavor-performance1-1
+                    set_image='image-{0}'.format(image_id),       # image-346eeba5-a122-42f1-94e7-06cb3c53f690
+                    hostId=server.hostId,                         # a84303c0021aa53c7e749cbbbfac265f
+                    hostName=server.name                          # cloudserver01
+                )))
 
         services = []
-        zones = {}            
+        zones = {}
+        hostmap = {}
         for service in results['services']:
             title = '{0}@{1} ({2})'.format(service.binary, service.host, service.zone)
             service_id = prepId('service-{0}-{1}-{2}'.format(service.binary, service.host, service.zone))
             host_id = prepId("host-{0}".format(service.host))
             zone_id = prepId("zone-{0}".format(service.zone))
+
+            hostmap[host_id] = {
+                'hostname': service.host,
+                'zone_id': zone_id
+            }
 
             zones.setdefault(zone_id, ObjectMap(
                 modname='ZenPacks.zenoss.OpenStack.AvailabilityZone',
@@ -262,9 +232,38 @@ class OpenStack(PythonPlugin):
                     set_orgComponent=zone_id
                 )))
 
+        hosts = []
+        for host_id in hostmap:
+            data = hostmap[host_id]
+            hosts.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.Host',
+                data=dict(
+                    id=host_id,
+                    title=data['hostname'],
+                    set_orgComponent=data['zone_id']
+                )))
+
+        hypervisors = []
+        for hypervisor in results['hypervisors']:
+            hypervisor_id = prepId("hypervisor-{0}".format(hypervisor.id))
+            host_id = prepId("host-{0}".format(hypervisor.hypervisor_hostname))
+
+            hypervisor_servers = []
+            if hasattr(hypervisor, 'servers'):
+                hypervisor_servers = ['server-{0}'.format(x['uuid']) for x in hypervisor.servers]
+
+            hypervisors.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.Hypervisor',
+                data=dict(
+                    id=hypervisor_id,
+                    title='{0}.{1}'.format(hypervisor.hypervisor_hostname, hypervisor.id),
+                    hypervisorId=hypervisor.id,  # 1
+                    set_servers=hypervisor_servers,
+                    set_host=host_id
+                )))
 
         componentsMap = RelationshipMap(relname='components')
-        for objmap in [region] + flavors + images + servers + hosts + hypervisors + zones.values() + services:
+        for objmap in [region] + flavors + images + servers + zones.values() + hosts + hypervisors + services:
             componentsMap.append(objmap)
 
         endpointObjMap = ObjectMap(
