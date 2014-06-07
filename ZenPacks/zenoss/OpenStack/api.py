@@ -16,10 +16,13 @@ log = logging.getLogger('zen.OpenStackAPI')
 
 from urlparse import urlparse
 
+from zope.event import notify
 from zope.interface import implements
+from ZODB.transact import transact
 
 from Products.ZenUtils.Ext import DirectRouter, DirectResponse
 from Products import Zuul
+from Products.Zuul.catalog.events import IndexingEvent
 from Products.Zuul.facades import ZuulFacade
 from Products.Zuul.interfaces import IFacade
 from Products.Zuul.utils import ZuulMessageFactory as _t
@@ -31,7 +34,7 @@ OPENSTACK_DEVICE_PATH = "/Devices/OpenStack"
 
 
 class IOpenStackFacade(IFacade):
-    def addOpenStack(self, username, api_key, project_id, auth_url,
+    def addOpenStack(self, device_name, username, api_key, project_id, auth_url,
                      region_name=None, collector='localhost'):
         """Add OpenStack Endpoint."""
 
@@ -42,7 +45,7 @@ class IOpenStackFacade(IFacade):
 class OpenStackFacade(ZuulFacade):
     implements(IOpenStackFacade)
 
-    def addOpenStack(self, username, api_key, project_id, auth_url,
+    def addOpenStack(self, device_name, username, api_key, project_id, auth_url,
                      region_name, collector='localhost'):
         """Add a new OpenStack endpoint to the system."""
         parsed_url = urlparse(auth_url)
@@ -50,13 +53,11 @@ class OpenStackFacade(ZuulFacade):
         if parsed_url.scheme == "" or parsed_url.hostname is None:
             return False, _t("'%s' is not a valid URL." % auth_url)
 
-        hostname = parsed_url.hostname
-
         # Verify that this device does not already exist.
         deviceRoot = self._dmd.getDmdRoot("Devices")
-        device = deviceRoot.findDeviceByIdExact(hostname)
+        device = deviceRoot.findDeviceByIdExact(device_name)
         if device:
-            return False, _t("A device named %s already exists." % hostname)
+            return False, _t("A device named %s already exists." % device_name)
 
         zProperties = {
             'zCommandUsername': username,
@@ -66,15 +67,28 @@ class OpenStackFacade(ZuulFacade):
             'zOpenStackRegionName': region_name
             }
 
-        perfConf = self._dmd.Monitors.getPerformanceMonitor('localhost')
-        jobStatus = perfConf.addDeviceCreationJob(
-            deviceName=hostname,
-            devicePath=OPENSTACK_DEVICE_PATH,
-            discoverProto='python',
-            performanceMonitor=collector,
-            zProperties=zProperties)
+        @transact
+        def create_device():
+            dc = self._dmd.Devices.getOrganizer(OPENSTACK_DEVICE_PATH)
 
-        return True, jobStatus.id
+            device = dc.createInstance(device_name)
+            device.setPerformanceMonitor(collector)
+
+            for prop, val in zProperties.items():
+                device.setZenProperty(prop, val)
+
+            device.index_object()
+            notify(IndexingEvent(device))
+
+        # This must be committed before the following model can be
+        # scheduled.
+        create_device()
+
+        # Schedule a modeling job for the new device.
+        device = deviceRoot.findDeviceByIdExact(device_name)
+        device.collectDevice(setlog=False, background=True)
+
+        return True, 'Device addition scheduled'
 
     def getRegions(self, username, api_key, project_id, auth_url):
         """Get a list of available regions, given a keystone endpoint and credentials."""
@@ -101,12 +115,12 @@ class OpenStackRouter(DirectRouter):
     def _getFacade(self):
         return Zuul.getFacade('openstack', self.context)
 
-    def addOpenStack(self, username, api_key, project_id, auth_url,
+    def addOpenStack(self, device_name, username, api_key, project_id, auth_url,
                      region_name, collector='localhost'):
 
         facade = self._getFacade()
         success, message = facade.addOpenStack(
-            username, api_key, project_id, auth_url,
+            device_name, username, api_key, project_id, auth_url,
             region_name=region_name, collector=collector)
 
         if success:
