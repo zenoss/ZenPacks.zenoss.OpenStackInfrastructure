@@ -292,6 +292,9 @@ True
 </property>
 <tomanycont id='graphPoints'>
 <object id='Total' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property type="string" id="color" mode="w" >
 000000
 </property>
@@ -526,6 +529,9 @@ AVERAGE
 </property>
 </object>
 <object id='Total' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property type="string" id="color" mode="w" >
 000000
 </property>
@@ -609,6 +615,9 @@ False
 </property>
 <property type="boolean" id="hasSummary" mode="w" >
 True
+</property>
+<property type="long" id="sequence" mode="w" >
+0
 </property>
 <tomanycont id='graphPoints'>
 <object id='Active' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
@@ -989,6 +998,9 @@ AVERAGE
 </property>
 </object>
 <object id='Total' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property type="string" id="color" mode="w" >
 000000
 </property>
@@ -1158,5 +1170,159 @@ OpenStack connectivity restored
 <property visible="True" type="int" id="zEventSeverity" >
 0
 </property>
+</object>
+<!-- ('', 'zport', 'dmd', 'Processes', 'OpenStack') -->
+<object id='/zport/dmd/Processes/OpenStack' module='Products.ZenModel.OSProcessOrganizer' class='OSProcessOrganizer'>
+<property visible="True" type="int" id="zModelerLock" >
+1
+</property>
+<tomanycont id='osProcessClasses'>
+<object id='nova-api' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+nova-api
+</property>
+<property type="string" id="regex" mode="w" >
+nova-api
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+4
+</property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/devstack1/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-api_c6b3f6fdf5a2aaa75801d5505d173b27'/>
+</tomany>
+</object>
+<object id='nova-cert' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+nova-cert
+</property>
+<property type="string" id="regex" mode="w" >
+nova-cert
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+0
+</property>
+</object>
+<object id='nova-compute' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+nova-compute
+</property>
+<property type="string" id="regex" mode="w" >
+nova-compute
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+3
+</property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/devstack1/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-compute_204077b5c1f97c535be5d8ae72436199'/>
+</tomany>
+</object>
+<object id='nova-conductor' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+nova-conductor
+</property>
+<property type="string" id="regex" mode="w" >
+nova-conductor
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+0
+</property>
+</object>
+<object id='nova-consoleauth' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+nova-consoleauth
+</property>
+<property type="string" id="regex" mode="w" >
+nova-consoleauth
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+0
+</property>
+</object>
+<object id='nova-network' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+nova-network
+</property>
+<property type="string" id="regex" mode="w" >
+nova-network
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+0
+</property>
+</object>
+<object id='nova-scheduler' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+nova-scheduler
+</property>
+<property type="string" id="regex" mode="w" >
+nova-scheduler
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
 </object>
 </objects>

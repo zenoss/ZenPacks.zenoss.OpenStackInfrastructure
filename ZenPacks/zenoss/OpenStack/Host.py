@@ -13,6 +13,7 @@ from . import schema
 import logging
 LOG = logging.getLogger('zen.OpenStackHost')
 
+from Products.ZenEvents.ZenEventClasses import Clear, Warning
 
 class Host(schema.Host):
     # These will be derived from the services present on the host
@@ -22,21 +23,53 @@ class Host(schema.Host):
     def isControllerNode(self):
         pass
 
+    def maintain_proxy_device(self):
+        self.ensure_proxy_device()
+        self.ensure_service_monitoring()
+
     def ensure_proxy_device(self):
+        # ensure that the host exists.
+        self.proxy_device()
+
+    def ensure_service_monitoring(self):
+        # Based on the NovaServices we have modeled on the host, ensure that we
+        # have the right OSProcess groups detected.
         device = self.proxy_device()
+        if device.getSnmpLastCollection() is None:
+            LOG.info("Unable to ensure service monitoring until host device is modeled.")
+            return
 
-        # Replace the default linux process plugin with our own, which
-        # will enforce that certain processes are monitored, and will create
-        # instances of ZenPacks.zenoss.OpenStack.OSProcess instead of
-        # the default one.
-        plugins = device.getZ('zCollectorPlugins')
-        if 'zenoss.cmd.linux.process' in plugins:
-            plugins.remove('zenoss.cmd.linux.process')
-        if 'zenoss.cmd.linux.openstack.process' not in plugins:
-            plugins.append('zenoss.cmd.linux.openstack.process')
-        device.setZenProperty('zCollectorPlugins', plugins)
+        required_services = set()
+        for service in self.getDeviceComponents(type='OpenStackNovaService'):
+            required_services.add(service.binary)
 
-        return True
+        process_classes = [p.osProcessClass().processClassPrimaryUrlPath()
+                           for p in device.getDeviceComponents(type='OSProcess')]
+
+        detected_services = [pc.split('/')[6] for pc in process_classes
+                             if pc.split('/')[4] == 'OpenStack']
+
+        # Services we have defined process sets for, and thus can monitor.
+        supported_services = [x.id for x in self.dmd.Processes.getSubOSProcessClassesGen()
+                              if x.getPrimaryParentOrgName() == '/OpenStack']
+
+        for service in supported_services:
+            if service in required_services and service not in detected_services:
+                self.dmd.ZenEventManager.sendEvent(dict(
+                    device=self.id,
+                    summary='OpenStack Host %s is missing OSProcess monitoring for %s process set.' % (device.name(), service),
+                    eventClass='/Status/OpenStack',
+                    eventKey='ServiceMonitoring-' + service,
+                    severity=Warning,
+                    ))
+            else:
+                self.dmd.ZenEventManager.sendEvent(dict(
+                    device=self.id,
+                    summary='Openstack Host %s monitoring for %s process set has been enabled.' % (device.name(), service),
+                    eventClass='/Status/OpenStack',
+                    eventKey='ServiceMonitoring-' + service,
+                    severity=Clear,
+                    ))
 
     def devicelink_descr(self):
         '''

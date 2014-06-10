@@ -90,14 +90,10 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
             LOG.info("Creating DeviceClass %s" % dcpath)
             return self.dmd.Devices.createOrganizer(dcpath)
 
-    def ensure_proxy_device(self):
+    def maintain_proxy_device(self):
         '''
         Ensure that the proxy device exists, creating it if necessary.
-        '''
-        # Technically his does not need to retrieve the device, just
-        # verify that it is there.  (Default is to retrieving it,
-        # but this can be made more efficient by querying the
-        # catalog more intelligently)
+        '''    
         self.proxy_device()
 
         return True

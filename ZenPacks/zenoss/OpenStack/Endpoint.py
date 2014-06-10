@@ -23,6 +23,6 @@ class Endpoint(schema.Endpoint):
         from ZenPacks.zenoss.OpenStack.DeviceProxyComponent import DeviceProxyComponent
         for meta_type in DeviceProxyComponent.deviceproxy_meta_types():
             for component in self.getDeviceComponents(type=meta_type):
-                component.ensure_proxy_device()
+                component.maintain_proxy_device()
 
         return True
