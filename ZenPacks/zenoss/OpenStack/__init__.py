@@ -225,6 +225,54 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'hypervisorId':      {'grid_display': False}
             }
+        },
+
+        'Meter': {
+            'base': 'OpenstackComponent',
+            'meta_type': 'OpenStackMeter',
+            'label': 'Meter',
+            'order': 28,
+            'properties': {
+                'meterId':      {'grid_display': False},
+                'meterType':    {'type_': 'lines',
+                                 'label': 'Type'},
+                'meterUnit':    {'type_': 'lines',
+                                 'label': 'Unit'},
+            }
+        },
+
+        'Statistic': {
+            'base': 'OpenstackComponent',
+            'meta_type': 'OpenStackStatistic',
+            'label': 'Statistic',
+            'order': 29,
+            'properties': {
+                'statisticId':          {'grid_display': False},
+                'statUnit':             {'type_': 'lines',
+                                         'label': 'Unit'},
+                'statDurationStart':    {'type_': 'lines',
+                                         'label': 'DurationStart'},
+                'statDurationEnd':      {'type_': 'lines',
+                                         'label': 'DurationEnd'},
+                'statDuration':         {'type_': 'lines',
+                                         'label': 'Duration'},
+                'statPeriodStart':      {'type_': 'lines',
+                                         'label': 'PeriodStart'},
+                'statPeriodEnd':        {'type_': 'lines',
+                                         'label': 'PeriodEnd'},
+                'statPeriod':           {'type_': 'lines',
+                                         'label': 'Period'},
+                'statMin':              {'type_': 'float',
+                                         'label': 'Min'},
+                'statMax':              {'type_': 'float',
+                                         'label': 'Max'},
+                'statAvg':              {'type_': 'float',
+                                         'label': 'Avg'},
+                'statSum':              {'type_': 'float',
+                                         'label': 'Sum'},
+                'statCount':            {'type_': 'int',
+                                         'label': 'Count'},
+            }
         }
     },
 

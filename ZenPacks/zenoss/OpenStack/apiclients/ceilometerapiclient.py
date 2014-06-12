@@ -40,6 +40,7 @@ class CeilometerAPIClient(object):
         )
 
         self._get_meters()
+        self._meternames = self.get_meternames()
 
     def _get_token(self):
         # token expires in 3600 seconds
@@ -82,8 +83,7 @@ class CeilometerAPIClient(object):
     def get_statistics(self, meter_name=''):
         if len(meter_name) == 0:
             return None
-        meternames = self.get_meternames()
-        if meter_name not in meternames:
+        if meter_name not in self._meternames:
             return None
 
         return self._client.statistics.list(meter_name)[0].to_dict()
