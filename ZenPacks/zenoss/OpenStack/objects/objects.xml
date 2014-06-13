@@ -1196,9 +1196,6 @@ False
 <property type="int" id="sequence" mode="w" >
 4
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/devstack1/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-api_c6b3f6fdf5a2aaa75801d5505d173b27'/>
-</tomany>
 </object>
 <object id='nova-cert' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -1239,9 +1236,6 @@ False
 <property type="int" id="sequence" mode="w" >
 3
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/devstack1/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-compute_204077b5c1f97c535be5d8ae72436199'/>
-</tomany>
 </object>
 <object id='nova-conductor' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
