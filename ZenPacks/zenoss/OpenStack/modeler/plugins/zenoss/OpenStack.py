@@ -25,6 +25,7 @@ add_local_lib_path()
 
 from novaclient import client as novaclient
 from ceilometerapiclient import CeilometerAPIClient
+from keystoneapiclient import KeystoneAPIClient
 
 class OpenStack(PythonPlugin):
     deviceProperties = PythonPlugin.deviceProperties + (
@@ -73,24 +74,39 @@ class OpenStack(PythonPlugin):
         log.info('Requesting hypervisors')
         results['hypervisors'] = client.hypervisors.search('%', servers=True)
 
-        # Ceilometer
-        ceiloclient = CeilometerAPIClient(
-            username=device.zCommandUsername,
-            api_key=device.zCommandPassword,
-            project_id=device.zOpenStackProjectId,
-            auth_url=device.zOpenStackAuthUrl,
-            api_version=2,
-            region_name=region_name
-        )
+        # Keystone
+#       keystoneclient = KeystoneAPIClient(
+#           username=device.zCommandUsername,
+#           api_key=device.zCommandPassword,
+#           project_id=device.zOpenStackProjectId,
+#           auth_url=device.zOpenStackAuthUrl,
+#           api_version=2
+#       )
 
-        results['statistics'] = {}
-        meternames = ceiloclient.get_meternames()
-        for name in meternames:
-            results['statistics'][name] = ceiloclient.get_statistics(name)
-        results['meters-list'] = ceiloclient.get_meters()
-        results['alarms-list'] = ceiloclient.get_alarms()
-        results['resources-list'] = ceiloclient.get_resources()
-        results['samples-list'] = ceiloclient.get_samples()
+#       log.info('Requesting endpoints')
+#       results['endpoints'] = keystoneclient.get_endpoints()
+
+#       log.info('Requesting roles')
+#       results['roles'] = keystoneclient.get_roles()
+
+#       log.info('Requesting services')
+#       results['keystoneservices'] = keystoneclient.get_services()
+
+#       log.info('Requesting tenants')
+#       results['tenants'] = keystoneclient.get_tenants()
+
+#       log.info('Requesting users')
+#       results['userts'] = keystoneclient.get_users()
+
+        # Ceilometer
+#       ceiloclient = CeilometerAPIClient(
+#           username=device.zCommandUsername,
+#           api_key=device.zCommandPassword,
+#           project_id=device.zOpenStackProjectId,
+#           auth_url=device.zOpenStackAuthUrl,
+#           api_version=2,
+#           region_name=region_name
+#       )
 
         return results
 
@@ -206,6 +222,7 @@ class OpenStack(PythonPlugin):
                 data=dict(
                     id='server-{0}'.format(server.id),
                     title=server.name,   # cloudserver01
+                    resourceId=server.id,
                     serverId=server.id,  # 847424
                     serverStatus=server.status,  # ACTIVE
                     serverBackupEnabled=backup_schedule_enabled,  # False
@@ -281,71 +298,9 @@ class OpenStack(PythonPlugin):
                     set_host=host_id
                 )))
 
-        meters = []
-        Id = 1
-        for meter in results['meters-list']:
-            meter_id = prepId("meter-{0}".format(Id))
-            meters.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStack.Meter',
-                data=dict(
-                    id=meter_id,
-                    title=meter['name'],
-                    meterId=meter['meter_id'],
-                    meterType=meter['type'],
-                    meterUnit=meter['unit'],
-                )))
-            Id += 1
-
-        statistics = []
-        Id = 1
-        for key in results['statistics'].keys():
-            stat_id = prepId("statistic-{0}".format(Id))
-            statistics.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStack.Statistic',
-                data=dict(
-                    id=stat_id,
-                    title=key,
-                    statUnit=results['statistics'][key]['unit'],
-                    statDurationStart=results['statistics'][key]['duration_start'],
-                    statDurationEnd=results['statistics'][key]['duration_end'],
-                    statDuration=results['statistics'][key]['duration'],
-                    statPeriodStart=results['statistics'][key]['period_start'],
-                    statPeriodEnd=results['statistics'][key]['period_end'],
-                    statPeriod=results['statistics'][key]['period'],
-                    statMin=results['statistics'][key]['min'],
-                    statMax=results['statistics'][key]['max'],
-                    statAvg=results['statistics'][key]['avg'],
-                    statSum=results['statistics'][key]['sum'],
-                    statCount=results['statistics'][key]['count'],
-                )))
-            Id += 1
-
-        '''
-        resources = []
-        Id = 1
-        for res in results['resources-list']:
-#           import pdb; pdb.set_trace()
-#           if len(meters) > 0 and meter['name'] in \
-#               [meter.title for meter in meters]:
-#               continue
-
-            res_id = prepId("resource-{0}".format(Id))
-            resources.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStack.Resource',
-                data=dict(
-                    id=res_id,
-                    title=res['metadata']['name'],
-                    meterId=meter['meter_id'],
-                    resSource=res['source'],
-                    meterUnit=meter['unit'],
-                )))
-            Id += 1
-        '''
-
         componentsMap = RelationshipMap(relname='components')
         for objmap in [region] + flavors + images + servers + \
-            zones.values() + hosts + hypervisors + services + meters + \
-            statistics:
+            zones.values() + hosts + hypervisors + services:
             componentsMap.append(objmap)
 
         endpointObjMap = ObjectMap(

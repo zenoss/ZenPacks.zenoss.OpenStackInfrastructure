@@ -74,6 +74,9 @@ class OpenStackFacade(ZuulFacade):
             device = dc.createInstance(device_name)
             device.setPerformanceMonitor(collector)
 
+            device.username = username
+            device.password = api_key
+
             for prop, val in zProperties.items():
                 device.setZenProperty(prop, val)
 

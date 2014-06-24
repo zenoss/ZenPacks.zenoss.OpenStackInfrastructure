@@ -21,6 +21,11 @@ $ZENHOME/ZenPacks/easy-install.pth.
 from . import zenpacklib
 
 
+# Useful to avoid making literal string references to module and class names
+# throughout the rest of the ZenPack.
+MODULE_NAME = {}
+CLASS_NAME = {}
+
 RELATIONSHIPS_YUML = """
 // containing
 [Endpoint]++components-endpoint1[OpenstackComponent]
@@ -47,7 +52,7 @@ CFG = zenpacklib.ZenPackSpec(
         'zOpenStackProjectId':         {},
         'zOpenStackAuthUrl':           {},
         'zOpenStackRegionName':        {},
-        'zOpenStackHostDeviceClass':   {'default': '/Server/SSH/Linux/NovaHost'}
+        'zOpenStackHostDeviceClass':   {'default': '/Server/SSH/Linux/NovaHost'},
     },
 
     classes={
@@ -75,6 +80,10 @@ CFG = zenpacklib.ZenPackSpec(
         'OpenstackComponent': {
             'base': zenpacklib.Component,
             'filter_display': False,
+            'properties': {
+                 'resourceId': {'grid_display': False,
+                                'label': 'Ceilometer Resource ID',}
+            }
         },
 
         'DeviceProxyComponent': {
@@ -227,53 +236,6 @@ CFG = zenpacklib.ZenPackSpec(
             }
         },
 
-        'Meter': {
-            'base': 'OpenstackComponent',
-            'meta_type': 'OpenStackMeter',
-            'label': 'Meter',
-            'order': 28,
-            'properties': {
-                'meterId':      {'grid_display': False},
-                'meterType':    {'type_': 'lines',
-                                 'label': 'Type'},
-                'meterUnit':    {'type_': 'lines',
-                                 'label': 'Unit'},
-            }
-        },
-
-        'Statistic': {
-            'base': 'OpenstackComponent',
-            'meta_type': 'OpenStackStatistic',
-            'label': 'Statistic',
-            'order': 29,
-            'properties': {
-                'statisticId':          {'grid_display': False},
-                'statUnit':             {'type_': 'lines',
-                                         'label': 'Unit'},
-                'statDurationStart':    {'type_': 'lines',
-                                         'label': 'DurationStart'},
-                'statDurationEnd':      {'type_': 'lines',
-                                         'label': 'DurationEnd'},
-                'statDuration':         {'type_': 'lines',
-                                         'label': 'Duration'},
-                'statPeriodStart':      {'type_': 'lines',
-                                         'label': 'PeriodStart'},
-                'statPeriodEnd':        {'type_': 'lines',
-                                         'label': 'PeriodEnd'},
-                'statPeriod':           {'type_': 'lines',
-                                         'label': 'Period'},
-                'statMin':              {'type_': 'float',
-                                         'label': 'Min'},
-                'statMax':              {'type_': 'float',
-                                         'label': 'Max'},
-                'statAvg':              {'type_': 'float',
-                                         'label': 'Avg'},
-                'statSum':              {'type_': 'float',
-                                         'label': 'Sum'},
-                'statCount':            {'type_': 'int',
-                                         'label': 'Count'},
-            }
-        }
     },
 
     class_relationships=zenpacklib.relationships_from_yuml(RELATIONSHIPS_YUML),

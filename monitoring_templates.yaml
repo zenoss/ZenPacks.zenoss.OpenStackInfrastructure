@@ -1,0 +1,43 @@
+#/OpenStack/OpenStackEndpoint:
+/OpenStack/Server:
+  description: "OpenStack monitoring."
+  targetPythonClass: ZenPacks.zenoss.OpenStack.Server.Server
+
+  datasources:
+    cpuUtilization:
+      type: OpenStack Ceilometer
+      namespace: '/OpenStack/Nova/Server'
+      metric: 'cpu_util'
+      severity: 'Clear'
+
+      datapoints:
+        cpuUtilization: GAUGE_MIN_0_ALIAS
+
+    cpuUsage:
+      type: OpenStack Ceilometer
+      namespace: '/OpenStack/Nova/Server'
+      metric: 'cpu'
+      severity: 'Clear'
+
+      datapoints:
+        cpuUsage: GAUGE_MIN_0_ALIAS
+
+  graphs:
+    CPU Utilization:
+      units: percent
+      miny: 0
+      maxy: 100
+
+      graphpoints:
+        cpu_util:
+          dpName: cpuUtilization
+          format: "%5.2lf"
+
+    CPU Usage:
+      units: seconds
+      miny: 0
+      
+      graphpoints:
+        cpu_usage:
+          dpName: cpuUsage
+          format: "%5.2lf"
