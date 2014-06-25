@@ -114,8 +114,6 @@ class OpenStackCeilometerDataSource(PythonDataSource):
     Datasource used to capture datapoints from OpenStack Ceilometer.
     '''
 
-#   import pdb;pdb.set_trace()
-    log.info("zen.OpenStack: class OpenStackCeilometerDataSource")
     ZENPACKID = 'ZenPacks.zenoss.OpenStack'
 
     sourcetypes = ('OpenStack Ceilometer',)
@@ -359,8 +357,6 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
         return data
 
     def onError(self, result, config):
-
-        log.info("zen.OpenStack: class OpenStackCeilometerDataSourceiPlugin:onError()")
         errmsg = 'OpenStack: %s' % result_errmsg(result)
         log.error('%s: %s', config.id, errmsg)
 
