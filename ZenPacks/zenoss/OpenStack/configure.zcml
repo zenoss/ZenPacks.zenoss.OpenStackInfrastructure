@@ -2,67 +2,63 @@
 <configure
     xmlns="http://namespaces.zope.org/zope"
     xmlns:browser="http://namespaces.zope.org/browser"
-    xmlns:zcml="http://namespaces.zope.org/zcml">
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    >
 
-    <!-- Import directRouter Directive -->
-    <include package="Products.ZenUtils.extdirect.zope" file="meta.zcml"/>
-
-    <!-- Define the Router and Facade -->
-    <browser:directRouter
-        name="openstack_router"
-        for="*"
-        class=".routers.OpenStackRouter"
-        namespace="Zenoss.remote"
-        permission="zenoss.View"
-        />
-
-    <adapter
-        name="openstack"
-        provides=".interfaces.IOpenStackFacade"
-        for="*"
-        factory=".facades.OpenStackFacade"
-        />
-
-    <!-- Define Device Loader -->
+    <!-- Device Loaders -->
     <utility
-        name="openstack"
+        name="openstack_account"
         provides="Products.ZenModel.interfaces.IDeviceLoader"
         component=".deviceloaders.OpenStackLoader"
         />
 
-    <!-- Info Adapters -->
-    <adapter
-        factory=".info.EndpointInfo"
-        for=".Endpoint.Endpoint"
-        provides=".interfaces.IEndpointInfo"
+    <!-- API: Routers -->
+    <include package="Products.ZenUtils.extdirect.zope" file="meta.zcml"/>
+
+    <browser:directRouter
+        name="openstack_router"
+        for="*"
+        class=".api.OpenStackRouter"
+        namespace="Zenoss.remote"
+        permission="zenoss.View"
         />
 
+    <!-- API: Facades -->
     <adapter
-        factory=".info.FlavorInfo"
-        for=".Flavor.Flavor"
-        provides=".interfaces.IFlavorInfo"
+        name="openstack"
+        provides=".api.IOpenStackFacade"
+        for="*"
+        factory=".api.OpenStackFacade"
         />
 
+    <!-- API: Infos -->
     <adapter
-        factory=".info.ImageInfo"
-        for=".Image.Image"
-        provides=".interfaces.IImageInfo"
+        provides=".datasources.OpenStackCeilometerDataSource.IOpenStackCeilometerDataSourceInfo"
+        for=".datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSource"
+        factory=".datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourceInfo"
         />
 
-    <adapter
-        factory=".info.ServerInfo"
-        for=".Server.Server"
-        provides=".interfaces.IServerInfo"
+    <!-- Device Links -->
+    <configure zcml:condition="have zenoss:IExpandedLinkProvider">
+        <subscriber
+            provides='Products.ZenModel.interfaces.IExpandedLinkProvider'
+            for='Products.ZenModel.Device.Device'
+            factory='.DeviceProxyComponent.DeviceLinkProvider'
+            />
+
+    </configure>
+
+    <!-- DeviceProxyComponent cleanup -->
+    <subscriber
+        for="Products.ZenModel.Device.Device
+             OFS.interfaces.IObjectWillBeMovedEvent"
+        handler=".DeviceProxyComponent.onDeviceDeleted"
         />
 
-    <!-- Include Browser Code -->
-    <include package=".browser"/>		
-
-    <!-- Include Dynamic View Adapters -->
-    <include
-        zcml:condition="installed ZenPacks.zenoss.DynamicView"
-        package=".dynamicview"
+    <subscriber
+        for=".DeviceProxyComponent.DeviceProxyComponent
+             OFS.interfaces.IObjectWillBeMovedEvent"
+        handler=".DeviceProxyComponent.onDeviceProxyComponentDeleted"
         />
 
 </configure>
-

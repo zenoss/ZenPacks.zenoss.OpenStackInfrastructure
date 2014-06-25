@@ -18,11 +18,14 @@ import types
 
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
+from Products.ZenUtils.Utils import prepId
 
-from ZenPacks.zenoss.OpenStack.util import addLocalLibPath
-addLocalLibPath()
+from ZenPacks.zenoss.OpenStack.utils import add_local_lib_path
+add_local_lib_path()
 
 from novaclient import client as novaclient
+from ceilometerapiclient import CeilometerAPIClient
+from keystoneapiclient import KeystoneAPIClient
 
 class OpenStack(PythonPlugin):
     deviceProperties = PythonPlugin.deviceProperties + (
@@ -31,7 +34,8 @@ class OpenStack(PythonPlugin):
         'zOpenStackProjectId',
         'zOpenStackAuthUrl',
         'zOpenStackRegionName',
-        'zOpenstackComputeApiVersion'
+        'zOpenStackNovaApiHosts',
+        'zOpenStackExtraHosts',
     )
 
     def collect(self, device, unused):
@@ -46,7 +50,7 @@ class OpenStack(PythonPlugin):
             http_log_debug = False
 
         client = novaclient.Client(
-            device.zOpenstackComputeApiVersion,
+            2,  # API version 2
             device.zCommandUsername,
             device.zCommandPassword,
             device.zOpenStackProjectId,
@@ -66,42 +70,84 @@ class OpenStack(PythonPlugin):
         log.info('Requesting servers')
         results['servers'] = client.servers.list()
 
+        log.info('Requesting services')
+        results['services'] = client.services.list()
+
+        log.info('Requesting hypervisors')
+        results['hypervisors'] = client.hypervisors.search('%', servers=True)
+
+        # Keystone
+#       keystoneclient = KeystoneAPIClient(
+#           username=device.zCommandUsername,
+#           api_key=device.zCommandPassword,
+#           project_id=device.zOpenStackProjectId,
+#           auth_url=device.zOpenStackAuthUrl,
+#           api_version=2
+#       )
+
+#       log.info('Requesting endpoints')
+#       results['endpoints'] = keystoneclient.get_endpoints()
+
+#       log.info('Requesting roles')
+#       results['roles'] = keystoneclient.get_roles()
+
+#       log.info('Requesting services')
+#       results['keystoneservices'] = keystoneclient.get_services()
+
+#       log.info('Requesting tenants')
+#       results['tenants'] = keystoneclient.get_tenants()
+
+#       log.info('Requesting users')
+#       results['userts'] = keystoneclient.get_users()
+
+        # Ceilometer
+#       ceiloclient = CeilometerAPIClient(
+#           username=device.zCommandUsername,
+#           api_key=device.zCommandPassword,
+#           project_id=device.zOpenStackProjectId,
+#           auth_url=device.zOpenStackAuthUrl,
+#           api_version=2,
+#           region_name=region_name
+#       )
+
         return results
 
-    def process(self, devices, results, unused):
+    def process(self, device, results, unused):
+        region_id = prepId("region-{0}".format(device.zOpenStackRegionName))
+        region = ObjectMap(
+            modname='ZenPacks.zenoss.OpenStack.Region',
+            data=dict(
+                id=region_id,
+                title=device.zOpenStackRegionName
+            ))
+
         flavors = []
         for flavor in results['flavors']:
-            flavors.append(ObjectMap(data=dict(
-                id='flavor{0}'.format(flavor.id),
-                title=flavor.name,  # 256 server
-                flavorId=flavor.id,  # performance1-1
-                flavorRAM=flavor.ram * 1024 * 1024,  # 256
-                flavorDisk=flavor.disk * 1024 * 1024 * 1024,  # 10
-            )))
-
-        flavorsMap = RelationshipMap(
-            relname='flavors',
-            modname='ZenPacks.zenoss.OpenStack.Flavor',
-            objmaps=flavors)
+            flavors.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.Flavor',
+                data=dict(
+                    id='flavor-{0}'.format(flavor.id),
+                    title=flavor.name,  # 256 server
+                    flavorId=flavor.id,  # performance1-1
+                    flavorRAM=flavor.ram * 1024 * 1024,  # 256
+                    flavorDisk=flavor.disk * 1024 * 1024 * 1024,  # 10
+                )))
 
         images = []
         for image in results['images']:
             # Sometimes there's no created timestamp for an image.
             created = getattr(image, 'created', '')
 
-            images.append(ObjectMap(data=dict(
-                id='image{0}'.format(image.id),
-                title=image.name,  # Red Hat Enterprise Linux 5.5
-                imageId=image.id,  # 346eeba5-a122-42f1-94e7-06cb3c53f690
-                imageStatus=image.status,  # ACTIVE
-                imageCreated=created,  # 2010-09-17T07:19:20-05:00
-                imageUpdated=image.updated,  # 2010-09-17T07:19:20-05:00
-            )))
-
-        imagesMap = RelationshipMap(
-            relname='images',
-            modname='ZenPacks.zenoss.OpenStack.Image',
-            objmaps=images)
+            images.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.Image',
+                data=dict(
+                    id='image-{0}'.format(image.id),
+                    title=image.name,  # Red Hat Enterprise Linux 5.5
+                    imageId=image.id,  # 346eeba5-a122-42f1-94e7-06cb3c53f690
+                    imageStatus=image.status,  # ACTIVE
+                    imageCreated=created,  # 2010-09-17T07:19:20-05:00
+                    imageUpdated=image.updated,  # 2010-09-17T07:19:20-05:00
+                )))
 
         servers = []
         for server in results['servers']:
@@ -173,26 +219,139 @@ class OpenStack(PythonPlugin):
             else:
                 image_id = server.image['id']
 
-            servers.append(ObjectMap(data=dict(
-                id='server{0}'.format(server.id),
-                title=server.name,  # cloudserver01
-                serverId=server.id,  # 847424
-                serverStatus=server.status,  # ACTIVE
-                serverBackupEnabled=backup_schedule_enabled,  # False
-                serverBackupDaily=backup_schedule_daily,  # DISABLED
-                serverBackupWeekly=backup_schedule_weekly,  # DISABLED
-                publicIps=list(public_ips),  # 50.57.74.222
-                privateIps=list(private_ips),  # 10.182.13.13
-                setFlavorId=flavor_id,  # performance1-1
-                setImageId=image_id,  # 346eeba5-a122-42f1-94e7-06cb3c53f690
+            servers.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.Server',
+                data=dict(
+                    id='server-{0}'.format(server.id),
+                    title=server.name,   # cloudserver01
+                    resourceId=server.id,
+                    serverId=server.id,  # 847424
+                    serverStatus=server.status,  # ACTIVE
+                    serverBackupEnabled=backup_schedule_enabled,  # False
+                    serverBackupDaily=backup_schedule_daily,      # DISABLED
+                    serverBackupWeekly=backup_schedule_weekly,    # DISABLED
+                    publicIps=list(public_ips),                   # 50.57.74.222
+                    privateIps=list(private_ips),                 # 10.182.13.13
+                    set_flavor='flavor-{0}'.format(flavor_id),    # flavor-performance1-1
+                    set_image='image-{0}'.format(image_id),       # image-346eeba5-a122-42f1-94e7-06cb3c53f690
+                    hostId=server.hostId,                         # a84303c0021aa53c7e749cbbbfac265f
+                    hostName=server.name                          # cloudserver01
+                )))
 
-                # a84303c0021aa53c7e749cbbbfac265f
-                hostId=server.hostId,
-            )))
+        services = []
+        zones = {}
+        hostmap = {}
 
-        serversMap = RelationshipMap(
-            relname='servers',
-            modname='ZenPacks.zenoss.OpenStack.Server',
-            objmaps=servers)
+        # Find all hosts which have a nova service on them.
+        for service in results['services']:
+            title = '{0}@{1} ({2})'.format(service.binary, service.host, service.zone)
+            service_id = prepId('service-{0}-{1}-{2}'.format(service.binary, service.host, service.zone))
+            host_id = prepId("host-{0}".format(service.host))
+            zone_id = prepId("zone-{0}".format(service.zone))
 
-        return (flavorsMap, imagesMap, serversMap)
+            hostmap[host_id] = {
+                'hostname': service.host,
+                'org_id': zone_id
+            }
+
+            zones.setdefault(zone_id, ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.AvailabilityZone',
+                data=dict(
+                    id=zone_id,
+                    title=service.zone,
+                    set_parentOrg=region_id
+                )))
+
+            # Currently, nova-api doesn't show in the nova service list.
+            # Even if it does show up there in the future, I don't model
+            # it as a NovaService, but rather as its own type of software
+            # component.   (See below)
+            if service.binary == 'nova-api':
+                continue
+
+            services.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.NovaService',
+                data=dict(
+                    id=service_id,
+                    title=title,
+                    binary=service.binary,
+                    set_hostedOn=host_id,
+                    set_orgComponent=zone_id
+                )))
+
+        # add any user-specified hosts which we haven't already found.
+        for hostname in device.zOpenStackNovaApiHosts + device.zOpenStackExtraHosts:
+            host_id = prepId("host-{0}".format(hostname))
+            hostmap[host_id] = {
+                'hostname': service.host,
+                'org_id': region_id
+            }
+
+        hosts = []
+        for host_id in hostmap:
+            data = hostmap[host_id]
+            hosts.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.Host',
+                data=dict(
+                    id=host_id,
+                    title=data['hostname'],
+                    set_orgComponent=data['org_id']
+                )))
+
+        hypervisors = []
+        for hypervisor in results['hypervisors']:
+            hypervisor_id = prepId("hypervisor-{0}".format(hypervisor.id))
+            host_id = prepId("host-{0}".format(hypervisor.hypervisor_hostname))
+
+            hypervisor_servers = []
+            if hasattr(hypervisor, 'servers'):
+                hypervisor_servers = ['server-{0}'.format(x['uuid']) for x in hypervisor.servers]
+
+            hypervisors.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.Hypervisor',
+                data=dict(
+                    id=hypervisor_id,
+                    title='{0}.{1}'.format(hypervisor.hypervisor_hostname, hypervisor.id),
+                    hypervisorId=hypervisor.id,  # 1
+                    set_servers=hypervisor_servers,
+                    set_host=host_id
+                )))
+
+        # nova-api support.
+        # Place it on the user-specified hosts, or also find it if it's
+        # in the nova-service list (which we ignored earlier). It should not
+        # be, under icehouse, at least, but just in case this changes..)
+        nova_api_hosts = device.zOpenStackNovaApiHosts
+        for service in results['services']:
+            if service.binary == 'nova-api':
+                if service.host not in nova_api_hosts:
+                    nova_api_hosts.append(service.host)
+
+        for hostname in nova_api_hosts:
+            title = '{0}@{1} ({2})'.format('nova-api', hostname, device.zOpenStackRegionName)
+            host_id = prepId("host-{0}".format(hostname))
+            nova_api_id = prepId('service-nova-api-{0}-{1}'.format(service.host, device.zOpenStackRegionName))
+
+            services.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.NovaApi',
+                data=dict(
+                    id=nova_api_id,
+                    title=title,
+                    binary='nova-api',
+                    set_hostedOn=host_id,
+                    set_orgComponent=region_id
+                )))
+
+        componentsMap = RelationshipMap(relname='components')
+        for objmap in [region] + flavors + images + servers + \
+            zones.values() + hosts + hypervisors + services:
+            componentsMap.append(objmap)
+
+        endpointObjMap = ObjectMap(
+            modname='ZenPacks.zenoss.OpenStack.Endpoint',
+            data=dict(
+                set_maintain_proxydevices=True
+            )
+        )
+
+        return (componentsMap, endpointObjMap)

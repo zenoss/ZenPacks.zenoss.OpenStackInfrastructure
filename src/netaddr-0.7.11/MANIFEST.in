@@ -1,0 +1,42 @@
+include AUTHORS
+include CHANGELOG
+include COPYRIGHT
+include README
+include REFERENCES
+include THANKS
+include INSTALL
+include LICENSE
+include Makefile
+include MANIFEST.in
+include release.py
+include setup.cfg
+include setup.py
+include setup_egg.py
+
+recursive-include docs/source *
+
+include netaddr/__init__.py
+include netaddr/core.py
+include netaddr/compat.py
+include netaddr/fbsocket.py
+
+recursive-include netaddr/eui *.py *.txt *.idx
+
+recursive-include netaddr/ip *.py *.xml
+
+recursive-include netaddr/strategy *.py
+
+include netaddr/tests/__init__.py
+recursive-include netaddr/tests/2.x/core *.txt
+recursive-include netaddr/tests/2.x/eui *.txt
+recursive-include netaddr/tests/2.x/ip *.txt
+recursive-include netaddr/tests/2.x/strategy *.txt
+recursive-include netaddr/tests/3.x/core *.txt
+recursive-include netaddr/tests/3.x/eui *.txt
+recursive-include netaddr/tests/3.x/ip *.txt
+recursive-include netaddr/tests/3.x/strategy *.txt
+
+include netaddr/tools/netaddr
+
+global-exclude *.svn*
+global-exclude *.git*

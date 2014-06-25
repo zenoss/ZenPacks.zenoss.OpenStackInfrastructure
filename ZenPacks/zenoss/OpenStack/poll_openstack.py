@@ -14,37 +14,31 @@
 
 import json
 import sys
+import logging
+log = logging.getLogger('ZenPacks.zenoss.OpenStack.poll_openstack')
 
-from util import addLocalLibPath
-addLocalLibPath()
+import Globals
+from Products.ZenUtils.Utils import unused
+unused(Globals)
+
+from utils import add_local_lib_path
+add_local_lib_path()
 
 from novaclient import client as novaclient
+from apiclients.ceilometerapiclient import CeilometerAPIClient
+
 
 
 class OpenStackPoller(object):
-    def __init__(self, username, api_key, project_id, auth_url, api_version, region_name):
+    def __init__(self, username, api_key, project_id, auth_url, region_name):
         self._username = username
         self._api_key = api_key
         self._project_id = project_id
         self._auth_url = auth_url
-        self._api_version = api_version
+        self._api_version = 2
         self._region_name = region_name
 
-    def getData(self):
-        client = novaclient.Client(
-            self._api_version,
-            self._username,
-            self._api_key,
-            self._project_id,
-            self._auth_url,
-            region_name=self._region_name or None,
-            http_log_debug=False)
-
-        data = {}
-        data['events'] = []
-
-        data['flavorTotalCount'] = len(client.flavors.list())
-
+    def _populateImageData(self, client, data):
         data['imageTotalCount'] = 0
         data['imageSavingCount'] = 0
         data['imageUnknownCount'] = 0
@@ -90,6 +84,7 @@ class OpenStackPoller(object):
                 imageStatus=image.status,
             ))
 
+    def _populateServerData(self, client, data):
         data['serverTotalCount'] = 0
         data['serverActiveCount'] = 0
         data['serverBuildCount'] = 0
@@ -167,6 +162,51 @@ class OpenStackPoller(object):
                 serverStatus=server.status,
             ))
 
+    def getData(self):
+        if (log.isEnabledFor(logging.DEBUG)):
+            http_log_debug = True
+            logging.getLogger('novaclient.client').setLevel(logging.DEBUG)
+        else:
+            http_log_debug = False
+
+        # Nova
+        client = novaclient.Client(
+            self._api_version,
+            self._username,
+            self._api_key,
+            self._project_id,
+            self._auth_url,
+            region_name=self._region_name or None,
+            http_log_debug=http_log_debug,
+        )
+
+        data = {}
+        data['events'] = []
+
+        data['flavorTotalCount'] = len(client.flavors.list())
+
+        self._populateImageData(client, data)
+        self._populateServerData(client, data)
+
+        # Ceilometer
+        ceiloclient = CeilometerAPIClient(
+            username=self._username,
+            api_key=self._api_key,
+            project_id=self._project_id,
+            auth_url=self._auth_url,
+            api_version=self._api_version,
+            region_name=self._region_name
+        )
+
+        data['statistics'] = {}
+        meternames = ceiloclient.get_meternames()
+        for name in meternames:
+            data['statistics'][name] = ceiloclient.get_statistics(name)
+        data['meters-list'] = ceiloclient.get_meters()
+        data['alarms-list'] = ceiloclient.get_alarms()
+        data['resources-list'] = ceiloclient.get_resources()
+        data['samples-list'] = ceiloclient.get_samples()
+
         return data
 
     def printJSON(self):
@@ -194,7 +234,7 @@ class OpenStackPoller(object):
 if __name__ == '__main__':
     username = api_key = project_id = auth_url = api_version = region_name = None
     try:
-        username, api_key, project_id, auth_url, api_version, region_name = sys.argv[1:7]
+        username, api_key, project_id, auth_url, region_name = sys.argv[1:7]
     except ValueError:
         print >> sys.stderr, (
             "Usage: %s <username> <api_key> <project_id> <auth_url> "
