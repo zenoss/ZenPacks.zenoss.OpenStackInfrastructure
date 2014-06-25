@@ -43,11 +43,13 @@ CFG = zenpacklib.ZenPackSpec(
         'DEFAULTS': {'category': 'OpenStack',
                      'type': 'string'},
 
-        'zOpenStackInsecure':          {'type': 'boolean', 'default': False},
-        'zOpenStackProjectId':         {},
-        'zOpenStackAuthUrl':           {},
-        'zOpenStackRegionName':        {},
-        'zOpenStackHostDeviceClass':   {'default': '/Server/SSH/Linux/NovaHost'}
+        'zOpenStackInsecure':         {'type': 'boolean', 'default': False},
+        'zOpenStackProjectId':        {},
+        'zOpenStackAuthUrl':          {},
+        'zOpenStackRegionName':       {},
+        'zOpenStackHostDeviceClass':  {'default': '/Server/SSH/Linux/NovaHost'},
+        'zOpenStackNovaApiHosts':     {'type': 'lines'},
+        'zOpenStackExtraHosts':       {'type': 'lines'}
     },
 
     classes={
@@ -206,7 +208,7 @@ CFG = zenpacklib.ZenPackSpec(
         'NovaApi': {
             'base': 'SoftwareComponent',
             'meta_type': 'OpenStackNovaApi',
-            'label': 'NovaApi',
+            'label': 'Nova API',
             'order': 9
         },
 

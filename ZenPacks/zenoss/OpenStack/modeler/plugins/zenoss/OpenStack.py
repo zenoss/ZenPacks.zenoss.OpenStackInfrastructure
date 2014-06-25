@@ -32,7 +32,9 @@ class OpenStack(PythonPlugin):
         'zCommandPassword',
         'zOpenStackProjectId',
         'zOpenStackAuthUrl',
-        'zOpenStackRegionName'
+        'zOpenStackRegionName',
+        'zOpenStackNovaApiHosts',
+        'zOpenStackExtraHosts',
     )
 
     def collect(self, device, unused):
@@ -203,6 +205,8 @@ class OpenStack(PythonPlugin):
         services = []
         zones = {}
         hostmap = {}
+
+        # Find all hosts which have a nova service on them.
         for service in results['services']:
             title = '{0}@{1} ({2})'.format(service.binary, service.host, service.zone)
             service_id = prepId('service-{0}-{1}-{2}'.format(service.binary, service.host, service.zone))
@@ -211,7 +215,7 @@ class OpenStack(PythonPlugin):
 
             hostmap[host_id] = {
                 'hostname': service.host,
-                'zone_id': zone_id
+                'org_id': zone_id
             }
 
             zones.setdefault(zone_id, ObjectMap(
@@ -221,6 +225,13 @@ class OpenStack(PythonPlugin):
                     title=service.zone,
                     set_parentOrg=region_id
                 )))
+
+            # Currently, nova-api doesn't show in the nova service list.
+            # Even if it does show up there in the future, I don't model
+            # it as a NovaService, but rather as its own type of software
+            # component.   (See below)
+            if service.binary == 'nova-api':
+                continue
 
             services.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStack.NovaService',
@@ -232,6 +243,14 @@ class OpenStack(PythonPlugin):
                     set_orgComponent=zone_id
                 )))
 
+        # add any user-specified hosts which we haven't already found.
+        for hostname in device.zOpenStackNovaApiHosts + device.zOpenStackExtraHosts:
+            host_id = prepId("host-{0}".format(hostname))
+            hostmap[host_id] = {
+                'hostname': service.host,
+                'org_id': region_id
+            }
+
         hosts = []
         for host_id in hostmap:
             data = hostmap[host_id]
@@ -240,7 +259,7 @@ class OpenStack(PythonPlugin):
                 data=dict(
                     id=host_id,
                     title=data['hostname'],
-                    set_orgComponent=data['zone_id']
+                    set_orgComponent=data['org_id']
                 )))
 
         hypervisors = []
@@ -260,6 +279,31 @@ class OpenStack(PythonPlugin):
                     hypervisorId=hypervisor.id,  # 1
                     set_servers=hypervisor_servers,
                     set_host=host_id
+                )))
+
+        # nova-api support.
+        # Place it on the user-specified hosts, or also find it if it's
+        # in the nova-service list (which we ignored earlier). It should not
+        # be, under icehouse, at least, but just in case this changes..)
+        nova_api_hosts = device.zOpenStackNovaApiHosts
+        for service in results['services']:
+            if service.binary == 'nova-api':
+                if service.host not in nova_api_hosts:
+                    nova_api_hosts.append(service.host)
+
+        for hostname in nova_api_hosts:
+            title = '{0}@{1} ({2})'.format('nova-api', hostname, device.zOpenStackRegionName)
+            host_id = prepId("host-{0}".format(hostname))
+            nova_api_id = prepId('service-nova-api-{0}-{1}'.format(service.host, device.zOpenStackRegionName))
+
+            services.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.NovaApi',
+                data=dict(
+                    id=nova_api_id,
+                    title=title,
+                    binary='nova-api',
+                    set_hostedOn=host_id,
+                    set_orgComponent=region_id
                 )))
 
         componentsMap = RelationshipMap(relname='components')
