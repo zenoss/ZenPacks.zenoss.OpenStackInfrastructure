@@ -5,6 +5,13 @@
     xmlns:zcml="http://namespaces.zope.org/zcml"
     >
 
+    <!-- Device Loaders -->
+    <utility
+        name="openstack_account"
+        provides="Products.ZenModel.interfaces.IDeviceLoader"
+        component=".deviceloaders.OpenStackLoader"
+        />
+
     <!-- API: Routers -->
     <include package="Products.ZenUtils.extdirect.zope" file="meta.zcml"/>
 
@@ -22,6 +29,13 @@
         provides=".api.IOpenStackFacade"
         for="*"
         factory=".api.OpenStackFacade"
+        />
+
+    <!-- API: Infos -->
+    <adapter
+        provides=".datasources.OpenStackCeilometerDataSource.IOpenStackCeilometerDataSourceInfo"
+        for=".datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSource"
+        factory=".datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourceInfo"
         />
 
     <!-- Device Links -->

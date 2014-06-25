@@ -21,6 +21,11 @@ $ZENHOME/ZenPacks/easy-install.pth.
 from . import zenpacklib
 
 
+# Useful to avoid making literal string references to module and class names
+# throughout the rest of the ZenPack.
+MODULE_NAME = {}
+CLASS_NAME = {}
+
 RELATIONSHIPS_YUML = """
 // containing
 [Endpoint]++components-endpoint1[OpenstackComponent]
@@ -77,6 +82,10 @@ CFG = zenpacklib.ZenPackSpec(
         'OpenstackComponent': {
             'base': zenpacklib.Component,
             'filter_display': False,
+            'properties': {
+                 'resourceId': {'grid_display': False,
+                                'label': 'Ceilometer Resource ID',}
+            }
         },
 
         'DeviceProxyComponent': {
@@ -231,7 +240,8 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'hypervisorId':      {'grid_display': False}
             }
-        }
+        },
+
     },
 
     class_relationships=zenpacklib.relationships_from_yuml(RELATIONSHIPS_YUML),

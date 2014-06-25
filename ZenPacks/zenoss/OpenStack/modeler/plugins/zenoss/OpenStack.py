@@ -24,7 +24,8 @@ from ZenPacks.zenoss.OpenStack.utils import add_local_lib_path
 add_local_lib_path()
 
 from novaclient import client as novaclient
-
+from ceilometerapiclient import CeilometerAPIClient
+from keystoneapiclient import KeystoneAPIClient
 
 class OpenStack(PythonPlugin):
     deviceProperties = PythonPlugin.deviceProperties + (
@@ -74,6 +75,40 @@ class OpenStack(PythonPlugin):
 
         log.info('Requesting hypervisors')
         results['hypervisors'] = client.hypervisors.search('%', servers=True)
+
+        # Keystone
+#       keystoneclient = KeystoneAPIClient(
+#           username=device.zCommandUsername,
+#           api_key=device.zCommandPassword,
+#           project_id=device.zOpenStackProjectId,
+#           auth_url=device.zOpenStackAuthUrl,
+#           api_version=2
+#       )
+
+#       log.info('Requesting endpoints')
+#       results['endpoints'] = keystoneclient.get_endpoints()
+
+#       log.info('Requesting roles')
+#       results['roles'] = keystoneclient.get_roles()
+
+#       log.info('Requesting services')
+#       results['keystoneservices'] = keystoneclient.get_services()
+
+#       log.info('Requesting tenants')
+#       results['tenants'] = keystoneclient.get_tenants()
+
+#       log.info('Requesting users')
+#       results['userts'] = keystoneclient.get_users()
+
+        # Ceilometer
+#       ceiloclient = CeilometerAPIClient(
+#           username=device.zCommandUsername,
+#           api_key=device.zCommandPassword,
+#           project_id=device.zOpenStackProjectId,
+#           auth_url=device.zOpenStackAuthUrl,
+#           api_version=2,
+#           region_name=region_name
+#       )
 
         return results
 
@@ -189,6 +224,7 @@ class OpenStack(PythonPlugin):
                 data=dict(
                     id='server-{0}'.format(server.id),
                     title=server.name,   # cloudserver01
+                    resourceId=server.id,
                     serverId=server.id,  # 847424
                     serverStatus=server.status,  # ACTIVE
                     serverBackupEnabled=backup_schedule_enabled,  # False
@@ -307,7 +343,8 @@ class OpenStack(PythonPlugin):
                 )))
 
         componentsMap = RelationshipMap(relname='components')
-        for objmap in [region] + flavors + images + servers + zones.values() + hosts + hypervisors + services:
+        for objmap in [region] + flavors + images + servers + \
+            zones.values() + hosts + hypervisors + services:
             componentsMap.append(objmap)
 
         endpointObjMap = ObjectMap(

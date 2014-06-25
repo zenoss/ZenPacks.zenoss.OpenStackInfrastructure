@@ -40,6 +40,7 @@ class CeilometerAPIClient(object):
         )
 
         self._get_meters()
+        self._meternames = self.get_meternames()
 
     def _get_token(self):
         # token expires in 3600 seconds
@@ -61,6 +62,17 @@ class CeilometerAPIClient(object):
         endpoint = ''
         if len(self._auth_url) > 0:
             endpoint = self._auth_url[:(self._auth_url.rindex(':'))] + ':8777'
+#       if len(self._username) > 0 and \
+#          len(self._api_key) > 0 and \
+#          len(self._project_id) > 0 and \
+#          len(self._auth_url) > 0:
+#           client = keystoneclient(
+#               username=self._username,
+#               password=self._api_key,
+#               tenant_name=self._project_id,
+#               auth_url=self._auth_url,
+#           )
+#           endpoint = client.endpoints.list()[-1].publicurl
         return endpoint
 
     def _get_meters(self):
@@ -82,8 +94,7 @@ class CeilometerAPIClient(object):
     def get_statistics(self, meter_name=''):
         if len(meter_name) == 0:
             return None
-        meternames = self.get_meternames()
-        if meter_name not in meternames:
+        if meter_name not in self._meternames:
             return None
 
         return self._client.statistics.list(meter_name)[0].to_dict()
@@ -96,6 +107,9 @@ class CeilometerAPIClient(object):
 
     def get_resources(self):
         return [resource.to_dict() for resource in self._client.resources.list()]
+
+    def get_res_by_id(self, res_id):
+        return self._client.resources.get(res_id)
 
     def get_samples(self):
         return [sample.to_dict() for sample in self._client.samples.list()]

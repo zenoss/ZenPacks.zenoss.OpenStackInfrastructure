@@ -1827,6 +1827,7 @@ class ClassPropertySpec(object):
         schema_map = {
             'boolean': schema.Bool,
             'int': schema.Int,
+            'float': schema.Float,
             'lines': schema.Text,
             'string': schema.TextLine,
             'password': schema.Password,
