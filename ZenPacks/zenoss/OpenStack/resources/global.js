@@ -2,10 +2,6 @@
 
 var ZC = Ext.ns('Zenoss.component');
 
-ZC.registerName('OpenStackFlavor', _t('Flavor'), _t('Flavors'));
-ZC.registerName('OpenStackImage', _t('Image'), _t('Images'));
-ZC.registerName('OpenStackServer', _t('Server'), _t('Servers'));
-
 var addOpenStack = new Zenoss.Action({
     text: _t('Add OpenStack') + '...',
     id: 'addopenstack-item',
