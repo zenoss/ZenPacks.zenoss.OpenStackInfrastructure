@@ -44,8 +44,6 @@ from ZenPacks.zenoss.OpenStack.utils import result_errmsg
 from keystoneapiclient import KeystoneAPIClient
 from ceilometerapiclient import CeilometerAPIClient
 
-MAX_RETRIES = 3
-
 class ProxyWebClient(object):
     """Provide useful web methods with proxy."""
 
@@ -209,12 +207,6 @@ class OpenStackCeilometerDataSourceInfo(RRDDataSourceInfo):
     namespace = ProxyProperty('namespace')
     metric = ProxyProperty('metric')
     statistic = ProxyProperty('statistic')
-#   dimension = ProxyProperty('dimension')
-#   region = ProxyProperty('region')
-#   username = ProxyProperty('username')
-#   password = ProxyProperty('password')
-#   project = ProxyProperty('project')
-#   authurl = ProxyProperty('authurl')
 
 
 class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
@@ -230,7 +222,6 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
         return(
             context.device().id,
             datasource.getCycleTime(context),
-            context.getDimension(),
             context.zOpenStackRegionName,
             context.zOpenStackProjectId,
             context.zOpenStackAuthUrl,
@@ -240,7 +231,6 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
 
     @classmethod
     def params(cls, datasource, context):
-#       import pdb;pdb.set_trace()
         return {
             'namespace': datasource.talesEval(datasource.namespace, context),
             'metric':    datasource.talesEval(datasource.metric, context),
@@ -298,8 +288,6 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
                      '/statistics?q.field=resource_id&q.op=eq&q.value=' + \
                      resourceId
 
-#           import pdb;pdb.set_trace()
-#           getURL = '%s/v2/meters/cpu_util/statistics?q.field=resource_id&q.op=eq&q.value=31d94c3e-03ba-43bc-8484-99229a874651' % ceiloclient._endpoint
             factory = ProxyWebClient(getURL)
             result = yield factory.get_page(hdr)
             results.append((ds, result))
@@ -336,13 +324,53 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
 
             # returned json sometimes contains bare null, and python does not like it
             stats = ast.literal_eval(result.replace('null', '\"null\"'))
-           
-#           import pdb;pdb.set_trace()
-            if ds.params['metric'] == 'cpu_util':
+
+            if len(stats) == 0:
+                value = '0'
+            elif ds.params['metric'] == 'cpu_util':
                 value = str(round(stats[0]['avg'], 2))
             elif ds.params['metric'] == 'cpu':
                 # convert nano seconds to seconds
                 value = str(float(stats[0]['avg']) * 1.0e-9)
+            elif ds.params['metric'] == 'disk.read.requests':
+                value = str(stats[0]['avg'])
+            elif ds.params['metric'] == 'disk.write.requests':
+                value = str(stats[0]['avg'])
+            elif ds.params['metric'] == 'disk.read.requests.rate':
+                value = str(stats[0]['avg'])
+            elif ds.params['metric'] == 'disk.write.requests.rate':
+                value = str(stats[0]['avg'])
+            elif ds.params['metric'] == 'disk.read.bytes':
+                # convert B to KB
+                value = str(float(stats[0]['avg']) * 1.0e-3)
+            elif ds.params['metric'] == 'disk.write.bytes':
+                # convert B to KB
+                value = str(float(stats[0]['avg']) * 1.0e-3)
+            elif ds.params['metric'] == 'disk.read.bytes.rate':
+                # convert B to KB
+                value = str(float(stats[0]['avg']) * 1.0e-3)
+            elif ds.params['metric'] == 'disk.write.bytes.rate':
+                value = str(float(stats[0]['avg']) * 1.0e-3)
+            elif ds.params['metric'] == 'network.incoming.packets':
+                value = str(float(stats[0]['avg']) * 1.0e-3)
+            elif ds.params['metric'] == 'network.outpoing.packets':
+                value = str(float(stats[0]['avg']) * 1.0e-3)
+            elif ds.params['metric'] == 'network.incoming.packets.rate':
+                value = str(float(stats[0]['avg']) * 1.0e-3)
+            elif ds.params['metric'] == 'network.outpoing.packets.rate':
+                value = str(float(stats[0]['avg']) * 1.0e-3)
+            elif ds.params['metric'] == 'network.incoming.bytes':
+                # convert B to KB
+                value = str(float(stats[0]['avg']) * 1.0e-3)
+            elif ds.params['metric'] == 'network.outpoing.bytes':
+                # convert B to KB
+                value = str(float(stats[0]['avg']) * 1.0e-3)
+            elif ds.params['metric'] == 'network.incoming.bytes.rate':
+                value = str(float(stats[0]['avg']) * 1.0e-3)
+            elif ds.params['metric'] == 'network.outpoing.bytes.rate':
+                value = str(float(stats[0]['avg']) * 1.0e-3)
+            else:
+                value = '0'
             data['values'][ds.component][ds.datasource] = (value, 'N')
 
         data['events'].append({
@@ -353,7 +381,6 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
             'eventKey': 'openstackCeilometerCollection',
             'eventClassKey': 'OpenStackCeilometerSuccess',
             })
-#       import pdb;pdb.set_trace()
         return data
 
     def onError(self, result, config):
