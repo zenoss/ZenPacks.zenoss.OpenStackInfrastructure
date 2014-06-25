@@ -103,6 +103,10 @@ CFG = zenpacklib.ZenPackSpec(
         'SoftwareComponent': {
             'base': 'OpenstackComponent',
             'filter_display': False,
+            'relationships': {
+                # Provide better contextual naming for the relationships in the UI.
+                'orgComponent': {'label': 'Supporting OrgComponent', 'order': 1.0}
+            },
             'properties': {
                 'binary':   {'label': 'Binary'},
             }
