@@ -35,6 +35,16 @@ class Host(schema.Host):
         # Based on the NovaServices we have modeled on the host, ensure that we
         # have the right OSProcess groups detected.
         device = self.proxy_device()
+
+        # If we're getting IPServices directly from the OS (rather than port
+        # scannning, there's no good reason to have such a low
+        # zIpServiceMapMaxPort value.  It prevents detection of most useful
+        # services.
+        if device.getZ('zIpServiceMapMaxPort') < 32767:
+
+            LOG.info("Raising zIpServiceMapMaxPort on %s to 32767" % device.name())
+            device.setZenProperty('zIpServiceMapMaxPort', 32767)
+
         if device.getSnmpLastCollection() is None:
             LOG.info("Unable to ensure service monitoring until host device is modeled.")
             return
