@@ -20,12 +20,12 @@ Choose that option and you'll be presented with a dialog asking for the followin
 Once you click Add, Zenoss will contact the OpenStack API and discover servers, images and flavors. Once it is complete you'll find a new device in the OpenStack device class with the same name as the hostname or IP you entered into the dialog. Click into this new device to see everything that was discovered.
 
 The following types of elements are discovered.
-* Servers
+* Instances (Servers)
 * Images
 * Flavors
 
 The following metrics are collected.
-* Total Servers and Servers by State
+* Total Instances and Instances by State
 ** States: Active, Build, Rebuild, Suspended, Queue Resize, Prep Resize, Resize, Verify Resize, Password, Rescue, Reboot, Hard Reboot, Delete IP, Unknown, Other
 * Total Images and Images by State
 ** States: Active, Saving, Preparing, Queued, Failed, Unknown, Other
@@ -33,7 +33,7 @@ The following metrics are collected.
 
 Status monitoring is performed on servers and images with the following mapping of state to Zenoss event severity.
 
-;Servers State to Severity Mapping
+;Instances State to Severity Mapping
 : Reboot, Hard Reboot, Build, Rebuild, Rescue, Unknown == Critical
 : Resize == Error
 : Prep Resize, Delete IP == Warning

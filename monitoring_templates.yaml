@@ -1,6 +1,6 @@
-/OpenStack/Server:
+/OpenStack/Instance:
   description: "OpenStack monitoring."
-  targetPythonClass: ZenPacks.zenoss.OpenStack.Server.Server
+  targetPythonClass: ZenPacks.zenoss.OpenStack.Instance.Instance
 
   datasources:
     cpuUtilization:
@@ -179,7 +179,7 @@
     CPU Usage:
       units: seconds
       miny: 0
-      
+
       graphpoints:
         cpu_usage:
           dpName: cpuUsage

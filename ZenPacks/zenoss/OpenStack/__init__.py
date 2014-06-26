@@ -34,9 +34,9 @@ RELATIONSHIPS_YUML = """
 [Host]1hostedSoftware-hostedOn*[SoftwareComponent]
 [OrgComponent]1-.-*[Host]
 [OrgComponent]1-.-*[SoftwareComponent]
-[Flavor]1-.-*[Server]
-[Image]1-.-*[Server]
-[Hypervisor]1-.-*[Server]
+[Flavor]1-.-*[Instance]
+[Image]1-.-*[Instance]
+[Hypervisor]1-.-*[Instance]
 // non-containing 1:1
 [Hypervisor]1-.-1[Host]
 """
@@ -157,10 +157,10 @@ CFG = zenpacklib.ZenPackSpec(
             }
         },
 
-        'Server': {
+        'Instance': {
             'base': 'LogicalComponent',
-            'meta_type': 'OpenStackServer',
-            'label': 'Server',
+            'meta_type': 'OpenStackInstance',
+            'label': 'Instance',
             'order': 3,
             'properties': {
                 'serverId':            {'grid_display': False},   # 847424
