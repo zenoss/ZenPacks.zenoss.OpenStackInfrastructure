@@ -220,7 +220,7 @@ class OpenStack(PythonPlugin):
                 image_id = server.image['id']
 
             servers.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStack.Server',
+                modname='ZenPacks.zenoss.OpenStack.Instance',
                 data=dict(
                     id='server-{0}'.format(server.id),
                     title=server.name,   # cloudserver01
@@ -313,7 +313,7 @@ class OpenStack(PythonPlugin):
                     id=hypervisor_id,
                     title='{0}.{1}'.format(hypervisor.hypervisor_hostname, hypervisor.id),
                     hypervisorId=hypervisor.id,  # 1
-                    set_servers=hypervisor_servers,
+                    set_instances=hypervisor_servers,
                     set_host=host_id
                 )))
 

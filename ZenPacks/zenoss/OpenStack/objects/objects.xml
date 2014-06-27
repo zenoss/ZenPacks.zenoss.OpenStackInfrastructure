@@ -27,6 +27,1933 @@ ZenPacks.zenoss.OpenStack.Endpoint
 300
 </property>
 <tomanycont id='rrdTemplates'>
+<object id='Instance' module='Products.ZenModel.RRDTemplate' class='RRDTemplate'>
+<property id='zendoc' type='string'>
+OpenStack monitoring.
+</property>
+<property type="text" id="description" mode="w" >
+OpenStack monitoring.
+</property>
+<property type="string" id="targetPythonClass" mode="w" >
+ZenPacks.zenoss.OpenStack.Instance.Instance
+</property>
+<tomanycont id='datasources'>
+<object id='cpuUsage' module='ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource' class='OpenStackCeilometerDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
+</property>
+<property type="string" id="namespace" >
+/OpenStack/Nova/Server
+</property>
+<property type="string" id="metric" >
+cpu
+</property>
+<property type="string" id="statistic" >
+Average
+</property>
+<property type="string" id="dimension" >
+${here/getDimension}
+</property>
+<property type="string" id="region" >
+${here/zOpenStackRegionName}
+</property>
+<property type="string" id="username" >
+${here/zCommandUsername}
+</property>
+<property type="string" id="password" >
+${here/zCommandPassword}
+</property>
+<property type="string" id="project" >
+${here/zOpenStackProjectId}
+</property>
+<property type="string" id="authurl" >
+${here/zOpenStackAuthUrl}
+</property>
+<tomanycont id='datapoints'>
+<object id='cpuUsage' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='cpuUtilization' module='ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource' class='OpenStackCeilometerDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
+</property>
+<property type="string" id="namespace" >
+/OpenStack/Nova/Server
+</property>
+<property type="string" id="metric" >
+cpu_util
+</property>
+<property type="string" id="statistic" >
+Average
+</property>
+<property type="string" id="dimension" >
+${here/getDimension}
+</property>
+<property type="string" id="region" >
+${here/zOpenStackRegionName}
+</property>
+<property type="string" id="username" >
+${here/zCommandUsername}
+</property>
+<property type="string" id="password" >
+${here/zCommandPassword}
+</property>
+<property type="string" id="project" >
+${here/zOpenStackProjectId}
+</property>
+<property type="string" id="authurl" >
+${here/zOpenStackAuthUrl}
+</property>
+<tomanycont id='datapoints'>
+<object id='cpuUtilization' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='diskReadBytes' module='ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource' class='OpenStackCeilometerDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
+</property>
+<property type="string" id="namespace" >
+/OpenStack/Nova/Server
+</property>
+<property type="string" id="metric" >
+disk.read.bytes
+</property>
+<property type="string" id="statistic" >
+Average
+</property>
+<property type="string" id="dimension" >
+${here/getDimension}
+</property>
+<property type="string" id="region" >
+${here/zOpenStackRegionName}
+</property>
+<property type="string" id="username" >
+${here/zCommandUsername}
+</property>
+<property type="string" id="password" >
+${here/zCommandPassword}
+</property>
+<property type="string" id="project" >
+${here/zOpenStackProjectId}
+</property>
+<property type="string" id="authurl" >
+${here/zOpenStackAuthUrl}
+</property>
+<tomanycont id='datapoints'>
+<object id='diskReadBytes' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='diskReadBytesRate' module='ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource' class='OpenStackCeilometerDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
+</property>
+<property type="string" id="namespace" >
+/OpenStack/Nova/Server
+</property>
+<property type="string" id="metric" >
+disk.read.bytes.rate
+</property>
+<property type="string" id="statistic" >
+Average
+</property>
+<property type="string" id="dimension" >
+${here/getDimension}
+</property>
+<property type="string" id="region" >
+${here/zOpenStackRegionName}
+</property>
+<property type="string" id="username" >
+${here/zCommandUsername}
+</property>
+<property type="string" id="password" >
+${here/zCommandPassword}
+</property>
+<property type="string" id="project" >
+${here/zOpenStackProjectId}
+</property>
+<property type="string" id="authurl" >
+${here/zOpenStackAuthUrl}
+</property>
+<tomanycont id='datapoints'>
+<object id='diskReadBytesRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='diskReadRequests' module='ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource' class='OpenStackCeilometerDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
+</property>
+<property type="string" id="namespace" >
+/OpenStack/Nova/Server
+</property>
+<property type="string" id="metric" >
+disk.read.requests
+</property>
+<property type="string" id="statistic" >
+Average
+</property>
+<property type="string" id="dimension" >
+${here/getDimension}
+</property>
+<property type="string" id="region" >
+${here/zOpenStackRegionName}
+</property>
+<property type="string" id="username" >
+${here/zCommandUsername}
+</property>
+<property type="string" id="password" >
+${here/zCommandPassword}
+</property>
+<property type="string" id="project" >
+${here/zOpenStackProjectId}
+</property>
+<property type="string" id="authurl" >
+${here/zOpenStackAuthUrl}
+</property>
+<tomanycont id='datapoints'>
+<object id='diskReadRequests' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='diskReadRequestsRate' module='ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource' class='OpenStackCeilometerDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
+</property>
+<property type="string" id="namespace" >
+/OpenStack/Nova/Server
+</property>
+<property type="string" id="metric" >
+disk.read.requests.rate
+</property>
+<property type="string" id="statistic" >
+Average
+</property>
+<property type="string" id="dimension" >
+${here/getDimension}
+</property>
+<property type="string" id="region" >
+${here/zOpenStackRegionName}
+</property>
+<property type="string" id="username" >
+${here/zCommandUsername}
+</property>
+<property type="string" id="password" >
+${here/zCommandPassword}
+</property>
+<property type="string" id="project" >
+${here/zOpenStackProjectId}
+</property>
+<property type="string" id="authurl" >
+${here/zOpenStackAuthUrl}
+</property>
+<tomanycont id='datapoints'>
+<object id='diskReadRequestsRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='diskWriteBytes' module='ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource' class='OpenStackCeilometerDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
+</property>
+<property type="string" id="namespace" >
+/OpenStack/Nova/Server
+</property>
+<property type="string" id="metric" >
+disk.write.bytes
+</property>
+<property type="string" id="statistic" >
+Average
+</property>
+<property type="string" id="dimension" >
+${here/getDimension}
+</property>
+<property type="string" id="region" >
+${here/zOpenStackRegionName}
+</property>
+<property type="string" id="username" >
+${here/zCommandUsername}
+</property>
+<property type="string" id="password" >
+${here/zCommandPassword}
+</property>
+<property type="string" id="project" >
+${here/zOpenStackProjectId}
+</property>
+<property type="string" id="authurl" >
+${here/zOpenStackAuthUrl}
+</property>
+<tomanycont id='datapoints'>
+<object id='diskWriteBytes' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='diskWriteBytesRate' module='ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource' class='OpenStackCeilometerDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
+</property>
+<property type="string" id="namespace" >
+/OpenStack/Nova/Server
+</property>
+<property type="string" id="metric" >
+disk.write.bytes.rate
+</property>
+<property type="string" id="statistic" >
+Average
+</property>
+<property type="string" id="dimension" >
+${here/getDimension}
+</property>
+<property type="string" id="region" >
+${here/zOpenStackRegionName}
+</property>
+<property type="string" id="username" >
+${here/zCommandUsername}
+</property>
+<property type="string" id="password" >
+${here/zCommandPassword}
+</property>
+<property type="string" id="project" >
+${here/zOpenStackProjectId}
+</property>
+<property type="string" id="authurl" >
+${here/zOpenStackAuthUrl}
+</property>
+<tomanycont id='datapoints'>
+<object id='diskWriteBytesRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='diskWriteRequests' module='ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource' class='OpenStackCeilometerDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
+</property>
+<property type="string" id="namespace" >
+/OpenStack/Nova/Server
+</property>
+<property type="string" id="metric" >
+disk.write.requests
+</property>
+<property type="string" id="statistic" >
+Average
+</property>
+<property type="string" id="dimension" >
+${here/getDimension}
+</property>
+<property type="string" id="region" >
+${here/zOpenStackRegionName}
+</property>
+<property type="string" id="username" >
+${here/zCommandUsername}
+</property>
+<property type="string" id="password" >
+${here/zCommandPassword}
+</property>
+<property type="string" id="project" >
+${here/zOpenStackProjectId}
+</property>
+<property type="string" id="authurl" >
+${here/zOpenStackAuthUrl}
+</property>
+<tomanycont id='datapoints'>
+<object id='diskWriteRequests' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='diskWriteRequestsRate' module='ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource' class='OpenStackCeilometerDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
+</property>
+<property type="string" id="namespace" >
+/OpenStack/Nova/Server
+</property>
+<property type="string" id="metric" >
+disk.write.requests.rate
+</property>
+<property type="string" id="statistic" >
+Average
+</property>
+<property type="string" id="dimension" >
+${here/getDimension}
+</property>
+<property type="string" id="region" >
+${here/zOpenStackRegionName}
+</property>
+<property type="string" id="username" >
+${here/zCommandUsername}
+</property>
+<property type="string" id="password" >
+${here/zCommandPassword}
+</property>
+<property type="string" id="project" >
+${here/zOpenStackProjectId}
+</property>
+<property type="string" id="authurl" >
+${here/zOpenStackAuthUrl}
+</property>
+<tomanycont id='datapoints'>
+<object id='diskWriteRequestsRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='networkIncomingBytes' module='ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource' class='OpenStackCeilometerDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
+</property>
+<property type="string" id="namespace" >
+/OpenStack/Nova/Server
+</property>
+<property type="string" id="metric" >
+network.incoming.bytes
+</property>
+<property type="string" id="statistic" >
+Average
+</property>
+<property type="string" id="dimension" >
+${here/getDimension}
+</property>
+<property type="string" id="region" >
+${here/zOpenStackRegionName}
+</property>
+<property type="string" id="username" >
+${here/zCommandUsername}
+</property>
+<property type="string" id="password" >
+${here/zCommandPassword}
+</property>
+<property type="string" id="project" >
+${here/zOpenStackProjectId}
+</property>
+<property type="string" id="authurl" >
+${here/zOpenStackAuthUrl}
+</property>
+<tomanycont id='datapoints'>
+<object id='networkIncomingBytes' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='networkIncomingBytesRate' module='ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource' class='OpenStackCeilometerDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
+</property>
+<property type="string" id="namespace" >
+/OpenStack/Nova/Server
+</property>
+<property type="string" id="metric" >
+network.incoming.bytes.rate
+</property>
+<property type="string" id="statistic" >
+Average
+</property>
+<property type="string" id="dimension" >
+${here/getDimension}
+</property>
+<property type="string" id="region" >
+${here/zOpenStackRegionName}
+</property>
+<property type="string" id="username" >
+${here/zCommandUsername}
+</property>
+<property type="string" id="password" >
+${here/zCommandPassword}
+</property>
+<property type="string" id="project" >
+${here/zOpenStackProjectId}
+</property>
+<property type="string" id="authurl" >
+${here/zOpenStackAuthUrl}
+</property>
+<tomanycont id='datapoints'>
+<object id='networkIncomingBytesRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='networkIncomingPackets' module='ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource' class='OpenStackCeilometerDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
+</property>
+<property type="string" id="namespace" >
+/OpenStack/Nova/Server
+</property>
+<property type="string" id="metric" >
+network.incoming.packets
+</property>
+<property type="string" id="statistic" >
+Average
+</property>
+<property type="string" id="dimension" >
+${here/getDimension}
+</property>
+<property type="string" id="region" >
+${here/zOpenStackRegionName}
+</property>
+<property type="string" id="username" >
+${here/zCommandUsername}
+</property>
+<property type="string" id="password" >
+${here/zCommandPassword}
+</property>
+<property type="string" id="project" >
+${here/zOpenStackProjectId}
+</property>
+<property type="string" id="authurl" >
+${here/zOpenStackAuthUrl}
+</property>
+<tomanycont id='datapoints'>
+<object id='networkIncomingPackets' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='networkIncomingPacketsRate' module='ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource' class='OpenStackCeilometerDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
+</property>
+<property type="string" id="namespace" >
+/OpenStack/Nova/Server
+</property>
+<property type="string" id="metric" >
+network.incoming.packets.rate
+</property>
+<property type="string" id="statistic" >
+Average
+</property>
+<property type="string" id="dimension" >
+${here/getDimension}
+</property>
+<property type="string" id="region" >
+${here/zOpenStackRegionName}
+</property>
+<property type="string" id="username" >
+${here/zCommandUsername}
+</property>
+<property type="string" id="password" >
+${here/zCommandPassword}
+</property>
+<property type="string" id="project" >
+${here/zOpenStackProjectId}
+</property>
+<property type="string" id="authurl" >
+${here/zOpenStackAuthUrl}
+</property>
+<tomanycont id='datapoints'>
+<object id='networkIncomingPacketsRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='networkOutgoingBytes' module='ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource' class='OpenStackCeilometerDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
+</property>
+<property type="string" id="namespace" >
+/OpenStack/Nova/Server
+</property>
+<property type="string" id="metric" >
+network.outgoing.bytes
+</property>
+<property type="string" id="statistic" >
+Average
+</property>
+<property type="string" id="dimension" >
+${here/getDimension}
+</property>
+<property type="string" id="region" >
+${here/zOpenStackRegionName}
+</property>
+<property type="string" id="username" >
+${here/zCommandUsername}
+</property>
+<property type="string" id="password" >
+${here/zCommandPassword}
+</property>
+<property type="string" id="project" >
+${here/zOpenStackProjectId}
+</property>
+<property type="string" id="authurl" >
+${here/zOpenStackAuthUrl}
+</property>
+<tomanycont id='datapoints'>
+<object id='networkOutgoingBytes' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='networkOutgoingBytesRate' module='ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource' class='OpenStackCeilometerDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
+</property>
+<property type="string" id="namespace" >
+/OpenStack/Nova/Server
+</property>
+<property type="string" id="metric" >
+network.outgoing.bytes.rate
+</property>
+<property type="string" id="statistic" >
+Average
+</property>
+<property type="string" id="dimension" >
+${here/getDimension}
+</property>
+<property type="string" id="region" >
+${here/zOpenStackRegionName}
+</property>
+<property type="string" id="username" >
+${here/zCommandUsername}
+</property>
+<property type="string" id="password" >
+${here/zCommandPassword}
+</property>
+<property type="string" id="project" >
+${here/zOpenStackProjectId}
+</property>
+<property type="string" id="authurl" >
+${here/zOpenStackAuthUrl}
+</property>
+<tomanycont id='datapoints'>
+<object id='networkOutgoingBytesRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='networkOutgoingPackets' module='ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource' class='OpenStackCeilometerDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
+</property>
+<property type="string" id="namespace" >
+/OpenStack/Nova/Server
+</property>
+<property type="string" id="metric" >
+network.outgoing.packets
+</property>
+<property type="string" id="statistic" >
+Average
+</property>
+<property type="string" id="dimension" >
+${here/getDimension}
+</property>
+<property type="string" id="region" >
+${here/zOpenStackRegionName}
+</property>
+<property type="string" id="username" >
+${here/zCommandUsername}
+</property>
+<property type="string" id="password" >
+${here/zCommandPassword}
+</property>
+<property type="string" id="project" >
+${here/zOpenStackProjectId}
+</property>
+<property type="string" id="authurl" >
+${here/zOpenStackAuthUrl}
+</property>
+<tomanycont id='datapoints'>
+<object id='networkOutgoingPackets' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='networkOutgoingPacketsRate' module='ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource' class='OpenStackCeilometerDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
+</property>
+<property type="string" id="namespace" >
+/OpenStack/Nova/Server
+</property>
+<property type="string" id="metric" >
+network.outgoing.packets.rate
+</property>
+<property type="string" id="statistic" >
+Average
+</property>
+<property type="string" id="dimension" >
+${here/getDimension}
+</property>
+<property type="string" id="region" >
+${here/zOpenStackRegionName}
+</property>
+<property type="string" id="username" >
+${here/zCommandUsername}
+</property>
+<property type="string" id="password" >
+${here/zCommandPassword}
+</property>
+<property type="string" id="project" >
+${here/zOpenStackProjectId}
+</property>
+<property type="string" id="authurl" >
+${here/zOpenStackAuthUrl}
+</property>
+<tomanycont id='datapoints'>
+<object id='networkOutgoingPacketsRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+</tomanycont>
+<tomanycont id='graphDefs'>
+<object id='CPU Usage' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<property type="int" id="height" mode="w" >
+100
+</property>
+<property type="int" id="width" mode="w" >
+500
+</property>
+<property type="string" id="units" mode="w" >
+seconds
+</property>
+<property type="boolean" id="log" mode="w" >
+False
+</property>
+<property type="boolean" id="base" mode="w" >
+False
+</property>
+<property type="int" id="miny" mode="w" >
+0
+</property>
+<property type="int" id="maxy" mode="w" >
+-1
+</property>
+<property type="boolean" id="hasSummary" mode="w" >
+True
+</property>
+<property type="long" id="sequence" mode="w" >
+1
+</property>
+<tomanycont id='graphPoints'>
+<object id='cpu_usage' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+cpuUsage_cpuUsage
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='CPU Utilization' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<property type="int" id="height" mode="w" >
+100
+</property>
+<property type="int" id="width" mode="w" >
+500
+</property>
+<property type="string" id="units" mode="w" >
+percent
+</property>
+<property type="boolean" id="log" mode="w" >
+False
+</property>
+<property type="boolean" id="base" mode="w" >
+False
+</property>
+<property type="int" id="miny" mode="w" >
+0
+</property>
+<property type="int" id="maxy" mode="w" >
+100
+</property>
+<property type="boolean" id="hasSummary" mode="w" >
+True
+</property>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
+<tomanycont id='graphPoints'>
+<object id='cpu_util' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+cpuUtilization_cpuUtilization
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='Disk read_write bytes' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<property type="int" id="height" mode="w" >
+100
+</property>
+<property type="int" id="width" mode="w" >
+500
+</property>
+<property type="string" id="units" mode="w" >
+bytes
+</property>
+<property type="boolean" id="log" mode="w" >
+False
+</property>
+<property type="boolean" id="base" mode="w" >
+False
+</property>
+<property type="int" id="miny" mode="w" >
+0
+</property>
+<property type="int" id="maxy" mode="w" >
+-1
+</property>
+<property type="boolean" id="hasSummary" mode="w" >
+True
+</property>
+<property type="long" id="sequence" mode="w" >
+8
+</property>
+<tomanycont id='graphPoints'>
+<object id='disk.read.bytes' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+diskReadBytes_diskReadBytes
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+<object id='disk.write.bytes' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+1
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+diskWriteBytes_diskWriteBytes
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='Disk read_write bytes rate' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<property type="int" id="height" mode="w" >
+100
+</property>
+<property type="int" id="width" mode="w" >
+500
+</property>
+<property type="string" id="units" mode="w" >
+kilo bytes / second
+</property>
+<property type="boolean" id="log" mode="w" >
+False
+</property>
+<property type="boolean" id="base" mode="w" >
+False
+</property>
+<property type="int" id="miny" mode="w" >
+0
+</property>
+<property type="int" id="maxy" mode="w" >
+-1
+</property>
+<property type="boolean" id="hasSummary" mode="w" >
+True
+</property>
+<property type="long" id="sequence" mode="w" >
+9
+</property>
+<tomanycont id='graphPoints'>
+<object id='disk.read.bytes.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+diskReadBytesRate_diskReadBytesRate
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+<object id='disk.write.bytes.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+1
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+diskWriteBytesRate_diskWriteBytesRate
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='Disk read_write request' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<property type="int" id="height" mode="w" >
+100
+</property>
+<property type="int" id="width" mode="w" >
+500
+</property>
+<property type="string" id="units" mode="w" >
+requests
+</property>
+<property type="boolean" id="log" mode="w" >
+False
+</property>
+<property type="boolean" id="base" mode="w" >
+False
+</property>
+<property type="int" id="miny" mode="w" >
+0
+</property>
+<property type="int" id="maxy" mode="w" >
+-1
+</property>
+<property type="boolean" id="hasSummary" mode="w" >
+True
+</property>
+<property type="long" id="sequence" mode="w" >
+6
+</property>
+<tomanycont id='graphPoints'>
+<object id='disk.read.requests' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+diskReadRequests_diskReadRequests
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+<object id='disk.write.requests' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+1
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+diskWriteRequests_diskWriteRequests
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='Disk read_write request rate' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<property type="int" id="height" mode="w" >
+100
+</property>
+<property type="int" id="width" mode="w" >
+500
+</property>
+<property type="string" id="units" mode="w" >
+requests / second
+</property>
+<property type="boolean" id="log" mode="w" >
+False
+</property>
+<property type="boolean" id="base" mode="w" >
+False
+</property>
+<property type="int" id="miny" mode="w" >
+0
+</property>
+<property type="int" id="maxy" mode="w" >
+-1
+</property>
+<property type="boolean" id="hasSummary" mode="w" >
+True
+</property>
+<property type="long" id="sequence" mode="w" >
+7
+</property>
+<tomanycont id='graphPoints'>
+<object id='disk.read.requests.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+diskReadRequestsRate_diskReadRequestsRate
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+<object id='disk.write.requests.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+1
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+diskWriteRequestsRate_diskWriteRequestsRate
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='Incoming_Outgoing bytes' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<property type="int" id="height" mode="w" >
+100
+</property>
+<property type="int" id="width" mode="w" >
+500
+</property>
+<property type="string" id="units" mode="w" >
+kilo bytes
+</property>
+<property type="boolean" id="log" mode="w" >
+False
+</property>
+<property type="boolean" id="base" mode="w" >
+False
+</property>
+<property type="int" id="miny" mode="w" >
+0
+</property>
+<property type="int" id="maxy" mode="w" >
+-1
+</property>
+<property type="boolean" id="hasSummary" mode="w" >
+True
+</property>
+<property type="long" id="sequence" mode="w" >
+4
+</property>
+<tomanycont id='graphPoints'>
+<object id='network.incoming.bytes' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+networkIncomingBytes_networkIncomingBytes
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+<object id='network.outgoing.bytes' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+1
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+networkOutgoingBytes_networkOutgoingBytes
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='Incoming_Outgoing bytes rate' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<property type="int" id="height" mode="w" >
+100
+</property>
+<property type="int" id="width" mode="w" >
+500
+</property>
+<property type="string" id="units" mode="w" >
+bytes / second
+</property>
+<property type="boolean" id="log" mode="w" >
+False
+</property>
+<property type="boolean" id="base" mode="w" >
+False
+</property>
+<property type="int" id="miny" mode="w" >
+0
+</property>
+<property type="int" id="maxy" mode="w" >
+-1
+</property>
+<property type="boolean" id="hasSummary" mode="w" >
+True
+</property>
+<property type="long" id="sequence" mode="w" >
+5
+</property>
+<tomanycont id='graphPoints'>
+<object id='network.incoming.bytes.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+networkIncomingBytesRate_networkIncomingBytesRate
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+<object id='network.outgoing.bytes.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+1
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+networkOutgoingBytesRate_networkOutgoingBytesRate
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='Incoming_Outgoing packets' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<property type="int" id="height" mode="w" >
+100
+</property>
+<property type="int" id="width" mode="w" >
+500
+</property>
+<property type="string" id="units" mode="w" >
+packets
+</property>
+<property type="boolean" id="log" mode="w" >
+False
+</property>
+<property type="boolean" id="base" mode="w" >
+False
+</property>
+<property type="int" id="miny" mode="w" >
+0
+</property>
+<property type="int" id="maxy" mode="w" >
+-1
+</property>
+<property type="boolean" id="hasSummary" mode="w" >
+True
+</property>
+<property type="long" id="sequence" mode="w" >
+2
+</property>
+<tomanycont id='graphPoints'>
+<object id='network.incoming.packets' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+networkIncomingPackets_networkIncomingPackets
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+<object id='network.outgoing.packets' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+1
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+networkOutgoingPackets_networkOutgoingPackets
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='Incoming_Outgoing packets rate' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<property type="int" id="height" mode="w" >
+100
+</property>
+<property type="int" id="width" mode="w" >
+500
+</property>
+<property type="string" id="units" mode="w" >
+packets rate
+</property>
+<property type="boolean" id="log" mode="w" >
+False
+</property>
+<property type="boolean" id="base" mode="w" >
+False
+</property>
+<property type="int" id="miny" mode="w" >
+0
+</property>
+<property type="int" id="maxy" mode="w" >
+-1
+</property>
+<property type="boolean" id="hasSummary" mode="w" >
+True
+</property>
+<property type="long" id="sequence" mode="w" >
+3
+</property>
+<tomanycont id='graphPoints'>
+<object id='network.incoming.packets.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+networkIncomingPacketsRate_networkIncomingPacketsRate
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+<object id='network.outgoing.packets.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+1
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+networkOutgoingPacketsRate_networkOutgoingPacketsRate
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+</tomanycont>
+</object>
+</tomanycont>
+</object>
 <object id='OpenStackEndpoint' module='Products.ZenModel.RRDTemplate' class='RRDTemplate'>
 <property type="string" id="targetPythonClass" mode="w" >
 Products.ZenModel.Device
