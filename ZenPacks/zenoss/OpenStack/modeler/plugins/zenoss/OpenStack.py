@@ -24,8 +24,7 @@ from ZenPacks.zenoss.OpenStack.utils import add_local_lib_path
 add_local_lib_path()
 
 from novaclient import client as novaclient
-from ceilometerapiclient import CeilometerAPIClient
-from keystoneapiclient import KeystoneAPIClient
+
 
 class OpenStack(PythonPlugin):
     deviceProperties = PythonPlugin.deviceProperties + (

@@ -10,18 +10,10 @@
 import logging
 log = logging.getLogger('zen.OpenStack')
 
-import datetime
-import time
-import calendar
-import random
 import os
 import ast
 
-from cStringIO import StringIO
-from lxml import etree
-
 from twisted.web import client as txwebclient
-from twisted.web.client import getPage
 
 from twisted.internet import reactor, defer
 from twisted.internet.defer import inlineCallbacks
@@ -41,8 +33,8 @@ from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource \
 
 from ZenPacks.zenoss.OpenStack.utils import result_errmsg
 
-from keystoneapiclient import KeystoneAPIClient
 from ceilometerapiclient import CeilometerAPIClient
+
 
 class ProxyWebClient(object):
     """Provide useful web methods with proxy."""
