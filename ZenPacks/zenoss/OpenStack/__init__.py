@@ -176,6 +176,14 @@ CFG = zenpacklib.ZenPackSpec(
                 'hostId':              {'grid_display': False},   # a84303c0021aa53c7e749cbbbfac265f
                 'hostName':            {'grid_display': False,
                                         'index_type': 'field'},   # devstack1
+                'host': {'label': 'Host',   # link to the host this is running on.
+                         'type_': 'entity',
+                         'api_only': True,
+                         'api_backendtype': 'method'}
+            },
+            'relationships': {
+                # NOTE (FIXME): This isn't suppressing it.
+                'hypervisor': {'grid_display': False}  # no need to show this- show the host instead
             }
 
             # Note: By (nova) design, hostId is a hash of the actual underlying host and project, and
