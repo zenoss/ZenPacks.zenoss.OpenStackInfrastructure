@@ -318,7 +318,7 @@ class ComponentBase(ModelBase):
             new_obj.index_object()
             return
 
-        LOG.error("setIdForRelationship: No target found matching id=%s", id_)
+        LOG.error("setIdForRelationship (%s): No target found matching id=%s", relationship,id_)
 
     def getIdsInRelationship(self, relationship):
         """Return a list of object ids in relationship.
@@ -356,8 +356,8 @@ class ComponentBase(ModelBase):
             obj = obj_map.get(id_)
             if not obj:
                 LOG.error(
-                    "setIdsInRelationship: No targets found matching "
-                    "id=%s", id_)
+                    "setIdsInRelationship (%s): No targets found matching "
+                    "id=%s", relationship, id_)
 
                 continue
 
@@ -587,7 +587,7 @@ class ComponentFormBuilder(BaseComponentFormBuilder):
 
     def render(self, **kwargs):
         rendered = super(ComponentFormBuilder, self).render(kwargs)
-        self.zpl_decorate(rendered)    
+        self.zpl_decorate(rendered)
         return rendered
 
     def zpl_decorate(self, item):
@@ -596,7 +596,7 @@ class ComponentFormBuilder(BaseComponentFormBuilder):
                 self.zpl_decorate(item)
             return
 
-        if 'xtype' in item and 'name' in item:
+        if 'xtype' in item and 'name' in item and item['xtype'] != 'linkfield':
             if item['name'] in self.renderer:
                 renderer = self.renderer[item['name']]
 
@@ -1304,6 +1304,10 @@ class ClassSpec(object):
             'meta_type': self.meta_type,
             'portal_type': self.meta_type,
             'icon_url': self.icon_url,
+            'class_label': self.label,
+            'class_plural_label': self.plural_label,
+            'class_short_label': self.short_label,
+            'class_plural_short_label': self.plural_short_label
             }
 
         properties = []
@@ -1436,6 +1440,12 @@ class ClassSpec(object):
                 bases = [InfoBase]
 
         attributes = {}
+        attributes.update({
+            'class_label':              ProxyProperty('class_label'),
+            'class_plural_label':       ProxyProperty('class_plural_label'),
+            'class_short_label':        ProxyProperty('class_short_label'),
+            'class_plural_short_label': ProxyProperty('class_plural_short_label')
+        })
 
         for spec in self.containing_components:
             attr = relname_from_classname(spec.name)
@@ -1469,10 +1479,15 @@ class ClassSpec(object):
 
         bases = (ComponentFormBuilder,)
         attributes = {}
-
         renderer = {}
+
+        # Find renderers for our properties:
+        for propname, spec in self.properties.iteritems():
+            renderer[propname] = spec.renderer
+
+        # Find renderers for inherited properties
         for class_spec in self.base_class_specs(recursive=True):
-            for propname, spec in self.properties.iteritems():
+            for propname, spec in class_spec.properties.iteritems():
                 renderer[propname] = spec.renderer
 
         attributes['renderer'] = renderer
@@ -1615,7 +1630,7 @@ class ClassSpec(object):
 
         default_fields = [
             "{{name: '{}'}}".format(x) for x in (
-                'uid', 'name', 'meta_type', 'status', 'severity',
+                'uid', 'name', 'meta_type', 'class_label', 'status', 'severity',
                 'usesMonitorAttribute', 'monitored', 'locking',
                 )]
 
@@ -1779,6 +1794,11 @@ class ClassPropertySpec(object):
         self.details_display = details_display
         self.grid_display = grid_display
         self.renderer = renderer
+
+        # pick an appropriate default renderer for this property.
+        if type_ == 'entity' and not self.renderer:
+            self.renderer = 'Zenoss.render.zenpacklib_entityLinkFromGrid'
+
         self.editable = bool(editable)
         self.api_only = bool(api_only)
         self.api_backendtype = api_backendtype
@@ -1913,6 +1933,7 @@ class ClassRelationshipSpec(object):
             details_display=True,
             grid_display=True,
             renderer=None,
+            render_with_type=False,
             order=None,
             ):
         """TODO."""
@@ -1941,7 +1962,12 @@ class ClassRelationshipSpec(object):
         self.details_display = details_display
         self.grid_display = grid_display
         self.renderer = renderer
+        self.render_with_type = render_with_type
         self.order = order
+
+        if self.renderer is None:
+            self.renderer = 'Zenoss.render.zenpacklib_entityTypeLinkFromGrid' \
+                if self.render_with_type else 'Zenoss.render.zenpacklib_entityLinkFromGrid'
 
     @property
     def zenrelations_tuple(self):
@@ -2026,14 +2052,14 @@ class ClassRelationshipSpec(object):
         if isinstance(self.schema, ToOne):
             fieldname = self.name
             header = self.short_label or self.label or remote_spec.short_label
-            renderer = self.renderer or 'Zenoss.render.zenpacklib_entityLinkFromGrid'
+            renderer = self.renderer
             width = max(
                 (self.content_width or remote_spec.content_width) + 14,
                 (self.label_width or remote_spec.label_width) + 20)
         else:
             fieldname = '{}_count'.format(self.name)
             header = self.short_label or self.label or remote_spec.plural_short_label
-            renderer = self.renderer or None
+            renderer = None
             width = (self.label_width or remote_spec.plural_label_width) + 20
 
         column_fields = [
@@ -2567,7 +2593,37 @@ Ext.apply(Zenoss.render, {
         } else {
             return obj.title;
         }
+    },
+
+    zenpacklib_entityTypeLinkFromGrid: function(obj, metaData, record, rowIndex, colIndex) {
+        if (!obj)
+            return;
+
+        if (typeof(obj) == 'string')
+            obj = record.data;
+
+        if (!obj.title && obj.name)
+            obj.title = obj.name;
+
+        var isLink = false;
+
+        if (this.refName == 'componentgrid') {
+            // Zenoss >= 4.2 / ExtJS4
+            if (colIndex != 1 || this.subComponentGridPanel)
+                isLink = true;
+        } else {
+            // Zenoss < 4.2 / ExtJS3
+            if (!this.panel || this.panel.subComponentGridPanel)
+                isLink = true;
+        }
+
+        if (isLink) {
+            return '<a href="javascript:Ext.getCmp(\\'component_card\\').componentgrid.jumpToEntity(\\''+obj.uid+'\\', \\''+obj.meta_type+'\\');">'+obj.title+'</a> (' + obj.class_label + ')';
+        } else {
+            return obj.title;
+        }
     }
+
 });
 
 Ext.define("Zenoss.component.ZPLComponentGridPanel", {
