@@ -19,6 +19,8 @@ from Products.ZenUtils.guid.interfaces import IGlobalIdentifier
 import functools
 import importlib
 
+from twisted.internet.error import ConnectionRefusedError, TimeoutError
+
 import logging
 LOG = logging.getLogger('ZenPacks.zenoss.OpenStack.utils')
 
