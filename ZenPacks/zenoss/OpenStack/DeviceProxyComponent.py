@@ -108,6 +108,14 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
 
         device = GUIDManager(self.dmd).getObject(getattr(self, 'openstackProxyDeviceUUID', None))
         if device:
+            guid = IGlobalIdentifier(self).getGUID()
+
+            # this shouldn't happen, but if we've somehow become half-connected
+            # (we know about the device, it doesn't know about us), reconnect.
+            if device.openstackProxyComponentUUID != guid:
+                LOG.info("%s component '%s' linkage to device '%s' is broken.  Re-claiming it." % (self.meta_type, self.name(), device.name()))
+                self.claim_proxy_device(device)
+
             return device
 
         # Does a device with a matching name exist?  Claim that one.
