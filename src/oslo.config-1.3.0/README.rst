@@ -1,5 +1,0 @@
-Oslo Configuration Library
-==========================
-
-The Oslo configuration API supports parsing command line arguments and
-.ini style configuration files.

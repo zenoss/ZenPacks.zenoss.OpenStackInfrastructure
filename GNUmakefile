@@ -14,11 +14,13 @@
 PYTHON=python
 SRC_DIR=$(PWD)/src
 NOVACLIENT_DIR=$(SRC_DIR)/python-novaclient-2.15.0
-KEYSTONECLIENT_DIR=$(SRC_DIR)/python-keystoneclient-0.4.0
+KEYSTONECLIENT_DIR=$(SRC_DIR)/python-keystoneclient-0.8.0
 CEILOMETERCLIENT_DIR=$(SRC_DIR)/python-ceilometerclient-1.0.6
 ZP_DIR=$(PWD)/ZenPacks/zenoss/OpenStack
 BIN_DIR=$(ZP_DIR)/bin
 LIB_DIR=$(ZP_DIR)/lib
+
+##
 
 default: egg
 
@@ -60,24 +62,18 @@ build:
 	cd $(NOVACLIENT_DIR) && \
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
-
+	# convince keystoneclient not to try to download any dependencies. We have already taken
+	# care of them above.
 	cp /dev/null $(KEYSTONECLIENT_DIR)/requirements.txt
 	cd $(KEYSTONECLIENT_DIR) && \
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
-
+	# convince ceilometerlient not to try to download any dependencies. We have already taken
+	# care of them above.
 	cp /dev/null $(CEILOMETERCLIENT_DIR)/requirements.txt
 	cd $(CEILOMETERCLIENT_DIR) && \
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
-
-	# convince keystoneclient not to try to download any dependencies. We have already taken
-	# care of them above.
-	cp /dev/null $(SRC_DIR)/python-keystoneclient-0.8.0/requirements.txt
-	cd $(SRC_DIR)/python-keystoneclient-0.8.0 && \
-		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
-			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
-
 clean:
 	rm -rf build dist *.egg-info
 	cd $(NOVACLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
