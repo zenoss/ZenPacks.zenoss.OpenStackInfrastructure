@@ -25,8 +25,6 @@ from utils import add_local_lib_path
 add_local_lib_path()
 
 from novaclient import client as novaclient
-from apiclients.ceilometerapiclient import CeilometerAPIClient
-
 
 
 class OpenStackPoller(object):
@@ -176,7 +174,7 @@ class OpenStackPoller(object):
             self._api_key,
             self._project_id,
             self._auth_url,
-            region_name=self._region_name or None,
+            region_name=self._region_name,
             http_log_debug=http_log_debug,
         )
 
@@ -187,25 +185,6 @@ class OpenStackPoller(object):
 
         self._populateImageData(client, data)
         self._populateServerData(client, data)
-
-        # Ceilometer
-        ceiloclient = CeilometerAPIClient(
-            username=self._username,
-            api_key=self._api_key,
-            project_id=self._project_id,
-            auth_url=self._auth_url,
-            api_version=self._api_version,
-            region_name=self._region_name
-        )
-
-        data['statistics'] = {}
-        meternames = ceiloclient.get_meternames()
-        for name in meternames:
-            data['statistics'][name] = ceiloclient.get_statistics(name)
-        data['meters-list'] = ceiloclient.get_meters()
-        data['alarms-list'] = ceiloclient.get_alarms()
-        data['resources-list'] = ceiloclient.get_resources()
-        data['samples-list'] = ceiloclient.get_samples()
 
         return data
 
@@ -237,13 +216,12 @@ if __name__ == '__main__':
         username, api_key, project_id, auth_url, region_name = sys.argv[1:7]
     except ValueError:
         print >> sys.stderr, (
-            "Usage: %s <username> <api_key> <project_id> <auth_url> "
-            "<api_version> <region_name>"
+            "Usage: %s <username> <api_key> <project_id> <auth_url> <region_name>"
             ) % sys.argv[0]
 
         sys.exit(1)
 
     poller = OpenStackPoller(
-        username, api_key, project_id, auth_url, api_version, region_name)
+        username, api_key, project_id, auth_url, region_name)
 
     poller.printJSON()
