@@ -121,22 +121,10 @@ class OpenStackCeilometerDataSource(PythonDataSource):
     # OpenStackCeilometerDataSource
     metric = ''
     statistic = 'Average'
-    dimension = '${here/getDimension}'
-    region = '${here/zOpenStackRegionName}'
-    username = '${here/zCommandUsername}'
-    password = '${here/zCommandPassword}'
-    project = '${here/zOpenStackProjectId}'
-    authurl = '${here/zOpenStackAuthUrl}'
 
     _properties = PythonDataSource._properties + (
         {'id': 'metric', 'type': 'string'},
         {'id': 'statistic', 'type': 'string'},
-        {'id': 'dimension', 'type': 'string'},
-        {'id': 'region', 'type': 'string'},
-        {'id': 'username', 'type': 'string'},
-        {'id': 'password', 'type': 'string'},
-        {'id': 'project', 'type': 'string'},
-        {'id': 'authurl', 'type': 'string'},
         )
 
 
@@ -152,30 +140,6 @@ class IOpenStackCeilometerDataSourceInfo(IRRDDataSourceInfo):
     statistic = schema.TextLine(
         group=_t('OpenStack Ceilometer'),
         title=_t('Statistic'))
-
-    dimension = schema.TextLine(
-        group=_t('OpenStack Ceilometer'),
-        title=_t('Dimension'))
-
-    region = schema.TextLine(
-        group=_t('OpenStack Ceilometer'),
-        title=_t('Region'))
-
-    username = schema.TextLine(
-        group=_t('OpenStack Ceilometer'),
-        title=_t('Username'))
-
-    password = schema.TextLine(
-        group=_t('OpenStack Ceilometer'),
-        title=_t('Password'))
-
-    project = schema.TextLine(
-        group=_t('OpenStack Ceilometer'),
-        title=_t('Project'))
-
-    authurl = schema.TextLine(
-        group=_t('OpenStack Ceilometer'),
-        title=_t('Auth Url'))
 
 
 class OpenStackCeilometerDataSourceInfo(RRDDataSourceInfo):
