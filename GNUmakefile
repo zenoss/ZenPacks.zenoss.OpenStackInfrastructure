@@ -14,13 +14,12 @@
 PYTHON=python
 SRC_DIR=$(PWD)/src
 NOVACLIENT_DIR=$(SRC_DIR)/python-novaclient-2.15.0
-KEYSTONECLIENT_DIR=$(SRC_DIR)/python-keystoneclient-0.8.0
+KEYSTONECLIENT_DIR=$(SRC_DIR)/python-keystoneclient-0.4.0
 CEILOMETERCLIENT_DIR=$(SRC_DIR)/python-ceilometerclient-1.0.6
 ZP_DIR=$(PWD)/ZenPacks/zenoss/OpenStack
 BIN_DIR=$(ZP_DIR)/bin
 LIB_DIR=$(ZP_DIR)/lib
 
-##
 
 default: egg
 
