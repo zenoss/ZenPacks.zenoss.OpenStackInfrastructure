@@ -83,8 +83,8 @@ CFG = zenpacklib.ZenPackSpec(
             'base': zenpacklib.Component,
             'filter_display': False,
             'properties': {
-                 'resourceId': {'grid_display': False,
-                                'label': 'Ceilometer Resource ID',}
+                'resourceId': {'grid_display': False,
+                               'label': 'Ceilometer Resource ID'}
             }
         },
 
@@ -114,7 +114,10 @@ CFG = zenpacklib.ZenPackSpec(
             'filter_display': False,
             'relationships': {
                 # Provide better contextual naming for the relationships in the UI.
-                'orgComponent': {'label': 'Supporting OrgComponent', 'order': 1.0}
+                'orgComponent': {'label': 'Supporting',
+                                 'render_with_type': True,
+                                 'order': 1.0,
+                                 'content_width': 150}  # need to fix the default width for render_with_type
             },
             'properties': {
                 'binary':   {'label': 'Binary'},
@@ -186,6 +189,8 @@ CFG = zenpacklib.ZenPackSpec(
                 'hypervisor': {'grid_display': False}  # no need to show this- show the host instead
             }
 
+
+
             # Note: By (nova) design, hostId is a hash of the actual underlying host and project, and
             # is designed to allow users of a specific project to tell if two VMs are on the same host, nothing
             # more.  It is not a unique identifier of hosts (compute nodes).
@@ -216,7 +221,13 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'DeviceProxyComponent',
             'meta_type': 'OpenStackHost',
             'label': 'Host',
-            'order': 8
+            'order': 8,
+            'relationships': {
+                'orgComponent': {'label': 'Supporting',
+                                 'render_with_type': True,
+                                 'order': 1.0,
+                                 'content_width': 150}  # need to fix the default width for render_with_type
+                }
         },
 
         'NovaService': {
