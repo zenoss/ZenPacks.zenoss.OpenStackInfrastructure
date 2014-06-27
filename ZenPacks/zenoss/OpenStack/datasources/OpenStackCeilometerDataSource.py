@@ -256,18 +256,17 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
         project = ds0.zOpenStackProjectId
         region = ds0.zOpenStackRegionName
         resourceId = ds0.resourceId
-#       import pdb;pdb.set_trace()
 
         # CloudWatch only accepts periods that are evenly divisible by 60.
         cycletime = (ds0.cycletime / 60) * 60
 
         ceiloclient = CeilometerAPIClient(
-            username = username,
-            api_key = password,
-            project_id = project,
-            auth_url = authurl,
-            api_version = 2,
-            region_name = region,
+            username=username,
+            api_key=password,
+            project_id=project,
+            auth_url=authurl,
+            api_version=2,
+            region_name=region,
         )
         if metric not in ceiloclient._meternames:
             log.error("metric(%s) is not in ceilometer meter names(%s)".format(metric, str(ceiloclient._meternames)))
