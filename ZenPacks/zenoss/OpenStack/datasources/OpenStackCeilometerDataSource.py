@@ -24,12 +24,11 @@ from zope.interface import implements
 from Products.ZenEvents import ZenEventClasses
 from Products.Zuul.form import schema
 from Products.Zuul.infos import ProxyProperty
-from Products.Zuul.infos.template import RRDDataSourceInfo
-from Products.Zuul.interfaces import IRRDDataSourceInfo
 from Products.Zuul.utils import ZuulMessageFactory as _t
 
-from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource \
-    import PythonDataSource, PythonDataSourcePlugin
+from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import (
+    PythonDataSource, PythonDataSourcePlugin, PythonDataSourceInfo,
+    IPythonDataSourceInfo)
 
 from ZenPacks.zenoss.OpenStack.utils import result_errmsg
 
@@ -128,7 +127,7 @@ class OpenStackCeilometerDataSource(PythonDataSource):
         )
 
 
-class IOpenStackCeilometerDataSourceInfo(IRRDDataSourceInfo):
+class IOpenStackCeilometerDataSourceInfo(IPythonDataSourceInfo):
     '''
     API Info interface for OpenStackCeilometer.
     '''
@@ -142,7 +141,7 @@ class IOpenStackCeilometerDataSourceInfo(IRRDDataSourceInfo):
         title=_t('Statistic'))
 
 
-class OpenStackCeilometerDataSourceInfo(RRDDataSourceInfo):
+class OpenStackCeilometerDataSourceInfo(PythonDataSourceInfo):
     '''
     API Info adapter factory for OpenStackCeilometerDataSource.
     '''
@@ -152,7 +151,6 @@ class OpenStackCeilometerDataSourceInfo(RRDDataSourceInfo):
 
     testable = False
 
-    cycletime = ProxyProperty('cycletime')
     metric    = ProxyProperty('metric')
     statistic = ProxyProperty('statistic')
 
