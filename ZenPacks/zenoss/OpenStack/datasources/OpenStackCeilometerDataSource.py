@@ -8,7 +8,7 @@
 ##############################################################################
 
 import logging
-log = logging.getLogger('zen.OpenStack')
+log = logging.getLogger('zen.OpenStackCeilometer')
 
 import os
 import ast
@@ -203,14 +203,17 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
 
     @classmethod
     def config_key(cls, datasource, context):
-        return(
+        """
+        Return list that is used to split configurations at the collector.
+
+        This is a classmethod that is executed in zenhub. The datasource and
+        context parameters are the full objects.
+        """
+        return (
             context.device().id,
             datasource.getCycleTime(context),
-            context.zOpenStackRegionName,
-            context.zOpenStackProjectId,
-            context.zOpenStackAuthUrl,
-            context.zOpenStackHostDeviceClass,
-            context.zOpenStackInsecure,
+            datasource.rrdTemplate().id,
+            datasource.plugin_classname,
             )
 
     @classmethod
