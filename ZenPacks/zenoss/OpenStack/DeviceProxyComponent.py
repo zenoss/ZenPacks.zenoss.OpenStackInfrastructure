@@ -178,6 +178,19 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
             self.device().name()
         )
 
+    def getDefaultGraphDefs(self, drange=None):
+        """
+        Return graph definitions for this component along with all graphs
+        from the associated device.
+        """
+        graphs = super(DeviceProxyComponent, self).getDefaultGraphDefs(drange=drange)
+        device = self.proxy_device()
+        if device:
+            for device_graph in device.getDefaultGraphDefs(drange):
+                graphs.append(device_graph)
+
+        return graphs
+
 
 class DeviceLinkProvider(object):
     '''
