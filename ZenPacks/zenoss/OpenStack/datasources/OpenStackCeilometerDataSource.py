@@ -119,7 +119,6 @@ class OpenStackCeilometerDataSource(PythonDataSource):
         'OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin'
 
     # OpenStackCeilometerDataSource
-    namespace = ''
     metric = ''
     statistic = 'Average'
     dimension = '${here/getDimension}'
@@ -130,7 +129,6 @@ class OpenStackCeilometerDataSource(PythonDataSource):
     authurl = '${here/zOpenStackAuthUrl}'
 
     _properties = PythonDataSource._properties + (
-        {'id': 'namespace', 'type': 'string'},
         {'id': 'metric', 'type': 'string'},
         {'id': 'statistic', 'type': 'string'},
         {'id': 'dimension', 'type': 'string'},
@@ -146,10 +144,6 @@ class IOpenStackCeilometerDataSourceInfo(IRRDDataSourceInfo):
     '''
     API Info interface for OpenStackCeilometer.
     '''
-
-    namespace = schema.TextLine(
-        group=_t('OpenStack Ceilometer'),
-        title=_t('Namespace'))
 
     metric = schema.TextLine(
         group=_t('OpenStack Ceilometer'),
@@ -195,7 +189,6 @@ class OpenStackCeilometerDataSourceInfo(RRDDataSourceInfo):
     testable = False
 
     cycletime = ProxyProperty('cycletime')
-    namespace = ProxyProperty('namespace')
     metric    = ProxyProperty('metric')
     statistic = ProxyProperty('statistic')
 
@@ -223,7 +216,6 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
     @classmethod
     def params(cls, datasource, context):
         return {
-            'namespace': datasource.talesEval(datasource.namespace, context),
             'metric':    datasource.talesEval(datasource.metric, context),
             'statistic': datasource.talesEval(datasource.statistic, context),
             }
@@ -236,7 +228,6 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
         ds0 = config.datasources[0]
         username = ds0.zCommandUsername
         password = ds0.zCommandPassword
-        namespace = ds0.params['namespace']
         metric = ds0.params['metric']
         authurl = ds0.zOpenStackAuthUrl
         project = ds0.zOpenStackProjectId
