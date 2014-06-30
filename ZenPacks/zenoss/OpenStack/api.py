@@ -35,18 +35,22 @@ OPENSTACK_DEVICE_PATH = "/Devices/OpenStack"
 
 class IOpenStackFacade(IFacade):
     def addOpenStack(self, device_name, username, api_key, project_id, auth_url,
-                     region_name=None, collector='localhost'):
+                     ceilometer_url, region_name=None, collector='localhost'):
         """Add OpenStack Endpoint."""
 
     def getRegions(self, username, api_key, project_id, auth_url):
         """Get a list of available regions, given a keystone endpoint and credentials."""
+
+    def getCeilometerUrl(self, username, api_key, project_id, auth_url, region_name):
+        """Return the first defined ceilometer URL, given a keystone endpoint,
+        credentials, and a region.  May return an empty string if none is found."""
 
 
 class OpenStackFacade(ZuulFacade):
     implements(IOpenStackFacade)
 
     def addOpenStack(self, device_name, username, api_key, project_id, auth_url,
-                     region_name, collector='localhost'):
+                     ceilometer_url, region_name, collector='localhost'):
         """Add a new OpenStack endpoint to the system."""
         parsed_url = urlparse(auth_url)
 
@@ -64,7 +68,8 @@ class OpenStackFacade(ZuulFacade):
             'zCommandPassword': api_key,
             'zOpenStackProjectId': project_id,
             'zOpenStackAuthUrl': auth_url,
-            'zOpenStackRegionName': region_name
+            'zOpenStackRegionName': region_name,
+            'zOpenStackCeilometerUrl': ceilometer_url
             }
 
         @transact
@@ -114,16 +119,38 @@ class OpenStackFacade(ZuulFacade):
         return [{'key': c, 'label': c} for c in sorted(regions)]
 
 
+    def getCeilometerUrl(self, username, api_key, project_id, auth_url, region_name):
+        """Return the first defined ceilometer URL, given a keystone endpoint,
+        credentials, and a region.  May return an empty string if none is found."""
+
+        from keystoneclient.v2_0.client import Client as keystoneclient
+
+        client = keystoneclient(
+            username=username,
+            password=api_key,
+            tenant_name=project_id,
+            auth_url=auth_url,
+        )
+
+        endpoints = client.service_catalog.get_endpoints('metering')
+        if 'metering' in endpoints:
+            for endpoint in endpoints['metering']:
+                if endpoint['region'] == region_name:
+                    return endpoint['publicURL']
+
+        return ""
+
+
 class OpenStackRouter(DirectRouter):
     def _getFacade(self):
         return Zuul.getFacade('openstack', self.context)
 
     def addOpenStack(self, device_name, username, api_key, project_id, auth_url,
-                     region_name, collector='localhost'):
+                     ceilometer_url, region_name, collector='localhost'):
 
         facade = self._getFacade()
         success, message = facade.addOpenStack(
-            device_name, username, api_key, project_id, auth_url,
+            device_name, username, api_key, project_id, auth_url, ceilometer_url,
             region_name=region_name, collector=collector)
 
         if success:
@@ -135,4 +162,10 @@ class OpenStackRouter(DirectRouter):
         facade = self._getFacade()
 
         data = facade.getRegions(username, api_key, project_id, auth_url)
+        return DirectResponse(success=True, data=data)
+
+    def getCeilometerUrl(self, username, api_key, project_id, auth_url, region_name):
+        facade = self._getFacade()
+
+        data = facade.getCeilometerUrl(username, api_key, project_id, auth_url, region_name)
         return DirectResponse(success=True, data=data)

@@ -95,7 +95,7 @@ class ProxyWebClient(object):
         return data
 
     def errdata(self, failure):
-        log.error('%s: %s', 'AWSCloudWatchError', failure.getErrorMessage())
+        log.error('%s: %s', 'OpenStackCeilometerError', failure.getErrorMessage())
         return failure.getErrorMessage()
 
 
@@ -159,6 +159,7 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
     proxy_attributes = ('zCommandUsername',
                         'zCommandPassword',
                         'zOpenStackAuthUrl',
+                        'zOpenStackCeilometerUrl',
                         'zOpenStackProjectId',
                         'zOpenStackRegionName',
                         'resourceId')
@@ -191,6 +192,8 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
         results = []
 
         ds0 = config.datasources[0]
+
+        ceilometer_url = ds0.zOpenStackCeilometerUrl.rstrip('/')
         username = ds0.zCommandUsername
         password = ds0.zCommandPassword
         metric = ds0.params['metric']
@@ -200,6 +203,7 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
         resourceId = ds0.resourceId
 
         ceiloclient = CeilometerAPIClient(
+            url=ceilometer_url,
             username=username,
             api_key=password,
             project_id=project,
@@ -223,7 +227,7 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
             metric = ds.params['metric']
             resourceId = ds.resourceId
             getURL = "%s/v2/meters/%s/statistics?q.field=resource_id&q.op=eq&q.value=%s" % \
-                (ceiloclient._endpoint, metric, resourceId)
+                (ceilometer_url, metric, resourceId)
 
             factory = ProxyWebClient(getURL)
             result = yield factory.get_page(hdr)

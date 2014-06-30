@@ -20,20 +20,18 @@ from keystoneclient.v2_0.client import Client as keystoneclient
 
 class KeystoneAPIClient(object):
 
-    def __init__(self, username, api_key, project_id,
-                 auth_url, api_version):
+    def __init__(self, url, username, api_key, project_id):
         self._username = username
         self._api_key = api_key
         self._project_id = project_id
-        self._auth_url = auth_url
-        self._api_version = api_version
+        self._auth_url = url
         # use keystone client v2 by default
         self._client = keystoneclient(
-                username=self._username,
-                password=self._api_key,
-                tenant_name=self._project_id,
-                auth_url=self._auth_url,
-            )
+            username=self._username,
+            password=self._api_key,
+            tenant_name=self._project_id,
+            auth_url=self._auth_url,
+        )
         self._token = self._get_token()
 
     def _get_token(self):

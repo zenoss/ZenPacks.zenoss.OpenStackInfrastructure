@@ -21,7 +21,7 @@ from ceilometerclient.v2.client import Client as ceilometerclient
 
 class CeilometerAPIClient(object):
 
-    def __init__(self, username, api_key, project_id,
+    def __init__(self, url, username, api_key, project_id,
                  auth_url, api_version, region_name):
         self._username = username
         self._api_key = api_key
@@ -30,12 +30,12 @@ class CeilometerAPIClient(object):
         self._api_version = api_version
         self._region_name = region_name
         self._token = self._get_token()
-        self._endpoint = self._get_endpoint()
+        self._ceilometer_url = url
 
         self._meters = []
 
         self._client = ceilometerclient(
-            endpoint=self._endpoint,
+            endpoint=self._ceilometer_url,
             token=self._token
         )
 
@@ -57,23 +57,6 @@ class CeilometerAPIClient(object):
             )
             token = client.service_catalog.catalog['token']['id']
         return token
-
-    def _get_endpoint(self):
-        endpoint = ''
-        if len(self._auth_url) > 0:
-            endpoint = self._auth_url[:(self._auth_url.rindex(':'))] + ':8777'
-#       if len(self._username) > 0 and \
-#          len(self._api_key) > 0 and \
-#          len(self._project_id) > 0 and \
-#          len(self._auth_url) > 0:
-#           client = keystoneclient(
-#               username=self._username,
-#               password=self._api_key,
-#               tenant_name=self._project_id,
-#               auth_url=self._auth_url,
-#           )
-#           endpoint = client.endpoints.list()[-1].publicurl
-        return endpoint
 
     def _get_meters(self):
         meterlist = self._client.meters.list()
