@@ -228,6 +228,10 @@ var addOpenStack = new Zenoss.Action({
                    api_key: formvalues.api_key,
                    project_id: formvalues.project_id,
                    auth_url: formvalues.auth_url
+               },
+               callback: function(records, operation, success) {
+                    combo.select(store.getAt(0));
+                    combo.fireEvent('select');
                }
             });
         } else {
