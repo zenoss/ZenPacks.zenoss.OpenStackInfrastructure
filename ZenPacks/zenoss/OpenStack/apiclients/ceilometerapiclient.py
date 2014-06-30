@@ -53,7 +53,7 @@ class CeilometerAPIClient(object):
                 username=self._username,
                 password=self._api_key,
                 tenant_name=self._project_id,
-                url=self._auth_url,
+                auth_url=self._auth_url,
             )
             token = client.service_catalog.catalog['token']['id']
         return token
