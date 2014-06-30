@@ -5,7 +5,6 @@
   datasources:
     cpuUtilization:
       type: OpenStack Ceilometer
-      namespace: '/OpenStack/Nova/Server'
       metric: 'cpu_util'
       severity: 'Clear'
 
@@ -14,7 +13,6 @@
 
     cpuUsage:
       type: OpenStack Ceilometer
-      namespace: '/OpenStack/Nova/Server'
       metric: 'cpu'
       severity: 'Clear'
 
@@ -23,7 +21,6 @@
 
     diskReadRequests:
       type: OpenStack Ceilometer
-      namespace: '/OpenStack/Nova/Server'
       metric: 'disk.read.requests'
       severity: 'Clear'
 
@@ -32,7 +29,6 @@
 
     diskWriteRequests:
       type: OpenStack Ceilometer
-      namespace: '/OpenStack/Nova/Server'
       metric: 'disk.write.requests'
       severity: 'Clear'
 
@@ -41,7 +37,6 @@
 
     diskReadRequestsRate:
       type: OpenStack Ceilometer
-      namespace: '/OpenStack/Nova/Server'
       metric: 'disk.read.requests.rate'
       severity: 'Clear'
 
@@ -50,7 +45,6 @@
 
     diskWriteRequestsRate:
       type: OpenStack Ceilometer
-      namespace: '/OpenStack/Nova/Server'
       metric: 'disk.write.requests.rate'
       severity: 'Clear'
 
@@ -59,7 +53,6 @@
 
     diskReadBytes:
       type: OpenStack Ceilometer
-      namespace: '/OpenStack/Nova/Server'
       metric: 'disk.read.bytes'
       severity: 'Clear'
 
@@ -68,7 +61,6 @@
 
     diskWriteBytes:
       type: OpenStack Ceilometer
-      namespace: '/OpenStack/Nova/Server'
       metric: 'disk.write.bytes'
       severity: 'Clear'
 
@@ -77,7 +69,6 @@
 
     diskReadBytesRate:
       type: OpenStack Ceilometer
-      namespace: '/OpenStack/Nova/Server'
       metric: 'disk.read.bytes.rate'
       severity: 'Clear'
 
@@ -86,7 +77,6 @@
 
     diskWriteBytesRate:
       type: OpenStack Ceilometer
-      namespace: '/OpenStack/Nova/Server'
       metric: 'disk.write.bytes.rate'
       severity: 'Clear'
 
@@ -95,7 +85,6 @@
 
     networkIncomingPackets:
       type: OpenStack Ceilometer
-      namespace: '/OpenStack/Nova/Server'
       metric: 'network.incoming.packets'
       severity: 'Clear'
 
@@ -104,7 +93,6 @@
 
     networkOutgoingPackets:
       type: OpenStack Ceilometer
-      namespace: '/OpenStack/Nova/Server'
       metric: 'network.outgoing.packets'
       severity: 'Clear'
 
@@ -113,7 +101,6 @@
 
     networkIncomingPacketsRate:
       type: OpenStack Ceilometer
-      namespace: '/OpenStack/Nova/Server'
       metric: 'network.incoming.packets.rate'
       severity: 'Clear'
 
@@ -122,7 +109,6 @@
 
     networkOutgoingPacketsRate:
       type: OpenStack Ceilometer
-      namespace: '/OpenStack/Nova/Server'
       metric: 'network.outgoing.packets.rate'
       severity: 'Clear'
 
@@ -131,7 +117,6 @@
 
     networkIncomingBytes:
       type: OpenStack Ceilometer
-      namespace: '/OpenStack/Nova/Server'
       metric: 'network.incoming.bytes'
       severity: 'Clear'
 
@@ -140,7 +125,6 @@
 
     networkOutgoingBytes:
       type: OpenStack Ceilometer
-      namespace: '/OpenStack/Nova/Server'
       metric: 'network.outgoing.bytes'
       severity: 'Clear'
 
@@ -149,7 +133,6 @@
 
     networkIncomingBytesRate:
       type: OpenStack Ceilometer
-      namespace: '/OpenStack/Nova/Server'
       metric: 'network.incoming.bytes.rate'
       severity: 'Clear'
 
@@ -158,7 +141,6 @@
 
     networkOutgoingBytesRate:
       type: OpenStack Ceilometer
-      namespace: '/OpenStack/Nova/Server'
       metric: 'network.outgoing.bytes.rate'
       severity: 'Clear'
 

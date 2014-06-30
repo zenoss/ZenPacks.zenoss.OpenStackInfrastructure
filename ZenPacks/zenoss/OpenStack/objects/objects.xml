@@ -57,32 +57,11 @@ ${here/id}
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
 </property>
-<property type="string" id="namespace" >
-/OpenStack/Nova/Server
-</property>
 <property type="string" id="metric" >
 cpu
 </property>
 <property type="string" id="statistic" >
 Average
-</property>
-<property type="string" id="dimension" >
-${here/getDimension}
-</property>
-<property type="string" id="region" >
-${here/zOpenStackRegionName}
-</property>
-<property type="string" id="username" >
-${here/zCommandUsername}
-</property>
-<property type="string" id="password" >
-${here/zCommandPassword}
-</property>
-<property type="string" id="project" >
-${here/zOpenStackProjectId}
-</property>
-<property type="string" id="authurl" >
-${here/zOpenStackAuthUrl}
 </property>
 <tomanycont id='datapoints'>
 <object id='cpuUsage' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -117,32 +96,11 @@ ${here/id}
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
 </property>
-<property type="string" id="namespace" >
-/OpenStack/Nova/Server
-</property>
 <property type="string" id="metric" >
 cpu_util
 </property>
 <property type="string" id="statistic" >
 Average
-</property>
-<property type="string" id="dimension" >
-${here/getDimension}
-</property>
-<property type="string" id="region" >
-${here/zOpenStackRegionName}
-</property>
-<property type="string" id="username" >
-${here/zCommandUsername}
-</property>
-<property type="string" id="password" >
-${here/zCommandPassword}
-</property>
-<property type="string" id="project" >
-${here/zOpenStackProjectId}
-</property>
-<property type="string" id="authurl" >
-${here/zOpenStackAuthUrl}
 </property>
 <tomanycont id='datapoints'>
 <object id='cpuUtilization' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -177,32 +135,11 @@ ${here/id}
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
 </property>
-<property type="string" id="namespace" >
-/OpenStack/Nova/Server
-</property>
 <property type="string" id="metric" >
 disk.read.bytes
 </property>
 <property type="string" id="statistic" >
 Average
-</property>
-<property type="string" id="dimension" >
-${here/getDimension}
-</property>
-<property type="string" id="region" >
-${here/zOpenStackRegionName}
-</property>
-<property type="string" id="username" >
-${here/zCommandUsername}
-</property>
-<property type="string" id="password" >
-${here/zCommandPassword}
-</property>
-<property type="string" id="project" >
-${here/zOpenStackProjectId}
-</property>
-<property type="string" id="authurl" >
-${here/zOpenStackAuthUrl}
 </property>
 <tomanycont id='datapoints'>
 <object id='diskReadBytes' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -237,32 +174,11 @@ ${here/id}
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
 </property>
-<property type="string" id="namespace" >
-/OpenStack/Nova/Server
-</property>
 <property type="string" id="metric" >
 disk.read.bytes.rate
 </property>
 <property type="string" id="statistic" >
 Average
-</property>
-<property type="string" id="dimension" >
-${here/getDimension}
-</property>
-<property type="string" id="region" >
-${here/zOpenStackRegionName}
-</property>
-<property type="string" id="username" >
-${here/zCommandUsername}
-</property>
-<property type="string" id="password" >
-${here/zCommandPassword}
-</property>
-<property type="string" id="project" >
-${here/zOpenStackProjectId}
-</property>
-<property type="string" id="authurl" >
-${here/zOpenStackAuthUrl}
 </property>
 <tomanycont id='datapoints'>
 <object id='diskReadBytesRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -297,32 +213,11 @@ ${here/id}
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
 </property>
-<property type="string" id="namespace" >
-/OpenStack/Nova/Server
-</property>
 <property type="string" id="metric" >
 disk.read.requests
 </property>
 <property type="string" id="statistic" >
 Average
-</property>
-<property type="string" id="dimension" >
-${here/getDimension}
-</property>
-<property type="string" id="region" >
-${here/zOpenStackRegionName}
-</property>
-<property type="string" id="username" >
-${here/zCommandUsername}
-</property>
-<property type="string" id="password" >
-${here/zCommandPassword}
-</property>
-<property type="string" id="project" >
-${here/zOpenStackProjectId}
-</property>
-<property type="string" id="authurl" >
-${here/zOpenStackAuthUrl}
 </property>
 <tomanycont id='datapoints'>
 <object id='diskReadRequests' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -357,32 +252,11 @@ ${here/id}
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
 </property>
-<property type="string" id="namespace" >
-/OpenStack/Nova/Server
-</property>
 <property type="string" id="metric" >
 disk.read.requests.rate
 </property>
 <property type="string" id="statistic" >
 Average
-</property>
-<property type="string" id="dimension" >
-${here/getDimension}
-</property>
-<property type="string" id="region" >
-${here/zOpenStackRegionName}
-</property>
-<property type="string" id="username" >
-${here/zCommandUsername}
-</property>
-<property type="string" id="password" >
-${here/zCommandPassword}
-</property>
-<property type="string" id="project" >
-${here/zOpenStackProjectId}
-</property>
-<property type="string" id="authurl" >
-${here/zOpenStackAuthUrl}
 </property>
 <tomanycont id='datapoints'>
 <object id='diskReadRequestsRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -417,32 +291,11 @@ ${here/id}
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
 </property>
-<property type="string" id="namespace" >
-/OpenStack/Nova/Server
-</property>
 <property type="string" id="metric" >
 disk.write.bytes
 </property>
 <property type="string" id="statistic" >
 Average
-</property>
-<property type="string" id="dimension" >
-${here/getDimension}
-</property>
-<property type="string" id="region" >
-${here/zOpenStackRegionName}
-</property>
-<property type="string" id="username" >
-${here/zCommandUsername}
-</property>
-<property type="string" id="password" >
-${here/zCommandPassword}
-</property>
-<property type="string" id="project" >
-${here/zOpenStackProjectId}
-</property>
-<property type="string" id="authurl" >
-${here/zOpenStackAuthUrl}
 </property>
 <tomanycont id='datapoints'>
 <object id='diskWriteBytes' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -477,32 +330,11 @@ ${here/id}
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
 </property>
-<property type="string" id="namespace" >
-/OpenStack/Nova/Server
-</property>
 <property type="string" id="metric" >
 disk.write.bytes.rate
 </property>
 <property type="string" id="statistic" >
 Average
-</property>
-<property type="string" id="dimension" >
-${here/getDimension}
-</property>
-<property type="string" id="region" >
-${here/zOpenStackRegionName}
-</property>
-<property type="string" id="username" >
-${here/zCommandUsername}
-</property>
-<property type="string" id="password" >
-${here/zCommandPassword}
-</property>
-<property type="string" id="project" >
-${here/zOpenStackProjectId}
-</property>
-<property type="string" id="authurl" >
-${here/zOpenStackAuthUrl}
 </property>
 <tomanycont id='datapoints'>
 <object id='diskWriteBytesRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -537,32 +369,11 @@ ${here/id}
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
 </property>
-<property type="string" id="namespace" >
-/OpenStack/Nova/Server
-</property>
 <property type="string" id="metric" >
 disk.write.requests
 </property>
 <property type="string" id="statistic" >
 Average
-</property>
-<property type="string" id="dimension" >
-${here/getDimension}
-</property>
-<property type="string" id="region" >
-${here/zOpenStackRegionName}
-</property>
-<property type="string" id="username" >
-${here/zCommandUsername}
-</property>
-<property type="string" id="password" >
-${here/zCommandPassword}
-</property>
-<property type="string" id="project" >
-${here/zOpenStackProjectId}
-</property>
-<property type="string" id="authurl" >
-${here/zOpenStackAuthUrl}
 </property>
 <tomanycont id='datapoints'>
 <object id='diskWriteRequests' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -597,32 +408,11 @@ ${here/id}
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
 </property>
-<property type="string" id="namespace" >
-/OpenStack/Nova/Server
-</property>
 <property type="string" id="metric" >
 disk.write.requests.rate
 </property>
 <property type="string" id="statistic" >
 Average
-</property>
-<property type="string" id="dimension" >
-${here/getDimension}
-</property>
-<property type="string" id="region" >
-${here/zOpenStackRegionName}
-</property>
-<property type="string" id="username" >
-${here/zCommandUsername}
-</property>
-<property type="string" id="password" >
-${here/zCommandPassword}
-</property>
-<property type="string" id="project" >
-${here/zOpenStackProjectId}
-</property>
-<property type="string" id="authurl" >
-${here/zOpenStackAuthUrl}
 </property>
 <tomanycont id='datapoints'>
 <object id='diskWriteRequestsRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -657,32 +447,11 @@ ${here/id}
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
 </property>
-<property type="string" id="namespace" >
-/OpenStack/Nova/Server
-</property>
 <property type="string" id="metric" >
 network.incoming.bytes
 </property>
 <property type="string" id="statistic" >
 Average
-</property>
-<property type="string" id="dimension" >
-${here/getDimension}
-</property>
-<property type="string" id="region" >
-${here/zOpenStackRegionName}
-</property>
-<property type="string" id="username" >
-${here/zCommandUsername}
-</property>
-<property type="string" id="password" >
-${here/zCommandPassword}
-</property>
-<property type="string" id="project" >
-${here/zOpenStackProjectId}
-</property>
-<property type="string" id="authurl" >
-${here/zOpenStackAuthUrl}
 </property>
 <tomanycont id='datapoints'>
 <object id='networkIncomingBytes' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -717,32 +486,11 @@ ${here/id}
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
 </property>
-<property type="string" id="namespace" >
-/OpenStack/Nova/Server
-</property>
 <property type="string" id="metric" >
 network.incoming.bytes.rate
 </property>
 <property type="string" id="statistic" >
 Average
-</property>
-<property type="string" id="dimension" >
-${here/getDimension}
-</property>
-<property type="string" id="region" >
-${here/zOpenStackRegionName}
-</property>
-<property type="string" id="username" >
-${here/zCommandUsername}
-</property>
-<property type="string" id="password" >
-${here/zCommandPassword}
-</property>
-<property type="string" id="project" >
-${here/zOpenStackProjectId}
-</property>
-<property type="string" id="authurl" >
-${here/zOpenStackAuthUrl}
 </property>
 <tomanycont id='datapoints'>
 <object id='networkIncomingBytesRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -777,32 +525,11 @@ ${here/id}
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
 </property>
-<property type="string" id="namespace" >
-/OpenStack/Nova/Server
-</property>
 <property type="string" id="metric" >
 network.incoming.packets
 </property>
 <property type="string" id="statistic" >
 Average
-</property>
-<property type="string" id="dimension" >
-${here/getDimension}
-</property>
-<property type="string" id="region" >
-${here/zOpenStackRegionName}
-</property>
-<property type="string" id="username" >
-${here/zCommandUsername}
-</property>
-<property type="string" id="password" >
-${here/zCommandPassword}
-</property>
-<property type="string" id="project" >
-${here/zOpenStackProjectId}
-</property>
-<property type="string" id="authurl" >
-${here/zOpenStackAuthUrl}
 </property>
 <tomanycont id='datapoints'>
 <object id='networkIncomingPackets' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -837,32 +564,11 @@ ${here/id}
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
 </property>
-<property type="string" id="namespace" >
-/OpenStack/Nova/Server
-</property>
 <property type="string" id="metric" >
 network.incoming.packets.rate
 </property>
 <property type="string" id="statistic" >
 Average
-</property>
-<property type="string" id="dimension" >
-${here/getDimension}
-</property>
-<property type="string" id="region" >
-${here/zOpenStackRegionName}
-</property>
-<property type="string" id="username" >
-${here/zCommandUsername}
-</property>
-<property type="string" id="password" >
-${here/zCommandPassword}
-</property>
-<property type="string" id="project" >
-${here/zOpenStackProjectId}
-</property>
-<property type="string" id="authurl" >
-${here/zOpenStackAuthUrl}
 </property>
 <tomanycont id='datapoints'>
 <object id='networkIncomingPacketsRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -897,32 +603,11 @@ ${here/id}
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
 </property>
-<property type="string" id="namespace" >
-/OpenStack/Nova/Server
-</property>
 <property type="string" id="metric" >
 network.outgoing.bytes
 </property>
 <property type="string" id="statistic" >
 Average
-</property>
-<property type="string" id="dimension" >
-${here/getDimension}
-</property>
-<property type="string" id="region" >
-${here/zOpenStackRegionName}
-</property>
-<property type="string" id="username" >
-${here/zCommandUsername}
-</property>
-<property type="string" id="password" >
-${here/zCommandPassword}
-</property>
-<property type="string" id="project" >
-${here/zOpenStackProjectId}
-</property>
-<property type="string" id="authurl" >
-${here/zOpenStackAuthUrl}
 </property>
 <tomanycont id='datapoints'>
 <object id='networkOutgoingBytes' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -957,32 +642,11 @@ ${here/id}
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
 </property>
-<property type="string" id="namespace" >
-/OpenStack/Nova/Server
-</property>
 <property type="string" id="metric" >
 network.outgoing.bytes.rate
 </property>
 <property type="string" id="statistic" >
 Average
-</property>
-<property type="string" id="dimension" >
-${here/getDimension}
-</property>
-<property type="string" id="region" >
-${here/zOpenStackRegionName}
-</property>
-<property type="string" id="username" >
-${here/zCommandUsername}
-</property>
-<property type="string" id="password" >
-${here/zCommandPassword}
-</property>
-<property type="string" id="project" >
-${here/zOpenStackProjectId}
-</property>
-<property type="string" id="authurl" >
-${here/zOpenStackAuthUrl}
 </property>
 <tomanycont id='datapoints'>
 <object id='networkOutgoingBytesRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -1017,32 +681,11 @@ ${here/id}
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
 </property>
-<property type="string" id="namespace" >
-/OpenStack/Nova/Server
-</property>
 <property type="string" id="metric" >
 network.outgoing.packets
 </property>
 <property type="string" id="statistic" >
 Average
-</property>
-<property type="string" id="dimension" >
-${here/getDimension}
-</property>
-<property type="string" id="region" >
-${here/zOpenStackRegionName}
-</property>
-<property type="string" id="username" >
-${here/zCommandUsername}
-</property>
-<property type="string" id="password" >
-${here/zCommandPassword}
-</property>
-<property type="string" id="project" >
-${here/zOpenStackProjectId}
-</property>
-<property type="string" id="authurl" >
-${here/zOpenStackAuthUrl}
 </property>
 <tomanycont id='datapoints'>
 <object id='networkOutgoingPackets' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -1077,32 +720,11 @@ ${here/id}
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStack.datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin
 </property>
-<property type="string" id="namespace" >
-/OpenStack/Nova/Server
-</property>
 <property type="string" id="metric" >
 network.outgoing.packets.rate
 </property>
 <property type="string" id="statistic" >
 Average
-</property>
-<property type="string" id="dimension" >
-${here/getDimension}
-</property>
-<property type="string" id="region" >
-${here/zOpenStackRegionName}
-</property>
-<property type="string" id="username" >
-${here/zCommandUsername}
-</property>
-<property type="string" id="password" >
-${here/zCommandPassword}
-</property>
-<property type="string" id="project" >
-${here/zOpenStackProjectId}
-</property>
-<property type="string" id="authurl" >
-${here/zOpenStackAuthUrl}
 </property>
 <tomanycont id='datapoints'>
 <object id='networkOutgoingPacketsRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>

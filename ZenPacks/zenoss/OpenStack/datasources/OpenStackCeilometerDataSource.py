@@ -8,20 +8,12 @@
 ##############################################################################
 
 import logging
-log = logging.getLogger('zen.OpenStack')
+log = logging.getLogger('zen.OpenStackCeilometer')
 
-import datetime
-import time
-import calendar
-import random
 import os
 import ast
 
-from cStringIO import StringIO
-from lxml import etree
-
 from twisted.web import client as txwebclient
-from twisted.web.client import getPage
 
 from twisted.internet import reactor, defer
 from twisted.internet.defer import inlineCallbacks
@@ -32,17 +24,16 @@ from zope.interface import implements
 from Products.ZenEvents import ZenEventClasses
 from Products.Zuul.form import schema
 from Products.Zuul.infos import ProxyProperty
-from Products.Zuul.infos.template import RRDDataSourceInfo
-from Products.Zuul.interfaces import IRRDDataSourceInfo
 from Products.Zuul.utils import ZuulMessageFactory as _t
 
-from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource \
-    import PythonDataSource, PythonDataSourcePlugin
+from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import (
+    PythonDataSource, PythonDataSourcePlugin, PythonDataSourceInfo,
+    IPythonDataSourceInfo)
 
 from ZenPacks.zenoss.OpenStack.utils import result_errmsg
 
-from keystoneapiclient import KeystoneAPIClient
 from ceilometerapiclient import CeilometerAPIClient
+
 
 class ProxyWebClient(object):
     """Provide useful web methods with proxy."""
@@ -85,10 +76,10 @@ class ProxyWebClient(object):
                     contextFactory = ssl.ClientContextFactory()
                 if self.use_proxy:
                     reactor.connectSSL(self.proxy_host, self.proxy_port,
-                                   factory, contextFactory)
+                                       factory, contextFactory)
                 else:
                     reactor.connectSSL(self.host, self.port,
-                                   factory, contextFactory)
+                                       factory, contextFactory)
             else:
                 if self.use_proxy:
                     reactor.connectTCP(self.proxy_host, self.proxy_port, factory)
@@ -106,6 +97,7 @@ class ProxyWebClient(object):
     def errdata(self, failure):
         log.error('%s: %s', 'AWSCloudWatchError', failure.getErrorMessage())
         return failure.getErrorMessage()
+
 
 class OpenStackCeilometerDataSource(PythonDataSource):
     '''
@@ -126,37 +118,19 @@ class OpenStackCeilometerDataSource(PythonDataSource):
         'OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin'
 
     # OpenStackCeilometerDataSource
-    namespace = ''
     metric = ''
     statistic = 'Average'
-    dimension = '${here/getDimension}'
-    region = '${here/zOpenStackRegionName}'
-    username = '${here/zCommandUsername}'
-    password = '${here/zCommandPassword}'
-    project = '${here/zOpenStackProjectId}'
-    authurl = '${here/zOpenStackAuthUrl}'  
 
     _properties = PythonDataSource._properties + (
-        {'id': 'namespace', 'type': 'string'},
         {'id': 'metric', 'type': 'string'},
         {'id': 'statistic', 'type': 'string'},
-        {'id': 'dimension', 'type': 'string'},
-        {'id': 'region', 'type': 'string'},
-        {'id': 'username', 'type': 'string'},
-        {'id': 'password', 'type': 'string'},
-        {'id': 'project', 'type': 'string'},
-        {'id': 'authurl', 'type': 'string'},
         )
 
 
-class IOpenStackCeilometerDataSourceInfo(IRRDDataSourceInfo):
+class IOpenStackCeilometerDataSourceInfo(IPythonDataSourceInfo):
     '''
     API Info interface for OpenStackCeilometer.
     '''
-
-    namespace = schema.TextLine(
-        group=_t('OpenStack Ceilometer'),
-        title=_t('Namespace'))
 
     metric = schema.TextLine(
         group=_t('OpenStack Ceilometer'),
@@ -166,32 +140,8 @@ class IOpenStackCeilometerDataSourceInfo(IRRDDataSourceInfo):
         group=_t('OpenStack Ceilometer'),
         title=_t('Statistic'))
 
-    dimension = schema.TextLine(
-        group=_t('OpenStack Ceilometer'),
-        title=_t('Dimension'))
 
-    region = schema.TextLine(
-        group=_t('OpenStack Ceilometer'),
-        title=_t('Region'))
-
-    username = schema.TextLine(
-        group=_t('OpenStack Ceilometer'),
-        title=_t('Username'))
-
-    password = schema.TextLine(
-        group=_t('OpenStack Ceilometer'),
-        title=_t('Password'))
-
-    project = schema.TextLine(
-        group=_t('OpenStack Ceilometer'),
-        title=_t('Project'))
-
-    authurl = schema.TextLine(
-        group=_t('OpenStack Ceilometer'),
-        title=_t('Auth Url'))
-
-
-class OpenStackCeilometerDataSourceInfo(RRDDataSourceInfo):
+class OpenStackCeilometerDataSourceInfo(PythonDataSourceInfo):
     '''
     API Info adapter factory for OpenStackCeilometerDataSource.
     '''
@@ -201,11 +151,7 @@ class OpenStackCeilometerDataSourceInfo(RRDDataSourceInfo):
 
     testable = False
 
-    log.info("zen.OpenStack: class OpenStackCeilometerDataSourceInfo")
-    cycletime = ProxyProperty('cycletime')
-
-    namespace = ProxyProperty('namespace')
-    metric = ProxyProperty('metric')
+    metric    = ProxyProperty('metric')
     statistic = ProxyProperty('statistic')
 
 
@@ -215,50 +161,43 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
                         'zOpenStackAuthUrl',
                         'zOpenStackProjectId',
                         'zOpenStackRegionName',
-                        'resourceId' )
+                        'resourceId')
 
     @classmethod
     def config_key(cls, datasource, context):
-        return(
+        """
+        Return list that is used to split configurations at the collector.
+
+        This is a classmethod that is executed in zenhub. The datasource and
+        context parameters are the full objects.
+        """
+        return (
             context.device().id,
             datasource.getCycleTime(context),
-            context.zOpenStackRegionName,
-            context.zOpenStackProjectId,
-            context.zOpenStackAuthUrl,
-            context.zOpenStackHostDeviceClass,
-            context.zOpenStackInsecure,
+            datasource.rrdTemplate().id,
+            datasource.plugin_classname,
             )
 
     @classmethod
     def params(cls, datasource, context):
         return {
-            'namespace': datasource.talesEval(datasource.namespace, context),
             'metric':    datasource.talesEval(datasource.metric, context),
             'statistic': datasource.talesEval(datasource.statistic, context),
             }
 
     @inlineCallbacks
     def collect(self, config):
-        # defer.returnValue([])
-        '''
-        [u'image.size', u'image.size', u'image.size', u'image', u'image', u'image', u'disk.read.requests', u'network.incoming.packets', u'instance:m1.tiny', u'disk.write.bytes', u'cpu', u'disk.write.requests', u'network.outgoing.bytes', u'network.incoming.bytes', u'network.outgoing.packets', u'disk.read.bytes', u'instance', u'disk.read.requests.rate', u'network.incoming.packets.rate', u'disk.write.bytes.rate', u'cpu_util', u'disk.write.requests.rate', u'network.outgoing.bytes.rate', u'network.incoming.bytes.rate', u'network.outgoing.packets.rate', u'disk.read.bytes.rate']
-        '''
-
         log.debug("Collect for OpenStack")
         results = []
 
         ds0 = config.datasources[0]
         username = ds0.zCommandUsername
         password = ds0.zCommandPassword
-        namespace = ds0.params['namespace']
         metric = ds0.params['metric']
         authurl = ds0.zOpenStackAuthUrl
         project = ds0.zOpenStackProjectId
         region = ds0.zOpenStackRegionName
         resourceId = ds0.resourceId
-
-        # CloudWatch only accepts periods that are evenly divisible by 60.
-        cycletime = (ds0.cycletime / 60) * 60
 
         ceiloclient = CeilometerAPIClient(
             username=username,
@@ -283,9 +222,8 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
         for ds in config.datasources:
             metric = ds.params['metric']
             resourceId = ds.resourceId
-            getURL = ceiloclient._endpoint + '/v2/meters/' + metric + \
-                     '/statistics?q.field=resource_id&q.op=eq&q.value=' + \
-                     resourceId
+            getURL = "%s/v2/meters/%s/statistics?q.field=resource_id&q.op=eq&q.value=%s" % \
+                (ceiloclient._endpoint, metric, resourceId)
 
             factory = ProxyWebClient(getURL)
             result = yield factory.get_page(hdr)
@@ -294,31 +232,8 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
         defer.returnValue(results)
 
     def onSuccess(self, results, config):
-        meternames = [u'imane.size',
-                      u'image',
-                      u'disk.read.requests',
-                      u'network.incoming.packets',
-                      u'instance:m1.tiny',
-                      u'disk.write.bytes',
-                      u'cpu',
-                      u'disk.write.requests',
-                      u'network.outgoing.bytes',
-                      u'network.incoming.bytes',
-                      u'network.outgoing.packets',
-                      u'disk.read.bytes',
-                      u'instance',
-                      u'disk.read.requests.rate',
-                      u'network.incoming.packets.rate',
-                      u'disk.write.bytes.rate',
-                      u'cpu_util',
-                      u'disk.write.requests.rate',
-                      u'network.outgoing.bytes.rate',
-                      u'network.incoming.bytes.rate',
-                      u'network.outgoing.packets.rate',
-                      u'disk.read.bytes.rate']
         data = self.new_data()
 
-        log.info("zen.OpenStack: class OpenStackCeilometerDataSourceiPlugin:onSuccess()")
         for ds, result in results:
 
             # returned json sometimes contains bare null, and python does not like it
