@@ -54,7 +54,8 @@ CFG = zenpacklib.ZenPackSpec(
         'zOpenStackRegionName':       {},
         'zOpenStackHostDeviceClass':  {'default': '/Server/SSH/Linux/NovaHost'},
         'zOpenStackNovaApiHosts':     {'type': 'lines'},
-        'zOpenStackExtraHosts':       {'type': 'lines'}
+        'zOpenStackExtraHosts':       {'type': 'lines'},
+        'zOpenStackCeilometerUrl':    {},
     },
 
     classes={
