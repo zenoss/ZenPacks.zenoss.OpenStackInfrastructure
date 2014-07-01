@@ -61,4 +61,8 @@
         handler=".DeviceProxyComponent.onDeviceProxyComponentDeleted"
         />
 
+    <!-- DeviceProxyComponent event handling -->
+    <include package="Products.ZenEvents" file="meta.zcml"/>
+    <postEventPlugin plugin=".DeviceProxyComponent.PostEventPlugin"/>
+
 </configure>

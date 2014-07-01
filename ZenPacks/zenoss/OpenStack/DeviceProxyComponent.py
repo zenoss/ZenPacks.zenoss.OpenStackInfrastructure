@@ -14,10 +14,12 @@ import logging
 LOG = logging.getLogger('zen.OpenStackDeviceProxyComponent')
 
 from zope.event import notify
+from zope.interface import implements
 
 from ZODB.transact import transact
 from OFS.interfaces import IObjectWillBeAddedEvent
 from Products.Zuul.catalog.events import IndexingEvent
+from Products.ZenEvents.interfaces import IPostEventPlugin
 from Products.ZenUtils.guid.interfaces import IGlobalIdentifier
 from Products.ZenUtils.guid.guid import GUIDManager
 
@@ -209,3 +211,33 @@ class DeviceLinkProvider(object):
             )]
 
         return []
+
+
+class PostEventPlugin(object):
+    """ 
+    Post-event plugin to mirror events from a proxy device onto its
+    deviceproxycomponent.
+    """
+    implements(IPostEventPlugin)
+
+    def apply(self, eventProxy, dmd):
+        device = dmd.Devices.findDeviceByIdExact(eventProxy.device)
+
+        if device and hasattr(device, 'openstackProxyComponentUUID'):
+            LOG.debug("tagging event on %s with openstack proxy component component uuid %s",
+                      eventProxy.device, device.openstackProxyComponentUUID)
+            
+            tags = [device.openstackProxyComponentUUID]
+
+            # Also tag it with the openstack endpoint that the component is part of,
+            # if possible.
+            try:
+                component = GUIDManager(dmd).getObject(device.openstackProxyComponentUUID)
+                if component:
+                    endpoint = component.device()
+                    tags.append(IGlobalIdentifier(endpoint).getGUID())
+            except Exception:
+                LOG.debug("Unable to determine endpoint for proxy component uuid %s",
+                          device.openstackProxyComponentUUID)
+
+            eventProxy.tags.addAll('ZenPacks.zenoss.OpenStack.DeviceProxyComponent', tags)
