@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:browser="http://namespaces.zope.org/browser"
+           >
+
+  <!-- Define the reportable schema -->
+
+  <adapter factory=".reportable.BaseReportable"
+           for=".OpenstackComponent.OpenstackComponent"
+           provides="Products.Zuul.interfaces.IReportable"
+           />
+
+  <adapter factory=".reportable.BaseReportableFactory"
+           for=".OpenstackComponent.OpenstackComponent"
+           provides="Products.Zuul.interfaces.IReportableFactory"
+           />
+
+</configure>
