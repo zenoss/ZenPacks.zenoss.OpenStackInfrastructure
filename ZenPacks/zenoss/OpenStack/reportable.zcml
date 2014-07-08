@@ -6,12 +6,22 @@
   <!-- Define the reportable schema -->
 
   <adapter factory=".reportable.BaseReportable"
-           for=".OpenstackComponent.OpenstackComponent"
+           for=".zenpacklib.Device"
            provides="Products.Zuul.interfaces.IReportable"
            />
 
   <adapter factory=".reportable.BaseReportableFactory"
-           for=".OpenstackComponent.OpenstackComponent"
+           for=".zenpacklib.Device"
+           provides="Products.Zuul.interfaces.IReportableFactory"
+           />
+
+  <adapter factory=".reportable.BaseReportable"
+           for=".zenpacklib.Component"
+           provides="Products.Zuul.interfaces.IReportable"
+           />
+
+  <adapter factory=".reportable.BaseReportableFactory"
+           for=".zenpacklib.Component"
            provides="Products.Zuul.interfaces.IReportableFactory"
            />
 
