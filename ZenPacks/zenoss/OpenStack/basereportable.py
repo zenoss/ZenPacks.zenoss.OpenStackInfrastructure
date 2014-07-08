@@ -9,7 +9,7 @@
 ##############################################################################
 
 """
-reportable - upgraded versions of the ZenETL basereportables which
+basereportable - upgraded versions of the ZenETL basereportables which
 provide a more appropriate default behavior for zenpacks.
 """
 
