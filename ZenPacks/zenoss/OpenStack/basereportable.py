@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2013-2014, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2014, all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -19,11 +19,17 @@ import logging
 LOG = logging.getLogger('zenpack.reportable')
 
 import sys
-from zope.interface import implements
+from zope.component import adapts, getGlobalSiteManager
+from zope.interface import implements, implementedBy
+
 from Products.Five import zcml
-from Products.ZenUtils.Utils import unused, importClass
-from Products.ZenUtils.ZenScriptBase import ZenScriptBase
+from Products.ZenModel.ZenModelRM import ZenModelRM
+from Products.ZenModel.Device import Device
 from Products.ZenRelations.RelSchema import ToOne, ToMany
+from Products.ZenRelations.utils import importClass
+from Products.ZenUtils.Utils import unused
+from Products.ZenUtils.ZenScriptBase import ZenScriptBase
+from Products.Zuul.decorators import memoize
 from Products.Zuul.interfaces import IReportable, IReportableFactory, ICatalogTool
 
 from ZenPacks.zenoss.ZenETL.utils import un_camel as zenetl_un_camel
@@ -49,10 +55,91 @@ def refValue(rel):
         return None
 
 
+@memoize
+def adapter_for_class(class_, adapter_interface):
+    gsm = getGlobalSiteManager()
+
+    adapter = gsm.adapters.registered((implementedBy(class_),), adapter_interface)
+
+    if adapter:
+        return adapter
+
+    # recurse up the inheritence tree to find an adapter, if we don't have one
+    # registered for this class directly.
+    for base_class in class_.__bases__:
+        return adapter_for_class(base_class, adapter_interface)
+
+
 class BaseReportableFactory(ETLBaseReportableFactory):
+    implements(IReportableFactory)
+    adapts(ZenModelRM)
+
+    class_context = None
+
+    def set_class_context(self, class_):
+        self.class_context = class_
 
     def exports(self):
-        yield IReportable(self.context)
+        context_reportable = IReportable(self.context)
+        if self.class_context and hasattr(context_reportable, 'set_class_context'):
+            context_reportable.set_class_context(self.class_context)
+
+        yield context_reportable
+
+        if hasattr(context_reportable, 'export_as_bases'):
+            # The idea here is to give the abiliity to export something both as
+            # itself, but also as a more generic type (one of its base classes).
+            # For example, an OpenStack Endpoint is both an openstack endpoint
+            # and a Device.  Therefore I would like it to end up in both
+            # dim_openstack_endpoint and dim_device.
+
+            for class_ in context_reportable.export_as_bases:                
+                if class_ == self.class_context:
+                    # no need to re-export as ourself..
+                    continue
+
+                reportable_factory_class = adapter_for_class(class_, IReportableFactory)
+                reportable_class = adapter_for_class(class_, IReportable)
+
+                # The problem is that normally, a Reportable or ReportableFactory
+                # does not know what class it is adapting.  It therefore tends
+                # to rely on the model object to tell it what to export, and
+                # most of the reportables export all properties and relationships
+                # of the supplied object.
+                #
+                # In this situation, though, we want to export, say, an Endpoint
+                # as if it was a Device, and therefore to only export the
+                # properties and relationships defined in the Device class.
+                #
+                # The only way to make this work is to introduce the idea of
+                # class-context to Reportable (and ReportableFactory).
+                #
+                # A class-context-aware Reportable or ReportableFactory has
+                # an additional method, set_class_context(), which is passed
+                # a class object.
+                #
+                # The default behavior is still the same- if set_class_context
+                # has not been used, the reportable should behave as it does
+                # today.
+                #
+                # However, in this specific situation (export_as_bases), if a
+                # class-context-aware ReportableFactory is available, I will
+                # use it (and expect it to pass that class context on to the
+                # reportables it generates).
+                #
+                # Otherwise, I will create the single reportable directly, not
+                # using any reportablefactory, because I can't trust the
+                # an existing factory that doesn't realize that it's dealing
+                # with a base class, not the actual object class, to not
+                # duplicate all the exports I have already done.
+                factory = reportable_factory_class(self.context)
+
+                if hasattr(reportable_factory_class, 'set_class_context'):
+                    factory.set_class_context(class_)
+                    for export in factory.exports():
+                        yield export
+                else:
+                    yield reportable_class(self.context)
 
         relations = getattr(self.context, '_relations', tuple())
         for relName, relation in relations:
@@ -81,37 +168,77 @@ class BaseReportableFactory(ETLBaseReportableFactory):
 
 
 class BaseReportable(ETLBaseReportable):
+    class_context = None
+
     def __init__(self, context):
         super(BaseReportable, self).__init__(context)
-
+        self.class_context = self.context.__class__    
         self.rel_property_name = dict()
         seen_target_entity = set()
 
         relations = getattr(self.context, '_relations', tuple())
         for relName, relation in relations:
-            if type(relation.remoteClass) == str:
-                remoteClass = importClass(relation.remoteClass, None)
-            else:
-                remoteClass = relation.remoteClass()
+            try:
+                if type(relation.remoteClass) == str:
+                    remoteClass = importClass(relation.remoteClass, None)
+                else:
+                    remoteClass = relation.remoteClass()
 
-            if remoteClass.meta_type in ('ZenModelRM'):
-                # Way too generic.  Just go with the relname.
-                target_entity = un_camel(relName)
-            else:
-                target_entity = un_camel(remoteClass.meta_type)
+                if remoteClass.meta_type in ('ZenModelRM'):
+                    # Way too generic.  Just go with the relname.
+                    target_entity = un_camel(relName)
+                else:
+                    target_entity = self.entity_class_for_class(remoteClass)
 
-                if target_entity in seen_target_entity:
-                    # if we have more than one relationship to the same
-                    # target entity, prefix all but the first
-                    # with the relname to disambiguate.
-                    target_entity = un_camel(relName + '_' + target_entity)
+                    if target_entity in seen_target_entity:
+                        # if we have more than one relationship to the same
+                        # target entity, prefix all but the first
+                        # with the relname to disambiguate.
+                        target_entity = un_camel(relName + '_' + target_entity)
 
-            seen_target_entity.add(target_entity)
-            self.rel_property_name[relName] = target_entity
+                seen_target_entity.add(target_entity)
+                self.rel_property_name[relName] = target_entity
+            except Exception, e:
+                LOG.error("Error processing relationship %s on %s: %s") % (relName, self.context, e)
 
     @property
     def entity_class_name(self):
-        return un_camel(self.context.meta_type)
+        return self.__class__.entity_class_for_class(self.class_context)
+
+    @classmethod
+    def entity_class_for_class(cls, object_class):
+        # Unfortunately, since entity_class_name is not a classmethod, we can
+        # not determine the entity_class_name for the target of a relationship
+        # if we only know its type, not an actual object.   So it's necessary
+        # to define this method.  It should always return the same value
+        # as entity_class_name would.   If you have relationships that point
+        # to an object managed by a different reportable, which perhaps does
+        # not use entity class names derived from meta_types in the normal way,
+        # of if you have subclassed entity_class_name, you will need to also
+        # subclass this function and ensure that it matches.
+        return un_camel(object_class.meta_type)
+
+    def set_class_context(self, class_):
+        self.class_context = class_
+
+    @property
+    def export_as_bases(self):
+        """
+        In addition to exporting as dim_{entity_class_name}, also export
+        to the dimension table for the specified classes.
+
+        If the reportable for the specified class is not class-context-aware,
+        This may cause columns from the subclass to be leaked to the base class's
+        dimension table, so some care should be taken in using this.
+        """
+        bases = []
+
+        if isinstance(self.context, Device):
+            # If we're reporting any subclass of device, also export it to
+            # dim_device.
+            bases.append(Device)
+
+        return bases
 
     def reportProperties(self):
 
@@ -129,6 +256,12 @@ class BaseReportable(ETLBaseReportable):
 
         # UID
         yield (eclass + '_uid', 'string', self.uid, DEFAULT_STRING_LENGTH)
+
+        # If we're also exporting as a base class, add a reference to that table.
+        # (with the same SID as ourselves, of course)
+        for base_class in self.export_as_bases:
+            base_eclass = self.entity_class_for_class(base_class)
+            yield (base_eclass + "_key", 'reference', self.sid, MARKER_LENGTH)
 
         for entry in super(BaseReportable, self).reportProperties():
             yield entry
@@ -235,7 +368,12 @@ class DumpReportables(ZenScriptBase):
                     # not my problem.
                     continue
 
-                print "      adapter=%s -> %s" % (factory.__class__.__name__, reportable.__class__.__name__)
+                print "      adapter=%s.%s -> %s.%s" % (
+                    factory.__class__.__module__,
+                    factory.__class__.__name__,
+                    reportable.__class__.__module__,
+                    reportable.__class__.__name__,
+                )
                 print "      reportable.entity_class_name=%s" % reportable.entity_class_name
                 print "      reportable.id=%s, sid=%s" % (reportable.id, reportable.sid)
 
