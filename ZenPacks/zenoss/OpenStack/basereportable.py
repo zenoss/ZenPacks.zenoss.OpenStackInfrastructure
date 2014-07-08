@@ -11,6 +11,156 @@
 """
 basereportable - upgraded versions of the ZenETL basereportables which
 provide a more appropriate default behavior for zenpacks.
+
+These adapters automatically export all properties and relationships of any
+model object they are applied to in a consistent manner.
+
+Enabling basic analytics model export support for a ZenPack can be done entirely
+through ZCML as follows:
+
+Add the following to configure.zcml:
+
+    <!-- Analytics -->
+    <include file="reportable.zcml"
+             xmlns:zcml="http://namespaces.zope.org/zcml"
+             zcml:condition="installed ZenPacks.zenoss.ZenETL" />
+
+
+The contents of reportable.zcml will depend on the structure of your ZenPack.
+
+The goal is to bind the BaseReportable and BaseReportableFactory adapters to
+every model class in your ZenPack, most particularly to those that inherit from
+Device or DeviceComponent.
+
+If you are using zenpacklib, all devices and devicecomponents inherit from
+a common base class, so you can simply use the following:
+
+    <?xml version="1.0" encoding="utf-8"?>
+    <configure xmlns="http://namespaces.zope.org/zope"
+               xmlns:browser="http://namespaces.zope.org/browser"
+               >
+
+      <!-- Define the reportable schema -->
+
+      <adapter factory=".basereportable.BaseReportable"
+               for=".zenpacklib.Device"
+               provides="Products.Zuul.interfaces.IReportable"
+               />
+
+      <adapter factory=".basereportable.BaseReportableFactory"
+               for=".zenpacklib.Device"
+               provides="Products.Zuul.interfaces.IReportableFactory"
+               />
+
+      <adapter factory=".basereportable.BaseReportable"
+               for=".zenpacklib.Component"
+               provides="Products.Zuul.interfaces.IReportable"
+               />
+
+      <adapter factory=".basereportable.BaseReportableFactory"
+               for=".zenpacklib.Component"
+               provides="Products.Zuul.interfaces.IReportableFactory"
+               />
+
+    </configure>
+
+All of the device/devicecomponent schema classes will inherit these adapters
+automatically.
+
+If you are not using zenpacklib, but you do have a similar base class that most
+components inherit from, you may bind to that class instead.  If your ZenPack's
+devicecomponents do not share a common base class within your zenpack, then
+you will need to bind each one individually.  For example, in StorageBase,
+we would have:
+
+      <adapter factory=".basereportable.BaseReportable"
+               for=".HardDisk.HardDisk"
+               provides="Products.Zuul.interfaces.IReportable"
+               />
+
+      <adapter factory=".basereportable.BaseReportableFactory"
+               for=".HardDisk.HardDisk"
+               provides="Products.Zuul.interfaces.IReportableFactory"
+               />
+
+      <adapter factory=".basereportable.BaseReportable"
+               for=".LUN.LUN"
+               provides="Products.Zuul.interfaces.IReportable"
+               />
+
+      <adapter factory=".basereportable.BaseReportableFactory"
+               for=".LUN.LUN"
+               provides="Products.Zuul.interfaces.IReportableFactory"
+               />
+
+   (etc, for every class)
+
+
+Generally, creating this ZCML file is all you will need to do in order to get
+a reasonable implementation of Reportable adapters for your ZenPack.
+
+To test the result, you may invoke this script directly:
+
+    python basereportable.py <device name>
+
+It will output all of the data that will be sent to analytics.  (Note that you
+must install the ZenETL zenpack in order to even run this test!)
+
+If this data looks reasonable, you're done.   If you find that some of the
+reportables need tweaking, you may subclass the BaseReportable class provided
+in this file and extend the reportProperties method.   If you are unhappy with
+the naming of the entities or columns, you may modify the naming in 
+entity_class_for_class, as follows:
+
+
+    import basereportable
+    from ZenPacks.zenoss.OpenStack.SoftwareComponent import SoftwareComponent
+
+
+    class BaseReportable(basereportable.BaseReportable):
+
+        @classmethod
+        def entity_class_for_class(cls, object_class):
+            entity_class = super(BaseReportable, cls).entity_class_for_class(object_class)
+            return entity_class.replace("open_stack", "openstack")
+
+
+Another customization you may wish to do is to output some of your components
+in multiple analytics tables.  This is particularly important if you have
+subclassed a component class that is provided outside of your ZenPack.
+
+For example, if you subclass IpInterface and create MyIpInterface, by default,
+your data will only go into the dim_my_ip_interface table, not into
+dim_ip_interface.  This could cause your interfaces to not show up in analytics
+reports that are meant to show "all" interfaces, for instance.
+
+To correct this, subclass BaseReportable, and provide an export_as_bases
+similar to that shown below.  The idea is to, based on context, return a list
+of parent classes to "also" export as.   This may be a class within
+your zenpack, or outside of it.
+
+    @property
+    def export_as_bases(self):
+        bases = super(BaseReportable, self).export_as_bases
+
+        # Anything that is a IPInterface subclass, also export
+        # as a IPInterface.
+        if isinstance(self.context, IPInterface):
+            bases.append(IPInterface)
+
+        # Anything that is a softwarecomponent subclass, also export
+        # as a softwarecomponent.
+        if isinstance(self.context, SoftwareComponent):
+            bases.append(SoftwareComponent)
+
+        return bases
+
+Generally this is the extent of customization you are likely to require for
+most ZenPacks.   However, these classes can be subclassed to add almost any
+functionality, if you really need to.  It is our hope, however, to get to
+the point where the default adapters will just "do the right thing" without
+any need to subclass.
+
 """
 
 import Globals
@@ -93,7 +243,7 @@ class BaseReportableFactory(ETLBaseReportableFactory):
             # and a Device.  Therefore I would like it to end up in both
             # dim_openstack_endpoint and dim_device.
 
-            for class_ in context_reportable.export_as_bases:                
+            for class_ in context_reportable.export_as_bases:
                 if class_ == self.class_context:
                     # no need to re-export as ourself..
                     continue
@@ -172,7 +322,7 @@ class BaseReportable(ETLBaseReportable):
 
     def __init__(self, context):
         super(BaseReportable, self).__init__(context)
-        self.class_context = self.context.__class__    
+        self.class_context = self.context.__class__
         self.rel_property_name = dict()
         seen_target_entity = set()
 
