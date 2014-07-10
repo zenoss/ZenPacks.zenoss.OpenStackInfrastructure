@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:browser="http://namespaces.zope.org/browser"
+           >
+
+  <!-- Define the reportable schema -->
+
+  <adapter factory=".reportable.BaseReportable"
+           for=".zenpacklib.Device"
+           provides="Products.Zuul.interfaces.IReportable"
+           />
+
+  <adapter factory=".reportable.BaseReportableFactory"
+           for=".zenpacklib.Device"
+           provides="Products.Zuul.interfaces.IReportableFactory"
+           />
+
+  <adapter factory=".reportable.BaseReportable"
+           for=".zenpacklib.Component"
+           provides="Products.Zuul.interfaces.IReportable"
+           />
+
+  <adapter factory=".reportable.BaseReportableFactory"
+           for=".zenpacklib.Component"
+           provides="Products.Zuul.interfaces.IReportableFactory"
+           />
+
+</configure>
