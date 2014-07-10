@@ -1139,7 +1139,8 @@ class ClassSpec(object):
         self.properties = {}
 
         for name, data in properties.iteritems():
-            self.properties[name] = ClassPropertySpec(self, name, **data)
+            self.properties[name] = ClassPropertySpec(
+                self, name, **(fix_kwargs(data)))
 
         # Relationships.
         if relationships is None:
