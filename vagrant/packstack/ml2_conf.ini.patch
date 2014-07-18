@@ -1,0 +1,30 @@
+--- ml2_conf.ini~	2014-07-16 22:16:45.000000000 +0000
++++ ml2_conf.ini	2014-07-18 00:21:09.312919272 +0000
+@@ -3,15 +3,16 @@
+ # the neutron.ml2.type_drivers namespace.
+ #
+ # type_drivers = local,flat,vlan,gre,vxlan
+-type_drivers = vxlan
++#type_drivers = vxlan
++type_drivers=local
+ # Example: type_drivers = flat,vlan,gre,vxlan
+ 
+ # (ListOpt) Ordered list of network_types to allocate as tenant
+ # networks. The default value 'local' is useful for single-box testing
+ # but provides no connectivity between hosts.
+ #
+-# tenant_network_types = local
+-tenant_network_types = vxlan
++tenant_network_types = local
++#tenant_network_types = vxlan
+ # Example: tenant_network_types = vlan,gre,vxlan
+ 
+ # (ListOpt) Ordered list of networking mechanism driver entrypoints
+@@ -32,6 +33,7 @@
+ # flat_networks =
+ # Example:flat_networks = physnet1,physnet2
+ # Example:flat_networks = *
++flat_networks=*
+ 
+ [ml2_type_vlan]
+ # (ListOpt) List of <physical_network>[:<vlan_min>:<vlan_max>] tuples
