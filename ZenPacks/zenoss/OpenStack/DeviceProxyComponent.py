@@ -22,6 +22,8 @@ from Products.Zuul.catalog.events import IndexingEvent
 from Products.ZenEvents.interfaces import IPostEventPlugin
 from Products.ZenUtils.guid.interfaces import IGlobalIdentifier
 from Products.ZenUtils.guid.guid import GUIDManager
+from Products.Zuul.interfaces import ICatalogTool
+from Products.AdvancedQuery import Eq
 
 
 def onDeviceDeleted(object, event):
@@ -239,5 +241,19 @@ class PostEventPlugin(object):
             except Exception:
                 LOG.debug("Unable to determine endpoint for proxy component uuid %s",
                           device.openstackProxyComponentUUID)
+
+            # Get OSProcess component, if the event has one
+            for brain in ICatalogTool(dmd).search('Products.ZenModel.OSProcess.OSProcess', query=Eq('id', eventProxy.component)):
+                osprocess = brain.getObject()
+
+                # Figure out if we have a corresponding software component:
+                try:
+                    for software in component.hostedSoftware():
+                        if software.binary == osprocess.osProcessClass().id:
+                            # Matches!
+                            tags.append(IGlobalIdentifier(software).getGUID())
+                except Exception:
+                    LOG.debug("Unable to append event for OSProcess %s",
+                              osprocess.osProcessClass().id)
 
             eventProxy.tags.addAll('ZenPacks.zenoss.OpenStack.DeviceProxyComponent', tags)
