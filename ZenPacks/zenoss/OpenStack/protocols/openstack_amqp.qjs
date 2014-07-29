@@ -1,0 +1,30 @@
+{
+    "content_types" : {
+    },
+    "exchanges" : {
+        "$OpenStackInbound" : {
+            "name" : "zenoss.openstack.ceilometer",
+            "type" : "topic",
+            "durable" : true,
+            "auto_delete" : true,
+            "description" : "Messages are sent from OpenStack Ceilmeter to this exchange for zenoss collectors to process",
+            "content_types" : []
+        }
+    },
+    "queues" : {
+        "$OpenStackInbound" : {
+            "name" : "zenoss.queues.openstack.ceilometer",
+            "durable" : true,
+            "exclusive" : false,
+            "auto_delete" : false,
+            "description" : "Queue for Zenoss collectors to consume messages from Openstack Ceilometer",
+            "bindings" : [
+                {
+                    "exchange" : "$OpenStackInbound",
+                    "routing_key": "zenoss.openstack.{device}.#"
+                }
+            ]
+        }
+    }
+}
+
