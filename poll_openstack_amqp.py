@@ -22,7 +22,7 @@ import Globals
 from Products.ZenUtils.Utils import unused
 unused(Globals)
 
-from utils import add_local_lib_path
+from ZenPacks.zenoss.OpenStack.utils import add_local_lib_path
 add_local_lib_path()
 
 from os.path import join as pathjoin, dirname
@@ -49,38 +49,38 @@ class OpenStackAMQPPoller(object):
         self._amqpConnectionInfo = getUtility(IAMQPConnectionInfo)
         self._queueSchema = getUtility(IQueueSchema)
 
-    @defer.inlineCallbacks
-    def connect(self, host=None, port=None, user=None, password=None, vhost=None,
-                heartbeat=None):
-        host = host or self.host
-        port = port or self.port
-        user = user or self.user
-        password = password or self.password
-        vhost = vhost or self.vhost
-        heartbeat = heartbeat or self.heartbeat
+    # @defer.inlineCallbacks
+    # def connect(self, host=None, port=None, user=None, password=None, vhost=None,
+    #             heartbeat=None):
+    #     host = host or self.host
+    #     port = port or self.port
+    #     user = user or self.user
+    #     password = password or self.password
+    #     vhost = vhost or self.vhost
+    #     heartbeat = heartbeat or self.heartbeat
 
-        import zenoss.protocols.twisted.amqp
-        amqp_specfile = pathjoin(dirname(zenoss.protocols.twisted.amqp.__file__), 'amqp0-9-1.xml')
+    #     import zenoss.protocols.twisted.amqp
+    #     amqp_specfile = pathjoin(dirname(zenoss.protocols.twisted.amqp.__file__), 'amqp0-9-1.xml')
 
-        delegate = TwistedDelegate()
-        onConn = defer.Deferred()
-        p = AMQClient(delegate, vhost, txamqp.spec.load(amqp_specfile), heartbeat=heartbeat)
-        f = protocol._InstanceFactory(reactor, p, onConn)
-        c = reactor.connectTCP(host, port, f)
+    #     delegate = TwistedDelegate()
+    #     onConn = defer.Deferred()
+    #     p = AMQClient(delegate, vhost, txamqp.spec.load(amqp_specfile), heartbeat=heartbeat)
+    #     f = protocol._InstanceFactory(reactor, p, onConn)
+    #     c = reactor.connectTCP(host, port, f)
 
-        def errb(thefailure):
-            log.error("failed to connect to AMQP host: %s, port: %s"
-                      " of the %s AMQP broker.  failure: %r" %
-                      (host, port, self.broker, thefailure,))
-            thefailure.raiseException()
-        onConn.addErrback(errb)
+    #     def errb(thefailure):
+    #         log.error("failed to connect to AMQP host: %s, port: %s"
+    #                   " of the %s AMQP broker.  failure: %r" %
+    #                   (host, port, self.broker, thefailure,))
+    #         thefailure.raiseException()
+    #     onConn.addErrback(errb)
 
-        self.connector = (c)
-        client = yield onConn
+    #     self.connector = (c)
+    #     client = yield onConn
 
-        yield client.authenticate(user, password, mechanism='PLAIN')
+    #     yield client.authenticate(user, password, mechanism='PLAIN')
 
-        defer.returnValue(client)
+    #     defer.returnValue(client)
 
     @defer.inlineCallbacks
     def disconnect(self):
