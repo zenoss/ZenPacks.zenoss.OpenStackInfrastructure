@@ -24,7 +24,7 @@ from Products.ZenUtils.guid.interfaces import IGlobalIdentifier
 from Products.ZenUtils.guid.guid import GUIDManager
 from Products.Zuul.interfaces import ICatalogTool
 from Products.AdvancedQuery import Eq
-
+from Products.ZenUtils.IpUtil import getHostByName
 
 def onDeviceDeleted(object, event):
     '''
@@ -124,7 +124,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
 
         # Does a device with a matching name exist?  Claim that one.
         device = self.dmd.Devices.findDevice(self.name())
-        if device:
+        if device and device.id != self.device().id:
             self.claim_proxy_device(device)
             return device
         else:
@@ -140,12 +140,16 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
 
         # add the missing proxy device.
         device_name = self.name()
+        if self.dmd.Devices.findDevice(device_name):
+            device_name = device_name + "_nameconflict"
+            LOG.info("Device name conflict with endpoint.  Changed name to %s" % device_name)
 
         LOG.info('Adding device for %s %s' % (self.meta_type, self.title))
 
         device = self.proxy_deviceclass().createInstance(device_name)
         device.setProdState(self.productionState)
         device.setPerformanceMonitor(self.getPerformanceServer().id)
+        device.setManageIp(getHostByName(self.name()))
 
         device.index_object()
         notify(IndexingEvent(device))
