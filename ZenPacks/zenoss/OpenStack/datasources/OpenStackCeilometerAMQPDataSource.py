@@ -279,10 +279,10 @@ class OpenStackCeilometerAMQPDataSourcePlugin(PythonDataSourcePlugin):
 
                 now = time.time()
                 if timestamp > now:
-                    log.info("Timestamp (%s) appears to be in the future.  Using now instead." % value['data']['timestamp'])
+                    log.info("[%s/%s] Timestamp (%s) appears to be in the future.  Using now instead." % (resourceId, meter, value['data']['timestamp']))
 
                 if timestamp < now - CACHE_EXPIRE_TIME:
-                    log.info("Timestamp (%s) is already too old- discarding message." % value['data']['timestamp'])
+                    log.info("[%s/%s] Timestamp (%s) is already %d seconds old- discarding message." % (resourceId, meter, value['data']['timestamp'], now-timestamp))
                 else:
                     cache[device_id].add_perf(resourceId, meter, meter_value, timestamp)
 
