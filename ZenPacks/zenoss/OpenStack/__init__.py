@@ -94,7 +94,8 @@ CFG = zenpacklib.ZenPackSpec(
             'filter_display': False,
             'properties': {
                 'proxy_device': {'label': 'Device',
-                                 'type_': 'entity',
+#                                 'type_': 'entity',
+                                 'renderer': 'Zenoss.render.default_uid_renderer',  # workaround to link to a different device
                                  'api_only': True,
                                  'api_backendtype': 'method'}
             }
