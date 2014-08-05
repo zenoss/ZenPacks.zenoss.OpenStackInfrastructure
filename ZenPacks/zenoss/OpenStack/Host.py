@@ -15,6 +15,7 @@ LOG = logging.getLogger('zen.OpenStackHost')
 
 from Products.ZenEvents.ZenEventClasses import Clear, Warning
 
+
 class Host(schema.Host):
     # These will be derived from the services present on the host
     def isComputeNode(self):

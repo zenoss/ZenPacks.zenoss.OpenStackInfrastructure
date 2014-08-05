@@ -75,40 +75,6 @@ class OpenStack(PythonPlugin):
         log.info('Requesting hypervisors')
         results['hypervisors'] = client.hypervisors.search('%', servers=True)
 
-        # Keystone
-#       keystoneclient = KeystoneAPIClient(
-#           username=device.zCommandUsername,
-#           api_key=device.zCommandPassword,
-#           project_id=device.zOpenStackProjectId,
-#           auth_url=device.zOpenStackAuthUrl,
-#           api_version=2
-#       )
-
-#       log.info('Requesting endpoints')
-#       results['endpoints'] = keystoneclient.get_endpoints()
-
-#       log.info('Requesting roles')
-#       results['roles'] = keystoneclient.get_roles()
-
-#       log.info('Requesting services')
-#       results['keystoneservices'] = keystoneclient.get_services()
-
-#       log.info('Requesting tenants')
-#       results['tenants'] = keystoneclient.get_tenants()
-
-#       log.info('Requesting users')
-#       results['userts'] = keystoneclient.get_users()
-
-        # Ceilometer
-#       ceiloclient = CeilometerAPIClient(
-#           username=device.zCommandUsername,
-#           api_key=device.zCommandPassword,
-#           project_id=device.zOpenStackProjectId,
-#           auth_url=device.zOpenStackAuthUrl,
-#           api_version=2,
-#           region_name=region_name
-#       )
-
         return results
 
     def process(self, device, results, unused):
