@@ -61,53 +61,19 @@ class OpenStack(PythonPlugin):
         results = {}
 
         log.info('Requesting flavors')
-        results['flavors'] = client.flavors.list()
+        results['flavors'] = client.flavors.list(is_public=None)
 
         log.info('Requesting images')
         results['images'] = client.images.list()
 
         log.info('Requesting servers')
-        results['servers'] = client.servers.list()
+        results['servers'] = client.servers.list(search_opts={'all_tenants': 1})
 
         log.info('Requesting services')
         results['services'] = client.services.list()
 
         log.info('Requesting hypervisors')
         results['hypervisors'] = client.hypervisors.search('%', servers=True)
-
-        # Keystone
-#       keystoneclient = KeystoneAPIClient(
-#           username=device.zCommandUsername,
-#           api_key=device.zCommandPassword,
-#           project_id=device.zOpenStackProjectId,
-#           auth_url=device.zOpenStackAuthUrl,
-#           api_version=2
-#       )
-
-#       log.info('Requesting endpoints')
-#       results['endpoints'] = keystoneclient.get_endpoints()
-
-#       log.info('Requesting roles')
-#       results['roles'] = keystoneclient.get_roles()
-
-#       log.info('Requesting services')
-#       results['keystoneservices'] = keystoneclient.get_services()
-
-#       log.info('Requesting tenants')
-#       results['tenants'] = keystoneclient.get_tenants()
-
-#       log.info('Requesting users')
-#       results['userts'] = keystoneclient.get_users()
-
-        # Ceilometer
-#       ceiloclient = CeilometerAPIClient(
-#           username=device.zCommandUsername,
-#           api_key=device.zCommandPassword,
-#           project_id=device.zOpenStackProjectId,
-#           auth_url=device.zOpenStackAuthUrl,
-#           api_version=2,
-#           region_name=region_name
-#       )
 
         return results
 
