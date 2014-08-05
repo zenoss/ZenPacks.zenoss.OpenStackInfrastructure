@@ -61,13 +61,13 @@ class OpenStack(PythonPlugin):
         results = {}
 
         log.info('Requesting flavors')
-        results['flavors'] = client.flavors.list()
+        results['flavors'] = client.flavors.list(is_public=None)
 
         log.info('Requesting images')
         results['images'] = client.images.list()
 
         log.info('Requesting servers')
-        results['servers'] = client.servers.list()
+        results['servers'] = client.servers.list(search_opts={'all_tenants': 1})
 
         log.info('Requesting services')
         results['services'] = client.services.list()
