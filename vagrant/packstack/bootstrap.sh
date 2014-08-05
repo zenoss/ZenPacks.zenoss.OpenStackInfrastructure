@@ -41,6 +41,9 @@ easy_install --no-deps /vagrant/ceilometer_zenoss-0.9.0-py2.7.egg
 # bounce ceilometer.
 for e in openstack-ceilometer-alarm-evaluator openstack-ceilometer-alarm-notifier openstack-ceilometer-api openstack-ceilometer-central openstack-ceilometer-collector openstack-ceilometer-compute openstack-ceilometer-notification; do service $e restart; done
 
+# Create a zenoss user so that zenoss can monitor this host as well.
+adduser zenoss -p '$6$GBeC9/Vf$0/6klsM6XThSI/nXvZTwsn1ESPjKjSbmlXj1Okh1i2CVTCknekldztlvhAF5ki85a94FejZ1cliKd30Met0BT/'
+
 # set up the vagrant user with the right openstack environment so you can just
 # log in and run the openstack commandline tools.
 cp /root/keystonerc_admin /home/vagrant/keystonerc_admin
