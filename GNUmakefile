@@ -28,6 +28,17 @@ egg:
 	python setup.py bdist_egg
 
 build:	
+	# First Build the ceilometer_zenoss egg for installation on openstack
+	# sync up the version with the zenpack version:
+	cd ceilometer_zenoss && \
+      rm -f ceilometer_zenoss/dist/*egg && \
+      python setup.py clean && \
+      python setup.py bdist_egg
+	cp ceilometer_zenoss/dist/*egg vagrant/packstack/
+	cp ceilometer_zenoss/dist/*egg vagrant/devstack/controller/
+	cp ceilometer_zenoss/dist/*egg vagrant/devstack/compute/
+
+	# Now build all the build dependencies for this zenpack.
 	cd $(SRC_DIR)/pip-1.5.5 && \
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
@@ -74,16 +85,12 @@ build:
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
 
-	# Build the ceilometer_zenoss egg for installation on openstack
-    cd ZenPacks/zenoss/OpenStack/ceilometer_zenoss && \
-      rm -f ZenPacks/zenoss/OpenStack/ceilometer_zenoss/dist/*egg && \
-      python setup.py clean && \
-      python setup.py bdist_egg && \
-      cp ZenPacks/zenoss/OpenStack/ceilometer_zenoss/dist/*egg vagrant/packstack/
+
 
 
 clean:
 	rm -rf build dist *.egg-info
+	cd ceilometer_zenoss; rm -rf build dist *.egg-info
 	cd $(NOVACLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
 	cd $(KEYSTONECLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
 	cd $(CEILOMETERCLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)

@@ -21,6 +21,7 @@ requires = [
     'eventlet'
 ]
 
+
 setup(
     name='ceilometer_zenoss',
     packages=find_packages(),
@@ -28,7 +29,7 @@ setup(
         'ceilometer.dispatcher': 'zenoss = ceilometer_zenoss.dispatcher.zenoss:ZenossDispatcher'
     },
 
-    version='0.9.0',
+    version='2.0.0dev',
     description="Ceilometer dispatcher plugin to ship data to Zenoss.",
     long_description=read('README.rst'),
 
