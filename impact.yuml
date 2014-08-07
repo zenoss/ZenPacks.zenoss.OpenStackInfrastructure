@@ -1,0 +1,36 @@
+// OpenStack Internal Impacts
+[note: OpenStack;ZenPack{bg:aquamarine}]-[NovaEndpoint{bg:aquamarine}]
+[NovaEndpoint{bg:aquamarine}]1-0..*>[Host{bg:aquamarine}]
+
+[Host{bg:aquamarine}]1..*-1>[AvailabilityZone{bg:aquamarine}]
+[Host{bg:aquamarine}]1..*-1>[Cell{bg:aquamarine}]
+[Cell{bg:aquamarine}]1..*-1>[Cell{bg:aquamarine}]
+[Cell{bg:aquamarine}]1..*-1>[AvailabilityZone{bg:aquamarine}]
+[AvailabilityZone{bg:aquamarine}]1..*-1>[Region{bg:aquamarine}]
+
+[Host{bg:aquamarine}]1-0..*>[Hypervisor{bg:aquamarine}]
+[Hypervisor{bg:aquamarine}]0..1-0..*>[VM{bg:aquamarine}]
+
+[Host{bg:aquamarine}]0..1-0..*>[NovaService{bg:aquamarine}]
+[Host{bg:aquamarine}]0..1-0..*>[NovaApi{bg:aquamarine}]
+[NovaService{bg:aquamarine}]0..1-0..*>[AvailabilityZone{bg:aquamarine}]
+[NovaAPI{bg:aquamarine}]0..1-0..*>[Region{bg:aquamarine}]
+
+
+
+//
+// Platform Impacts
+[note: Platform{bg:deepskyblue}]-[Guest;Device{bg:deepskyblue}]
+[VM{bg:aquamarine}]1-0..1>[Guest;Device{bg:deepskyblue}]
+
+[note: Platform{bg:deepskyblue}]-[Linux;Device{bg:deepskyblue}]
+[Linux;Device{bg:deepskyblue}]1-1>[Host{bg:aquamarine}]
+[Linux;Device{bg:deepskyblue}]1-0..*>[OSProcess{bg:deepskyblue}]
+[OSProcess{bg:deepskyblue}]0..*-1>[NovaService{bg:aquamarine}]
+[OSProcess{bg:deepskyblue}]0..*-1>[NovaApi{bg:aquamarine}]
+
+//
+// CiscoUCS Impacts
+[note: Cisco UCS;ZenPack{bg:darkslateblue}]-[UCS Service Profile{bg:darkslateblue}]
+[UCS Service Profile{bg:darkslateblue}]0..1-1..*>[Host{bg:aquamarine}]
+//
