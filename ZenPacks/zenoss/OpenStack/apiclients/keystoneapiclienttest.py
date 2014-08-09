@@ -1,9 +1,15 @@
+import os, sys
+
 from keystoneapiclient import KeystoneAPIClient
 
 username = 'admin'
 password = 'password'
 project_id = 'demo'
 url = 'http://192.168.56.104:5000/v2.0'
+#username = 'admin'
+#password = '8a041d9c59dd403a'
+#project_id = 'admin'
+#url = 'http://10.87.208.184:5000/v2.0'
 
 kac = KeystoneAPIClient(url, username, password, project_id)
 hdr = {}
@@ -25,20 +31,20 @@ def errdata(self, failure):
     print ('%s: %s', 'OpenStackCeilometerError', failure.getErrorMessage())
     return failure.getErrorMessage()
 
-# import pdb; pdb.set_trace()
 #print ""
-print 'token result:',  kac.get_token().result
+print 'token result:',  kac.get_token()
 print ""
-print 'endpoints: ', kac.get_endpoints().result
+print 'endpoints: ', kac.get_endpoints()
 print ""
-print 'roles: %s' % kac.get_roles().result
+print 'roles: %s' % kac.get_roles()
+#sys.exit(0)
 print ""
-print 'service: %s' % kac.get_services().result
+print 'service: %s' % kac.get_services()
 print ""
-print 'tenants: %s' % kac.get_tenants().result
+print 'tenants: %s' % kac.get_tenants()
 print ""
-print 'user: %s' % kac.get_users().result
+print 'user: %s' % kac.get_users()
 print ""
-print 'regions: %s' % kac.get_regions().result
+print 'regions: %s' % kac.get_regions()
 print ""
-print 'ceilo: %s' % kac.get_ceilometerurl('RegionOne').result
+print 'ceilo: %s' % kac.get_ceilometerurl('RegionOne')
