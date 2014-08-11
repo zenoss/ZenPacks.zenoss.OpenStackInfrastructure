@@ -8,7 +8,7 @@
 ##############################################################################
 
 import logging
-log = logging.getLogger('zen.OpenStackCeilometer')
+log = logging.getLogger('zen.PerfCeilometerAPI')
 
 import os
 import ast
@@ -95,11 +95,11 @@ class ProxyWebClient(object):
         return data
 
     def errdata(self, failure):
-        log.error('%s: %s', 'OpenStackCeilometerError', failure.getErrorMessage())
+        log.error('%s: %s', 'PerfCeilometerAPIError', failure.getErrorMessage())
         return failure.getErrorMessage()
 
 
-class OpenStackCeilometerDataSource(PythonDataSource):
+class PerfCeilometerAPIDataSource(PythonDataSource):
     '''
     Datasource used to capture datapoints from OpenStack Ceilometer.
     '''
@@ -115,9 +115,9 @@ class OpenStackCeilometerDataSource(PythonDataSource):
 
     # PythonDataSource
     plugin_classname = 'ZenPacks.zenoss.OpenStack.datasources.'\
-        'OpenStackCeilometerDataSource.OpenStackCeilometerDataSourcePlugin'
+        'PerfCeilometerAPIDataSource.PerfCeilometerAPIDataSourcePlugin'
 
-    # OpenStackCeilometerDataSource
+    # PerfCeilometerAPIDataSource
     metric = ''
     statistic = 'Average'
 
@@ -127,9 +127,9 @@ class OpenStackCeilometerDataSource(PythonDataSource):
         )
 
 
-class IOpenStackCeilometerDataSourceInfo(IPythonDataSourceInfo):
+class IPerfCeilometerAPIDataSourceInfo(IPythonDataSourceInfo):
     '''
-    API Info interface for OpenStackCeilometer.
+    API Info interface for PerfCeilometerAPI.
     '''
 
     metric = schema.TextLine(
@@ -141,13 +141,13 @@ class IOpenStackCeilometerDataSourceInfo(IPythonDataSourceInfo):
         title=_t('Statistic'))
 
 
-class OpenStackCeilometerDataSourceInfo(PythonDataSourceInfo):
+class PerfCeilometerAPIDataSourceInfo(PythonDataSourceInfo):
     '''
-    API Info adapter factory for OpenStackCeilometerDataSource.
+    API Info adapter factory for PerfCeilometerAPIDataSource.
     '''
 
-    implements(IOpenStackCeilometerDataSourceInfo)
-    adapts(OpenStackCeilometerDataSource)
+    implements(IPerfCeilometerAPIDataSourceInfo)
+    adapts(PerfCeilometerAPIDataSource)
 
     testable = False
 
@@ -155,11 +155,11 @@ class OpenStackCeilometerDataSourceInfo(PythonDataSourceInfo):
     statistic = ProxyProperty('statistic')
 
 
-class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
+class PerfCeilometerAPIDataSourcePlugin(PythonDataSourcePlugin):
     proxy_attributes = ('zCommandUsername',
                         'zCommandPassword',
                         'zOpenStackAuthUrl',
-                        'zOpenStackCeilometerUrl',
+                        'zPerfCeilometerAPIUrl',
                         'zOpenStackProjectId',
                         'zOpenStackRegionName',
                         'resourceId')
@@ -193,7 +193,7 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
 
         ds0 = config.datasources[0]
 
-        ceilometer_url = ds0.zOpenStackCeilometerUrl.rstrip('/')
+        ceilometer_url = ds0.zPerfCeilometerAPIUrl.rstrip('/')
         username = ds0.zCommandUsername
         password = ds0.zCommandPassword
         metric = ds0.params['metric']
@@ -296,8 +296,8 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
             'component': ds.component,
             'summary': 'OpenStack Ceilometer: successful %s collection' % ds.params['metric'],
             'severity': ZenEventClasses.Clear,
-            'eventKey': 'openstackCeilometerCollection',
-            'eventClassKey': 'OpenStackCeilometerSuccess',
+            'eventKey': 'PerfCeilometerAPICollection',
+            'eventClassKey': 'PerfCeilometerAPISuccess',
             })
         return data
 
@@ -310,8 +310,8 @@ class OpenStackCeilometerDataSourcePlugin(PythonDataSourcePlugin):
             'device': config.id,
             'summary': errmsg,
             'severity': ZenEventClasses.Error,
-            'eventKey': 'openstackCeilometerCollection',
-            'eventClassKey': 'OpenStackCeilometerError',
+            'eventKey': 'PerfCeilometerAPICollection',
+            'eventClassKey': 'PerfCeilometerAPIError',
             })
 
         return data

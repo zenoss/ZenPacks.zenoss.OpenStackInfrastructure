@@ -12,8 +12,8 @@
         }
     },
     "queues" : {
-        "$OpenStackInbound" : {
-            "name" : "zenoss.queues.openstack.ceilometer",
+        "$OpenStackInboundPerf" : {
+            "name" : "zenoss.queues.openstack.ceilometer.perf",
             "durable" : true,
             "exclusive" : false,
             "auto_delete" : false,
@@ -21,8 +21,21 @@
             "bindings" : [
                 {
                     "exchange" : "$OpenStackInbound",
-                    "routing_key": "zenoss.openstack.{device}.#"
+                    "routing_key": "zenoss.openstack.{device}.meter.#"
                 }
+            ]
+        },
+        "$OpenStackInboundEvent" : {
+            "name" : "zenoss.queues.openstack.ceilometer.event",
+            "durable" : true,
+            "exclusive" : false,
+            "auto_delete" : false,
+            "description" : "Queue for Zenoss collectors to consume messages from Openstack Ceilometer",
+            "bindings" : [
+                {
+                    "exchange" : "$OpenStackInbound",
+                    "routing_key": "zenoss.openstack.{device}.event.#"
+                }                
             ]
         }
     }

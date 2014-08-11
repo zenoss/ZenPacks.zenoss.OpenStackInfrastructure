@@ -16,10 +16,17 @@ from ZODB.transact import transact
 from Products.Zuul.interfaces import ICatalogTool
 
 from Products.ZenUtils.guid.interfaces import IGlobalIdentifier
+from collections import deque
+import dateutil
+import datetime
 import functools
 import importlib
+import pytz
+import time
 
+from twisted.internet import reactor
 from twisted.internet.error import ConnectionRefusedError, TimeoutError
+from twisted.internet.task import deferLater
 
 import logging
 LOG = logging.getLogger('ZenPacks.zenoss.OpenStack.utils')
@@ -163,3 +170,67 @@ def result_errmsg(result):
 
     return str(result)
 
+
+_EPOCH = datetime.datetime(1970, 1, 1, tzinfo=pytz.utc)
+
+
+def amqp_timestamp_to_int(timestamp_string):
+    # The timestamps arrive in several formats, so we let
+    # dateutil.parser.parse() figure them out.
+    dt = dateutil.parser.parse(timestamp_string)
+    if dt.tzinfo is None:
+        LOG.debug("Timestamp string (%s) does not contain a timezone- assuming it is UTC." % timestamp_string)
+        dt = pytz.utc.localize(dt)
+
+    return (dt - _EPOCH).total_seconds()
+
+
+def sleep(sec):
+    # Simple helper to delay asynchronously for some number of seconds.
+    return deferLater(reactor, sec, lambda: None)
+
+
+class ExpiringFIFOEntry(object):
+    def __init__(self, value, timestamp, expires):
+        self.value = value
+        self.timestamp = timestamp
+        self.expires = expires
+
+
+class ExpiringFIFO(object):
+    '''
+    As data arrives via AMQP, we place it into an in-memory cache (for a
+    period of time), and then pull it out of the cache during normal collection
+    cycles.
+    '''
+
+    # seconds to retain entries before discarding them.
+    expireTime = None
+    queueName = None
+    entries = None
+
+    def __init__(self, expireTime, queueName):
+        self.expireTime = expireTime
+        self.queueName = queueName
+        self.entries = deque()
+
+    def _expire(self):
+        # remove expired entries from the supplied list (deque)
+        now = time.time()
+
+        while len(self.entries) and self.entries[0].expires <= now:
+            v = self.entries.popleft()
+            LOG.debug("Expired %s@%s from %s", v.value, v.timestamp, self.queueName)
+
+    def add(self, value, timestamp):
+        self._expire()
+        self.entries.append(ExpiringFIFOEntry(value, timestamp, timestamp + self.expireTime))
+
+    def get(self):
+        try:
+            entry = self.entries.popleft()
+            LOG.debug("get(%s) = %s @ %s" % (self.queueName, entry.value, entry.timestamp))
+            yield entry
+        except IndexError:
+            # deque is empty.
+            return

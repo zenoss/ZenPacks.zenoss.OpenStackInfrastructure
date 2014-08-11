@@ -1,147 +1,147 @@
 /OpenStack/Instance:
-  description: "OpenStack monitoring."
+  description: "OpenStack: Instance Monitoring"
   targetPythonClass: ZenPacks.zenoss.OpenStack.Instance.Instance
 
   datasources:
     cpuUtilization:
-      type: OpenStack Ceilometer
-      metric: 'cpu_util'
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'cpu_util'
       severity: 'Clear'
 
       datapoints:
         cpuUtilization: GAUGE_MIN_0_ALIAS
 
     cpuUsage:
-      type: OpenStack Ceilometer
-      metric: 'cpu'
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'cpu'
       severity: 'Clear'
 
       datapoints:
         cpuUsage: GAUGE_MIN_0_ALIAS
 
     diskReadRequests:
-      type: OpenStack Ceilometer
-      metric: 'disk.read.requests'
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'disk.read.requests'
       severity: 'Clear'
 
       datapoints:
         diskReadRequests: GAUGE_MIN_0_ALIAS
 
     diskWriteRequests:
-      type: OpenStack Ceilometer
-      metric: 'disk.write.requests'
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'disk.write.requests'
       severity: 'Clear'
 
       datapoints:
         diskWriteRequests: GAUGE_MIN_0_ALIAS
 
     diskReadRequestsRate:
-      type: OpenStack Ceilometer
-      metric: 'disk.read.requests.rate'
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'disk.read.requests.rate'
       severity: 'Clear'
 
       datapoints:
         diskReadRequestsRate: GAUGE_MIN_0_ALIAS
 
     diskWriteRequestsRate:
-      type: OpenStack Ceilometer
-      metric: 'disk.write.requests.rate'
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'disk.write.requests.rate'
       severity: 'Clear'
 
       datapoints:
         diskWriteRequestsRate: GAUGE_MIN_0_ALIAS
 
     diskReadBytes:
-      type: OpenStack Ceilometer
-      metric: 'disk.read.bytes'
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'disk.read.bytes'
       severity: 'Clear'
 
       datapoints:
         diskReadBytes: GAUGE_MIN_0_ALIAS
 
     diskWriteBytes:
-      type: OpenStack Ceilometer
-      metric: 'disk.write.bytes'
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'disk.write.bytes'
       severity: 'Clear'
 
       datapoints:
         diskWriteBytes: GAUGE_MIN_0_ALIAS
 
     diskReadBytesRate:
-      type: OpenStack Ceilometer
-      metric: 'disk.read.bytes.rate'
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'disk.read.bytes.rate'
       severity: 'Clear'
 
       datapoints:
         diskReadBytesRate: GAUGE_MIN_0_ALIAS
 
     diskWriteBytesRate:
-      type: OpenStack Ceilometer
-      metric: 'disk.write.bytes.rate'
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'disk.write.bytes.rate'
       severity: 'Clear'
 
       datapoints:
         diskWriteBytesRate: GAUGE_MIN_0_ALIAS
 
     networkIncomingPackets:
-      type: OpenStack Ceilometer
-      metric: 'network.incoming.packets'
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'network.incoming.packets'
       severity: 'Clear'
 
       datapoints:
         networkIncomingPackets: GAUGE_MIN_0_ALIAS
 
     networkOutgoingPackets:
-      type: OpenStack Ceilometer
-      metric: 'network.outgoing.packets'
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'network.outgoing.packets'
       severity: 'Clear'
 
       datapoints:
         networkOutgoingPackets: GAUGE_MIN_0_ALIAS
 
     networkIncomingPacketsRate:
-      type: OpenStack Ceilometer
-      metric: 'network.incoming.packets.rate'
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'network.incoming.packets.rate'
       severity: 'Clear'
 
       datapoints:
         networkIncomingPacketsRate: GAUGE_MIN_0_ALIAS
 
     networkOutgoingPacketsRate:
-      type: OpenStack Ceilometer
-      metric: 'network.outgoing.packets.rate'
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'network.outgoing.packets.rate'
       severity: 'Clear'
 
       datapoints:
         networkOutgoingPacketsRate: GAUGE_MIN_0_ALIAS
 
     networkIncomingBytes:
-      type: OpenStack Ceilometer
-      metric: 'network.incoming.bytes'
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'network.incoming.bytes'
       severity: 'Clear'
 
       datapoints:
         networkIncomingBytes: GAUGE_MIN_0_ALIAS
 
     networkOutgoingBytes:
-      type: OpenStack Ceilometer
-      metric: 'network.outgoing.bytes'
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'network.outgoing.bytes'
       severity: 'Clear'
 
       datapoints:
         networkOutgoingBytes: GAUGE_MIN_0_ALIAS
 
     networkIncomingBytesRate:
-      type: OpenStack Ceilometer
-      metric: 'network.incoming.bytes.rate'
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'network.incoming.bytes.rate'
       severity: 'Clear'
 
       datapoints:
         networkIncomingBytesRate: GAUGE_MIN_0_ALIAS
 
     networkOutgoingBytesRate:
-      type: OpenStack Ceilometer
-      metric: 'network.outgoing.bytes.rate'
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'network.outgoing.bytes.rate'
       severity: 'Clear'
 
       datapoints:
@@ -271,3 +271,139 @@
           dpName: diskWriteBytesRate
           format: "%5.2lf"
 
+/OpenStack/OpenStackEndpoint:
+  description: "OpenStack: Endpoint Monitoring"
+  targetPythonClass: ZenPacks.zenoss.OpenStack.Endpoint.Endpoint
+
+  datasources:
+    events:
+      type: OpenStack Ceilometer Events AMQP
+
+    openstack:
+      commandTemplate: poll_openstack.py '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}' '${here/zOpenStackAuthUrl}' '${here/zOpenStackRegionName}'
+      cycletime: 300
+      datapoints:
+        flavorTotalCount: GAUGE_MIN_0_ALIAS
+        imageActiveCount: GAUGE_MIN_0_ALIAS
+        imageFailedCount: GAUGE_MIN_0_ALIAS
+        imageOtherCount: GAUGE_MIN_0_ALIAS
+        imagePreparingCount: GAUGE_MIN_0_ALIAS
+        imageQueuedCount: GAUGE_MIN_0_ALIAS
+        imageSavingCount: GAUGE_MIN_0_ALIAS
+        imageTotalCount: GAUGE_MIN_0_ALIAS
+        imageUnknownCount: GAUGE_MIN_0_ALIAS
+        serverActiveCount: GAUGE_MIN_0_ALIAS
+        serverBuildCount: GAUGE_MIN_0_ALIAS
+        serverDeleteIpCount: GAUGE_MIN_0_ALIAS
+        serverHardRebootCount: GAUGE_MIN_0_ALIAS
+        serverOtherCount: GAUGE_MIN_0_ALIAS
+        serverPasswordCount: GAUGE_MIN_0_ALIAS
+        serverPrepResizeCount: GAUGE_MIN_0_ALIAS
+        serverQueueResizeCount: GAUGE_MIN_0_ALIAS
+        serverRebootCount: GAUGE_MIN_0_ALIAS
+        serverRebuildCount: GAUGE_MIN_0_ALIAS
+        serverRescueCount: GAUGE_MIN_0_ALIAS
+        serverResizeCount: GAUGE_MIN_0_ALIAS
+        serverSuspendedCount: GAUGE_MIN_0_ALIAS
+        serverTotalCount: GAUGE_MIN_0_ALIAS
+        serverUnknownCount: GAUGE_MIN_0_ALIAS
+        serverVerifyResizeCount: GAUGE_MIN_0_ALIAS
+      parser: ZenPacks.zenoss.OpenStack.parsers.endpoint
+      type: COMMAND
+      usessh: false
+
+  graphs:
+    Flavors:
+      units: count
+      height: 100
+      width: 500
+
+      graphpoints:
+        Total:
+          dpName: openstack_flavorTotalCount
+          format: '%7.0lf'
+    Images:
+      units: count
+      height: 100
+      width: 500
+
+      graphpoints:
+        Active: 
+          dpName: openstack_imageActiveCount
+          format: '%7.0lf'
+        Failed:
+          dpName: openstack_imageFailedCount
+          format: '%7.0lf'
+        Other:
+          dpName: openstack_imageOtherCount
+          format: '%7.0lf'
+        Preparing:
+          dpName: openstack_imagePreparingCount
+          format: '%7.0lf'
+        Queued:
+          dpName: openstack_imageQueuedCount
+          format: '%7.0lf'
+        Saving:
+          dpName: openstack_imageSavingCount
+          format: '%7.0lf'
+        Total:
+          dpName: openstack_imageTotalCount
+          format: '%7.0lf'
+        Unknown:
+          dpName: openstack_imageUnknownCount
+          format: '%7.0lf'
+
+    Servers:
+      units: count
+      height: 100
+      width: 500
+
+      graphpoints:
+        Active:
+          dpName: openstack_serverActiveCount
+          format: '%7.0lf'
+        Build:
+          dpName: openstack_serverBuildCount
+          format: '%7.0lf'
+        Delete IP:
+          dpName: openstack_serverDeleteIpCount
+          format: '%7.0lf'
+        Hard Reboot:
+          dpName: openstack_serverHardRebootCount
+          format: '%7.0lf'
+        Other:
+          dpName: openstack_serverOtherCount
+          format: '%7.0lf'
+        Password:
+          dpName: openstack_serverPasswordCount
+          format: '%7.0lf'
+        Prep Resize:
+          dpName: openstack_serverPrepResizeCount
+          format: '%7.0lf'
+        Queue Resize:
+          dpName: openstack_serverQueueResizeCount
+          format: '%7.0lf'
+        Reboot:
+          dpName: openstack_serverRebootCount
+          format: '%7.0lf'
+        Rebuild:
+          dpName: openstack_serverRebuildCount
+          format: '%7.0lf'
+        Rescue:
+          dpName: openstack_serverRescueCount
+          format: '%7.0lf'
+        Resize:
+          dpName: openstack_serverResizeCount
+          format: '%7.0lf'
+        Suspended:
+          dpName: openstack_serverSuspendedCount
+          format: '%7.0lf'
+        Total:
+          dpName: openstack_serverTotalCount
+          format: '%7.0lf'
+        Unknown:
+          dpName: openstack_serverUnknownCount
+          format: '%7.0lf'
+        Verify Resize:
+          dpName: openstack_serverVerifyResizeCount
+          format: '%7.0lf'

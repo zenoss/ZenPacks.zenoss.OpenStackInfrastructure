@@ -8,19 +8,15 @@
 ##############################################################################
 
 import logging
-log = logging.getLogger('zen.OpenStackCeilometerAMQP')
+log = logging.getLogger('zen.PerfAMQP')
 
-from collections import defaultdict, deque
+from collections import defaultdict
 import json
 from functools import partial
 import time
-import dateutil
-import datetime
-import pytz
 
-from twisted.internet import defer, reactor
+from twisted.internet import defer
 from twisted.internet.defer import inlineCallbacks
-from twisted.internet.task import deferLater
 
 import zope.component
 from zope.component import adapts, getUtility
@@ -37,7 +33,7 @@ from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import (
     PythonDataSource, PythonDataSourcePlugin, PythonDataSourceInfo,
     IPythonDataSourceInfo)
 
-from ZenPacks.zenoss.OpenStack.utils import result_errmsg
+from ZenPacks.zenoss.OpenStack.utils import result_errmsg, ExpiringFIFO, sleep, amqp_timestamp_to_int
 from zenoss.protocols.interfaces import IAMQPConnectionInfo, IQueueSchema
 from zenoss.protocols.twisted.amqp import AMQPFactory
 
@@ -46,10 +42,8 @@ from zenoss.protocols.twisted.amqp import AMQPFactory
 # Should be at least the cycle interval.
 CACHE_EXPIRE_TIME = 15*60
 
-_EPOCH = datetime.datetime(1970, 1, 1, tzinfo=pytz.utc)
 
-
-class OpenStackCeilometerAMQPDataSource(PythonDataSource):
+class PerfAMQPDataSource(PythonDataSource):
     '''
     Datasource used to capture data and events shipped to us from OpenStack
     Ceilometer via AMQP.
@@ -57,7 +51,7 @@ class OpenStackCeilometerAMQPDataSource(PythonDataSource):
 
     ZENPACKID = 'ZenPacks.zenoss.OpenStack'
 
-    sourcetypes = ('OpenStack Ceilometer AMQP',)
+    sourcetypes = ('OpenStack Ceilometer Perf AMQP',)
     sourcetype = sourcetypes[0]
 
     # RRDDataSource
@@ -66,9 +60,9 @@ class OpenStackCeilometerAMQPDataSource(PythonDataSource):
 
     # PythonDataSource
     plugin_classname = 'ZenPacks.zenoss.OpenStack.datasources.'\
-        'OpenStackCeilometerAMQPDataSource.OpenStackCeilometerAMQPDataSourcePlugin'
+        'PerfAMQPDataSource.PerfAMQPDataSourcePlugin'
 
-    # OpenStackCeilometerAMQPDataSource
+    # PerfAMQPDataSource
     meter = ''
 
     _properties = PythonDataSource._properties + (
@@ -76,9 +70,9 @@ class OpenStackCeilometerAMQPDataSource(PythonDataSource):
         )
 
 
-class IOpenStackCeilometerAMQPDataSourceInfo(IPythonDataSourceInfo):
+class IPerfAMQPDataSourceInfo(IPythonDataSourceInfo):
     '''
-    API Info interface for OpenStackCeilometerAMQP.
+    API Info interface for IPerfAMQPDataSource.
     '''
 
     meter = schema.TextLine(
@@ -86,94 +80,58 @@ class IOpenStackCeilometerAMQPDataSourceInfo(IPythonDataSourceInfo):
         title=_t('meter Name'))
 
 
-class OpenStackCeilometerAMQPDataSourceInfo(PythonDataSourceInfo):
+class PerfAMQPDataSourceInfo(PythonDataSourceInfo):
     '''
-    API Info adapter factory for OpenStackCeilometerAMQPDataSource.
+    API Info adapter factory for PerfAMQPDataSource.
     '''
 
-    implements(IOpenStackCeilometerAMQPDataSourceInfo)
-    adapts(OpenStackCeilometerAMQPDataSource)
+    implements(IPerfAMQPDataSourceInfo)
+    adapts(PerfAMQPDataSource)
 
     testable = False
 
     meter = ProxyProperty('meter')
 
 
-def sleep(sec):
-    # Simple helper to delay asynchronously for some number of seconds.
-    return deferLater(reactor, sec, lambda: None)
-
-
-class CeilometerCacheEntry(object):
-    def __init__(self, value, timestamp):
-        self.value = value
-        self.timestamp = timestamp
-        self.expires = time.time() + CACHE_EXPIRE_TIME
-
-
-class CeilometerCache(object):
+class CeilometerPerfCache(object):
     '''
     As data arrives via AMQP, we place it into an in-memory cache (for a
     period of time), and then pull it out of the cache during normal collection
     cycles.
     '''
-    event_entries = deque()
-    perf_entries = defaultdict(deque)
+    expireTime = CACHE_EXPIRE_TIME
 
-    def _expire(self, entries, context):
-        # remove expired entries from the supplied list (deque)
-        now = time.time()
-
-        while len(entries) and entries[0].expires <= now:
-            log.debug("Expiration timestamp %s < %s", entries[0].expires, now)
-            v = entries.popleft()
-            log.debug("Expired %s = %s from cache", context, v.value)
-
-    def add_event(self, value, timestamp):
-        entries = self.event_entries
-        self._expire(entries, "event")
-        entries.append(CeilometerCacheEntry(value, timestamp))
+    perf_entries = {}
 
     def add_perf(self, resourceId, meter, value, timestamp):
         log.debug("add_perf(%s/%s) = %s @ %s" % (resourceId, meter, value, timestamp))
-        entries = self.perf_entries[(resourceId, meter,)]
-        self._expire(entries, (resourceId, meter,))
-        entries.append(CeilometerCacheEntry(value, timestamp))
 
-    def get_event(self):
-        entries = self.event_entries
-        self._expire(entries, "event")
+        key = (resourceId, meter,)
 
-        try:
-            entry = entries.popleft()
-            yield entry.value
-        except IndexError:
-            # deque is empty.
-            return
+        if key not in self.perf_entries:
+            context = "%s/%s" % key
+            self.perf_entries[key] = ExpiringFIFO(self.expireTime, context)
+
+        self.perf_entries[key].add(value, timestamp)
 
     def get_perf(self, resourceId, meter, ):
-        entries = self.perf_entries[(resourceId, meter,)]
-        self._expire(entries, (resourceId, meter,))
-
-        try:
-            entry = entries.popleft()
-            log.debug("get_perf(%s/%s) = %s @ %s" % (resourceId, meter, entry.value, entry.timestamp))
-            yield entry
-        except IndexError:
-            # deque is empty.
+        key = (resourceId, meter,)
+        if key not in self.perf_entries:
             return
+
+        yield self.perf_entries[key].get()
 
 
 # Persistent state
 amqp_client = {}                     # amqp_client[device.id] = AMQClient object
-cache = defaultdict(CeilometerCache)
+cache = defaultdict(CeilometerPerfCache)
 
 
-class OpenStackCeilometerAMQPDataSourcePlugin(PythonDataSourcePlugin):
+class PerfAMQPDataSourcePlugin(PythonDataSourcePlugin):
     proxy_attributes = ('resourceId')
 
     def __init__(self, *args, **kwargs):
-        super(OpenStackCeilometerAMQPDataSourcePlugin, self).__init__(*args, **kwargs)
+        super(PerfAMQPDataSourcePlugin, self).__init__(*args, **kwargs)
 
     @classmethod
     def config_key(cls, datasource, context):
@@ -216,7 +174,7 @@ class OpenStackCeilometerAMQPDataSourcePlugin(PythonDataSourcePlugin):
             self._queueSchema = getUtility(IQueueSchema)
 
             amqp = AMQPFactory(self._amqpConnectionInfo, self._queueSchema)
-            queue = self._queueSchema.getQueue('$OpenStackInbound', replacements={'device': config.id})
+            queue = self._queueSchema.getQueue('$OpenStackInboundPerf', replacements={'device': config.id})
             log.info("Listening on queue: %s with binding to routing key %s" % (queue.name, queue.bindings['$OpenStackInbound'].routing_key))
             yield amqp.listen(queue, callback=partial(self.processMessage, config.id))
             amqp_client[config.id] = amqp
@@ -240,33 +198,17 @@ class OpenStackCeilometerAMQPDataSourcePlugin(PythonDataSourcePlugin):
                 'summary': 'OpenStack Ceilometer AMQP: successful collection',
                 'severity': ZenEventClasses.Clear,
                 'eventKey': 'openstackCeilometerAMQPCollection',
-                'eventClassKey': 'OpenStackCeilometerAMQPSuccess',
+                'eventClassKey': 'PerfSuccess',
                 })
 
         defer.returnValue(data)
-
-    def timestamp_to_int(self, timestamp_string):
-        # The timestamps arrive in several formats, so we let
-        # dateutil.parser.parse() figure them out.
-        dt = dateutil.parser.parse(timestamp_string)
-        if dt.tzinfo is None:
-            log.debug("Timestamp string (%s) does not contain a timezone- assuming it is UTC." % timestamp_string)
-            dt = pytz.utc.localize(dt)
-
-        return (dt - _EPOCH).total_seconds()
 
     def processMessage(self, device_id, message):
         try:
             value = json.loads(message.content.body)
             log.debug(value)
 
-            if value['type'] == 'event':
-                # Message is a json-serialized version of a ceilometer.storage.models.Event object
-                # (http://docs.openstack.org/developer/ceilometer/_modules/ceilometer/storage/models.html#Event)
-                timestamp = self.timestamp_to_int(value['data']['generated'])
-                cache[device_id].add_event(value['data'], timestamp)
-
-            elif value['type'] == 'meter':
+            if value['type'] == 'meter':
                 # Message is a json-serialized version of a ceilometer.storage.models.Sample object
                 # (http://docs.openstack.org/developer/ceilometer/_modules/ceilometer/storage/models.html#Sample)
 
@@ -275,7 +217,7 @@ class OpenStackCeilometerAMQPDataSourcePlugin(PythonDataSourcePlugin):
                 resourceId = value['data']['resource_id']
                 meter = value['data']['counter_name']
                 meter_value = value['data']['counter_volume']
-                timestamp = self.timestamp_to_int(value['data']['timestamp'])
+                timestamp = amqp_timestamp_to_int(value['data']['timestamp'])
 
                 now = time.time()
                 if timestamp > now:
@@ -285,6 +227,9 @@ class OpenStackCeilometerAMQPDataSourcePlugin(PythonDataSourcePlugin):
                     log.info("[%s/%s] Timestamp (%s) is already %d seconds old- discarding message." % (resourceId, meter, value['data']['timestamp'], now-timestamp))
                 else:
                     cache[device_id].add_perf(resourceId, meter, meter_value, timestamp)
+
+            else:
+                log.error("Discarding unrecognized message type: %s" % value['type'])
 
         except Exception, e:
             log.error("Exception while processing ceilometer message: %r", e)
@@ -299,7 +244,7 @@ class OpenStackCeilometerAMQPDataSourcePlugin(PythonDataSourcePlugin):
             'summary': errmsg,
             'severity': ZenEventClasses.Error,
             'eventKey': 'openstackCeilometerAMQPCollection',
-            'eventClassKey': 'OpenStackCeilometerAMQPError',
+            'eventClassKey': 'PerfFailure',
             })
 
         return data
