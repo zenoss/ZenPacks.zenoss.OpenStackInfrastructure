@@ -30,6 +30,9 @@ from Products.Zuul.utils import ZuulMessageFactory as _t
 from ZenPacks.zenoss.OpenStack.utils import add_local_lib_path
 add_local_lib_path()
 
+import logging
+log = logging.getLogger('ZenPacks.zenoss.OpenStack.api')
+
 OPENSTACK_DEVICE_PATH = "/Devices/OpenStack"
 
 
@@ -101,45 +104,19 @@ class OpenStackFacade(ZuulFacade):
     def getRegions(self, username, api_key, project_id, auth_url):
         """Get a list of available regions, given a keystone endpoint and credentials."""
 
-        from keystoneclient.v2_0.client import Client as keystoneclient
-
-        client = keystoneclient(
-            username=username,
-            password=api_key,
-            tenant_name=project_id,
-            auth_url=auth_url,
-        )
-
-        regions = set()
-        endpoints = client.service_catalog.get_endpoints()
-        for (service, service_endpoints) in endpoints.iteritems():
-            for endpoint in service_endpoints:
-                regions.add(endpoint['region'])
-
-        return [{'key': c, 'label': c} for c in sorted(regions)]
-
+        from keystoneapiclient import KeystoneAPIClient
+        kac = KeystoneAPIClient(auth_url, username, api_key, project_id)
+        log.info("region name: %s" % kac.get_regions()[0])
+        return kac.get_regions()[0]
 
     def getCeilometerUrl(self, username, api_key, project_id, auth_url, region_name):
         """Return the first defined ceilometer URL, given a keystone endpoint,
         credentials, and a region.  May return an empty string if none is found."""
 
-        from keystoneclient.v2_0.client import Client as keystoneclient
-
-        client = keystoneclient(
-            username=username,
-            password=api_key,
-            tenant_name=project_id,
-            auth_url=auth_url,
-        )
-
-        endpoints = client.service_catalog.get_endpoints('metering')
-        if 'metering' in endpoints:
-            for endpoint in endpoints['metering']:
-                if endpoint['region'] == region_name:
-                    return endpoint['publicURL']
-
-        return ""
-
+        from keystoneapiclient import KeystoneAPIClient
+        kac = KeystoneAPIClient(auth_url, username, api_key, project_id)
+        log.info("ceilometerurl: %s" % kac.get_ceilometerurl(kac.get_regions()[0]['label']))
+        return kac.get_ceilometerurl(kac.get_regions()[0]['label'])
 
 class OpenStackRouter(DirectRouter):
     def _getFacade(self):
