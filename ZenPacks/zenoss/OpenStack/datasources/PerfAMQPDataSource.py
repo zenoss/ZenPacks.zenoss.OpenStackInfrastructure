@@ -8,7 +8,7 @@
 ##############################################################################
 
 import logging
-log = logging.getLogger('zen.PerfAMQP')
+log = logging.getLogger('zen.OpenStack.PerfAMQP')
 
 from collections import defaultdict
 import json

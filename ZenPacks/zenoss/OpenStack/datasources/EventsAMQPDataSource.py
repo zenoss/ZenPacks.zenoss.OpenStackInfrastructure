@@ -8,7 +8,7 @@
 ##############################################################################
 
 import logging
-log = logging.getLogger('zen.EventsAMQP')
+log = logging.getLogger('zen.OpenStack.EventsAMQP')
 
 from collections import defaultdict
 import json
@@ -157,10 +157,10 @@ class EventsAMQPDataSourcePlugin(PythonDataSourcePlugin):
 
             evt = {
                 'device': device_id,
-                'severity': ZenEventClasses.Clear,
+                'severity': ZenEventClasses.Info,
                 'eventKey': '',
+                'summary': '',
                 'eventClassKey': c_event['event_type'],
-
             }
 
             traits = {}
@@ -173,7 +173,10 @@ class EventsAMQPDataSourcePlugin(PythonDataSourcePlugin):
                 evt['eventKey'] = c_event['message_id']
 
             for trait in traits:
-                evt[trait] = traits[trait]
+                evt['trait_' + trait] = traits[trait]
+
+            from pprint import pformat
+            log.debug(pformat(evt))
 
             data['events'].append(evt)
 
@@ -191,12 +194,12 @@ class EventsAMQPDataSourcePlugin(PythonDataSourcePlugin):
     def processMessage(self, device_id, message):
         try:
             value = json.loads(message.content.body)
-            log.debug(value)
 
             if value['type'] == 'event':
                 # Message is a json-serialized version of a ceilometer.storage.models.Event object
                 # (http://docs.openstack.org/developer/ceilometer/_modules/ceilometer/storage/models.html#Event)
                 timestamp = amqp_timestamp_to_int(value['data']['generated'])
+                log.debug("Incoming event (%s) %s" % (timestamp, value['data']))
                 cache[device_id].add(value['data'], timestamp)
             else:
                 log.error("Discarding unrecognized message type: %s" % value['type'])
