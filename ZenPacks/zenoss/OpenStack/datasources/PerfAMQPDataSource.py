@@ -119,7 +119,8 @@ class CeilometerPerfCache(object):
         if key not in self.perf_entries:
             return
 
-        yield self.perf_entries[key].get()
+        for entry in self.perf_entries[key].get():
+            yield entry
 
 
 # Persistent state
