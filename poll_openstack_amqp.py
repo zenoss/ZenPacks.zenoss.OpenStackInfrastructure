@@ -14,7 +14,7 @@
 
 import json
 import logging
-log = logging.getLogger('ZenPacks.zenoss.OpenStack.poll_openstack_amqp')
+log = logging.getLogger('zen.OpenStack.poll_openstack_amqp')
 
 from collections import defaultdict
 

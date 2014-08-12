@@ -15,7 +15,7 @@
 import json
 import sys
 import logging
-log = logging.getLogger('ZenPacks.zenoss.OpenStack.poll_openstack')
+log = logging.getLogger('zen.OpenStack.poll_openstack')
 
 import Globals
 from Products.ZenUtils.Utils import unused
