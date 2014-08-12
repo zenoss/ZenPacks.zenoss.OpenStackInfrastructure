@@ -29,7 +29,7 @@ from twisted.internet.error import ConnectionRefusedError, TimeoutError
 from twisted.internet.task import deferLater
 
 import logging
-LOG = logging.getLogger('ZenPacks.zenoss.OpenStack.utils')
+LOG = logging.getLogger('zen.OpenStack.utils')
 
 
 def add_local_lib_path():
@@ -227,10 +227,8 @@ class ExpiringFIFO(object):
         self.entries.append(ExpiringFIFOEntry(value, timestamp, timestamp + self.expireTime))
 
     def get(self):
-        try:
-            entry = self.entries.popleft()
-            LOG.debug("get(%s) = %s @ %s" % (self.queueName, entry.value, entry.timestamp))
-            yield entry
-        except IndexError:
-            # deque is empty.
-            return
+        while True:
+            try:
+                yield self.entries.popleft()
+            except IndexError:
+                break
