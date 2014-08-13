@@ -38,42 +38,6 @@ OpenStack: Instance Monitoring
 ZenPacks.zenoss.OpenStack.Instance.Instance
 </property>
 <tomanycont id='datasources'>
-<object id='cpuUsage' module='ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource' class='PerfAMQPDataSource'>
-<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
-OpenStack Ceilometer Perf AMQP
-</property>
-<property type="boolean" id="enabled" mode="w" >
-True
-</property>
-<property type="string" id="component" mode="w" >
-${here/id}
-</property>
-<property type="int" id="severity" mode="w" >
-0
-</property>
-<property type="string" id="cycletime" mode="w" >
-300
-</property>
-<property type="string" id="plugin_classname" mode="w" >
-ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
-</property>
-<property type="string" id="meter" >
-cpu
-</property>
-<tomanycont id='datapoints'>
-<object id='cpuUsage' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
-<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
-GAUGE
-</property>
-<property type="boolean" id="isrow" mode="w" >
-True
-</property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
-</object>
-</tomanycont>
-</object>
 <object id='cpuUtilization' module='ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource' class='PerfAMQPDataSource'>
 <property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
 OpenStack Ceilometer Perf AMQP
@@ -98,42 +62,6 @@ cpu_util
 </property>
 <tomanycont id='datapoints'>
 <object id='cpuUtilization' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
-<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
-GAUGE
-</property>
-<property type="boolean" id="isrow" mode="w" >
-True
-</property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
-</object>
-</tomanycont>
-</object>
-<object id='diskReadBytes' module='ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource' class='PerfAMQPDataSource'>
-<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
-OpenStack Ceilometer Perf AMQP
-</property>
-<property type="boolean" id="enabled" mode="w" >
-True
-</property>
-<property type="string" id="component" mode="w" >
-${here/id}
-</property>
-<property type="int" id="severity" mode="w" >
-0
-</property>
-<property type="string" id="cycletime" mode="w" >
-300
-</property>
-<property type="string" id="plugin_classname" mode="w" >
-ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
-</property>
-<property type="string" id="meter" >
-disk.read.bytes
-</property>
-<tomanycont id='datapoints'>
-<object id='diskReadBytes' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -182,42 +110,6 @@ True
 </object>
 </tomanycont>
 </object>
-<object id='diskReadRequests' module='ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource' class='PerfAMQPDataSource'>
-<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
-OpenStack Ceilometer Perf AMQP
-</property>
-<property type="boolean" id="enabled" mode="w" >
-True
-</property>
-<property type="string" id="component" mode="w" >
-${here/id}
-</property>
-<property type="int" id="severity" mode="w" >
-0
-</property>
-<property type="string" id="cycletime" mode="w" >
-300
-</property>
-<property type="string" id="plugin_classname" mode="w" >
-ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
-</property>
-<property type="string" id="meter" >
-disk.read.requests
-</property>
-<tomanycont id='datapoints'>
-<object id='diskReadRequests' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
-<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
-GAUGE
-</property>
-<property type="boolean" id="isrow" mode="w" >
-True
-</property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
-</object>
-</tomanycont>
-</object>
 <object id='diskReadRequestsRate' module='ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource' class='PerfAMQPDataSource'>
 <property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
 OpenStack Ceilometer Perf AMQP
@@ -254,42 +146,6 @@ True
 </object>
 </tomanycont>
 </object>
-<object id='diskWriteBytes' module='ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource' class='PerfAMQPDataSource'>
-<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
-OpenStack Ceilometer Perf AMQP
-</property>
-<property type="boolean" id="enabled" mode="w" >
-True
-</property>
-<property type="string" id="component" mode="w" >
-${here/id}
-</property>
-<property type="int" id="severity" mode="w" >
-0
-</property>
-<property type="string" id="cycletime" mode="w" >
-300
-</property>
-<property type="string" id="plugin_classname" mode="w" >
-ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
-</property>
-<property type="string" id="meter" >
-disk.write.bytes
-</property>
-<tomanycont id='datapoints'>
-<object id='diskWriteBytes' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
-<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
-GAUGE
-</property>
-<property type="boolean" id="isrow" mode="w" >
-True
-</property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
-</object>
-</tomanycont>
-</object>
 <object id='diskWriteBytesRate' module='ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource' class='PerfAMQPDataSource'>
 <property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
 OpenStack Ceilometer Perf AMQP
@@ -314,42 +170,6 @@ disk.write.bytes.rate
 </property>
 <tomanycont id='datapoints'>
 <object id='diskWriteBytesRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
-<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
-GAUGE
-</property>
-<property type="boolean" id="isrow" mode="w" >
-True
-</property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
-</object>
-</tomanycont>
-</object>
-<object id='diskWriteRequests' module='ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource' class='PerfAMQPDataSource'>
-<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
-OpenStack Ceilometer Perf AMQP
-</property>
-<property type="boolean" id="enabled" mode="w" >
-True
-</property>
-<property type="string" id="component" mode="w" >
-${here/id}
-</property>
-<property type="int" id="severity" mode="w" >
-0
-</property>
-<property type="string" id="cycletime" mode="w" >
-300
-</property>
-<property type="string" id="plugin_classname" mode="w" >
-ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
-</property>
-<property type="string" id="meter" >
-disk.write.requests
-</property>
-<tomanycont id='datapoints'>
-<object id='diskWriteRequests' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -400,66 +220,6 @@ True
 </object>
 </tomanycont>
 <tomanycont id='graphDefs'>
-<object id='CPU Usage' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
-<property type="int" id="height" mode="w" >
-100
-</property>
-<property type="int" id="width" mode="w" >
-500
-</property>
-<property type="string" id="units" mode="w" >
-seconds
-</property>
-<property type="boolean" id="log" mode="w" >
-False
-</property>
-<property type="boolean" id="base" mode="w" >
-False
-</property>
-<property type="int" id="miny" mode="w" >
-0
-</property>
-<property type="int" id="maxy" mode="w" >
--1
-</property>
-<property type="boolean" id="hasSummary" mode="w" >
-True
-</property>
-<property type="long" id="sequence" mode="w" >
-1
-</property>
-<tomanycont id='graphPoints'>
-<object id='cpu_usage' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
-<property type="long" id="sequence" mode="w" >
-0
-</property>
-<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
-LINE
-</property>
-<property type="long" id="lineWidth" mode="w" >
-1
-</property>
-<property type="boolean" id="stacked" mode="w" >
-False
-</property>
-<property type="string" id="format" mode="w" >
-%5.2lf
-</property>
-<property type="string" id="legend" mode="w" >
-${graphPoint/id}
-</property>
-<property type="long" id="limit" mode="w" >
--1
-</property>
-<property type="string" id="dpName" mode="w" >
-cpuUsage_cpuUsage
-</property>
-<property type="string" id="cFunc" mode="w" >
-AVERAGE
-</property>
-</object>
-</tomanycont>
-</object>
 <object id='CPU Utilization' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
 <property type="int" id="height" mode="w" >
 100
@@ -520,96 +280,7 @@ AVERAGE
 </object>
 </tomanycont>
 </object>
-<object id='Disk read_write bytes' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
-<property type="int" id="height" mode="w" >
-100
-</property>
-<property type="int" id="width" mode="w" >
-500
-</property>
-<property type="string" id="units" mode="w" >
-bytes
-</property>
-<property type="boolean" id="log" mode="w" >
-False
-</property>
-<property type="boolean" id="base" mode="w" >
-False
-</property>
-<property type="int" id="miny" mode="w" >
-0
-</property>
-<property type="int" id="maxy" mode="w" >
--1
-</property>
-<property type="boolean" id="hasSummary" mode="w" >
-True
-</property>
-<property type="long" id="sequence" mode="w" >
-4
-</property>
-<tomanycont id='graphPoints'>
-<object id='disk.read.bytes' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
-<property type="long" id="sequence" mode="w" >
-0
-</property>
-<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
-LINE
-</property>
-<property type="long" id="lineWidth" mode="w" >
-1
-</property>
-<property type="boolean" id="stacked" mode="w" >
-False
-</property>
-<property type="string" id="format" mode="w" >
-%5.2lf
-</property>
-<property type="string" id="legend" mode="w" >
-${graphPoint/id}
-</property>
-<property type="long" id="limit" mode="w" >
--1
-</property>
-<property type="string" id="dpName" mode="w" >
-diskReadBytes_diskReadBytes
-</property>
-<property type="string" id="cFunc" mode="w" >
-AVERAGE
-</property>
-</object>
-<object id='disk.write.bytes' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
-<property type="long" id="sequence" mode="w" >
-1
-</property>
-<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
-LINE
-</property>
-<property type="long" id="lineWidth" mode="w" >
-1
-</property>
-<property type="boolean" id="stacked" mode="w" >
-False
-</property>
-<property type="string" id="format" mode="w" >
-%5.2lf
-</property>
-<property type="string" id="legend" mode="w" >
-${graphPoint/id}
-</property>
-<property type="long" id="limit" mode="w" >
--1
-</property>
-<property type="string" id="dpName" mode="w" >
-diskWriteBytes_diskWriteBytes
-</property>
-<property type="string" id="cFunc" mode="w" >
-AVERAGE
-</property>
-</object>
-</tomanycont>
-</object>
-<object id='Disk read_write bytes rate' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<object id='Disk IO Rate' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
 <property type="int" id="height" mode="w" >
 100
 </property>
@@ -635,10 +306,10 @@ False
 True
 </property>
 <property type="long" id="sequence" mode="w" >
-5
+2
 </property>
 <tomanycont id='graphPoints'>
-<object id='disk.read.bytes.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<object id='Read' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
 <property type="long" id="sequence" mode="w" >
 0
 </property>
@@ -667,7 +338,7 @@ diskReadBytesRate_diskReadBytesRate
 AVERAGE
 </property>
 </object>
-<object id='disk.write.bytes.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<object id='Write' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
 <property type="long" id="sequence" mode="w" >
 1
 </property>
@@ -698,96 +369,7 @@ AVERAGE
 </object>
 </tomanycont>
 </object>
-<object id='Disk read_write request' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
-<property type="int" id="height" mode="w" >
-100
-</property>
-<property type="int" id="width" mode="w" >
-500
-</property>
-<property type="string" id="units" mode="w" >
-requests
-</property>
-<property type="boolean" id="log" mode="w" >
-False
-</property>
-<property type="boolean" id="base" mode="w" >
-False
-</property>
-<property type="int" id="miny" mode="w" >
-0
-</property>
-<property type="int" id="maxy" mode="w" >
--1
-</property>
-<property type="boolean" id="hasSummary" mode="w" >
-True
-</property>
-<property type="long" id="sequence" mode="w" >
-2
-</property>
-<tomanycont id='graphPoints'>
-<object id='disk.read.requests' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
-<property type="long" id="sequence" mode="w" >
-0
-</property>
-<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
-LINE
-</property>
-<property type="long" id="lineWidth" mode="w" >
-1
-</property>
-<property type="boolean" id="stacked" mode="w" >
-False
-</property>
-<property type="string" id="format" mode="w" >
-%5.2lf
-</property>
-<property type="string" id="legend" mode="w" >
-${graphPoint/id}
-</property>
-<property type="long" id="limit" mode="w" >
--1
-</property>
-<property type="string" id="dpName" mode="w" >
-diskReadRequests_diskReadRequests
-</property>
-<property type="string" id="cFunc" mode="w" >
-AVERAGE
-</property>
-</object>
-<object id='disk.write.requests' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
-<property type="long" id="sequence" mode="w" >
-1
-</property>
-<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
-LINE
-</property>
-<property type="long" id="lineWidth" mode="w" >
-1
-</property>
-<property type="boolean" id="stacked" mode="w" >
-False
-</property>
-<property type="string" id="format" mode="w" >
-%5.2lf
-</property>
-<property type="string" id="legend" mode="w" >
-${graphPoint/id}
-</property>
-<property type="long" id="limit" mode="w" >
--1
-</property>
-<property type="string" id="dpName" mode="w" >
-diskWriteRequests_diskWriteRequests
-</property>
-<property type="string" id="cFunc" mode="w" >
-AVERAGE
-</property>
-</object>
-</tomanycont>
-</object>
-<object id='Disk read_write request rate' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<object id='Disk Requests' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
 <property type="int" id="height" mode="w" >
 100
 </property>
@@ -813,10 +395,10 @@ False
 True
 </property>
 <property type="long" id="sequence" mode="w" >
-3
+1
 </property>
 <tomanycont id='graphPoints'>
-<object id='disk.read.requests.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<object id='Read' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
 <property type="long" id="sequence" mode="w" >
 0
 </property>
@@ -845,7 +427,7 @@ diskReadRequestsRate_diskReadRequestsRate
 AVERAGE
 </property>
 </object>
-<object id='disk.write.requests.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<object id='Write' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
 <property type="long" id="sequence" mode="w" >
 1
 </property>
