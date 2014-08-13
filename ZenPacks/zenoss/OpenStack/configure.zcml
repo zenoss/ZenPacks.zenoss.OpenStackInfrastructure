@@ -33,9 +33,15 @@
 
     <!-- API: Infos -->
     <adapter
-        provides=".datasources.OpenStackCeilometerDataSource.IOpenStackCeilometerDataSourceInfo"
-        for=".datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSource"
-        factory=".datasources.OpenStackCeilometerDataSource.OpenStackCeilometerDataSourceInfo"
+        provides=".datasources.PerfAMQPDataSource.IPerfAMQPDataSourceInfo"
+        for=".datasources.PerfAMQPDataSource.PerfAMQPDataSource"
+        factory=".datasources.PerfAMQPDataSource.PerfAMQPDataSourceInfo"
+        />
+
+    <adapter
+        provides=".datasources.EventsAMQPDataSource.IEventsAMQPDataSourceInfo"
+        for=".datasources.EventsAMQPDataSource.EventsAMQPDataSource"
+        factory=".datasources.EventsAMQPDataSource.EventsAMQPDataSourceInfo"
         />
 
     <!-- Device Links -->
