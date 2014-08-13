@@ -26,9 +26,11 @@ service httpd  restart
 cp /vagrant/event_definitions.yaml /etc/ceilometer/
 perl -p -i -e 's/#dispatcher=database/dispatcher=database\ndispatcher=zenoss/g' /etc/ceilometer/ceilometer.conf
 openstack-config --set /etc/ceilometer/ceilometer.conf notification store_events True
+openstack-config --set /etc/ceilometer/ceilometer.conf DEFAULT verbose False
+openstack-config --set /etc/ceilometer/ceilometer.conf DEFAULT debug True
 
 # These will need to be tweaked for your specific setup.
-openstack-config --set /etc/ceilometer/ceilometer.conf dispatcher_zenoss zenoss_device packstack1
+openstack-config --set /etc/ceilometer/ceilometer.conf dispatcher_zenoss zenoss_device packstack
 openstack-config --set /etc/ceilometer/ceilometer.conf dispatcher_zenoss amqp_hostname 192.168.2.2
 openstack-config --set /etc/ceilometer/ceilometer.conf dispatcher_zenoss amqp_port 5672
 openstack-config --set /etc/ceilometer/ceilometer.conf dispatcher_zenoss amqp_userid zenoss

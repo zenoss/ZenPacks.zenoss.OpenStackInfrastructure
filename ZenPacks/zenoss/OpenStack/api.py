@@ -12,7 +12,7 @@ API interfaces and default implementations.
 '''
 
 import logging
-log = logging.getLogger('zen.OpenStackAPI')
+log = logging.getLogger('zen.OpenStack.api')
 
 from urlparse import urlparse
 
