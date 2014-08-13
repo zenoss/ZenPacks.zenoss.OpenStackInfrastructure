@@ -11,30 +11,6 @@
       datapoints:
         cpuUtilization: GAUGE_MIN_0_ALIAS
 
-    cpuUsage:
-      type: OpenStack Ceilometer Perf AMQP
-      meter: 'cpu'
-      severity: 'Clear'
-
-      datapoints:
-        cpuUsage: GAUGE_MIN_0_ALIAS
-
-    diskReadRequests:
-      type: OpenStack Ceilometer Perf AMQP
-      meter: 'disk.read.requests'
-      severity: 'Clear'
-
-      datapoints:
-        diskReadRequests: GAUGE_MIN_0_ALIAS
-
-    diskWriteRequests:
-      type: OpenStack Ceilometer Perf AMQP
-      meter: 'disk.write.requests'
-      severity: 'Clear'
-
-      datapoints:
-        diskWriteRequests: GAUGE_MIN_0_ALIAS
-
     diskReadRequestsRate:
       type: OpenStack Ceilometer Perf AMQP
       meter: 'disk.read.requests.rate'
@@ -50,22 +26,6 @@
 
       datapoints:
         diskWriteRequestsRate: GAUGE_MIN_0_ALIAS
-
-    diskReadBytes:
-      type: OpenStack Ceilometer Perf AMQP
-      meter: 'disk.read.bytes'
-      severity: 'Clear'
-
-      datapoints:
-        diskReadBytes: GAUGE_MIN_0_ALIAS
-
-    diskWriteBytes:
-      type: OpenStack Ceilometer Perf AMQP
-      meter: 'disk.write.bytes'
-      severity: 'Clear'
-
-      datapoints:
-        diskWriteBytes: GAUGE_MIN_0_ALIAS
 
     diskReadBytesRate:
       type: OpenStack Ceilometer Perf AMQP
@@ -83,7 +43,6 @@
       datapoints:
         diskWriteBytesRate: GAUGE_MIN_0_ALIAS
 
-        
     # # These are per-interface statistics, but vnics are not yet modeled.
     # networkIncomingPackets:
     #   type: OpenStack Ceilometer Perf AMQP
@@ -160,15 +119,6 @@
           dpName: cpuUtilization
           format: "%5.2lf"
 
-    CPU Usage:
-      units: seconds
-      miny: 0
-
-      graphpoints:
-        cpu_usage:
-          dpName: cpuUsage
-          format: "%5.2lf"
-
     # Incoming_Outgoing packets:
     #   units: packets
     #   miny: 0
@@ -221,55 +171,29 @@
     #       dpName: networkOutgoingBytesRate
     #       format: "%5.2lf"
 
-    Disk read_write request:
-      units: requests
-      miny: 0
-
-      graphpoints:
-        disk.read.requests:
-          dpName: diskReadRequests
-          format: "%5.2lf"
-
-        disk.write.requests:
-          dpName: diskWriteRequests
-          format: "%5.2lf"
-
-    Disk read_write request rate:
+    Disk Requests:
       units: requests / second
       miny: 0
 
       graphpoints:
-        disk.read.requests.rate:
+        Read:
           dpName: diskReadRequestsRate
           format: "%5.2lf"
 
-        disk.write.requests.rate:
+        Write:
           dpName: diskWriteRequestsRate
           format: "%5.2lf"
 
-    Disk read_write bytes:
-      units: bytes
-      miny: 0
-
-      graphpoints:
-        disk.read.bytes:
-          dpName: diskReadBytes
-          format: "%5.2lf"
-
-        disk.write.bytes:
-          dpName: diskWriteBytes
-          format: "%5.2lf"
-
-    Disk read_write bytes rate:
+    Disk IO Rate:
       units: kilo bytes / second
       miny: 0
 
       graphpoints:
-        disk.read.bytes.rate:
+        Read:
           dpName: diskReadBytesRate
           format: "%5.2lf"
 
-        disk.write.bytes.rate:
+        Write:
           dpName: diskWriteBytesRate
           format: "%5.2lf"
 
