@@ -85,7 +85,12 @@ build:
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
 
-
+	# Build the ceilometer_zenoss egg for installation on openstack
+	cd ZenPacks/zenoss/OpenStack/ceilometer_zenoss && \
+	rm -f ZenPacks/zenoss/OpenStack/ceilometer_zenoss/dist/*egg && \
+	python setup.py clean && \
+	python setup.py bdist_egg && \
+	cp ZenPacks/zenoss/OpenStack/ceilometer_zenoss/dist/*egg vagrant/packstack/
 
 
 clean:
