@@ -31,9 +31,9 @@ build:
 	# First Build the ceilometer_zenoss egg for installation on openstack
 	# sync up the version with the zenpack version:
 	cd ceilometer_zenoss && \
-      rm -f ceilometer_zenoss/dist/*egg && \
-      python setup.py clean && \
-      python setup.py bdist_egg
+	rm -f ceilometer_zenoss/dist/*egg && \
+	python setup.py clean && \
+	python setup.py bdist_egg
 	cp ceilometer_zenoss/dist/*egg vagrant/packstack/
 	cp ceilometer_zenoss/dist/*egg vagrant/devstack/controller/
 	cp ceilometer_zenoss/dist/*egg vagrant/devstack/compute/
@@ -84,8 +84,6 @@ build:
 	cd $(CEILOMETERCLIENT_DIR) && \
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
-
-
 
 
 clean:
