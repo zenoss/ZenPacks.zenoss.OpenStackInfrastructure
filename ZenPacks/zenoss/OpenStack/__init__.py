@@ -122,7 +122,11 @@ CFG = zenpacklib.ZenPackSpec(
                                  'content_width': 150}  # need to fix the default width for render_with_type
             },
             'properties': {
-                'binary':   {'label': 'Binary'},
+                'binary':     {'label': 'Binary',  'order': 1},
+                'enabled':    {'label': 'Enabled', 'order': 2,
+                               'renderer': 'Zenoss.render.openstack_ServiceEnabledStatus'},
+                'operStatus': {'label': 'State',   'order': 3,
+                               'renderer': 'Zenoss.render.openstack_ServiceOperStatus'}
             }
         },
 

@@ -35,3 +35,23 @@ Ext.onReady(function() {
         box.removeField('snmpVersion');
     });
 });
+
+
+Ext.apply(Zenoss.render, {
+    openstack_ServiceOperStatus: function(value) {
+        switch (value) {
+            case 'UNKNOWN': return Zenoss.render.severity(1);
+            case 'UP': return Zenoss.render.severity(0);
+            case 'DOWN': return Zenoss.render.severity(5);
+            default: return Zenoss.render.severity(1);
+        }
+    },
+
+    openstack_ServiceEnabledStatus: function(value) {
+        switch (value) {
+            case true: return Zenoss.render.severity(0);
+            case false: return Zenoss.render.severity(5);
+            default: return Zenoss.render.severity(1);
+        }
+    },
+});
