@@ -22,8 +22,6 @@ Ext.onReady(function() {
         box.removeField('rackSlot');
         box.removeField('hwManufacturer');
         box.removeField('hwModel');
-        box.removeField('osManufacturer');
-        box.removeField('osModel');
     });
 
     var DEVICE_OVERVIEW_SNMP = 'deviceoverviewpanel_snmpsummary';

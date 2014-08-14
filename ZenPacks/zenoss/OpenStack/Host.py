@@ -91,3 +91,13 @@ class Host(schema.Host):
             self.name(),
             self.device().name()
         )
+
+    def getOpenStackVersion(self):
+        pk = self.device().os.getProductKey()
+        if pk:
+            return pk[0]
+        else:
+            return None
+
+    def setOpenStackVersion(self, version):
+        self.device().os.setProductKey(version, 'OpenStack')
