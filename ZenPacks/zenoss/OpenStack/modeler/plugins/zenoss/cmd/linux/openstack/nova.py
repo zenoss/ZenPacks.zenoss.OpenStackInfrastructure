@@ -11,7 +11,7 @@
 #
 ###########################################################################
 
-from Products.DataCollector.plugins.DataMaps import ObjectMap, MultiArgs
+from Products.DataCollector.plugins.DataMaps import ObjectMap
 from Products.DataCollector.plugins.CollectorPlugin import CommandPlugin
 from ZenPacks.zenoss.OpenStack.utils import add_local_lib_path
 add_local_lib_path()
