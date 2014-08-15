@@ -182,6 +182,12 @@ CFG = zenpacklib.ZenPackSpec(
                                         'label': 'Public IPs'},   # ['50.57.74.222']
                 'privateIps':          {'type_': 'lines',
                                         'label': 'Private IPs'},  # ['10.182.13.13']
+
+                # The name this insance is known by within the hypervisor (for instance,
+                # for libvirt, it would be something like 'instance-00000001')
+                'hypervisorInstanceName': {'label': 'Hypervisor Instance Name',
+                                           'grid_display': False},
+
                 'hostId':              {'grid_display': False},   # a84303c0021aa53c7e749cbbbfac265f
                 'hostName':            {'grid_display': False,
                                         'index_type': 'field'},   # devstack1
