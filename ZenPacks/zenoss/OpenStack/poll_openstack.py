@@ -21,10 +21,12 @@ import Globals
 from Products.ZenUtils.Utils import unused
 unused(Globals)
 
+from twisted.internet.defer import inlineCallbacks, returnValue
+
 from utils import add_local_lib_path
 add_local_lib_path()
 
-from novaclient import client as novaclient
+from apiclients.novaapiclient import NovaAPIClient
 
 
 class OpenStackPoller(object):
@@ -36,6 +38,18 @@ class OpenStackPoller(object):
         self._api_version = 2
         self._region_name = region_name
 
+    @inlineCallbacks
+    def _populateFlavorData(self, client, data):
+        try:
+            result = yield client.flavors(detailed=True, is_public=None)
+
+        except Exception as e:
+            raise
+
+        data['flavorTotalCount'] = len(result['flavors'])
+
+
+    @inlineCallbacks
     def _populateImageData(self, client, data):
         data['imageTotalCount'] = 0
         data['imageSavingCount'] = 0
@@ -46,26 +60,32 @@ class OpenStackPoller(object):
         data['imageFailedCount'] = 0
         data['imageOtherCount'] = 0
 
-        for image in client.images.list():
+        try:
+            result = yield client.images(detailed=True, limit=None)
+
+        except Exception as e:
+            raise
+
+        for image in result['images']:
             data['imageTotalCount'] += 1
             severity = None
 
-            if image.status == 'SAVING':
+            if image['status'] == 'SAVING':
                 data['imageSavingCount'] += 1
                 severity = 2
-            elif image.status == 'UNKNOWN':
+            elif image['status'] == 'UNKNOWN':
                 data['imageUnknownCount'] += 1
                 severity = 5
-            elif image.status == 'PREPARING':
+            elif image['status'] == 'PREPARING':
                 data['imagePreparingCount'] += 1
                 severity = 2
-            elif image.status == 'ACTIVE':
+            elif image['status'] == 'ACTIVE':
                 data['imageActiveCount'] += 1
                 severity = 0
-            elif image.status == 'QUEUED':
+            elif image['status'] == 'QUEUED':
                 data['imageQueuedCount'] += 1
                 severity = 2
-            elif image.status == 'FAILED':
+            elif image['status'] == 'FAILED':
                 data['imageFailedCount'] += 1
                 severity = 5
             else:
@@ -75,13 +95,14 @@ class OpenStackPoller(object):
 
             data['events'].append(dict(
                 severity=severity,
-                summary='image status is {0}'.format(image.status),
-                component='image{0}'.format(image.id),
+                summary='image status is {0}'.format(image['status']),
+                component='image{0}'.format(image['id']),
                 eventKey='imageStatus',
                 eventClassKey='openstackImageStatus',
-                imageStatus=image.status,
+                imageStatus=image['status'],
             ))
 
+    @inlineCallbacks
     def _populateServerData(self, client, data):
         data['serverTotalCount'] = 0
         data['serverActiveCount'] = 0
@@ -100,50 +121,56 @@ class OpenStackPoller(object):
         data['serverUnknownCount'] = 0
         data['serverOtherCount'] = 0
 
-        for server in client.servers.list():
+        try:
+            result = yield client.servers(detailed=True)
+
+        except Exception as e:
+            raise
+
+        for server in result['servers']:
             data['serverTotalCount'] += 1
             severity = None
 
-            if server.status == 'ACTIVE':
+            if server['status'] == 'ACTIVE':
                 data['serverActiveCount'] += 1
                 severity = 0
-            elif server.status == 'BUILD':
+            elif server['status'] == 'BUILD':
                 data['serverBuildCount'] += 1
                 severity = 5
-            elif server.status == 'REBUILD':
+            elif server['status'] == 'REBUILD':
                 data['serverRebuildCount'] += 1
                 severity = 5
-            elif server.status == 'SUSPENDED':
+            elif server['status'] == 'SUSPENDED':
                 data['serverSuspendedCount'] += 1
                 severity = 2
-            elif server.status == 'QUEUE_RESIZE':
+            elif server['status'] == 'QUEUE_RESIZE':
                 data['serverQueueResizeCount'] += 1
                 severity = 2
-            elif server.status == 'PREP_RESIZE':
+            elif server['status'] == 'PREP_RESIZE':
                 data['serverPrepResizeCount'] += 1
                 severity = 3
-            elif server.status == 'RESIZE':
+            elif server['status'] == 'RESIZE':
                 data['serverResizeCount'] += 1
                 severity = 4
-            elif server.status == 'VERIFY_RESIZE':
+            elif server['status'] == 'VERIFY_RESIZE':
                 data['serverVerifyResizeCount'] += 1
                 severity = 2
-            elif server.status == 'PASSWORD':
+            elif server['status'] == 'PASSWORD':
                 data['serverPasswordCount'] += 1
                 severity = 2
-            elif server.status == 'RESCUE':
+            elif server['status'] == 'RESCUE':
                 data['serverRescueCount'] += 1
                 severity = 5
-            elif server.status == 'REBOOT':
+            elif server['status'] == 'REBOOT':
                 data['serverRebootCount'] += 1
                 severity = 5
-            elif server.status == 'HARD_REBOOT':
+            elif server['status'] == 'HARD_REBOOT':
                 data['serverHardRebootCount'] += 1
                 severity = 5
-            elif server.status == 'DELETE_IP':
+            elif server['status'] == 'DELETE_IP':
                 data['serverDeleteIpCount'] += 1
                 severity = 3
-            elif server.status == 'UNKNOWN':
+            elif server['status'] == 'UNKNOWN':
                 data['serverUnknownCount'] += 1
                 severity = 5
             else:
@@ -153,13 +180,14 @@ class OpenStackPoller(object):
 
             data['events'].append(dict(
                 severity=severity,
-                summary='server status is {0}'.format(server.status),
-                component='server{0}'.format(server.id),
+                summary='server status is {0}'.format(server['status']),
+                component='server{0}'.format(server['id']),
                 eventKey='serverStatus',
                 eventClassKey='openstackServerStatus',
-                serverStatus=server.status,
+                serverStatus=server['status'],
             ))
 
+    @inlineCallbacks
     def getData(self):
         if (log.isEnabledFor(logging.DEBUG)):
             http_log_debug = True
@@ -167,31 +195,31 @@ class OpenStackPoller(object):
         else:
             http_log_debug = False
 
-        # Nova
-        client = novaclient.Client(
-            self._api_version,
+        client = NovaAPIClient(
             self._username,
             self._api_key,
-            self._project_id,
             self._auth_url,
-            region_name=self._region_name,
-            http_log_debug=http_log_debug,
-        )
+            self._project_id,
+            self._region_name)
 
         data = {}
         data['events'] = []
 
-        data['flavorTotalCount'] = len(client.flavors.list())
+        try:
+            yield self._populateFlavorData(client, data)
+            yield self._populateImageData(client, data)
+            yield self._populateServerData(client, data)
 
-        self._populateImageData(client, data)
-        self._populateServerData(client, data)
+        except Exception as e:
+            raise
 
-        return data
+        returnValue(data)
 
+    @inlineCallbacks
     def printJSON(self):
         data = None
         try:
-            data = self.getData()
+            data = yield self.getData()
             data['events'].append(dict(
                 severity=0,
                 summary='OpenStack connectivity restored',
@@ -211,6 +239,8 @@ class OpenStackPoller(object):
         print json.dumps(data)
 
 if __name__ == '__main__':
+    from twisted.internet import reactor
+
     username = api_key = project_id = auth_url = api_version = region_name = None
     try:
         username, api_key, project_id, auth_url, region_name = sys.argv[1:7]
@@ -225,3 +255,4 @@ if __name__ == '__main__':
         username, api_key, project_id, auth_url, region_name)
 
     poller.printJSON()
+    reactor.run()
