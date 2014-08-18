@@ -1,4 +1,4 @@
-Metadata-Version: 1.0
+Metadata-Version: 1.1
 Name: txsshclient
 Version: 0.1.0dev1
 Summary: Twisted python asynchronous library for issueing commands and receiving or sending files over ssh.
@@ -65,3 +65,6 @@ Classifier: Natural Language :: English
 Classifier: Operating System :: POSIX :: Linux
 Classifier: Programming Language :: Python :: 2
 Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires: twisted
+Requires: pyasn1
+Requires: PyCrypto

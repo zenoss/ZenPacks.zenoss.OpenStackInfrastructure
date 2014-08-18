@@ -21,7 +21,7 @@ class SSHTransport(transport.SSHClientTransport):
         self.factory.dTransport.callback(self)
 
     def sendDisconnect(self, reason, desc):
-        log.debug('sending transport disconnect')
+        log.debug('sending transport disconnect [%s]' % reason)
         transport.SSHClientTransport.sendDisconnect(self, reason, desc)
 
         # Tell the factory we had an unauthorized login exception

@@ -99,6 +99,8 @@ class CommandChannel(channel.SSHChannel):
 
     def eofReceived(self):
         self.timeoutCancel()
+
+    def closed(self):
         log.debug('[%s] Sending results back to the callback (%s)' % (id(self), self.data))
         if not self.result.called:
             #self.result.callback((self.exit, self.data, self.err))
