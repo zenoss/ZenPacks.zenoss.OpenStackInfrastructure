@@ -16,7 +16,7 @@ SRC_DIR=$(PWD)/src
 NOVACLIENT_DIR=$(SRC_DIR)/python-novaclient-2.15.0
 KEYSTONECLIENT_DIR=$(SRC_DIR)/python-keystoneclient-0.4.0
 CEILOMETERCLIENT_DIR=$(SRC_DIR)/python-ceilometerclient-1.0.6
-TXSSHCLIENT_DIR=$(SRC_DIR)/txsshclient
+TXSSHCLIENT_DIR=$(SRC_DIR)/txsshclient-0.1.0dev1
 ZP_DIR=$(PWD)/ZenPacks/zenoss/OpenStack
 BIN_DIR=$(ZP_DIR)/bin
 LIB_DIR=$(ZP_DIR)/lib
@@ -28,9 +28,9 @@ egg:
 	# setup.py will call 'make build' before creating the egg
 	python setup.py bdist_egg
 
+.PHONY: build
 
-
-build: | src/txsshclient
+build:
 	# First Build the ceilometer_zenoss egg for installation on openstack
 	# sync up the version with the zenpack version:
 	cd ceilometer_zenoss && \
@@ -87,13 +87,10 @@ build: | src/txsshclient
 	cd $(CEILOMETERCLIENT_DIR) && \
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
-
-	cd $(TXSSHCLIENT_DIR); git checkout master; git pull
-	rm -rf $(LIB_DIR)/txsshclient.zip
-	(cd $(TXSSHCLIENT_DIR); zip -x .git -r ${LIB_DIR}/txsshclient.zip *)
-
-src/txsshclient:
-	cd $SRC_DIR; git clone https://github.com/zenoss/txsshclient.git
+	# txsshclient..
+	cd $(TXSSHCLIENT_DIR) && \
+		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
+			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
 
 clean:
 	rm -rf build dist *.egg-info
@@ -102,6 +99,7 @@ clean:
 	cd $(NOVACLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
 	cd $(KEYSTONECLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
 	cd $(CEILOMETERCLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
+	cd $(TXSSHCLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
 	rm -f $(BIN_DIR)/nova
 	rm -f $(BIN_DIR)/keystone
 	rm -f $(BIN_DIR)/ceilometer
