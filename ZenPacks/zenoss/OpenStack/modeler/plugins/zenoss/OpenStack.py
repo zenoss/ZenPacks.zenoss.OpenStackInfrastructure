@@ -60,50 +60,25 @@ class OpenStack(PythonPlugin):
 
         results = {}
 
-        try:
-            result = yield client.flavors(detailed=True, is_public=None)
-
-        except Exception as e:
-            raise
-
+        result = yield client.flavors(detailed=True, is_public=None)
         results['flavors'] = result['flavors']
         log.info('flavors: %s\n' % str(results['flavors']))
 
-        try:
-            result = yield client.images(detailed=True)
-
-        except Exception as e:
-            raise
-
+        result = yield client.images(detailed=True)
         results['images'] = result['images']
         log.info('images: %s\n' % str(results['images']))
 
-        try:
-            result = yield client.hypervisors(detailed=False,
+        result = yield client.hypervisors(detailed=False,
                                               hypervisor_match='%',
                                               servers=True)
-
-        except Exception as e:
-            raise
-
         results['hypervisors'] = result['hypervisors']
         log.info('hypervisors: %s\n' % str(results['hypervisors']))
 
-        try:
-            result = yield client.servers(detailed=True)
-
-        except Exception as e:
-            raise
-
+        result = yield client.servers(detailed=True)
         results['servers'] = result['servers']
         log.info('servers: %s\n' % str(results['servers']))
 
-        try:
-            result = yield client.services()
-
-        except Exception as e:
-            raise
-
+        result = yield client.services()
         results['services'] = result['services']
         log.info('services: %s\n' % str(results['services']))
 

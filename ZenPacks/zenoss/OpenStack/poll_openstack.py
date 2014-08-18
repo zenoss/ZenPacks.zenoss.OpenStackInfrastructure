@@ -40,12 +40,7 @@ class OpenStackPoller(object):
 
     @inlineCallbacks
     def _populateFlavorData(self, client, data):
-        try:
-            result = yield client.flavors(detailed=True, is_public=None)
-
-        except Exception as e:
-            raise
-
+        result = yield client.flavors(detailed=True, is_public=None)
         data['flavorTotalCount'] = len(result['flavors'])
 
 
@@ -60,11 +55,7 @@ class OpenStackPoller(object):
         data['imageFailedCount'] = 0
         data['imageOtherCount'] = 0
 
-        try:
-            result = yield client.images(detailed=True, limit=None)
-
-        except Exception as e:
-            raise
+        result = yield client.images(detailed=True, limit=None)
 
         for image in result['images']:
             data['imageTotalCount'] += 1
@@ -121,11 +112,7 @@ class OpenStackPoller(object):
         data['serverUnknownCount'] = 0
         data['serverOtherCount'] = 0
 
-        try:
-            result = yield client.servers(detailed=True)
-
-        except Exception as e:
-            raise
+        result = yield client.servers(detailed=True)
 
         for server in result['servers']:
             data['serverTotalCount'] += 1
