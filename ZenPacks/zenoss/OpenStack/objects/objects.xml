@@ -471,9 +471,9 @@ OpenStack: Endpoint Monitoring
 ZenPacks.zenoss.OpenStack.Endpoint.Endpoint
 </property>
 <tomanycont id='datasources'>
-<object id='events' module='ZenPacks.zenoss.OpenStack.datasources.EventsAMQPDataSource' class='EventsAMQPDataSource'>
+<object id='serviceStatus' module='ZenPacks.zenoss.OpenStack.datasources.NovaServiceStatusDataSource' class='NovaServiceStatusDataSource'>
 <property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
-OpenStack Ceilometer Events AMQP
+OpenStack Nova Service Status
 </property>
 <property type="boolean" id="enabled" mode="w" >
 True
