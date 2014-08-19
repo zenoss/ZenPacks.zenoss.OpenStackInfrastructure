@@ -248,6 +248,14 @@ class OpenStack(PythonPlugin):
                     id=service_id,
                     title=title,
                     binary=service['binary'],
+                    enabled={
+                        'enabled': True,
+                        'disabled': False
+                    }.get(service['status'], False),
+                    operStatus={
+                        'up': 'UP',
+                        'down': 'DOWN'
+                    }.get(service['state'], 'UNKNOWN'),
                     set_hostedOn=host_id,
                     set_orgComponent=zone_id
                 )))

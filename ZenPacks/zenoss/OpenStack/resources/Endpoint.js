@@ -22,8 +22,6 @@ Ext.onReady(function() {
         box.removeField('rackSlot');
         box.removeField('hwManufacturer');
         box.removeField('hwModel');
-        box.removeField('osManufacturer');
-        box.removeField('osModel');
     });
 
     var DEVICE_OVERVIEW_SNMP = 'deviceoverviewpanel_snmpsummary';
@@ -36,4 +34,24 @@ Ext.onReady(function() {
         box.removeField('snmpCommunity');
         box.removeField('snmpVersion');
     });
+});
+
+
+Ext.apply(Zenoss.render, {
+    openstack_ServiceOperStatus: function(value) {
+        switch (value) {
+            case 'UNKNOWN': return Zenoss.render.severity(1);
+            case 'UP': return Zenoss.render.severity(0);
+            case 'DOWN': return Zenoss.render.severity(5);
+            default: return Zenoss.render.severity(1);
+        }
+    },
+
+    openstack_ServiceEnabledStatus: function(value) {
+        switch (value) {
+            case true: return Zenoss.render.severity(0);
+            case false: return Zenoss.render.severity(5);
+            default: return Zenoss.render.severity(1);
+        }
+    },
 });
