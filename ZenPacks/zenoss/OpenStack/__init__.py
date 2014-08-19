@@ -29,6 +29,7 @@ CLASS_NAME = {}
 RELATIONSHIPS_YUML = """
 // containing
 [Endpoint]++components-endpoint1[OpenstackComponent]
+[Instance]++-[Vnic]
 // non-containing 1:M
 [OrgComponent]*parentOrg-childOrgs1[OrgComponent]
 [Host]1hostedSoftware-hostedOn*[SoftwareComponent]
@@ -201,11 +202,19 @@ CFG = zenpacklib.ZenPackSpec(
                 'hypervisor': {'grid_display': False}  # no need to show this- show the host instead
             }
 
-
-
             # Note: By (nova) design, hostId is a hash of the actual underlying host and project, and
             # is designed to allow users of a specific project to tell if two VMs are on the same host, nothing
             # more.  It is not a unique identifier of hosts (compute nodes).
+        },
+
+        'Vnic': {
+            'base': 'LogicalComponent',
+            'meta_type': 'OpenStackVnic',
+            'label': 'Vnic',
+            'order': 3.5,
+            'properties': {
+                'macaddress': {'label': 'MAC Address'}
+            }
         },
 
         'Region': {
