@@ -23,6 +23,7 @@ from Products.DataCollector.ApplyDataMap import ApplyDataMap
 def getApplyDataMapToOpenStackEndpoint(self):
     return []
 
+
 @monkeypatch('Products.ZenModel.Device.Device')
 def setApplyDataMapToOpenStackEndpoint(self, datamap):
     mapper = ApplyDataMap()
@@ -33,13 +34,14 @@ def setApplyDataMapToOpenStackEndpoint(self, datamap):
     else:
         mapper._applyDataMap(component.device(), datamap)
 
+
 @monkeypatch('Products.ZenModel.Device.Device')
 def openstack_instanceNames(self):
-    # If this is an openstack compute node, returns a list of hypervisor instance
-    # names running ont his host.
+    # If this is an openstack compute node, returns a list of (instance ID, hypervisor
+    # instance name) tuples for instances running on this host.
 
     try:
         host = DeviceProxyComponent.component_for_proxy_device(self)
-        return [x.hypervisorInstanceName for x in host.hypervisor().instances()]
+        return [(x.id, x.hypervisorInstanceName) for x in host.hypervisor().instances()]
     except AttributeError:
         return []
