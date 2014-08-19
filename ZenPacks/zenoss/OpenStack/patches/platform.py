@@ -45,3 +45,17 @@ def openstack_instanceNames(self):
         return [(x.id, x.hypervisorInstanceName) for x in host.hypervisor().instances()]
     except AttributeError:
         return []
+
+@monkeypatch('Products.ZenModel.Device.Device')
+def getApplyDataMapToOpenStackEndpoint(self):
+    return []
+
+@monkeypatch('Products.ZenModel.Device.Device')
+def setApplyDataMapToOpenStackEndpoint(self, datamap):
+    mapper = ApplyDataMap()
+
+    component = DeviceProxyComponent.component_for_proxy_device(self)
+    if not component:
+        log.error("Unable to apply datamap to proxy component for %s (component not found)" % self)
+    else:
+        mapper._applyDataMap(component.device(), datamap)

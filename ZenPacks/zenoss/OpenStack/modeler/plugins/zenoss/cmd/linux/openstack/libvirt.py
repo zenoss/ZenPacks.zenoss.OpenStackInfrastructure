@@ -62,55 +62,57 @@ class libvirt(PythonPlugin):
         timeout = device.zCommandCommandTimeout
         data = {}
 
-        for instanceId, instanceName in device.openstack_instanceList:
-            cmd = "virsh --readonly -c 'qemu:///system' dumpxml '%s'" % instanceName
-            log.info("Running %s" % cmd)
-            d = yield client.run(cmd, timeout=timeout)
+        try:
+            for instanceId, instanceName in device.openstack_instanceList:
+                cmd = "virsh --readonly -c 'qemu:///system' dumpxml '%s'" % instanceName
+                log.info("Running %s" % cmd)
+                d = yield client.run(cmd, timeout=timeout)
 
-            if d.exitCode != 0 or d.stderr:
-                log.error("Error running virsh (rc=%s, stderr='%s'" % (d.exitCode, d.stderr))
-                returnValue(None)
-                continue
-
-            try:
-                tree = etree.fromstring(d.output)
-
-                instanceUuid = tree.xpath("/domain/uuid/text()")[0]
-                zenossInstanceId = 'server-%s' % (instanceUuid)
-                data[instanceUuid] = {
-                    'id': zenossInstanceId,
-                    'serialNumber': tree.xpath("/domain/sysinfo/system/entry[@name='serial']/text()")[0],
-                    'biosUuid': tree.xpath("/domain/sysinfo/system/entry[@name='uuid']/text()")[0]
-                }
-
-            except Exception:
-                log.error("Invalid XML Received from (%s):\n%s\n\n" % (cmd, d.output))
-                raise LibvirtXMLError('Incomplete or invalid XML returned from virsh command. Consult log for more details.')
-
-            vnics = []
-            for interface in tree.xpath("/domain/devices/interface"):
-                target = interface.find("target/[@dev]")
-                mac = interface.find("mac/[@address]")
-
-                if target is None or mac is None:
-                    # unrecognized interface type 
+                if d.exitCode != 0 or d.stderr:
+                    log.error("Error running virsh (rc=%s, stderr='%s'" % (d.exitCode, d.stderr))
+                    returnValue(None)
                     continue
 
-                # compute the resourceId in the same way that ceilometer's
-                # net pollster does.
-                vnicName = target.get('dev')
-                zenossVnicId = 'vnic-%s-%s' % (instanceUuid, vnicName)
-                ceilometerResourceId = '%s-%s-%s' % (instanceName, instanceUuid, vnicName)
+                try:
+                    tree = etree.fromstring(d.output)
 
-                vnics.append({
-                    'id': zenossVnicId,
-                    'name': vnicName,
-                    'macaddress': mac.get('address'),
-                    'resourceId': ceilometerResourceId
-                })
-            data[instanceUuid]['vnics'] = vnics
+                    instanceUuid = str(tree.xpath("/domain/uuid/text()")[0])
+                    zenossInstanceId = 'server-%s' % (instanceUuid)
+                    data[instanceUuid] = {
+                        'id': zenossInstanceId,
+                        'serialNumber': str(tree.xpath("/domain/sysinfo/system/entry[@name='serial']/text()")[0]),
+                        'biosUuid': str(tree.xpath("/domain/sysinfo/system/entry[@name='uuid']/text()")[0])
+                    }
 
-        client.disconnect()
+                except Exception:
+                    log.error("Invalid XML Received from (%s):\n%s\n\n" % (cmd, d.output))
+                    raise LibvirtXMLError('Incomplete or invalid XML returned from virsh command. Consult log for more details.')
+
+                vnics = []
+                for interface in tree.xpath("/domain/devices/interface"):
+                    target = interface.find("target/[@dev]")
+                    mac = interface.find("mac/[@address]")
+
+                    if target is None or mac is None:
+                        # unrecognized interface type 
+                        continue
+
+                    # compute the resourceId in the same way that ceilometer's
+                    # net pollster does.
+                    vnicName = str(target.get('dev'))
+                    zenossVnicId = 'vnic-%s-%s' % (instanceUuid, vnicName)
+                    ceilometerResourceId = '%s-%s-%s' % (instanceName, instanceUuid, vnicName)
+
+                    vnics.append({
+                        'id': zenossVnicId,
+                        'name': vnicName,
+                        'macaddress': str(mac.get('address')),
+                        'resourceId': ceilometerResourceId
+                    })
+                data[instanceUuid]['vnics'] = vnics
+
+        finally:        
+            client.disconnect()
 
         returnValue(data)
 
@@ -136,6 +138,7 @@ class libvirt(PythonPlugin):
                     modname='ZenPacks.zenoss.OpenStack.Vnic',
                     compname='components/%s/vnics/%s' % (instance['id'], vnic['id']),
                     data=dict(
+                        id=vnic['id'],
                         title=vnic['name'],
                         macaddress=vnic['macaddress'],
                         resourceId=vnic['resourceId']
@@ -150,8 +153,4 @@ class libvirt(PythonPlugin):
         # Wrap all the objmaps so that they are applied to the openstack
         # device components, not to the linux device we are modeling.
 
-
-        import pdb; pdb.set_trace()
-
-
-        pass
+        return [ObjectMap({'setApplyDataMapToOpenStackEndpoint': om}) for om in objmaps]
