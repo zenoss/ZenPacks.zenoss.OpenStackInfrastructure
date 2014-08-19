@@ -131,13 +131,15 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
         data = self.new_data()
 
         for service in result['services']:
-            service_id = prepId('service-{0}-{1}-{2}'.format(service.binary, service.host, service.zone))
+            service_id = prepId('service-{0}-{1}-{2}'.format(
+                service.binary, service.host, service.zone))
 
             if service.status == 'disabled':
                 data['events'].append({
                     'device': config.id,
                     'component': service_id,
-                    'summary': 'Service %s on host %s (Availabilty Zone %s) is now DISABLED' % (service.binary, service.host, service.zone),
+                    'summary': 'Service %s on host %s (Availabilty Zone %s) is now DISABLED' %
+                               (service.binary, service.host, service.zone),
                     'severity': ZenEventClasses.Clear,
                     'eventClassKey': 'OpenStackNovaServiceStatus',
                     })
@@ -146,7 +148,8 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
                 data['events'].append({
                     'device': config.id,
                     'component': service_id,
-                    'summary': 'Service %s on host %s (Availabilty Zone %s) is now UP' % (service.binary, service.host, service.zone),
+                    'summary': 'Service %s on host %s (Availabilty Zone %s) is now UP' %
+                               (service.binary, service.host, service.zone),
                     'severity': ZenEventClasses.Clear,
                     'eventClassKey': 'OpenStackNovaServiceStatus',
                     })
@@ -155,7 +158,8 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
                 data['events'].append({
                     'device': config.id,
                     'component': service_id,
-                    'summary': 'Service %s on host %s (Availabilty Zone %s) is now DOWN' % (service.binary, service.host, service.zone),
+                    'summary': 'Service %s on host %s (Availabilty Zone %s) is now DOWN' %
+                               (service.binary, service.host, service.zone),
                     'severity': ZenEventClasses.Error,
                     'eventClassKey': 'OpenStackNovaServiceStatus',
                     })
