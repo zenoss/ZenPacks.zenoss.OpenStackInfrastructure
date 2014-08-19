@@ -1,7 +1,7 @@
 ###########################################################################
 #
 # This program is part of Zenoss Core, an open source monitoring platform.
-# Copyright (C) 2011, Zenoss Inc.
+# Copyright (C) 2014, Zenoss Inc.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 or (at your
@@ -28,6 +28,7 @@ add_local_lib_path()
 from novaclient import client as novaclient
 from apiclients.novaapiclient import NovaAPIClient
 
+
 class OpenStack(PythonPlugin):
     deviceProperties = PythonPlugin.deviceProperties + (
         'zCommandUsername',
@@ -41,22 +42,15 @@ class OpenStack(PythonPlugin):
 
     @inlineCallbacks
     def collect(self, device, unused):
-        region_name = None
-        if device.zOpenStackRegionName:
-            region_name = device.zOpenStackRegionName
-
         if (log.isEnabledFor(logging.DEBUG)):
-            http_log_debug = True
             logging.getLogger('novaclient.client').setLevel(logging.DEBUG)
-        else:
-            http_log_debug = False
 
         client = NovaAPIClient(
-                device.zCommandUsername,
-                device.zCommandPassword,
-                device.zOpenStackAuthUrl,
-                device.zOpenStackProjectId,
-                device.zOpenStackRegionName)
+            device.zCommandUsername,
+            device.zCommandPassword,
+            device.zOpenStackAuthUrl,
+            device.zOpenStackProjectId,
+            device.zOpenStackRegionName)
 
         results = {}
 
@@ -69,8 +63,8 @@ class OpenStack(PythonPlugin):
         log.info('images: %s\n' % str(results['images']))
 
         result = yield client.hypervisors(detailed=False,
-                                              hypervisor_match='%',
-                                              servers=True)
+                                          hypervisor_match='%',
+                                          servers=True)
         results['hypervisors'] = result['hypervisors']
         log.info('hypervisors: %s\n' % str(results['hypervisors']))
 
@@ -107,9 +101,6 @@ class OpenStack(PythonPlugin):
 
         images = []
         for image in results['images']:
-            # Sometimes there's no created timestamp for an image.
-            created = getattr(image, 'created', '')
-
             images.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStack.Image',
                 data=dict(
@@ -286,13 +277,17 @@ class OpenStack(PythonPlugin):
                 )))
 
         hypervisors = []
+        server_hypervisor_instance_name = {}
         for hypervisor in results['hypervisors']:
             hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
             host_id = prepId("host-{0}".format(hypervisor['hypervisor_hostname']))
 
             hypervisor_servers = []
             if hypervisor.has_key('servers'):
-                hypervisor_servers = ['server-{0}'.format(x['uuid']) for x in hypervisor['servers']]
+                for server in hypervisor['servers']:
+                    server_id = 'server-{0}'.format(server['uuid'])
+                    hypervisor_servers.append(server_id)
+                    server_hypervisor_instance_name[server_id] = server['name']
 
             hypervisors.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStack.Hypervisor',
@@ -303,6 +298,11 @@ class OpenStack(PythonPlugin):
                     set_instances=hypervisor_servers,
                     set_host=host_id
                 )))
+
+        # add hypervisor instance name to the existing server objectmaps.
+        for om in servers:
+            if om.id in server_hypervisor_instance_name:
+                om.hypervisorInstanceName = server_hypervisor_instance_name[om.id]
 
         # nova-api support.
         # Place it on the user-specified hosts, or also find it if it's

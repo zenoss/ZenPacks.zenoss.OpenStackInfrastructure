@@ -1,6 +1,6 @@
 /OpenStack/Instance:
   description: "OpenStack: Instance Monitoring"
-  targetPythonClass: ZenPacks.zenoss.OpenStack.Instance.Instance
+  targetPythonClass: ZenPacks.zenoss.OpenStack.Instance
 
   datasources:
     cpuUtilization:
@@ -43,71 +43,6 @@
       datapoints:
         diskWriteBytesRate: GAUGE_MIN_0_ALIAS
 
-    # # These are per-interface statistics, but vnics are not yet modeled.
-    # networkIncomingPackets:
-    #   type: OpenStack Ceilometer Perf AMQP
-    #   meter: 'network.incoming.packets'
-    #   severity: 'Clear'
-
-    #   datapoints:
-    #     networkIncomingPackets: GAUGE_MIN_0_ALIAS
-
-    # networkOutgoingPackets:
-    #   type: OpenStack Ceilometer Perf AMQP
-    #   meter: 'network.outgoing.packets'
-    #   severity: 'Clear'
-
-    #   datapoints:
-    #     networkOutgoingPackets: GAUGE_MIN_0_ALIAS
-
-    # networkIncomingPacketsRate:
-    #   type: OpenStack Ceilometer Perf AMQP
-    #   meter: 'network.incoming.packets.rate'
-    #   severity: 'Clear'
-
-    #   datapoints:
-    #     networkIncomingPacketsRate: GAUGE_MIN_0_ALIAS
-
-    # networkOutgoingPacketsRate:
-    #   type: OpenStack Ceilometer Perf AMQP
-    #   meter: 'network.outgoing.packets.rate'
-    #   severity: 'Clear'
-
-    #   datapoints:
-    #     networkOutgoingPacketsRate: GAUGE_MIN_0_ALIAS
-
-    # networkIncomingBytes:
-    #   type: OpenStack Ceilometer Perf AMQP
-    #   meter: 'network.incoming.bytes'
-    #   severity: 'Clear'
-
-    #   datapoints:
-    #     networkIncomingBytes: GAUGE_MIN_0_ALIAS
-
-    # networkOutgoingBytes:
-    #   type: OpenStack Ceilometer Perf AMQP
-    #   meter: 'network.outgoing.bytes'
-    #   severity: 'Clear'
-
-    #   datapoints:
-    #     networkOutgoingBytes: GAUGE_MIN_0_ALIAS
-
-    # networkIncomingBytesRate:
-    #   type: OpenStack Ceilometer Perf AMQP
-    #   meter: 'network.incoming.bytes.rate'
-    #   severity: 'Clear'
-
-    #   datapoints:
-    #     networkIncomingBytesRate: GAUGE_MIN_0_ALIAS
-
-    # networkOutgoingBytesRate:
-    #   type: OpenStack Ceilometer Perf AMQP
-    #   meter: 'network.outgoing.bytes.rate'
-    #   severity: 'Clear'
-
-    #   datapoints:
-    #     networkOutgoingBytesRate: GAUGE_MIN_0_ALIAS
-
   graphs:
     CPU Utilization:
       units: percent
@@ -118,58 +53,6 @@
         cpu_util:
           dpName: cpuUtilization
           format: "%5.2lf"
-
-    # Incoming_Outgoing packets:
-    #   units: packets
-    #   miny: 0
-
-    #   graphpoints:
-    #     network.incoming.packets:
-    #       dpName: networkIncomingPackets
-    #       format: "%5.2lf"
-
-    #     network.outgoing.packets:
-    #       dpName: networkOutgoingPackets
-    #       format: "%5.2lf"
-
-    # Incoming_Outgoing packets rate:
-    #   units: packets rate
-    #   miny: 0
-
-    #   graphpoints:
-    #     network.incoming.packets.rate:
-    #       dpName: networkIncomingPacketsRate
-    #       format: "%5.2lf"
-
-    #     network.outgoing.packets.rate:
-    #       dpName: networkOutgoingPacketsRate
-    #       format: "%5.2lf"
-
-    # Incoming_Outgoing bytes:
-    #   units: kilo bytes
-    #   miny: 0
-
-    #   graphpoints:
-    #     network.incoming.bytes:
-    #       dpName: networkIncomingBytes
-    #       format: "%5.2lf"
-
-    #     network.outgoing.bytes:
-    #       dpName: networkOutgoingBytes
-    #       format: "%5.2lf"
-
-    # Incoming_Outgoing bytes rate:
-    #   units: bytes / second
-    #   miny: 0
-
-    #   graphpoints:
-    #     network.incoming.bytes.rate:
-    #       dpName: networkIncomingBytesRate
-    #       format: "%5.2lf"
-
-    #     network.outgoing.bytes.rate:
-    #       dpName: networkOutgoingBytesRate
-    #       format: "%5.2lf"
 
     Disk Requests:
       units: requests / second
@@ -197,9 +80,74 @@
           dpName: diskWriteBytesRate
           format: "%5.2lf"
 
+
+/OpenStack/Vnic:
+  description: "OpenStack: Vnic Monitoring"
+  targetPythonClass: ZenPacks.zenoss.OpenStack.Vnic
+
+  datasources:
+    networkIncomingPacketsRate:
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'network.incoming.packets.rate'
+      severity: 'Clear'
+
+      datapoints:
+        networkIncomingPacketsRate: GAUGE_MIN_0_ALIAS
+
+    networkOutgoingPacketsRate:
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'network.outgoing.packets.rate'
+      severity: 'Clear'
+
+      datapoints:
+        networkOutgoingPacketsRate: GAUGE_MIN_0_ALIAS
+
+    networkIncomingBytesRate:
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'network.incoming.bytes.rate'
+      severity: 'Clear'
+
+      datapoints:
+        networkIncomingBytesRate: GAUGE_MIN_0_ALIAS
+
+    networkOutgoingBytesRate:
+      type: OpenStack Ceilometer Perf AMQP
+      meter: 'network.outgoing.bytes.rate'
+      severity: 'Clear'
+
+      datapoints:
+        networkOutgoingBytesRate: GAUGE_MIN_0_ALIAS
+
+  graphs:
+    Network Packet Rate:
+      units: packets/sec
+      miny: 0
+
+      graphpoints:
+        network.incoming.packets.rate:
+          dpName: networkIncomingPacketsRate
+          format: "%5.2lf"
+
+        network.outgoing.packets.rate:
+          dpName: networkOutgoingPacketsRate
+          format: "%5.2lf"
+
+    Network Throughpout:
+      units: bytes / second
+      miny: 0
+
+      graphpoints:
+        network.incoming.bytes.rate:
+          dpName: networkIncomingBytesRate
+          format: "%5.2lf"
+
+        network.outgoing.bytes.rate:
+          dpName: networkOutgoingBytesRate
+          format: "%5.2lf"
+
 /OpenStack/OpenStackEndpoint:
   description: "OpenStack: Endpoint Monitoring"
-  targetPythonClass: ZenPacks.zenoss.OpenStack.Endpoint.Endpoint
+  targetPythonClass: ZenPacks.zenoss.OpenStack.Endpoint
 
   datasources:
     events:

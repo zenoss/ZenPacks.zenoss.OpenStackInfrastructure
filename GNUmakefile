@@ -1,7 +1,7 @@
 ###########################################################################
 #
 # This program is part of Zenoss Core, an open source monitoring platform.
-# Copyright (C) 2011, Zenoss Inc.
+# Copyright (C) 2014, Zenoss Inc.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 or (at your
@@ -16,6 +16,7 @@ SRC_DIR=$(PWD)/src
 NOVACLIENT_DIR=$(SRC_DIR)/python-novaclient-2.15.0
 KEYSTONECLIENT_DIR=$(SRC_DIR)/python-keystoneclient-0.4.0
 CEILOMETERCLIENT_DIR=$(SRC_DIR)/python-ceilometerclient-1.0.6
+TXSSHCLIENT_DIR=$(SRC_DIR)/txsshclient-0.1.0dev1
 ZP_DIR=$(PWD)/ZenPacks/zenoss/OpenStack
 BIN_DIR=$(ZP_DIR)/bin
 LIB_DIR=$(ZP_DIR)/lib
@@ -27,7 +28,9 @@ egg:
 	# setup.py will call 'make build' before creating the egg
 	python setup.py bdist_egg
 
-build:	
+.PHONY: build
+
+build:
 	# First Build the ceilometer_zenoss egg for installation on openstack
 	# sync up the version with the zenpack version:
 	cd ceilometer_zenoss && \
@@ -84,14 +87,19 @@ build:
 	cd $(CEILOMETERCLIENT_DIR) && \
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
-
+	# txsshclient..
+	cd $(TXSSHCLIENT_DIR) && \
+		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
+			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
 
 clean:
 	rm -rf build dist *.egg-info
+	rm -f  $(LIB_DIR)/txsshclient.zip
 	cd ceilometer_zenoss; rm -rf build dist *.egg-info
 	cd $(NOVACLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
 	cd $(KEYSTONECLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
 	cd $(CEILOMETERCLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
+	cd $(TXSSHCLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
 	rm -f $(BIN_DIR)/nova
 	rm -f $(BIN_DIR)/keystone
 	rm -f $(BIN_DIR)/ceilometer
