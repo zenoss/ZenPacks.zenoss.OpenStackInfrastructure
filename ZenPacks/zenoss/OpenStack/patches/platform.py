@@ -20,7 +20,7 @@ from Products.DataCollector.ApplyDataMap import ApplyDataMap
 
 
 @monkeypatch('Products.ZenModel.Device.Device')
-def openstack_instanceNames(self):
+def openstack_instanceList(self):
     # If this is an openstack compute node, returns a list of (instance ID, hypervisor
     # instance name) tuples for instances running on this host.
 
