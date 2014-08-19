@@ -35,7 +35,7 @@ OpenStack: Instance Monitoring
 OpenStack: Instance Monitoring
 </property>
 <property type="string" id="targetPythonClass" mode="w" >
-ZenPacks.zenoss.OpenStack.Instance.Instance
+ZenPacks.zenoss.OpenStack.Instance
 </property>
 <tomanycont id='datasources'>
 <object id='cpuUtilization' module='ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource' class='PerfAMQPDataSource'>
@@ -468,7 +468,7 @@ OpenStack: Endpoint Monitoring
 OpenStack: Endpoint Monitoring
 </property>
 <property type="string" id="targetPythonClass" mode="w" >
-ZenPacks.zenoss.OpenStack.Endpoint.Endpoint
+ZenPacks.zenoss.OpenStack.Endpoint
 </property>
 <tomanycont id='datasources'>
 <object id='events' module='ZenPacks.zenoss.OpenStack.datasources.EventsAMQPDataSource' class='EventsAMQPDataSource'>
@@ -1636,6 +1636,343 @@ AVERAGE
 </object>
 </tomanycont>
 </object>
+<object id='Vnic' module='Products.ZenModel.RRDTemplate' class='RRDTemplate'>
+<property id='zendoc' type='string'>
+OpenStack: Vnic Monitoring
+</property>
+<property type="text" id="description" mode="w" >
+OpenStack: Vnic Monitoring
+</property>
+<property type="string" id="targetPythonClass" mode="w" >
+ZenPacks.zenoss.OpenStack.Vnic
+</property>
+<tomanycont id='datasources'>
+<object id='networkIncomingBytesRate' module='ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource' class='PerfAMQPDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer Perf AMQP
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
+</property>
+<property type="string" id="meter" >
+network.incoming.bytes.rate
+</property>
+<tomanycont id='datapoints'>
+<object id='networkIncomingBytesRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='networkIncomingPacketsRate' module='ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource' class='PerfAMQPDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer Perf AMQP
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
+</property>
+<property type="string" id="meter" >
+network.incoming.packets.rate
+</property>
+<tomanycont id='datapoints'>
+<object id='networkIncomingPacketsRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='networkOutgoingBytesRate' module='ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource' class='PerfAMQPDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer Perf AMQP
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
+</property>
+<property type="string" id="meter" >
+network.outgoing.bytes.rate
+</property>
+<tomanycont id='datapoints'>
+<object id='networkOutgoingBytesRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='networkOutgoingPacketsRate' module='ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource' class='PerfAMQPDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer Perf AMQP
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+0
+</property>
+<property type="string" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStack.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
+</property>
+<property type="string" id="meter" >
+network.outgoing.packets.rate
+</property>
+<tomanycont id='datapoints'>
+<object id='networkOutgoingPacketsRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+</tomanycont>
+<tomanycont id='graphDefs'>
+<object id='Network Packet Rate' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<property type="int" id="height" mode="w" >
+100
+</property>
+<property type="int" id="width" mode="w" >
+500
+</property>
+<property type="string" id="units" mode="w" >
+packets/sec
+</property>
+<property type="boolean" id="log" mode="w" >
+False
+</property>
+<property type="boolean" id="base" mode="w" >
+False
+</property>
+<property type="int" id="miny" mode="w" >
+0
+</property>
+<property type="int" id="maxy" mode="w" >
+-1
+</property>
+<property type="boolean" id="hasSummary" mode="w" >
+True
+</property>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
+<tomanycont id='graphPoints'>
+<object id='network.incoming.packets.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+networkIncomingPacketsRate_networkIncomingPacketsRate
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+<object id='network.outgoing.packets.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+1
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+networkOutgoingPacketsRate_networkOutgoingPacketsRate
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='Network Throughpout' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<property type="int" id="height" mode="w" >
+100
+</property>
+<property type="int" id="width" mode="w" >
+500
+</property>
+<property type="string" id="units" mode="w" >
+bytes / second
+</property>
+<property type="boolean" id="log" mode="w" >
+False
+</property>
+<property type="boolean" id="base" mode="w" >
+False
+</property>
+<property type="int" id="miny" mode="w" >
+0
+</property>
+<property type="int" id="maxy" mode="w" >
+-1
+</property>
+<property type="boolean" id="hasSummary" mode="w" >
+True
+</property>
+<property type="long" id="sequence" mode="w" >
+1
+</property>
+<tomanycont id='graphPoints'>
+<object id='network.incoming.bytes.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+networkIncomingBytesRate_networkIncomingBytesRate
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+<object id='network.outgoing.bytes.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+1
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+networkOutgoingBytesRate_networkOutgoingBytesRate
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+</tomanycont>
+</object>
+</tomanycont>
+</object>
 </tomanycont>
 </object>
 <!-- ('', 'zport', 'dmd', 'Events', 'Status', 'Image') -->
@@ -1852,6 +2189,9 @@ False
 <property type="int" id="sequence" mode="w" >
 1
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack1/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_ceilometer-collector_f3133f761caf692b20913d074c48f83c'/>
+</tomany>
 </object>
 <object id='nova-api' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -1875,6 +2215,9 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack1/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-api_598009ea75d0dbb6127f67256592ddc7'/>
+</tomany>
 </object>
 <object id='nova-cert' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -1898,6 +2241,9 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack1/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-cert_ae62c273187050a0ea84661c059ce41a'/>
+</tomany>
 </object>
 <object id='nova-compute' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -1921,6 +2267,9 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack1/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-compute_e75d0baadf683ea95955ad037d70b373'/>
+</tomany>
 </object>
 <object id='nova-conductor' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -1944,6 +2293,9 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack1/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-conductor_27c89a6eeeb7f309ea241992716c3247'/>
+</tomany>
 </object>
 <object id='nova-consoleauth' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -1967,6 +2319,9 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack1/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-consoleauth_0f4e29f6026ee433e293f7f5fbda7eb2'/>
+</tomany>
 </object>
 <object id='nova-network' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -2013,6 +2368,9 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack1/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-scheduler_c014c7b8d4f5952f24830d49571c3e6f'/>
+</tomany>
 </object>
 </tomanycont>
 </object>
