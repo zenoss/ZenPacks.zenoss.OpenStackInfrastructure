@@ -11,7 +11,8 @@
 #
 ###########################################################################
 
-from Products.DataCollector.plugins.DataMaps import ObjectMap
+from Products.DataCollector.plugins.DataMaps import ObjectMap, MultiArgs
+
 from Products.DataCollector.plugins.CollectorPlugin import CommandPlugin
 from ZenPacks.zenoss.OpenStack.utils import add_local_lib_path
 add_local_lib_path()
@@ -32,12 +33,14 @@ class nova(CommandPlugin):
         for line in results.split('\n'):
             match = matcher.search(line)
             if match:
+                version = match.group('version')
                 openstack_om = ObjectMap({
-                    'setOpenStackVersion': match.group('version')
+                    'compname': 'os',
+                    'setProductKey': MultiArgs(version, 'OpenStack')
                 })
 
                 return [ObjectMap({
-                    'setApplyDataMapToProxyComponent': openstack_om
+                    'setApplyDataMapToOpenStackEndpoint': openstack_om
                     })]
 
         return []

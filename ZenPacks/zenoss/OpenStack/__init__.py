@@ -279,7 +279,7 @@ import os
 import logging
 log = logging.getLogger('zen.OpenStack')
 
-from Products.ZenUtils.Utils import zenPath
+from Products.ZenUtils.Utils import zenPath, unused
 from . import schema
 
 
@@ -304,3 +304,8 @@ class ZenPack(schema.ZenPack):
     def removePluginSymlink(self):
         log.info('Removing poll_openstack.py link from $ZENHOME/libexec/')
         os.system('rm -f {0}'.format(zenPath('libexec', 'poll_openstack.py')))
+
+
+# Patch last to avoid import recursion problems.
+from ZenPacks.zenoss.OpenStack import patches
+unused(patches)
