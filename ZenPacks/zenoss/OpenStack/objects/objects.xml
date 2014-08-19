@@ -1975,6 +1975,12 @@ AVERAGE
 </object>
 </tomanycont>
 </object>
+<!-- ('', 'zport', 'dmd', 'Devices', 'Server', 'SSH', 'Linux', 'NovaHost') -->
+<object id='/zport/dmd/Devices/Server/SSH/Linux/NovaHost' module='Products.ZenModel.DeviceClass' class='DeviceClass'>
+<property visible="True" type="lines" id="zCollectorPlugins" >
+['zenoss.cmd.uname', 'zenoss.cmd.uname_a', 'zenoss.cmd.df', 'zenoss.cmd.linux.cpuinfo', 'zenoss.cmd.linux.memory', 'zenoss.cmd.linux.ifconfig', 'zenoss.cmd.linux.netstat_an', 'zenoss.cmd.linux.netstat_rn', 'zenoss.cmd.linux.process', 'zenoss.cmd.linux.rpm', 'zenoss.cmd.linux.openstack.nova', 'zenoss.cmd.linux.openstack.libvirt']
+</property>
+</object>
 <!-- ('', 'zport', 'dmd', 'Events', 'Status', 'Image') -->
 <object id='/zport/dmd/Events/Status/Image' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
