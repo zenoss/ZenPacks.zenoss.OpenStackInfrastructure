@@ -471,9 +471,9 @@ OpenStack: Endpoint Monitoring
 ZenPacks.zenoss.OpenStack.Endpoint.Endpoint
 </property>
 <tomanycont id='datasources'>
-<object id='events' module='ZenPacks.zenoss.OpenStack.datasources.EventsAMQPDataSource' class='EventsAMQPDataSource'>
+<object id='serviceStatus' module='ZenPacks.zenoss.OpenStack.datasources.NovaServiceStatusDataSource' class='NovaServiceStatusDataSource'>
 <property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
-OpenStack Ceilometer Events AMQP
+OpenStack Nova Service Status
 </property>
 <property type="boolean" id="enabled" mode="w" >
 True
@@ -1694,6 +1694,117 @@ OpenStack connectivity restored
 </property>
 <property visible="True" type="int" id="zEventSeverity" >
 0
+</property>
+</object>
+<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack', 'products', '2015.1') -->
+<object id='/zport/dmd/Manufacturers/OpenStack/products/2015.1' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<property type="string" id="name" mode="w" >
+2015.1
+</property>
+<property type="lines" id="productKeys" mode="w" >
+['2015.1.1', '2015.1.2', '2015.1.3', '2015.1.4', '2015.1.5', '2015.1.6', '2015.1.7', '2015.1.8', '2015.1.9', '2015.1.10']
+</property>
+<property type="boolean" id="isOS" mode="w" >
+True
+</property>
+</object>
+<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack', 'products', '2015.2') -->
+<object id='/zport/dmd/Manufacturers/OpenStack/products/2015.2' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<property type="string" id="name" mode="w" >
+2015.2
+</property>
+<property type="lines" id="productKeys" mode="w" >
+['2015.2.1', '2015.2.2', '2015.2.3', '2015.2.4', '2015.2.5', '2015.2.6', '2015.2.7', '2015.2.8', '2015.2.9', '2015.2.10']
+</property>
+<property type="boolean" id="isOS" mode="w" >
+True
+</property>
+</object>
+<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack', 'products', '2016.1') -->
+<object id='/zport/dmd/Manufacturers/OpenStack/products/2016.1' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<property type="string" id="name" mode="w" >
+2016.1
+</property>
+<property type="lines" id="productKeys" mode="w" >
+['2016.1.1', '2016.1.2', '2016.1.3', '2016.1.4', '2016.1.5', '2016.1.6', '2016.1.7', '2016.1.8', '2016.1.9', '2016.1.10']
+</property>
+<property type="boolean" id="isOS" mode="w" >
+True
+</property>
+</object>
+<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack', 'products', '2016.2') -->
+<object id='/zport/dmd/Manufacturers/OpenStack/products/2016.2' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<property type="string" id="name" mode="w" >
+2016.2
+</property>
+<property type="lines" id="productKeys" mode="w" >
+['2016.2.1', '2016.2.2', '2016.2.3', '2016.2.4', '2016.2.5', '2016.2.6', '2016.2.7', '2016.2.8', '2016.2.9', '2016.2.10']
+</property>
+<property type="boolean" id="isOS" mode="w" >
+True
+</property>
+</object>
+<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack', 'products', '2017.1') -->
+<object id='/zport/dmd/Manufacturers/OpenStack/products/2017.1' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<property type="string" id="name" mode="w" >
+2017.1
+</property>
+<property type="lines" id="productKeys" mode="w" >
+['2017.1.1', '2017.1.2', '2017.1.3', '2017.1.4', '2017.1.5', '2017.1.6', '2017.1.7', '2017.1.8', '2017.1.9', '2017.1.10']
+</property>
+<property type="boolean" id="isOS" mode="w" >
+True
+</property>
+</object>
+<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack', 'products', '2017.2') -->
+<object id='/zport/dmd/Manufacturers/OpenStack/products/2017.2' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<property type="string" id="name" mode="w" >
+2017.2
+</property>
+<property type="lines" id="productKeys" mode="w" >
+['2017.2.1', '2017.2.2', '2017.2.3', '2017.2.4', '2017.2.5', '2017.2.6', '2017.2.7', '2017.2.8', '2017.2.9', '2017.2.10']
+</property>
+<property type="boolean" id="isOS" mode="w" >
+True
+</property>
+</object>
+<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack', 'products', 'Havana (2013.2)') -->
+<object id='/zport/dmd/Manufacturers/OpenStack/products/Havana (2013.2)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<property type="string" id="name" mode="w" >
+Havana (2013.2)
+</property>
+<property type="lines" id="productKeys" mode="w" >
+['2013.2.1', '2013.2.2', '2013.2.3', '2013.2.4', '2013.2.5', '2013.2.6', '2013.2.7', '2013.2.8', '2013.2.9', '2013.2.10']
+</property>
+<property type="boolean" id="isOS" mode="w" >
+True
+</property>
+</object>
+<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack', 'products', 'Icehouse (2014.1)') -->
+<object id='/zport/dmd/Manufacturers/OpenStack/products/Icehouse (2014.1)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<property type="string" id="name" mode="w" >
+Icehouse (2014.1)
+</property>
+<property type="lines" id="productKeys" mode="w" >
+['2014.1.1', '2014.1.2', '2014.1.3', '2014.1.4', '2014.1.5', '2014.1.6', '2014.1.7', '2014.1.8', '2014.1.9', '2014.1.10']
+</property>
+<property type="boolean" id="isOS" mode="w" >
+True
+</property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/OpenStack/devices/packstack/os'/>
+</tomany>
+</object>
+<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack', 'products', 'Juno (2014.2)') -->
+<object id='/zport/dmd/Manufacturers/OpenStack/products/Juno (2014.2)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<property type="string" id="name" mode="w" >
+Juno (2014.2)
+</property>
+<property type="lines" id="productKeys" mode="w" >
+['2014.2.1', '2014.2.2', '2014.2.3', '2014.2.4', '2014.2.5', '2014.2.6', '2014.2.7', '2014.2.8', '2014.2.9', '2014.2.10']
+</property>
+<property type="boolean" id="isOS" mode="w" >
+True
 </property>
 </object>
 <!-- ('', 'zport', 'dmd', 'Processes', 'OpenStack') -->

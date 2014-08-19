@@ -22,9 +22,12 @@ from Products.Zuul.catalog.events import IndexingEvent
 from Products.ZenEvents.interfaces import IPostEventPlugin
 from Products.ZenUtils.guid.interfaces import IGlobalIdentifier
 from Products.ZenUtils.guid.guid import GUIDManager
+from Products.ZenUtils.Utils import monkeypatch
 from Products.Zuul.interfaces import ICatalogTool
 from Products.AdvancedQuery import Eq
 from Products.ZenUtils.IpUtil import getHostByName
+from Products.DataCollector.ApplyDataMap import ApplyDataMap
+
 
 def onDeviceDeleted(object, event):
     '''
@@ -217,6 +220,20 @@ class DeviceLinkProvider(object):
             )]
 
         return []
+
+@monkeypatch('Products.ZenModel.Device.Device')
+def getApplyDataMapToProxyComponent(self):
+    return []
+
+@monkeypatch('Products.ZenModel.Device.Device')
+def setApplyDataMapToProxyComponent(self, datamap):
+    mapper = ApplyDataMap()
+
+    component = DeviceProxyComponent.component_for_proxy_device(self)
+    if not component:
+        LOG.error("Unable to apply datamap to proxy component for %s (component not found)" % self)
+    else:
+        mapper._applyDataMap(component, datamap)
 
 
 class PostEventPlugin(object):

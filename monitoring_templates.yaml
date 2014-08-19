@@ -205,6 +205,9 @@
     events:
       type: OpenStack Ceilometer Events AMQP
 
+    serviceStatus:
+      type: OpenStack Nova Service Status
+
     openstack:
       commandTemplate: poll_openstack.py '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}' '${here/zOpenStackAuthUrl}' '${here/zOpenStackRegionName}'
       cycletime: 300
