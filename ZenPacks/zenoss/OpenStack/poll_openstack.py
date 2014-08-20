@@ -43,7 +43,6 @@ class OpenStackPoller(object):
         result = yield client.flavors(detailed=True, is_public=None)
         data['flavorTotalCount'] = len(result['flavors'])
 
-
     @inlineCallbacks
     def _populateImageData(self, client, data):
         data['imageTotalCount'] = 0
@@ -176,12 +175,6 @@ class OpenStackPoller(object):
 
     @inlineCallbacks
     def getData(self):
-        if (log.isEnabledFor(logging.DEBUG)):
-            http_log_debug = True
-            logging.getLogger('novaclient.client').setLevel(logging.DEBUG)
-        else:
-            http_log_debug = False
-
         client = NovaAPIClient(
             self._username,
             self._api_key,
@@ -197,7 +190,7 @@ class OpenStackPoller(object):
             yield self._populateImageData(client, data)
             yield self._populateServerData(client, data)
 
-        except Exception as e:
+        except Exception:
             raise
 
         returnValue(data)
