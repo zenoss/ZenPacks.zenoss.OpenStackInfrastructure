@@ -82,59 +82,44 @@ class NovaAPIClient(object):
         self.project_id = project_id
         self.region_name = region_name
 
-        self._api = None
+        self._apis = {}
         self._nova_url = None
         self._token = None
-
 
     @property
     def avzones(self):
         """Return entry-point to the API."""
-        self._api = API(self, '/os-availability-zone')
-
-        return self._api
+        return self._apis.setdefault('avzones', API(self, '/os-availability-zone'))
 
     @property
     def flavors(self):
         """Return entry-point to the API."""
-        self._api = API(self, "/flavors")
-
-        return self._api
+        return self._apis.setdefault('flavors', API(self, "/flavors"))
 
     @property
     def hosts(self):
         """Return entry-point to the API."""
-        self._api = API(self, '/os-hosts')
-
-        return self._api
+        return self._apis.setdefault('hosts', API(self, '/os-hosts'))
 
     @property
     def hypervisors(self):
         """Return entry-point to the API."""
-        self._api = API(self, '/os-hypervisors')
-
-        return self._api
+        return self._apis.setdefault('hypervisors', API(self, '/os-hypervisors'))
 
     @property
     def images(self):
         """Return entry-point to the API."""
-        self._api = API(self, '/images')
-
-        return self._api
+        return self._apis.setdefault('images', API(self, '/images'))
 
     @property
     def servers(self):
         """aka instances."""
-        self._api = API(self, "/servers")
-
-        return self._api
+        return self._apis.setdefault('servers', API(self, "/servers"))
 
     @property
     def services(self):
         """Return entry-point to the API."""
-        self._api = API(self, "/os-services")
-
-        return self._api
+        return self._apis.setdefault('services', API(self, "/os-services"))
 
     def __getitem__(self, name):
         if name == 'flavors':
@@ -146,7 +131,7 @@ class NovaAPIClient(object):
         elif name == 'hypervisors':
             return self.search
         elif name == 'servers':
-            return self.services
+            return self.servers
         elif name == 'services':
             return self.services
 
@@ -233,7 +218,7 @@ class NovaAPIClient(object):
         """
         request = self._get_request(path, data=data, params=params, **kwargs)
         log.debug("Request URL: %s" % request.url)
-        
+
         try:
             response = yield getPageAndHeaders(
                 request.url,

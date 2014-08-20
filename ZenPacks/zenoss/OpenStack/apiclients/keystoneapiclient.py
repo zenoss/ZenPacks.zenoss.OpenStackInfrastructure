@@ -28,6 +28,9 @@ from twisted.web import client as txwebclient
 from twisted.web.error import Error
 from twisted.internet import reactor
 
+import logging
+log = logging.getLogger('zen.OpenStack.keystoneapiclient')
+
 
 __all__ = [
     # Exceptions
@@ -72,7 +75,7 @@ class KeystoneAPIClient(object):
         self.auth_url = auth_url
         self.project_id = project_id
 
-        self._api = None
+        self._apis = {}
         self._management_url = None
         self._token = None
         self._service_catalog = None
@@ -80,42 +83,27 @@ class KeystoneAPIClient(object):
     @property
     def endpoints(self):
         """Return entry-point to the API."""
-        if not self._api:
-            self._api = API(self, '/endpoints')
-
-        return self._api
+        return self._apis.setdefault('endpoints', API(self, '/endpoints'))
 
     @property
     def roles(self):
         """Return entry-point to the API."""
-        if not self._api:
-            self._api = API(self, '/OS-KSADM/roles')
-
-        return self._api
+        return self._apis.setdefault('roles', API(self, '/OS-KSADM/roles'))
 
     @property
     def services(self):
         """Return entry-point to the API."""
-        if not self._api:
-            self._api = API(self, '/OS-KSADM/services')
-
-        return self._api
+        return self._apis.setdefault('services', API(self, '/OS-KSADM/services'))
 
     @property
     def tenants(self):
         """Return entry-point to the API."""
-        if not self._api:
-            self._api = API(self, '/tenants')
-
-        return self._api
+        return self._apis.setdefault('tenants', API(self, '/tenants'))
 
     @property
     def users(self):
         """Return entry-point to the API."""
-        if not self._api:
-            self._api = API(self, '/users')
-
-        return self._api
+        return self._apis.setdefault('users', API(self, '/users'))
 
     def __getitem__(self, name):
         if name == 'endpoints':
@@ -201,6 +189,7 @@ class KeystoneAPIClient(object):
 
         """
         request = self._get_request(path, data=data, params=params, **kwargs)
+        log.debug("Request URL: %s" % request.url)
 
         try:
             response = yield getPageAndHeaders(
