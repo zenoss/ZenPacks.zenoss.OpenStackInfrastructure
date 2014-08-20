@@ -20,7 +20,6 @@ Example usage:
 """
 
 import collections
-import datetime
 import httplib
 import json
 
@@ -31,8 +30,6 @@ from twisted.internet import reactor
 
 
 __all__ = [
-    'Client',
-
     # Exceptions
     'KeystoneError',
     'BadRequestError',
@@ -79,7 +76,6 @@ class KeystoneAPIClient(object):
         self._management_url = None
         self._token = None
         self._service_catalog = None
-
 
     @property
     def endpoints(self):
@@ -134,7 +130,7 @@ class KeystoneAPIClient(object):
             return self.users
 
         raise TypeError(
-            "%r object is not subscriptable (except for endpoints" + \
+            "%r object is not subscriptable (except for endpoints" +
             ", roles, services, tenants, users",
             self.__class__.__name__)
 
@@ -158,11 +154,11 @@ class KeystoneAPIClient(object):
 
         r = yield self.direct_api_call('/tokens', data=body)
 
-        self._token = r['access']['token']['id'].encode('ascii','ignore')
+        self._token = r['access']['token']['id'].encode('ascii', 'ignore')
         self._service_catalog = r['access']['serviceCatalog']
         for sc in r['access']['serviceCatalog']:
             if sc['endpoints'][0]['adminURL'].find(':35357') > -1:
-                self._management_url = sc['endpoints'][0]['adminURL'].encode('ascii','ignore')
+                self._management_url = sc['endpoints'][0]['adminURL'].encode('ascii', 'ignore')
         returnValue(r)
 
     @inlineCallbacks
@@ -261,15 +257,6 @@ class KeystoneAPIClient(object):
             postdata=postdata)
 
 
-    def callback(self, result):
-        print "result: %s" % result
-        reactor.stop()
-
-    def errback(self, failure):
-        print failure.getErrorMessage()
-        reactor.stop()
-
-
 class API(object):
 
     """Wrapper for each element of an API path including the leaf.  """
@@ -293,7 +280,7 @@ class API(object):
             self.path, data=data, params=params, **kwargs)
 
 
-## Exceptions #########################################################
+# Exceptions #########################################################
 
 class KeystoneError(Exception):
 
