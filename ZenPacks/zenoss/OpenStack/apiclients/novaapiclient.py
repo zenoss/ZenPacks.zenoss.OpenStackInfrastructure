@@ -48,7 +48,7 @@ __all__ = [
     ]
 
 
-USER_AGENT = 'python-novaclient'
+USER_AGENT = 'zenoss-novaclient'
 
 
 Request = collections.namedtuple(

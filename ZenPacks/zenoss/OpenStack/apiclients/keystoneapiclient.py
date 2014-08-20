@@ -40,7 +40,7 @@ __all__ = [
     ]
 
 
-USER_AGENT = 'python-keystoneclient'
+USER_AGENT = 'zenoss-keystoneclient'
 
 
 Request = collections.namedtuple(
