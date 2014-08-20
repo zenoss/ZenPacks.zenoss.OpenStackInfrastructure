@@ -25,8 +25,8 @@ from Products.ZenUtils.Utils import prepId
 from ZenPacks.zenoss.OpenStack.utils import add_local_lib_path
 add_local_lib_path()
 
-from novaclient import client as novaclient
-from apiclients.novaapiclient import NovaAPIClient
+from apiclients.novaapiclient import NovaAPIClient, NotFoundError
+
 
 
 class OpenStack(PythonPlugin):
@@ -42,8 +42,6 @@ class OpenStack(PythonPlugin):
 
     @inlineCallbacks
     def collect(self, device, unused):
-        if (log.isEnabledFor(logging.DEBUG)):
-            logging.getLogger('novaclient.client').setLevel(logging.DEBUG)
 
         client = NovaAPIClient(
             device.zCommandUsername,
@@ -123,7 +121,7 @@ class OpenStack(PythonPlugin):
                 backup_schedule_enabled = server['backup_schedule']['enabled']
                 backup_schedule_daily = server['backup_schedule']['daily']
                 backup_schedule_weekly = server['backup_schedule']['weekly']
-            except (novaclient.exceptions.NotFound, AttributeError, KeyError):
+            except (NotFoundError, AttributeError, KeyError):
                 backup_schedule_enabled = False
                 backup_schedule_daily = 'DISABLED'
                 backup_schedule_weekly = 'DISABLED'
