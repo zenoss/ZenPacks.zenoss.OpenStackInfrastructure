@@ -13,16 +13,10 @@
 
 PYTHON=python
 SRC_DIR=$(PWD)/src
-<<<<<<< HEAD
-NOVACLIENT_DIR=$(SRC_DIR)/python-novaclient-2.15.0
-KEYSTONECLIENT_DIR=$(SRC_DIR)/python-keystoneclient-0.4.0
-CEILOMETERCLIENT_DIR=$(SRC_DIR)/python-ceilometerclient-1.0.6
 TXSSHCLIENT_DIR=$(SRC_DIR)/txsshclient-0.1.0dev1
-=======
 # NOVACLIENT_DIR=$(SRC_DIR)/python-novaclient-2.15.0
 # KEYSTONECLIENT_DIR=$(SRC_DIR)/python-keystoneclient-0.4.0
 # CEILOMETERCLIENT_DIR=$(SRC_DIR)/python-ceilometerclient-1.0.6
->>>>>>> Remove all the openstack libraries from the build.
 ZP_DIR=$(PWD)/ZenPacks/zenoss/OpenStack
 BIN_DIR=$(ZP_DIR)/bin
 LIB_DIR=$(ZP_DIR)/lib
