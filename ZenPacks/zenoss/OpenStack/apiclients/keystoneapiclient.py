@@ -76,9 +76,8 @@ class KeystoneAPIClient(object):
         self.project_id = project_id
 
         self._apis = {}
-        self._management_url = None
+        self._keystone_url = None
         self._token = None
-        self._service_catalog = None
 
     @property
     def endpoints(self):
@@ -93,7 +92,8 @@ class KeystoneAPIClient(object):
     @property
     def services(self):
         """Return entry-point to the API."""
-        return self._apis.setdefault('services', API(self, '/OS-KSADM/services'))
+        return self._apis.setdefault('services',
+                                     API(self, '/OS-KSADM/services'))
 
     @property
     def tenants(self):
@@ -143,10 +143,10 @@ class KeystoneAPIClient(object):
         r = yield self.direct_api_call('/tokens', data=body)
 
         self._token = r['access']['token']['id'].encode('ascii', 'ignore')
-        self._service_catalog = r['access']['serviceCatalog']
         for sc in r['access']['serviceCatalog']:
-            if sc['endpoints'][0]['adminURL'].find(':35357') > -1:
-                self._management_url = sc['endpoints'][0]['adminURL'].encode('ascii', 'ignore')
+            if sc['type'] == 'identity' and sc['name'] == 'keystone':
+                self._keystone_url = sc['endpoints'][0]['adminURL'].encode(
+                    'ascii', 'ignore')
         returnValue(r)
 
     @inlineCallbacks
@@ -205,7 +205,7 @@ class KeystoneAPIClient(object):
             text = response['error']['message']
 
             if status == httplib.UNAUTHORIZED:
-                raise UnauthorizedError(text + " (check username and password)")
+                raise UnauthorizedError(text + " (check username & password)")
             elif status == httplib.BAD_REQUEST:
                 raise BadRequestError(text)
             elif status == httplib.NOT_FOUND:
@@ -234,8 +234,8 @@ class KeystoneAPIClient(object):
         if self._token:
             headers['X-Auth-Token'] = self._token
 
-        if self._management_url is not None and method == 'GET':
-            auth_url = self._management_url
+        if self._keystone_url is not None and method == 'GET':
+            auth_url = self._keystone_url
         else:
             auth_url = self.auth_url
         return Request(
@@ -300,8 +300,18 @@ class NotFoundError(KeystoneError):
 
 
 def main():
-    c = KeystoneAPIClient('admin', 'password', 'http://192.168.56.104:5000/v2.0', 'demo')
-#   c = KeystoneAPIClient('admin', '8a041d9c59dd403a', 'http://10.87.208.184:5000/v2.0', 'admin')
+#   c = KeystoneAPIClient('admin',
+#                         'password',
+#                         'http://192.168.56.104:5000/v2.0',
+#                         'demo')
+#   c = KeystoneAPIClient('admin',
+#                         '8a041d9c59dd403a',
+#                         'http://10.87.208.184:5000/v2.0',
+#                         'admin')
+    c = KeystoneAPIClient('admin',
+                          'c96e7977c18748e8',
+                          'http://192.168.56.122:5000/v2.0',
+                          'admin')
     ret = c.endpoints()
 #   ret = c.roles()
 #   ret = c.services()
