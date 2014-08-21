@@ -224,3 +224,11 @@ class EventsAMQPDataSourcePlugin(PythonDataSourcePlugin):
 
     def cleanup(self, config):
         log.debug("cleanup for OpenStack AMQP (%s)" % config.id)
+
+        if config.id in amqp_client and amqp_client[config.id]:
+            result = yield self.collect(config)
+            self.onSuccess(result, config)
+            amqp = amqp_client[config.id]
+            amqp.disconnect()
+            amqp.shutdown()
+            del amqp_client[config.id]
