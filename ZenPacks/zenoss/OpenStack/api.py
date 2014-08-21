@@ -14,7 +14,10 @@ API interfaces and default implementations.
 import logging
 log = logging.getLogger('zen.OpenStack.api')
 
+import json
+import os.path
 from urlparse import urlparse
+import subprocess
 
 from zope.event import notify
 from zope.interface import implements
@@ -31,6 +34,26 @@ from ZenPacks.zenoss.OpenStack.utils import add_local_lib_path
 add_local_lib_path()
 
 OPENSTACK_DEVICE_PATH = "/Devices/OpenStack"
+
+_helper = os.path.join(os.path.dirname(__file__), 'openstack_helper.py')
+
+class KeystoneError(Exception):
+    pass
+
+
+def _runcommand(cmd):
+    p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    (stdout, stderr) = p.communicate()
+    if p.returncode == 0:
+        return json.loads(stdout)
+    else:
+        try:
+            message = json.loads(stdout)['error']
+        except Exception:
+            message = stderr
+
+        log.exception(subprocess.CalledProcessError(p.returncode, cmd=cmd, output=message))
+        raise KeystoneError(message)
 
 
 class IOpenStackFacade(IFacade):
@@ -101,44 +124,26 @@ class OpenStackFacade(ZuulFacade):
     def getRegions(self, username, api_key, project_id, auth_url):
         """Get a list of available regions, given a keystone endpoint and credentials."""
 
-        from keystoneclient.v2_0.client import Client as keystoneclient
+        cmd = [_helper, "getRegions"]
+        cmd.append("--username=%s" % username)
+        cmd.append("--api_key=%s" % api_key)
+        cmd.append("--project_id=%s" % project_id)
+        cmd.append("--auth_url=%s" % auth_url)
 
-        client = keystoneclient(
-            username=username,
-            password=api_key,
-            tenant_name=project_id,
-            auth_url=auth_url,
-        )
-
-        regions = set()
-        endpoints = client.service_catalog.get_endpoints()
-        for (service, service_endpoints) in endpoints.iteritems():
-            for endpoint in service_endpoints:
-                regions.add(endpoint['region'])
-
-        return [{'key': c, 'label': c} for c in sorted(regions)]
-
+        return _runcommand(cmd)
 
     def getCeilometerUrl(self, username, api_key, project_id, auth_url, region_name):
         """Return the first defined ceilometer URL, given a keystone endpoint,
         credentials, and a region.  May return an empty string if none is found."""
 
-        from keystoneclient.v2_0.client import Client as keystoneclient
+        cmd = [_helper, "getCeilometerUrl"]
+        cmd.append("--username=%s" % username)
+        cmd.append("--api_key=%s" % api_key)
+        cmd.append("--project_id=%s" % project_id)
+        cmd.append("--auth_url=%s" % auth_url)
+        cmd.append("--region_name=%s" % region_name)
 
-        client = keystoneclient(
-            username=username,
-            password=api_key,
-            tenant_name=project_id,
-            auth_url=auth_url,
-        )
-
-        endpoints = client.service_catalog.get_endpoints('metering')
-        if 'metering' in endpoints:
-            for endpoint in endpoints['metering']:
-                if endpoint['region'] == region_name:
-                    return endpoint['publicURL']
-
-        return ""
+        return _runcommand(cmd)
 
 
 class OpenStackRouter(DirectRouter):
