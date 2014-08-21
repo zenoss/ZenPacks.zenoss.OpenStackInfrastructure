@@ -26,7 +26,7 @@ from Products.ZenUtils.Utils import prepId
 from ZenPacks.zenoss.OpenStack.utils import result_errmsg, add_local_lib_path
 add_local_lib_path()
 
-from novaclient import client as novaclient
+from apiclients.novaapiclient import NovaAPIClient
 
 
 class NovaServiceStatusDataSource(PythonDataSource):
@@ -103,53 +103,44 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
         log.debug("Collect for OpenStack Nova Service Status (%s)" % config.id)
         ds0 = config.datasources[0]
 
-        if (log.isEnabledFor(logging.DEBUG)):
-            http_log_debug = True
-            logging.getLogger('novaclient.client').setLevel(logging.DEBUG)
-        else:
-            http_log_debug = False
-
-        client = novaclient.Client(
-            2,  # API version 2
+        client = NovaAPIClient(
             ds0.zCommandUsername,
             ds0.zCommandPassword,
-            ds0.zOpenStackProjectId,
             ds0.zOpenStackAuthUrl,
-            region_name=ds0.zOpenStackRegionName,
-            http_log_debug=http_log_debug
-        )
+            ds0.zOpenStackProjectId,
+            ds0.zOpenStackRegionName)
 
         results = {}
 
         log.info('Requesting services')
-        results['services'] = client.services.list()
+        result = yield client.services()
+        results['services'] = result['services']
 
         defer.returnValue(results)
-        yield None
 
     def onSuccess(self, result, config):
         data = self.new_data()
 
         for service in result['services']:
             service_id = prepId('service-{0}-{1}-{2}'.format(
-                service.binary, service.host, service.zone))
+                service['binary'], service['host'], service['zone']))
 
-            if service.status == 'disabled':
+            if service['status'] == 'disabled':
                 data['events'].append({
                     'device': config.id,
                     'component': service_id,
                     'summary': 'Service %s on host %s (Availabilty Zone %s) is now DISABLED' %
-                               (service.binary, service.host, service.zone),
+                               (service['binary'], service['host'], service['zone']),
                     'severity': ZenEventClasses.Clear,
                     'eventClassKey': 'OpenStackNovaServiceStatus',
                     })
 
-            elif service.state == 'up':
+            elif service['state'] == 'up':
                 data['events'].append({
                     'device': config.id,
                     'component': service_id,
                     'summary': 'Service %s on host %s (Availabilty Zone %s) is now UP' %
-                               (service.binary, service.host, service.zone),
+                               (service['binary'], service['host'], service['zone']),
                     'severity': ZenEventClasses.Clear,
                     'eventClassKey': 'OpenStackNovaServiceStatus',
                     })
@@ -159,7 +150,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
                     'device': config.id,
                     'component': service_id,
                     'summary': 'Service %s on host %s (Availabilty Zone %s) is now DOWN' %
-                               (service.binary, service.host, service.zone),
+                               (service['binary'], service['host'], service['zone']),
                     'severity': ZenEventClasses.Error,
                     'eventClassKey': 'OpenStackNovaServiceStatus',
                     })

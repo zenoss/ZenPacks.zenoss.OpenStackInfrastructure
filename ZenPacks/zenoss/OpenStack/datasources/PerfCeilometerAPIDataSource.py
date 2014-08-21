@@ -31,8 +31,7 @@ from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import (
     IPythonDataSourceInfo)
 
 from ZenPacks.zenoss.OpenStack.utils import result_errmsg
-
-from ceilometerapiclient import CeilometerAPIClient
+from apiclients.keystoneapiclient import KeystoneAPIClient
 
 
 class ProxyWebClient(object):
@@ -151,7 +150,6 @@ class PerfCeilometerAPIDataSourceInfo(PythonDataSourceInfo):
 
     testable = False
 
-    metric    = ProxyProperty('metric')
     statistic = ProxyProperty('statistic')
 
 
@@ -199,23 +197,21 @@ class PerfCeilometerAPIDataSourcePlugin(PythonDataSourcePlugin):
         metric = ds0.params['metric']
         authurl = ds0.zOpenStackAuthUrl
         project = ds0.zOpenStackProjectId
-        region = ds0.zOpenStackRegionName
         resourceId = ds0.resourceId
 
-        ceiloclient = CeilometerAPIClient(
-            url=ceilometer_url,
+        # this is not very efficient- if we end up using this datasource, it should
+        # be rewritten to use a real ceilometer client library with token caching/re-login
+        # support.
+        client = KeystoneAPIClient(
             username=username,
-            api_key=password,
+            password=password,
             project_id=project,
             auth_url=authurl,
-            api_version=2,
-            region_name=region,
         )
-        if metric not in ceiloclient._meternames:
-            log.error("metric(%s) is not in ceilometer meter names(%s)".format(metric, str(ceiloclient._meternames)))
+        yield client.login()
 
         hdr = {}
-        hdr['X-Auth-Token'] = ceiloclient._token
+        hdr['X-Auth-Token'] = client._token
         hdr['Content-Type'] = 'application/json'
 
         def sleep(secs):

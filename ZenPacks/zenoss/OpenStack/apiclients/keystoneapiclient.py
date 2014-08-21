@@ -20,7 +20,6 @@ Example usage:
 """
 
 import collections
-import datetime
 import httplib
 import json
 
@@ -29,10 +28,11 @@ from twisted.web import client as txwebclient
 from twisted.web.error import Error
 from twisted.internet import reactor
 
+import logging
+log = logging.getLogger('zen.OpenStack.keystoneapiclient')
+
 
 __all__ = [
-    'Client',
-
     # Exceptions
     'KeystoneError',
     'BadRequestError',
@@ -40,7 +40,7 @@ __all__ = [
     ]
 
 
-USER_AGENT = 'python-keystoneclient'
+USER_AGENT = 'zenoss-keystoneclient'
 
 
 Request = collections.namedtuple(
@@ -75,51 +75,35 @@ class KeystoneAPIClient(object):
         self.auth_url = auth_url
         self.project_id = project_id
 
-        self._api = None
+        self._apis = {}
         self._management_url = None
         self._token = None
         self._service_catalog = None
 
-
     @property
     def endpoints(self):
         """Return entry-point to the API."""
-        if not self._api:
-            self._api = API(self, '/endpoints')
-
-        return self._api
+        return self._apis.setdefault('endpoints', API(self, '/endpoints'))
 
     @property
     def roles(self):
         """Return entry-point to the API."""
-        if not self._api:
-            self._api = API(self, '/OS-KSADM/roles')
-
-        return self._api
+        return self._apis.setdefault('roles', API(self, '/OS-KSADM/roles'))
 
     @property
     def services(self):
         """Return entry-point to the API."""
-        if not self._api:
-            self._api = API(self, '/OS-KSADM/services')
-
-        return self._api
+        return self._apis.setdefault('services', API(self, '/OS-KSADM/services'))
 
     @property
     def tenants(self):
         """Return entry-point to the API."""
-        if not self._api:
-            self._api = API(self, '/tenants')
-
-        return self._api
+        return self._apis.setdefault('tenants', API(self, '/tenants'))
 
     @property
     def users(self):
         """Return entry-point to the API."""
-        if not self._api:
-            self._api = API(self, '/users')
-
-        return self._api
+        return self._apis.setdefault('users', API(self, '/users'))
 
     def __getitem__(self, name):
         if name == 'endpoints':
@@ -134,7 +118,7 @@ class KeystoneAPIClient(object):
             return self.users
 
         raise TypeError(
-            "%r object is not subscriptable (except for endpoints" + \
+            "%r object is not subscriptable (except for endpoints" +
             ", roles, services, tenants, users",
             self.__class__.__name__)
 
@@ -158,11 +142,11 @@ class KeystoneAPIClient(object):
 
         r = yield self.direct_api_call('/tokens', data=body)
 
-        self._token = r['access']['token']['id'].encode('ascii','ignore')
+        self._token = r['access']['token']['id'].encode('ascii', 'ignore')
         self._service_catalog = r['access']['serviceCatalog']
         for sc in r['access']['serviceCatalog']:
             if sc['endpoints'][0]['adminURL'].find(':35357') > -1:
-                self._management_url = sc['endpoints'][0]['adminURL'].encode('ascii','ignore')
+                self._management_url = sc['endpoints'][0]['adminURL'].encode('ascii', 'ignore')
         returnValue(r)
 
     @inlineCallbacks
@@ -205,6 +189,7 @@ class KeystoneAPIClient(object):
 
         """
         request = self._get_request(path, data=data, params=params, **kwargs)
+        log.debug("Request URL: %s" % request.url)
 
         try:
             response = yield getPageAndHeaders(
@@ -220,7 +205,7 @@ class KeystoneAPIClient(object):
             text = response['error']['message']
 
             if status == httplib.UNAUTHORIZED:
-                raise UnauthorizedError(text)
+                raise UnauthorizedError(text + " (check username and password)")
             elif status == httplib.BAD_REQUEST:
                 raise BadRequestError(text)
             elif status == httplib.NOT_FOUND:
@@ -261,15 +246,6 @@ class KeystoneAPIClient(object):
             postdata=postdata)
 
 
-    def callback(self, result):
-        print "result: %s" % result
-        reactor.stop()
-
-    def errback(self, failure):
-        print failure.getErrorMessage()
-        reactor.stop()
-
-
 class API(object):
 
     """Wrapper for each element of an API path including the leaf.  """
@@ -293,7 +269,7 @@ class API(object):
             self.path, data=data, params=params, **kwargs)
 
 
-## Exceptions #########################################################
+# Exceptions #########################################################
 
 class KeystoneError(Exception):
 

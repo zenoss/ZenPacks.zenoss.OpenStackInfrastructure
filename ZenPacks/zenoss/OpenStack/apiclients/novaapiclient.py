@@ -20,7 +20,6 @@ Example usage:
 """
 
 import collections
-import datetime
 import httplib
 import json
 
@@ -31,15 +30,14 @@ from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.web import client as txwebclient
 from twisted.web.error import Error
 from twisted.internet import reactor
+import urllib
 
 import Globals
 from ZenPacks.zenoss.OpenStack.utils import add_local_lib_path
 add_local_lib_path()
 
-from novaclient.openstack.common.py3kcompat import urlutils
 
 __all__ = [
-    'Client',
 
     # Exceptions
     'NovaError',
@@ -48,7 +46,7 @@ __all__ = [
     ]
 
 
-USER_AGENT = 'python-novaclient'
+USER_AGENT = 'zenoss-novaclient'
 
 
 Request = collections.namedtuple(
@@ -84,59 +82,44 @@ class NovaAPIClient(object):
         self.project_id = project_id
         self.region_name = region_name
 
-        self._api = None
+        self._apis = {}
         self._nova_url = None
         self._token = None
-
 
     @property
     def avzones(self):
         """Return entry-point to the API."""
-        self._api = API(self, '/os-availability-zone')
-
-        return self._api
+        return self._apis.setdefault('avzones', API(self, '/os-availability-zone'))
 
     @property
     def flavors(self):
         """Return entry-point to the API."""
-        self._api = API(self, "/flavors")
-
-        return self._api
+        return self._apis.setdefault('flavors', API(self, "/flavors"))
 
     @property
     def hosts(self):
         """Return entry-point to the API."""
-        self._api = API(self, '/os-hosts')
-
-        return self._api
+        return self._apis.setdefault('hosts', API(self, '/os-hosts'))
 
     @property
     def hypervisors(self):
         """Return entry-point to the API."""
-        self._api = API(self, '/os-hypervisors')
-            
-        return self._api
+        return self._apis.setdefault('hypervisors', API(self, '/os-hypervisors'))
 
     @property
     def images(self):
         """Return entry-point to the API."""
-        self._api = API(self, '/images')
-
-        return self._api
+        return self._apis.setdefault('images', API(self, '/images'))
 
     @property
     def servers(self):
         """aka instances."""
-        self._api = API(self, "/servers")
-
-        return self._api
+        return self._apis.setdefault('servers', API(self, "/servers"))
 
     @property
     def services(self):
         """Return entry-point to the API."""
-        self._api = API(self, "/os-services")
-
-        return self._api
+        return self._apis.setdefault('services', API(self, "/os-services"))
 
     def __getitem__(self, name):
         if name == 'flavors':
@@ -148,12 +131,12 @@ class NovaAPIClient(object):
         elif name == 'hypervisors':
             return self.search
         elif name == 'servers':
-            return self.services
+            return self.servers
         elif name == 'services':
             return self.services
 
         raise TypeError(
-            "%r object is not subscriptable (except for flavors" + \
+            "%r object is not subscriptable (except for flavors" +
             ", hosts, images, servers, services, hypervisors",
             self.__class__.__name__)
 
@@ -185,11 +168,11 @@ class NovaAPIClient(object):
             log.error("Exception from login: %s" % str(ex))
 
         if 'access' in r.keys():
-            self._token = r['access']['token']['id'].encode('ascii','ignore')
+            self._token = r['access']['token']['id'].encode('ascii', 'ignore')
             self._service_catalog = r['access']['serviceCatalog']
             for sc in r['access']['serviceCatalog']:
                 if sc['type'] == 'compute' and sc['name'] == 'nova':
-                    self._nova_url = sc['endpoints'][0]['adminURL'].encode('ascii','ignore')
+                    self._nova_url = sc['endpoints'][0]['adminURL'].encode('ascii', 'ignore')
                     break
 
         returnValue(r)
@@ -234,6 +217,7 @@ class NovaAPIClient(object):
 
         """
         request = self._get_request(path, data=data, params=params, **kwargs)
+        log.debug("Request URL: %s" % request.url)
 
         try:
             response = yield getPageAndHeaders(
@@ -249,7 +233,7 @@ class NovaAPIClient(object):
             text = str(response)
 
             if status == httplib.UNAUTHORIZED:
-                raise UnauthorizedError(text)
+                raise UnauthorizedError(text + " (check username and password)")
             elif status == httplib.BAD_REQUEST:
                 raise BadRequestError(text)
             elif status == httplib.NOT_FOUND:
@@ -290,14 +274,6 @@ class NovaAPIClient(object):
             postdata=postdata)
 
 
-    def callback(self, result):
-        log.info("result: %s" % result)
-
-    def errback(self, failure):
-        log.info("result: %s" % result)
-        reactor.stop()
-
-
 class API(object):
 
     """Wrapper for each element of an API path including the leaf.  """
@@ -321,7 +297,7 @@ class API(object):
         if kwargs:
             qparams = {}
             if kwargs.has_key('detailed') and kwargs['detailed']:
-                detail = '/detail' if kwargs['detailed']  else ""
+                detail = '/detail' if kwargs['detailed'] else ""
                 self.path += '%s' % detail
 
         #     # is_public is ternary - None means give all flavors.
@@ -332,17 +308,17 @@ class API(object):
                 kwargs['is_public'] is not None:
                 qparams['is_public'] = kwargs['is_public']
                 if qparams:
-                    self.path += '?%s' % urlutils.urlencode(qparams)
+                    self.path += '?%s' % urllib.urlencode(qparams)
 
             if self.path.find('hosts') > -1 and \
                 kwargs.has_key('zone') and \
                 kwargs['zone'] is not None:
-                self.path += '?zone=%s' % kwargs['zone'] 
+                self.path += '?zone=%s' % kwargs['zone']
 
             if self.path.find('images') > -1 and \
                 kwargs.has_key('limit') and \
                 kwargs['limit'] is not None:
-                self.path += '?limit=%d' % int(kwargs['limit']) 
+                self.path += '?limit=%d' % int(kwargs['limit'])
 
             if self.path.find('servers') > -1:
                 params = {}
@@ -355,7 +331,7 @@ class API(object):
                     params['marker'] = kwargs['marker']
                 if kwargs.has_key('limit'):
                     params['limit'] = int(kwargs['limit'])
-                query_string = "?%s" % urlutils.urlencode(params) if params else ""
+                query_string = "?%s" % urllib.urlencode(params) if params else ""
                 self.path += '%s' % query_string
 
             if self.path.find('services') > -1:
@@ -375,14 +351,14 @@ class API(object):
                 kwargs.has_key('servers'):
                 target = 'servers' if kwargs['servers'] else 'search'
                 self.path += '/%s/%s' % (
-                    urlutils.quote(kwargs['hypervisor_match'], safe=''),
+                    urllib.quote(kwargs['hypervisor_match'], safe=''),
                     target)
 
         return self.client.api_call(
             self.path, data=data, params=params, **kwargs)
 
 
-## Exceptions #########################################################
+# Exceptions #########################################################
 
 class NovaError(Exception):
 
@@ -413,10 +389,10 @@ class NotFoundError(NovaError):
 
 def main():
     # url = ('/os-hypervisors/%s/%s' %
-    #            (urlutils.quote(None, safe=''), 'servers'))
+    #            (urllib.quote(None, safe=''), 'servers'))
     c = NovaAPIClient('admin', 'password', 'http://192.168.56.104:5000/v2.0', 'demo', 'RegionOne')
 #    c = NovaAPIClient('admin', '8a041d9c59dd403a', 'http://10.87.208.184:5000/v2.0', 'admin', 'RegionOne')
-    #ret = c.avzones(detailed=True)
+    # ret = c.avzones(detailed=True)
     # ret = c.avzones(detailed=False)
     # ret = c.flavors()
     # ret = c.flavors(detailed=False)
@@ -449,4 +425,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
