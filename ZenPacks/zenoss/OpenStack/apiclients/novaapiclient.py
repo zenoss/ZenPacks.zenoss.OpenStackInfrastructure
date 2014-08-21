@@ -233,7 +233,7 @@ class NovaAPIClient(object):
             text = str(response)
 
             if status == httplib.UNAUTHORIZED:
-                raise UnauthorizedError(text)
+                raise UnauthorizedError(text + " (check username and password)")
             elif status == httplib.BAD_REQUEST:
                 raise BadRequestError(text)
             elif status == httplib.NOT_FOUND:
