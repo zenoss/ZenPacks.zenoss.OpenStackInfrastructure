@@ -2059,8 +2059,15 @@ OpenStack connectivity restored
 0
 </property>
 </object>
-<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack', 'products', '2015.1') -->
-<object id='/zport/dmd/Manufacturers/OpenStack/products/2015.1' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack') -->
+<object id='/zport/dmd/Manufacturers/OpenStack' module='Products.ZenModel.Manufacturer' class='Manufacturer'>
+<property type="string" id="zip" mode="w" >
+</property>
+<property type="lines" id="regexes" mode="w" >
+()
+</property>
+<tomanycont id='products'>
+<object id='2015.1' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
 <property type="string" id="name" mode="w" >
 2015.1
 </property>
@@ -2071,8 +2078,7 @@ OpenStack connectivity restored
 True
 </property>
 </object>
-<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack', 'products', '2015.2') -->
-<object id='/zport/dmd/Manufacturers/OpenStack/products/2015.2' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<object id='2015.2' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
 <property type="string" id="name" mode="w" >
 2015.2
 </property>
@@ -2083,8 +2089,7 @@ True
 True
 </property>
 </object>
-<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack', 'products', '2016.1') -->
-<object id='/zport/dmd/Manufacturers/OpenStack/products/2016.1' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<object id='2016.1' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
 <property type="string" id="name" mode="w" >
 2016.1
 </property>
@@ -2095,8 +2100,7 @@ True
 True
 </property>
 </object>
-<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack', 'products', '2016.2') -->
-<object id='/zport/dmd/Manufacturers/OpenStack/products/2016.2' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<object id='2016.2' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
 <property type="string" id="name" mode="w" >
 2016.2
 </property>
@@ -2107,8 +2111,7 @@ True
 True
 </property>
 </object>
-<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack', 'products', '2017.1') -->
-<object id='/zport/dmd/Manufacturers/OpenStack/products/2017.1' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<object id='2017.1' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
 <property type="string" id="name" mode="w" >
 2017.1
 </property>
@@ -2119,8 +2122,7 @@ True
 True
 </property>
 </object>
-<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack', 'products', '2017.2') -->
-<object id='/zport/dmd/Manufacturers/OpenStack/products/2017.2' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<object id='2017.2' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
 <property type="string" id="name" mode="w" >
 2017.2
 </property>
@@ -2131,8 +2133,7 @@ True
 True
 </property>
 </object>
-<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack', 'products', 'Havana (2013.2)') -->
-<object id='/zport/dmd/Manufacturers/OpenStack/products/Havana (2013.2)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<object id='Havana (2013.2)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
 <property type="string" id="name" mode="w" >
 Havana (2013.2)
 </property>
@@ -2143,8 +2144,7 @@ Havana (2013.2)
 True
 </property>
 </object>
-<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack', 'products', 'Icehouse (2014.1)') -->
-<object id='/zport/dmd/Manufacturers/OpenStack/products/Icehouse (2014.1)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<object id='Icehouse (2014.1)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
 <property type="string" id="name" mode="w" >
 Icehouse (2014.1)
 </property>
@@ -2158,8 +2158,7 @@ True
 <link objid='/zport/dmd/Devices/OpenStack/devices/packstack/os'/>
 </tomany>
 </object>
-<!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack', 'products', 'Juno (2014.2)') -->
-<object id='/zport/dmd/Manufacturers/OpenStack/products/Juno (2014.2)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<object id='Juno (2014.2)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
 <property type="string" id="name" mode="w" >
 Juno (2014.2)
 </property>
@@ -2169,6 +2168,8 @@ Juno (2014.2)
 <property type="boolean" id="isOS" mode="w" >
 True
 </property>
+</object>
+</tomanycont>
 </object>
 <!-- ('', 'zport', 'dmd', 'Processes', 'OpenStack') -->
 <object id='/zport/dmd/Processes/OpenStack' module='Products.ZenModel.OSProcessOrganizer' class='OSProcessOrganizer'>
