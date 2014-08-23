@@ -109,7 +109,9 @@ CFG = zenpacklib.ZenPackSpec(
                 # Provide better contextual naming for the relationships in the UI.
                 'parentOrg': {'label': 'Parent', 'order': 1.0},
                 'childOrgs': {'label': 'Children', 'order': 1.1},
-            }
+            },
+            'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'],
+            'impacts': ['orgComponent', 'parentOrg']
         },
 
         'SoftwareComponent': {
@@ -128,7 +130,9 @@ CFG = zenpacklib.ZenPackSpec(
                                'renderer': 'Zenoss.render.openstack_ServiceEnabledStatus'},
                 'operStatus': {'label': 'State',   'order': 3,
                                'renderer': 'Zenoss.render.openstack_ServiceOperStatus'}
-            }
+            },
+            'impacted_by': ['hostedOn'],
+            'impacts': ['orgComponent']
         },
 
         'LogicalComponent': {
@@ -202,7 +206,8 @@ CFG = zenpacklib.ZenPackSpec(
             'relationships': {
                 # NOTE (FIXME): This isn't suppressing it.
                 'hypervisor': {'grid_display': False}  # no need to show this- show the host instead
-            }
+            },
+            'impacted_by': ['hypervisor']
 
             # Note: By (nova) design, hostId is a hash of the actual underlying host and project, and
             # is designed to allow users of a specific project to tell if two VMs are on the same host, nothing
@@ -223,21 +228,27 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'OrgComponent',
             'meta_type': 'OpenStackRegion',
             'label': 'Region',
-            'order': 4
+            'order': 4,
+            'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'], #inherit
+            'impacts': ['orgComponent', 'parentOrg']                   #inherit
         },
 
         'Cell': {
             'base': 'OrgComponent',
             'meta_type': 'OpenStackCell',
             'label': 'Cell',
-            'order': 5
+            'order': 5,
+            'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'], #inherit
+            'impacts': ['orgComponent', 'parentOrg']                   #inherit            
         },
 
         'AvailabilityZone': {
             'base': 'OrgComponent',
             'meta_type': 'OpenStackAvailabilityZone',
             'label': 'Availability Zone',
-            'order': 6
+            'order': 6,
+            'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'], #inherit
+            'impacts': ['orgComponent', 'parentOrg']                   #inherit            
         },
 
         'Host': {
@@ -250,28 +261,36 @@ CFG = zenpacklib.ZenPackSpec(
                                  'render_with_type': True,
                                  'order': 1.0,
                                  'content_width': 150}  # need to fix the default width for render_with_type
-                }
+            },
+            'impacted_by': ['endpoint'],
+            'impacts': ['hypervisor', 'orgComponent', 'hostedSoftware']
         },
 
         'NovaService': {
             'base': 'SoftwareComponent',
             'meta_type': 'OpenStackNovaService',
             'label': 'Nova Service',
-            'order': 10
+            'order': 10,
+            'impacted_by': ['hostedOn'], #inherit
+            'impacts': ['orgComponent']  #inherit
         },
 
         'NovaApi': {
             'base': 'SoftwareComponent',
             'meta_type': 'OpenStackNovaApi',
             'label': 'Nova API',
-            'order': 9
+            'order': 9,
+            'impacted_by': ['hostedOn'], #inherit
+            'impacts': ['orgComponent']  #inherit
         },
 
         'NovaDatabase': {
             'base': 'SoftwareComponent',
             'meta_type': 'OpenStackNovaDatabase',
             'label': 'NovaDatabase',
-            'order': 13
+            'order': 13,
+            'impacted_by': ['hostedOn'], #inherit
+            'impacts': ['orgComponent']  #inherit
         },
 
         'Hypervisor': {
@@ -281,7 +300,9 @@ CFG = zenpacklib.ZenPackSpec(
             'order': 14,
             'properties': {
                 'hypervisorId':      {'grid_display': False}
-            }
+            },
+            'impacts': ['instances'],
+            'impacted_by': ['host']
         },
 
     },
