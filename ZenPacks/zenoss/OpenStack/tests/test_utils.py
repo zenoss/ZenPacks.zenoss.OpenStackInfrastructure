@@ -14,6 +14,7 @@ import Globals
 
 import functools
 import importlib
+import re
 
 from Products.ZenRelations.RelationshipBase import RelationshipBase
 from Products.ZenRelations.ToManyContRelationship import ToManyContRelationship
@@ -95,6 +96,11 @@ def create_model_data(dmd):
     dc = dmd.Devices.createOrganizer('/OpenStack')
     dc.setZenProperty('zPythonClass', 'ZenPacks.zenoss.OpenStack.Endpoint')
 
+    # OSProcessClasses
+    osc = dmd.Processes.createOrganizer('/OpenStack')
+    for binary in ['nova-cert', 'nova-conductor', 'nova-consoleauth', 'nova-scheduler', 'nova-compute', 'nova-api']:
+        osc.manage_addOSProcessClass(binary)
+
     # Endpoint
     endpoint = dc.createInstance('endpoint')
 
@@ -128,27 +134,35 @@ def create_model_data(dmd):
     from ZenPacks.zenoss.OpenStack.NovaService import NovaService
     from ZenPacks.zenoss.OpenStack.NovaApi import NovaApi
     nova_consoleauth = addContained(endpoint, "components", NovaService("nova-consoleauth"))
+    nova_consoleauth.binary = 'nova-consoleauth'
     addNonContained(nova_consoleauth, "hostedOn", controllerhost)
     addNonContained(nova_consoleauth, "orgComponent", zone1)
     nova_scheduler = addContained(endpoint, "components", NovaService("nova-scheduler"))
+    nova_scheduler.binary = 'nova-scheduler'
     addNonContained(nova_scheduler, "hostedOn", controllerhost)
     addNonContained(nova_scheduler, "orgComponent", zone1)
     nova_conductor1 = addContained(endpoint, "components", NovaService("nova-conductor1"))
+    nova_conductor1.binary = 'nova-conductor'
     nova_conductor2 = addContained(endpoint, "components", NovaService("nova-conductor2"))
+    nova_conductor2.binary = 'nova-conductor'
     addNonContained(nova_conductor1, "hostedOn", computehost1)
     addNonContained(nova_conductor1, "orgComponent", zone1)
     addNonContained(nova_conductor2, "hostedOn", computehost2)
     addNonContained(nova_conductor2, "orgComponent", zone2)
     nova_compute1 = addContained(endpoint, "components", NovaService("nova-compute1"))
+    nova_compute1.binary = 'nova-compute'
     nova_compute2 = addContained(endpoint, "components", NovaService("nova-compute2"))
+    nova_compute2.binary = 'nova-compute'
     addNonContained(nova_compute1, "hostedOn", computehost1)
     addNonContained(nova_compute1, "orgComponent", zone1)
     addNonContained(nova_compute2, "hostedOn", computehost2)
     addNonContained(nova_compute2, "orgComponent", zone2)
     nova_cert = addContained(endpoint, "components", NovaService("nova-cert"))
+    nova_cert.binary = 'nova-cert'
     addNonContained(nova_cert, "hostedOn", controllerhost)
     addNonContained(nova_cert, "orgComponent", zone1)
     nova_api = addContained(endpoint, "components", NovaApi("nova-api"))
+    nova_api.binary = 'nova-api'
     addNonContained(nova_api, "hostedOn", controllerhost)
     addNonContained(nova_api, "orgComponent", region)
 
@@ -209,9 +223,9 @@ def create_model_data(dmd):
     # make sure that the interfaces line up.
     guest_dc = dmd.Devices.createOrganizer('/Server/SSH/Linux')
     guest_dc.setZenProperty('zPythonClass', 'Products.ZenModel.Device.Device')
-    guest_instance1 = guest_dc.createInstance("instance1")
-    guest_instance2 = guest_dc.createInstance("instance2")
-    guest_instance3 = guest_dc.createInstance("instance3")
+    guest_instance1 = guest_dc.createInstance("g-instance1")
+    guest_instance2 = guest_dc.createInstance("g-instance2")
+    guest_instance3 = guest_dc.createInstance("g-instance3")
     # instance4 is not monitored by zenoss.
 
     from Products.ZenModel.IpInterface import IpInterface
@@ -234,14 +248,30 @@ def create_model_data(dmd):
     # (link to host1 and host2)
     phys_dc = dmd.Devices.createOrganizer('/Server/SSH/Linux/NovaHost')
     phys_dc.setZenProperty('zPythonClass', 'Products.ZenModel.Device.Device')
-    phys_computehost1 = phys_dc.createInstance("computehost1")
-    phys_computehost2 = phys_dc.createInstance("computehost2")
-    phys_controllerhost = phys_dc.createInstance("controllerhost")
+    phys_computehost1 = phys_dc.createInstance("p-computehost1")
+    phys_computehost2 = phys_dc.createInstance("p-computehost2")
+    phys_controllerhost = phys_dc.createInstance("p-controllerhost")
 
     # Link the host components to the physical hosts.
     computehost1.claim_proxy_device(phys_computehost1)
     computehost2.claim_proxy_device(phys_computehost2)
     controllerhost.claim_proxy_device(phys_controllerhost)
+
+    # Add OSprocesses for each of the software components.
+    from ZenPacks.zenoss.OpenStack.SoftwareComponent import SoftwareComponent
+    from Products.ZenModel.OSProcess import OSProcess
+    for component in endpoint.components():        
+        if isinstance(component, SoftwareComponent):
+            binary = component.binary
+            linux_device = component.hostedOn().proxy_device()
+
+            process_id = '%s_%s' % (linux_device.id, binary)
+            process = OSProcess(process_id)
+            linux_device.os.processes._setObject(process_id, process)
+            process = linux_device.os.processes._getOb(process_id)
+
+            process_class = re.sub(r'\d+$', '', binary)
+            process.setOSProcessClass("Processes/OpenStack/osProcessClasses/%s" % process_class)
 
     return {
         'endpoint': endpoint,

@@ -65,7 +65,8 @@ CFG = zenpacklib.ZenPackSpec(
         'Endpoint': {
             'base': zenpacklib.Device,
             'meta_type': 'OpenStackEndpoint',
-            'label': 'OpenStack Endpoint'
+            'label': 'OpenStack Endpoint',
+            'impacts': ['hosts']
         },
 
         'KeystoneEndpoint': {
@@ -131,7 +132,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'operStatus': {'label': 'State',   'order': 3,
                                'renderer': 'Zenoss.render.openstack_ServiceOperStatus'}
             },
-            'impacted_by': ['hostedOn'],
+            'impacted_by': ['hostedOn', 'osprocess_component'],
             'impacts': ['orgComponent']
         },
 
@@ -207,7 +208,8 @@ CFG = zenpacklib.ZenPackSpec(
                 # NOTE (FIXME): This isn't suppressing it.
                 'hypervisor': {'grid_display': False}  # no need to show this- show the host instead
             },
-            'impacted_by': ['hypervisor']
+            'impacted_by': ['hypervisor'],
+            'impacts': ['guestDevice']
 
             # Note: By (nova) design, hostId is a hash of the actual underlying host and project, and
             # is designed to allow users of a specific project to tell if two VMs are on the same host, nothing
@@ -262,7 +264,7 @@ CFG = zenpacklib.ZenPackSpec(
                                  'order': 1.0,
                                  'content_width': 150}  # need to fix the default width for render_with_type
             },
-            'impacted_by': ['endpoint'],
+            'impacted_by': ['endpoint', 'proxy_device'],
             'impacts': ['hypervisor', 'orgComponent', 'hostedSoftware']
         },
 
@@ -271,7 +273,7 @@ CFG = zenpacklib.ZenPackSpec(
             'meta_type': 'OpenStackNovaService',
             'label': 'Nova Service',
             'order': 10,
-            'impacted_by': ['hostedOn'], #inherit
+            'impacted_by': ['hostedOn', 'osprocess_component'], #inherit
             'impacts': ['orgComponent']  #inherit
         },
 
@@ -280,7 +282,7 @@ CFG = zenpacklib.ZenPackSpec(
             'meta_type': 'OpenStackNovaApi',
             'label': 'Nova API',
             'order': 9,
-            'impacted_by': ['hostedOn'], #inherit
+            'impacted_by': ['hostedOn', 'osprocess_component'], #inherit
             'impacts': ['orgComponent']  #inherit
         },
 
@@ -289,7 +291,7 @@ CFG = zenpacklib.ZenPackSpec(
             'meta_type': 'OpenStackNovaDatabase',
             'label': 'NovaDatabase',
             'order': 13,
-            'impacted_by': ['hostedOn'], #inherit
+            'impacted_by': ['hostedOn', 'osprocess_component'], #inherit
             'impacts': ['orgComponent']  #inherit
         },
 

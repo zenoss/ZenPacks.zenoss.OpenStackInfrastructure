@@ -16,6 +16,9 @@ LOG = logging.getLogger('zen.OpenStackEndpoint')
 
 class Endpoint(schema.Endpoint):
 
+    def hosts(self):
+        return self.getDeviceComponents(type="OpenStackHost")
+
     def get_maintain_proxydevices(self):
         return False
 

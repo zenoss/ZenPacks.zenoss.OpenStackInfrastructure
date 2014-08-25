@@ -22,3 +22,23 @@ class Instance(schema.Instance):
             return self.hypervisor().host()
         except Exception:
             return None
+
+    def guestDevice(self):
+        # TODO: Implement
+        return None
+
+class DeviceLinkProvider(object):
+    '''
+Provides a link on the (guest) device overview page to the VM which the
+guest is running within.
+'''
+    def __init__(self, device):
+        self._device = device
+
+    def getExpandedLinks(self):
+        instance = self._device.openstackInstance()
+        if instance:
+            return ['<a href="%s">Openstack VM Instance \'%s\' on %s</a>' % (
+                instance.getPrimaryUrlPath(), instance.titleOrId(), instance.device().titleOrId())]
+
+        return []

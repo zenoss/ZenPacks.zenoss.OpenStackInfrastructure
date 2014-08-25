@@ -81,6 +81,7 @@ def impacts_for(thing):
         for edge in subscriber.getEdges():
             source = guid_manager.getObject(edge.source)
             impacted = guid_manager.getObject(edge.impacted)
+
             if source.id == thing.id:
                 impacted_by.append(impacted.id)
             elif impacted.id == thing.id:
@@ -167,10 +168,16 @@ class TestImpact(zenpacklib.TestCase):
         return self.model_data()['endpoint']
 
     def linuxguest(self, guestid):
-        return self.model_data()['virt_dc'].getObjByPath('devices/' + guestid)
+        return self.model_data()['guest_dc'].getObjByPath('devices/' + guestid)
+
+    def linuxguests(self):
+        return self.model_data()['guest_dc'].getDevices()
 
     def linuxhost(self, hostid):
         return self.model_data()['phys_dc'].getObjByPath('devices/' + hostid)
+
+    def linuxhosts(self):
+        return self.model_data()['phys_dc'].getDevices()
 
     def assertTriggersExist(self, triggers, expected_trigger_ids):
         '''
@@ -181,7 +188,6 @@ class TestImpact(zenpacklib.TestCase):
                 trigger_id in triggers, 'missing trigger: %s' % trigger_id)
 
     @require_zenpack('ZenPacks.zenoss.Impact')
-    @unittest.expectedFailure
     def test_Endpoint(self):
         impacts, impacted_by = impacts_for(self.endpoint())
 
@@ -221,7 +227,14 @@ class TestImpact(zenpacklib.TestCase):
 
             # endpoint -> host
             self.assertTrue(self.endpoint().id in impacted_by,
-                            msg="host %s impacted by endpoint")
+                            msg="host %s impacted by endpoint" % (host.id))
+
+            # (proxy) linux device -> host
+            linuxhost = self.linuxhost("p-" + host.id)
+            self.assertIsNotNone(linuxhost)
+
+            self.assertTrue(linuxhost.id in impacted_by,
+                            msg="host %s impacted by linux device %s" % (host.id, linuxhost.id))
 
     @require_zenpack('ZenPacks.zenoss.Impact')
     def test_NovaApi(self):
@@ -241,6 +254,14 @@ class TestImpact(zenpacklib.TestCase):
 
         self.assertTrue(host.id in impacted_by,
                         msg="%s is impacted by host %s it runs upon" % (nova_api.id, host.id))
+
+        osprocess = nova_api.osprocess_component()
+        if osprocess:
+            # not all processes run on all boxes, so only check for the ones that seem to
+            # be running there.
+            self.assertIsNotNone(osprocess)
+            self.assertTrue(osprocess.id in impacted_by,
+                            msg="%s is impacted by osprocess component %s" % (nova_api.id, osprocess.id))
 
     @require_zenpack('ZenPacks.zenoss.Impact')
     def test_NovaService(self):
@@ -262,6 +283,14 @@ class TestImpact(zenpacklib.TestCase):
 
             self.assertTrue(host.id in impacted_by,
                             msg="%s is impacted by host %s it runs upon" % (nova_service.id, host.id))
+
+            osprocess = nova_service.osprocess_component()
+            if osprocess:
+                # not all processes run on all boxes, so only check for the ones that seem to
+                # be running there.
+                self.assertIsNotNone(osprocess)
+                self.assertTrue(osprocess.id in impacted_by,
+                                msg="%s is impacted by osprocess component %s" % (nova_service.id, osprocess.id))
 
     @require_zenpack('ZenPacks.zenoss.Impact')
     def test_Hypervisor(self):
@@ -358,47 +387,66 @@ class TestImpact(zenpacklib.TestCase):
                 self.assertTrue(False, msg="Unrecognized Region child type %s" % (childOrg.meta_type))
 
     @require_zenpack('ZenPacks.zenoss.Impact')
-    @require_zenpack('ZenPacks.zenoss.CiscoUCS')
-    @unittest.expectedFailure    # This test is not built yet.
-    def test_CiscoUCS(self):
-        self.assertTrue(False)
+    @unittest.expectedFailure
+    # Have not yet implemented openstackInstance()
+    def test_Instance(self):
+        instances = self.endpoint().getDeviceComponents(type='OpenStackInstance')
+        self.assertNotEqual(len(instances), 0)
 
-        from ZenPacks.zenoss.CiscoUCS.ServiceProfile import ServiceProfile
-        from ZenPacks.zenoss.CiscoUCS.VnicEther import VnicEther
+        for instance in instances:
+            impacts, impacted_by = impacts_for(instance)
 
-        shared_macaddress = '00:0c:29:7c:3f:6c'
+            hypervisor = instance.hypervisor()
+            self.assertTrue(hypervisor.id in impacted_by,
+                            msg="Instance %s impacted by hypervisor %s" % (instance.id, hypervisor.id))
 
-        ucs_dc = self.dmd.Devices.createOrganizer('/CiscoUCS')
-        ucs_dc.setZenProperty('zPythonClass', 'ZenPacks.zenoss.CiscoUCS.Device')
-        ucsm = ucs_dc.createInstance('test-ucms1')
+            guest = self.linuxguest("g-" + instance.id)
+            if guest:
+                self.assertTrue(guest.id in impacts,
+                                msg="Instance %s impacts guest %s" % (instance.id, guest.id))
 
-        profile = addContained(ucsm, 'serviceprofiles', ServiceProfile('profile1'))
-        vnicether = addContained(profile, 'vnicethers', VnicEther('vnicether1'))
-        vnicether.macAddress = shared_macaddress
 
-        host = self.endpoint().getObjByPath('datacenters/dc1/hosts/c1_h1')
-        pnic = host.getObjByPath('pnics/c1_h1_pnic1')
-        pnic.macaddress = shared_macaddress
-        pnic.index_object()
+    @require_zenpack('ZenPacks.zenoss.Impact')
+    @unittest.expectedFailure
+    # Have not yet implemented openstackInstance()
+    def test_GuestDevice(self):
+        guests = self.linuxguests()
+        self.assertNotEqual(len(guests), 0)
 
-        profile_impacts, profile_impacted_by = impacts_for(profile)
-        vnicether_impacts, vnicether_impacted_by = impacts_for(vnicether)
+        for guest in guests:
+            impacts, impacted_by = impacts_for(guest)
+            instance = guest.openstackInstance()
+            self.assertIsNotNone(instance, msg="Guest device %s is an openstack instance" % guest.id)
+            self.assertTrue(instance.id in impacted_by,
+                            msg="Guest %s is impacted by instance %s" % (guest.id, instance.id))
 
-        # UCS VnicEther -> OpenStack Pnic
-        self.assertTrue(
-            pnic.id in vnicether_impacts,
-            "missing impact: {0} -> {1}".format(vnicether, pnic))
+    @require_zenpack('ZenPacks.zenoss.Impact')
+    def test_HostDevice(self):
+        hostdevices = self.linuxhosts()
+        self.assertNotEqual(len(hostdevices), 0)
 
-        # UCS ServiceProfile -> OpenStack HostSystem
-        self.assertTrue(
-            host.id in profile_impacts,
-            "missing impact: {0} -> {1}".format(profile, host))
+        for hostdevice in hostdevices:
+            impacts, impacted_by = impacts_for(hostdevice)
+            host = hostdevice.openstack_hostComponent()
+            self.assertIsNotNone(host, msg="Host device %s is an openstack host" % hostdevice.id)
+            self.assertTrue(host.id in impacts,
+                            msg="Host Device %s impacts host component %s" % (hostdevice.id, host.id))
 
-        self.assertTriggersExist(triggers_for(host), [
-            'DOWN >=1 UCSServiceProfile DOWN',
-            ])
+    @require_zenpack('ZenPacks.zenoss.Impact')
+    def test_OSProcess(self):
+        from ZenPacks.zenoss.OpenStack.SoftwareComponent import SoftwareComponent
+        passes = 0
+        for component in self.endpoint().getDeviceComponents():
+            if isinstance(component, SoftwareComponent):
+                osprocess = component.osprocess_component()
+                if osprocess:
+                    impacts, impacted_by = impacts_for(osprocess)
+                    self.assertTrue(component.id in impacts,
+                                    msg="OSProcess %s is impacts software component %s" % (osprocess.id, component.id))
+                    passes += 1
 
-    
+        self.assertTrue(passes > 0, msg="OSProcesses found with which to test")                    
+
 def test_suite():
     from unittest import TestSuite, makeSuite
     suite = TestSuite()

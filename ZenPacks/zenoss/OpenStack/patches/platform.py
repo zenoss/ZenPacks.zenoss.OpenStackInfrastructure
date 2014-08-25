@@ -20,6 +20,12 @@ from Products.DataCollector.ApplyDataMap import ApplyDataMap
 
 
 @monkeypatch('Products.ZenModel.Device.Device')
+def openstackInstance(self):
+    # TODO: Implement
+    return None
+
+
+@monkeypatch('Products.ZenModel.Device.Device')
 def openstack_hostComponent(self):
     # If this is an openstack compute node, returns a the OpenstackHost component for it.
     host = DeviceProxyComponent.component_for_proxy_device(self)

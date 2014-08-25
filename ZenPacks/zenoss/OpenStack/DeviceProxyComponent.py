@@ -100,7 +100,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
     def maintain_proxy_device(self):
         '''
         Ensure that the proxy device exists, creating it if necessary.
-        '''    
+        '''
         self.proxy_device()
 
         return True
@@ -221,9 +221,11 @@ class DeviceLinkProvider(object):
 
         return []
 
+
 @monkeypatch('Products.ZenModel.Device.Device')
 def getApplyDataMapToProxyComponent(self):
     return []
+
 
 @monkeypatch('Products.ZenModel.Device.Device')
 def setApplyDataMapToProxyComponent(self, datamap):
@@ -237,7 +239,7 @@ def setApplyDataMapToProxyComponent(self, datamap):
 
 
 class PostEventPlugin(object):
-    """ 
+    """
     Post-event plugin to mirror events from a proxy device onto its
     deviceproxycomponent.
     """
@@ -249,7 +251,7 @@ class PostEventPlugin(object):
         if device and hasattr(device, 'openstackProxyComponentUUID'):
             LOG.debug("tagging event on %s with openstack proxy component component uuid %s",
                       eventProxy.device, device.openstackProxyComponentUUID)
-            
+
             tags = [device.openstackProxyComponentUUID]
 
             # Also tag it with the openstack endpoint that the component is part of,

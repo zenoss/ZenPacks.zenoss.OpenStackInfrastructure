@@ -46,10 +46,18 @@
 
     <!-- Device Links -->
     <configure zcml:condition="have zenoss:IExpandedLinkProvider">
+        <!-- hosts -->
         <subscriber
             provides='Products.ZenModel.interfaces.IExpandedLinkProvider'
             for='Products.ZenModel.Device.Device'
             factory='.DeviceProxyComponent.DeviceLinkProvider'
+            />
+
+        <!-- instances -->
+        <subscriber
+            provides='Products.ZenModel.interfaces.IExpandedLinkProvider'
+            for='Products.ZenModel.Device.Device'
+            factory='.Instance.DeviceLinkProvider'
             />
 
     </configure>
@@ -75,5 +83,28 @@
     <include file="reportable.zcml"
              xmlns:zcml="http://namespaces.zope.org/zcml"
              zcml:condition="installed ZenPacks.zenoss.ZenETL" />
+
+    <!-- Impact (special cases) -->
+    <configure zcml:condition="installed ZenPacks.zenoss.Impact">
+        <include package="ZenPacks.zenoss.Impact" file="meta.zcml"/>
+
+        <subscriber
+            provides="ZenPacks.zenoss.Impact.impactd.interfaces.IRelationshipDataProvider"
+            for="Products.ZenModel.Device.Device"
+            factory=".impact.HostDeviceRelationsProvider"
+            />
+
+        <subscriber
+            provides="ZenPacks.zenoss.Impact.impactd.interfaces.IRelationshipDataProvider"
+            for="Products.ZenModel.Device.Device"
+            factory=".impact.GuestDeviceRelationsProvider"
+            />
+
+        <subscriber
+            provides="ZenPacks.zenoss.Impact.impactd.interfaces.IRelationshipDataProvider"
+            for="Products.ZenModel.OSProcess.OSProcess"
+            factory=".impact.OSProcessRelationsProvider"
+            />
+    </configure>
 
 </configure>
