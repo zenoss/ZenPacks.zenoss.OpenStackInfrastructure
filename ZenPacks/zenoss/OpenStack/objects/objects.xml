@@ -2177,29 +2177,6 @@ True
 1
 </property>
 <tomanycont id='osProcessClasses'>
-<object id='ceilometer-collector' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
-<property type="string" id="name" mode="w" >
-ceilometer-collector
-</property>
-<property type="string" id="regex" mode="w" >
-ceilometer-collector
-</property>
-<property type="string" id="excludeRegex" mode="w" >
-\b(vim|tail|grep|tar|cat|bash)\b
-</property>
-<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
-False
-</property>
-<property type="boolean" id="ignoreParameters" mode="w" >
-False
-</property>
-<property type="int" id="sequence" mode="w" >
-1
-</property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack1/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_ceilometer-collector_f3133f761caf692b20913d074c48f83c'/>
-</tomany>
-</object>
 <object id='nova-api' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
 nova-api
@@ -2222,9 +2199,6 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack1/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-api_598009ea75d0dbb6127f67256592ddc7'/>
-</tomany>
 </object>
 <object id='nova-cert' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -2248,9 +2222,6 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack1/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-cert_ae62c273187050a0ea84661c059ce41a'/>
-</tomany>
 </object>
 <object id='nova-compute' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -2274,9 +2245,6 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack1/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-compute_e75d0baadf683ea95955ad037d70b373'/>
-</tomany>
 </object>
 <object id='nova-conductor' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -2300,9 +2268,6 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack1/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-conductor_27c89a6eeeb7f309ea241992716c3247'/>
-</tomany>
 </object>
 <object id='nova-consoleauth' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -2326,9 +2291,6 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack1/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-consoleauth_0f4e29f6026ee433e293f7f5fbda7eb2'/>
-</tomany>
 </object>
 <object id='nova-network' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -2375,9 +2337,6 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack1/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-scheduler_c014c7b8d4f5952f24830d49571c3e6f'/>
-</tomany>
 </object>
 </tomanycont>
 </object>
