@@ -405,6 +405,24 @@ class TestImpact(zenpacklib.TestCase):
                 self.assertTrue(guest.id in impacts,
                                 msg="Instance %s impacts guest %s" % (instance.id, guest.id))
 
+            tenant = instance.tenant()
+            self.assertTrue(tenant.id in impacts,
+                            msg="Instance %s impacts tenant %s" % (instance.id, tenant.id))
+
+
+    @require_zenpack('ZenPacks.zenoss.Impact')
+    def test_Tenant(self):
+        tenants = self.endpoint().getDeviceComponents(type='OpenStackTenant')
+        self.assertNotEqual(len(tenants), 0)
+
+        for tenant in tenants:
+            impacts, impacted_by = impacts_for(tenant)
+
+            for instance in tenant.instances():                
+                self.assertTrue(instance.id in impacted_by,
+                                msg="Tenant %s impacted by instance %s" % (tenant.id, instance.id))
+
+
 
     @require_zenpack('ZenPacks.zenoss.Impact')
     @unittest.expectedFailure

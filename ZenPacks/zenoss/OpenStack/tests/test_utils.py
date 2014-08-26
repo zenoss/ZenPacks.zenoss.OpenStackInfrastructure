@@ -113,6 +113,11 @@ def create_model_data(dmd):
     addNonContained(region, "childOrgs", zone1)
     addNonContained(region, "childOrgs", zone2)
 
+    # Tenants
+    from ZenPacks.zenoss.OpenStack.Tenant import Tenant
+    tenant1 = addContained(endpoint, "components", Tenant("tenant1"))
+    tenant2 = addContained(endpoint, "components", Tenant("tenant2"))
+
     # Flavor
     from ZenPacks.zenoss.OpenStack.Flavor import Flavor
     flavor1 = addContained(endpoint, "components", Flavor("flavor1"))
@@ -191,6 +196,10 @@ def create_model_data(dmd):
     addNonContained(instance2, "hypervisor", hypervisor1)
     addNonContained(instance3, "hypervisor", hypervisor2)
     addNonContained(instance4, "hypervisor", hypervisor2)
+    addNonContained(instance1, "tenant", tenant1)
+    addNonContained(instance2, "tenant", tenant2)
+    addNonContained(instance3, "tenant", tenant1)
+    addNonContained(instance4, "tenant", tenant2)
 
     # Vnic
     from ZenPacks.zenoss.OpenStack.Vnic import Vnic

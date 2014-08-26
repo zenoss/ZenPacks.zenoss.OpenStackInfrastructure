@@ -26,6 +26,7 @@ from ZenPacks.zenoss.OpenStack.utils import add_local_lib_path
 add_local_lib_path()
 
 from apiclients.novaapiclient import NovaAPIClient, NotFoundError
+from apiclients.keystoneapiclient import KeystoneAPIClient
 
 
 
@@ -50,33 +51,57 @@ class OpenStack(PythonPlugin):
             device.zOpenStackProjectId,
             device.zOpenStackRegionName)
 
+        keystone_client = KeystoneAPIClient(
+            device.zCommandUsername,
+            device.zCommandPassword,
+            device.zOpenStackAuthUrl,
+            device.zOpenStackProjectId)
+
         results = {}
+
+        result = yield keystone_client.tenants()
+        results['tenants'] = result['tenants']
+        log.debug('tenants: %s\n' % str(results['tenants']))
 
         result = yield client.flavors(detailed=True, is_public=None)
         results['flavors'] = result['flavors']
-        log.info('flavors: %s\n' % str(results['flavors']))
+        log.debug('flavors: %s\n' % str(results['flavors']))
 
         result = yield client.images(detailed=True)
         results['images'] = result['images']
-        log.info('images: %s\n' % str(results['images']))
+        log.debug('images: %s\n' % str(results['images']))
 
         result = yield client.hypervisors(detailed=False,
                                           hypervisor_match='%',
                                           servers=True)
         results['hypervisors'] = result['hypervisors']
-        log.info('hypervisors: %s\n' % str(results['hypervisors']))
+        log.debug('hypervisors: %s\n' % str(results['hypervisors']))
 
-        result = yield client.servers(detailed=True)
+        result = yield client.servers(detailed=True, search_opts={'all_tenants': 1})
         results['servers'] = result['servers']
-        log.info('servers: %s\n' % str(results['servers']))
+        log.debug('servers: %s\n' % str(results['servers']))
 
         result = yield client.services()
         results['services'] = result['services']
-        log.info('services: %s\n' % str(results['services']))
+        log.debug('services: %s\n' % str(results['services']))
 
         returnValue(results)
 
     def process(self, device, results, unused):
+        tenants = []
+        for tenant in results['tenants']:
+            if tenant['enabled'] is not True:
+                continue
+
+            tenants.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStack.Tenant',
+                data=dict(
+                    id='tenant-{0}'.format(tenant['id']),
+                    title=tenant['name'],              # nova
+                    description=tenant['description'], # tenant description
+                    tenantId=tenant['id']
+                )))
+
         region_id = prepId("region-{0}".format(device.zOpenStackRegionName))
         region = ObjectMap(
             modname='ZenPacks.zenoss.OpenStack.Region',
@@ -180,6 +205,8 @@ class OpenStack(PythonPlugin):
             elif server.has_key('image') and server['image'].has_key('id'):
                 image_id = server['image']['id']
 
+            tenant_id = server['tenant_id']
+
             servers.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStack.Instance',
                 data=dict(
@@ -195,8 +222,9 @@ class OpenStack(PythonPlugin):
                     privateIps=list(private_ips),                 # 10.182.13.13
                     set_flavor='flavor-{0}'.format(flavor_id),    # flavor-performance1-1
                     set_image='image-{0}'.format(image_id),       # image-346eeba5-a122-42f1-94e7-06cb3c53f690
-                    hostId=server['hostId'],                         # a84303c0021aa53c7e749cbbbfac265f
-                    hostName=server['name']                          # cloudserver01
+                    set_tenant='tenant-{0}'.format(tenant_id),    # tenant-a3a2901f2fd14f808401863e3628a858
+                    hostId=server['hostId'],                      # a84303c0021aa53c7e749cbbbfac265f
+                    hostName=server['name']                       # cloudserver01
                 )))
 
         services = []
@@ -328,9 +356,10 @@ class OpenStack(PythonPlugin):
                 )))
 
         componentsMap = RelationshipMap(relname='components')
-        for objmap in [region] + flavors + images + servers + \
+
+        for objmap in tenants + [region] + flavors + images + servers + \
             zones.values() + hosts + hypervisors + services:
-            componentsMap.append(objmap)
+            componentsMap.append(objmap)        
 
         endpointObjMap = ObjectMap(
             modname='ZenPacks.zenoss.OpenStack.Endpoint',
