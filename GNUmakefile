@@ -41,6 +41,11 @@ build:
 	cp ceilometer_zenoss/dist/*egg vagrant/devstack/controller/
 	cp ceilometer_zenoss/dist/*egg vagrant/devstack/compute/
 
+	cd $(TXSSHCLIENT_DIR) && \
+		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
+			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
+
+
 	# Now build all the build dependencies for this zenpack.
 	# cd $(SRC_DIR)/pip-1.5.5 && \
 	# 	PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
@@ -90,8 +95,8 @@ build:
 
 clean:
 	rm -rf build dist *.egg-info
-	rm -f  $(LIB_DIR)/txsshclient.zip
 	cd ceilometer_zenoss; rm -rf build dist *.egg-info
+	cd $(TXSSHCLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
 	# cd $(NOVACLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
 	# cd $(KEYSTONECLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
 	# cd $(CEILOMETERCLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
