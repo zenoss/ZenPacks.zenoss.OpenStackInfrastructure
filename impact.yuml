@@ -32,5 +32,5 @@
 //
 // CiscoUCS Impacts
 [note: Cisco UCS;ZenPack{bg:darkslateblue}]-[UCS Service Profile{bg:darkslateblue}]
-[UCS Service Profile{bg:darkslateblue}]0..1-1..*>[Host{bg:aquamarine}]
+[UCS Service Profile{bg:darkslateblue}]0..1-1..*>[Linux;Device{bg:deepskyblue}]
 //

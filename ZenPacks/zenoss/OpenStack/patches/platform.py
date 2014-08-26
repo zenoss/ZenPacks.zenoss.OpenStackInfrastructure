@@ -20,12 +20,27 @@ from Products.DataCollector.ApplyDataMap import ApplyDataMap
 
 
 @monkeypatch('Products.ZenModel.Device.Device')
+def openstackInstance(self):
+    # TODO: Implement
+    return None
+
+
+@monkeypatch('Products.ZenModel.Device.Device')
+def openstack_hostComponent(self):
+    # If this is an openstack compute node, returns a the OpenstackHost component for it.
+    host = DeviceProxyComponent.component_for_proxy_device(self)
+    if host is not None and host.meta_type == 'OpenStackHost':
+        return host
+    return None
+
+
+@monkeypatch('Products.ZenModel.Device.Device')
 def openstack_instanceList(self):
     # If this is an openstack compute node, returns a list of (instance ID, hypervisor
     # instance name) tuples for instances running on this host.
 
+    host = self.openstack_hostComponent()
     try:
-        host = DeviceProxyComponent.component_for_proxy_device(self)
         return [(x.id, x.hypervisorInstanceName) for x in host.hypervisor().instances()]
     except AttributeError:
         return []
