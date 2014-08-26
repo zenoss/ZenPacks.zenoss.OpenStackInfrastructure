@@ -14,9 +14,6 @@
 PYTHON=python
 SRC_DIR=$(PWD)/src
 TXSSHCLIENT_DIR=$(SRC_DIR)/txsshclient-0.1.0dev1
-# NOVACLIENT_DIR=$(SRC_DIR)/python-novaclient-2.15.0
-# KEYSTONECLIENT_DIR=$(SRC_DIR)/python-keystoneclient-0.4.0
-# CEILOMETERCLIENT_DIR=$(SRC_DIR)/python-ceilometerclient-1.0.6
 ZP_DIR=$(PWD)/ZenPacks/zenoss/OpenStack
 BIN_DIR=$(ZP_DIR)/bin
 LIB_DIR=$(ZP_DIR)/lib
@@ -41,12 +38,28 @@ build:
 	cp ceilometer_zenoss/dist/*egg vagrant/devstack/controller/
 	cp ceilometer_zenoss/dist/*egg vagrant/devstack/compute/
 
+	# Now build all the build dependencies for this zenpack.
 	cd $(TXSSHCLIENT_DIR) && \
 		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
 
 
-	# Now build all the build dependencies for this zenpack.
+
+clean:
+	rm -rf build dist *.egg-info
+	cd ceilometer_zenoss; rm -rf build dist *.egg-info
+	cd $(TXSSHCLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
+	cd $(LIB_DIR) ; rm -Rf *.egg site.py easy-install.pth ; cd $(SRC_DIR)
+	find . -name '*.pyc' | xargs rm -f
+
+# The libraries below are no longer needed, and will be removed from the build
+# completely, soon.
+NOVACLIENT_DIR=$(SRC_DIR)/python-novaclient-2.15.0
+KEYSTONECLIENT_DIR=$(SRC_DIR)/python-keystoneclient-0.4.0
+CEILOMETERCLIENT_DIR=$(SRC_DIR)/python-ceilometerclient-1.0.6
+
+
+build_openstack_libs:
 	# cd $(SRC_DIR)/pip-1.5.5 && \
 	# 	PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 	# 		--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
@@ -93,19 +106,14 @@ build:
 	# 	PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
 	# 		--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
 
-clean:
-	rm -rf build dist *.egg-info
-	cd ceilometer_zenoss; rm -rf build dist *.egg-info
-	cd $(TXSSHCLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
-	# cd $(NOVACLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
-	# cd $(KEYSTONECLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
-	# cd $(CEILOMETERCLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
-	# rm -f $(BIN_DIR)/nova
-	# rm -f $(BIN_DIR)/keystone
-	# rm -f $(BIN_DIR)/ceilometer
-	# cd $(LIB_DIR) ; rm -Rf keystoneclient ; cd $(SRC_DIR)
-	# cd $(LIB_DIR) ; rm -Rf novaclient ; cd $(SRC_DIR)
-	# cd $(LIB_DIR) ; rm -Rf ceilometerclient ; cd $(SRC_DIR)
-	cd $(LIB_DIR) ; rm -Rf *.egg site.py easy-install.pth ; cd $(SRC_DIR)
-	find . -name '*.pyc' | xargs rm -f
+clean_openstack_libs:
+	cd $(NOVACLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
+	cd $(KEYSTONECLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
+	cd $(CEILOMETERCLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
+	rm -f $(BIN_DIR)/nova
+	rm -f $(BIN_DIR)/keystone
+	rm -f $(BIN_DIR)/ceilometer
+	cd $(LIB_DIR) ; rm -Rf keystoneclient ; cd $(SRC_DIR)
+	cd $(LIB_DIR) ; rm -Rf novaclient ; cd $(SRC_DIR)
+	cd $(LIB_DIR) ; rm -Rf ceilometerclient ; cd $(SRC_DIR)
 
