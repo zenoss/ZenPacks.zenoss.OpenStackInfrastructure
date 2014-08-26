@@ -396,6 +396,10 @@ class TestImpact(zenpacklib.TestCase):
         for instance in instances:
             impacts, impacted_by = impacts_for(instance)
 
+            for vnic in instance.vnics():
+                self.assertTrue(vnic.id in impacted_by,
+                                msg="Instance %s impacted by vnic %s" % (instance.id, vnic.id))
+
             hypervisor = instance.hypervisor()
             self.assertTrue(hypervisor.id in impacted_by,
                             msg="Instance %s impacted by hypervisor %s" % (instance.id, hypervisor.id))
@@ -408,6 +412,18 @@ class TestImpact(zenpacklib.TestCase):
             tenant = instance.tenant()
             self.assertTrue(tenant.id in impacts,
                             msg="Instance %s impacts tenant %s" % (instance.id, tenant.id))
+
+    @require_zenpack('ZenPacks.zenoss.Impact')
+    def test_Vnic(self):
+        vnics = self.endpoint().getDeviceComponents(type='OpenStackVnic')
+        self.assertNotEqual(len(vnics), 0)
+
+        for vnic in vnics:
+            impacts, impacted_by = impacts_for(vnic)
+            instance = vnic.instance()
+            self.assertTrue(instance.id in impacts,
+                            msg="Vnic %s impacts instance %s" % (vnic.id, instance.id))
+
 
 
     @require_zenpack('ZenPacks.zenoss.Impact')

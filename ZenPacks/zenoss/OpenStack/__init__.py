@@ -223,7 +223,7 @@ CFG = zenpacklib.ZenPackSpec(
                 # NOTE (FIXME): This isn't suppressing it.
                 'hypervisor': {'grid_display': False}  # no need to show this- show the host instead
             },
-            'impacted_by': ['hypervisor'],
+            'impacted_by': ['hypervisor', 'vnics'],
             'impacts': ['guestDevice', 'tenant']
 
             # Note: By (nova) design, hostId is a hash of the actual underlying host and project, and
@@ -238,7 +238,8 @@ CFG = zenpacklib.ZenPackSpec(
             'order': 3.5,
             'properties': {
                 'macaddress': {'label': 'MAC Address'}
-            }
+            },
+            'impacts': ['instance']
         },
 
         'Region': {
