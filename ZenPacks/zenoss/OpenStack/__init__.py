@@ -37,6 +37,7 @@ RELATIONSHIPS_YUML = """
 [OrgComponent]1-.-*[SoftwareComponent]
 [Flavor]1-.-*[Instance]
 [Image]1-.-*[Instance]
+[Tenant]1-.-*[Instance]
 [Hypervisor]1-.-*[Instance]
 // non-containing 1:1
 [Hypervisor]1-.-1[Host]
@@ -143,6 +144,18 @@ CFG = zenpacklib.ZenPackSpec(
 
         # Component Types ############################################
 
+        'Tenant': {
+            'base': 'OpenstackComponent',
+            'meta_type': 'OpenStackTenant',
+            'label': 'Tenant',
+            'order': 1,
+            'properties': {
+                'tenantID':   {'grid_display': False},
+                'description': { 'label': 'Description'},
+            },
+            'impacted_by': ['instances']
+        },
+
         'Flavor': {
             'base': 'LogicalComponent',
             'meta_type': 'OpenStackFlavor',
@@ -188,8 +201,10 @@ CFG = zenpacklib.ZenPackSpec(
                                         'label': 'Public IPs'},   # ['50.57.74.222']
                 'privateIps':          {'type_': 'lines',
                                         'label': 'Private IPs'},  # ['10.182.13.13']
-                'biosUuid':            {'label': 'BIOS UUID'},
-                'serialNumber':        {'label': 'BIOS Serial Number'},
+                'biosUuid':            {'label': 'BIOS UUID',
+                                        'grid_display': False},
+                'serialNumber':        {'label': 'BIOS Serial Number',
+                                        'grid_display': False},
                 
                 # The name this insance is known by within the hypervisor (for instance,
                 # for libvirt, it would be something like 'instance-00000001')
@@ -209,7 +224,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'hypervisor': {'grid_display': False}  # no need to show this- show the host instead
             },
             'impacted_by': ['hypervisor'],
-            'impacts': ['guestDevice']
+            'impacts': ['guestDevice', 'tenant']
 
             # Note: By (nova) design, hostId is a hash of the actual underlying host and project, and
             # is designed to allow users of a specific project to tell if two VMs are on the same host, nothing
