@@ -211,7 +211,9 @@ CFG = zenpacklib.ZenPackSpec(
                 'biosUuid':            {'label': 'BIOS UUID',
                                         'grid_display': False},
                 'serialNumber':        {'label': 'BIOS Serial Number',
-                                        'grid_display': False},
+                                        'grid_display': False,
+                                        'index_type': 'field',
+                                        'index_scope': 'global'},
                 
                 # The name this insance is known by within the hypervisor (for instance,
                 # for libvirt, it would be something like 'instance-00000001')
@@ -248,7 +250,9 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Vnic',
             'order': 3.5,
             'properties': {
-                'macaddress': {'label': 'MAC Address'}
+                'macaddress': {'label': 'MAC Address',
+                               'index_type': 'field',
+                               'index_scope': 'global'}
             },
             'impacts': ['instance']
         },
