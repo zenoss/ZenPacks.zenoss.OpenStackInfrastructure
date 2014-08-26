@@ -387,8 +387,6 @@ class TestImpact(zenpacklib.TestCase):
                 self.assertTrue(False, msg="Unrecognized Region child type %s" % (childOrg.meta_type))
 
     @require_zenpack('ZenPacks.zenoss.Impact')
-    @unittest.expectedFailure
-    # Have not yet implemented openstackInstance()
     def test_Instance(self):
         instances = self.endpoint().getDeviceComponents(type='OpenStackInstance')
         self.assertNotEqual(len(instances), 0)

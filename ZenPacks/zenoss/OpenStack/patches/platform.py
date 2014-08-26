@@ -15,6 +15,7 @@ import logging
 log = logging.getLogger("zen.OpenStack.device")
 
 from Products.ZenUtils.Utils import monkeypatch
+from ZenPacks.zenoss.OpenStack.utils import getIpInterfaceMacs
 from ZenPacks.zenoss.OpenStack.DeviceProxyComponent import DeviceProxyComponent
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
 

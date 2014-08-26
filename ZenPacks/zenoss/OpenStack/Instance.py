@@ -13,6 +13,7 @@ from . import schema
 import logging
 LOG = logging.getLogger('zen.OpenStackInstance')
 
+from ZenPacks.zenoss.OpenStack.utils import findIpInterfacesByMAC
 
 class Instance(schema.Instance):
 
@@ -24,7 +25,10 @@ class Instance(schema.Instance):
             return None
 
     def guestDevice(self):
-        # TODO: Implement
+        for vnic in self.vnics():
+            for interface in findIpInterfacesByMAC(self.dmd, vnic.macaddress):
+                return interface.device()
+
         return None
 
 class DeviceLinkProvider(object):
