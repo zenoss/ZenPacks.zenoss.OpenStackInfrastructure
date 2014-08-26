@@ -234,7 +234,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'flavor':     {'label_width': 50, 'content_width': 50},
                 'image':      {'label_width': 50, 'content_width': 50},
             },
-            'impacted_by': ['hypervisor'],
+            'impacted_by': ['hypervisor', 'vnics'],
             'impacts': ['guestDevice', 'tenant']
 
             # Note: By (nova) design, hostId is a hash of the actual underlying host and project, and
@@ -250,6 +250,7 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'macaddress': {'label': 'MAC Address'}
             },
+            'impacts': ['instance']
         },
 
         'Region': {
