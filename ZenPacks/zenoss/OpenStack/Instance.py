@@ -25,9 +25,10 @@ class Instance(schema.Instance):
             return None
 
     def guestDevice(self):
-        for vnic in self.vnics():
-            for interface in findIpInterfacesByMAC(self.dmd, vnic.macaddress):
-                return interface.device()
+        macs = [x.macaddress for x in self.vnics()]
+
+        for interface in findIpInterfacesByMAC(self.dmd, macs):
+            return interface.device()
 
         return None
 

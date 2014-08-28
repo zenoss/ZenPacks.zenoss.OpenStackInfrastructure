@@ -204,29 +204,30 @@ def create_model_data(dmd):
     # Vnic
     from ZenPacks.zenoss.OpenStack.Vnic import Vnic
     instance1vnic1 = addContained(instance1, "vnics", Vnic("instance1_vnic1"))
-    instance1vnic1.macaddress = 'de:ad:be:ef:04:02'
+    instance1vnic1.macaddress = 'de:ad:be:ef:01:01'
     instance1vnic1.index_object()
     instance1vnic2 = addContained(instance1, "vnics", Vnic("instance1_vnic2"))
-    instance1vnic2.macaddress = 'de:ad:be:ef:04:01'
+    instance1vnic2.macaddress = 'de:ad:be:ef:01:02'
     instance1vnic2.index_object()
     instance2vnic1 = addContained(instance2, "vnics", Vnic("instance2_vnic1"))
-    instance2vnic1.macaddress = 'de:ad:be:ef:03:02'
+    instance2vnic1.macaddress = 'de:ad:be:ef:02:01'
     instance2vnic1.index_object()
     instance2vnic2 = addContained(instance2, "vnics", Vnic("instance2_vnic2"))
-    instance2vnic2.macaddress = 'de:ad:be:ef:03:01'
+    instance2vnic2.macaddress = 'de:ad:be:ef:02:02'
     instance2vnic2.index_object()
     instance3vnic1 = addContained(instance3, "vnics", Vnic("instance3_vnic1"))
-    instance3vnic1.macaddress = 'de:ad:be:ef:02:02'
+    instance3vnic1.macaddress = 'de:ad:be:ef:03:01'
     instance3vnic1.index_object()
     instance3vnic2 = addContained(instance3, "vnics", Vnic("instance3_vnic2"))
-    instance3vnic2.macaddress = 'de:ad:be:ef:02:01'
+    instance3vnic2.macaddress = 'de:ad:be:ef:03:02'
     instance3vnic2.index_object()
     instance4vnic1 = addContained(instance4, "vnics", Vnic("instance4_vnic1"))
-    instance4vnic1.macaddress = 'de:ad:be:ef:01:02'
+    instance4vnic1.macaddress = 'de:ad:be:ef:04:01'
     instance4vnic1.index_object()
     instance4vnic2 = addContained(instance4, "vnics", Vnic("instance4_vnic2"))
-    instance4vnic2.macaddress = 'de:ad:be:ef:01:01'
+    instance4vnic2.macaddress = 'de:ad:be:ef:04:02'
     instance4vnic2.index_object()
+
 
     # Linux guest devices (Virtual)
     # make sure that the interfaces line up.
