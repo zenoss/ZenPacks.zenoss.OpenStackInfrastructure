@@ -2164,8 +2164,31 @@ class ClassRelationshipSpec(object):
 
         return ["{{name: '{}'}}".format(fieldname)]
 
+    def js_columns_width(self):
+        """Return integer pixel width of JavaScript columns."""
+        if not self.grid_display:
+            return 0
+
+        remote_spec = self.class_.zenpack.classes.get(self.remote_classname)
+
+        # No reason to show a column for the device since we're already
+        # looking at the device.
+        if not remote_spec or remote_spec.is_device:
+            return 0
+
+        if isinstance(self.schema, ToOne):
+            return max(
+                (self.content_width or remote_spec.content_width) + 14,
+                (self.label_width or remote_spec.label_width) + 20)
+        else:
+            return (self.label_width or remote_spec.plural_label_width) + 20
+
+
     @property
     def js_columns(self):
+        if not self.grid_display:
+            return []
+
         """Return list of JavaScript columns."""
         remote_classname = self.schema.remoteClass.split('.')[-1]
         remote_spec = self.class_.zenpack.classes.get(remote_classname)
