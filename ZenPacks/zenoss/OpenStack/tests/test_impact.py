@@ -168,13 +168,19 @@ class TestImpact(zenpacklib.TestCase):
         return self.model_data()['endpoint']
 
     def linuxguest(self, guestid):
-        return self.model_data()['guest_dc'].getObjByPath('devices/' + guestid)
+        try:
+            return self.model_data()['guest_dc'].getObjByPath('devices/' + guestid)
+        except Exception:
+            return None
 
     def linuxguests(self):
         return self.model_data()['guest_dc'].getDevices()
 
     def linuxhost(self, hostid):
-        return self.model_data()['phys_dc'].getObjByPath('devices/' + hostid)
+        try:        
+            return self.model_data()['phys_dc'].getObjByPath('devices/' + hostid)
+        except Exception:
+            return None
 
     def linuxhosts(self):
         return self.model_data()['phys_dc'].getDevices()
@@ -439,7 +445,6 @@ class TestImpact(zenpacklib.TestCase):
 
 
     @require_zenpack('ZenPacks.zenoss.Impact')
-    @unittest.expectedFailure
     # Have not yet implemented openstackInstance()
     def test_GuestDevice(self):
         guests = self.linuxguests()

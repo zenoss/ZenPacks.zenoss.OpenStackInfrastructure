@@ -18,11 +18,40 @@ from Products.ZenUtils.Utils import monkeypatch
 from ZenPacks.zenoss.OpenStack.utils import getIpInterfaceMacs
 from ZenPacks.zenoss.OpenStack.DeviceProxyComponent import DeviceProxyComponent
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
-
+from ..zenpacklib import catalog_search
 
 @monkeypatch('Products.ZenModel.Device.Device')
 def openstackInstance(self):
-    # TODO: Implement
+    # Search first by serial number, if known.
+    serialNumber = self.os.getHWSerialNumber()
+    if serialNumber:
+        instances = list(catalog_search(self.dmd,
+                                       'ZenPacks_zenoss_OpenStack_InstanceSearch',
+                                       serialNumber=serialNumber))
+        if len(instances) > 1:
+            log.warning("More than one openstack instance found with a serial number of %s - returning the first one (%s)" %
+                (serialNumber, instances[0].id))
+            return instances[0]
+
+    # Nope?  OK, go to MAC addresses.
+    instances = set()
+    macs = getIpInterfaceMacs(self)
+    vnics = catalog_search(self.dmd,
+                           'ZenPacks_zenoss_OpenStack_VnicSearch',
+                           macaddress=macs)
+    for vnic in vnics:
+        instances.add(vnic.instance())
+
+    if len(instances):
+        instance = instances.pop()
+
+        if len(instances):
+            log.warning("More than one openstack instance found with MACs of %s - returning the first one (%s)" %
+                (macs, instance.id))
+
+        return instance
+
+    # Didn't find it.  Oh well.
     return None
 
 
