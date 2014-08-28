@@ -228,7 +228,6 @@ CFG = zenpacklib.ZenPackSpec(
                          'order': 3.4}
             },
             'relationships': {
-                # NOTE (FIXME): This isn't suppressing it.
                 'hypervisor': {'grid_display': False},
                 'vnics':      {'grid_display': False},
                 'tenant':     {'label_width': 50, 'content_width': 50},
