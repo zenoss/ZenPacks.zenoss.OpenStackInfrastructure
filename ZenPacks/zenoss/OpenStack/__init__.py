@@ -284,6 +284,10 @@ CFG = zenpacklib.ZenPackSpec(
             'meta_type': 'OpenStackHost',
             'label': 'Host',
             'order': 8,
+            'properties': {
+                'hostfqdn':            {'grid_display': False,
+                                        'index_type': 'field'},
+            },
             'relationships': {
                 'orgComponent': {'label': 'Supporting',
                                  'render_with_type': True,
@@ -327,7 +331,8 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Hypervisor',
             'order': 14,
             'properties': {
-                'hypervisorId':      {'grid_display': False}
+                'hypervisorId':      {'grid_display': False},
+                'hostname':          {'grid_display': False},
             },
             'impacts': ['instances'],
             'impacted_by': ['host']
