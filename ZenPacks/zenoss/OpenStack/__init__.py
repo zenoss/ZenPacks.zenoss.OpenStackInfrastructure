@@ -98,7 +98,7 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'proxy_device': {'label': 'Device',
 #                                 'type_': 'entity',
-                                 'renderer': 'Zenoss.render.default_uid_renderer',  # workaround to link to a different device
+                                 'renderer': 'Zenoss.render.openstack_uid_renderer',  # workaround to link to a different device
                                  'api_only': True,
                                  'api_backendtype': 'method'}
             }
@@ -192,15 +192,22 @@ CFG = zenpacklib.ZenPackSpec(
             'order': 3,
             'properties': {
                 'serverId':            {'grid_display': False},   # 847424
-                'serverStatus':        {'label': 'Status'},   # ACTIVE
+                'serverStatus':        {'label': 'Status',
+                                        'label_width': 50,
+                                        'order': 3.3},            # ACTIVE
                 'serverBackupEnabled': {'type_': 'boolean',
-                                        'label': 'Backup'},    # False
+                                        'label': 'Backup',        # False
+                                        'grid_display': False},   # DISABLED
                 'serverBackupDaily':   {'grid_display': False},   # DISABLED
                 'serverBackupWeekly':  {'grid_display': False},   # DISABLED
                 'publicIps':           {'type_': 'lines',
-                                        'label': 'Public IPs'},   # ['50.57.74.222']
+                                        'label': 'Public IPs',
+                                        'label_width': 75,
+                                        'order': 3.1},            # ['50.57.74.222']
                 'privateIps':          {'type_': 'lines',
-                                        'label': 'Private IPs'},  # ['10.182.13.13']
+                                        'label': 'Private IPs',
+                                        'label_width': 75,
+                                        'order': 3.2},            # ['10.182.13.13']
                 'biosUuid':            {'label': 'BIOS UUID',
                                         'grid_display': False},
                 'serialNumber':        {'label': 'BIOS Serial Number',
@@ -217,11 +224,15 @@ CFG = zenpacklib.ZenPackSpec(
                 'host': {'label': 'Host',   # link to the host this is running on.
                          'type_': 'entity',
                          'api_only': True,
-                         'api_backendtype': 'method'}
+                         'api_backendtype': 'method',
+                         'order': 3.4}
             },
             'relationships': {
-                # NOTE (FIXME): This isn't suppressing it.
-                'hypervisor': {'grid_display': False}  # no need to show this- show the host instead
+                'hypervisor': {'grid_display': False},
+                'vnics':      {'grid_display': False},
+                'tenant':     {'label_width': 50, 'content_width': 50},
+                'flavor':     {'label_width': 50, 'content_width': 50},
+                'image':      {'label_width': 50, 'content_width': 50},
             },
             'impacted_by': ['hypervisor'],
             'impacts': ['guestDevice', 'tenant']
@@ -238,7 +249,7 @@ CFG = zenpacklib.ZenPackSpec(
             'order': 3.5,
             'properties': {
                 'macaddress': {'label': 'MAC Address'}
-            }
+            },
         },
 
         'Region': {

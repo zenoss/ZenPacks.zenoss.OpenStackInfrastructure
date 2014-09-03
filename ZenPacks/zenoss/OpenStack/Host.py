@@ -54,7 +54,7 @@ class Host(schema.Host):
         for service in self.getDeviceComponents(type='OpenStackNovaService'):
             required_services.add(service.binary)
 
-        process_classes = [p.osProcessClass().processClassPrimaryUrlPath()
+        process_classes = [p.osProcessClass().getPrimaryUrlPath()
                            for p in device.getDeviceComponents(type='OSProcess')]
 
         detected_services = [pc.split('/')[6] for pc in process_classes
