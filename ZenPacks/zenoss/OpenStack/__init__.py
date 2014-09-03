@@ -150,7 +150,7 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Tenant',
             'order': 1,
             'properties': {
-                'tenantID':   {'grid_display': False},
+                'tenantId':   {'grid_display': False},
                 'description': { 'label': 'Description'},
             },
             'impacted_by': ['instances']
