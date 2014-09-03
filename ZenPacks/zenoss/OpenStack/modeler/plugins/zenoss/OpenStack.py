@@ -306,7 +306,6 @@ class OpenStack(PythonPlugin):
         server_hypervisor_instance_name = {}
         for hypervisor in results['hypervisors']:
             hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
-            host_id = prepId("host-{0}".format(hypervisor['hypervisor_hostname']))
 
             hypervisor_servers = []
             if hypervisor.has_key('servers'):
@@ -322,7 +321,7 @@ class OpenStack(PythonPlugin):
                     title='{0}.{1}'.format(hypervisor['hypervisor_hostname'], hypervisor['id']),
                     hypervisorId=hypervisor['id'],  # 1
                     set_instances=hypervisor_servers,
-                    set_host=host_id
+                    set_hostByName=hypervisor['hypervisor_hostname'],
                 )))
 
         # add hypervisor instance name to the existing server objectmaps.
