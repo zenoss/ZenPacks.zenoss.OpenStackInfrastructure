@@ -122,6 +122,8 @@ class TestImpact(zenpacklib.TestCase):
     Test suite for Impact within OpenStack.
     '''
 
+    disableLogging = False
+
     def afterSetUp(self):
         # needed if this is run directly on the commandline,
         # since otherwise it will be __main__, and ZPL's afterSetup
