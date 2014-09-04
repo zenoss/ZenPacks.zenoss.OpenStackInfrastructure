@@ -202,7 +202,9 @@ class OpenStack(PythonPlugin):
             image_id = None
             if server.has_key('imageId'):
                 image_id = server['imageId']
-            elif server.has_key('image') and server['image'].has_key('id'):
+            elif server.has_key('image') and \
+                 isinstance(server['image'], dict) and \
+                 server['image'].has_key('id'):
                 image_id = server['image']['id']
 
             tenant_id = server['tenant_id']
