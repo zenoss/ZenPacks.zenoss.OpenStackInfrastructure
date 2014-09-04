@@ -167,10 +167,7 @@ class EventsAMQPDataSourcePlugin(PythonDataSourcePlugin):
             for trait in c_event['traits']:
                 traits[trait['name']] = trait['value']
 
-            if 'request_id' in traits:
-                evt['eventKey'] = traits['request_id']
-            else:
-                evt['eventKey'] = c_event['message_id']
+            evt['eventKey'] = c_event['message_id']
 
             for trait in traits:
                 evt['trait_' + trait] = traits[trait]
