@@ -301,6 +301,7 @@ class OpenStack(PythonPlugin):
                 data=dict(
                     id=host_id,
                     title=data['hostname'],
+                    hostname=data['hostname'],
                     set_orgComponent=data['org_id']
                 )))
 

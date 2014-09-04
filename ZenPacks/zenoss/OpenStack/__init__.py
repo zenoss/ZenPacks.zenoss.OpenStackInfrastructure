@@ -287,6 +287,8 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'hostfqdn':            {'grid_display': False,
                                         'index_type': 'field'},
+                'hostname':            {'grid_display': False,
+                                        'index_type': 'field'},
             },
             'relationships': {
                 'orgComponent': {'label': 'Supporting',
@@ -332,7 +334,7 @@ CFG = zenpacklib.ZenPackSpec(
             'order': 14,
             'properties': {
                 'hypervisorId':      {'grid_display': False},
-                'hostname':          {'grid_display': False},
+                'hostfqdn':          {'grid_display': False},
             },
             'impacts': ['instances'],
             'impacted_by': ['host']

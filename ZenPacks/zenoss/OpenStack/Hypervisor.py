@@ -13,41 +13,35 @@ from . import schema
 import logging
 log = logging.getLogger('zen.OpenStackHypervisor')
 
+from Products.AdvancedQuery import Eq, Or
 
 class Hypervisor(schema.Hypervisor):
 
     def get_hostByName(self):
-        if self.hostname:
-            return self.hostname
+        if self.hostfqdn:
+            return self.hostfqdn
         return None
 
 
     def set_hostByName(self, name):
-        host = None
+        if not name:
+            log.warning("Could not set host. Given name is None")
+            return
 
-        if name and len(self.search('Host', hostname=name)) > 0:
-            host = self.search('Host', hostname=name)[0].getObject()
+        self.hostfqdn = name
+        query = Or(Eq('hostname', name), Eq('hostfqdn', name))
+        if len(self.search('Host', query)) > 0:
+            host = self.search('Host', query)[0].getObject()
             if host:
                 log.info("Set host by fqdn: %s" % name)
                 self.set_host(host.id)
-                self.hostname = name
-        elif self.host() and self.host().hostname() and \
-            len(self.search('Host', hostname=self.host().hostname())) > 0:
-            # try host hostname
-            host = self.search('Host',
-                hostname=self.host().hostname())[0].getObject()
-            if host:
-                log.info("Set host by hostname: %s" % self.host().hostname())
-                self.set_host(host.id)
-                self.hostname = self.host().hostname()
-        elif self.host() and self.host().id and \
-            len(self.search('Host', id=self.host().id)) > 0:
-            # try one more time with host id
-            host = self.search('Host',
-                id=self.host().id)[0].getObject()
-            if host:
-                log.info("Set host by host id: %s" % self.host().id)
-                self.set_host(host.id)
-                self.hostname = self.host().id
+        elif name.find('.') > -1:
+            name = name[:name.index('.')]
+            query = Or(Eq('hostname', name), Eq('hostfqdn', name))
+            if len(self.search('Host', query)) > 0:
+                host = self.search('Host', query)[0].getObject()
+                if host:
+                    log.info("Set host by hostname: %s" % name)
+                    self.set_host(host.id)
         else:
-            log.error("Could not set host")
+            log.error("Could not setup host")
