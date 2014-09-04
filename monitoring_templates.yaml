@@ -1,3 +1,5 @@
+# Ceilometer Reference: http://docs.openstack.org/developer/ceilometer/measurements.html
+
 /OpenStack/Instance:
   description: "OpenStack: Instance Monitoring"
   targetPythonClass: ZenPacks.zenoss.OpenStack.Instance
