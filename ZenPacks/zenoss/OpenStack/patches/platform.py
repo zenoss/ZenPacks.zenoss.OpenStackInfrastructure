@@ -60,3 +60,19 @@ def setApplyDataMapToOpenStackEndpoint(self, datamap):
         log.error("Unable to apply datamap to proxy component for %s (component not found)" % self)
     else:
         mapper._applyDataMap(component.device(), datamap)
+
+
+@monkeypatch('Products.ZenModel.Device.Device')
+def getApplyDataMapToOpenStackHost(self):
+    return []
+
+
+@monkeypatch('Products.ZenModel.Device.Device')
+def setApplyDataMapToOpenStackHost(self, datamap):
+    mapper = ApplyDataMap()
+
+    component = DeviceProxyComponent.component_for_proxy_device(self)
+    if not component:
+        log.error("Unable to apply datamap to proxy component for %s (component not found)" % self)
+    else:
+        mapper._applyDataMap(component, datamap)
