@@ -33,7 +33,9 @@ class Hypervisor(schema.Hypervisor):
         hosts = self.search('Host', query)
         if len(hosts) > 0:
             if len(hosts) > 1:
-                log.warning("Got more than one host")
+                log.warning(
+                    "Got more than one host for hypervisor: " + \
+                    "%s with id: %s" % (self.title, self.id))
 
             host = hosts[0].getObject()
             if host:
@@ -45,7 +47,9 @@ class Hypervisor(schema.Hypervisor):
             hosts = self.search('Host', query)
             if len(hosts) > 0:
                 if len(hosts) > 1:
-                    log.warning("Got more than one host")
+                    log.warning(
+                        "Got more than one host for hypervisor: " + \
+                        "%s with id: %s" (self.title, self.id))
 
                 host = hosts[0].getObject()
                 if host:
