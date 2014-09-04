@@ -30,16 +30,24 @@ class Hypervisor(schema.Hypervisor):
 
         self.hostfqdn = name
         query = Or(Eq('hostname', name), Eq('hostfqdn', name))
-        if len(self.search('Host', query)) > 0:
-            host = self.search('Host', query)[0].getObject()
+        hosts = self.search('Host', query)
+        if len(hosts) > 0:
+            if len(hosts) > 1:
+                log.warning("Got more than one host")
+
+            host = hosts[0].getObject()
             if host:
                 log.info("Set host by fqdn: %s" % name)
                 self.set_host(host.id)
         elif name.find('.') > -1:
             name = name[:name.index('.')]
             query = Or(Eq('hostname', name), Eq('hostfqdn', name))
-            if len(self.search('Host', query)) > 0:
-                host = self.search('Host', query)[0].getObject()
+            hosts = self.search('Host', query)
+            if len(hosts) > 0:
+                if len(hosts) > 1:
+                    log.warning("Got more than one host")
+
+                host = hosts[0].getObject()
                 if host:
                     log.info("Set host by hostname: %s" % name)
                     self.set_host(host.id)
