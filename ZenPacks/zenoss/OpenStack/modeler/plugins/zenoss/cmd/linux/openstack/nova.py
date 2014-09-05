@@ -11,6 +11,8 @@
 #
 ###########################################################################
 
+""" Get OpenStack Nova API version """
+
 from Products.DataCollector.plugins.DataMaps import ObjectMap, MultiArgs
 
 from Products.DataCollector.plugins.CollectorPlugin import CommandPlugin

@@ -11,6 +11,8 @@
 #
 ###########################################################################
 
+""" Get component information using OpenStack API clients """
+
 import logging
 log = logging.getLogger('zen.OpenStack')
 
