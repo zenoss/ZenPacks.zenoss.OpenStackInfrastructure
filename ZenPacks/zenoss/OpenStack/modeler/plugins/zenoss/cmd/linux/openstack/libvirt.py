@@ -11,6 +11,8 @@
 #
 ###########################################################################
 
+""" Get OpenStack instance virtual NIC information using libvert """
+
 from lxml import etree
 from twisted.internet.defer import inlineCallbacks, returnValue
 

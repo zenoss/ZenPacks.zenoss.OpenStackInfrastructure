@@ -11,6 +11,8 @@
 #
 ###########################################################################
 
+""" Get OpenStack host FQDN """
+
 from Products.DataCollector.plugins.DataMaps import ObjectMap
 
 from Products.DataCollector.plugins.CollectorPlugin import CommandPlugin
