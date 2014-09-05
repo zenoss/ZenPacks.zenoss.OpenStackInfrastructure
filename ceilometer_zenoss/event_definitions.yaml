@@ -10,6 +10,10 @@
       fields: payload.instance_id
     state:
       fields: payload.state
+    old_state:
+      fields: payload.old_state
+    state_description:
+      fields: payload.state_description
     fixed_ips:
       fields: payload.fixed_ips
     flavor_name:
