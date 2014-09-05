@@ -1,6 +1,9 @@
 ---
+# Nova Instance Events
 - event_type: compute.instance.*
   traits: &instance_traits
+    priority:
+      fields: priority
     display_name:
       fields: payload.display_name
     instance_id:

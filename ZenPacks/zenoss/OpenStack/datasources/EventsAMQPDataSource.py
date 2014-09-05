@@ -167,6 +167,12 @@ class EventsAMQPDataSourcePlugin(PythonDataSourcePlugin):
             for trait in c_event['traits']:
                 traits[trait['name']] = trait['value']
 
+            if 'priority' in traits:
+                if traits['priority'] == 'WARN':
+                    evt['severity'] = ZenEventClasses.Warning
+                elif traits['priority'] == 'ERROR':
+                    evt['severity'] = ZenEventClasses.Error
+
             evt['eventKey'] = c_event['message_id']
 
             for trait in traits:
