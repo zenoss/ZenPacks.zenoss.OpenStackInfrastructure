@@ -265,12 +265,15 @@ MAPPERS = {
     'compute.instance.exists':              None,
     'compute.instance.exists.verified.old': None,
 
-    # 'compute.instance.live_migration.pre.end': 
-    # 'compute.instance.live_migration.pre.start': 
-    # 'compute.instance.live_migration.post.dest.end': 
-    # 'compute.instance.live_migration.post.dest.start': 
-    # 'compute.instance.live_migration._post.end': 
-    # 'compute.instance.live_migration._post.start': 
+    # Note: I do not currently have good test data for what a real
+    # live migration looks like.  I am assuming that the new host will be
+    # carried in the last event, and only processing that one.
+    'compute.instance.live_migration.pre.start': None,
+    'compute.instance.live_migration.pre.end': None,
+    'compute.instance.live_migration.post.dest.start': None,
+    'compute.instance.live_migration.post.dest.end':  None,
+    'compute.instance.live_migration._post.start':  None,
+    'compute.instance.live_migration._post.end': instance_update,
 
     'compute.instance.power_off.start':  instance_powering_off,
     'compute.instance.power_off.end':    instance_powered_off,
