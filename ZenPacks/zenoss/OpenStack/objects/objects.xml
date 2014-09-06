@@ -2076,9 +2076,6 @@ Icehouse (2014.1)
 <property type="boolean" id="isOS" mode="w" >
 True
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/OpenStack/devices/packstack/os'/>
-</tomany>
 </object>
 <object id='Juno (2014.2)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
 <property type="string" id="name" mode="w" >
