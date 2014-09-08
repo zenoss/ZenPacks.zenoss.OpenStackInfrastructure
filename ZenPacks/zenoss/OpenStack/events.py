@@ -41,12 +41,16 @@ def _apply_traits(evt, traitset, objmap):
                 setattr(objmap, prop_name, value)
 
 
+def instance_id(evt):
+    return 'server-{0}'.format(evt.trait_instance_id)
+
+
 def instance_objmap(evt):
     return ObjectMap(
         modname='ZenPacks.zenoss.OpenStack.Instance',
         compname='',
         data={
-            'id': 'server-{0}'.format(evt.trait_instance_id),
+            'id': instance_id(evt),
             'relname': 'components'
         },
     )
@@ -213,6 +217,7 @@ def instance_rebuilt(device, dmd, evt):
     _apply_traits(evt, 'instance', objmap)
     return [objmap]
 
+
 def instance_suspended(device, dmd, evt):
     if not evt.summary:
         evt.summary = "Instance %s suspended" % (evt.trait_display_name)
@@ -229,6 +234,7 @@ def instance_resumed(device, dmd, evt):
     objmap = instance_objmap(evt)
     _apply_traits(evt, 'instance', objmap)
     return [objmap]
+
 
 def instance_rescue(device, dmd, evt):
     if not evt.summary:
@@ -254,84 +260,83 @@ def instance_unrescue(device, dmd, evt):
 
 
 MAPPERS = {
-    'compute.instance.create.start':     instance_create,
-    'compute.instance.create.end':       instance_update,
-    'compute.instance.create.error':     instance_update,
-    'compute.instance.update':           instance_update_status,
-    'compute.instance.delete.start':     None,
-    'compute.instance.delete.end':       instance_delete,
+    'openstack|compute.instance.create.start':     (instance_id, instance_create),
+    'openstack|compute.instance.create.end':       (instance_id, instance_update),
+    'openstack|compute.instance.create.error':     (instance_id, instance_update),
+    'openstack|compute.instance.update':           (instance_id, instance_update_status),
+    'openstack|compute.instance.delete.start':     (instance_id, None),
+    'openstack|compute.instance.delete.end':       (instance_id, instance_delete),
 
-    'compute.instance.create_ip.start':  None,
-    'compute.instance.create_ip.end':    None,
-    'compute.instance.delete_ip.start':  None,
-    'compute.instance.delete_ip.end':    None,
+    'openstack|compute.instance.create_ip.start':  (instance_id, None),
+    'openstack|compute.instance.create_ip.end':    (instance_id, None),
+    'openstack|compute.instance.delete_ip.start':  (instance_id, None),
+    'openstack|compute.instance.delete_ip.end':    (instance_id, None),
 
-    'compute.instance.exists':              None,
-    'compute.instance.exists.verified.old': None,
+    'openstack|compute.instance.exists':              (instance_id, None),
+    'openstack|compute.instance.exists.verified.old': (instance_id, None),
 
     # Note: I do not currently have good test data for what a real
     # live migration looks like.  I am assuming that the new host will be
     # carried in the last event, and only processing that one.
-    'compute.instance.live_migration.pre.start': None,
-    'compute.instance.live_migration.pre.end': None,
-    'compute.instance.live_migration.post.dest.start': None,
-    'compute.instance.live_migration.post.dest.end':  None,
-    'compute.instance.live_migration._post.start':  None,
-    'compute.instance.live_migration._post.end': instance_update,
+    'openstack|compute.instance.live_migration.pre.start': (instance_id, None),
+    'openstack|compute.instance.live_migration.pre.end': (instance_id, None),
+    'openstack|compute.instance.live_migration.post.dest.start': (instance_id, None),
+    'openstack|compute.instance.live_migration.post.dest.end':  (instance_id, None),
+    'openstack|compute.instance.live_migration._post.start':  (instance_id, None),
+    'openstack|compute.instance.live_migration._post.end': (instance_id, instance_update),
 
-    'compute.instance.power_off.start':  instance_powering_off,
-    'compute.instance.power_off.end':    instance_powered_off,
-    'compute.instance.power_on.start':   instance_powering_on,
-    'compute.instance.power_on.end':     instance_powered_on,
-    'compute.instance.reboot.start':     instance_rebooting,
-    'compute.instance.reboot.end':       instance_rebooted,
-    'compute.instance.shutdown.start':   instance_shutting_down,
-    'compute.instance.shutdown.end':     instance_shut_down,
-    'compute.instance.rebuild.start':    instance_rebuilding,
-    'compute.instance.rebuild.end':      instance_rebuilt,
+    'openstack|compute.instance.power_off.start':  (instance_id, instance_powering_off),
+    'openstack|compute.instance.power_off.end':    (instance_id, instance_powered_off),
+    'openstack|compute.instance.power_on.start':   (instance_id, instance_powering_on),
+    'openstack|compute.instance.power_on.end':     (instance_id, instance_powered_on),
+    'openstack|compute.instance.reboot.start':     (instance_id, instance_rebooting),
+    'openstack|compute.instance.reboot.end':       (instance_id, instance_rebooted),
+    'openstack|compute.instance.shutdown.start':   (instance_id, instance_shutting_down),
+    'openstack|compute.instance.shutdown.end':     (instance_id, instance_shut_down),
+    'openstack|compute.instance.rebuild.start':    (instance_id, instance_rebuilding),
+    'openstack|compute.instance.rebuild.end':      (instance_id, instance_rebuilt),
 
-    'compute.instance.rescue.start':     None,
-    'compute.instance.rescue.end':       instance_rescue,
-    'compute.instance.unrescue.start':   None,
-    'compute.instance.unrescue.end':     instance_unrescue,
+    'openstack|compute.instance.rescue.start':     (instance_id, None),
+    'openstack|compute.instance.rescue.end':       (instance_id, instance_rescue),
+    'openstack|compute.instance.unrescue.start':   (instance_id, None),
+    'openstack|compute.instance.unrescue.end':     (instance_id, instance_unrescue),
 
-    'compute.instance.finish_resize.start':  None,
-    'compute.instance.finish_resize.end':    instance_update,
-    'compute.instance.resize.start':         None,
-    'compute.instance.resize.confirm.start': None,
-    'compute.instance.resize.confirm.end':   None,
-    'compute.instance.resize.prep.end':      None,
-    'compute.instance.resize.prep.start':    None,
-    'compute.instance.resize.revert.end':    instance_update,
-    'compute.instance.resize.revert.start':  None,
-    'compute.instance.resize.end':           instance_update,
+    'openstack|compute.instance.finish_resize.start':  (instance_id, None),
+    'openstack|compute.instance.finish_resize.end':    (instance_id, instance_update),
+    'openstack|compute.instance.resize.start':         (instance_id, None),
+    'openstack|compute.instance.resize.confirm.start': (instance_id, None),
+    'openstack|compute.instance.resize.confirm.end':   (instance_id, None),
+    'openstack|compute.instance.resize.prep.end':      (instance_id, None),
+    'openstack|compute.instance.resize.prep.start':    (instance_id, None),
+    'openstack|compute.instance.resize.revert.end':    (instance_id, instance_update),
+    'openstack|compute.instance.resize.revert.start':  (instance_id, None),
+    'openstack|compute.instance.resize.end':           (instance_id, instance_update),
 
-    'compute.instance.snapshot.end':    None,
-    'compute.instance.snapshot.start':  None,
+    'openstack|compute.instance.snapshot.end':    (instance_id, None),
+    'openstack|compute.instance.snapshot.start':  (instance_id, None),
 
-    'compute.instance.suspend':         instance_suspended,
-    'compute.instance.resume':          instance_resumed,
+    'openstack|compute.instance.suspend':         (instance_id, instance_suspended),
+    'openstack|compute.instance.resume':          (instance_id, instance_resumed),
 
-    'compute.instance.volume.attach':   None,
-    'compute.instance.volume.detach':   None
+    'openstack|compute.instance.volume.attach':   (instance_id, None),
+    'openstack|compute.instance.volume.detach':   (instance_id, None)
 }
 
 
 def process(evt, device, dmd, txnCommit):
-    # most events are not particularly noteworthy, so we can send them
-    # straight to history.
-    if not evt.eventClassKey.endswith('.error'):
-        evt._action = 'history'
+    (idfunc, mapper) = MAPPERS.get(evt.eventClassKey, (None, None))
 
-    mapper = MAPPERS.get(evt.eventClassKey)
-    if not mapper:
+    if idfunc:
+        evt.component = idfunc(evt)
+
+    if mapper:
+        datamaps = mapper(device, dmd, evt)
+        if datamaps:
+            adm = ApplyDataMap()
+            for datamap in datamaps:
+                # LOG.debug("Applying %s" % datamap)
+                adm._applyDataMap(device, datamap)
+
+        return len(datamaps)
+    else:
         return 0
-
-    datamaps = mapper(device, dmd, evt)
-    if datamaps:
-        adm = ApplyDataMap()
-        for datamap in datamaps:
-            # LOG.debug("Applying %s" % datamap)
-            adm._applyDataMap(device, datamap)
-
-    return len(datamaps)

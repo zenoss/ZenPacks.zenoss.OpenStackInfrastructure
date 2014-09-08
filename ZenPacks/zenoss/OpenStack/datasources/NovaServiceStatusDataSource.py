@@ -132,7 +132,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
                     'summary': 'Service %s on host %s (Availabilty Zone %s) is now DISABLED' %
                                (service['binary'], service['host'], service['zone']),
                     'severity': ZenEventClasses.Clear,
-                    'eventClassKey': 'OpenStackNovaServiceStatus',
+                    'eventClassKey': 'openStackNovaServiceStatus',
                     })
 
             elif service['state'] == 'up':
@@ -142,7 +142,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
                     'summary': 'Service %s on host %s (Availabilty Zone %s) is now UP' %
                                (service['binary'], service['host'], service['zone']),
                     'severity': ZenEventClasses.Clear,
-                    'eventClassKey': 'OpenStackNovaServiceStatus',
+                    'eventClassKey': 'openStackNovaServiceStatus',
                     })
             else:
 
@@ -152,7 +152,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
                     'summary': 'Service %s on host %s (Availabilty Zone %s) is now DOWN' %
                                (service['binary'], service['host'], service['zone']),
                     'severity': ZenEventClasses.Error,
-                    'eventClassKey': 'OpenStackNovaServiceStatus',
+                    'eventClassKey': 'openStackNovaServiceStatus',
                     })
 
         # Note: Technically, this event could be related to the nova-api component(s)
@@ -161,8 +161,8 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
             'device': config.id,
             'summary': 'Nova Status Collector: successful collection',
             'severity': ZenEventClasses.Clear,
-            'eventKey': 'NovaServiceStatusCollection',
-            'eventClassKey': 'EventsSuccess',
+            'eventKey': 'openStackNovaServiceCollectionError',
+            'eventClassKey': 'openstackRestored',
             })
 
         return data
@@ -179,8 +179,8 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
             'device': config.id,
             'summary': errmsg,
             'severity': ZenEventClasses.Error,
-            'eventKey': 'NovaServiceStatusCollection',
-            'eventClassKey': 'EventsFailure',
+            'eventKey': 'openStackNovaServiceCollectionError',
+            'eventClassKey': 'openStackFailure',
             })
 
         return data

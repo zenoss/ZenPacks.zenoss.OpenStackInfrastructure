@@ -160,7 +160,7 @@ class EventsAMQPDataSourcePlugin(PythonDataSourcePlugin):
                 'severity': ZenEventClasses.Info,
                 'eventKey': '',
                 'summary': '',
-                'eventClassKey': c_event['event_type'],
+                'eventClassKey': 'openstack|' + c_event['event_type'],
             }
 
             traits = {}

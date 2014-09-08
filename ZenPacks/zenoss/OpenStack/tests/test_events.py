@@ -69,13 +69,13 @@ class TestEventTransforms(zenpacklib.TestCase):
 
     def process_event(self, evt):
         changes = process_event(evt, self.endpoint(), self.dmd, None)
-        log.info("Processed event (eventClassKey=%s, summary=%s, %d objmaps)" %
-                 (evt.eventClassKey, evt.summary, changes))
+        log.info("Processed event (eventClassKey=%s, summary=%s, %d objmaps, component=%s)" %
+                 (evt.eventClassKey, evt.summary, changes, evt.component))
 
     def test_instance_creation(self):
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'scheduler.run_instance.end',
+            'eventClassKey': u'openstack|scheduler.run_instance.end',
             'eventKey': u'07180940-d533-43ee-b5a7-930108e6238f',
             'severity': 2,
             'summary': '',
@@ -87,7 +87,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.create.start',
+            'eventClassKey': u'openstack|compute.instance.create.start',
             'eventKey': u'bc58885b-7677-4a10-9f4a-133a696dc6ab',
             'severity': 2,
             'summary': '',
@@ -115,7 +115,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.create.end',
+            'eventClassKey': u'openstack|compute.instance.create.end',
             'eventKey': u'd207460b-2e8a-48e0-917a-cebb07b063a5',
             'severity': 2,
             'summary': '',
@@ -170,7 +170,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.power_off.start',
+            'eventClassKey': u'openstack|compute.instance.power_off.start',
             'eventKey': u'e7be253c-7e5a-445a-aed7-15e09f56c7ac',
             'severity': 2,
             'summary': '',
@@ -197,7 +197,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.power_off.end',
+            'eventClassKey': u'openstack|compute.instance.power_off.end',
             'eventKey': u'c8f2f937-0737-4f2c-b5b1-6b14b162e3e7',
             'severity': 2,
             'summary': '',
@@ -233,7 +233,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.power_on.start',
+            'eventClassKey': u'openstack|compute.instance.power_on.start',
             'eventKey': u'66a24089-185b-4df2-ae3c-29854f1c783d',
             'severity': 2,
             'summary': '',
@@ -258,7 +258,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.power_on.end',
+            'eventClassKey': u'openstack|compute.instance.power_on.end',
             'eventKey': u'05a0aecb-0bbd-4799-b3bc-2db3e89b5654',
             'severity': 2,
             'summary': '',
@@ -291,7 +291,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.reboot.start',
+            'eventClassKey': u'openstack|compute.instance.reboot.start',
             'eventKey': u'ab29f32e-125f-4e89-8702-11a734042d4b',
             'severity': 2,
             'summary': '',
@@ -315,7 +315,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.reboot.end',
+            'eventClassKey': u'openstack|compute.instance.reboot.end',
             'eventKey': u'94485eb4-763e-40e5-8e97-1c61129e2430',
             'severity': 2,
             'summary': '',
@@ -345,7 +345,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.rebuild.start',
+            'eventClassKey': u'openstack|compute.instance.rebuild.start',
             'eventKey': u'598a5770-bab0-4de3-ac13-4839c6d9e6e3',
             'severity': 2,
             'summary': '',
@@ -370,7 +370,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.power_off.start',
+            'eventClassKey': u'openstack|compute.instance.power_off.start',
             'eventKey': u'f3016ce9-bfb9-40fa-b7c2-05a9d15312bd',
             'severity': 2,
             'summary': '',
@@ -394,7 +394,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.power_off.end',
+            'eventClassKey': u'openstack|compute.instance.power_off.end',
             'eventKey': u'189946bf-5727-4800-9d48-1003b5f99a96',
             'severity': 2,
             'summary': '',
@@ -418,7 +418,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.rebuild.end',
+            'eventClassKey': u'openstack|compute.instance.rebuild.end',
             'eventKey': u'd6846392-bd1d-4860-87c2-07cb66e7787a',
             'severity': 2,
             'summary': '',
@@ -449,7 +449,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.suspend',
+            'eventClassKey': u'openstack|compute.instance.suspend',
             'eventKey': u'252a9e83-cc66-42ab-838a-832f2f49f4bd',
             'severity': 2,
             'summary': '',
@@ -475,7 +475,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.resume',
+            'eventClassKey': u'openstack|compute.instance.resume',
             'eventKey': u'd46b69a0-e9bb-4201-83e7-8c46d3172fe9',
             'severity': 2,
             'summary': '',
@@ -506,7 +506,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.delete.start',
+            'eventClassKey': u'openstack|compute.instance.delete.start',
             'eventKey': u'a7a5b4d3-d1d3-438c-b973-381eed5e4109',
             'severity': 2,
             'summary': '',
@@ -531,7 +531,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.shutdown.start',
+            'eventClassKey': u'openstack|compute.instance.shutdown.start',
             'eventKey': u'6b6f59e1-7420-4472-b1ac-32b0455e0d73',
             'severity': 2,
             'summary': '',
@@ -556,7 +556,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.shutdown.end',
+            'eventClassKey': u'openstack|compute.instance.shutdown.end',
             'eventKey': u'c822e4dd-3071-4bc0-b67a-386757475163',
             'severity': 2,
             'summary': '',
@@ -581,7 +581,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.delete.end',
+            'eventClassKey': u'openstack|compute.instance.delete.end',
             'eventKey': u'dc5e13b1-ff07-4db9-9100-4aaf29b5aaa5',
             'severity': 2,
             'summary': '',
@@ -615,7 +615,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.rescue.start',
+            'eventClassKey': u'openstack|compute.instance.rescue.start',
             'eventKey': u'5c84b158-6539-4025-9ca2-f7a9b2f68ed5',
             'severity': 2,
             'summary': '',
@@ -641,7 +641,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.exists',
+            'eventClassKey': u'openstack|compute.instance.exists',
             'eventKey': u'89e3ee5d-eaca-4fa8-97df-090047dcd98a',
             'severity': 2,
             'summary': '',
@@ -668,7 +668,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.rescue.end',
+            'eventClassKey': u'openstack|compute.instance.rescue.end',
             'eventKey': u'621d4147-45f7-482c-9c67-4a2fb5d77449',
             'severity': 2,
             'summary': '',
@@ -696,7 +696,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.unrescue.start',
+            'eventClassKey': u'openstack|compute.instance.unrescue.start',
             'eventKey': u'bc85c40c-ea3c-4c8b-b37c-7086a6b55bbb',
             'severity': 2,
             'summary': '',
@@ -721,7 +721,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'compute.instance.unrescue.end',
+            'eventClassKey': u'openstack|compute.instance.unrescue.end',
             'eventKey': u'f27cd55d-8f19-4630-922c-682a772b63a2',
             'severity': 2,
             'summary': '',
