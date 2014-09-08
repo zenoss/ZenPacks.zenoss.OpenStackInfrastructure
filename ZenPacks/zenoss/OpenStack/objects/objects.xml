@@ -1981,6 +1981,145 @@ AVERAGE
 ['zenoss.cmd.uname', 'zenoss.cmd.uname_a', 'zenoss.cmd.df', 'zenoss.cmd.linux.cpuinfo', 'zenoss.cmd.linux.memory', 'zenoss.cmd.linux.ifconfig', 'zenoss.cmd.linux.netstat_an', 'zenoss.cmd.linux.netstat_rn', 'zenoss.cmd.linux.process', 'zenoss.cmd.linux.rpm', 'zenoss.cmd.linux.openstack.nova', 'zenoss.cmd.linux.openstack.libvirt']
 </property>
 </object>
+<!-- ('', 'zport', 'dmd', 'Events', 'OpenStack') -->
+<object id='/zport/dmd/Events/OpenStack' module='Products.ZenEvents.EventClass' class='EventClass'>
+<tomanycont id='instances'>
+<object id='OpenStack Events Default' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStack.events import process
+process(evt, device, dmd, txnCommit)
+</property>
+<property type="string" id="eventClassKey" mode="w" >
+defaultmapping
+</property>
+<property type="int" id="sequence" mode="w" >
+10
+</property>
+<property type="string" id="rule" mode="w" >
+(getattr(evt, 'eventClassKey', '') or '').startswith('openstack|')
+</property>
+<property type="string" id="example" mode="w" >
+openstack|compute.instance.create.start
+</property>
+<property type="text" id="explanation" mode="w" >
+Default event transform for all OpenStack Ceilometer notifications.  Maps to /OpenStack, history.
+</property>
+<property visible="True" type="string" id="zEventAction" >
+history
+</property>
+</object>
+</tomanycont>
+<object id='compute' module='Products.ZenEvents.EventClass' class='EventClass'>
+<object id='instance' module='Products.ZenEvents.EventClass' class='EventClass'>
+<tomanycont id='instances'>
+<object id='compute.instance default mapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+defaultmapping
+</property>
+<property type="int" id="sequence" mode="w" >
+11
+</property>
+<property type="string" id="rule" mode="w" >
+(getattr(evt, 'eventClassKey', '') or '').startswith('openstack|compute.instance.')
+</property>
+<property type="text" id="explanation" mode="w" >
+All compute.instance events not otherwise mapped will be placed in the /OpenStack/compute/instance class history.
+</property>
+<property visible="True" type="string" id="zEventAction" >
+history
+</property>
+</object>
+<object id='compute.instance.create.error' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+openstack|compute.instance.create.error
+</property>
+<property type="int" id="sequence" mode="w" >
+12
+</property>
+<property type="text" id="explanation" mode="w" >
+An error has occurred while creating an instance
+</property>
+<property visible="True" type="int" id="zEventSeverity" >
+4
+</property>
+</object>
+<object id='compute.instance.exists' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+openstack|compute.instance.exists
+</property>
+<property type="int" id="sequence" mode="w" >
+12
+</property>
+<property type="text" id="explanation" mode="w" >
+Drop compute.instance.exists events, not worth storing in event history.
+</property>
+<property visible="True" type="string" id="zEventAction" >
+drop
+</property>
+</object>
+<object id='compute.instance.exists.verified.old' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+openstack|compute.instance.exists.verified.old
+</property>
+<property type="int" id="sequence" mode="w" >
+12
+</property>
+<property type="text" id="explanation" mode="w" >
+Drop compute.instance.exists.verified.old events, not worth storing in event history.
+</property>
+<property visible="True" type="string" id="zEventAction" >
+drop
+</property>
+</object>
+</tomanycont>
+</object>
+</object>
+</object>
+<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackFailure') -->
+<object id='/zport/dmd/Events/Status/instances/openStackFailure' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+openStackFailure
+</property>
+<property type="int" id="sequence" mode="w" >
+7
+</property>
+<property type="string" id="example" mode="w" >
+OpenStack failure: reason
+</property>
+<property visible="True" type="int" id="zEventSeverity" >
+5
+</property>
+</object>
+<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackNovaServiceStatus') -->
+<object id='/zport/dmd/Events/Status/instances/openStackNovaServiceStatus' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+openStackNovaServiceStatus
+</property>
+<property type="int" id="sequence" mode="w" >
+12
+</property>
+<property type="text" id="explanation" mode="w" >
+A nova service is not running properly
+</property>
+<property type="text" id="resolution" mode="w" >
+Restart the offending service.
+</property>
+</object>
+<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackRestored') -->
+<object id='/zport/dmd/Events/Status/instances/openStackRestored' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+openStackRestored
+</property>
+<property type="int" id="sequence" mode="w" >
+7
+</property>
+<property type="string" id="example" mode="w" >
+OpenStack connectivity restored
+</property>
+<property visible="True" type="int" id="zEventSeverity" >
+0
+</property>
+</object>
 <!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack') -->
 <object id='/zport/dmd/Manufacturers/OpenStack' module='Products.ZenModel.Manufacturer' class='Manufacturer'>
 <property type="string" id="zip" mode="w" >
