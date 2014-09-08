@@ -16,6 +16,10 @@ This module provides a single integration point for common ZenPacks.
 import logging
 LOG = logging.getLogger('zen.zenpacklib')
 
+# Suppresses "No handlers could be found for logger" errors if logging
+# hasn't been configured.
+LOG.addHandler(logging.NullHandler())
+
 import collections
 import imp
 import importlib
@@ -1786,13 +1790,25 @@ class ClassSpec(object):
         fields = []
         ordered_columns = []
 
+        # Keep track of pixel width of custom fields. Exceeding a
+        # certain width causes horizontal scrolling of the component
+        # grid panel.
+        width = 0
+
         for spec in self.inherited_properties().itervalues():
             fields.extend(spec.js_fields)
             ordered_columns.extend(spec.js_columns)
+            width += spec.js_columns_width
 
         for spec in self.inherited_relationships().itervalues():
             fields.extend(spec.js_fields)
             ordered_columns.extend(spec.js_columns)
+            width += spec.js_columns_width
+
+        if width > 750:
+            LOG.warning(
+                "%s: %s custom columns exceed 750 pixels (%s)",
+                self.zenpack.name, self.name, width)
 
         return (
             "Ext.define('Zenoss.component.{meta_type}Panel', {{\n"
@@ -2014,20 +2030,25 @@ class ClassPropertySpec(object):
             return ["{{name: '{}'}}".format(self.name)]
 
     @property
+    def js_columns_width(self):
+        """Return integer pixel width of JavaScript columns."""
+        if self.grid_display:
+            return max(self.content_width + 14, self.label_width + 20)
+        else:
+            return 0
+
+    @property
     def js_columns(self):
         """Return list of JavaScript columns."""
+
         if self.grid_display is False:
             return []
-
-        width = max(
-            self.content_width + 14,
-            self.label_width + 20)
 
         column_fields = [
             "id: '{}'".format(self.name),
             "dataIndex: '{}'".format(self.name),
             "header: _t('{}')".format(self.short_label),
-            "width: {}".format(width),
+            "width: {}".format(self.js_columns_width),
             ]
 
         if self.renderer:
@@ -2164,6 +2185,7 @@ class ClassRelationshipSpec(object):
 
         return ["{{name: '{}'}}".format(fieldname)]
 
+    @property
     def js_columns_width(self):
         """Return integer pixel width of JavaScript columns."""
         if not self.grid_display:
@@ -2183,15 +2205,13 @@ class ClassRelationshipSpec(object):
         else:
             return (self.label_width or remote_spec.plural_label_width) + 20
 
-
     @property
     def js_columns(self):
+        """Return list of JavaScript columns."""
         if not self.grid_display:
             return []
 
-        """Return list of JavaScript columns."""
-        remote_classname = self.schema.remoteClass.split('.')[-1]
-        remote_spec = self.class_.zenpack.classes.get(remote_classname)
+        remote_spec = self.class_.zenpack.classes.get(self.remote_classname)
 
         # No reason to show a column for the device since we're already
         # looking at the device.
@@ -2207,20 +2227,16 @@ class ClassRelationshipSpec(object):
             fieldname = self.name
             header = self.short_label or self.label or remote_spec.short_label
             renderer = self.renderer
-            width = max(
-                (self.content_width or remote_spec.content_width) + 14,
-                (self.label_width or remote_spec.label_width) + 20)
         else:
             fieldname = '{}_count'.format(self.name)
             header = self.short_label or self.label or remote_spec.plural_short_label
             renderer = None
-            width = (self.label_width or remote_spec.plural_label_width) + 20
 
         column_fields = [
             "id: '{}'".format(fieldname),
             "dataIndex: '{}'".format(fieldname),
             "header: _t('{}')".format(header),
-            "width: {}".format(width),
+            "width: {}".format(self.js_columns_width),
             ]
 
         if renderer:
@@ -2249,8 +2265,17 @@ def enableTesting():
         return
 
     from Products.ZenTestCase.BaseTestCase import BaseTestCase
+    from transaction._transaction import Transaction
 
     class TestCase(BaseTestCase):
+
+        # As in BaseTestCase, the default behavior is to disable
+        # all logging from within a unit test.  To enable it,
+        # set disableLogging = False in your subclass.  This is
+        # recommended during active development, but is too noisy
+        # to leave as the default.
+        disableLogging = True
+
         def afterSetUp(self):
             super(TestCase, self).afterSetUp()
 
@@ -2270,6 +2295,15 @@ def enableTesting():
                     .format('.'.join((zenpack_module_name, 'CFG'))))
 
             zenpackspec.test_setup()
+
+            # BaseTestCast.afterSetUp already hides transaction.commit. So we also
+            # need to hide transaction.abort.
+            self._transaction_abort = Transaction.abort
+            Transaction.abort = lambda *x: None
+
+        def beforeTearDown(self):
+            if hasattr(self, '_transaction_abort'):
+                Transaction.abort = self._transaction_abort
 
 
 def ucfirst(text):
@@ -2726,6 +2760,11 @@ if IMPACT_INSTALLED:
             """Generate object GUIDs returned by adapted.methodname()."""
             method = getattr(self.adapted, methodname, None)
             if not method or not callable(method):
+                LOG.warning(
+                    "no %r relationship or method for %r",
+                    methodname,
+                    self.adapted.meta_type)
+
                 return
 
             r = method()
