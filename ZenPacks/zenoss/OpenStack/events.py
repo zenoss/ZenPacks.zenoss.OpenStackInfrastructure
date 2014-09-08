@@ -10,6 +10,10 @@
 from Products.DataCollector.plugins.DataMaps import ObjectMap
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
 
+import logging
+LOG = logging.getLogger('zen.OpenStack.events')
+
+
 # Sets of traits we can expect to get (see event_definitions.yaml on the
 # openstack side) and what objmap properties they map to.
 TRAITMAPS = {
@@ -327,6 +331,7 @@ def process(evt, device, dmd, txnCommit):
     if datamaps:
         adm = ApplyDataMap()
         for datamap in datamaps:
+            # LOG.debug("Applying %s" % datamap)
             adm._applyDataMap(device, datamap)
 
     return len(datamaps)

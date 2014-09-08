@@ -35,27 +35,6 @@ from ZenPacks.zenoss.OpenStack import zenpacklib
 zenpacklib.enableTesting()
 
 
-@monkeypatch('Products.Zuul')
-def get_dmd():
-    '''
-    Retrieve the DMD object. Handle unit test connection oddities.
-
-    This has to be monkeypatched on Products.Zuul instead of
-    Products.Zuul.utils because it's already imported into Products.Zuul
-    by the time this monkeypatch happens.
-    '''
-    try:
-        # original is injected by the monkeypatch decorator.
-        return original()
-
-    except AttributeError:
-        connections = transaction.get()._synchronizers.data.values()[:]
-        for cxn in connections:
-            app = cxn.root()['Application']
-            if hasattr(app, 'zport'):
-                return app.zport.dmd
-
-
 class TestEventTransforms(zenpacklib.TestCase):
 
     disableLogging = False
