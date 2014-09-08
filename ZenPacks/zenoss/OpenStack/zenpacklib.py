@@ -842,14 +842,18 @@ class ZenPackSpec(object):
 
             self.classes[classname] = ClassSpec(self, classname, **classdata)
 
+        for classname, classdata in classes.iteritems():
             relationships = classdata['relationships']
             for relationship in relationships:
                 try:
-                    className = relationships[relationship]['schema'].remoteClass
-                    if '.' in className:
-                        module = '.'.join(className.split('.')[0:-1])
-                        kls = importClass(module)
-                        self.imported_classes[className] = kls
+                    if 'schema' in relationships[relationship]:
+                        className = relationships[relationship]['schema'].remoteClass
+                        if '.' in className and className.split('.')[-1] not in self.classes:
+                            module = ".".join(className.split('.')[0:-1])
+                            kls = importClass(module)
+                            self.imported_classes[className] = kls
+                    else:
+                        LOG.error('%s: relationship %s has no schema' % (self.name, relationship))
                 except ImportError:
                     pass
 
@@ -1070,6 +1074,11 @@ class ZenPackSpec(object):
             for x in self.classes.itervalues()
             if Device in x.resolved_bases]
 
+        # Add imported device objects
+        for kls in self.imported_classes.itervalues():
+            if 'deviceClass' in [x[0] for x in kls._relations]:
+                device_classes.append(kls)
+
         return self.create_js_snippet(
             'device', snippet, classes=device_classes)
 
@@ -1274,6 +1283,8 @@ class ClassSpec(object):
         self.create_info_class()
         if self.is_component:
             self.create_formbuilder_class()
+        if self.is_hardware_component:
+            self.create_formbuilder_class()
         self.register_impact_adapters()
 
     @property
@@ -1422,29 +1433,21 @@ class ClassSpec(object):
         # Add local properties and catalog indexes.
         for name, spec in self.properties.iteritems():
             if not spec.datapoint:
-                attributes[name] = None
+                attributes[name] = spec.default  # defaults to None
             else:
                 # Lookup the datapoint and get the value from rrd
                 def datapoint_method(self, default=spec.datapoint_default, cached=spec.datapoint_cached, datapoint=spec.datapoint):
                     if cached:
                         r = self.cacheRRDValue(datapoint, default=default)
-                        if r is not None:
-                            if not math.isnan(float(r)):
-                                return r
                     else:
                         r = self.getRRDValue(datapoint, default=default)
-                        if r is not None:
-                            if not math.isnan(float(r)):
-                                return r
 
+                    if r is not None:
+                        if not math.isnan(float(r)):
+                            return r
                     return default
 
-                if self.api_backendtype == 'property':
-                    attributes[name] = property(datapoint_method)
-                elif self.api_backendtype == 'method':
-                    attributes[name] = datapoint_method
-                else:
-                    attributes[name] = datapoint_method
+                attributes[name] = datapoint_method
 
             if spec.ofs_dict:
                 properties.append(spec.ofs_dict)
@@ -1696,7 +1699,15 @@ class ClassSpec(object):
         if self.is_device:
             return fields
 
+        filtered_relationships = {}
+        for r in self.relationships.values():
+            if r.grid_display is False:
+                filtered_relationships[r.remote_classname] = r
+
         for spec in self.containing_components:
+            # grid_display=False
+            if spec.name in filtered_relationships:
+                continue
             fields.append(
                 "{{name: '{}'}}"
                 .format(
@@ -1712,7 +1723,16 @@ class ClassSpec(object):
         if self.is_device:
             return columns
 
+        filtered_relationships = {}
+        for r in self.relationships.values():
+            if r.grid_display is False:
+                filtered_relationships[r.remote_classname] = r
+
         for spec in self.containing_components:
+            # grid_display=False
+            if spec.name in filtered_relationships:
+                continue
+
             width = max(spec.content_width + 14, spec.label_width + 20)
             renderer = 'Zenoss.render.zenpacklib_entityLinkFromGrid'
 
@@ -1902,6 +1922,7 @@ class ClassPropertySpec(object):
             short_label=None,
             index_type=None,
             label_width=80,
+            default=None,
             content_width=None,
             display=True,
             details_display=True,
@@ -1919,6 +1940,7 @@ class ClassPropertySpec(object):
         """TODO."""
         self.class_spec = class_spec
         self.name = name
+        self.default = default
         self.type_ = type_
         self.label = label or self.name
         self.short_label = short_label or self.label
@@ -1937,6 +1959,8 @@ class ClassPropertySpec(object):
         self.editable = bool(editable)
         self.api_only = bool(api_only)
         self.api_backendtype = api_backendtype
+        if isinstance(enum, (set, list, tuple)):
+            enum = dict(enumerate(enum))
         self.enum = enum
         self.datapoint = datapoint
         self.datapoint_default = datapoint_default
@@ -2110,6 +2134,10 @@ class ClassRelationshipSpec(object):
         self.render_with_type = render_with_type
         self.order = order
 
+        if not self.display:
+            self.details_display = False
+            self.grid_display = False
+
         if self.renderer is None:
             self.renderer = 'Zenoss.render.zenpacklib_entityTypeLinkFromGrid' \
                 if self.render_with_type else 'Zenoss.render.zenpacklib_entityLinkFromGrid'
@@ -2167,6 +2195,10 @@ class ClassRelationshipSpec(object):
     def js_fields(self):
         """Return list of JavaScript fields."""
         remote_spec = self.class_.zenpack.classes.get(self.remote_classname)
+
+        # do not show if grid turned off
+        if self.grid_display is False:
+            return []
 
         # No reason to show a column for the device since we're already
         # looking at the device.
@@ -2295,6 +2327,22 @@ def enableTesting():
                     .format('.'.join((zenpack_module_name, 'CFG'))))
 
             zenpackspec.test_setup()
+
+            import Products.ZenEvents
+            zcml.load_config('meta.zcml', Products.ZenEvents)
+
+            try:
+                import ZenPacks.zenoss.DynamicView
+                zcml.load_config('configure.zcml', ZenPacks.zenoss.DynamicView)
+            except ImportError:
+                return
+
+            try:
+                import ZenPacks.zenoss.Impact
+                zcml.load_config('meta.zcml', ZenPacks.zenoss.Impact)
+                zcml.load_config('configure.zcml', ZenPacks.zenoss.Impact)
+            except ImportError:
+                return
 
             # BaseTestCast.afterSetUp already hides transaction.commit. So we also
             # need to hide transaction.abort.
@@ -2439,7 +2487,11 @@ def MethodInfoProperty(method_name):
     one for those returning a single value.
     """
     def getter(self):
-        return Zuul.info(getattr(self._object, method_name)())
+        try:
+            return Zuul.info(getattr(self._object, method_name)())
+        except TypeError:
+            # If not callable avoid the traceback and send the property
+            return Zuul.info(getattr(self._object, method_name))
 
     return property(getter)
 
@@ -2452,8 +2504,6 @@ def EnumInfoProperty(data, enum):
         else:
             data = getattr(self._object, data, None)
             try:
-                if isinstance(enum, (set, list, tuple)):
-                    enum = dict(enumerate(enum))
                 data = int(data)
                 return Zuul.info(enum[data])
             except Exception:
