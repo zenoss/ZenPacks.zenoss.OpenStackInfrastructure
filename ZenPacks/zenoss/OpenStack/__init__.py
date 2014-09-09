@@ -211,7 +211,9 @@ CFG = zenpacklib.ZenPackSpec(
                 'biosUuid':            {'label': 'BIOS UUID',
                                         'grid_display': False},
                 'serialNumber':        {'label': 'BIOS Serial Number',
-                                        'grid_display': False},
+                                        'grid_display': False,
+                                        'index_type': 'field',
+                                        'index_scope': 'global'},
                 
                 # The name this insance is known by within the hypervisor (for instance,
                 # for libvirt, it would be something like 'instance-00000001')
@@ -234,7 +236,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'flavor':     {'label_width': 50, 'content_width': 50},
                 'image':      {'label_width': 50, 'content_width': 50},
             },
-            'impacted_by': ['hypervisor'],
+            'impacted_by': ['hypervisor', 'vnics'],
             'impacts': ['guestDevice', 'tenant']
 
             # Note: By (nova) design, hostId is a hash of the actual underlying host and project, and
@@ -248,8 +250,11 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Vnic',
             'order': 3.5,
             'properties': {
-                'macaddress': {'label': 'MAC Address'}
+                'macaddress': {'label': 'MAC Address',
+                               'index_type': 'field',
+                               'index_scope': 'global'}
             },
+            'impacts': ['instance']
         },
 
         'Region': {
