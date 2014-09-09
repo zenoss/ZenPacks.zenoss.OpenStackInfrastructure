@@ -160,17 +160,20 @@ class EventsAMQPDataSourcePlugin(PythonDataSourcePlugin):
                 'severity': ZenEventClasses.Info,
                 'eventKey': '',
                 'summary': '',
-                'eventClassKey': c_event['event_type'],
+                'eventClassKey': 'openstack|' + c_event['event_type'],
             }
 
             traits = {}
             for trait in c_event['traits']:
                 traits[trait['name']] = trait['value']
 
-            if 'request_id' in traits:
-                evt['eventKey'] = traits['request_id']
-            else:
-                evt['eventKey'] = c_event['message_id']
+            if 'priority' in traits:
+                if traits['priority'] == 'WARN':
+                    evt['severity'] = ZenEventClasses.Warning
+                elif traits['priority'] == 'ERROR':
+                    evt['severity'] = ZenEventClasses.Error
+
+            evt['eventKey'] = c_event['message_id']
 
             for trait in traits:
                 evt['trait_' + trait] = traits[trait]

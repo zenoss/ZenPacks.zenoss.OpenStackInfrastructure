@@ -27,6 +27,64 @@ class Instance(schema.Instance):
         # TODO: Implement
         return None
 
+    def get_host_name(self):
+        if self.host():
+            return self.host().titleOrId()
+
+    def set_host_name(self, hostname):
+        search = self.device().componentSearch
+        hypervisors = []
+        for host in [x.getObject() for x in search(titleOrId=hostname,
+                                                   meta_type='OpenStackHost')]:
+            if host.hypervisor():
+                hypervisors.append(host.hypervisor().id)
+
+        if len(hypervisors):
+            hypervisor = sorted(hypervisors)[0]
+            if len(hypervisors) > 1:
+                LOG.error("Multiple hypervisors were found matching hostname %s - Choosing %s" %
+                          (hostname, hypervisor))
+            self.set_hypervisor(hypervisor)
+        else:
+            LOG.warning("No matching host hypervisor found for name %s" % hostname)
+
+        return
+
+    def get_flavor_name(self):
+        if self.flavor():
+            return self.flavor().titleOrId()
+
+    def set_flavor_name(self, flavorname):
+        search = self.device().componentSearch
+        flavors = [x.getObject().id for x in search(titleOrId=flavorname,
+                                                    meta_type='OpenStackFlavor')]
+        if len(flavors):
+            flavor = sorted(flavors)[0]
+            if len(flavors) > 1:
+                LOG.error("Multiple flavors were found matching name %s - Choosing %s" %
+                          (flavorname, flavor))
+            self.set_flavor(flavor)
+        else:
+            LOG.warning("No matching flavor found for name %s" % flavorname)
+
+    def get_image_name(self):
+        if self.image():
+            return self.image().titleOrId()
+
+    def set_image_name(self, imagename):
+        search = self.device().componentSearch
+        images = [x.getObject().id for x in search(titleOrId=imagename,
+                                                   meta_type='OpenStackImage')]
+        if len(images):
+            image = sorted(images)[0]
+            if len(images) > 1:
+                LOG.error("Multiple images were found matching name %s - Choosing %s" %
+                          (imagename, image))
+            self.set_image(image)
+        else:
+            LOG.warning("No matching image found for name %s" % imagename)
+
+
 class DeviceLinkProvider(object):
     '''
 Provides a link on the (guest) device overview page to the VM which the

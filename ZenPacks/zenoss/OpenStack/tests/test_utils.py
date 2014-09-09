@@ -231,7 +231,7 @@ def create_model_data(dmd):
     # Linux guest devices (Virtual)
     # make sure that the interfaces line up.
     guest_dc = dmd.Devices.createOrganizer('/Server/SSH/Linux')
-    guest_dc.setZenProperty('zPythonClass', 'Products.ZenModel.Device.Device')
+    guest_dc.setZenProperty('zPythonClass', 'Products.ZenModel.Device')
     guest_instance1 = guest_dc.createInstance("g-instance1")
     guest_instance2 = guest_dc.createInstance("g-instance2")
     guest_instance3 = guest_dc.createInstance("g-instance3")
@@ -256,7 +256,7 @@ def create_model_data(dmd):
     # Linux devices (Physical)
     # (link to host1 and host2)
     phys_dc = dmd.Devices.createOrganizer('/Server/SSH/Linux/NovaHost')
-    phys_dc.setZenProperty('zPythonClass', 'Products.ZenModel.Device.Device')
+    phys_dc.setZenProperty('zPythonClass', 'Products.ZenModel.Device')
     phys_computehost1 = phys_dc.createInstance("p-computehost1")
     phys_computehost2 = phys_dc.createInstance("p-computehost2")
     phys_controllerhost = phys_dc.createInstance("p-controllerhost")

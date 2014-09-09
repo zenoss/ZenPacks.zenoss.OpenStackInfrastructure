@@ -9,6 +9,10 @@ packstack --allinone --os-ceilometer-install=y --os-controller-host=192.168.2.11
 # Fix libvirt hypervisor so it can run nested under virtualbox.
 openstack-config --set /etc/nova/nova.conf libvirt virt_type qemu
 
+# Enable compute.instance.update events
+openstack-config --set /etc/nova/nova.conf DEFAULT notify_on_state_change vm_state
+
+
 # bounce most of nova/neutron to pick up those config file changes
 for e in openstack-nova-api openstack-nova-compute openstack-nova-conductor openstack-nova-scheduler; do service $e restart; done
 for e in neutron-dhcp-agent neutron-l3-agent neutron-metadata-agent neutron-openvswitch-agent neutron-server; do service $e restart; done
