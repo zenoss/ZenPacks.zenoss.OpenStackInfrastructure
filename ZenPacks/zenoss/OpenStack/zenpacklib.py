@@ -95,6 +95,7 @@ __all__ = (
     'ucfirst',
     'relname_from_classname',
     'relationships_from_yuml',
+    'catalog_search',
     )
 
 # Must defer definition of TestCase. Otherwise it imports
@@ -128,6 +129,13 @@ class ZenPack(ZenPackBase):
     def remove(self, app, leaveObjects=False):
         from Products.Zuul.interfaces import ICatalogTool
         if not leaveObjects:
+            dc = app.Devices
+            for catalog in self.GLOBAL_CATALOGS:
+                catObj = getattr(dc, catalog, None)
+                if catObj:
+                    LOG.info('Removing Catalog %s' % catalog)
+                    dc._delObject(catalog)
+
             if self.NEW_COMPONENT_TYPES:
                 LOG.info('Removing %s components' % self.id)
                 cat = ICatalogTool(app.zport.dmd)
@@ -144,6 +152,8 @@ class ZenPack(ZenPackBase):
 
                 LOG.info('Removing %s relationships from existing devices.' % self.id)
                 self._buildDeviceRelations()
+
+            # Remove Zenpack create global catalogs
 
         super(ZenPack, self).remove(app, leaveObjects=leaveObjects)
 
@@ -167,23 +177,7 @@ class DeviceBase(ModelBase):
     """
 
     def search(self, name, *args, **kwargs):
-        """Return iterable of matching brains in named catalog."""
-        catalog = getattr(self, '{}Search'.format(name), None)
-        if not catalog:
-            return []
-
-        if args:
-            if isinstance(args[0], BaseQuery):
-                return catalog.evalAdvancedQuery(args[0])
-            elif isinstance(args[0], dict):
-                return catalog(args[0])
-            else:
-                raise TypeError(
-                    "search() argument must be a BaseQuery or a dict, "
-                    "not {0!r}"
-                    .format(type(args[0]).__name__))
-
-        return catalog(**kwargs)
+        return catalog_search(self, name, args, kwargs)
 
 
 class ComponentBase(ModelBase):
@@ -228,20 +222,57 @@ class ComponentBase(ModelBase):
                     'while getting device for %s' % (
                         obj, exc, self))
 
-    def get_catalog(self, name):
+    def get_catalog_name(self, name, scope):
+        if scope == 'device':
+            return '{}Search'.format(name)
+        else:
+            name = self.__module__.replace('.', '_')
+            return '{}Search'.format(name)
+
+    def get_catalog(self, name, scope, create=True):
         """Return catalog by name."""
         spec = self._get_catalog_spec(name)
         if not spec:
             return
 
-        try:
-            return getattr(self.device(), '{}Search'.format(name))
-        except AttributeError:
-            return self._create_catalog(name)
+        if scope == 'device':
+            try:
+                return getattr(self.device(), self.get_catalog_name(name, scope))
+            except AttributeError:
+                if create:
+                    return self._create_catalog(name, 'device')
+        else:
+            try:
+                return getattr(self.dmd.Device, self.get_catalog_name(name, scope))
+            except AttributeError:
+                if create:
+                    return self._create_catalog(name, 'global')
+        return
 
-    def get_catalogs(self):
+    def get_catalog_scopes(self, name):
+        """Return catalog scopes by name."""
+        spec = self._get_catalog_spec(name)
+        if not spec:
+            []
+
+        scopes = [spec['indexes'][x].get('scope', 'device') for x in spec['indexes']]
+        if 'both' in scopes:
+            scopes = [x for x in scopes if x != 'both']
+            scopes.append('device')
+            scopes.append('global')
+        return set(scopes)
+
+    def get_catalogs(self, whiteList=None):
         """Return all catalogs for this class."""
-        return [self.get_catalog(name) for name in self._catalogs]
+        catalogs = []
+        for name in self._catalogs:
+            for scope in self.get_catalog_scopes(name):
+                if not whiteList:
+                    catalogs.append(self.get_catalog(name, scope))
+                else:
+                    if scope in whiteList:
+                        catalogs.append(self.get_catalog(name, scope, create=False))
+        return catalogs
 
     def _get_catalog_spec(self, name):
         if not hasattr(self, '_catalogs'):
@@ -263,7 +294,7 @@ class ComponentBase(ModelBase):
 
         return spec
 
-    def _create_catalog(self, name):
+    def _create_catalog(self, name, scope='device'):
         """Create and return catalog defined by name."""
         from Products.ZCatalog.Catalog import CatalogError
         from Products.ZCatalog.ZCatalog import manage_addZCatalog
@@ -274,13 +305,23 @@ class ComponentBase(ModelBase):
         if not spec:
             return
 
-        catalog_name = '{}Search'.format(name)
+        if scope == 'device':
+            catalog_name = self.get_catalog_name(name, scope)
 
-        device = self.device()
-        if not hasattr(device, catalog_name):
-            manage_addZCatalog(device, catalog_name, catalog_name)
+            device = self.device()
+            if not hasattr(device, catalog_name):
+                manage_addZCatalog(device, catalog_name, catalog_name)
 
-        zcatalog = device._getOb(catalog_name)
+            zcatalog = device._getOb(catalog_name)
+        else:
+            catalog_name = self.get_catalog_name(name, scope)
+            deviceClass = self.dmd.Devices
+
+            if not hasattr(deviceClass, catalog_name):
+                manage_addZCatalog(deviceClass, catalog_name, catalog_name)
+
+            zcatalog = deviceClass._getOb(catalog_name)
+
         catalog = zcatalog._catalog
 
         classname = spec.get(
@@ -308,9 +349,14 @@ class ComponentBase(ModelBase):
                 # Index already exists.
                 pass
             else:
-                results = ICatalogTool(device).search(types=(classname,))
+                if scope == 'device':
+                    results = ICatalogTool(device).search(types=(classname,))
+                else:
+                    results = ICatalogTool(deviceClass).search(types=(classname,))
+
                 for result in results:
-                    result.getObject().index_object()
+                    if hasattr(result.getObject(), 'index_object'):
+                        result.getObject().index_object()
 
         return zcatalog
 
@@ -1019,7 +1065,10 @@ class ZenPackSpec(object):
             (JavaScriptSnippet,),
             attributes)
 
-        target_name = 'global' if classes[0] is None else 'device'
+        try:
+            target_name = 'global' if classes[0] is None else 'device'
+        except Exception:
+            target_name = 'global'
 
         for klass in classes:
             GSM.registerAdapter(
@@ -1104,6 +1153,16 @@ class ZenPackSpec(object):
 
         attributes['NEW_COMPONENT_TYPES'] = self.NEW_COMPONENT_TYPES
         attributes['NEW_RELATIONS'] = self.NEW_RELATIONS
+        attributes['GLOBAL_CATALOGS'] = []
+        global_catalog_classes = {}
+        for (class_, class_spec) in self.classes.items():
+            for (p, property_spec) in class_spec.properties.items():
+                if property_spec.index_scope in ('both', 'global'):
+                    global_catalog_classes[class_] = True
+                    continue
+        for class_ in global_catalog_classes:
+            catalog = ".".join([self.name, class_]).replace(".", "_")
+            attributes['GLOBAL_CATALOGS'].append('{}Search'.format(catalog))
 
         return create_class(get_symbol_name(self.name),
                             get_symbol_name(self.name, 'schema'),
@@ -1460,8 +1519,22 @@ class ClassSpec(object):
                             'id': {'type': 'field'},
                         }
                     }
-
                 catalogs[self.name]['indexes'].update(pindexes)
+                scopes = [catalogs[self.name]['indexes'][x]['scope'] for x in catalogs[self.name]['indexes'] if x != 'id']
+
+                if 'both' in scopes:
+                    scope_id = 'both'
+                elif 'global' and 'device' in scopes:
+                    scope_id = 'both'
+                elif 'global' in scopes and 'device' not in scopes:
+                    scope_id = 'global'
+                else:
+                    scope_id = 'device'
+
+                catalogs[self.name]['indexes']['id']['scope'] = scope_id
+
+            if spec.enum:
+                attributes['enum_{}'.format(name)] = spec.enum
 
         # Add local relations.
         for name, spec in self.relationships.iteritems():
@@ -1935,7 +2008,8 @@ class ClassPropertySpec(object):
             enum=None,
             datapoint=None,
             datapoint_default=None,
-            datapoint_cached=True
+            datapoint_cached=True,
+            index_scope='device'
             ):
         """TODO."""
         self.class_spec = class_spec
@@ -1945,6 +2019,7 @@ class ClassPropertySpec(object):
         self.label = label or self.name
         self.short_label = short_label or self.label
         self.index_type = index_type
+        self.index_scope = index_scope
         self.label_width = label_width
         self.content_width = content_width or label_width
         self.display = display
@@ -1968,11 +2043,17 @@ class ClassPropertySpec(object):
         # Force api mode when a datapoint is supplied
         if self.datapoint:
             self.api_only = True
+            self.api_backendtype = 'method'
 
         if self.api_backendtype not in ('property', 'method'):
             raise TypeError(
                 "Property '%s': api_backendtype must be 'property' or 'method', not '%s'"
                 % (name, self.api_backendtype))
+
+        if self.index_scope not in ('device', 'global', 'both'):
+            raise TypeError(
+                "Property '%s': index_scope must be 'device', 'global', or 'both', not '%s'"
+                % (name, self.index_scope))
 
         # Force properties into the 4.0 - 4.9 order range.
         if not order:
@@ -1999,7 +2080,8 @@ class ClassPropertySpec(object):
             return {}
 
         return {
-            self.name: {'type': self.index_type},
+            self.name: {'type': self.index_type,
+                        'scope': self.index_scope},
             }
 
     @property
@@ -2625,6 +2707,26 @@ def update(d, u):
         else:
             d[k] = u[k]
     return d
+
+
+def catalog_search(scope, name, *args, **kwargs):
+    """Return iterable of matching brains in named catalog."""
+    catalog = getattr(scope, '{}Search'.format(name), None)
+    if not catalog:
+	return []
+
+    if args:
+	if isinstance(args[0], BaseQuery):
+	    return catalog.evalAdvancedQuery(args[0])
+	elif isinstance(args[0], dict):
+	    return catalog(args[0])
+	else:
+	    raise TypeError(
+		"search() argument must be a BaseQuery or a dict, "
+		"not {0!r}"
+		.format(type(args[0]).__name__))
+
+    return catalog(**kwargs)
 
 
 def apply_defaults(dictionary, default_defaults=None):
