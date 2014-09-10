@@ -216,11 +216,14 @@ class ComponentBase(ModelBase):
 
             try:
                 obj = obj.getPrimaryParent()
-            except AttributeError as exc:
-                raise AttributeError(
-                    'Unable to determine parent at %s (%s) '
-                    'while getting device for %s' % (
-                        obj, exc, self))
+            except AttributeError:
+                # While it is generally not normal to have devicecomponents
+                # that are not part of a device, it CAN occur in certain
+                # non-error situations, such as when it is in the process of
+                # being deleted.  In that case, the DeviceComponentProtobuf
+                # (Products.ZenMessaging.queuemessaging.adapters) implementation
+                # expects device() to return None, not to throw an exception.
+                return None
 
     def get_catalog_name(self, name, scope):
         if scope == 'device':
