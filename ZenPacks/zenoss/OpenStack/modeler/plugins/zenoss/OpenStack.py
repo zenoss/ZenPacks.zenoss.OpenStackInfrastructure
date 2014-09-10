@@ -126,6 +126,13 @@ class OpenStack(PythonPlugin):
 
         images = []
         for image in results['images']:
+
+            # If it's a snapshot, rather than a normal image, ignore it for
+            # the time being.
+            if 'server' in image:
+                log.info("Ignoring image %s" % image['name'])
+                continue
+
             images.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStack.Image',
                 data=dict(
