@@ -78,3 +78,35 @@ Ext.apply(Zenoss.render, {
         return Zenoss.render.link(null, uid, name);
     },
 });
+
+
+/*
+ * Add the "Cloud View" for endpoints.
+ */
+Zenoss.nav.appendTo('Device', [{
+    id: 'openstackcomponentview',
+    text: _t('OpenStack Component View'),
+    xtype: 'dynamicview',
+    relationshipFilter: 'openstack_link',
+    viewName: 'openstack_view'
+}]);
+
+/*
+ * Enable Dynamic View and Cloud View for components as well.
+ */
+
+ Zenoss.nav.appendTo('Component', [{
+    id: 'component_openstackcomponentview',
+    text: _t('OpenStack Component View'),
+    xtype: 'dynamicview',
+    relationshipFilter: 'openstack_link',
+    viewName: 'openstack_view'
+}]);
+
+Zenoss.nav.appendTo('Component', [{
+    id: 'subcomponent_view',
+    text: _t('Dynamic View'),
+    xtype: 'dynamicview',
+    relationshipFilter: 'impacted_by',
+    viewName: 'subcomponent_view'
+}]);
