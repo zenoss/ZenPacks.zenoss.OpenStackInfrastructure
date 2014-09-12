@@ -38,6 +38,12 @@ def _apply_traits(evt, traitset, objmap):
             trait_field = 'trait_' + trait
             if hasattr(evt, trait_field):
                 value = getattr(evt, trait_field)
+
+                # Store server status in uppercase, to match how the nova-api
+                # shows it.
+                if prop_name == 'serverStatus':
+                    value = value.upper()
+
                 setattr(objmap, prop_name, value)
 
 
