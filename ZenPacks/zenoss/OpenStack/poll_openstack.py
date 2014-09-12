@@ -218,6 +218,10 @@ class OpenStackPoller(object):
 
         print json.dumps(data)
 
+        # Shut down, we're done.
+        if reactor.running:
+            reactor.stop()
+
 if __name__ == '__main__':
     from twisted.internet import reactor
 
