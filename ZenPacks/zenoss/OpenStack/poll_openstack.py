@@ -164,14 +164,6 @@ class OpenStackPoller(object):
                 data['serverOtherCount'] += 1
                 severity = 1
 
-            data['events'].append(dict(
-                severity=severity,
-                summary='server status is {0}'.format(server['status']),
-                component='server{0}'.format(server['id']),
-                eventKey='serverStatus',
-                eventClassKey='openstackServerStatus',
-                serverStatus=server['status'],
-            ))
 
     @inlineCallbacks
     def getData(self):
