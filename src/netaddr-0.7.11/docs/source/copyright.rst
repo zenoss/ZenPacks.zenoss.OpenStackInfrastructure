@@ -1,5 +1,0 @@
-=========
-Copyright
-=========
-
-.. include:: ../../COPYRIGHT

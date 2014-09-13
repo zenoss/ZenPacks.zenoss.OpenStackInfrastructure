@@ -1,5 +1,0 @@
-============
-Contributors
-============
-
-.. include:: ../../THANKS

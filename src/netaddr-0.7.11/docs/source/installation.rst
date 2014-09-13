@@ -1,5 +1,0 @@
-==================
-Installing netaddr
-==================
-
-.. include:: ../../INSTALL
