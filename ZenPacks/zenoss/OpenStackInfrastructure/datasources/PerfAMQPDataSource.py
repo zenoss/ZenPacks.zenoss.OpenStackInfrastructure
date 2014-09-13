@@ -49,7 +49,7 @@ class PerfAMQPDataSource(PythonDataSource):
     Ceilometer via AMQP.
     '''
 
-    ZENPACKID = 'ZenPacks.zenoss.OpenStackInfrastructure.
+    ZENPACKID = 'ZenPacks.zenoss.OpenStackInfrastructure.'
 
     sourcetypes = ('OpenStack Ceilometer Perf AMQP',)
     sourcetype = sourcetypes[0]

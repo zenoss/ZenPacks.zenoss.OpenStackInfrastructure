@@ -17,7 +17,7 @@ from ZenPacks.zenoss.Impact.impactd.interfaces import IRelationshipDataProvider
 from Products.ZenModel.Device import Device
 from Products.ZenModel.OSProcess import OSProcess
 
-ZENPACK_NAME = 'ZenPacks.zenoss.OpenStackInfrastructure.
+ZENPACK_NAME = 'ZenPacks.zenoss.OpenStackInfrastructure'
 
 
 class BaseRelationshipDataProvider(object):

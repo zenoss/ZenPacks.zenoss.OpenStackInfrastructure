@@ -48,7 +48,7 @@ setup(
     keywords="openstack ceilometer zenoss",
     author='Zenoss, Inc.',
     author_email='support@zenoss.com',
-    url='http://github.com/zenoss/ZenPacks.zenoss.OpenStackInfrastructure.,
+    url='http://github.com/zenoss/ZenPacks.zenoss.OpenStackInfrastructure',
     license=read('LICENSE'),
 
     requires=requires,

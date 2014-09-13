@@ -103,7 +103,7 @@ class PerfCeilometerAPIDataSource(PythonDataSource):
     Datasource used to capture datapoints from OpenStack Ceilometer.
     '''
 
-    ZENPACKID = 'ZenPacks.zenoss.OpenStackInfrastructure.
+    ZENPACKID = 'ZenPacks.zenoss.OpenStackInfrastructure.'
 
     sourcetypes = ('OpenStack Ceilometer',)
     sourcetype = sourcetypes[0]

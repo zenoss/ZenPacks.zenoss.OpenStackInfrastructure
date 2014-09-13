@@ -45,7 +45,7 @@ class EventsAMQPDataSource(PythonDataSource):
     Ceilometer via AMQP.
     '''
 
-    ZENPACKID = 'ZenPacks.zenoss.OpenStackInfrastructure.
+    ZENPACKID = 'ZenPacks.zenoss.OpenStackInfrastructure.'
 
     sourcetypes = ('OpenStack Ceilometer Events AMQP',)
     sourcetype = sourcetypes[0]

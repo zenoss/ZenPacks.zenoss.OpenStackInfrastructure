@@ -34,7 +34,7 @@ class NovaServiceStatusDataSource(PythonDataSource):
     Datasource used to check the status of nova services via the nova API
     '''
 
-    ZENPACKID = 'ZenPacks.zenoss.OpenStackInfrastructure.
+    ZENPACKID = 'ZenPacks.zenoss.OpenStackInfrastructure.'
 
     sourcetypes = ('OpenStack Nova Service Status',)
     sourcetype = sourcetypes[0]

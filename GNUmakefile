@@ -14,10 +14,9 @@
 PYTHON=python
 SRC_DIR=$(PWD)/src
 TXSSHCLIENT_DIR=$(SRC_DIR)/txsshclient-0.1.0dev1
-ZP_DIR=$(PWD)/ZenPacks.zenoss.OpenStackInfrastructure
+ZP_DIR=$(PWD)/ZenPacks/zenoss/OpenStackInfrastructure
 BIN_DIR=$(ZP_DIR)/bin
 LIB_DIR=$(ZP_DIR)/lib
-
 
 default: egg
 
