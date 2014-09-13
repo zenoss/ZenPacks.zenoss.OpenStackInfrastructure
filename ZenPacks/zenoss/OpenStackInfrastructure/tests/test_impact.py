@@ -155,7 +155,7 @@ class TestImpact(zenpacklib.TestCase):
             return
 
         import ZenPacks.zenoss.OpenStack
-        zcml.load_config('configure.zcml', ZenPacks.zenoss.OpenStackInfrastructure.
+        zcml.load_config('configure.zcml', ZenPacks.zenoss.OpenStackInfrastructure)
 
     def model_data(self):
         if not hasattr(self, '_model_data'):

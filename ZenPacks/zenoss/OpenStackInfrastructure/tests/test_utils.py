@@ -281,7 +281,7 @@ def create_model_data(dmd):
             process = linux_device.os.processes._getOb(process_id)
 
             process_class = re.sub(r'\d+$', '', binary)
-            process.setOSProcessClass("Processes/OpenStackInfrastructure/osProcessClasses/%s" % process_class)
+            process.setOSProcessClass("Processes/OpenStack/osProcessClasses/%s" % process_class)
 
     return {
         'endpoint': endpoint,
