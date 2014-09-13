@@ -1,12 +1,12 @@
 # These variables are overwritten by Zenoss when the ZenPack is exported
 # or saved.  Do not modify them directly here.
 # NB: PACKAGES is deprecated
-NAME = "ZenPacks.zenoss.OpenStack"
+NAME = "ZenPacks.zenoss.OpenStackInfrastructure.
 VERSION = "2.0.0dev"
 AUTHOR = "Zenoss"
 LICENSE = "GPLv2"
 NAMESPACE_PACKAGES = [u'ZenPacks', u'ZenPacks.zenoss']
-PACKAGES = [u'ZenPacks', u'ZenPacks.zenoss', u'ZenPacks.zenoss.OpenStack']
+PACKAGES = [u'ZenPacks', u'ZenPacks.zenoss', u'ZenPacks.zenoss.OpenStackInfrastructure.]
 INSTALL_REQUIRES = ['ZenPacks.zenoss.PythonCollector>=1.1']
 COMPAT_ZENOSS_VERS = ">=4.2.0"
 PREV_ZENPACK_NAME = ""

@@ -1,5 +1,5 @@
-// OpenStack Internal Impacts
-[note: OpenStack;ZenPack{bg:aquamarine}]-[NovaEndpoint{bg:aquamarine}]
+// OpenStackInfrastructure Internal Impacts
+[note: OpenStackInfrastructure;ZenPack{bg:aquamarine}]-[NovaEndpoint{bg:aquamarine}]
 [NovaEndpoint{bg:aquamarine}]1-0..*>[Host{bg:aquamarine}]
 
 [Host{bg:aquamarine}]1..*-1>[AvailabilityZone{bg:aquamarine}]
