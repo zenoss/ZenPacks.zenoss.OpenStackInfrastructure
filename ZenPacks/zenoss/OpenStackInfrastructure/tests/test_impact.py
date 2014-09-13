@@ -37,7 +37,7 @@ from ZenPacks.zenoss.OpenStackInfrastructure.tests.test_utils import (
 from Products.ZenUtils.Utils import unused
 unused(Globals)
 
-from ZenPacks.zenoss.OpenStackInfrastructure.import zenpacklib
+from ZenPacks.zenoss.OpenStackInfrastructure import zenpacklib
 # Required before zenpacklib.TestCase can be used.
 zenpacklib.enableTesting()
 

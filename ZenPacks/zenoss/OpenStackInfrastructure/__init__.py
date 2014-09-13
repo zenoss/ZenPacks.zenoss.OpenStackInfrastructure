@@ -386,5 +386,5 @@ class ZenPack(schema.ZenPack):
 
 
 # Patch last to avoid import recursion problems.
-from ZenPacks.zenoss.OpenStackInfrastructure.import patches
+from ZenPacks.zenoss.OpenStackInfrastructure import patches
 unused(patches)
