@@ -32,7 +32,7 @@ from apiclients.keystoneapiclient import KeystoneAPIClient
 
 
 
-class OpenStack(PythonPlugin):
+class OpenStackInfrastructure(PythonPlugin):
     deviceProperties = PythonPlugin.deviceProperties + (
         'zCommandUsername',
         'zCommandPassword',
