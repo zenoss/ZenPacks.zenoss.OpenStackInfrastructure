@@ -15,6 +15,7 @@ log = logging.getLogger('zen.OpenStackInfrastructureHypervisor')
 
 from Products.AdvancedQuery import Eq, Or
 
+
 class Hypervisor(schema.Hypervisor):
 
     def get_hostByName(self):
@@ -34,7 +35,7 @@ class Hypervisor(schema.Hypervisor):
         if len(hosts) > 0:
             if len(hosts) > 1:
                 log.warning(
-                    "Got more than one host for hypervisor: " + \
+                    "Got more than one host for hypervisor: " +
                     "%s with id: %s" % (self.title, self.id))
 
             host = hosts[0].getObject()
@@ -48,7 +49,7 @@ class Hypervisor(schema.Hypervisor):
             if len(hosts) > 0:
                 if len(hosts) > 1:
                     log.warning(
-                        "Got more than one host for hypervisor: " + \
+                        "Got more than one host for hypervisor: " +
                         "%s with id: %s" (self.title, self.id))
 
                 host = hosts[0].getObject()
