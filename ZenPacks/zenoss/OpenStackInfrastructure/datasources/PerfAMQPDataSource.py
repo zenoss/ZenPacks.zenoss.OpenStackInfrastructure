@@ -209,6 +209,10 @@ class PerfAMQPDataSourcePlugin(PythonDataSourcePlugin):
             value = json.loads(message.content.body)
             log.debug(value)
 
+            if value['device'] != device_id:
+                log.error("While expecting a message for %s, received a message regarding %s instead!" % (device_id, value['device']))
+                return
+
             if value['type'] == 'meter':
                 # Message is a json-serialized version of a ceilometer.storage.models.Sample object
                 # (http://docs.openstack.org/developer/ceilometer/_modules/ceilometer/storage/models.html#Sample)
