@@ -16,7 +16,7 @@
     <include package="Products.ZenUtils.extdirect.zope" file="meta.zcml"/>
 
     <browser:directRouter
-        name="openstack_router"
+        name="openstackinfrastructure_router"
         for="*"
         class=".api.OpenStackInfrastructureRouter"
         namespace="Zenoss.remote"
