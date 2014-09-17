@@ -96,6 +96,17 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
             LOG.info("Creating DeviceClass %s" % dcpath)
             return self.dmd.Devices.createOrganizer(dcpath)
 
+    def need_maintenance(self):
+        device = GUIDManager(self.dmd).getObject(getattr(self, 'openstackProxyDeviceUUID', None))
+        if device and self.uuid != device.uuid:
+            return True
+
+        device = self.dmd.Devices.findDevice(self.name())
+        if device and device.uuid != self.device().uuid:
+            return True
+
+        return False
+
     def maintain_proxy_device(self):
         '''
         Ensure that the proxy device exists, creating it if necessary.

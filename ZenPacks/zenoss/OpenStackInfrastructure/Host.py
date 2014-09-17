@@ -24,16 +24,6 @@ class Host(schema.Host):
     def isControllerNode(self):
         pass
 
-    def need_maintenance(self):
-        # hosts that Endpoint device already knows about
-        hosts = self.device().hosts()
-        hostUuids = [host.uuid for host in hosts]
-        need = False
-        if self.uuid not in hostUuids:
-            need = True
-
-        return need
-
     def maintain_proxy_device(self):
         self.ensure_proxy_device()
         self.ensure_service_monitoring()
