@@ -22,16 +22,12 @@ class Endpoint(schema.Endpoint):
     def get_maintain_proxydevices(self):
         from ZenPacks.zenoss.OpenStackInfrastructure.DeviceProxyComponent \
             import DeviceProxyComponent
-        # hosts that our Endpoint already knows about
-        hosts = self.dmd.Devices.findDevice(self.name()).hosts()
-        hostUuids = [host.uuid for host in hosts]
-        found = True
         for meta_type in DeviceProxyComponent.deviceproxy_meta_types():
             for component in self.getDeviceComponents(type=meta_type):
-                if component.uuid not in hostUuids:
-                    found = False
-                    break
-        return found
+                if component.need_maintenance():
+                    return False
+
+        return True
 
     def set_maintain_proxydevices(self, arg):
         from ZenPacks.zenoss.OpenStackInfrastructure.DeviceProxyComponent \
