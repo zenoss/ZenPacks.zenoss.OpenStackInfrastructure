@@ -154,7 +154,7 @@ class TestImpact(zenpacklib.TestCase):
         except ImportError:
             return
 
-        import ZenPacks.zenoss.OpenStack
+        import ZenPacks.zenoss.OpenStackInfrastructure
         zcml.load_config('configure.zcml', ZenPacks.zenoss.OpenStackInfrastructure)
 
     def model_data(self):
