@@ -197,6 +197,11 @@ class EventsAMQPDataSourcePlugin(PythonDataSourcePlugin):
     def processMessage(self, device_id, message):
         try:
             value = json.loads(message.content.body)
+            log.debug(value)
+
+            if value['device'] != device_id:
+                log.error("While expecting a message for %s, received a message regarding %s instead!" % (device_id, value['device']))
+                return
 
             if value['type'] == 'event':
                 # Message is a json-serialized version of a ceilometer.storage.models.Event object
