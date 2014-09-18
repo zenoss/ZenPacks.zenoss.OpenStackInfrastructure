@@ -24,7 +24,7 @@ TRAITMAPS = {
         'flavor_name':  ['set_flavor_name'],
         'host_name':    ['set_host_name'],
         'image_name':   ['set_image_name'],
-        'tenant_id':    ['set_tenant'],
+        'tenant_id':    ['set_tenant_id'],
         # Todo: handle fixed_IPs
     },
 }

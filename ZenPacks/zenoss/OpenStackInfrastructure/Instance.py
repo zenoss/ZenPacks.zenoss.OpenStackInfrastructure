@@ -55,6 +55,13 @@ class Instance(schema.Instance):
 
         return
 
+    def get_tenant_id(self):
+        if self.tenant():
+            return self.tenant().tenantId
+
+    def set_tenant_id(self, tenant_id):
+        return self.set_tenant('tenant-{0}'.format(tenant_id))
+
     def get_flavor_name(self):
         if self.flavor():
             return self.flavor().titleOrId()
