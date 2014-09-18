@@ -753,6 +753,13 @@ class TestEventTransforms(zenpacklib.TestCase):
 def logChange(self, device, compname, eventClass, msg):
     logging.getLogger('zen.ApplyDataMap').info(msg)
 
+# My test data doesn't have properly formatted ids, so instead of
+# "tenant-tenant1", it's just "tenant1.  Rather than fix the data, we hack the
+# setter to not prefix tenant- on the front.
+@monkeypatch('ZenPacks.zenoss.OpenStackInfrastructure.Instance.Instance')
+def set_tenant_id(self, tenant_id):
+    return self.set_tenant(tenant_id)
+
 
 def test_suite():
     from unittest import TestSuite, makeSuite
