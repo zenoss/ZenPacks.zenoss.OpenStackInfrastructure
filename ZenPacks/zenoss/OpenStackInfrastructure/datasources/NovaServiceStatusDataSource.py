@@ -16,6 +16,7 @@ from twisted.internet.defer import inlineCallbacks
 from zope.component import adapts
 from zope.interface import implements
 
+from Products.DataCollector.plugins.DataMaps import ObjectMap
 from Products.ZenEvents import ZenEventClasses
 
 from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import (
@@ -124,6 +125,22 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
         for service in result['services']:
             service_id = prepId('service-{0}-{1}-{2}'.format(
                 service['binary'], service['host'], service['zone']))
+
+            data['maps'].append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.NovaService',
+                compname='',
+                data=dict(
+                    id=service_id,
+                    relname='components',
+                    enabled={
+                        'enabled': True,
+                        'disabled': False
+                    }.get(service['status'], False),
+                    operStatus={
+                        'up': 'UP',
+                        'down': 'DOWN'
+                    }.get(service['state'], 'UNKNOWN'),
+                )))
 
             if service['status'] == 'disabled':
                 data['events'].append({
