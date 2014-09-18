@@ -1,7 +1,7 @@
 # Ceilometer Reference: http://docs.openstack.org/developer/ceilometer/measurements.html
 
-/OpenStackInfrastructure/Instance:
-  description: "OpenStack: Instance Monitoring"
+/OpenStack/OpenStackInfrastructureInstance:
+  description: "OpenStackInfrastructure: Instance Monitoring"
   targetPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Instance
 
   datasources:
@@ -52,12 +52,12 @@
       maxy: 100
 
       graphpoints:
-        cpu_util:
+        CPU Utilization:
           dpName: cpuUtilization
           format: "%5.2lf"
 
     Disk Requests:
-      units: requests / second
+      units: requests/sec
       miny: 0
 
       graphpoints:
@@ -70,7 +70,7 @@
           format: "%5.2lf"
 
     Disk IO Rate:
-      units: kilo bytes / second
+      units: bytes/sec
       miny: 0
 
       graphpoints:
@@ -83,8 +83,8 @@
           format: "%5.2lf"
 
 
-/OpenStackInfrastructure/Vnic:
-  description: "OpenStack: Vnic Monitoring"
+/OpenStack/OpenStackInfrastructureVnic:
+  description: "OpenStackInfrastructure: Vnic Monitoring"
   targetPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Vnic
 
   datasources:
@@ -126,29 +126,29 @@
       miny: 0
 
       graphpoints:
-        network.incoming.packets.rate:
+        Inbound:
           dpName: networkIncomingPacketsRate
           format: "%5.2lf"
 
-        network.outgoing.packets.rate:
+        Outbound:
           dpName: networkOutgoingPacketsRate
           format: "%5.2lf"
 
-    Network Throughpout:
-      units: bytes / second
+    Network Throughput:
+      units: bytes/sec
       miny: 0
 
       graphpoints:
-        network.incoming.bytes.rate:
+        Inbound:
           dpName: networkIncomingBytesRate
           format: "%5.2lf"
 
-        network.outgoing.bytes.rate:
+        Outbound:
           dpName: networkOutgoingBytesRate
           format: "%5.2lf"
 
-/OpenStackInfrastructure/OpenStackInfrastructureEndpoint:
-  description: "OpenStack: Endpoint Monitoring"
+/OpenStack/OpenStackInfrastructureEndpoint:
+  description: "OpenStackInfrastructure: Endpoint Monitoring"
   targetPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Endpoint
 
   datasources:
