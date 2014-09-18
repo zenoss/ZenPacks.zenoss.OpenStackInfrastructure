@@ -20,12 +20,12 @@ from ZenPacks.zenoss.DynamicView.model.adapters import BaseRelatable
 from ZenPacks.zenoss.DynamicView.model.adapters import DeviceComponentRelatable
 from ZenPacks.zenoss.DynamicView.model.adapters import BaseRelationsProvider
 
-from ZenPacks.zenoss.OpenStack.Endpoint import Endpoint
-from ZenPacks.zenoss.OpenStack.Region import Region
-from ZenPacks.zenoss.OpenStack.AvailabilityZone import AvailabilityZone
-from ZenPacks.zenoss.OpenStack.Cell import Cell
-from ZenPacks.zenoss.OpenStack.SoftwareComponent import SoftwareComponent
-from ZenPacks.zenoss.OpenStack.Host import Host
+from ZenPacks.zenoss.OpenStackInfrastructure.Endpoint import Endpoint
+from ZenPacks.zenoss.OpenStackInfrastructure.Region import Region
+from ZenPacks.zenoss.OpenStackInfrastructure.AvailabilityZone import AvailabilityZone
+from ZenPacks.zenoss.OpenStackInfrastructure.Cell import Cell
+from ZenPacks.zenoss.OpenStackInfrastructure.SoftwareComponent import SoftwareComponent
+from ZenPacks.zenoss.OpenStackInfrastructure.Host import Host
 
 TAG_CLOUD = 'openstack_link'
 
@@ -41,7 +41,7 @@ class EndpointRelationsProvider(BaseRelationsProvider):
 
     def relations(self, type=TAG_ALL):
         for region in [x for x in self._adapted.components()
-                       if x.meta_type == 'OpenStackRegion']:
+                       if x.meta_type == 'OpenStackInfrastructureRegion']:
             yield self.constructRelationTo(region, TAG_CLOUD)
 
 
@@ -63,7 +63,6 @@ class RegionRelationsProvider(BaseRelationsProvider):
 
             for software in self._adapted.softwareComponents():
                 yield self.constructRelationTo(software, TAG_CLOUD)
-
 
 
 class AvailabilityZoneRelatable(BaseRelatable):
@@ -134,4 +133,4 @@ class HostRelationsProvider(BaseRelationsProvider):
     def relations(self, type=TAG_ALL):
         if type in (TAG_ALL, TAG_CLOUD):
             for software in self._adapted.hostedSoftware():
-                yield self.constructRelationTo(software, TAG_CLOUD)                
+                yield self.constructRelationTo(software, TAG_CLOUD)

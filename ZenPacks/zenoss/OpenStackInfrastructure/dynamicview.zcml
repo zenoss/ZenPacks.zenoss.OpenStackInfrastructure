@@ -25,14 +25,14 @@
         view="openstack_view"
         relatable=".dynamicview.EndpointRelatable"
         weight="500"
-        icon="/++resource++ZenPacks.zenoss.OpenStack/icon/Endpoint.png"
+        icon="/++resource++ZenPacks.zenoss.OpenStackInfrastructure/icon/Endpoint.png"
         />        
 
 
     <relatableGroup name="Region"
         groupType="OpenStack"
         weight="100"
-        icon="/++resource++ZenPacks.zenoss.OpenStack/icon/Region.png"
+        icon="/++resource++ZenPacks.zenoss.OpenStackInfrastructure/icon/Region.png"
     />
 
     <dynamicViewToGroup
@@ -42,22 +42,22 @@
     />
 
     <adapter provides="ZenPacks.zenoss.DynamicView.interfaces.IRelatable"
-        for="ZenPacks.zenoss.OpenStack.Endpoint.Endpoint"
+        for="ZenPacks.zenoss.OpenStackInfrastructure.Endpoint.Endpoint"
         factory=".dynamicview.EndpointRelatable"
         />
 
     <subscriber provides="ZenPacks.zenoss.DynamicView.interfaces.IRelationsProvider"
-        for="ZenPacks.zenoss.OpenStack.Endpoint.Endpoint"
+        for="ZenPacks.zenoss.OpenStackInfrastructure.Endpoint.Endpoint"
         factory=".dynamicview.EndpointRelationsProvider"
         />
 
     <adapter provides="ZenPacks.zenoss.DynamicView.interfaces.IRelatable"
-        for="ZenPacks.zenoss.OpenStack.Region.Region"
+        for="ZenPacks.zenoss.OpenStackInfrastructure.Region.Region"
         factory=".dynamicview.RegionRelatable"
         />
 
     <subscriber provides="ZenPacks.zenoss.DynamicView.interfaces.IRelationsProvider"
-        for="ZenPacks.zenoss.OpenStack.Region.Region"
+        for="ZenPacks.zenoss.OpenStackInfrastructure.Region.Region"
         factory=".dynamicview.RegionRelationsProvider"
         />
 
@@ -66,7 +66,7 @@
     <relatableGroup name="Availability Zones"
         groupType="OpenStack"
         weight="200"        
-        icon="/++resource++ZenPacks.zenoss.OpenStack/icon/AvailabilityZone.png"
+        icon="/++resource++ZenPacks.zenoss.OpenStackInfrastructure/icon/AvailabilityZone.png"
     />
 
     <dynamicViewToGroup
@@ -76,12 +76,12 @@
     />
 
     <adapter provides="ZenPacks.zenoss.DynamicView.interfaces.IRelatable"
-        for="ZenPacks.zenoss.OpenStack.AvailabilityZone.AvailabilityZone"
+        for="ZenPacks.zenoss.OpenStackInfrastructure.AvailabilityZone.AvailabilityZone"
         factory=".dynamicview.AvailabilityZoneRelatable"
         />
 
     <subscriber provides="ZenPacks.zenoss.DynamicView.interfaces.IRelationsProvider"
-        for="ZenPacks.zenoss.OpenStack.AvailabilityZone.AvailabilityZone"
+        for="ZenPacks.zenoss.OpenStackInfrastructure.AvailabilityZone.AvailabilityZone"
         factory=".dynamicview.AvailabilityZoneRelationsProvider"
         />
 
@@ -91,7 +91,7 @@
     <relatableGroup name="Nova Cells"
         groupType="OpenStack"
         weight="300"        
-        icon="/++resource++ZenPacks.zenoss.OpenStack/icon/Cell.png"
+        icon="/++resource++ZenPacks.zenoss.OpenStackInfrastructure/icon/Cell.png"
     />
 
     <dynamicViewToGroup
@@ -101,12 +101,12 @@
     />
 
     <adapter provides="ZenPacks.zenoss.DynamicView.interfaces.IRelatable"
-        for="ZenPacks.zenoss.OpenStack.Cell.Cell"
+        for="ZenPacks.zenoss.OpenStackInfrastructure.Cell.Cell"
         factory=".dynamicview.CellRelatable"
         />
 
     <subscriber provides="ZenPacks.zenoss.DynamicView.interfaces.IRelationsProvider"
-        for="ZenPacks.zenoss.OpenStack.Cell.Cell"
+        for="ZenPacks.zenoss.OpenStackInfrastructure.Cell.Cell"
         factory=".dynamicview.CellRelationsProvider"
         />
 
@@ -114,7 +114,7 @@
     <relatableGroup name="Services"
         groupType="OpenStack"
         weight="400"        
-        icon="/++resource++ZenPacks.zenoss.OpenStack/icon/SoftwareComponent.png"
+        icon="/++resource++ZenPacks.zenoss.OpenStackInfrastructure/icon/SoftwareComponent.png"
     />
 
     <dynamicViewToGroup
@@ -124,12 +124,12 @@
     />
 
     <adapter provides="ZenPacks.zenoss.DynamicView.interfaces.IRelatable"
-        for="ZenPacks.zenoss.OpenStack.SoftwareComponent.SoftwareComponent"
+        for="ZenPacks.zenoss.OpenStackInfrastructure.SoftwareComponent.SoftwareComponent"
         factory=".dynamicview.SoftwareComponentRelatable"
         />
 
     <subscriber provides="ZenPacks.zenoss.DynamicView.interfaces.IRelationsProvider"
-        for="ZenPacks.zenoss.OpenStack.SoftwareComponent.SoftwareComponent"
+        for="ZenPacks.zenoss.OpenStackInfrastructure.SoftwareComponent.SoftwareComponent"
         factory=".dynamicview.SoftwareComponentRelationsProvider"
         />
 
@@ -139,7 +139,7 @@
     <relatableGroup name="Hosts"
         groupType="OpenStack"
         weight="500"        
-        icon="/++resource++ZenPacks.zenoss.OpenStack/icon/Host.png"
+        icon="/++resource++ZenPacks.zenoss.OpenStackInfrastructure/icon/Host.png"
     />
 
     <dynamicViewToGroup
@@ -149,12 +149,12 @@
     />
 
     <adapter provides="ZenPacks.zenoss.DynamicView.interfaces.IRelatable"
-        for="ZenPacks.zenoss.OpenStack.Host.Host"
+        for="ZenPacks.zenoss.OpenStackInfrastructure.Host.Host"
         factory=".dynamicview.HostRelatable"
         />
 
     <subscriber provides="ZenPacks.zenoss.DynamicView.interfaces.IRelationsProvider"
-        for="ZenPacks.zenoss.OpenStack.Host.Host"
+        for="ZenPacks.zenoss.OpenStackInfrastructure.Host.Host"
         factory=".dynamicview.HostRelationsProvider"
         />
 
