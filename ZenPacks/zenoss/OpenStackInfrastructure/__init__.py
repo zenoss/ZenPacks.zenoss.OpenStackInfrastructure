@@ -113,7 +113,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'childOrgs': {'label': 'Children', 'order': 1.1},
             },
             'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'],
-            'impacts': ['orgComponent', 'parentOrg']
+            'impacts': ['parentOrg']
         },
 
         'SoftwareComponent': {
@@ -263,7 +263,7 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Region',
             'order': 4,
             'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'], #inherit
-            'impacts': ['orgComponent', 'parentOrg']                   #inherit
+            'impacts': ['parentOrg']                   #inherit
         },
 
         'Cell': {
@@ -272,7 +272,7 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Cell',
             'order': 5,
             'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'], #inherit
-            'impacts': ['orgComponent', 'parentOrg']                   #inherit            
+            'impacts': ['parentOrg']                   #inherit            
         },
 
         'AvailabilityZone': {
@@ -281,7 +281,7 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Availability Zone',
             'order': 6,
             'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'], #inherit
-            'impacts': ['orgComponent', 'parentOrg']                   #inherit            
+            'impacts': ['parentOrg']                   #inherit            
         },
 
         'Host': {
