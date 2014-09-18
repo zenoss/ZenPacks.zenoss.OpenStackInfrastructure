@@ -121,6 +121,20 @@ class ZenPack(ZenPackBase):
             d.buildRelations()
 
     def install(self, app):
+        for dcname, dcspec in self.device_classes.iteritems():
+            if dcspec.create:
+                try:
+                    self.dmd.Devices.getOrganizer(dcspec.path)
+                except KeyError:
+                    LOG.info('Creating DeviceClass %s' % dcspec.path)
+                    app.dmd.Devices.createOrganizer(dcspec.path)
+
+            dcObject = self.dmd.Devices.getOrganizer(dcspec.path)
+            for zprop, value in dcspec.zProperties.iteritems():
+                LOG.info('Setting zProperty %s on %s' % (zprop, dcspec.path))
+                dcObject.setZenProperty(zprop, value)
+
+        # Load objects.xml now
         super(ZenPack, self).install(app)
         if self.NEW_COMPONENT_TYPES:
             LOG.info('Adding %s relationships to existing devices' % self.id)
@@ -153,7 +167,10 @@ class ZenPack(ZenPackBase):
                 LOG.info('Removing %s relationships from existing devices.' % self.id)
                 self._buildDeviceRelations()
 
-            # Remove Zenpack create global catalogs
+            for dcname, dcspec in self.device_classes.iteritems():
+                if dcspec.remove():
+                    LOG.info('Removing DeviceClass %s' % dcspec.path)
+                    app.dmd.Devices.manage_deleteOrganizer(dcspec.path)
 
         super(ZenPack, self).remove(app, leaveObjects=leaveObjects)
 
@@ -800,7 +817,29 @@ FACET_BLACKLIST = (
     )
 
 
-class ZenPackSpec(object):
+class Spec(object):
+
+    """Abstract base class for specifications."""
+
+    def specs_from_param(self, spec_type, param_name, param_dict):
+        """Return a normalized dictionary of spec_type instances."""
+        if param_dict is None:
+            param_dict = {}
+        elif not isinstance(param_dict, dict):
+            raise TypeError(
+                "{!r} argument must be dict or None, not {!r}"
+                .format(
+                    '{}.{}'.format(spec_type.__name__, param_name),
+                    type(param_dict).__name__))
+        else:
+            apply_defaults(param_dict)
+
+        return {
+            k: spec_type(self, k, **(fix_kwargs(v)))
+            for k, v in param_dict.iteritems()}
+
+
+class ZenPackSpec(Spec):
 
     """Representation of a ZenPack's desired configuration.
 
@@ -852,44 +891,31 @@ class ZenPackSpec(object):
             name,
             zProperties=None,
             classes=None,
-            class_relationships=None):
+            class_relationships=None,
+            device_classes=None):
         """TODO."""
         self.name = name
         self.NEW_COMPONENT_TYPES = []
         self.NEW_RELATIONS = collections.defaultdict(list)
 
-        # Configuration Properties (zProperties).
-        if zProperties is None:
-            zProperties = {}
-        elif not isinstance(zProperties, dict):
-            raise TypeError(
-                "zenpack zProperties argument must be dict or None, not {!r}"
-                .format(type(zProperties).__name__))
-        else:
-            apply_defaults(zProperties)
+        # zProperties
+        self.zProperties = self.specs_from_param(
+            ZPropertySpec, 'zProperties', zProperties)
 
-        self.zProperties = {}
+        # Classes
+        if classes:
+            for classname, classdata in classes.items():
+                if 'relationships' not in classdata:
+                    classdata['relationships'] = {}
 
-        for zpname, zpspecdict in zProperties.iteritems():
-            self.zProperties[zpname] = ZPropertySpec(
-                self, zpname, **(fix_kwargs(zpspecdict)))
+                # Merge class_relationships.
+                if class_relationships:
+                    update(
+                        classdata['relationships'],
+                        class_relationships.get(classname, {}))
 
-        # Classes.
-        self.classes = {}
+        self.classes = self.specs_from_param(ClassSpec, 'classes', classes)
         self.imported_classes = {}
-        apply_defaults(classes)
-
-        for classname, classdata in classes.iteritems():
-            if 'relationships' not in classdata:
-                classdata['relationships'] = {}
-
-            # Merge class_relationships.
-            if class_relationships:
-                update(
-                    classdata['relationships'],
-                    class_relationships.get(classname, {}))
-
-            self.classes[classname] = ClassSpec(self, classname, **classdata)
 
         for classname, classdata in classes.iteritems():
             relationships = classdata['relationships']
@@ -928,6 +954,10 @@ class ZenPackSpec(object):
                     component_type = '.'.join((modname, className))
                     if component_type not in self.NEW_COMPONENT_TYPES:
                         self.NEW_COMPONENT_TYPES.append(component_type)
+
+        # Device Classes
+        self.device_classes = self.specs_from_param(
+            DeviceClassSpec, 'device_classes', device_classes)
 
     @property
     def ordered_classes(self):
@@ -1154,6 +1184,7 @@ class ZenPackSpec(object):
             'packZProperties': packZProperties
             }
 
+        attributes['device_classes'] = self.device_classes
         attributes['NEW_COMPONENT_TYPES'] = self.NEW_COMPONENT_TYPES
         attributes['NEW_RELATIONS'] = self.NEW_RELATIONS
         attributes['GLOBAL_CATALOGS'] = []
@@ -1188,7 +1219,22 @@ class ZenPackSpec(object):
         self.create_device_js_snippet()
 
 
-class ZPropertySpec(object):
+class DeviceClassSpec(Spec):
+
+    """Initialize a DeviceClass via Python at install time."""
+
+    def __init__(self, zenpack_spec, path, create=True, zProperties=None):
+        self.zenpack_spec = zenpack_spec
+        self.path = path.lstrip('/')
+        self.create = bool(create)
+
+        if zProperties is None:
+            self.zProperties = {}
+        else:
+            self.zProperties = zProperties
+
+
+class ZPropertySpec(Spec):
 
     """TODO."""
 
@@ -1227,7 +1273,7 @@ class ZPropertySpec(object):
         return (self.name, self.default, self.type_)
 
 
-class ClassSpec(object):
+class ClassSpec(Spec):
 
     """TODO."""
 
@@ -1292,37 +1338,12 @@ class ClassSpec(object):
             self.order = 5 + (max(0, min(100, order)) / 100.0)
 
         # Properties.
-        if properties is None:
-            properties = {}
-        elif not isinstance(properties, dict):
-            raise TypeError(
-                "class properties argument must be dict or None, not {!r}"
-                .format(type(properties).__name__))
-        else:
-            apply_defaults(properties)
-
-        self.properties = {}
-
-        for name, data in properties.iteritems():
-            self.properties[name] = ClassPropertySpec(
-                self, name, **(fix_kwargs(data)))
+        self.properties = self.specs_from_param(
+            ClassPropertySpec, 'properties', properties)
 
         # Relationships.
-        if relationships is None:
-            relationships = {}
-        elif not isinstance(relationships, dict):
-            raise TypeError(
-                "class relationships argument must be dict or None, not {!r}"
-                .format(
-                    type(relationships).__name__))
-        else:
-            apply_defaults(relationships)
-
-        self.relationships = {}
-
-        for name, reldata in relationships.iteritems():
-            self.relationships[name] = ClassRelationshipSpec(
-                self, name, **reldata)
+        self.relationships = self.specs_from_param(
+            ClassRelationshipSpec, 'relationships', relationships)
 
         # Impact.
         self.impacts = impacts
@@ -1340,13 +1361,17 @@ class ClassSpec(object):
 
     def create(self):
         """Implement specification."""
+        self.create_model_schema_class()
+        self.create_iinfo_schema_class()
+        self.create_info_schema_class()
+
         self.create_model_class()
         self.create_iinfo_class()
         self.create_info_class()
-        if self.is_component:
+
+        if self.is_component or self.is_hardware_component:
             self.create_formbuilder_class()
-        if self.is_hardware_component:
-            self.create_formbuilder_class()
+
         self.register_impact_adapters()
 
     @property
@@ -1422,7 +1447,7 @@ class ClassSpec(object):
 
     def is_a(self, type_):
         """Return True if this class is a subclass of type_."""
-        return issubclass(self.model_class, type_)
+        return issubclass(self.model_schema_class, type_)
 
     @property
     def is_device(self):
@@ -1458,13 +1483,12 @@ class ClassSpec(object):
         return '/zport/dmd/img/icons/noicon.png'
 
     @property
-    def model_class(self):
-        """Return model class."""
-        return self.create_model_class()
+    def model_schema_class(self):
+        """Return model schema class."""
+        return self.create_model_schema_class()
 
-    @memoize
-    def create_model_class(self):
-        """Create and return model class."""
+    def create_model_schema_class(self):
+        """Create and return model schema class."""
         attributes = {
             'zenpack_name': self.zenpack.name,
             'meta_type': self.meta_type,
@@ -1523,21 +1547,6 @@ class ClassSpec(object):
                         }
                     }
                 catalogs[self.name]['indexes'].update(pindexes)
-                scopes = [catalogs[self.name]['indexes'][x]['scope'] for x in catalogs[self.name]['indexes'] if x != 'id']
-
-                if 'both' in scopes:
-                    scope_id = 'both'
-                elif 'global' and 'device' in scopes:
-                    scope_id = 'both'
-                elif 'global' in scopes and 'device' not in scopes:
-                    scope_id = 'global'
-                else:
-                    scope_id = 'device'
-
-                catalogs[self.name]['indexes']['id']['scope'] = scope_id
-
-            if spec.enum:
-                attributes['enum_{}'.format(name)] = spec.enum
 
         # Add local relations.
         for name, spec in self.relationships.iteritems():
@@ -1561,20 +1570,31 @@ class ClassSpec(object):
         attributes['impacts'] = self.impacts
         attributes['impacted_by'] = self.impacted_by
 
-        return create_class(
-            get_symbol_name(self.zenpack.name, self.name),
+        return create_schema_class(
             get_symbol_name(self.zenpack.name, 'schema'),
             self.name,
             self.resolved_bases,
             attributes)
 
     @property
-    def iinfo_class(self):
-        """Return IInfo subclass."""
-        return self.create_iinfo_class()
+    def model_class(self):
+        """Return model class."""
+        return self.create_model_class()
 
-    def create_iinfo_class(self):
-        """Create and return IInfo subclass."""
+    def create_model_class(self):
+        """Create and return model class."""
+        return create_stub_class(
+            get_symbol_name(self.zenpack.name, self.name),
+            self.model_schema_class,
+            self.name)
+
+    @property
+    def iinfo_schema_class(self):
+        """Return I<name>Info schema class."""
+        return self.create_iinfo_schema_class()
+
+    def create_iinfo_schema_class(self):
+        """Create and return I<name>Info schema class."""
         bases = []
         for base_classname in self.zenpack.classes[self.name].bases:
             if base_classname in self.zenpack.classes:
@@ -1605,20 +1625,31 @@ class ClassSpec(object):
         for spec in self.inherited_relationships().itervalues():
             attributes.update(spec.iinfo_schemas)
 
-        return create_class(
-            get_symbol_name(self.zenpack.name, self.name),
+        return create_schema_class(
             get_symbol_name(self.zenpack.name, 'schema'),
             'I{}Info'.format(self.name),
             tuple(bases),
             attributes)
 
     @property
-    def info_class(self):
-        """Return Info subclass."""
-        return self.create_info_class()
+    def iinfo_class(self):
+        """Return I<name>Info class."""
+        return self.create_iinfo_class()
 
-    def create_info_class(self):
-        """Create and return Info subclass."""
+    def create_iinfo_class(self):
+        """Create and return I<Info>Info class."""
+        return create_stub_class(
+            get_symbol_name(self.zenpack.name, self.name),
+            self.iinfo_schema_class,
+            'I{}Info'.format(self.name))
+
+    @property
+    def info_schema_class(self):
+        """Return <name>Info schema class."""
+        return self.create_info_schema_class()
+
+    def create_info_schema_class(self):
+        """Create and return <name>Info schema class."""
         bases = []
         for base_classname in self.zenpack.classes[self.name].bases:
             if base_classname in self.zenpack.classes:
@@ -1636,9 +1667,9 @@ class ClassSpec(object):
 
         attributes = {}
         attributes.update({
-            'class_label':              ProxyProperty('class_label'),
-            'class_plural_label':       ProxyProperty('class_plural_label'),
-            'class_short_label':        ProxyProperty('class_short_label'),
+            'class_label': ProxyProperty('class_label'),
+            'class_plural_label': ProxyProperty('class_plural_label'),
+            'class_short_label': ProxyProperty('class_short_label'),
             'class_plural_short_label': ProxyProperty('class_plural_short_label')
         })
 
@@ -1652,12 +1683,23 @@ class ClassSpec(object):
         for spec in self.inherited_relationships().itervalues():
             attributes.update(spec.info_properties)
 
-        info_class = create_class(
-            get_symbol_name(self.zenpack.name, self.name),
+        return create_schema_class(
             get_symbol_name(self.zenpack.name, 'schema'),
             '{}Info'.format(self.name),
             tuple(bases),
             attributes)
+
+    @property
+    def info_class(self):
+        """Return Info subclass."""
+        return self.create_info_class()
+
+    def create_info_class(self):
+        """Create and return Info subclass."""
+        info_class = create_stub_class(
+            get_symbol_name(self.zenpack.name, self.name),
+            self.info_schema_class,
+            '{}Info'.format(self.name))
 
         classImplements(info_class, self.iinfo_class)
         GSM.registerAdapter(info_class, (self.model_class,), self.iinfo_class)
@@ -1722,7 +1764,7 @@ class ClassSpec(object):
         """
         containing_specs = []
 
-        for relname, relschema in self.model_class._relations:
+        for relname, relschema in self.model_schema_class._relations:
             if not issubclass(relschema.remoteType, ToManyCont):
                 continue
 
@@ -1985,7 +2027,7 @@ class ClassSpec(object):
         self.register_impact_adapters()
 
 
-class ClassPropertySpec(object):
+class ClassPropertySpec(Spec):
 
     """TODO."""
 
@@ -2170,7 +2212,7 @@ class ClassPropertySpec(object):
             ]
 
 
-class ClassRelationshipSpec(object):
+class ClassRelationshipSpec(Spec):
 
     """TODO."""
 
@@ -2435,8 +2477,18 @@ def enableTesting():
             Transaction.abort = lambda *x: None
 
         def beforeTearDown(self):
+            super(TestCase, self).beforeTearDown()
+
             if hasattr(self, '_transaction_abort'):
                 Transaction.abort = self._transaction_abort
+
+        # If the exception occurs during setUp, beforeTearDown is not called,
+        # so we also need to restore abort here as well:
+        def _close(self):
+            if hasattr(self, '_transaction_abort'):
+                Transaction.abort = self._transaction_abort
+
+            super(TestCase, self)._close()
 
 
 def ucfirst(text):
@@ -2812,25 +2864,33 @@ def create_module(*args):
     return importlib.import_module(module_name)
 
 
-def create_class(module, schema_module, classname, bases, attributes):
-    """Create and return described class.
+def get_class_factory(klass):
+    """Return class factory for class."""
+    if issubclass(klass, IInfo):
+        return InterfaceClass
+    else:
+        return type
 
-    Dynamically add schema class and stub implmentation if needed.
 
-    """
+def create_schema_class(schema_module, classname, bases, attributes):
+    """Create and return described schema class."""
     if isinstance(schema_module, basestring):
         schema_module = create_module(schema_module)
 
-    if issubclass(bases[0], IInfo):
-        class_factory = InterfaceClass
-    else:
-        class_factory = type
+    schema_class = getattr(schema_module, classname, None)
+    if schema_class:
+        return schema_class
 
-    if not hasattr(schema_module, classname):
-        schema_class = class_factory(classname, tuple(bases), attributes)
-        schema_class.__module__ = schema_module.__name__
-        setattr(schema_module, classname, schema_class)
+    class_factory = get_class_factory(bases[0])
+    schema_class = class_factory(classname, tuple(bases), attributes)
+    schema_class.__module__ = schema_module.__name__
+    setattr(schema_module, classname, schema_class)
 
+    return schema_class
+
+
+def create_stub_class(module, schema_class, classname):
+    """Create and return described stub class."""
     if isinstance(module, basestring):
         module = create_module(module)
 
@@ -2838,11 +2898,23 @@ def create_class(module, schema_module, classname, bases, attributes):
     if concrete_class:
         return concrete_class
 
-    concrete_class = class_factory(classname, (schema_class,), {})
-    concrete_class.__module__ = module.__name__
-    setattr(module, classname, concrete_class)
+    class_factory = get_class_factory(schema_class)
+    stub_class = class_factory(classname, (schema_class,), {})
+    stub_class.__module__ = module.__name__
+    setattr(module, classname, stub_class)
 
-    return concrete_class
+    return stub_class
+
+
+def create_class(module, schema_module, classname, bases, attributes):
+    """Create and return described class."""
+    if isinstance(module, basestring):
+        module = create_module(module)
+
+    schema_class = create_schema_class(
+        schema_module, classname, bases, attributes)
+
+    return create_stub_class(module, schema_class, classname)
 
 
 # Impact Stuff ##############################################################
