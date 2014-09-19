@@ -97,15 +97,12 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
             return self.dmd.Devices.createOrganizer(dcpath)
 
     def need_maintenance(self):
+        guid = IGlobalIdentifier(self).getGUID()
         device = GUIDManager(self.dmd).getObject(getattr(self, 'openstackProxyDeviceUUID', None))
-        if device and self.uuid != device.uuid:
-            return True
-
-        device = self.dmd.Devices.findDevice(self.name())
-        if device and device.uuid != self.device().uuid:
-            return True
-
-        return False
+        if device and getattr(device, 'openstackProxyComponentUUID', None) \
+            and device.openstackProxyComponentUUID == guid:
+            return False
+        return True
 
     def maintain_proxy_device(self):
         '''
