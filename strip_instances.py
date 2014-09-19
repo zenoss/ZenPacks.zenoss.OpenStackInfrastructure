@@ -20,7 +20,7 @@ top-level directory of the ZenPack.
 
 """
 
-objects_filename = 'ZenPacks.zenoss.OpenStackInfrastructure/objects/objects.xml'
+objects_filename = 'ZenPacks/zenoss/OpenStackInfrastructure/objects/objects.xml'
 
 print "Stripping product instances from objects.xml."
 
