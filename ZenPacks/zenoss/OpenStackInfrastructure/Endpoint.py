@@ -20,10 +20,18 @@ class Endpoint(schema.Endpoint):
         return self.getDeviceComponents(type="OpenStackInfrastructureHost")
 
     def get_maintain_proxydevices(self):
-        return False
+        from ZenPacks.zenoss.OpenStackInfrastructure.DeviceProxyComponent \
+            import DeviceProxyComponent
+        for meta_type in DeviceProxyComponent.deviceproxy_meta_types():
+            for component in self.getDeviceComponents(type=meta_type):
+                if component.need_maintenance():
+                    return False
+
+        return True
 
     def set_maintain_proxydevices(self, arg):
-        from ZenPacks.zenoss.OpenStackInfrastructure.DeviceProxyComponent import DeviceProxyComponent
+        from ZenPacks.zenoss.OpenStackInfrastructure.DeviceProxyComponent \
+            import DeviceProxyComponent
         for meta_type in DeviceProxyComponent.deviceproxy_meta_types():
             for component in self.getDeviceComponents(type=meta_type):
                 component.maintain_proxy_device()
