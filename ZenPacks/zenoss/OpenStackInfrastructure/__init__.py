@@ -150,7 +150,8 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Tenant',
             'order': 1,
             'properties': {
-                'tenantId':   {'grid_display': False},
+                'tenantId':   {'grid_display': False,
+                               'label': 'Tenant ID'},
                 'description': { 'label': 'Description'},
             },
             'impacted_by': ['instances']
@@ -162,7 +163,8 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Flavor',
             'order': 1,
             'properties': {
-                'flavorId':   {'grid_display': False},                 # 1
+                'flavorId':   {'grid_display': False,
+                               'label': 'Flavor ID'},                 # 1
                 'flavorRAM':  {'type_': 'int',
                                'renderer': 'Zenoss.render.bytesString',
                                'label': 'RAM'},                        # bytes
@@ -178,7 +180,8 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Image',
             'order': 2,
             'properties': {
-                'imageId':      {'grid_display': False},
+                'imageId':      {'grid_display': False,
+                                 'label': 'Image ID'},
                 'imageStatus':  {'label': 'Status'},
                 'imageCreated': {'label': 'Created'},
                 'imageUpdated': {'label': 'Updated'},
@@ -191,15 +194,18 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Instance',
             'order': 3,
             'properties': {
-                'serverId':            {'grid_display': False},   # 847424
+                'serverId':            {'grid_display': False,
+                                        'label': 'Server ID'},   # 847424
                 'serverStatus':        {'label': 'Status',
                                         'label_width': 50,
                                         'order': 3.3},            # ACTIVE
                 'serverBackupEnabled': {'type_': 'boolean',
                                         'label': 'Backup',        # False
                                         'grid_display': False},   # DISABLED
-                'serverBackupDaily':   {'grid_display': False},   # DISABLED
-                'serverBackupWeekly':  {'grid_display': False},   # DISABLED
+                'serverBackupDaily':   {'grid_display': False,
+                                        'label': 'Daily Server Backup'},   # DISABLED
+                'serverBackupWeekly':  {'grid_display': False,
+                                        'label': 'Weekly Server Backup'},   # DISABLED
                 'publicIps':           {'type_': 'lines',
                                         'label': 'Public IPs',
                                         'label_width': 75,
@@ -220,7 +226,8 @@ CFG = zenpacklib.ZenPackSpec(
                 'hypervisorInstanceName': {'label': 'Hypervisor Instance Name',
                                            'grid_display': False},
 
-                'hostId':              {'grid_display': False},   # a84303c0021aa53c7e749cbbbfac265f
+                'hostId':              {'grid_display': False,
+                                        'label': 'Host ID'},   # a84303c0021aa53c7e749cbbbfac265f
                 'hostName':            {'grid_display': False,
                                         'index_type': 'field'},   # devstack1
                 'host': {'label': 'Host',   # link to the host this is running on.
@@ -338,8 +345,10 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Hypervisor',
             'order': 14,
             'properties': {
-                'hypervisorId':      {'grid_display': False},
-                'hostfqdn':          {'grid_display': False},
+                'hypervisorId':      {'grid_display': False,
+                                      'label': 'Hypervisor ID'},
+                'hostfqdn':          {'grid_display': False,
+                                      'label': 'FQDN'},
             },
             'impacts': ['instances'],
             'impacted_by': ['host']
