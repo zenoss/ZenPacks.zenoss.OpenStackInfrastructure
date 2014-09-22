@@ -1777,7 +1777,7 @@ class ClassSpec(Spec):
             dvm = DynamicViewMappings()
 
             groupName = self.model_class.class_dynamicview_group
-            weight = None
+            weight = int(2000 + (self.order * 100))
             icon_url = getattr(self, 'icon_url', '/zport/dmd/img/icons/noicon.png')
 
             # Make sure the named utility is also registered.  It seems that
