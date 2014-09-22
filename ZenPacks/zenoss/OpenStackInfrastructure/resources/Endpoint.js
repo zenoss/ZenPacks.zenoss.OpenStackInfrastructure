@@ -103,10 +103,4 @@ Zenoss.nav.appendTo('Device', [{
     viewName: 'openstack_view'
 }]);
 
-Zenoss.nav.appendTo('Component', [{
-    id: 'subcomponent_view',
-    text: _t('Dynamic View'),
-    xtype: 'dynamicview',
-    relationshipFilter: 'impacted_by',
-    viewName: 'subcomponent_view'
-}]);
+
