@@ -81,7 +81,7 @@ Ext.apply(Zenoss.render, {
 
 
 /*
- * Add the "Cloud View" for endpoints.
+ * Add the OpenStack Component View for device page.
  */
 Zenoss.nav.appendTo('Device', [{
     id: 'openstackcomponentview',
@@ -92,7 +92,7 @@ Zenoss.nav.appendTo('Device', [{
 }]);
 
 /*
- * Enable Dynamic View and Cloud View for components as well.
+ * Enable OpenStack Component View for components as well.
  */
 
  Zenoss.nav.appendTo('Component', [{
