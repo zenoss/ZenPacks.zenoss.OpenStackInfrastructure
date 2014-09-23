@@ -249,7 +249,7 @@ True
 0
 </property>
 <tomanycont id='graphPoints'>
-<object id='cpu_util' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<object id='CPU Utilization' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
 <property type="long" id="sequence" mode="w" >
 0
 </property>
@@ -288,7 +288,7 @@ AVERAGE
 500
 </property>
 <property type="string" id="units" mode="w" >
-kilo bytes / second
+bytes / second
 </property>
 <property type="boolean" id="log" mode="w" >
 False
@@ -1858,6 +1858,68 @@ True
 </object>
 </tomanycont>
 </object>
+<object id='openstackQueues' module='Products.ZenModel.BasicDataSource' class='BasicDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+COMMAND
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="eventClass" mode="w" >
+/Perf/RabbitMQ
+</property>
+<property type="int" id="severity" mode="w" >
+3
+</property>
+<property type="string" id="commandTemplate" mode="w" >
+queue_counts.py
+</property>
+<property type="int" id="cycletime" mode="w" >
+300
+</property>
+<property type="boolean" id="usessh" mode="w" >
+False
+</property>
+<property type="string" id="parser" mode="w" >
+ZenPacks.zenoss.OpenStackInfrastructure.parsers.OpenStackQueue
+</property>
+<tomanycont id='datapoints'>
+<object id='eventQueueCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property id='zendoc' type='string'>
+OpenStackInfrastructure: Event Queue Count Monitoring
+</property>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+<property type="string" id="description" mode="w" >
+OpenStackInfrastructure: Event Queue Count Monitoring
+</property>
+</object>
+<object id='perfQueueCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property id='zendoc' type='string'>
+OpenStackInfrastructure: Perf Queue Count Monitoring
+</property>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+<property type="string" id="description" mode="w" >
+OpenStackInfrastructure: Perf Queue Count Monitoring
+</property>
+</object>
+</tomanycont>
+</object>
 <object id='serviceStatus' module='ZenPacks.zenoss.OpenStackInfrastructure.datasources.NovaServiceStatusDataSource' class='NovaServiceStatusDataSource'>
 <property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
 OpenStack Nova Service Status
@@ -1876,6 +1938,31 @@ ${here/id}
 </property>
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStackInfrastructure.datasources.NovaServiceStatusDataSource.NovaServiceStatusDataSourcePlugin
+</property>
+</object>
+</tomanycont>
+<tomanycont id='thresholds'>
+<object id='Queue Count' module='Products.ZenModel.MinMaxThreshold' class='MinMaxThreshold'>
+<property type="string" id="eventClass" mode="w" >
+/Perf/RabbitMQ
+</property>
+<property type="int" id="severity" mode="w" >
+3
+</property>
+<property label="DataPoints" type="lines" id="dsnames" mode="w" >
+['openstackQueues_eventQueueCount', 'openstackQueues_perfQueueCount']
+</property>
+<property label="Enabled" type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="minval" mode="w" >
+-1
+</property>
+<property type="string" id="maxval" mode="w" >
+1000
+</property>
+<property type="int" id="escalateCount" mode="w" >
+0
 </property>
 </object>
 </tomanycont>
@@ -2196,6 +2283,95 @@ ${graphPoint/id}
 </property>
 <property type="string" id="dpName" mode="w" >
 openstack_imageUnknownCount
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='Queue Count' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<property type="int" id="height" mode="w" >
+100
+</property>
+<property type="int" id="width" mode="w" >
+500
+</property>
+<property type="string" id="units" mode="w" >
+Count
+</property>
+<property type="boolean" id="log" mode="w" >
+False
+</property>
+<property type="boolean" id="base" mode="w" >
+False
+</property>
+<property type="int" id="miny" mode="w" >
+-1
+</property>
+<property type="int" id="maxy" mode="w" >
+10
+</property>
+<property type="boolean" id="hasSummary" mode="w" >
+True
+</property>
+<property type="long" id="sequence" mode="w" >
+3
+</property>
+<tomanycont id='graphPoints'>
+<object id='Event Queue Count' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf%s
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+openstackQueues_eventQueueCount
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+<object id='Perf Queue Count' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+1
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf%s
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+openstackQueues_perfQueueCount
 </property>
 <property type="string" id="cFunc" mode="w" >
 AVERAGE
@@ -2731,7 +2907,7 @@ ${here/id}
 ZenPacks.zenoss.OpenStackInfrastructure.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
 </property>
 <property type="string" id="meter" >
-cpu_util
+CPU Utilization
 </property>
 <tomanycont id='datapoints'>
 <object id='cpuUtilization' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -3132,6 +3308,17 @@ AVERAGE
 </tomanycont>
 </object>
 </tomanycont>
+</object>
+<object id='OpenStackInfrastructureOpenStackQueue' module='Products.ZenModel.RRDTemplate' class='RRDTemplate'>
+<property id='zendoc' type='string'>
+OpenStackInfrastructure: OpenStack Queue Monitoring
+</property>
+<property type="text" id="description" mode="w" >
+OpenStackInfrastructure: OpenStack Queue Monitoring
+</property>
+<property type="string" id="targetPythonClass" mode="w" >
+Products.ZenModel.Device
+</property>
 </object>
 <object id='OpenStackInfrastructureVnic' module='Products.ZenModel.RRDTemplate' class='RRDTemplate'>
 <property id='zendoc' type='string'>
@@ -3656,7 +3843,7 @@ True
 0
 </property>
 <tomanycont id='graphPoints'>
-<object id='network.incoming.packets.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<object id='Inbound' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
 <property type="long" id="sequence" mode="w" >
 0
 </property>
@@ -3685,7 +3872,7 @@ networkIncomingPacketsRate_networkIncomingPacketsRate
 AVERAGE
 </property>
 </object>
-<object id='network.outgoing.packets.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<object id='Outbound' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
 <property type="long" id="sequence" mode="w" >
 1
 </property>
@@ -3716,7 +3903,7 @@ AVERAGE
 </object>
 </tomanycont>
 </object>
-<object id='Network Throughpout' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<object id='Network Throughput' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
 <property type="int" id="height" mode="w" >
 100
 </property>
@@ -3745,7 +3932,7 @@ True
 1
 </property>
 <tomanycont id='graphPoints'>
-<object id='network.incoming.bytes.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<object id='Inbound' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
 <property type="long" id="sequence" mode="w" >
 0
 </property>
@@ -3774,7 +3961,7 @@ networkIncomingBytesRate_networkIncomingBytesRate
 AVERAGE
 </property>
 </object>
-<object id='network.outgoing.bytes.rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<object id='Outbound' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
 <property type="long" id="sequence" mode="w" >
 1
 </property>
@@ -4049,6 +4236,9 @@ Icehouse (2014.1)
 <property type="boolean" id="isOS" mode="w" >
 True
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/OpenStack/devices/myps/os'/>
+</tomany>
 </object>
 <object id='Juno (2014.2)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
 <property type="string" id="name" mode="w" >
@@ -4076,9 +4266,6 @@ nova-api
 <property type="string" id="regex" mode="w" >
 nova-api
 </property>
-<property type="string" id="excludeRegex" mode="w" >
-\b(vim|tail|grep|tar|cat|bash)\b
-</property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
 </property>
@@ -4088,9 +4275,15 @@ False
 <property type="int" id="sequence" mode="w" >
 8
 </property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack/os/processes/usr_bin_python 4f402e8edbd2d8d96eaded4fea37ec04'/>
+</tomany>
 </object>
 <object id='nova-cert' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4098,9 +4291,6 @@ nova-cert
 </property>
 <property type="string" id="regex" mode="w" >
 nova-cert
-</property>
-<property type="string" id="excludeRegex" mode="w" >
-\b(vim|tail|grep|tar|cat|bash)\b
 </property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
@@ -4111,9 +4301,15 @@ False
 <property type="int" id="sequence" mode="w" >
 2
 </property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack/os/processes/usr_bin_python 4d61dcafc913f82345f1a78561eca83b'/>
+</tomany>
 </object>
 <object id='nova-compute' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4121,9 +4317,6 @@ nova-compute
 </property>
 <property type="string" id="regex" mode="w" >
 nova-compute
-</property>
-<property type="string" id="excludeRegex" mode="w" >
-\b(vim|tail|grep|tar|cat|bash)\b
 </property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
@@ -4134,9 +4327,15 @@ False
 <property type="int" id="sequence" mode="w" >
 7
 </property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack/os/processes/usr_bin_python a3d5d296430fcc06f0f1162966e6c8bc'/>
+</tomany>
 </object>
 <object id='nova-conductor' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4144,9 +4343,6 @@ nova-conductor
 </property>
 <property type="string" id="regex" mode="w" >
 nova-conductor
-</property>
-<property type="string" id="excludeRegex" mode="w" >
-\b(vim|tail|grep|tar|cat|bash)\b
 </property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
@@ -4157,9 +4353,15 @@ False
 <property type="int" id="sequence" mode="w" >
 3
 </property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack/os/processes/usr_bin_python 5beaf86de1568b53fc220bf6bda8b799'/>
+</tomany>
 </object>
 <object id='nova-consoleauth' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4167,9 +4369,6 @@ nova-consoleauth
 </property>
 <property type="string" id="regex" mode="w" >
 nova-consoleauth
-</property>
-<property type="string" id="excludeRegex" mode="w" >
-\b(vim|tail|grep|tar|cat|bash)\b
 </property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
@@ -4180,9 +4379,15 @@ False
 <property type="int" id="sequence" mode="w" >
 4
 </property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack/os/processes/usr_bin_python d9180a15c0428624162d192598dac693'/>
+</tomany>
 </object>
 <object id='nova-network' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4190,9 +4395,6 @@ nova-network
 </property>
 <property type="string" id="regex" mode="w" >
 nova-network
-</property>
-<property type="string" id="excludeRegex" mode="w" >
-\b(vim|tail|grep|tar|cat|bash)\b
 </property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
@@ -4202,6 +4404,9 @@ False
 </property>
 <property type="int" id="sequence" mode="w" >
 5
+</property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
 </property>
 <property visible="True" type="int" id="zModelerLock" >
 1
@@ -4214,9 +4419,6 @@ nova-scheduler
 <property type="string" id="regex" mode="w" >
 nova-scheduler
 </property>
-<property type="string" id="excludeRegex" mode="w" >
-\b(vim|tail|grep|tar|cat|bash)\b
-</property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
 </property>
@@ -4226,9 +4428,15 @@ False
 <property type="int" id="sequence" mode="w" >
 6
 </property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack/os/processes/usr_bin_python 3a1d1d8799604704d87c5732ef666169'/>
+</tomany>
 </object>
 </tomanycont>
 </object>
