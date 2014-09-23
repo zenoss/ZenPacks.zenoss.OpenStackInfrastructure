@@ -3193,8 +3193,8 @@ if DYNAMICVIEW_INSTALLED:
                 yield IRelatable(r)
 
 if DYNAMICVIEW_INSTALLED and IMPACT_INSTALLED and \
-   not hasattr(DSVRelationshipProvider, '_zplpatched'):
-    DSVRelationshipProvider._zplpatched = True
+   not hasattr(DSVRelationshipProvider, '_dvs_all_impact_relationships'):
+    DSVRelationshipProvider._dvs_all_impact_relationships = True
 
     # Modify the impact zenpack's DSVRelationshipProvider adapter to include
     # all impact relationships from Dynamic View that are tagged IMPACTS or
