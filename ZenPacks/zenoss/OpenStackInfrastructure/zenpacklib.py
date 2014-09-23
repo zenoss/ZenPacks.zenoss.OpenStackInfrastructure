@@ -1301,8 +1301,9 @@ class ClassSpec(Spec):
             impacted_by=None,
             monitoring_templates=None,
             filter_display=True,
-            dynamicview_display=True,
+            dynamicview_views=None,
             dynamicview_group=None,
+            dynamicview_relations=None            
             ):
         """TODO."""
         self.zenpack = zenpack
@@ -1362,12 +1363,26 @@ class ClassSpec(Spec):
             self.monitoring_templates = list(monitoring_templates)
 
         self.filter_display = filter_display
-        self.dynamicview_display = dynamicview_display
+
+        # Dynamicview Views and Group
+        if dynamicview_views is None:
+            self.dynamicview_views = ['service_view']
+        elif isinstance(dynamicview_views, basestring):
+            self.dynamicview_views = [dynamicview_views]
+        else:
+            self.dynamicview_views = list(dynamicview_views)
 
         if dynamicview_group is None:
             self.dynamicview_group = self.plural_short_label
         else:
             self.dynamicview_group = dynamicview_group
+
+        # additional relationships to add, beyond IMPACTS and IMPACTED_BY.
+        if dynamicview_relations is None:
+            self.dynamicview_relations = {}
+        else:
+            # TAG_NAME: ['relationship', 'or_method']
+            self.dynamicview_relations = dict(dynamicview_relations)
 
     def create(self):
         """Implement specification."""
@@ -1581,6 +1596,7 @@ class ClassSpec(Spec):
         # Add Impact stuff.
         attributes['impacts'] = self.impacts
         attributes['impacted_by'] = self.impacted_by
+        attributes['dynamicview_relations'] = self.dynamicview_relations
 
         return create_schema_class(
             get_symbol_name(self.zenpack.name, 'schema'),
@@ -1760,10 +1776,10 @@ class ClassSpec(Spec):
         if not DYNAMICVIEW_INSTALLED:
             return
 
-        if self.dynamicview_display is False:
+        if not self.dynamicview_views:
             return
 
-        if self.impacts or self.impacted_by:
+        if self.impacts or self.impacted_by or self.dynamicview_views:
             GSM.registerAdapter(
                 DynamicViewRelatable,
                 (self.model_class,),
@@ -1777,22 +1793,24 @@ class ClassSpec(Spec):
             dvm = DynamicViewMappings()
 
             groupName = self.model_class.class_dynamicview_group
-            weight = int(2000 + (self.order * 100))
+            weight = 1000 + (self.order * 100)
             icon_url = getattr(self, 'icon_url', '/zport/dmd/img/icons/noicon.png')
 
             # Make sure the named utility is also registered.  It seems that
             # during unit tests, it may not be, even if the mapping is still
             # present.
-            if not GSM.queryUtility(IGroup, groupName):
+            group = GSM.queryUtility(IGroup, groupName)
+            if not group:
                 group = BaseGroup(groupName, weight, None, icon_url)
                 GSM.registerUtility(group, IGroup, groupName)
 
-            if groupName not in dvm.getGroupNames('service_view'):
-                dvm.addMapping(
-                    viewName='service_view',
-                    groupName=groupName,
-                    weight=weight,
-                    icon=icon_url)
+            for viewName in self.dynamicview_views:
+                if groupName not in dvm.getGroupNames(viewName):
+                    dvm.addMapping(
+                        viewName=viewName,
+                        groupName=group.name,
+                        weight=group.weight,
+                        icon=group.icon)
 
     def register_impact_adapters(self):
         """Register Impact adapters."""
@@ -1800,7 +1818,7 @@ class ClassSpec(Spec):
         if not IMPACT_INSTALLED:
             return
 
-        if DYNAMICVIEW_INSTALLED and self.dynamicview_display is True:
+        if DYNAMICVIEW_INSTALLED and self.dynamicview_views:
             # the DV impact relationships will be adapted to impact
             # automatically (by DSVRelationshipProvider), so we don't need
             # specific impact adapters.
@@ -3145,6 +3163,12 @@ if DYNAMICVIEW_INSTALLED:
                     for methodname in impacts:
                         for impactee in self.get_remote_relatables(methodname):
                             yield BaseRelation(target, impactee, TAG_IMPACTS)
+
+            for tag in (TAG_ALL, type):
+                relations = getattr(self._adapted, 'dynamicview_relations', {})
+                for methodname in relations.get(tag, []):
+                    for remote in self.get_remote_relatables(methodname):
+                        yield BaseRelation(target, remote, type)
 
         def get_remote_relatables(self, methodname):
             """Generate object relatables returned by adapted.methodname()."""
