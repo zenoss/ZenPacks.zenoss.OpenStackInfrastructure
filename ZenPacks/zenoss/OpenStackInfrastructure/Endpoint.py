@@ -19,6 +19,9 @@ class Endpoint(schema.Endpoint):
     def hosts(self):
         return self.getDeviceComponents(type="OpenStackInfrastructureHost")
 
+    def region(self):
+        return self.getDeviceComponents(type="OpenStackInfrastructureRegion")[0]
+
     def get_maintain_proxydevices(self):
         from ZenPacks.zenoss.OpenStackInfrastructure.DeviceProxyComponent \
             import DeviceProxyComponent

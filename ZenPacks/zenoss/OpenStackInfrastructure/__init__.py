@@ -67,19 +67,25 @@ CFG = zenpacklib.ZenPackSpec(
             'base': zenpacklib.Device,
             'meta_type': 'OpenStackInfrastructureEndpoint',
             'label': 'OpenStack Endpoint',
-            'impacts': ['hosts']
+            'order': 1,            
+            'impacts': ['hosts'],
+            'dynamicview_views': ['service_view', 'openstack_view'],
+            'dynamicview_group': 'Devices',
+            'dynamicview_relations': {'openstack_link': ['region']}
         },
 
         'KeystoneEndpoint': {
             'base': 'Endpoint',
             'meta_type': 'OpenStackInfrastructureKeystoneEndpoint',
-            'label': 'Keystone Endpoint'
+            'label': 'Keystone Endpoint',
+            'order': 2,            
         },
 
         'NovaEndpoint': {
             'base': 'Endpoint',
             'meta_type': 'OpenStackInfrastructureNovaEndpoint',
-            'label': 'Nova Endpoint'
+            'label': 'Nova Endpoint',
+            'order': 3,            
         },
 
         # Component Base Types #######################################
@@ -134,7 +140,9 @@ CFG = zenpacklib.ZenPackSpec(
                                'renderer': 'Zenoss.render.openstack_ServiceOperStatus'}
             },
             'impacted_by': ['hostedOn', 'osprocess_component'],
-            'impacts': ['orgComponent']
+            'impacts': ['orgComponent'],
+            'dynamicview_views': ['service_view', 'openstack_view'],
+            'dynamicview_relations': {'openstack_link': ['orgComponent']}
         },
 
         'LogicalComponent': {
@@ -148,7 +156,7 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'OpenstackComponent',
             'meta_type': 'OpenStackInfrastructureTenant',
             'label': 'Tenant',
-            'order': 1,
+            'order': 5,
             'properties': {
                 'tenantId':   {'grid_display': False,
                                'label': 'Tenant ID'},
@@ -161,7 +169,7 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'LogicalComponent',
             'meta_type': 'OpenStackInfrastructureFlavor',
             'label': 'Flavor',
-            'order': 1,
+            'order': 10,
             'properties': {
                 'flavorId':   {'grid_display': False,
                                'label': 'Flavor ID'},                 # 1
@@ -178,7 +186,7 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'LogicalComponent',
             'meta_type': 'OpenStackInfrastructureImage',
             'label': 'Image',
-            'order': 2,
+            'order': 10,
             'properties': {
                 'imageId':      {'grid_display': False,
                                  'label': 'Image ID'},
@@ -192,7 +200,7 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'LogicalComponent',
             'meta_type': 'OpenStackInfrastructureInstance',
             'label': 'Instance',
-            'order': 3,
+            'order': 8,
             'properties': {
                 'serverId':            {'grid_display': False,
                                         'label': 'Server ID'},   # 847424
@@ -255,7 +263,7 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'LogicalComponent',
             'meta_type': 'OpenStackInfrastructureVnic',
             'label': 'Vnic',
-            'order': 3.5,
+            'order': 8.5,
             'properties': {
                 'macaddress': {'label': 'MAC Address',
                                'index_type': 'field',
@@ -268,34 +276,40 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'OrgComponent',
             'meta_type': 'OpenStackInfrastructureRegion',
             'label': 'Region',
-            'order': 4,
+            'order': 1,
             'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'], #inherit
-            'impacts': ['parentOrg']                   #inherit
+            'impacts': ['parentOrg'],                   #inherit
+            'dynamicview_views': ['service_view', 'openstack_view'],
+            'dynamicview_relations': {'openstack_link': ['childOrgs', 'softwareComponents']}
         },
 
         'Cell': {
             'base': 'OrgComponent',
             'meta_type': 'OpenStackInfrastructureCell',
             'label': 'Cell',
-            'order': 5,
+            'order': 3,
             'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'], #inherit
-            'impacts': ['parentOrg']                   #inherit            
+            'impacts': ['parentOrg'],                   #inherit            
+            'dynamicview_views': ['service_view', 'openstack_view'],
+            'dynamicview_relations': {'openstack_link': ['childOrgs', 'hosts', 'softwareComponents']}
         },
 
         'AvailabilityZone': {
             'base': 'OrgComponent',
             'meta_type': 'OpenStackInfrastructureAvailabilityZone',
             'label': 'Availability Zone',
-            'order': 6,
+            'order': 2,
             'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'], #inherit
-            'impacts': ['parentOrg']                   #inherit            
+            'impacts': ['parentOrg'],                   #inherit            
+            'dynamicview_views': ['service_view', 'openstack_view'],
+            'dynamicview_relations': {'openstack_link': ['childOrgs', 'hosts', 'softwareComponents']}
         },
 
         'Host': {
             'base': 'DeviceProxyComponent',
             'meta_type': 'OpenStackInfrastructureHost',
             'label': 'Host',
-            'order': 8,
+            'order': 9,
             'properties': {
                 'hostfqdn':            {'grid_display': False,
                                         'index_type': 'field'},
@@ -309,41 +323,46 @@ CFG = zenpacklib.ZenPackSpec(
                                  'content_width': 150}  # need to fix the default width for render_with_type
             },
             'impacted_by': ['endpoint', 'proxy_device'],
-            'impacts': ['hypervisor', 'orgComponent', 'hostedSoftware']
+            'impacts': ['hypervisor', 'orgComponent', 'hostedSoftware'],
+            'dynamicview_views': ['service_view', 'openstack_view'],
+            'dynamicview_relations': {'openstack_link': ['hostedSoftware', 'hypervisor']}
         },
 
         'NovaService': {
             'base': 'SoftwareComponent',
             'meta_type': 'OpenStackInfrastructureNovaService',
             'label': 'Nova Service',
-            'order': 10,
+            'order': 7,
             'impacted_by': ['hostedOn', 'osprocess_component'], #inherit
-            'impacts': ['orgComponent']  #inherit
+            'impacts': ['orgComponent'],  #inherit
+            'dynamicview_views': ['service_view', 'openstack_view'],            
         },
 
         'NovaApi': {
             'base': 'SoftwareComponent',
             'meta_type': 'OpenStackInfrastructureNovaApi',
             'label': 'Nova API',
-            'order': 9,
+            'order': 7.1,
             'impacted_by': ['hostedOn', 'osprocess_component'], #inherit
-            'impacts': ['orgComponent']  #inherit
+            'impacts': ['orgComponent'],  #inherit
+            'dynamicview_views': ['service_view', 'openstack_view'],
         },
 
         'NovaDatabase': {
             'base': 'SoftwareComponent',
             'meta_type': 'OpenStackInfrastructureNovaDatabase',
             'label': 'NovaDatabase',
-            'order': 13,
+            'order': 7.2,
             'impacted_by': ['hostedOn', 'osprocess_component'], #inherit
-            'impacts': ['orgComponent']  #inherit
+            'impacts': ['orgComponent'],  #inherit
+            'dynamicview_views': ['service_view', 'openstack_view']
         },
 
         'Hypervisor': {
             'base': 'OpenstackComponent',   # SoftwareComponent
             'meta_type': 'OpenStackInfrastructureHypervisor',
             'label': 'Hypervisor',
-            'order': 14,
+            'order': 9.1,
             'properties': {
                 'hypervisorId':      {'grid_display': False,
                                       'label': 'Hypervisor ID'},
@@ -351,7 +370,8 @@ CFG = zenpacklib.ZenPackSpec(
                                       'label': 'FQDN'},
             },
             'impacts': ['instances'],
-            'impacted_by': ['host']
+            'impacted_by': ['host'],
+            'dynamicview_views': ['service_view', 'openstack_view']
         },
 
     },

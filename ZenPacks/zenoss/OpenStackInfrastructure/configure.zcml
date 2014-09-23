@@ -107,10 +107,4 @@
             />
     </configure>
 
-    <!-- Dynamic View -->
-    <include file="dynamicview.zcml"
-             xmlns:zcml="http://namespaces.zope.org/zcml"
-             zcml:condition="installed ZenPacks.zenoss.DynamicView" />
-
-
 </configure>
