@@ -2071,7 +2071,7 @@ class ClassSpec(Spec):
                 "    text: _t('Dynamic View'),\n"
                 "    xtype: 'dynamicview',\n"
                 "    relationshipFilter: 'impacted_by',\n"
-                "    viewName: 'subcomponent_view'\n"
+                "    viewName: 'service_view'\n"
                 "}]);\n"
                 )
 
