@@ -1802,7 +1802,8 @@ class ClassSpec(Spec):
 
         if DYNAMICVIEW_INSTALLED and self.dynamicview_display is True:
             # the DV impact relationships will be adapted to impact
-            # automatically, so we don't need specific impact adapters.
+            # automatically (by DSVRelationshipProvider), so we don't need
+            # specific impact adapters.
             return
 
         if self.impacts or self.impacted_by:
@@ -2094,7 +2095,7 @@ class ClassSpec(Spec):
         """
         self.create_iinfo_class()
         self.create_info_class()
-        self.register_dynamicview_adapters()        
+        self.register_dynamicview_adapters()
         self.register_impact_adapters()
 
 
@@ -2991,7 +2992,7 @@ def create_class(module, schema_module, classname, bases, attributes):
 # Impact Stuff ##############################################################
 
 try:
-    from ZenPacks.zenoss.Impact.impactd.relations import ImpactEdge
+    from ZenPacks.zenoss.Impact.impactd.relations import ImpactEdge, DSVRelationshipProvider, RelationshipEdgeError
     from ZenPacks.zenoss.Impact.impactd.interfaces import IRelationshipDataProvider
 except ImportError:
     IMPACT_INSTALLED = False
@@ -3088,7 +3089,6 @@ if IMPACT_INSTALLED:
             except TypeError:
                 yield IGlobalIdentifier(r).getGUID()
 
-
 if DYNAMICVIEW_INSTALLED:
     class DynamicViewRelatable(BaseRelatable):
         """Generic DynamicView Relatable adapter (IRelatable)
@@ -3168,6 +3168,45 @@ if DYNAMICVIEW_INSTALLED:
             except TypeError:
                 yield IRelatable(r)
 
+if DYNAMICVIEW_INSTALLED and IMPACT_INSTALLED and \
+   not hasattr(DSVRelationshipProvider, '_zplpatched'):
+    DSVRelationshipProvider._zplpatched = True
+
+    # Modify the impact zenpack's DSVRelationshipProvider adapter to include
+    # all impact relationships from Dynamic View that are tagged IMPACTS or
+    # IMPACTED_BY, regardless of what groups and views they are in.
+    #
+    # The current version requires that the ends of the relationship edge
+    # be in a group that is in service_view, and while this is OK for
+    # relationships between ZPL-managed components (we place everything into
+    # service_view by default), it can break down with impact relationships to
+    # components outside of this ZenPack (such as OSProcess, for example)
+    # may not meet all of these criteria.
+    #
+    # NOTE:  This is a system wide change, so once a ZPL-enabled zenpack
+    # is installed, the behavior of the mapping from DSV to Impact will
+    # slightly change!
+
+    @monkeypatch('ZenPacks.zenoss.Impact.impactd.relations.DSVRelationshipProvider')
+    def getEdges(self):
+        """
+        Returns an ImpactEdge for every edge determined by looking at DSV
+        """
+        relatable = IRelatable(self._object)
+        relationship_types = (TAG_IMPACTS, TAG_IMPACTED_BY)
+        for relationship_type in relationship_types:
+            for relation in relatable.relations(relationship_type):
+                tags = relation.getTags()
+                try:
+                    if TAG_IMPACTED_BY in tags:
+                        source = self._getGuidByUid(relation.target.id)
+                        target = self._getGuidByUid(relation.source.id)
+                    elif TAG_IMPACTS in tags:
+                        source = self._getGuidByUid(relation.source.id)
+                        target = self._getGuidByUid(relation.target.id)
+                    yield ImpactEdge(source, target, self.relationship_provider)
+                except RelationshipEdgeError:
+                    LOG.warning("error creating relationship for %s" % relation)
 
 # Templates #################################################################
 
