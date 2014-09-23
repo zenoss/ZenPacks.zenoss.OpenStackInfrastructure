@@ -1,3 +1,0 @@
-ceilometer_zenoss
-=================
-

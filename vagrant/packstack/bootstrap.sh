@@ -42,7 +42,7 @@ openstack-config --set /etc/ceilometer/ceilometer.conf dispatcher_zenoss amqp_pa
 openstack-config --set /etc/ceilometer/ceilometer.conf dispatcher_zenoss amqp_virtual_host /zenoss
 
 # Install zenoss plugin (provides dispatcher_zenoss)
-easy_install --no-deps /vagrant/ceilometer_zenoss-0.9.0-py2.7.egg
+sudo pip -q install --force-reinstall https://github.com/zenoss/ceilometer_zenoss/archive/master.zip
 
 # bounce ceilometer.
 for e in openstack-ceilometer-alarm-evaluator openstack-ceilometer-alarm-notifier openstack-ceilometer-api openstack-ceilometer-central openstack-ceilometer-collector openstack-ceilometer-compute openstack-ceilometer-notification; do service $e restart; done
