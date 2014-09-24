@@ -23,6 +23,7 @@ from twisted.internet.defer import inlineCallbacks, returnValue
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
 from Products.ZenUtils.Utils import prepId
+from Products.ZenUtils.Time import isoToTimestamp, LocalDateTime
 
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path
 add_local_lib_path()
@@ -134,6 +135,19 @@ class OpenStackInfrastructure(PythonPlugin):
                 log.debug("Ignoring image %s" % image['name'])
                 continue
 
+            # If we can, change dates like '2014-09-30T19:45:44Z' to '2014/09/30 19:45:44.00'
+            try:
+                imageCreated = LocalDateTime(isoToTimestamp(image['created'].replace('Z', '')))
+            except Exception:
+                log.debug("Unable to reformat imageCreated '%s'" % image['created'])
+                imageCreated = image['created']
+
+            try:
+                imageUpdated = LocalDateTime(isoToTimestamp(image['updated'].replace('Z', '')))
+            except Exception:
+                log.debug("Unable to reformat imageUpdated '%s'" % image['updated'])
+                imageUpdated = image['updated']
+
             images.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Image',
                 data=dict(
@@ -141,8 +155,8 @@ class OpenStackInfrastructure(PythonPlugin):
                     title=image['name'],  # Red Hat Enterprise Linux 5.5
                     imageId=image['id'],  # 346eeba5-a122-42f1-94e7-06cb3c53f690
                     imageStatus=image['status'],  # ACTIVE
-                    imageCreated=image['created'],  # 2010-09-17T07:19:20-05:00
-                    imageUpdated=image['updated'],  # 2010-09-17T07:19:20-05:00
+                    imageCreated=imageCreated,  # 2014/09/30 19:45:44.000
+                    imageUpdated=imageUpdated,  # 2014/09/30 19:45:44.000
                 )))
 
         servers = []
