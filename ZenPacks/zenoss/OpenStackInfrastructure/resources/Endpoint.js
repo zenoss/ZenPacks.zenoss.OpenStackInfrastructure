@@ -78,3 +78,29 @@ Ext.apply(Zenoss.render, {
         return Zenoss.render.link(null, uid, name);
     },
 });
+
+
+/*
+ * Add the OpenStack Component View for device page.
+ */
+Zenoss.nav.appendTo('Device', [{
+    id: 'openstackcomponentview',
+    text: _t('OpenStack Component View'),
+    xtype: 'dynamicview',
+    relationshipFilter: 'openstack_link',
+    viewName: 'openstack_view'
+}]);
+
+/*
+ * Enable OpenStack Component View for components as well.
+ */
+
+ Zenoss.nav.appendTo('Component', [{
+    id: 'component_openstackcomponentview',
+    text: _t('OpenStack Component View'),
+    xtype: 'dynamicview',
+    relationshipFilter: 'openstack_link',
+    viewName: 'openstack_view'
+}]);
+
+

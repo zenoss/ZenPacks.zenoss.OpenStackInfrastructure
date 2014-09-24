@@ -168,7 +168,7 @@ class ZenPack(ZenPackBase):
                 self._buildDeviceRelations()
 
             for dcname, dcspec in self.device_classes.iteritems():
-                if dcspec.remove():
+                if dcspec.remove:
                     LOG.info('Removing DeviceClass %s' % dcspec.path)
                     app.dmd.Devices.manage_deleteOrganizer(dcspec.path)
 
@@ -1223,10 +1223,12 @@ class DeviceClassSpec(Spec):
 
     """Initialize a DeviceClass via Python at install time."""
 
-    def __init__(self, zenpack_spec, path, create=True, zProperties=None):
+    def __init__(self, zenpack_spec, path, create=True, zProperties=None,
+                 remove=False):
         self.zenpack_spec = zenpack_spec
         self.path = path.lstrip('/')
         self.create = bool(create)
+        self.remove = bool(remove)
 
         if zProperties is None:
             self.zProperties = {}
@@ -1299,6 +1301,9 @@ class ClassSpec(Spec):
             impacted_by=None,
             monitoring_templates=None,
             filter_display=True,
+            dynamicview_views=None,
+            dynamicview_group=None,
+            dynamicview_relations=None            
             ):
         """TODO."""
         self.zenpack = zenpack
@@ -1359,6 +1364,26 @@ class ClassSpec(Spec):
 
         self.filter_display = filter_display
 
+        # Dynamicview Views and Group
+        if dynamicview_views is None:
+            self.dynamicview_views = ['service_view']
+        elif isinstance(dynamicview_views, basestring):
+            self.dynamicview_views = [dynamicview_views]
+        else:
+            self.dynamicview_views = list(dynamicview_views)
+
+        if dynamicview_group is None:
+            self.dynamicview_group = self.plural_short_label
+        else:
+            self.dynamicview_group = dynamicview_group
+
+        # additional relationships to add, beyond IMPACTS and IMPACTED_BY.
+        if dynamicview_relations is None:
+            self.dynamicview_relations = {}
+        else:
+            # TAG_NAME: ['relationship', 'or_method']
+            self.dynamicview_relations = dict(dynamicview_relations)
+
     def create(self):
         """Implement specification."""
         self.create_model_schema_class()
@@ -1372,6 +1397,7 @@ class ClassSpec(Spec):
         if self.is_component or self.is_hardware_component:
             self.create_formbuilder_class()
 
+        self.register_dynamicview_adapters()
         self.register_impact_adapters()
 
     @property
@@ -1497,7 +1523,8 @@ class ClassSpec(Spec):
             'class_label': self.label,
             'class_plural_label': self.plural_label,
             'class_short_label': self.short_label,
-            'class_plural_short_label': self.plural_short_label
+            'class_plural_short_label': self.plural_short_label,
+            'class_dynamicview_group': self.dynamicview_group,
             }
 
         properties = []
@@ -1569,6 +1596,7 @@ class ClassSpec(Spec):
         # Add Impact stuff.
         attributes['impacts'] = self.impacts
         attributes['impacted_by'] = self.impacted_by
+        attributes['dynamicview_relations'] = self.dynamicview_relations
 
         return create_schema_class(
             get_symbol_name(self.zenpack.name, 'schema'),
@@ -1744,14 +1772,61 @@ class ClassSpec(Spec):
 
         return formbuilder
 
+    def register_dynamicview_adapters(self):
+        if not DYNAMICVIEW_INSTALLED:
+            return
+
+        if not self.dynamicview_views:
+            return
+
+        if self.impacts or self.impacted_by or self.dynamicview_views:
+            GSM.registerAdapter(
+                DynamicViewRelatable,
+                (self.model_class,),
+                IRelatable)
+
+            GSM.registerSubscriptionAdapter(
+                DynamicViewRelationsProvider,
+                required=(self.model_class,),
+                provided=IRelationsProvider)
+
+            dvm = DynamicViewMappings()
+
+            groupName = self.model_class.class_dynamicview_group
+            weight = 1000 + (self.order * 100)
+            icon_url = getattr(self, 'icon_url', '/zport/dmd/img/icons/noicon.png')
+
+            # Make sure the named utility is also registered.  It seems that
+            # during unit tests, it may not be, even if the mapping is still
+            # present.
+            group = GSM.queryUtility(IGroup, groupName)
+            if not group:
+                group = BaseGroup(groupName, weight, None, icon_url)
+                GSM.registerUtility(group, IGroup, groupName)
+
+            for viewName in self.dynamicview_views:
+                if groupName not in dvm.getGroupNames(viewName):
+                    dvm.addMapping(
+                        viewName=viewName,
+                        groupName=group.name,
+                        weight=group.weight,
+                        icon=group.icon)
+
     def register_impact_adapters(self):
         """Register Impact adapters."""
+
         if not IMPACT_INSTALLED:
+            return
+
+        if DYNAMICVIEW_INSTALLED and self.dynamicview_views:
+            # the DV impact relationships will be adapted to impact
+            # automatically (by DSVRelationshipProvider), so we don't need
+            # specific impact adapters.
             return
 
         if self.impacts or self.impacted_by:
             GSM.registerSubscriptionAdapter(
-                RelationshipDataProvider,
+                ImpactRelationshipDataProvider,
                 required=(self.model_class,),
                 provided=IRelationshipDataProvider)
 
@@ -2007,11 +2082,25 @@ class ClassSpec(Spec):
                 cases=' '.join(cases)))
 
     @property
+    def dynamicview_nav_js_snippet(self):
+        if DYNAMICVIEW_INSTALLED:
+            return (
+                "Zenoss.nav.appendTo('Component', [{\n"
+                "    id: 'subcomponent_view',\n"
+                "    text: _t('Dynamic View'),\n"
+                "    xtype: 'dynamicview',\n"
+                "    relationshipFilter: 'impacted_by',\n"
+                "    viewName: 'service_view'\n"
+                "}]);\n"
+                )
+
+    @property
     def device_js_snippet(self):
         """Return device JavaScript snippet."""
         return ''.join((
             self.component_grid_panel_js_snippet,
             self.subcomponent_nav_js_snippet,
+            self.dynamicview_nav_js_snippet,
             ))
 
     def test_setup(self):
@@ -2024,6 +2113,7 @@ class ClassSpec(Spec):
         """
         self.create_iinfo_class()
         self.create_info_class()
+        self.register_dynamicview_adapters()
         self.register_impact_adapters()
 
 
@@ -2920,15 +3010,27 @@ def create_class(module, schema_module, classname, bases, attributes):
 # Impact Stuff ##############################################################
 
 try:
-    from ZenPacks.zenoss.Impact.impactd.relations import ImpactEdge
+    from ZenPacks.zenoss.Impact.impactd.relations import ImpactEdge, DSVRelationshipProvider, RelationshipEdgeError
     from ZenPacks.zenoss.Impact.impactd.interfaces import IRelationshipDataProvider
 except ImportError:
     IMPACT_INSTALLED = False
 else:
     IMPACT_INSTALLED = True
 
+try:
+    from ZenPacks.zenoss.DynamicView import BaseRelation, BaseGroup
+    from ZenPacks.zenoss.DynamicView import TAG_IMPACTED_BY, TAG_IMPACTS, TAG_ALL
+    from ZenPacks.zenoss.DynamicView.interfaces import IRelatable, IRelationsProvider, IGroup
+    from ZenPacks.zenoss.DynamicView.dynamicview import DynamicViewMappings
+    from ZenPacks.zenoss.DynamicView.model.adapters import BaseRelatable, BaseRelationsProvider
+
+except ImportError:
+    DYNAMICVIEW_INSTALLED = False
+else:
+    DYNAMICVIEW_INSTALLED = True
+
 if IMPACT_INSTALLED:
-    class RelationshipDataProvider(object):
+    class ImpactRelationshipDataProvider(object):
 
         """Generic Impact RelationshipDataProvider adapter factory.
 
@@ -3005,6 +3107,130 @@ if IMPACT_INSTALLED:
             except TypeError:
                 yield IGlobalIdentifier(r).getGUID()
 
+if DYNAMICVIEW_INSTALLED:
+    class DynamicViewRelatable(BaseRelatable):
+        """Generic DynamicView Relatable adapter (IRelatable)
+
+        Places object into a group based upon the class name.
+        """
+
+        implements(IRelatable)
+        adapts(DeviceBase, ComponentBase)
+
+        @property
+        def id(self):
+            return self._adapted.getPrimaryId()
+
+        @property
+        def name(self):
+            return self._adapted.titleOrId()
+
+        @property
+        def tags(self):
+            return set([self._adapted.meta_type])
+
+        @property
+        def group(self):
+            return self._adapted.class_dynamicview_group
+
+    class DynamicViewRelationsProvider(BaseRelationsProvider):
+        """Generic DynamicView RelationsProvider subscription adapter (IRelationsProvider)
+
+        Creates impact relationships by introspecting the adapted object's
+        impacted_by and impacts properties.
+
+        Note that these impact relationships will also be exposed through to
+        impact, so it is not necessary to activate both
+        ImpactRelationshipDataProvider and DynamicViewRelatable /
+        DynamicViewRelationsProvider for a given model class.
+        """
+        implements(IRelationsProvider)
+        adapts(DeviceBase, ComponentBase)
+
+        def relations(self, type=TAG_ALL):
+            target = IRelatable(self._adapted)
+
+            if type in (TAG_ALL, TAG_IMPACTED_BY):
+                impacted_by = getattr(self._adapted, 'impacted_by', [])
+                if impacted_by:
+                    for methodname in impacted_by:
+                        for impactor in self.get_remote_relatables(methodname):
+                            yield BaseRelation(target, impactor, TAG_IMPACTED_BY)
+
+            if type in (TAG_ALL, TAG_IMPACTS):
+                impacts = getattr(self._adapted, 'impacts', [])
+                if impacts:
+                    for methodname in impacts:
+                        for impactee in self.get_remote_relatables(methodname):
+                            yield BaseRelation(target, impactee, TAG_IMPACTS)
+
+            for tag in (TAG_ALL, type):
+                relations = getattr(self._adapted, 'dynamicview_relations', {})
+                for methodname in relations.get(tag, []):
+                    for remote in self.get_remote_relatables(methodname):
+                        yield BaseRelation(target, remote, type)
+
+        def get_remote_relatables(self, methodname):
+            """Generate object relatables returned by adapted.methodname()."""
+            method = getattr(self._adapted, methodname, None)
+            if not method or not callable(method):
+                LOG.warning(
+                    "no %r relationship or method for %r",
+                    methodname,
+                    self._adapted.meta_type)
+
+                return
+
+            r = method()
+            if not r:
+                return
+
+            try:
+                for obj in r:
+                    yield IRelatable(obj)
+
+            except TypeError:
+                yield IRelatable(r)
+
+if DYNAMICVIEW_INSTALLED and IMPACT_INSTALLED and \
+   not hasattr(DSVRelationshipProvider, '_dvs_all_impact_relationships'):
+    DSVRelationshipProvider._dvs_all_impact_relationships = True
+
+    # Modify the impact zenpack's DSVRelationshipProvider adapter to include
+    # all impact relationships from Dynamic View that are tagged IMPACTS or
+    # IMPACTED_BY, regardless of what groups and views they are in.
+    #
+    # The current version requires that the ends of the relationship edge
+    # be in a group that is in service_view, and while this is OK for
+    # relationships between ZPL-managed components (we place everything into
+    # service_view by default), it can break down with impact relationships to
+    # components outside of this ZenPack (such as OSProcess, for example)
+    # may not meet all of these criteria.
+    #
+    # NOTE:  This is a system wide change, so once a ZPL-enabled zenpack
+    # is installed, the behavior of the mapping from DSV to Impact will
+    # slightly change!
+
+    @monkeypatch('ZenPacks.zenoss.Impact.impactd.relations.DSVRelationshipProvider')
+    def getEdges(self):
+        """
+        Returns an ImpactEdge for every edge determined by looking at DSV
+        """
+        relatable = IRelatable(self._object)
+        relationship_types = (TAG_IMPACTS, TAG_IMPACTED_BY)
+        for relationship_type in relationship_types:
+            for relation in relatable.relations(relationship_type):
+                tags = relation.getTags()
+                try:
+                    if TAG_IMPACTED_BY in tags:
+                        source = self._getGuidByUid(relation.target.id)
+                        target = self._getGuidByUid(relation.source.id)
+                    elif TAG_IMPACTS in tags:
+                        source = self._getGuidByUid(relation.source.id)
+                        target = self._getGuidByUid(relation.target.id)
+                    yield ImpactEdge(source, target, self.relationship_provider)
+                except RelationshipEdgeError:
+                    LOG.warning("error creating relationship for %s" % relation)
 
 # Templates #################################################################
 
