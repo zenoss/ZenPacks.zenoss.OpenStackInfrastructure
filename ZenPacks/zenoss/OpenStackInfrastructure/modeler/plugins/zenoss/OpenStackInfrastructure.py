@@ -122,6 +122,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     flavorId=flavor['id'],  # performance1-1
                     flavorRAM=flavor['ram'] * 1024 * 1024,  # 256
                     flavorDisk=flavor['disk'] * 1024 * 1024 * 1024,  # 10
+                    flavorVCPUs=flavor['vcpus'],
                 )))
 
         images = []
@@ -130,7 +131,7 @@ class OpenStackInfrastructure(PythonPlugin):
             # If it's a snapshot, rather than a normal image, ignore it for
             # the time being.
             if 'server' in image:
-                log.info("Ignoring image %s" % image['name'])
+                log.debug("Ignoring image %s" % image['name'])
                 continue
 
             images.append(ObjectMap(

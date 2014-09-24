@@ -178,7 +178,9 @@ CFG = zenpacklib.ZenPackSpec(
                                'label': 'RAM'},                        # bytes
                 'flavorDisk': {'type_': 'int',
                                'renderer': 'Zenoss.render.bytesString',
-                               'label': 'Disk'}                        # bytes
+                               'label': 'Disk'},                       # bytes
+                'flavorVCPUs': {'type_': 'int',
+                                'label': 'VCPUs'}                      # count
             }
         },
 
