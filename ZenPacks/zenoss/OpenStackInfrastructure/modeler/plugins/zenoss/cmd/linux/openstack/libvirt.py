@@ -71,7 +71,10 @@ class libvirt(PythonPlugin):
                 d = yield client.run(cmd, timeout=timeout)
 
                 if d.exitCode != 0 or d.stderr:
-                    log.error("Error running virsh (rc=%s, stderr='%s'" % (d.exitCode, d.stderr))
+                    if 'Domain not found' in d.stderr:
+                        log.debug("Domain not found while running virsh (rc=%s, stderr='%s')" % (d.exitCode, d.stderr))
+                    else:
+                        log.error("Error running virsh (rc=%s, stderr='%s')" % (d.exitCode, d.stderr))
                     returnValue(None)
                     continue
 
