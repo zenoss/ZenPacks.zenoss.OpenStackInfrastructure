@@ -6,6 +6,77 @@ This ZenPack allows for monitoring of OpenStack. This means that you can monitor
 OpenStack is a global collaboration of developers and cloud computing technologists producing the ubiquitous open source cloud computing platform for public and private clouds. The project aims to deliver solutions for all types of clouds by being simple to implement, massively scalable, and feature rich. The technology consists of a series of interrelated projects delivering various components for a cloud infrastructure solution.
 </blockquote>
 
+==Installation: Zenoss Configuration Steps==
+
+On your zenoss host, you must run the following command as the zenoss user:
+<syntaxhighlight lang="bash">
+   /opt/zenoss/bin/openstack_amqp_config
+</syntaxhighlight>
+
+It will create a new user in rabbitmq and set up its permissions.  It will 
+print out the proper values to use for amqp_hostname, amqp_port, amqp_userid,
+amqp_password, and amqp_virtualhost during ceilometer configuration (see below)
+
+==Installation: OpenStack Ceilometer Configuration Steps==
+
+Zenoss relies upon a ceilometer dispatcher plugin to ship raw event and
+metering data from ceilometer to Zenoss for storage in the Zenoss event 
+and performance databases.   This integration is done by publishing messages
+to Zenoss's RabbitMQ server.
+
+This dispatcher should be installed on all nodes running any ceilometer, but
+particularly those running ceilometer-collector or ceilometer-agent-notification.
+
+To install it, perform the following steps on each of these openstack nodes (NOT
+on the zenoss collector):
+
+
+<syntaxhighlight lang="bash">
+  sudo pip -q install --force-reinstall https://github.com/zenoss/ceilometer_zenoss/archive/master.zip
+  sudo cp /usr/lib/python2.6/site-packages/ceilometer_zenoss/event_definitions.yaml /etc/ceilometer/
+</syntaxhighlight>
+
+Edit /etc/ceilometer/ceilometer.conf, and add the following lines to the
+appropriate sections:
+
+<syntaxhighlight lang="text">
+  [DEFAULT]
+  dispatcher=zenoss
+  
+  [notification]
+  store_events=True
+</syntaxhighlight>
+
+Also add the [dispatcher_zenoss] section reported by openstack_amqp_config above.
+
+==Optional Step==
+
+By default, instance state changes will be captured by Zenoss when certain 
+events occur, for example, when an instance is shut down, the state change
+to SHUTDOWN will be reflected in Zenoss.
+
+However, certain state changes that don't correspond to another defined event
+may not be picked up until the next time zenoss models the environment.
+
+If you would like to reduce the likelihood of this occurring, you can configure
+OpenStack Nova to send an event (through ceilometer) to zenoss whenever
+any VM state change occurs by adding the following to nova.conf:
+
+<syntaxhighlight lang="text">
+  [DEFAULT]
+  notify_on_state_change=vm_state
+</syntaxhighlight>  
+
+Note that this will cause increased event load, both on OpenStack and Zenoss,
+and additional processing within the event transforms in Zenoss to keep
+the model consistent.   Since most instance changes will still be caught
+without this option enabled, it is recommended to leave this disabled if your
+OpenStack environment is very large.
+
+
+
+
+
 == Usage ==
 Once the OpenStack ZenPack is installed you can begin monitoring by going to the infrastructure screen and clicking the normal button for adding devices. You'll find a new option labeled, "Add OpenStack."
 

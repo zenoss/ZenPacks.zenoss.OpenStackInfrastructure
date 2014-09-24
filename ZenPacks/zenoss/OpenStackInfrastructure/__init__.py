@@ -394,10 +394,12 @@ class ZenPack(schema.ZenPack):
     def install(self, app):
         super(ZenPack, self).install(app)
         self.symlinkPlugin()
+        self.installBinFile('openstack_amqp_config')
 
     def remove(self, app, leaveObjects=False):
         if not leaveObjects:
             self.removePluginSymlink()
+            self.removeBinFile('openstack_amqp_config')
 
         super(ZenPack, self).remove(app, leaveObjects=leaveObjects)
 
