@@ -2093,6 +2093,8 @@ class ClassSpec(Spec):
                 "    viewName: 'service_view'\n"
                 "}]);\n"
                 )
+        else:
+            return ""
 
     @property
     def device_js_snippet(self):
