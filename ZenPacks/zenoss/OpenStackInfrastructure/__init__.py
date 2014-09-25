@@ -413,9 +413,20 @@ class ZenPack(schema.ZenPack):
         os.system('chmod 0755 {0} {1}'.format(
             self.path('poll_openstack.py'), plugin_path))
 
+        log.info('Linking queue_counts.py plugin into $ZENHOME/libexec/')
+        plugin_path = zenPath('libexec', 'queue_counts.py')
+        os.system('ln -sf {0} {1}'.format(
+            self.path('queue_counts.py'), plugin_path))
+        os.system('chmod 0755 {0} {1}'.format(
+            self.path('queue_counts.py'), plugin_path))
+
+
     def removePluginSymlink(self):
         log.info('Removing poll_openstack.py link from $ZENHOME/libexec/')
         os.system('rm -f {0}'.format(zenPath('libexec', 'poll_openstack.py')))
+
+        log.info('Removing queue_counts.py link from $ZENHOME/libexec/')
+        os.system('rm -f {0}'.format(zenPath('libexec', 'queue_counts.py')))
 
 
 # Patch last to avoid import recursion problems.
