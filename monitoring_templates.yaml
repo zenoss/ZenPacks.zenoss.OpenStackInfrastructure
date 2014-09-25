@@ -7,7 +7,7 @@
   datasources:
     cpuUtilization:
       type: OpenStack Ceilometer Perf AMQP
-      meter: 'cpu_util'
+      meter: 'CPU Utilization'
       severity: 'Clear'
 
       datapoints:
@@ -90,7 +90,7 @@
   datasources:
     networkIncomingPacketsRate:
       type: OpenStack Ceilometer Perf AMQP
-      meter: 'network.incoming.packets.rate'
+      meter: 'Inbound'
       severity: 'Clear'
 
       datapoints:
@@ -98,7 +98,7 @@
 
     networkOutgoingPacketsRate:
       type: OpenStack Ceilometer Perf AMQP
-      meter: 'network.outgoing.packets.rate'
+      meter: 'Outbound'
       severity: 'Clear'
 
       datapoints:
@@ -106,7 +106,7 @@
 
     networkIncomingBytesRate:
       type: OpenStack Ceilometer Perf AMQP
-      meter: 'network.incoming.bytes.rate'
+      meter: 'Inbound'
       severity: 'Clear'
 
       datapoints:
@@ -114,7 +114,7 @@
 
     networkOutgoingBytesRate:
       type: OpenStack Ceilometer Perf AMQP
-      meter: 'network.outgoing.bytes.rate'
+      meter: 'Outbound'
       severity: 'Clear'
 
       datapoints:
@@ -157,6 +157,16 @@
 
     serviceStatus:
       type: OpenStack Nova Service Status
+
+    openstackQueues:
+      commandTemplate: queue_counts.py '${here/id}'
+      cycletime: 300
+      datapoints:
+        eventQueueCount: GAUGE_MIN_0_ALIAS
+        perfQueueCount: GAUGE_MIN_0_ALIAS
+      parser: ZenPacks.zenoss.OpenStackInfrastructure.parsers.OpenStackQueue
+      type: COMMAND
+      usessh: false
 
     openstack:
       commandTemplate: poll_openstack.py '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}' '${here/zOpenStackAuthUrl}' '${here/zOpenStackInfrastructureRegionName}'
@@ -285,4 +295,17 @@
           format: '%7.0lf'
         Verify Resize:
           dpName: openstack_serverVerifyResizeCount
+          format: '%7.0lf'
+
+    Queues:
+      units: count
+      height: 100
+      width: 500
+
+      graphpoints:
+        Event:
+          dpName: openstackQueues_eventQueueCount
+          format: '%7.0lf'
+        performance:
+          dpName: openstackQueues_perfQueueCount
           format: '%7.0lf'
