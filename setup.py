@@ -7,15 +7,13 @@ AUTHOR = "Zenoss"
 LICENSE = "GPLv2"
 NAMESPACE_PACKAGES = [u'ZenPacks', u'ZenPacks.zenoss']
 PACKAGES = [u'ZenPacks', u'ZenPacks.zenoss', u'ZenPacks.zenoss.OpenStackInfrastructure']
-INSTALL_REQUIRES = ['ZenPacks.zenoss.PythonCollector>=1.1']
+INSTALL_REQUIRES = ['ZenPacks.zenoss.PythonCollector>=1.5.2']
 COMPAT_ZENOSS_VERS = ">=4.2.0"
 PREV_ZENPACK_NAME = ""
 # STOP_REPLACEMENTS
 # Zenoss will not overwrite any changes you make below here.
 
 from setuptools import setup, find_packages
-
-import os
 
 # make build
 import subprocess
