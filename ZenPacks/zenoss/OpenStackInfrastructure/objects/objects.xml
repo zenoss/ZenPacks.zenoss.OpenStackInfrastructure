@@ -1866,13 +1866,13 @@ COMMAND
 True
 </property>
 <property type="string" id="eventClass" mode="w" >
-/Perf/RabbitMQ
+/Cmd/Fail
 </property>
 <property type="int" id="severity" mode="w" >
 3
 </property>
 <property type="string" id="commandTemplate" mode="w" >
-queue_counts.py
+queue_counts.py '${here/id}'
 </property>
 <property type="int" id="cycletime" mode="w" >
 300
@@ -1885,9 +1885,6 @@ ZenPacks.zenoss.OpenStackInfrastructure.parsers.OpenStackQueue
 </property>
 <tomanycont id='datapoints'>
 <object id='eventQueueCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
-<property id='zendoc' type='string'>
-OpenStackInfrastructure: Event Queue Count Monitoring
-</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -1896,15 +1893,9 @@ True
 </property>
 <property type="string" id="rrdmin" mode="w" >
 0
-</property>
-<property type="string" id="description" mode="w" >
-OpenStackInfrastructure: Event Queue Count Monitoring
 </property>
 </object>
 <object id='perfQueueCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
-<property id='zendoc' type='string'>
-OpenStackInfrastructure: Perf Queue Count Monitoring
-</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -1913,9 +1904,6 @@ True
 </property>
 <property type="string" id="rrdmin" mode="w" >
 0
-</property>
-<property type="string" id="description" mode="w" >
-OpenStackInfrastructure: Perf Queue Count Monitoring
 </property>
 </object>
 </tomanycont>
@@ -1938,31 +1926,6 @@ ${here/id}
 </property>
 <property type="string" id="plugin_classname" mode="w" >
 ZenPacks.zenoss.OpenStackInfrastructure.datasources.NovaServiceStatusDataSource.NovaServiceStatusDataSourcePlugin
-</property>
-</object>
-</tomanycont>
-<tomanycont id='thresholds'>
-<object id='Queue Count' module='Products.ZenModel.MinMaxThreshold' class='MinMaxThreshold'>
-<property type="string" id="eventClass" mode="w" >
-/Perf/RabbitMQ
-</property>
-<property type="int" id="severity" mode="w" >
-3
-</property>
-<property label="DataPoints" type="lines" id="dsnames" mode="w" >
-['openstackQueues_eventQueueCount', 'openstackQueues_perfQueueCount']
-</property>
-<property label="Enabled" type="boolean" id="enabled" mode="w" >
-True
-</property>
-<property type="string" id="minval" mode="w" >
--1
-</property>
-<property type="string" id="maxval" mode="w" >
-1000
-</property>
-<property type="int" id="escalateCount" mode="w" >
-0
 </property>
 </object>
 </tomanycont>
@@ -2290,7 +2253,7 @@ AVERAGE
 </object>
 </tomanycont>
 </object>
-<object id='Queue Count' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<object id='Queues' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
 <property type="int" id="height" mode="w" >
 100
 </property>
@@ -2298,7 +2261,7 @@ AVERAGE
 500
 </property>
 <property type="string" id="units" mode="w" >
-Count
+count
 </property>
 <property type="boolean" id="log" mode="w" >
 False
@@ -2310,7 +2273,7 @@ False
 -1
 </property>
 <property type="int" id="maxy" mode="w" >
-10
+-1
 </property>
 <property type="boolean" id="hasSummary" mode="w" >
 True
@@ -2319,7 +2282,7 @@ True
 3
 </property>
 <tomanycont id='graphPoints'>
-<object id='Event Queue Count' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<object id='Event' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
 <property type="long" id="sequence" mode="w" >
 0
 </property>
@@ -2333,7 +2296,7 @@ LINE
 False
 </property>
 <property type="string" id="format" mode="w" >
-%5.2lf%s
+%7.0lf
 </property>
 <property type="string" id="legend" mode="w" >
 ${graphPoint/id}
@@ -2348,7 +2311,7 @@ openstackQueues_eventQueueCount
 AVERAGE
 </property>
 </object>
-<object id='Perf Queue Count' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<object id='performance' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
 <property type="long" id="sequence" mode="w" >
 1
 </property>
@@ -2362,7 +2325,7 @@ LINE
 False
 </property>
 <property type="string" id="format" mode="w" >
-%5.2lf%s
+%7.0lf
 </property>
 <property type="string" id="legend" mode="w" >
 ${graphPoint/id}
@@ -3351,7 +3314,7 @@ ${here/id}
 ZenPacks.zenoss.OpenStackInfrastructure.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
 </property>
 <property type="string" id="meter" >
-network.incoming.bytes.rate
+Inbound
 </property>
 <tomanycont id='datapoints'>
 <object id='networkIncomingBytesRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -3387,7 +3350,7 @@ ${here/id}
 ZenPacks.zenoss.OpenStackInfrastructure.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
 </property>
 <property type="string" id="meter" >
-network.incoming.packets.rate
+Inbound
 </property>
 <tomanycont id='datapoints'>
 <object id='networkIncomingPacketsRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -3423,7 +3386,7 @@ ${here/id}
 ZenPacks.zenoss.OpenStackInfrastructure.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
 </property>
 <property type="string" id="meter" >
-network.outgoing.bytes.rate
+Outbound
 </property>
 <tomanycont id='datapoints'>
 <object id='networkOutgoingBytesRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -3459,7 +3422,7 @@ ${here/id}
 ZenPacks.zenoss.OpenStackInfrastructure.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
 </property>
 <property type="string" id="meter" >
-network.outgoing.packets.rate
+Outbound
 </property>
 <tomanycont id='datapoints'>
 <object id='networkOutgoingPacketsRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -4236,9 +4199,6 @@ Icehouse (2014.1)
 <property type="boolean" id="isOS" mode="w" >
 True
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/OpenStack/devices/myps/os'/>
-</tomany>
 </object>
 <object id='Juno (2014.2)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
 <property type="string" id="name" mode="w" >
@@ -4281,9 +4241,6 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack/os/processes/usr_bin_python 4f402e8edbd2d8d96eaded4fea37ec04'/>
-</tomany>
 </object>
 <object id='nova-cert' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4307,9 +4264,6 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack/os/processes/usr_bin_python 4d61dcafc913f82345f1a78561eca83b'/>
-</tomany>
 </object>
 <object id='nova-compute' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4333,9 +4287,6 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack/os/processes/usr_bin_python a3d5d296430fcc06f0f1162966e6c8bc'/>
-</tomany>
 </object>
 <object id='nova-conductor' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4359,9 +4310,6 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack/os/processes/usr_bin_python 5beaf86de1568b53fc220bf6bda8b799'/>
-</tomany>
 </object>
 <object id='nova-consoleauth' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4385,9 +4333,6 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack/os/processes/usr_bin_python d9180a15c0428624162d192598dac693'/>
-</tomany>
 </object>
 <object id='nova-network' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4434,9 +4379,6 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/packstack/os/processes/usr_bin_python 3a1d1d8799604704d87c5732ef666169'/>
-</tomany>
 </object>
 </tomanycont>
 </object>
