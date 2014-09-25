@@ -207,7 +207,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'serverId':            {'grid_display': False,
                                         'label': 'Server ID'},   # 847424
                 'serverStatus':        {'label': 'Status',
-                                        'label_width': 50,
+                                        'label_width': 65,
                                         'order': 3.3},            # ACTIVE
                 'serverBackupEnabled': {'type_': 'boolean',
                                         'label': 'Backup',        # False
