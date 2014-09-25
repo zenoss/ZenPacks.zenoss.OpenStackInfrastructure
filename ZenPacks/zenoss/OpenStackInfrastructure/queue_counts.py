@@ -12,7 +12,8 @@
 #
 ###########################################################################
 
-import json, pdb
+import sys
+import json
 
 from amqplib.client_0_8.connection import Connection
 
@@ -21,11 +22,9 @@ from Products.ZenUtils.Utils import unused
 unused(Globals)
 
 from Products.ZenUtils.GlobalConfig import getGlobalConfiguration
-from Products.ZenUtils.ZenScriptBase import ZenScriptBase
 
-def count_queues(conn, channel, qnames):
+def count_queues(channel, qnames):
     retMsg = []
-    # pdb.set_trace()
     for qname in qnames:
         name, count, consumers = channel.queue_declare(qname, passive=True)
         retMsg.append((name, count))
@@ -51,27 +50,24 @@ def localhost_conn_chan():
     channel = conn.channel()
     return conn, channel
 
-def get_device_names():
-    # all openstack device names
-    zbase = ZenScriptBase()
-    zbase.connect()
-    dmd=zbase.dmd
-    devices = dmd.Devices.OpenStack.devices()
-    return [dev.name() for dev in devices]
-
 def main():
-    device_names = get_device_names()
+    try:
+        devicename = sys.argv[1]
+    except ValueError:
+        print >> sys.stderr, ("Usage: %s <devicename>") % sys.argv[0]
+        sys.exit(1)
+
+    # queue names we are interested in
     queue_names = []
-    for dev_name in device_names:
-        qname = 'zenoss.queues.openstack.ceilometer.' + dev_name + '.event'
-        queue_names.append(qname)
-        qname = 'zenoss.queues.openstack.ceilometer.' + dev_name + '.perf'
-        queue_names.append(qname)
+    qname = 'zenoss.queues.openstack.ceilometer.' + devicename + '.event'
+    queue_names.append(qname)
+    qname = 'zenoss.queues.openstack.ceilometer.' + devicename + '.perf'
+    queue_names.append(qname)
 
     conn, channel = localhost_conn_chan()
     with conn:
         with channel:
-            msgs = count_queues(conn, channel, queue_names)
+            msgs = count_queues(channel, queue_names)
             print json.dumps(msgs)
 
 if __name__ == '__main__':

@@ -18,12 +18,12 @@ from Products.ZenRRD.CommandParser import CommandParser
 
 class OpenStackQueue(CommandParser):
     def processResults(self, cmd, result):
-        qInfo = json.loads(cmd.result.output)
-        deviceName = cmd.deviceConfig.name or cmd.deviceConfig.id
+        entries = json.loads(cmd.result.output)
         dp_map = dict([(dp.id, dp) for dp in cmd.points])
         for name, dp in dp_map.items():
-            clue = name[:name.index('QueueCount')]
-            [result.values.append((dp, item[1])) for item in qInfo \
-                 if item[0].find('openstack') > -1 and \
-                     item[0].find(deviceName) > -1 and \
-                     item[0].find(clue) > -1]
+            # looking for 'event' and 'perf'
+            clue = name[:name.find('QueueCount')]
+            for entry in entries:
+                if entry[0].find(clue) > -1:
+                    result.values.append((dp, entry[1]))
+                    break

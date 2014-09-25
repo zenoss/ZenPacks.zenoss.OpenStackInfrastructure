@@ -158,6 +158,16 @@
     serviceStatus:
       type: OpenStack Nova Service Status
 
+    openstackQueues:
+      commandTemplate: queue_counts.py '${here/id}'
+      cycletime: 300
+      datapoints:
+        eventQueueCount: GAUGE_MIN_0_ALIAS
+        perfQueueCount: GAUGE_MIN_0_ALIAS
+      parser: ZenPacks.zenoss.OpenStackInfrastructure.parsers.OpenStackQueue
+      type: COMMAND
+      usessh: false
+
     openstack:
       commandTemplate: poll_openstack.py '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}' '${here/zOpenStackAuthUrl}' '${here/zOpenStackInfrastructureRegionName}'
       cycletime: 300
@@ -287,28 +297,6 @@
           dpName: openstack_serverVerifyResizeCount
           format: '%7.0lf'
 
-/OpenStack/OpenStackInfrastructureOpenStackQueue:
-  description: "OpenStackInfrastructure: OpenStack Queue Monitoring"
-  targetPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.OpenStackQueue
-
-  datasources:
-    events:
-      type: OpenStack Ceilometer Queue
-
-    serviceStatus:
-      type: OpenStack Queue Status
-
-    openstack:
-      commandTemplate: queue_counts.py
-      cycletime: 300
-      datapoints:
-        eventQueueCount: GAUGE_MIN_0_ALIAS
-        perfQueueCount: GAUGE_MIN_0_ALIAS
-      parser: ZenPacks.zenoss.OpenStackInfrastructure.parsers.OpenStackQueue
-      type: COMMAND
-      usessh: false
-
-  graphs:
     Queues:
       units: count
       height: 100
@@ -316,8 +304,8 @@
 
       graphpoints:
         Event:
-          dpName: openstack_eventQueueCount
+          dpName: openstackQueues_eventQueueCount
           format: '%7.0lf'
         performance:
-          dpName: openstack_perfQueueCount
+          dpName: openstackQueues_perfQueueCount
           format: '%7.0lf'
