@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo $0
+
 AMQP_USERID="openstack"
 AMQP_PASSWORD="[previously configured password]"
 AMQP_HOSTNAME=`zenglobalconf -p amqphost`
@@ -24,6 +26,9 @@ fi
 # Ensure that openstack user has appropriate permissions
 sudo rabbitmqctl clear_permissions -p "$AMQP_VIRTUAL_HOST" "$AMQP_USERID"
 sudo rabbitmqctl set_permissions -p "$AMQP_VIRTUAL_HOST" "$AMQP_USERID" '' '' 'zenoss.openstack.*'
+
+# Create any required exchanges
+$ZENHOME/libexec/openstack_amqp_init.py
 
 echo ""
 echo "OpenStack Configuration"

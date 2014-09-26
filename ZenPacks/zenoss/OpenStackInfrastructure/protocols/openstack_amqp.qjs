@@ -6,12 +6,20 @@
             "name" : "zenoss.openstack.ceilometer",
             "type" : "topic",
             "durable" : true,
-            "auto_delete" : true,
-            "description" : "Messages are sent from OpenStack Ceilmeter to this exchange for zenoss collectors to process",
+            "auto_delete" : false,
+            "description" : "Perf and Event messages are sent from OpenStack Ceilometer to this exchange for zenoss collectors to process",
             "content_types" : []
-        }
+        },
+        "$OpenStackInboundHeartbeats" : {
+            "name" : "zenoss.openstack.heartbeats",
+            "type" : "topic",
+            "durable" : true,
+            "auto_delete" : false,
+            "description" : "Heartbeat messages are sent from OpenStack Ceilometer to this exchange for zenoss collectors to process",
+            "content_types" : []
+        }        
     },
-    "queues" : {
+    "queues" : {    
         "$OpenStackInboundPerf" : {
             "name" : "zenoss.queues.openstack.ceilometer.{device}.perf",
             "durable" : true,

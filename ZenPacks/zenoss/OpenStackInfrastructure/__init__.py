@@ -395,38 +395,29 @@ from . import schema
 class ZenPack(schema.ZenPack):
     def install(self, app):
         super(ZenPack, self).install(app)
-        self.symlinkPlugin()
+        self.symlinkScripts()
         self.installBinFile('openstack_amqp_config')
 
     def remove(self, app, leaveObjects=False):
         if not leaveObjects:
-            self.removePluginSymlink()
+            self.removeScriptSymlinks()
             self.removeBinFile('openstack_amqp_config')
 
         super(ZenPack, self).remove(app, leaveObjects=leaveObjects)
 
-    def symlinkPlugin(self):
-        log.info('Linking poll_openstack.py plugin into $ZENHOME/libexec/')
-        plugin_path = zenPath('libexec', 'poll_openstack.py')
-        os.system('ln -sf {0} {1}'.format(
-            self.path('poll_openstack.py'), plugin_path))
-        os.system('chmod 0755 {0} {1}'.format(
-            self.path('poll_openstack.py'), plugin_path))
+    def symlinkScripts(self):
+        for script in ('poll_openstack.py', 'openstack_amqp_init.py', 'queue_counts.py'):
+            log.info('Linking %s into $ZENHOME/libexec/' % script)
+            script_path = zenPath('libexec', script)
+            os.system('ln -sf {0} {1}'.format(
+                self.path(script), script_path))
+            os.system('chmod 0755 {0} {1}'.format(
+                self.path(script), script_path))
 
-        log.info('Linking queue_counts.py plugin into $ZENHOME/libexec/')
-        plugin_path = zenPath('libexec', 'queue_counts.py')
-        os.system('ln -sf {0} {1}'.format(
-            self.path('queue_counts.py'), plugin_path))
-        os.system('chmod 0755 {0} {1}'.format(
-            self.path('queue_counts.py'), plugin_path))
-
-
-    def removePluginSymlink(self):
-        log.info('Removing poll_openstack.py link from $ZENHOME/libexec/')
-        os.system('rm -f {0}'.format(zenPath('libexec', 'poll_openstack.py')))
-
-        log.info('Removing queue_counts.py link from $ZENHOME/libexec/')
-        os.system('rm -f {0}'.format(zenPath('libexec', 'queue_counts.py')))
+    def removeScriptSymlinks(self):
+        for script in ('poll_openstack.py', 'openstack_amqp_init.py', 'queue_counts.py'):
+            log.info('Removing %s link from $ZENHOME/libexec/' % script)
+            os.system('rm -f {0}'.format(zenPath('libexec', script)))
 
 
 # Patch last to avoid import recursion problems.
