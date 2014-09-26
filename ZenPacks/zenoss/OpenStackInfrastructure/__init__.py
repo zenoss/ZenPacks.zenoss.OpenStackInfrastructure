@@ -407,7 +407,8 @@ class ZenPack(schema.ZenPack):
         super(ZenPack, self).remove(app, leaveObjects=leaveObjects)
 
     def symlinkScripts(self):
-        for script in ('poll_openstack.py', 'openstack_amqp_init.py', 'queue_counts.py'):
+        for script in ('poll_openstack.py', 'openstack_amqp_init.py',
+                       'queue_counts.py', 'openstack_helper.py'):
             log.info('Linking %s into $ZENHOME/libexec/' % script)
             script_path = zenPath('libexec', script)
             os.system('ln -sf {0} {1}'.format(
@@ -416,7 +417,8 @@ class ZenPack(schema.ZenPack):
                 self.path(script), script_path))
 
     def removeScriptSymlinks(self):
-        for script in ('poll_openstack.py', 'openstack_amqp_init.py', 'queue_counts.py'):
+        for script in ('poll_openstack.py', 'openstack_amqp_init.py',
+                       'queue_counts.py', 'openstack_helper.py'):
             log.info('Removing %s link from $ZENHOME/libexec/' % script)
             os.system('rm -f {0}'.format(zenPath('libexec', script)))
 
