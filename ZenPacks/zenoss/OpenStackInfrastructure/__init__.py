@@ -124,6 +124,7 @@ CFG = zenpacklib.ZenPackSpec(
 
         'SoftwareComponent': {
             'base': 'OpenstackComponent',
+            'label': 'Software Component',
             'filter_display': False,
             'relationships': {
                 # Provide better contextual naming for the relationships in the UI.
