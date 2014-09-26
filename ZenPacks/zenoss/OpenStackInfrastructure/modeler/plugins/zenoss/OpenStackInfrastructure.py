@@ -16,6 +16,9 @@
 import logging
 log = logging.getLogger('zen.OpenStack')
 
+import json
+import os
+import re
 import types
 
 from twisted.internet.defer import inlineCallbacks, returnValue
@@ -25,12 +28,11 @@ from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
 from Products.ZenUtils.Utils import prepId
 from Products.ZenUtils.Time import isoToTimestamp, LocalDateTime
 
-from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path
+from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path, zenpack_path
 add_local_lib_path()
 
 from apiclients.novaapiclient import NovaAPIClient, NotFoundError
 from apiclients.keystoneapiclient import KeystoneAPIClient
-
 
 
 class OpenStackInfrastructure(PythonPlugin):
@@ -381,11 +383,76 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_orgComponent=region_id
                 )))
 
-        componentsMap = RelationshipMap(relname='components')
+        objmaps = {
+            'flavors': flavors,
+            'hosts': hosts,
+            'hypervisors': hypervisors,
+            'images': images,
+            'regions': [region],
+            'servers': servers,
+            'services': services,
+            'tenants': tenants,
+            'zones': zones.values()
+        }
 
-        for objmap in tenants + [region] + flavors + images + servers + \
-            zones.values() + hosts + hypervisors + services:
-            componentsMap.append(objmap)        
+        # If the user has provided a list of static objectmaps to
+        # slap on the ends of the ones we discovered dynamically, add them in.
+        # (this is mostly for testing purposes!)
+        filename = zenpack_path('static_objmaps.json')
+        if os.path.exists(filename):
+            log.info("Loading %s" % filename)
+            data = ''
+            with open(filename) as f:
+                for line in f:
+                    # skip //-style comments
+                    if re.match(r'^\s*//', line):
+                        data += "\n"
+                    else:
+                        data += line
+                static_objmaps = json.loads(data)
+            for key in objmaps:
+                if key in static_objmaps and len(static_objmaps[key]):
+                    starting_count = len(objmaps[key])
+                    for om_dict in static_objmaps[key]:
+                        compname = om_dict.pop('compname', None)
+                        modname = om_dict.pop('modname', None)
+                        classname = om_dict.pop('classname', None)
+                        for v in om_dict:
+                            om_dict[v] = str(om_dict[v])
+
+                        if 'id' not in om_dict:
+                            # Try to match it to an existing objectmap by title (as a regexp)
+                            # and merge into it.
+                            found = False
+                            for om in objmaps[key]:
+                                if re.match(om_dict['title'], om.title):
+                                    found = True
+                                    for attr in om_dict:
+                                        if attr != 'title':
+                                            log.info("  Adding %s=%s to %s (%s)" % (attr, om_dict[attr], om.id, om.title))
+                                            setattr(om, attr, om_dict[attr])
+                                    break
+
+                            if not found:
+                                log.error("Unable to find a matching objectmap to extend: %s" % om_dict)
+
+                            continue
+
+                        objmaps[key].append(ObjectMap(compname=compname,
+                                                      modname=modname,
+                                                      classname=classname,
+                                                      data=om_dict))
+                    added_count = len(objmaps[key]) - starting_count
+                    if added_count > 0:
+                        log.info("  Added %d new objectmaps to %s" % (added_count, key))
+
+
+        # Apply the objmaps in the right order.
+        componentsMap = RelationshipMap(relname='components')
+        for i in ('tenants', 'regions', 'flavors', 'images', 'servers', 'zones',
+                  'hosts', 'hypervisors', 'services'):
+            for objmap in objmaps[i]:
+                componentsMap.append(objmap)
 
         endpointObjMap = ObjectMap(
             modname='ZenPacks.zenoss.OpenStackInfrastructure.Endpoint',

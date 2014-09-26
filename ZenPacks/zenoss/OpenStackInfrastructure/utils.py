@@ -7,7 +7,7 @@
 #
 ##############################################################################
 
-
+import os
 import re
 
 from Products.AdvancedQuery import And, Eq
@@ -32,11 +32,14 @@ import logging
 LOG = logging.getLogger('zen.OpenStack.utils')
 
 
+def zenpack_path(path):
+    return os.path.join(os.path.dirname(__file__), path)
+
+
 def add_local_lib_path():
     '''
     Helper to add the ZenPack's lib directory to sys.path.
     '''
-    import os
     import site
 
     # The novaclient library does some elaborate things to figure out

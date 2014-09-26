@@ -51,7 +51,9 @@ class Host(schema.Host):
             return
 
         required_services = set()
-        for service in self.getDeviceComponents(type='OpenStackInfrastructureNovaService'):
+        for service in [x for x in self.hostedSoftware()
+                        if x.meta_type == 'OpenStackInfrastructureNovaService'
+                        and x.enabled]:
             required_services.add(service.binary)
 
         process_classes = [p.osProcessClass().getPrimaryUrlPath()
