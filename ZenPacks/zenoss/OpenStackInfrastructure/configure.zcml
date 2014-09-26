@@ -62,6 +62,15 @@
 
     </configure>
 
+    <!-- Endpoint cleanup -->
+    <subscriber
+        for="ZenPacks.zenoss.OpenStackInfrastructure.Endpoint.Endpoint
+             OFS.interfaces.IObjectWillBeMovedEvent"
+        handler=".Endpoint.onDeviceDeleted"
+        />
+
+
+
     <!-- DeviceProxyComponent cleanup -->
     <subscriber
         for="Products.ZenModel.Device.Device

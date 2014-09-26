@@ -13,6 +13,13 @@ from . import schema
 import logging
 LOG = logging.getLogger('zen.OpenStackInfrastructureEndpoint')
 
+from zope.component import getUtility
+from zenoss.protocols.queueschema import substitute_replacements
+from zenoss.protocols.interfaces import IAMQPConnectionInfo, IQueueSchema
+from zenoss.protocols.amqp import Publisher as BlockingPublisher
+from amqplib.client_0_8.exceptions import AMQPChannelException
+from OFS.interfaces import IObjectWillBeAddedEvent
+
 
 class Endpoint(schema.Endpoint):
 
@@ -40,3 +47,32 @@ class Endpoint(schema.Endpoint):
                 component.maintain_proxy_device()
 
         return True
+
+
+# Clean up any AMQP queues we may have created for this device.
+def onDeviceDeleted(object, event):
+    if not IObjectWillBeAddedEvent.providedBy(event):
+        connectionInfo = getUtility(IAMQPConnectionInfo)
+        queueSchema = getUtility(IQueueSchema)
+
+        # For some reason, if an error gets thrown by queue_delete, it seems
+        # to break the connection, so we'll just use a separate connection
+        # for each call to it.
+        for queue in ('$OpenStackInboundEvent', '$OpenStackInboundPerf'):
+            queueName = substitute_replacements(queueSchema._queue_nodes[queue].name,
+                                                {'device': object.id})
+
+            amqpClient = BlockingPublisher(connectionInfo, queueSchema)
+            channel = amqpClient.getChannel()
+            try:
+                LOG.debug("Removing AMQP queue %s" % queueName)
+                channel.queue_delete(queueName)
+                LOG.info("Removed AMQP queue %s successfully." % queueName)
+            except AMQPChannelException, e:
+                # if the queue doesn't exist, don't worry about it.
+                if e.amqp_reply_code == 404:
+                    LOG.debug('Queue %s did not exist', queueName)
+                else:
+                    LOG.exception(e)
+
+            amqpClient.close()

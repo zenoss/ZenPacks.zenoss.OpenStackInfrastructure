@@ -21,48 +21,30 @@ unused(Globals)
 
 import zope.component
 from zope.component import getUtility, getAdapter
-from twisted.internet.defer import inlineCallbacks
 from Products.Five import zcml
 
 import Products.ZenMessaging.queuemessaging
 from zenoss.protocols.interfaces import IAMQPConnectionInfo, IQueueSchema, IAMQPChannelAdapter
-from zenoss.protocols.twisted.amqp import AMQPFactory
+from zenoss.protocols.amqp import Publisher as BlockingPublisher
 
-
-class OpenStackAMQPInit(object):
-
-    # Create all the AMQP exchanges we require.   This should be run before we try
-    # to have ceilometer send zenoss any events.
-
-    @inlineCallbacks
-    def go(self):
-
-        zcml.load_config('configure.zcml', zope.component)
-        zcml.load_config('configure.zcml', Products.ZenMessaging.queuemessaging)
-
-        amqpConnectionInfo = getUtility(IAMQPConnectionInfo)
-        queueSchema = getUtility(IQueueSchema)
-
-        amqp = AMQPFactory(amqpConnectionInfo, queueSchema)
-        yield amqp._onConnectionMade
-
-        channel = amqp.channel
-
-        for exchange in ('$OpenStackInbound', '$OpenStackInboundHeartbeats',):
-            exchangeConfig = queueSchema.getExchange(exchange)
-            print "Verifying configuration of exchange '%s' (%s)" % (exchange, exchangeConfig.name) 
-
-            # Declare the exchange to which the message is being sent
-            yield getAdapter(channel, IAMQPChannelAdapter).declareExchange(exchangeConfig)
-
-        # Shut down, we're done.
-        if reactor.running:
-            reactor.stop()
-
+# Create all the AMQP exchanges we require.   This should be run before we try
+# to have ceilometer send zenoss any events.
 
 if __name__ == '__main__':
-    from twisted.internet import reactor
+    zcml.load_config('configure.zcml', zope.component)
+    zcml.load_config('configure.zcml', Products.ZenMessaging.queuemessaging)
 
-    amqp_init = OpenStackAMQPInit()
-    amqp_init.go()
-    reactor.run()
+    connectionInfo = getUtility(IAMQPConnectionInfo)
+    queueSchema = getUtility(IQueueSchema)
+    amqpClient = BlockingPublisher(connectionInfo, queueSchema)
+    channel = amqpClient.getChannel()
+
+    for exchange in ('$OpenStackInbound', '$OpenStackInboundHeartbeats',):
+        exchangeConfig = queueSchema.getExchange(exchange)
+        print "Verifying configuration of exchange '%s' (%s)" % (exchange, exchangeConfig.name) 
+
+        # Declare the exchange to which the message is being sent
+        getAdapter(channel, IAMQPChannelAdapter).declareExchange(exchangeConfig)
+
+    amqpClient.close()
+
