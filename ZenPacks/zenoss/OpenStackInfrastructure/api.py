@@ -33,7 +33,7 @@ from Products.Zuul.utils import ZuulMessageFactory as _t
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path
 add_local_lib_path()
 
-OPENSTACK_DEVICE_PATH = "/Devices/OpenStack"
+OPENSTACK_DEVICE_PATH = "/Devices/OpenStack/Infrastructure"
 
 _helper = os.path.join(os.path.dirname(__file__), 'openstack_helper.py')
 

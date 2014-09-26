@@ -93,7 +93,7 @@ def create_model_data(dmd):
     Return an Endpoint suitable for Impact functional testing.
     '''
     # DeviceClass
-    dc = dmd.Devices.createOrganizer('/OpenStack')
+    dc = dmd.Devices.createOrganizer('/OpenStack/Infrastructure')
     dc.setZenProperty('zPythonClass', 'ZenPacks.zenoss.OpenStackInfrastructure.Endpoint')
 
     # OSProcessClasses
