@@ -48,6 +48,27 @@ class Endpoint(schema.Endpoint):
 
         return True
 
+    def expected_ceilometer_heartbeats(self):
+        result = []
+        for host in self.getDeviceComponents(type='OpenStackInfrastructureHost'):
+            hostnames = set()
+            hostnames.add(host.hostname)
+            if host.hostfqdn:
+                hostnames.add(host.hostfqdn)
+
+            processes = set()
+            for process in host.proxy_device().getDeviceComponents(type='OSProcess'):
+                process_name = process.osProcessClass().id
+                if process_name in ('ceilometer-agent-notification', 'ceilometer-collector'):
+                    processes.add(process_name)
+
+            if processes:
+                result.append(dict(
+                    hostnames=list(hostnames),
+                    processes=list(processes)
+                ))
+
+        return result
 
 # Clean up any AMQP queues we may have created for this device.
 def onDeviceDeleted(object, event):
