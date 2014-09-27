@@ -4222,6 +4222,146 @@ True
 1
 </property>
 <tomanycont id='osProcessClasses'>
+<object id='ceilometer-agent-central' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+ceilometer-agent-central
+</property>
+<property type="string" id="regex" mode="w" >
+ceilometer-agent-central
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+0
+</property>
+</object>
+<object id='ceilometer-agent-compute' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+ceilometer-agent-compute
+</property>
+<property type="string" id="regex" mode="w" >
+ceilometer-agent-compute
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+0
+</property>
+</object>
+<object id='ceilometer-agent-notification' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+ceilometer-agent-notification
+</property>
+<property type="string" id="regex" mode="w" >
+ceilometer-agent-notification
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+0
+</property>
+</object>
+<object id='ceilometer-alarm-evaluator' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+ceilometer-alarm-evaluator
+</property>
+<property type="string" id="regex" mode="w" >
+ceilometer-alarm-evaluator
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+0
+</property>
+</object>
+<object id='ceilometer-alarm-notifier' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+ceilometer-alarm-notifier
+</property>
+<property type="string" id="regex" mode="w" >
+ceilometer-alarm-notifier
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+0
+</property>
+</object>
+<object id='ceilometer-api' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+ceilometer-api
+</property>
+<property type="string" id="regex" mode="w" >
+ceilometer-api
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+0
+</property>
+</object>
+<object id='ceilometer-collector' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+ceilometer-collector
+</property>
+<property type="string" id="regex" mode="w" >
+ceilometer-collector
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+0
+</property>
+</object>
 <object id='nova-api' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
 nova-api
@@ -4239,10 +4379,7 @@ False
 False
 </property>
 <property type="int" id="sequence" mode="w" >
-10
-</property>
-<property visible="True" type="int" id="zModelerLock" >
-1
+8
 </property>
 </object>
 <object id='nova-cert' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
@@ -4262,10 +4399,7 @@ False
 False
 </property>
 <property type="int" id="sequence" mode="w" >
-3
-</property>
-<property visible="True" type="int" id="zModelerLock" >
-1
+2
 </property>
 </object>
 <object id='nova-compute' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
@@ -4285,10 +4419,7 @@ False
 False
 </property>
 <property type="int" id="sequence" mode="w" >
-9
-</property>
-<property visible="True" type="int" id="zModelerLock" >
-1
+7
 </property>
 </object>
 <object id='nova-conductor' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
@@ -4308,10 +4439,7 @@ False
 False
 </property>
 <property type="int" id="sequence" mode="w" >
-4
-</property>
-<property visible="True" type="int" id="zModelerLock" >
-1
+3
 </property>
 </object>
 <object id='nova-consoleauth' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
@@ -4331,10 +4459,7 @@ False
 False
 </property>
 <property type="int" id="sequence" mode="w" >
-5
-</property>
-<property visible="True" type="int" id="zModelerLock" >
-1
+4
 </property>
 </object>
 <object id='nova-network' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
@@ -4354,10 +4479,7 @@ False
 False
 </property>
 <property type="int" id="sequence" mode="w" >
-7
-</property>
-<property visible="True" type="int" id="zModelerLock" >
-1
+5
 </property>
 </object>
 <object id='nova-scheduler' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
@@ -4377,10 +4499,7 @@ False
 False
 </property>
 <property type="int" id="sequence" mode="w" >
-8
-</property>
-<property visible="True" type="int" id="zModelerLock" >
-1
+6
 </property>
 </object>
 </tomanycont>
