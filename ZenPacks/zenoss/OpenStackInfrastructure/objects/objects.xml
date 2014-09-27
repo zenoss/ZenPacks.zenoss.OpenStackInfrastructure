@@ -4106,23 +4106,15 @@ OpenStack connectivity restored
 </object>
 <!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack') -->
 <object id='/zport/dmd/Manufacturers/OpenStack' module='Products.ZenModel.Manufacturer' class='Manufacturer'>
+<property type="string" id="url" mode="w" >
+http://www.openstack.org/
+</property>
 <property type="string" id="zip" mode="w" >
 </property>
 <property type="lines" id="regexes" mode="w" >
-()
+[]
 </property>
 <tomanycont id='products'>
-<object id='2015.1' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
-<property type="string" id="name" mode="w" >
-2015.1
-</property>
-<property type="lines" id="productKeys" mode="w" >
-['2015.1.1', '2015.1.2', '2015.1.3', '2015.1.4', '2015.1.5', '2015.1.6', '2015.1.7', '2015.1.8', '2015.1.9', '2015.1.10']
-</property>
-<property type="boolean" id="isOS" mode="w" >
-True
-</property>
-</object>
 <object id='2015.2' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
 <property type="string" id="name" mode="w" >
 2015.2
@@ -4206,6 +4198,17 @@ Juno (2014.2)
 </property>
 <property type="lines" id="productKeys" mode="w" >
 ['2014.2.1', '2014.2.2', '2014.2.3', '2014.2.4', '2014.2.5', '2014.2.6', '2014.2.7', '2014.2.8', '2014.2.9', '2014.2.10']
+</property>
+<property type="boolean" id="isOS" mode="w" >
+True
+</property>
+</object>
+<object id='Kilo (2015.1)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<property type="string" id="name" mode="w" >
+Kilo (2015.1)
+</property>
+<property type="lines" id="productKeys" mode="w" >
+['2015.1.1', '2015.1.2', '2015.1.3', '2015.1.4', '2015.1.5', '2015.1.6', '2015.1.7', '2015.1.8', '2015.1.9', '2015.1.10']
 </property>
 <property type="boolean" id="isOS" mode="w" >
 True
