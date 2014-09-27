@@ -3,7 +3,7 @@
 var ZC = Ext.ns('Zenoss.component');
 
 var addOpenStack = new Zenoss.Action({
-    text: _t('Add OpenStack Infrastructure') + '...',
+    text: _t('Add OpenStack Endpoint (Infrastructure)') + '...',
     id: 'addopenstackinfrastructure-item',
     permission: 'Manage DMD',
     handler: function(btn, e){
@@ -18,7 +18,7 @@ var addOpenStack = new Zenoss.Action({
 
         var win = new Zenoss.dialog.CloseDialog({
             width: 640,
-            title: _t('Add OpenStack Infrastructure'),
+            title: _t('Add OpenStack Endpoint (Infrastructure)'),
             items: [{
                 xtype: 'form',
                 id: 'addopenstackinfrastructure-form',

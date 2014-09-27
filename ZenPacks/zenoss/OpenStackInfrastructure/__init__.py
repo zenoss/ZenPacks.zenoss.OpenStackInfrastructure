@@ -60,6 +60,10 @@ CFG = zenpacklib.ZenPackSpec(
         'zOpenStackCeilometerUrl':    {},
     },
 
+    device_classes={
+        '/OpenStack': {'create': True, 'remove': False}
+    },
+
     classes={
         # Device Types ###############################################
 

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <objects>
-<!-- ('', 'zport', 'dmd', 'Devices', 'OpenStack') -->
-<object id='/zport/dmd/Devices/OpenStack' module='Products.ZenModel.DeviceClass' class='DeviceClass'>
+<!-- ('', 'zport', 'dmd', 'Devices', 'OpenStack', 'Infrastructure') -->
+<object id='/zport/dmd/Devices/OpenStack/Infrastructure' module='Products.ZenModel.DeviceClass' class='DeviceClass'>
 <property id='zendoc' type='string'>
 OpenStack Endpoints
 </property>
@@ -4226,6 +4226,9 @@ nova-api
 <property type="string" id="regex" mode="w" >
 nova-api
 </property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
 </property>
@@ -4233,10 +4236,7 @@ False
 False
 </property>
 <property type="int" id="sequence" mode="w" >
-8
-</property>
-<property visible="True" type="string" id="excludeRegex" >
-\b(vim|tail|grep|tar|cat|bash)\b
+10
 </property>
 <property visible="True" type="int" id="zModelerLock" >
 1
@@ -4249,6 +4249,9 @@ nova-cert
 <property type="string" id="regex" mode="w" >
 nova-cert
 </property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
 </property>
@@ -4256,10 +4259,7 @@ False
 False
 </property>
 <property type="int" id="sequence" mode="w" >
-2
-</property>
-<property visible="True" type="string" id="excludeRegex" >
-\b(vim|tail|grep|tar|cat|bash)\b
+3
 </property>
 <property visible="True" type="int" id="zModelerLock" >
 1
@@ -4272,6 +4272,9 @@ nova-compute
 <property type="string" id="regex" mode="w" >
 nova-compute
 </property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
 </property>
@@ -4279,10 +4282,7 @@ False
 False
 </property>
 <property type="int" id="sequence" mode="w" >
-7
-</property>
-<property visible="True" type="string" id="excludeRegex" >
-\b(vim|tail|grep|tar|cat|bash)\b
+9
 </property>
 <property visible="True" type="int" id="zModelerLock" >
 1
@@ -4295,6 +4295,9 @@ nova-conductor
 <property type="string" id="regex" mode="w" >
 nova-conductor
 </property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
 </property>
@@ -4302,10 +4305,7 @@ False
 False
 </property>
 <property type="int" id="sequence" mode="w" >
-3
-</property>
-<property visible="True" type="string" id="excludeRegex" >
-\b(vim|tail|grep|tar|cat|bash)\b
+4
 </property>
 <property visible="True" type="int" id="zModelerLock" >
 1
@@ -4318,6 +4318,9 @@ nova-consoleauth
 <property type="string" id="regex" mode="w" >
 nova-consoleauth
 </property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
 </property>
@@ -4325,10 +4328,7 @@ False
 False
 </property>
 <property type="int" id="sequence" mode="w" >
-4
-</property>
-<property visible="True" type="string" id="excludeRegex" >
-\b(vim|tail|grep|tar|cat|bash)\b
+5
 </property>
 <property visible="True" type="int" id="zModelerLock" >
 1
@@ -4341,6 +4341,9 @@ nova-network
 <property type="string" id="regex" mode="w" >
 nova-network
 </property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
 </property>
@@ -4348,10 +4351,7 @@ False
 False
 </property>
 <property type="int" id="sequence" mode="w" >
-5
-</property>
-<property visible="True" type="string" id="excludeRegex" >
-\b(vim|tail|grep|tar|cat|bash)\b
+7
 </property>
 <property visible="True" type="int" id="zModelerLock" >
 1
@@ -4364,6 +4364,9 @@ nova-scheduler
 <property type="string" id="regex" mode="w" >
 nova-scheduler
 </property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
 </property>
@@ -4371,10 +4374,7 @@ False
 False
 </property>
 <property type="int" id="sequence" mode="w" >
-6
-</property>
-<property visible="True" type="string" id="excludeRegex" >
-\b(vim|tail|grep|tar|cat|bash)\b
+8
 </property>
 <property visible="True" type="int" id="zModelerLock" >
 1
