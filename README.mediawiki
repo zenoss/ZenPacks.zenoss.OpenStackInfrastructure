@@ -1,12 +1,69 @@
-This ZenPack allows for monitoring of OpenStack. This means that you can monitor the flavors, images and servers from a user or consumer perspective. OpenStack API versions 1.0 and 1.1 are supported. Please watch the [http://www.youtube.com/watch?v=-43gnQLbX9g Monitoring OpenStack] video for a quick introduction that covers most of the details below.
+This ZenPack allows for monitoring of OpenStack from a service provider perspective.  This means that in addition to the user-oriented components supported in the regular OpenStack ZenPack (instances, flavors, images), the underlying OpenStack servers and software is monitored.
 
-{{note}} The video is of an early version of the ZenPack that doesn't have as many options when adding an OpenStack endpoint. See the usage notes below for help with the new fields available on the ''Add OpenStack'' dialog.
 
-<blockquote>
-OpenStack is a global collaboration of developers and cloud computing technologists producing the ubiquitous open source cloud computing platform for public and private clouds. The project aims to deliver solutions for all types of clouds by being simple to implement, massively scalable, and feature rich. The technology consists of a series of interrelated projects delivering various components for a cloud infrastructure solution.
-</blockquote>
+== Basic Usage ==
+Once the OpenStack ZenPack is installed and you can begin monitoring by going to the infrastructure screen and clicking the normal button for adding devices. You'll find a new option labeled, "Add OpenStack Endpoint (Infrastructure)."
 
-==Installation: Zenoss Configuration Steps==
+Choose that option and you'll be presented with a dialog asking for the following inputs.
+
+# Device To Create - name to use for this device in zenoss.  Should not be an actual hostname, since that name will be used when the host is registered as a linux device.
+# Auth URL - A keystone URL, such as http://<hostname>:5000/v2.0/
+# Username, Password / API Key, Project/Tenant ID - *Administrative* credentials to your zenoss instance.
+# Region Name - choose the correct region from the dropdown
+# Ceilometer URL - should auto-populate based on the other selections.
+
+Once you click Add, Zenoss will contact the OpenStack API and discover servers, images and flavors. Once it is complete you'll find a new device in the OpenStack device class with the same name as the hostname or IP you entered into the dialog. Click into this new device to see everything that was discovered.
+
+The following types of elements are discovered.
+* Tenants
+* Instances (Servers)
+* vNICs
+* Images
+* Flavors
+* Nova API Endpoints
+* Regions
+* Availability Zones
+* Hosts
+* Nova Services (processes supporting nova servers)
+* Hypervisors
+
+The following metrics are collected.
+* Images 
+	Total Images
+	Images by State
+* Flavors
+	Total Flavors
+* Instance Metrics
+	Total Instances
+	Instances by State
+	CPU Utilization (percent)
+    Disk Requests (requests/sec)
+    Disk IO Rate (bytes/sec)
+* Vnic Metrics
+    Network Packet Rate (packets/sec)
+    Network Throughput (bytes/sec)
+* Host Metrics (Zenoss Linux OS monitoring)
+	Load Average
+	CPU Utilization
+	Free Memory
+	Free Swap
+	IO
+* Nova Service Metrics (Zenoss Process monitoring)
+	CPU Utilization
+	Memory Utilization
+	Process Counts per Service
+
+All metrics collected by OpenStack Ceilometer may be collected and graphed in 
+Zenoss, and all events processed through ceilometer are exposed via the
+Zenoss Event Console.
+
+
+==Ceilometer Enablement==
+
+Although you may add an openstack device to zenoss, as shown above, event and
+performance data will not be collected until the following steps are performed.
+
+===Zenoss Configuration Steps===
 
 On your zenoss host, you must run the following command as the zenoss user:
 <syntaxhighlight lang="bash">
@@ -17,7 +74,7 @@ It will create a new user in rabbitmq and set up its permissions.  It will
 print out the proper values to use for amqp_hostname, amqp_port, amqp_userid,
 amqp_password, and amqp_virtualhost during ceilometer configuration (see below)
 
-==Installation: OpenStack Ceilometer Configuration Steps==
+===OpenStack Ceilometer Configuration Steps===
 
 Zenoss relies upon a ceilometer dispatcher plugin to ship raw event and
 metering data from ceilometer to Zenoss for storage in the Zenoss event 
@@ -49,7 +106,7 @@ appropriate sections:
 
 Also add the [dispatcher_zenoss] section reported by openstack_amqp_config above.
 
-==Optional Step==
+===Optional Step===
 
 By default, instance state changes will be captured by Zenoss when certain 
 events occur, for example, when an instance is shut down, the state change
@@ -76,58 +133,7 @@ OpenStack environment is very large.
 
 
 
-
-== Usage ==
-Once the OpenStack ZenPack is installed you can begin monitoring by going to the infrastructure screen and clicking the normal button for adding devices. You'll find a new option labeled, "Add OpenStack."
-
-Choose that option and you'll be presented with a dialog asking for the following inputs.
-
-# Username - Same username used to login to OpenStack web interface
-# API Key - Can be found by going to "Your Account/API Access"
-# Project ID - This can be left blank if you don't know what it is
-# Auth URL - For Rackspace this would be https://auth.api.rackspacecloud.com/v2.0
-# Region Name - This can be left blank if you don't know what it is
-
-Once you click Add, Zenoss will contact the OpenStack API and discover servers, images and flavors. Once it is complete you'll find a new device in the OpenStack device class with the same name as the hostname or IP you entered into the dialog. Click into this new device to see everything that was discovered.
-
-The following types of elements are discovered.
-* Instances (Servers)
-* Images
-* Flavors
-
-The following metrics are collected.
-* Total Instances and Instances by State
-** States: Active, Build, Rebuild, Suspended, Queue Resize, Prep Resize, Resize, Verify Resize, Password, Rescue, Reboot, Hard Reboot, Delete IP, Unknown, Other
-* Total Images and Images by State
-** States: Active, Saving, Preparing, Queued, Failed, Unknown, Other
-* Total Flavors
-
-Status monitoring is performed on servers and images with the following mapping of state to Zenoss event severity.
-
-;Instances State to Severity Mapping
-: Reboot, Hard Reboot, Build, Rebuild, Rescue, Unknown == Critical
-: Resize == Error
-: Prep Resize, Delete IP == Warning
-: Suspended, Queue Resize, Verify Resize, Password == Info
-: Active == Clear
-
-;Images State to Severity Mapping
-: Failed, Unknown == Critical
-: Queued, Saving, Preparing == Info
-: Active == Clear
-
-If you are also using Zenoss to monitor the guest operating system running within the server Zenoss will present the graphs for that operating system when the graphs option is chosen for the OpenStack server.
-
 == Changes ==
 
-;1.2.2
-* Fix bug that could prevent data collection.
-
-;1.2.1
-* Fix bug in handling of flavor ID. ([https://jira.zenoss.com/browse/ZEN-10333 ZEN-10333])
-
-;1.2.0
-* Add support for compute API versions 2 and 3. Still support version 1.
-* Add zOpenstackComputeApiVersion configuration property.
-* Update python-novaclient to 2.15.0.
-* Support uuid format for image identifier.
+;2.0.0
+* Initial Release
