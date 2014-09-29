@@ -9,6 +9,7 @@
 
 from Products.DataCollector.plugins.DataMaps import ObjectMap
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
+import ast
 
 import logging
 LOG = logging.getLogger('zen.OpenStack.events')
@@ -24,8 +25,7 @@ TRAITMAPS = {
         'flavor_name':  ['set_flavor_name'],
         'host_name':    ['set_host_name'],
         'image_name':   ['set_image_name'],
-        'tenant_id':    ['set_tenant_id'],
-        # Todo: handle fixed_IPs
+        'tenant_id':    ['set_tenant_id']
     },
 }
 
@@ -45,6 +45,22 @@ def _apply_traits(evt, traitset, objmap):
                     value = value.upper()
 
                 setattr(objmap, prop_name, value)
+
+    # special case for publicIps / privateIps
+    if hasattr(evt, 'trait_fixed_ips'):
+        try:
+            fixed_ips = ast.literal_eval(evt.trait_fixed_ips)
+            public_ips = set()
+            private_ips = set()
+            for ip in fixed_ips:
+                if ip['label'].lower() == "public":
+                    public_ips.add(ip['address'])
+                else:
+                    private_ips.add(ip['address'])
+            setattr(objmap, 'publicIps', list(public_ips))
+            setattr(objmap, 'privateIps', list(private_ips))
+        except Exception, e:
+            LOG.debug("Unable to parse trait_fixed_ips=%s (%s)" % (evt.trait_fixed_ips, e))
 
 
 def instance_id(evt):

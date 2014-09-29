@@ -113,6 +113,9 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         self.assertIsNotNone(instance5, msg="Incremental model created instance 'instance5'")
 
+        self.assertTrue(instance5.publicIps is None or instance5.publicIps == [])
+        self.assertTrue(instance5.privateIps is None or instance5.privateIps == [])
+
         evt = buildEventFromDict({
             'device': 'endpoint',
             'eventClassKey': u'openstack|compute.instance.create.end',
@@ -139,6 +142,9 @@ class TestEventTransforms(zenpacklib.TestCase):
         })
         self.process_event(evt)
 
+        self.assertTrue(instance5.publicIps == [u'172.24.4.229'])
+        self.assertTrue(instance5.privateIps is None or instance5.privateIps == [])
+
     def _create_instance5(self):
         # # Dummy up the instance (as if test_instance_creation had run, and we had instance5 in the system)
 
@@ -155,7 +161,7 @@ class TestEventTransforms(zenpacklib.TestCase):
         instance5.hostName = 'instance5'
         instance5.resourceId = u'instance5'
         instance5.serverId = u'instance5'
-        instance5.serverStatus = u'active'
+        instance5.serverStatus = u'ACTIVE'
         addNonContained(instance5, "flavor", instance1.flavor())
         addNonContained(instance5, "image", instance1.image())
         addNonContained(instance5, "hypervisor", instance1.hypervisor())
@@ -166,7 +172,7 @@ class TestEventTransforms(zenpacklib.TestCase):
         instance5 = self.getObjByPath('components/server-instance5')
         self.assertIsNotNone(instance5)
 
-        self.assertTrue(instance5.serverStatus == 'active')
+        self.assertTrue(instance5.serverStatus.lower() == 'active')
 
         evt = buildEventFromDict({
             'device': 'endpoint',
@@ -193,7 +199,7 @@ class TestEventTransforms(zenpacklib.TestCase):
         })
         self.process_event(evt)
 
-        self.assertTrue(instance5.serverStatus == 'active')
+        self.assertTrue(instance5.serverStatus.lower() == 'active')
 
         evt = buildEventFromDict({
             'device': 'endpoint',
@@ -220,7 +226,7 @@ class TestEventTransforms(zenpacklib.TestCase):
         })
         self.process_event(evt)
 
-        self.assertTrue(instance5.serverStatus == 'stopped')
+        self.assertTrue(instance5.serverStatus.lower() == 'stopped')
         self.assertTrue(evt.summary == 'Instance instance5 powered off (status changed to stopped)')
 
     def test_instance_power_on(self):
@@ -229,7 +235,7 @@ class TestEventTransforms(zenpacklib.TestCase):
         self.assertIsNotNone(instance5)
         instance5.serverStatus = 'stopped'
 
-        self.assertTrue(instance5.serverStatus == 'stopped')
+        self.assertTrue(instance5.serverStatus.lower() == 'stopped')
 
         evt = buildEventFromDict({
             'device': 'endpoint',
@@ -254,7 +260,7 @@ class TestEventTransforms(zenpacklib.TestCase):
             u'trait_vcpus': 1})
         self.process_event(evt)
 
-        self.assertTrue(instance5.serverStatus == 'stopped')
+        self.assertTrue(instance5.serverStatus.lower() == 'stopped')
 
         evt = buildEventFromDict({
             'device': 'endpoint',
@@ -279,7 +285,7 @@ class TestEventTransforms(zenpacklib.TestCase):
             u'trait_vcpus': 1})
         self.process_event(evt)
 
-        self.assertTrue(instance5.serverStatus == 'active')
+        self.assertTrue(instance5.serverStatus.lower() == 'active')
         self.assertTrue(evt.summary == 'Instance instance5 powered on (status changed to active)')
 
     def test_instance_reboot(self):
@@ -287,7 +293,7 @@ class TestEventTransforms(zenpacklib.TestCase):
         instance5 = self.getObjByPath('components/server-instance5')
         self.assertIsNotNone(instance5)
 
-        self.assertTrue(instance5.serverStatus == 'active')
+        self.assertTrue(instance5.serverStatus.lower() == 'active')
 
         evt = buildEventFromDict({
             'device': 'endpoint',
@@ -470,7 +476,7 @@ class TestEventTransforms(zenpacklib.TestCase):
             u'trait_user_id': u'user1',
             u'trait_vcpus': 1})
         self.process_event(evt)
-        self.assertTrue(instance5.serverStatus == 'suspended')
+        self.assertTrue(instance5.serverStatus.lower() == 'suspended')
         self.assertTrue(evt.summary == 'Instance instance5 suspended')
 
         evt = buildEventFromDict({
@@ -496,7 +502,7 @@ class TestEventTransforms(zenpacklib.TestCase):
             u'trait_user_id': u'user1',
             u'trait_vcpus': 1})
         self.process_event(evt)
-        self.assertTrue(instance5.serverStatus == 'active')
+        self.assertTrue(instance5.serverStatus.lower() == 'active')
         self.assertTrue(evt.summary == 'Instance instance5 resumed')
 
     def test_instance_delete(self):
@@ -691,7 +697,7 @@ class TestEventTransforms(zenpacklib.TestCase):
             u'trait_user_id': u'user1',
             u'trait_vcpus': 1})
         self.process_event(evt)
-        self.assertTrue(instance5.serverStatus == 'rescued')
+        self.assertTrue(instance5.serverStatus.lower() == 'rescued')
         self.assertTrue(evt.summary == 'Instance instance5 placed in rescue mode')
 
         evt = buildEventFromDict({
@@ -745,7 +751,7 @@ class TestEventTransforms(zenpacklib.TestCase):
             u'trait_vcpus': 1})
 
         self.process_event(evt)
-        self.assertTrue(instance5.serverStatus == 'active')
+        self.assertTrue(instance5.serverStatus.lower() == 'active')
         self.assertTrue(evt.summary == 'Instance instance5 removed from rescue mode')
 
 
