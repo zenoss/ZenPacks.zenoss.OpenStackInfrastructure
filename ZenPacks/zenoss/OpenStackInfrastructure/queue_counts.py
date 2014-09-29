@@ -16,6 +16,7 @@ import sys
 import json
 
 from amqplib.client_0_8.connection import Connection
+from amqplib.client_0_8.exceptions import AMQPChannelException
 
 import Globals
 from Products.ZenUtils.Utils import unused
@@ -25,9 +26,15 @@ from Products.ZenUtils.GlobalConfig import getGlobalConfiguration
 
 def count_queues(channel, qnames):
     retMsg = []
-    for qname in qnames:
-        name, count, consumers = channel.queue_declare(qname, passive=True)
-        retMsg.append((name, count))
+    try:
+        for qname in qnames:
+            name, count, consumers = channel.queue_declare(qname,
+                                                           passive=True)
+            retMsg.append((name, count))
+    except AMQPChannelException as ex:
+        # this could happen if the queue is not available.
+        # return an empty list
+        return []
 
     return retMsg
 
