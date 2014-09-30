@@ -31,12 +31,12 @@ from Products.Zuul.interfaces import IFacade
 from Products.Zuul.utils import ZuulMessageFactory as _t
 from Products.ZenUtils.Utils import zenPath
 
-from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path
+from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path, zenpack_path
 add_local_lib_path()
 
 OPENSTACK_DEVICE_PATH = "/Devices/OpenStack/Infrastructure"
 
-_helper = zenPath('libexec', 'openstack_helper.py')
+_helper = zenpack_path('openstack_helper.py')
 
 class KeystoneError(Exception):
     pass

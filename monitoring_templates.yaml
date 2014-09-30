@@ -159,7 +159,7 @@
       type: OpenStack Nova Service Status
 
     openstackQueues:
-      commandTemplate: queue_counts.py '${here/id}'
+      commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/queue_counts.py '${here/id}'
       cycletime: 300
       datapoints:
         eventQueueCount: GAUGE_MIN_0_ALIAS
@@ -169,7 +169,7 @@
       usessh: false
 
     openstack:
-      commandTemplate: poll_openstack.py '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}' '${here/zOpenStackAuthUrl}' '${here/zOpenStackInfrastructureRegionName}'
+      commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/poll_openstack.py '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}' '${here/zOpenStackAuthUrl}' '${here/zOpenStackInfrastructureRegionName}'
       cycletime: 300
       datapoints:
         flavorTotalCount: GAUGE_MIN_0_ALIAS

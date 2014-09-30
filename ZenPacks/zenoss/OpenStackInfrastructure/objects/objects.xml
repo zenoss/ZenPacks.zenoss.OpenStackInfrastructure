@@ -1569,7 +1569,7 @@ True
 3
 </property>
 <property type="string" id="commandTemplate" mode="w" >
-poll_openstack.py '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}' '${here/zOpenStackAuthUrl}' '${here/zOpenStackInfrastructureRegionName}'
+${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/poll_openstack.py '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}' '${here/zOpenStackAuthUrl}' '${here/zOpenStackInfrastructureRegionName}'
 </property>
 <property type="int" id="cycletime" mode="w" >
 300
@@ -1872,7 +1872,7 @@ True
 3
 </property>
 <property type="string" id="commandTemplate" mode="w" >
-queue_counts.py '${here/id}'
+${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/queue_counts.py '${here/id}'
 </property>
 <property type="int" id="cycletime" mode="w" >
 300
@@ -4053,21 +4053,6 @@ drop
 </object>
 </object>
 </object>
-<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackFailure') -->
-<object id='/zport/dmd/Events/Status/instances/openStackFailure' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
-<property type="string" id="eventClassKey" mode="w" >
-openStackFailure
-</property>
-<property type="int" id="sequence" mode="w" >
-7
-</property>
-<property type="string" id="example" mode="w" >
-OpenStack failure: reason
-</property>
-<property visible="True" type="int" id="zEventSeverity" >
-5
-</property>
-</object>
 <!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackNovaServiceStatus') -->
 <object id='/zport/dmd/Events/Status/instances/openStackNovaServiceStatus' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
 <property type="string" id="eventClassKey" mode="w" >
@@ -4081,21 +4066,6 @@ A nova service is not running properly
 </property>
 <property type="text" id="resolution" mode="w" >
 Restart the offending service.
-</property>
-</object>
-<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackRestored') -->
-<object id='/zport/dmd/Events/Status/instances/openStackRestored' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
-<property type="string" id="eventClassKey" mode="w" >
-openStackRestored
-</property>
-<property type="int" id="sequence" mode="w" >
-7
-</property>
-<property type="string" id="example" mode="w" >
-OpenStack connectivity restored
-</property>
-<property visible="True" type="int" id="zEventSeverity" >
-0
 </property>
 </object>
 <!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack') -->
