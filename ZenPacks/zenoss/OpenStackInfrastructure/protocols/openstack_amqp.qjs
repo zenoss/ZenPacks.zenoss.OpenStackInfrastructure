@@ -45,6 +45,19 @@
                     "routing_key": "zenoss.openstack.{device}.event.#"
                 }                
             ]
+        },
+        "$OpenStackInboundHeartbeat" : {
+            "name" : "zenoss.queues.openstack.ceilometer.{device}.heartbeat",
+            "durable" : true,
+            "exclusive" : false,
+            "auto_delete" : false,
+            "description" : "Queue for Zenoss collectors to consume messages from Openstack Ceilometer heartbeat",
+            "bindings" : [
+                {
+                    "exchange" : "$OpenStackInboundHeartbeats",
+                    "routing_key": "zenoss.openstack.heartbeat.{device}.#"
+                }
+            ]
         }
     }
 }
