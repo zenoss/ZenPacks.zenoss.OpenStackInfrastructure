@@ -8,7 +8,7 @@
 ##############################################################################
 
 import logging
-log = logging.getLogger('zen.PythonDataSource')
+log = logging.getLogger('zen.OpenStackService')
 
 from Products.ZenHub.HubService import HubService
 from Products.ZenHub.PBDaemon import translateError
