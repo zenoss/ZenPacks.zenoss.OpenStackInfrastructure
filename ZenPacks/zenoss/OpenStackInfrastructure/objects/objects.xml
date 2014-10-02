@@ -8046,6 +8046,7 @@ openStackCeilometerHeartbeat
 12
 </property>
 </object>
+<<<<<<< Updated upstream
 <!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackFailure') -->
 <object id='/zport/dmd/Events/Status/instances/openStackFailure' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
 <property type="string" id="eventClassKey" mode="w" >
@@ -8061,6 +8062,8 @@ OpenStack failure: reason
 5
 </property>
 </object>
+=======
+>>>>>>> Stashed changes
 <!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackNovaServiceStatus') -->
 <object id='/zport/dmd/Events/Status/instances/openStackNovaServiceStatus' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
 <property type="string" id="eventClassKey" mode="w" >
@@ -8239,6 +8242,9 @@ False
 <property visible="True" type="string" id="excludeRegex" >
 \b(vim|tail|grep|tar|cat|bash)\b
 </property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 </object>
 <object id='ceilometer-agent-compute' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -8255,6 +8261,9 @@ False
 </property>
 <property type="int" id="sequence" mode="w" >
 2
+</property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
 </property>
 <property visible="True" type="string" id="excludeRegex" >
 \b(vim|tail|grep|tar|cat|bash)\b
@@ -8279,6 +8288,9 @@ False
 <property visible="True" type="string" id="excludeRegex" >
 \b(vim|tail|grep|tar|cat|bash)\b
 </property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 </object>
 <object id='ceilometer-alarm-evaluator' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -8295,6 +8307,9 @@ False
 </property>
 <property type="int" id="sequence" mode="w" >
 4
+</property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
 </property>
 <property visible="True" type="string" id="excludeRegex" >
 \b(vim|tail|grep|tar|cat|bash)\b
@@ -8319,6 +8334,9 @@ False
 <property visible="True" type="string" id="excludeRegex" >
 \b(vim|tail|grep|tar|cat|bash)\b
 </property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 </object>
 <object id='ceilometer-api' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -8339,6 +8357,9 @@ False
 <property visible="True" type="string" id="excludeRegex" >
 \b(vim|tail|grep|tar|cat|bash)\b
 </property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 </object>
 <object id='ceilometer-collector' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -8355,6 +8376,9 @@ False
 </property>
 <property type="int" id="sequence" mode="w" >
 7
+</property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
 </property>
 <property visible="True" type="string" id="excludeRegex" >
 \b(vim|tail|grep|tar|cat|bash)\b
@@ -8382,6 +8406,9 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 </object>
 <object id='nova-cert' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -8404,6 +8431,9 @@ False
 </property>
 <property visible="True" type="int" id="zModelerLock" >
 1
+</property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
 </property>
 </object>
 <object id='nova-compute' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
@@ -8428,6 +8458,9 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 </object>
 <object id='nova-conductor' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -8450,6 +8483,9 @@ False
 </property>
 <property visible="True" type="int" id="zModelerLock" >
 1
+</property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
 </property>
 </object>
 <object id='nova-consoleauth' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
@@ -8474,6 +8510,9 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 </object>
 <object id='nova-network' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -8497,6 +8536,9 @@ False
 <property visible="True" type="int" id="zModelerLock" >
 1
 </property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 </object>
 <object id='nova-scheduler' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -8519,6 +8561,9 @@ False
 </property>
 <property visible="True" type="int" id="zModelerLock" >
 1
+</property>
+<property visible="True" type="string" id="excludeRegex" >
+\b(vim|tail|grep|tar|cat|bash)\b
 </property>
 </object>
 </tomanycont>
