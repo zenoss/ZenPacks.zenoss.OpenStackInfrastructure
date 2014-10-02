@@ -423,6 +423,7 @@ from . import schema
 class ZenPack(schema.ZenPack):
     def install(self, app):
         super(ZenPack, self).install(app)
+        self.chmodScripts()
         self.symlinkScripts()
         self.installBinFile('openstack_amqp_config')
 
@@ -433,19 +434,24 @@ class ZenPack(schema.ZenPack):
 
         super(ZenPack, self).remove(app, leaveObjects=leaveObjects)
 
+    def chmodScripts(self):
+        for script in ('poll_openstack.py', 'openstack_amqp_init.py',
+                       'queue_counts.py', 'openstack_helper.py'):
+            os.system('chmod 0755 {0}'.format(self.path(script)))
+
     def symlinkScripts(self):
         for script in ('openstack_amqp_init.py',):
             log.info('Linking %s into $ZENHOME/libexec/' % script)
             script_path = zenPath('libexec', script)
             os.system('ln -sf {0} {1}'.format(
-                self.path(script), script_path))
-            os.system('chmod 0755 {0} {1}'.format(
-                self.path(script), script_path))
+                self.path('openstack_amqp_init.py'), script_path))
 
     def removeScriptSymlinks(self):
-        for script in ('openstack_amqp_init.py',):
-            log.info('Removing %s link from $ZENHOME/libexec/' % script)
-            os.system('rm -f {0}'.format(zenPath('libexec', script)))
+        for script in ('poll_openstack.py', 'openstack_amqp_init.py',
+                       'queue_counts.py', 'openstack_helper.py',):
+            if os.path.exists(zenPath('libexec', script)):
+                log.info('Removing %s link from $ZENHOME/libexec/' % script)
+                os.system('rm -f {0}'.format(zenPath('libexec', script)))
 
 
 # Patch last to avoid import recursion problems.
