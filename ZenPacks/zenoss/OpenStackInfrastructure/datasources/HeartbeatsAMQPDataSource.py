@@ -11,16 +11,17 @@ import logging
 log = logging.getLogger('zen.OpenStack.HeartbeatsAMQP')
 
 import json
-from time import time, strftime, localtime
+from time import time
 from functools import partial
 
 from twisted.internet import defer
-from twisted.internet.defer import inlineCallbacks
+from twisted.internet.defer import inlineCallbacks, returnValue
 
 import zope.component
-from zope.component import adapts, getUtility
+from zope.component import adapts, getUtility, queryUtility
 from zope.interface import implements
 
+from Products.ZenCollector.interfaces import ICollector
 from Products.Five import zcml
 from Products.ZenEvents import ZenEventClasses
 import Products.ZenMessaging.queuemessaging
@@ -80,9 +81,8 @@ class HeartbeatsAMQPDataSourceInfo(PythonDataSourceInfo):
 
 # Persistent state
 amqp_client = {}                    # amqp_client[device.id] = AMQClient object
-heartbeats = {}
-MAX_MSG_RECORDS = 11                # for 10 diffs
-MAX_TIME_LAPSE = 3600
+last_heard_heartbeats = {}
+MAX_TIME_LAPSE = 300
 
 
 class HeartbeatsAMQPDataSourcePlugin(PythonDataSourcePlugin):
@@ -107,12 +107,20 @@ class HeartbeatsAMQPDataSourcePlugin(PythonDataSourcePlugin):
         return {}
 
     @inlineCallbacks
+    def getService(self, service_name):
+        collector = zope.component.queryUtility(ICollector)
+        service = yield collector.getService(service_name)
+        returnValue(service)
+
+    @inlineCallbacks
     def collect(self, config):
         log.debug("Collect for OpenStack AMQP Heartbeats (%s)" % config.id)
 
-        ds = config.datasources[0]
-        hostnames = ds.expected_ceilometer_heartbeats[0]['hostnames']
-        processes = ds.expected_ceilometer_heartbeats[0]['processes']
+        service = yield self.getService('ZenPacks.zenoss.OpenStackInfrastructure.services.OpenStackService')
+        expected_heartbeats = yield service.callRemote('expected_ceilometer_heartbeats', config.id)
+
+        hostnames = expected_heartbeats[0]['hostnames']
+        processes = expected_heartbeats[0]['processes']
 
         # During the first collect run, we spin up the AMQP listener.  After
         # that, no active collecting is done in the collect() method.
@@ -143,42 +151,47 @@ class HeartbeatsAMQPDataSourcePlugin(PythonDataSourcePlugin):
         data = self.new_data()
         device_id = config.id
 
-        for host in heartbeats.keys():
+        for host in last_heard_heartbeats.keys():
             if host not in hostnames:
                 continue
 
-            for proc in heartbeats[host].keys():
+            for proc in last_heard_heartbeats[host].keys():
                 if proc not in processes:
                     continue
 
-                # time diffs in lastheard
-                diffs = [(heartbeats[host][proc][i]['lastheard'] - \
-                           heartbeats[host][proc][i - 1]['lastheard']) \
-                          for i in xrange(1, len(heartbeats[host][proc]))]
-                # any diffs > MAX_TIME_LAPSE?
-                if len([diff for diff in diffs if diff > MAX_TIME_LAPSE]) > 0:
+                # diff > MAX_TIME_LAPSE?
+                time_diff = time() - \
+                    last_heard_heartbeats[host][proc]['lastheard']
+                if time_diff > MAX_TIME_LAPSE:
 
                     evt = {
                         'device': device_id,
                         'severity': ZenEventClasses.Warning,
-                        'eventKey': '',
-                        'summary': 'Timelapse between heartbeats from '+ \
+                        'eventKey': host + '_' + proc,
+                        'summary': 'Have not heard from '+ \
                                    proc + ' on ' + host + \
-                                   ' is more than ' + \
-                                   str(MAX_TIME_LAPSE) + ' seconds',
-                        'eventClassKey': 'openstackHeartbeat_' + \
-                                         host + '_' + proc,
+                                   ' for more than ' + \
+                                   str(MAX_TIME_LAPSE) + ' seconds. ' + \
+                                   'Please check its status. ' + \
+                                   'Restart it if necessary',
+                        'eventClassKey': 'openStackCeilometerHeartbeat',
                     }
 
                     from pprint import pformat
-                    log.debug(pformat(evt))
+                    log.error(pformat(evt))
 
-                    data['events'].append(evt)
+                else:
 
-                    log.warn('Timelapse between heartbeats from ' + \
-                             proc + ' on ' + host + \
-                             ' is more than ' + \
-                                str(MAX_TIME_LAPSE) + ' seconds')
+                    evt = {
+                        'device': device_id,
+                        'severity': ZenEventClasses.Clear,
+                        'eventKey': host + '_' + proc,
+                        'summary': 'Clear event for '+ \
+                                   proc + ' on ' + host,
+                        'eventClassKey': 'openStackCeilometerHeartbeat',
+                    }
+
+                data['events'].append(evt)
 
         if len(data['events']):
             data['events'].append({
@@ -192,26 +205,21 @@ class HeartbeatsAMQPDataSourcePlugin(PythonDataSourcePlugin):
         defer.returnValue(data)
 
     def processMessage(self, amqp, message):
-        # add neartbeats to messages on per host, per process base
+        # add neartbeats to last_heard_heartbeats on per host, per process base
         msg = {}
         try:
             contentbody = json.loads(message.content.body)
             hostname = contentbody['hostname']
             processname = contentbody['processname']
 
-            if hostname not in heartbeats:
-                heartbeats[hostname] = {}
-            if processname not in heartbeats[hostname]:
-                heartbeats[hostname][processname] = []
+            if hostname not in last_heard_heartbeats:
+                last_heard_heartbeats[hostname] = {}
 
             msg['exchange'] = message.fields[3]
             msg['routing_key'] = message.fields[4]
-            msg['lastheard'] = time()               # use zenoss side timer
+            msg['lastheard'] = contentbody['timestamp']
 
-            # keep no more than MAX_MSG_RECORDS records
-            while len(heartbeats[hostname][processname]) > (MAX_MSG_RECORDS - 1):
-                heartbeats[hostname][processname].pop(0)
-            heartbeats[hostname][processname].append(msg)
+            last_heard_heartbeats[hostname][processname] = msg
 
             amqp.acknowledge(message)
 
@@ -227,8 +235,8 @@ class HeartbeatsAMQPDataSourcePlugin(PythonDataSourcePlugin):
             'device': config.id,
             'summary': errmsg,
             'severity': ZenEventClasses.Error,
-            'eventKey': 'openstackCeilometerHeartbeatAMQPDataSourceCollection',
-            'eventClassKey': 'HeartbeatAMQPDataSourceFailure',
+            'eventKey': 'AMQPDataSourceCollection',
+            'eventClassKey': 'openStackCeilometerHeartbeat',
             })
 
         return data

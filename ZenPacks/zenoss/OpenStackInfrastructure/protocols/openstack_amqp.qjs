@@ -48,9 +48,9 @@
         },
         "$OpenStackInboundHeartbeat" : {
             "name" : "zenoss.queues.openstack.ceilometer.{device}.heartbeat",
-            "durable" : true,
-            "exclusive" : false,
-            "auto_delete" : false,
+            "durable" : false,
+            "exclusive" : true,
+            "auto_delete" : true,
             "description" : "Queue for Zenoss collectors to consume messages from Openstack Ceilometer heartbeat",
             "bindings" : [
                 {
