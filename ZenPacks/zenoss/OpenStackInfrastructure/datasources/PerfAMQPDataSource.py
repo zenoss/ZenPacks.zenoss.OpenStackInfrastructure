@@ -177,7 +177,7 @@ class PerfAMQPDataSourcePlugin(PythonDataSourcePlugin):
             amqp = AMQPFactory(self._amqpConnectionInfo, self._queueSchema)
             queue = self._queueSchema.getQueue('$OpenStackInboundPerf', replacements={'device': config.id})
             log.info("Listening on queue: %s with binding to routing key %s" % (queue.name, queue.bindings['$OpenStackInbound'].routing_key))
-            yield amqp.listen(queue, callback=partial(self.processMessage, config.id))
+            yield amqp.listen(queue, callback=partial(self.processMessage, amqp, config.id))
             amqp_client[config.id] = amqp
 
             # Give time for some of the existing messages to be processed during
@@ -204,7 +204,7 @@ class PerfAMQPDataSourcePlugin(PythonDataSourcePlugin):
 
         defer.returnValue(data)
 
-    def processMessage(self, device_id, message):
+    def processMessage(self, amqp, device_id, message):
         try:
             value = json.loads(message.content.body)
             log.debug(value)
@@ -235,6 +235,8 @@ class PerfAMQPDataSourcePlugin(PythonDataSourcePlugin):
 
             else:
                 log.error("Discarding unrecognized message type: %s" % value['type'])
+
+            amqp.acknowledge(message)
 
         except Exception, e:
             log.error("Exception while processing ceilometer message: %r", e)
