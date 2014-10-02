@@ -94,25 +94,27 @@ CFG = zenpacklib.ZenPackSpec(
             'base': zenpacklib.Device,
             'meta_type': 'OpenStackInfrastructureEndpoint',
             'label': 'OpenStack Endpoint',
-            'order': 1,            
-            'impacts': ['hosts'],
+            'order': 1,
             'dynamicview_views': ['service_view', 'openstack_view'],
             'dynamicview_group': 'Devices',
-            'dynamicview_relations': {'openstack_link': ['region']}
+            'dynamicview_relations': {
+                'openstack_link': ['region'],
+                'impacts': ['hosts']
+            }
         },
 
         'KeystoneEndpoint': {
             'base': 'Endpoint',
             'meta_type': 'OpenStackInfrastructureKeystoneEndpoint',
             'label': 'Keystone Endpoint',
-            'order': 2,            
+            'order': 2,
         },
 
         'NovaEndpoint': {
             'base': 'Endpoint',
             'meta_type': 'OpenStackInfrastructureNovaEndpoint',
             'label': 'Nova Endpoint',
-            'order': 3,            
+            'order': 3,
         },
 
         # Component Base Types #######################################
@@ -130,7 +132,7 @@ CFG = zenpacklib.ZenPackSpec(
             'filter_display': False,
             'properties': {
                 'proxy_device': {'label': 'Device',
-#                                 'type_': 'entity',
+                                 # 'type_': 'entity',
                                  'renderer': 'Zenoss.render.openstack_uid_renderer',  # workaround to link to a different device
                                  'api_only': True,
                                  'api_backendtype': 'method'}
@@ -145,8 +147,10 @@ CFG = zenpacklib.ZenPackSpec(
                 'parentOrg': {'label': 'Parent', 'order': 1.0},
                 'childOrgs': {'label': 'Children', 'order': 1.1},
             },
-            'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'],
-            'impacts': ['parentOrg']
+            # these are inherited by child classes:
+            #   'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'],
+            #   'impacts': ['parentOrg']
+
         },
 
         'SoftwareComponent': {
@@ -167,10 +171,10 @@ CFG = zenpacklib.ZenPackSpec(
                 'operStatus': {'label': 'State',   'order': 3,
                                'renderer': 'Zenoss.render.openstack_ServiceOperStatus'}
             },
-            'impacted_by': ['hostedOn', 'osprocess_component'],
-            'impacts': ['orgComponent'],
-            'dynamicview_views': ['service_view', 'openstack_view'],
-            'dynamicview_relations': {'openstack_link': ['orgComponent']}
+
+            # these are inherited by child classes:
+            #   'impacted_by': ['hostedOn', 'osprocess_component']
+            #   'impacts': ['orgComponent']
         },
 
         'LogicalComponent': {
@@ -188,9 +192,12 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'tenantId':   {'grid_display': False,
                                'label': 'Tenant ID'},
-                'description': { 'label': 'Description'},
+                'description': {'label': 'Description'},
             },
-            'impacted_by': ['instances']
+            'dynamicview_views': ['service_view'],
+            'dynamicview_relations': {
+                'impacted_by': ['instances']
+            }
         },
 
         'Flavor': {
@@ -258,7 +265,7 @@ CFG = zenpacklib.ZenPackSpec(
                                         'grid_display': False,
                                         'index_type': 'field',
                                         'index_scope': 'global'},
-                
+
                 # The name this insance is known by within the hypervisor (for instance,
                 # for libvirt, it would be something like 'instance-00000001')
                 'hypervisorInstanceName': {'label': 'Hypervisor Instance Name',
@@ -281,8 +288,11 @@ CFG = zenpacklib.ZenPackSpec(
                 'flavor':     {'label_width': 50, 'content_width': 50},
                 'image':      {'label_width': 50, 'content_width': 50},
             },
-            'impacted_by': ['hypervisor', 'vnics'],
-            'impacts': ['guestDevice', 'tenant']
+            'dynamicview_views': ['service_view'],
+            'dynamicview_relations': {
+                'impacted_by': ['hypervisor', 'vnics'],
+                'impacts': ['guestDevice', 'tenant']
+            }
 
             # Note: By (nova) design, hostId is a hash of the actual underlying host and project, and
             # is designed to allow users of a specific project to tell if two VMs are on the same host, nothing
@@ -299,7 +309,10 @@ CFG = zenpacklib.ZenPackSpec(
                                'index_type': 'field',
                                'index_scope': 'global'}
             },
-            'impacts': ['instance']
+            'dynamicview_views': ['service_view'],
+            'dynamicview_relations': {
+                'impacts': ['instance']
+            }
         },
 
         'Region': {
@@ -307,10 +320,12 @@ CFG = zenpacklib.ZenPackSpec(
             'meta_type': 'OpenStackInfrastructureRegion',
             'label': 'Region',
             'order': 1,
-            'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'], #inherit
-            'impacts': ['parentOrg'],                   #inherit
             'dynamicview_views': ['service_view', 'openstack_view'],
-            'dynamicview_relations': {'openstack_link': ['childOrgs', 'softwareComponents']}
+            'dynamicview_relations': {
+                'openstack_link': ['childOrgs', 'softwareComponents'],
+                'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'],  # inherit
+                'impacts': ['parentOrg'],  # inherit
+            }
         },
 
         'Cell': {
@@ -318,10 +333,12 @@ CFG = zenpacklib.ZenPackSpec(
             'meta_type': 'OpenStackInfrastructureCell',
             'label': 'Cell',
             'order': 3,
-            'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'], #inherit
-            'impacts': ['parentOrg'],                   #inherit            
             'dynamicview_views': ['service_view', 'openstack_view'],
-            'dynamicview_relations': {'openstack_link': ['childOrgs', 'hosts', 'softwareComponents']}
+            'dynamicview_relations': {
+                'openstack_link': ['childOrgs', 'hosts', 'softwareComponents'],
+                'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'],  # inherit
+                'impacts': ['parentOrg'],  # inherit
+            }
         },
 
         'AvailabilityZone': {
@@ -329,10 +346,12 @@ CFG = zenpacklib.ZenPackSpec(
             'meta_type': 'OpenStackInfrastructureAvailabilityZone',
             'label': 'Availability Zone',
             'order': 2,
-            'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'], #inherit
-            'impacts': ['parentOrg'],                   #inherit            
             'dynamicview_views': ['service_view', 'openstack_view'],
-            'dynamicview_relations': {'openstack_link': ['childOrgs', 'hosts', 'softwareComponents']}
+            'dynamicview_relations': {
+                'openstack_link': ['childOrgs', 'hosts', 'softwareComponents'],
+                'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'],  # inherit
+                'impacts': ['parentOrg'],  # inherit
+            }
         },
 
         'Host': {
@@ -352,10 +371,12 @@ CFG = zenpacklib.ZenPackSpec(
                                  'order': 1.0,
                                  'content_width': 150}  # need to fix the default width for render_with_type
             },
-            'impacted_by': ['endpoint', 'proxy_device'],
-            'impacts': ['hypervisor', 'orgComponent', 'hostedSoftware'],
             'dynamicview_views': ['service_view', 'openstack_view'],
-            'dynamicview_relations': {'openstack_link': ['hostedSoftware', 'hypervisor']}
+            'dynamicview_relations': {
+                'openstack_link': ['hostedSoftware', 'hypervisor'],
+                'impacted_by': ['endpoint', 'proxy_device'],
+                'impacts': ['hypervisor', 'orgComponent', 'hostedSoftware'],
+            }
         },
 
         'NovaService': {
@@ -363,9 +384,17 @@ CFG = zenpacklib.ZenPackSpec(
             'meta_type': 'OpenStackInfrastructureNovaService',
             'label': 'Nova Service',
             'order': 7,
-            'impacted_by': ['hostedOn', 'osprocess_component'], #inherit
-            'impacts': ['orgComponent'],  #inherit
-            'dynamicview_views': ['service_view', 'openstack_view'],            
+            'dynamicview_views': ['service_view', 'openstack_view'],
+            'dynamicview_relations': {
+                'impacted_by': ['hostedOn'],  # inherit
+                'impacts': ['orgComponent'],   # inherit
+            },
+
+            # we use a normal impact adaptor for osprocess_component, rather than
+            # dynamicview impacts adaptor, because OSProcess is not part of
+            # service_view, and so will not be exported from DV to impact
+            # currently (ZEN-14579).
+            'impacted_by': ['osprocess_component'],
         },
 
         'NovaApi': {
@@ -373,9 +402,17 @@ CFG = zenpacklib.ZenPackSpec(
             'meta_type': 'OpenStackInfrastructureNovaApi',
             'label': 'Nova API',
             'order': 7.1,
-            'impacted_by': ['hostedOn', 'osprocess_component'], #inherit
-            'impacts': ['orgComponent'],  #inherit
             'dynamicview_views': ['service_view', 'openstack_view'],
+            'dynamicview_relations': {
+                'impacted_by': ['hostedOn'],  # inherit
+                'impacts': ['orgComponent'],   # inherit
+            },
+
+            # we use a normal impact adaptor for osprocess_component, rather than
+            # dynamicview impacts adaptor, because OSProcess is not part of
+            # service_view, and so will not be exported from DV to impact
+            # currently (ZEN-14579).
+            'impacted_by': ['osprocess_component'],            
         },
 
         'NovaDatabase': {
@@ -383,9 +420,17 @@ CFG = zenpacklib.ZenPackSpec(
             'meta_type': 'OpenStackInfrastructureNovaDatabase',
             'label': 'NovaDatabase',
             'order': 7.2,
-            'impacted_by': ['hostedOn', 'osprocess_component'], #inherit
-            'impacts': ['orgComponent'],  #inherit
-            'dynamicview_views': ['service_view', 'openstack_view']
+            'dynamicview_views': ['service_view', 'openstack_view'],
+            'dynamicview_relations': {
+                'impacted_by': ['hostedOn'],  # inherit
+                'impacts': ['orgComponent'],   # inherit
+            },
+
+            # we use a normal impact adaptor for osprocess_component, rather than
+            # dynamicview impacts adaptor, because OSProcess is not part of
+            # service_view, and so will not be exported from DV to impact
+            # currently (ZEN-14579).
+            'impacted_by': ['osprocess_component'],
         },
 
         'Hypervisor': {
@@ -399,9 +444,11 @@ CFG = zenpacklib.ZenPackSpec(
                 'hostfqdn':          {'grid_display': False,
                                       'label': 'FQDN'},
             },
-            'impacts': ['instances'],
-            'impacted_by': ['host'],
-            'dynamicview_views': ['service_view', 'openstack_view']
+            'dynamicview_views': ['service_view', 'openstack_view'],
+            'dynamicview_relations': {
+                'impacts': ['instances'],
+                'impacted_by': ['host'],
+            }
         },
 
     },
