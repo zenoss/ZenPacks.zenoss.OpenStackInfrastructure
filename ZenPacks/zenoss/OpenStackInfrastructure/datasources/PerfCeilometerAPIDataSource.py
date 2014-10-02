@@ -159,7 +159,7 @@ class PerfCeilometerAPIDataSourcePlugin(PythonDataSourcePlugin):
                         'zOpenStackAuthUrl',
                         'zPerfCeilometerAPIUrl',
                         'zOpenStackProjectId',
-                        'zOpenStackInfrastructureRegionName',
+                        'zOpenStackRegionName',
                         'resourceId')
 
     @classmethod

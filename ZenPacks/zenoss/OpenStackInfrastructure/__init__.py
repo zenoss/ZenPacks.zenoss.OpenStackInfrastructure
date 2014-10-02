@@ -50,12 +50,14 @@ CFG = zenpacklib.ZenPackSpec(
         'DEFAULTS': {'category': 'OpenStack',
                      'type': 'string'},
 
-        'zOpenStackInsecure':         {'type': 'boolean', 'default': False},
-        'zOpenStackProjectId':        {},
-        'zOpenStackAuthUrl':          {},
-        'zOpenStackInfrastructureRegionName':       {},
-        'zOpenStackInfrastructureHostDeviceClass':  {'default': '/Server/SSH/Linux/NovaHost'},
-        'zOpenStackInfrastructureNovaApiHosts':     {'type': 'lines'},
+        # Pre-defined by ZenPacks.zenoss.OpenStack
+        # 'zOpenStackAuthUrl':          {},
+        # 'zOpenStackProjectId':        {},
+        # 'zOpenStackRegionName':       {},
+
+
+        'zOpenStackHostDeviceClass':  {'default': '/Server/SSH/Linux/NovaHost'},
+        'zOpenStackNovaApiHosts':     {'type': 'lines'},
         'zOpenStackExtraHosts':       {'type': 'lines'},
         'zOpenStackCeilometerUrl':    {},
     },
