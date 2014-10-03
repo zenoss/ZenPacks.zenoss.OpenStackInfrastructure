@@ -1588,9 +1588,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='flavor_total__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='imageActiveCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1599,9 +1600,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='image_active__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='imageFailedCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1610,9 +1612,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='image_failed__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='imageOtherCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1621,9 +1624,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='image_other__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='imagePreparingCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1632,9 +1636,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='image_preparing__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='imageQueuedCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1643,9 +1648,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='image_queued__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='imageSavingCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1654,9 +1660,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='image_saving__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='imageTotalCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1665,9 +1672,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='image_total__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='imageUnknownCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1676,9 +1684,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='image_unknown__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='serverActiveCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1687,9 +1696,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='server_active__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='serverBuildCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1698,9 +1708,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='server_build__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='serverDeleteIpCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1709,9 +1720,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='server_delete__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='serverHardRebootCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1720,9 +1732,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='server_hard_reboot__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='serverOtherCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1731,9 +1744,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='server_other__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='serverPasswordCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1742,9 +1756,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='server_password__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='serverPrepResizeCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1753,9 +1768,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='server_prep_resize__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='serverQueueResizeCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1764,9 +1780,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='server_queue_resize__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='serverRebootCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1775,9 +1792,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='server_reboot__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='serverRebuildCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1786,9 +1804,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='server_rebuild__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='serverRescueCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1797,9 +1816,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='server_rescue__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='serverResizeCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1808,9 +1828,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='server_resize__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='serverSuspendedCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1819,9 +1840,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='server_suspended__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='serverTotalCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1830,9 +1852,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='server_total__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='serverUnknownCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1841,9 +1864,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='server_unknown__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 <object id='serverVerifyResizeCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1852,9 +1876,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='server_verify_resize__count' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 </tomanycont>
 </object>
@@ -1891,9 +1916,6 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
 </object>
 <object id='perfQueueCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
@@ -1901,9 +1923,6 @@ GAUGE
 </property>
 <property type="boolean" id="isrow" mode="w" >
 True
-</property>
-<property type="string" id="rrdmin" mode="w" >
-0
 </property>
 </object>
 </tomanycont>
@@ -2880,9 +2899,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='cpu__pct' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 </tomanycont>
 </object>
@@ -2916,9 +2936,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='disk_read__bytessec' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 </tomanycont>
 </object>
@@ -2952,9 +2973,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='disk_reads__persec' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 </tomanycont>
 </object>
@@ -2988,9 +3010,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='disk_write__bytessec' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 </tomanycont>
 </object>
@@ -3024,9 +3047,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='disk_writes__persec' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 </tomanycont>
 </object>
@@ -3324,9 +3348,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='if_received__bytessec' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 </tomanycont>
 </object>
@@ -3360,9 +3385,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='if_received_packets__persec' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 </tomanycont>
 </object>
@@ -3396,9 +3422,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='if_sent__bytessec' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 </tomanycont>
 </object>
@@ -3432,9 +3459,10 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
-<property type="string" id="rrdmin" mode="w" >
-0
-</property>
+<tomanycont id='aliases'>
+<object id='if_sent_packets__persec' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 </tomanycont>
 </object>
@@ -4202,6 +4230,9 @@ ceilometer-agent-central
 <property type="string" id="regex" mode="w" >
 ceilometer-agent-central
 </property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
 </property>
@@ -4209,10 +4240,7 @@ False
 False
 </property>
 <property type="int" id="sequence" mode="w" >
-0
-</property>
-<property visible="True" type="string" id="excludeRegex" >
-\b(vim|tail|grep|tar|cat|bash)\b
+1
 </property>
 </object>
 <object id='ceilometer-agent-compute' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
@@ -4222,145 +4250,8 @@ ceilometer-agent-compute
 <property type="string" id="regex" mode="w" >
 ceilometer-agent-compute
 </property>
-<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
-False
-</property>
-<property type="boolean" id="ignoreParameters" mode="w" >
-False
-</property>
-<property type="int" id="sequence" mode="w" >
-0
-</property>
-<property visible="True" type="string" id="excludeRegex" >
+<property type="string" id="excludeRegex" mode="w" >
 \b(vim|tail|grep|tar|cat|bash)\b
-</property>
-</object>
-<object id='ceilometer-agent-notification' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
-<property type="string" id="name" mode="w" >
-ceilometer-agent-notification
-</property>
-<property type="string" id="regex" mode="w" >
-ceilometer-agent-notification
-</property>
-<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
-False
-</property>
-<property type="boolean" id="ignoreParameters" mode="w" >
-False
-</property>
-<property type="int" id="sequence" mode="w" >
-0
-</property>
-<property visible="True" type="string" id="excludeRegex" >
-\b(vim|tail|grep|tar|cat|bash)\b
-</property>
-</object>
-<object id='ceilometer-alarm-evaluator' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
-<property type="string" id="name" mode="w" >
-ceilometer-alarm-evaluator
-</property>
-<property type="string" id="regex" mode="w" >
-ceilometer-alarm-evaluator
-</property>
-<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
-False
-</property>
-<property type="boolean" id="ignoreParameters" mode="w" >
-False
-</property>
-<property type="int" id="sequence" mode="w" >
-0
-</property>
-<property visible="True" type="string" id="excludeRegex" >
-\b(vim|tail|grep|tar|cat|bash)\b
-</property>
-</object>
-<object id='ceilometer-alarm-notifier' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
-<property type="string" id="name" mode="w" >
-ceilometer-alarm-notifier
-</property>
-<property type="string" id="regex" mode="w" >
-ceilometer-alarm-notifier
-</property>
-<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
-False
-</property>
-<property type="boolean" id="ignoreParameters" mode="w" >
-False
-</property>
-<property type="int" id="sequence" mode="w" >
-0
-</property>
-<property visible="True" type="string" id="excludeRegex" >
-\b(vim|tail|grep|tar|cat|bash)\b
-</property>
-</object>
-<object id='ceilometer-api' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
-<property type="string" id="name" mode="w" >
-ceilometer-api
-</property>
-<property type="string" id="regex" mode="w" >
-ceilometer-api
-</property>
-<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
-False
-</property>
-<property type="boolean" id="ignoreParameters" mode="w" >
-False
-</property>
-<property type="int" id="sequence" mode="w" >
-0
-</property>
-<property visible="True" type="string" id="excludeRegex" >
-\b(vim|tail|grep|tar|cat|bash)\b
-</property>
-</object>
-<object id='ceilometer-collector' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
-<property type="string" id="name" mode="w" >
-ceilometer-collector
-</property>
-<property type="string" id="regex" mode="w" >
-ceilometer-collector
-</property>
-<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
-False
-</property>
-<property type="boolean" id="ignoreParameters" mode="w" >
-False
-</property>
-<property type="int" id="sequence" mode="w" >
-0
-</property>
-<property visible="True" type="string" id="excludeRegex" >
-\b(vim|tail|grep|tar|cat|bash)\b
-</property>
-</object>
-<object id='nova-api' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
-<property type="string" id="name" mode="w" >
-nova-api
-</property>
-<property type="string" id="regex" mode="w" >
-nova-api
-</property>
-<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
-False
-</property>
-<property type="boolean" id="ignoreParameters" mode="w" >
-False
-</property>
-<property type="int" id="sequence" mode="w" >
-8
-</property>
-<property visible="True" type="string" id="excludeRegex" >
-\b(vim|tail|grep|tar|cat|bash)\b
-</property>
-</object>
-<object id='nova-cert' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
-<property type="string" id="name" mode="w" >
-nova-cert
-</property>
-<property type="string" id="regex" mode="w" >
-nova-cert
 </property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
@@ -4371,36 +4262,16 @@ False
 <property type="int" id="sequence" mode="w" >
 2
 </property>
-<property visible="True" type="string" id="excludeRegex" >
-\b(vim|tail|grep|tar|cat|bash)\b
-</property>
 </object>
-<object id='nova-compute' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<object id='ceilometer-agent-notification' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
-nova-compute
+ceilometer-agent-notification
 </property>
 <property type="string" id="regex" mode="w" >
-nova-compute
+ceilometer-agent-notification
 </property>
-<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
-False
-</property>
-<property type="boolean" id="ignoreParameters" mode="w" >
-False
-</property>
-<property type="int" id="sequence" mode="w" >
-7
-</property>
-<property visible="True" type="string" id="excludeRegex" >
+<property type="string" id="excludeRegex" mode="w" >
 \b(vim|tail|grep|tar|cat|bash)\b
-</property>
-</object>
-<object id='nova-conductor' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
-<property type="string" id="name" mode="w" >
-nova-conductor
-</property>
-<property type="string" id="regex" mode="w" >
-nova-conductor
 </property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
@@ -4411,16 +4282,16 @@ False
 <property type="int" id="sequence" mode="w" >
 3
 </property>
-<property visible="True" type="string" id="excludeRegex" >
-\b(vim|tail|grep|tar|cat|bash)\b
-</property>
 </object>
-<object id='nova-consoleauth' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<object id='ceilometer-alarm-evaluator' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
-nova-consoleauth
+ceilometer-alarm-evaluator
 </property>
 <property type="string" id="regex" mode="w" >
-nova-consoleauth
+ceilometer-alarm-evaluator
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
 </property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
@@ -4431,16 +4302,16 @@ False
 <property type="int" id="sequence" mode="w" >
 4
 </property>
-<property visible="True" type="string" id="excludeRegex" >
-\b(vim|tail|grep|tar|cat|bash)\b
-</property>
 </object>
-<object id='nova-network' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<object id='ceilometer-alarm-notifier' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
-nova-network
+ceilometer-alarm-notifier
 </property>
 <property type="string" id="regex" mode="w" >
-nova-network
+ceilometer-alarm-notifier
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
 </property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
@@ -4451,16 +4322,16 @@ False
 <property type="int" id="sequence" mode="w" >
 5
 </property>
-<property visible="True" type="string" id="excludeRegex" >
-\b(vim|tail|grep|tar|cat|bash)\b
-</property>
 </object>
-<object id='nova-scheduler' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<object id='ceilometer-api' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
-nova-scheduler
+ceilometer-api
 </property>
 <property type="string" id="regex" mode="w" >
-nova-scheduler
+ceilometer-api
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
 </property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
@@ -4471,8 +4342,165 @@ False
 <property type="int" id="sequence" mode="w" >
 6
 </property>
-<property visible="True" type="string" id="excludeRegex" >
+</object>
+<object id='ceilometer-collector' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+ceilometer-collector
+</property>
+<property type="string" id="regex" mode="w" >
+ceilometer-collector
+</property>
+<property type="string" id="excludeRegex" mode="w" >
 \b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+7
+</property>
+</object>
+<object id='nova-api' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+nova-api
+</property>
+<property type="string" id="regex" mode="w" >
+nova-api
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+15
+</property>
+</object>
+<object id='nova-cert' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+nova-cert
+</property>
+<property type="string" id="regex" mode="w" >
+nova-cert
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+8
+</property>
+</object>
+<object id='nova-compute' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+nova-compute
+</property>
+<property type="string" id="regex" mode="w" >
+nova-compute
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+13
+</property>
+</object>
+<object id='nova-conductor' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+nova-conductor
+</property>
+<property type="string" id="regex" mode="w" >
+nova-conductor
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+9
+</property>
+</object>
+<object id='nova-consoleauth' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+nova-consoleauth
+</property>
+<property type="string" id="regex" mode="w" >
+nova-consoleauth
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+10
+</property>
+</object>
+<object id='nova-network' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+nova-network
+</property>
+<property type="string" id="regex" mode="w" >
+nova-network
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+11
+</property>
+</object>
+<object id='nova-scheduler' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+nova-scheduler
+</property>
+<property type="string" id="regex" mode="w" >
+nova-scheduler
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+12
 </property>
 </object>
 </tomanycont>
