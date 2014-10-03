@@ -1702,7 +1702,15 @@ class ClassSpec(Spec):
         })
 
         for spec in self.containing_components:
-            attr = relname_from_classname(spec.name)
+            attr = None
+            for rel,spec in self.relationships.items():
+               if spec.remote_classname == spec.name:
+                   attr = rel
+                   continue
+
+            if not attr:
+                attr = relname_from_classname(spec.name)
+
             attributes[attr] = RelationshipInfoProperty(attr)
 
         for spec in self.inherited_properties().itervalues():
@@ -1779,49 +1787,42 @@ class ClassSpec(Spec):
         if not self.dynamicview_views:
             return
 
-        if self.impacts or self.impacted_by or self.dynamicview_views:
-            GSM.registerAdapter(
-                DynamicViewRelatable,
-                (self.model_class,),
-                IRelatable)
+        GSM.registerAdapter(
+            DynamicViewRelatable,
+            (self.model_class,),
+            IRelatable)
 
-            GSM.registerSubscriptionAdapter(
-                DynamicViewRelationsProvider,
-                required=(self.model_class,),
-                provided=IRelationsProvider)
+        GSM.registerSubscriptionAdapter(
+            DynamicViewRelationsProvider,
+            required=(self.model_class,),
+            provided=IRelationsProvider)
 
-            dvm = DynamicViewMappings()
+        dvm = DynamicViewMappings()
 
-            groupName = self.model_class.class_dynamicview_group
-            weight = 1000 + (self.order * 100)
-            icon_url = getattr(self, 'icon_url', '/zport/dmd/img/icons/noicon.png')
+        groupName = self.model_class.class_dynamicview_group
+        weight = 1000 + (self.order * 100)
+        icon_url = getattr(self, 'icon_url', '/zport/dmd/img/icons/noicon.png')
 
-            # Make sure the named utility is also registered.  It seems that
-            # during unit tests, it may not be, even if the mapping is still
-            # present.
-            group = GSM.queryUtility(IGroup, groupName)
-            if not group:
-                group = BaseGroup(groupName, weight, None, icon_url)
-                GSM.registerUtility(group, IGroup, groupName)
+        # Make sure the named utility is also registered.  It seems that
+        # during unit tests, it may not be, even if the mapping is still
+        # present.
+        group = GSM.queryUtility(IGroup, groupName)
+        if not group:
+            group = BaseGroup(groupName, weight, None, icon_url)
+            GSM.registerUtility(group, IGroup, groupName)
 
-            for viewName in self.dynamicview_views:
-                if groupName not in dvm.getGroupNames(viewName):
-                    dvm.addMapping(
-                        viewName=viewName,
-                        groupName=group.name,
-                        weight=group.weight,
-                        icon=group.icon)
+        for viewName in self.dynamicview_views:
+            if groupName not in dvm.getGroupNames(viewName):
+                dvm.addMapping(
+                    viewName=viewName,
+                    groupName=group.name,
+                    weight=group.weight,
+                    icon=group.icon)
 
     def register_impact_adapters(self):
         """Register Impact adapters."""
 
         if not IMPACT_INSTALLED:
-            return
-
-        if DYNAMICVIEW_INSTALLED and self.dynamicview_views:
-            # the DV impact relationships will be adapted to impact
-            # automatically (by DSVRelationshipProvider), so we don't need
-            # specific impact adapters.
             return
 
         if self.impacts or self.impacted_by:
@@ -2378,6 +2379,9 @@ class ClassRelationshipSpec(Spec):
             return {}
 
         schemas = {}
+
+        if not self.details_display:
+            return {}
 
         if imported_class:
             remote_spec = imported_class
@@ -3074,7 +3078,6 @@ if IMPACT_INSTALLED:
             """
             provider = self.relationship_provider
             myguid = IGlobalIdentifier(self.adapted).getGUID()
-
             impacted_by = getattr(self.adapted, 'impacted_by', [])
             if impacted_by:
                 for methodname in impacted_by:
@@ -3152,20 +3155,6 @@ if DYNAMICVIEW_INSTALLED:
         def relations(self, type=TAG_ALL):
             target = IRelatable(self._adapted)
 
-            if type in (TAG_ALL, TAG_IMPACTED_BY):
-                impacted_by = getattr(self._adapted, 'impacted_by', [])
-                if impacted_by:
-                    for methodname in impacted_by:
-                        for impactor in self.get_remote_relatables(methodname):
-                            yield BaseRelation(target, impactor, TAG_IMPACTED_BY)
-
-            if type in (TAG_ALL, TAG_IMPACTS):
-                impacts = getattr(self._adapted, 'impacts', [])
-                if impacts:
-                    for methodname in impacts:
-                        for impactee in self.get_remote_relatables(methodname):
-                            yield BaseRelation(target, impactee, TAG_IMPACTS)
-
             for tag in (TAG_ALL, type):
                 relations = getattr(self._adapted, 'dynamicview_relations', {})
                 for methodname in relations.get(tag, []):
@@ -3194,45 +3183,6 @@ if DYNAMICVIEW_INSTALLED:
             except TypeError:
                 yield IRelatable(r)
 
-if DYNAMICVIEW_INSTALLED and IMPACT_INSTALLED and \
-   not hasattr(DSVRelationshipProvider, '_dvs_all_impact_relationships'):
-    DSVRelationshipProvider._dvs_all_impact_relationships = True
-
-    # Modify the impact zenpack's DSVRelationshipProvider adapter to include
-    # all impact relationships from Dynamic View that are tagged IMPACTS or
-    # IMPACTED_BY, regardless of what groups and views they are in.
-    #
-    # The current version requires that the ends of the relationship edge
-    # be in a group that is in service_view, and while this is OK for
-    # relationships between ZPL-managed components (we place everything into
-    # service_view by default), it can break down with impact relationships to
-    # components outside of this ZenPack (such as OSProcess, for example)
-    # may not meet all of these criteria.
-    #
-    # NOTE:  This is a system wide change, so once a ZPL-enabled zenpack
-    # is installed, the behavior of the mapping from DSV to Impact will
-    # slightly change!
-
-    @monkeypatch('ZenPacks.zenoss.Impact.impactd.relations.DSVRelationshipProvider')
-    def getEdges(self):
-        """
-        Returns an ImpactEdge for every edge determined by looking at DSV
-        """
-        relatable = IRelatable(self._object)
-        relationship_types = (TAG_IMPACTS, TAG_IMPACTED_BY)
-        for relationship_type in relationship_types:
-            for relation in relatable.relations(relationship_type):
-                tags = relation.getTags()
-                try:
-                    if TAG_IMPACTED_BY in tags:
-                        source = self._getGuidByUid(relation.target.id)
-                        target = self._getGuidByUid(relation.source.id)
-                    elif TAG_IMPACTS in tags:
-                        source = self._getGuidByUid(relation.source.id)
-                        target = self._getGuidByUid(relation.target.id)
-                    yield ImpactEdge(source, target, self.relationship_provider)
-                except RelationshipEdgeError:
-                    LOG.warning("error creating relationship for %s" % relation)
 
 # Templates #################################################################
 
