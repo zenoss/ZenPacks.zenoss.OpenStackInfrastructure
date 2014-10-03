@@ -41,8 +41,8 @@ class OpenStackInfrastructure(PythonPlugin):
         'zCommandPassword',
         'zOpenStackProjectId',
         'zOpenStackAuthUrl',
-        'zOpenStackInfrastructureRegionName',
-        'zOpenStackInfrastructureNovaApiHosts',
+        'zOpenStackRegionName',
+        'zOpenStackNovaApiHosts',
         'zOpenStackExtraHosts',
     )
 
@@ -54,7 +54,7 @@ class OpenStackInfrastructure(PythonPlugin):
             device.zCommandPassword,
             device.zOpenStackAuthUrl,
             device.zOpenStackProjectId,
-            device.zOpenStackInfrastructureRegionName)
+            device.zOpenStackRegionName)
 
         keystone_client = KeystoneAPIClient(
             device.zCommandUsername,
@@ -107,12 +107,12 @@ class OpenStackInfrastructure(PythonPlugin):
                     tenantId=tenant['id']
                 )))
 
-        region_id = prepId("region-{0}".format(device.zOpenStackInfrastructureRegionName))
+        region_id = prepId("region-{0}".format(device.zOpenStackRegionName))
         region = ObjectMap(
             modname='ZenPacks.zenoss.OpenStackInfrastructure.Region',
             data=dict(
                 id=region_id,
-                title=device.zOpenStackInfrastructureRegionName
+                title=device.zOpenStackRegionName
             ))
 
         flavors = []
@@ -307,12 +307,12 @@ class OpenStackInfrastructure(PythonPlugin):
 
         log.info("Finding hosts")
         # add any user-specified hosts which we haven't already found.
-        if device.zOpenStackInfrastructureNovaApiHosts:
-            log.info("  Adding zOpenStackInfrastructureNovaApiHosts=%s" % device.zOpenStackInfrastructureNovaApiHosts)
+        if device.zOpenStackNovaApiHosts:
+            log.info("  Adding zOpenStackNovaApiHosts=%s" % device.zOpenStackNovaApiHosts)
         if device.zOpenStackExtraHosts:
             log.info("  Adding zOpenStackExtraHosts=%s" % device.zOpenStackExtraHosts)
 
-        for hostname in device.zOpenStackInfrastructureNovaApiHosts + device.zOpenStackExtraHosts:
+        for hostname in device.zOpenStackNovaApiHosts + device.zOpenStackExtraHosts:
             host_id = prepId("host-{0}".format(hostname))
             hostmap[host_id] = {
                 'hostname': hostname,
@@ -362,16 +362,16 @@ class OpenStackInfrastructure(PythonPlugin):
         # Place it on the user-specified hosts, or also find it if it's
         # in the nova-service list (which we ignored earlier). It should not
         # be, under icehouse, at least, but just in case this changes..)
-        nova_api_hosts = device.zOpenStackInfrastructureNovaApiHosts
+        nova_api_hosts = device.zOpenStackNovaApiHosts
         for service in results['services']:
             if service['binary'] == 'nova-api':
                 if service['host'] not in nova_api_hosts:
                     nova_api_hosts.append(service['host'])
 
         for hostname in nova_api_hosts:
-            title = '{0}@{1} ({2})'.format('nova-api', hostname, device.zOpenStackInfrastructureRegionName)
+            title = '{0}@{1} ({2})'.format('nova-api', hostname, device.zOpenStackRegionName)
             host_id = prepId("host-{0}".format(hostname))
-            nova_api_id = prepId('service-nova-api-{0}-{1}'.format(service['host'], device.zOpenStackInfrastructureRegionName))
+            nova_api_id = prepId('service-nova-api-{0}-{1}'.format(service['host'], device.zOpenStackRegionName))
 
             services.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.NovaApi',

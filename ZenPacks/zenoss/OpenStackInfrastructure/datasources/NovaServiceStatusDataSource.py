@@ -74,7 +74,7 @@ class NovaServiceStatusDataSourceInfo(PythonDataSourceInfo):
 
 class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
     proxy_attributes = (
-        'zOpenStackInfrastructureRegionName',
+        'zOpenStackRegionName',
         'zCommandUsername',
         'zCommandPassword',
         'zOpenStackProjectId',
@@ -109,7 +109,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
             ds0.zCommandPassword,
             ds0.zOpenStackAuthUrl,
             ds0.zOpenStackProjectId,
-            ds0.zOpenStackInfrastructureRegionName)
+            ds0.zOpenStackRegionName)
 
         results = {}
 
