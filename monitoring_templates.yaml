@@ -1,6 +1,6 @@
 # Ceilometer Reference: http://docs.openstack.org/developer/ceilometer/measurements.html
 
-/OpenStack/Infrastructure/OpenStackInfrastructureInstance:
+/OpenStack/Infrastructure/Instance:
   description: "OpenStackInfrastructure: Instance Monitoring"
   targetPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Instance
 
@@ -98,7 +98,7 @@
           format: "%5.2lf"
 
 
-/OpenStack/Infrastructure/OpenStackInfrastructureVnic:
+/OpenStack/Infrastructure/Vnic:
   description: "OpenStackInfrastructure: Vnic Monitoring"
   targetPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Vnic
 
@@ -175,7 +175,7 @@
           dpName: networkOutgoingBytesRate
           format: "%5.2lf"
 
-/OpenStack/Infrastructure/OpenStackInfrastructureEndpoint:
+/OpenStack/Infrastructure/Endpoint:
   description: "OpenStackInfrastructure: Endpoint Monitoring"
   targetPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Endpoint
 
