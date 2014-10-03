@@ -24,6 +24,9 @@ class Host(schema.Host):
     def isControllerNode(self):
         pass
 
+    def proxy_deviceclass_zproperty(self):
+        return 'zOpenStackHostDeviceClass'
+
     def maintain_proxy_device(self):
         self.ensure_proxy_device()
         self.ensure_service_monitoring()
