@@ -26,23 +26,23 @@ service rabbitmq-server restart
 perl -p -i -e 's/\.openvpn//g' /etc/httpd/conf.d/15-horizon_vhost.conf /etc/openstack-dashboard/local_settings
 service httpd  restart
 
+# Install zenoss plugin (provides dispatcher_zenoss)
+sudo pip -q install --force-reinstall https://github.com/zenoss/ceilometer_zenoss/archive/master.zip
+
 # Configure ceilometer
-cp /vagrant/event_definitions.yaml /etc/ceilometer/
+cp /usr/lib/python2.6/site-packages/ceilometer_zenoss/event_definitions.yaml /etc/ceilometer/
 perl -p -i -e 's/#dispatcher=database/dispatcher=database\ndispatcher=zenoss/g' /etc/ceilometer/ceilometer.conf
 openstack-config --set /etc/ceilometer/ceilometer.conf notification store_events True
 openstack-config --set /etc/ceilometer/ceilometer.conf DEFAULT verbose False
 openstack-config --set /etc/ceilometer/ceilometer.conf DEFAULT debug True
 
 # These will need to be tweaked for your specific setup.
-openstack-config --set /etc/ceilometer/ceilometer.conf dispatcher_zenoss zenoss_device packstack
+openstack-config --set /etc/ceilometer/ceilometer.conf dispatcher_zenoss zenoss_device ostack
 openstack-config --set /etc/ceilometer/ceilometer.conf dispatcher_zenoss amqp_hostname 192.168.2.2
 openstack-config --set /etc/ceilometer/ceilometer.conf dispatcher_zenoss amqp_port 5672
 openstack-config --set /etc/ceilometer/ceilometer.conf dispatcher_zenoss amqp_userid zenoss
 openstack-config --set /etc/ceilometer/ceilometer.conf dispatcher_zenoss amqp_password zenoss
 openstack-config --set /etc/ceilometer/ceilometer.conf dispatcher_zenoss amqp_virtual_host /zenoss
-
-# Install zenoss plugin (provides dispatcher_zenoss)
-sudo pip -q install --force-reinstall https://github.com/zenoss/ceilometer_zenoss/archive/master.zip
 
 # bounce ceilometer.
 for e in openstack-ceilometer-alarm-evaluator openstack-ceilometer-alarm-notifier openstack-ceilometer-api openstack-ceilometer-central openstack-ceilometer-collector openstack-ceilometer-compute openstack-ceilometer-notification; do service $e restart; done
