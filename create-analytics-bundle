@@ -1,0 +1,789 @@
+#!/usr/bin/env python
+##############################################################################
+#
+# Copyright (C) Zenoss, Inc. 2014, all rights reserved.
+#
+# This content is made available according to terms specified in
+# License.zenoss under the directory where your Zenoss product is installed.
+#
+##############################################################################
+
+"""Script to create ZenPack Analytics bundle given a device.
+
+Example usage::
+
+    rm -f ZenPacks/zenoss/CiscoUCS/analytics/analytics-bundle.zip ;\
+    ./create-analytics-bundle \
+        --folder="Cisco UCS ZenPack" \
+        --domain="Cisco UCS CIMC Domain" \
+        --device=c220-sim ;\
+    pushd analytics ;\
+    zip -r ../ZenPacks/zenoss/CiscoUCS/analytics/analytics-bundle.zip * ;\
+    popd
+
+"""
+
+# stdlib Imports
+import collections
+import errno
+import os
+import sys
+
+# Zope Environment
+import Globals  # NOQA
+
+# Standard Third-Party Imports
+from lxml import etree
+from lxml.builder import E, ElementMaker
+
+# Zenoss Imports
+from Products.ZenModel.Device import Device
+from Products.ZenRelations.RelSchema import ToOne
+from Products.ZenUtils.ZenScriptBase import ZenScriptBase
+from Products.Zuul.interfaces import IReportable
+
+# ZenETL Imports
+from ZenPacks.zenoss.ZenETL.reportable import createReferenceProperty
+from ZenPacks.zenoss.ZenETL.utils import un_camel
+
+ZENOSS_DATASOURCE_NAME = 'zenoss_reporting'
+
+
+class AnalyticsBundleCreator(ZenScriptBase):
+
+    """ZenScriptBase that creates Analytics bundles."""
+
+    def run(self):
+        self.verify_options()
+
+        self.create_bundle_skeleton()
+        self.create_reporting_datasource()
+        self.create_zenpack_folder()
+        self.create_zenpack_domain()
+
+    def create_bundle_skeleton(self):
+        analytics_path = os.path.join('.', 'analytics')
+        makedirs(analytics_path)
+
+        index_xml_path = os.path.join(analytics_path, 'index.xml')
+        with open(index_xml_path, 'w') as f:
+            f.write(
+                etree_tostring(
+                    E.export(
+                        E.property(name="pathProcessorId", value="zip"),
+                        E.property(name="jsVersion", value="5.2.0 PRO"),
+                        E.module(
+                            E.folder('/public/{}'.format(self.folder_name)),
+                            id="repositoryResources"))))
+
+    def create_reporting_datasource(self):
+        organizations_path = os.path.join('.', 'analytics', 'resources', 'organizations')
+        zenoss_path = os.path.join(organizations_path, 'zenoss')
+        datasources_path = os.path.join(zenoss_path, 'Data_Sources')
+
+        folder_tuples = (
+            (organizations_path, '/', 'organizations', 'Organizations'),
+            (zenoss_path, '/organizations', 'zenoss', 'Zenoss'),
+            (datasources_path, '/organizations/zenoss', 'Data_Sources', 'Data Sources'),
+            )
+
+        for path, parent, name, label in folder_tuples:
+            self.create_folder(path, parent, name, label)
+
+        with open('{}/zenoss_reporting.xml'.format(datasources_path), 'w') as f:
+            f.write(
+                etree_tostring(
+                    E.jdbcDataSource(
+                        E.folder('/organizations/zenoss/Data_Sources'),
+                        E.name(ZENOSS_DATASOURCE_NAME),
+                        E.version('0'),
+                        E.label('Zenoss Reporting'),
+                        E.description('The Zenoss Datawarehouse. Choose this as the datasource for all domains, ad-hoc views and reports.'),
+                        E.driver('com.mysql.jdbc.Driver'),
+                        E.connectionUrl('jdbc:mysql://localhost:13306/reporting?useUnicode=true&characterEncoding=UTF-8'),
+                        E.connectionUser('reporting_read'),
+                        E.connectionPassword(),
+                        E.timezone(),
+                        exportedWithPermissions='false')))
+
+    def get_zenpack_resources(self):
+        """Return list of existing resources plus those to be added."""
+        public_path = os.path.join('.', 'analytics', 'resources', 'public')
+        zenpack_path = os.path.join(public_path, self.folder_name)
+
+        resources = {
+            x.replace('.xml', '')
+            for x in os.listdir(zenpack_path)
+            if x.endswith('.xml') and not x.startswith('.')}
+
+        resources.add(self.domain_name)
+
+        return list(resources)
+
+    def create_zenpack_folder(self):
+        public_path = os.path.join('.', 'analytics', 'resources', 'public')
+        zenpack_path = os.path.join(public_path, self.folder_name)
+
+        self.create_folder(public_path, '/', 'public', 'Public')
+        self.create_folder(
+            zenpack_path,
+            '/public',
+            self.folder_name,
+            self.folder,
+            self.get_zenpack_resources())
+
+    def create_zenpack_domain(self):
+        zenpack_path = os.path.join(
+            '.', 'analytics', 'resources', 'public', self.folder_name)
+
+        domain_xml_path = os.path.join(
+            zenpack_path,
+            '{}.xml'.format(self.domain_name))
+
+        XSI_NAMESPACE = 'http://www.w3.org/2001/XMLSchema-instance'
+        E_XSI = ElementMaker(nsmap={'xsi': XSI_NAMESPACE})
+
+        def xsi_ns(tag, *args):
+            return {'{{{}}}{}'.format(XSI_NAMESPACE, tag): ' '.join(args)}
+
+        with open(domain_xml_path, 'w') as f:
+            f.write(
+                etree_tostring(
+                    E.semanticLayerDataSource(
+                        E.folder('/public/{}'.format(self.folder_name)),
+                        E.name(self.domain_name),
+                        E.version("1"),
+                        E.label(self.domain),
+                        E.schema(
+                            E_XSI.localResource(
+                                E.folder(
+                                    '/public/{}/{}_files'
+                                    .format(
+                                        self.folder_name,
+                                        self.domain_name)),
+                                E.name('schema.xml'),
+                                E.version('0'),
+                                E.label('schema'),
+                                E.description('schema'),
+                                E.fileType('xml'),
+                                xsi_ns('type', 'fileResource'),
+                                dataFile='schema.xml.data',
+                                exportedWithPermissions='false')),
+                        E.dataSource(
+                            E.alias(ZENOSS_DATASOURCE_NAME),
+                            E.dataSourceReference(
+                                E.uri('/organizations/zenoss/Data_Sources/zenoss_reporting'))),
+                        exportedWithPermissions='false')))
+
+        domain_files_path = os.path.join(
+            zenpack_path,
+            '{}_files'.format(self.domain_name))
+
+        makedirs(domain_files_path)
+
+        schema = Schema()
+
+        update_schema(schema, self.device)
+
+        for component in self.device.getDeviceComponents():
+            update_schema(schema, component)
+
+        schema_path = os.path.join(domain_files_path, 'schema.xml.data')
+
+        with open(schema_path, 'w') as f:
+            f.write(etree_tostring(schema.xml()))
+
+    def create_folder(self, path, parent, name, label, resources=None):
+        if resources is None:
+            resources = []
+
+        makedirs(path)
+
+        with open('{}/.folder.xml'.format(path), 'w') as f:
+            f.write(
+                etree_tostring(
+                    E.folder(
+                        E.parent(parent),
+                        E.name(name),
+                        E.label(label),
+                        *[E.resource(r) for r in resources],
+                        exportedWithPermissions='false')))
+
+    def verify_options(self):
+        if not self.options.folder:
+            sys.exit("Analytics folder must be set with --folder=<folder>")
+
+        self.folder = self.options.folder
+        self.folder_name = self.folder.replace(' ', '_')
+
+        if not self.options.domain:
+            sys.exit("Analytics domain must be set with --domain=<domain>")
+
+        self.domain = self.options.domain
+        self.domain_name = self.options.domain.replace(' ', '_')
+
+        if not self.options.device:
+            sys.exit("Device for bundle creation must be set with --device=<device_id>")
+
+        self.device = self.dmd.Devices.findDeviceByIdExact(self.options.device)
+        if not self.device:
+            sys.exit(
+                "{!r} is not a valid device id"
+                .format(
+                    self.options.device))
+
+    def buildOptions(self):
+        super(AnalyticsBundleCreator, self).buildOptions()
+
+        self.parser.add_option(
+            '--folder',
+            dest='folder',
+            help="Analytics folder for generated resources.")
+
+        self.parser.add_option(
+            '--domain',
+            dest='domain',
+            help="Analytics domain to generate.")
+
+        self.parser.add_option(
+            '-d', '--device',
+            dest='device',
+            help="Device ID to use for bundle creation.")
+
+
+def makedirs(path):
+    """Return os.makedirs(path) ignoring directory exists exceptions."""
+    try:
+        os.makedirs(path)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+
+
+def etree_tostring(xml):
+    """Return etree.tostring(xml) with different defaults."""
+    return etree.tostring(
+        xml,
+        pretty_print=True,
+        xml_declaration=True,
+        encoding='utf-8')
+
+
+def update_schema(schema, obj):
+    reportable = IReportable(obj)
+    entity_class_name = reportable.entity_class_name
+
+    # Dimension Table
+    dim_table = schema.add_table(
+        Table(
+            id='dim_{}'.format(entity_class_name),
+            tableName='dim_{}'.format(entity_class_name)))
+
+    # Dimension Join
+    join = schema.get_join('JoinTree_1')
+    if not join:
+        join = schema.add_join(
+            Join(
+                id='JoinTree_1',
+                tableName=dim_table.id))
+
+        date_table = schema.add_table(
+            Table(
+                id='dim_date',
+                tableName='dim_date'))
+
+        date_key_field = date_table.add_field(
+            Field(
+                id="date_key",
+                type="java.lang.Integer"))
+
+        join.add_field(
+            Field(
+                id="{}.{}".format(date_table.id, date_key_field.id),
+                type=date_key_field.type))
+
+        date_field = date_table.add_field(
+            Field(
+                id="date_date",
+                type="java.util.Date"))
+
+        join.add_field(
+            Field(
+                id="{}.{}".format(date_table.id, date_field.id),
+                type=date_field.type))
+
+        schema.add_item(
+            DimensionItem(
+                id='{}_{}'.format(date_table.id, date_field.id),
+                label='Date',
+                resourceId='{}.{}.{}'.format(
+                    join.id,
+                    date_table.id,
+                    date_field.id)))
+
+    # Dimension Set
+    dim_set = schema.add_itemGroup(
+        ItemGroup(
+            id='set_{}'.format(entity_class_name),
+            label=getattr(obj, 'class_plural_label', obj.meta_type + 's'),
+            resourceId=join.id))
+
+    # Key Field
+    key_field = dim_table.add_field(
+        Field(
+            id='{}_key'.format(entity_class_name),
+            type='java.lang.Integer'))
+
+    join.add_field(
+        Field(
+            id='{}.{}'.format(dim_table.id, key_field.id),
+            type=key_field.type))
+
+    # "Deleted At" Field
+    deleted_at_field = dim_table.add_field(
+        Field(
+            id='{}_deleted_at'.format(entity_class_name),
+            type='java.sql.Timestamp'))
+
+    delete_at_join_field = join.add_field(
+        Field(
+            id='{}.{}'.format(dim_table.id, deleted_at_field.id),
+            type=deleted_at_field.id))
+
+    # Deleted Field (Derived)
+    deleted_field = dim_table.add_field(
+        Field(
+            id='{}_deleted_at'.format(entity_class_name),
+            type='java.sql.Timestamp',
+            dataSetExpression='if({},null,0,1)'.format(deleted_at_field.id)))
+
+    join.add_field(
+        Field(
+            id='{}.{}'.format(dim_table.id, deleted_field.id),
+            type=deleted_field.id,
+            dataSetExpression='if({},null,0,1)'.format(delete_at_join_field.id)))
+
+    # Name Field
+    if not isinstance(obj, Device):
+        name_field = dim_table.add_field(
+            Field(
+                id='{}_name'.format(entity_class_name),
+                type='java.lang.String'))
+
+        join.add_field(
+            Field(
+                id='{}.{}'.format(dim_table.id, name_field.id),
+                type=name_field.type))
+
+        dim_set.add_item(
+            DimensionItem(
+                id='{}_{}'.format(dim_table.id, name_field.id),
+                label='{} Name'.format(getattr(obj, 'class_label', obj.meta_type)),
+                resourceId='{}.{}.{}'.format(
+                    join.id,
+                    dim_table.id,
+                    name_field.id)))
+
+    # Other Properties.
+    java_type_map = {
+        'string': 'java.lang.String',
+        'int': 'java.lang.Double',
+        'long': 'java.lang.Double',
+        'boolean': 'java.lang.Boolean',
+        'date': 'java.util.Date',
+        'reference': 'java.lang.Integer',
+        }
+
+    cmf_property_map = dict({
+        'device_name': {'label': 'Device Name'},
+        'device_manage_ip': {'label': 'Management IP Address'},
+        'device_hw_manufacturer': {'label': 'Hardware Manufacturer'},
+        'device_hw_product': {'label': 'Hardware Model'},
+        'device_hw_serial_number': {'label': 'Hardware Serial Number'},
+        }, **{x['id']: x for x in obj._properties})
+
+    # Match up reportable properties of the forms
+    # flavorId or openstack_flavor_id to their corresponding columns in _properties.
+    search_cmf_property_map = {}
+    for k, v in cmf_property_map.iteritems():
+        k = k.lower().replace("_", "")
+        prefixed_k = reportable.entity_class_name.replace("_", "") + k
+
+        search_cmf_property_map[k] = v
+        search_cmf_property_map[prefixed_k] = v
+
+    for pid, ptype, _, _ in reportable.reportProperties():
+        field = dim_table.add_field(
+            Field(
+                id=pid,
+                type=java_type_map[ptype]))
+
+        join.add_field(
+            Field(
+                id='{}.{}'.format(dim_table.id, field.id),
+                type=java_type_map[ptype]))
+
+        if ptype != 'reference':
+
+            cmf_property = search_cmf_property_map.get(pid.lower().replace("_", ""))
+            if not cmf_property:
+                continue
+
+            plabel = cmf_property.get('label')
+            if not plabel:
+                continue
+
+            dim_set.add_item(
+                DimensionItem(
+                    id='{}_{}'.format(dim_table.id, field.id),
+                    label=plabel,
+                    resourceId='{}.{}.{}'.format(
+                        join.id,
+                        dim_table.id,
+                        field.id)))
+
+    # References
+    ignored_ref_keys = {
+        'device_key',
+        'component_key',
+        'device_class_key',
+        'perf_server_key',
+        }
+
+    relations = getattr(obj, '_relations', tuple())
+    for relName, relation in relations:
+        if isinstance(relation, ToOne):
+            rel = getattr(obj, relName, None)
+            if not rel:
+                continue
+
+            remote_obj = rel()
+            if not remote_obj or remote_obj is obj:
+                continue
+
+            reference_property = createReferenceProperty(
+                remote_obj,
+                un_camel(relName))
+
+            if reference_property[0] in ignored_ref_keys:
+                continue
+
+            remote_reportable = IReportable(remote_obj)
+            remote_entity_class_name = remote_reportable.entity_class_name
+            remote_table = 'dim_{}'.format(remote_entity_class_name)
+
+            if dim_table.id != join.tableName:
+                join.add(
+                    dim_table.id,
+                    '{local_table}.{reference_property} == {remote_table}.{remote_key}'
+                    .format(
+                        remote_table=remote_table,
+                        local_table=dim_table.id,
+                        reference_property=reference_property[0],
+                        remote_key='{}_key'.format(remote_reportable.entity_class_name)))
+
+    # Measures Set
+    measure_set = dim_set.add_itemGroup(
+        ItemGroup(
+            id='_'.join((dim_set.id, 'measures')),
+            label='Measures',
+            resourceId=join.id))
+
+    # Measures
+    for template in obj.getRRDTemplates():
+        for datasource in template.datasources():
+            for datapoint in datasource.datapoints():
+                for alias in datapoint.aliases():
+                    for aggregation in ('daily', 'hourly'):
+                        measure_table = schema.add_table(
+                            Table(
+                                id='{}_{}'.format(aggregation, alias.id),
+                                tableName='{}_{}'.format(aggregation, alias.id)))
+
+                        for reference_field in ('device_key', 'component_key'):
+                            ref_field = measure_table.add_field(
+                                Field(
+                                    id=reference_field,
+                                    type='java.lang.Integer'))
+
+                            join.add_field(
+                                Field(
+                                    id='{}.{}'.format(measure_table.id, ref_field.id),
+                                    type=ref_field.type))
+
+                        date_field = measure_table.add_field(
+                            Field(
+                                id='date_key',
+                                type='java.util.Date'))
+
+                        join.add_field(
+                            Field(
+                                id='{}.{}'.format(measure_table.id, date_field.id),
+                                type=date_field.type))
+
+                        ts_field_tuples = (
+                            ('fct_ts', 'TS'),
+                            ('fct_ts_gmt', 'TS GMT'),
+                            )
+
+                        for ts_field_id, ts_field_label in ts_field_tuples:
+                            ts_field = measure_table.add_field(
+                                Field(
+                                    id=ts_field_id,
+                                    type='java.sql.Timestamp'))
+
+                            join.add_field(
+                                Field(
+                                    id='{}.{}'.format(measure_table.id, ts_field.id),
+                                    type=ts_field.type))
+
+                            measure_set.add_item(
+                                DimensionItem(
+                                    id='{}_{}'.format(measure_table.id, ts_field.id),
+                                    label='{} / {} / {}'.format(
+                                        alias.id,
+                                        aggregation,
+                                        ts_field_label),
+                                    resourceId='{}.{}.{}'.format(
+                                        join.id,
+                                        measure_table.id,
+                                        ts_field.id)))
+
+                        cf_field_tuples = (
+                            ('fct_avg', 'Average'),
+                            ('fct_max', 'Highest'),
+                            ('fct_min', 'Lowest'),
+                            )
+
+                        for cf_field_id, cf_field_label in cf_field_tuples:
+                            cf_field = measure_table.add_field(
+                                Field(
+                                    id=cf_field_id,
+                                    type='java.lang.Double'))
+
+                            join.add_field(
+                                Field(
+                                    id='{}.{}'.format(measure_table.id, cf_field.id),
+                                    type=cf_field.type))
+
+                            measure_set.add_item(
+                                MeasureItem(
+                                    id='{}_{}'.format(measure_table.id, cf_field.id),
+                                    label='{} / {} / {}'.format(
+                                        alias.id,
+                                        aggregation,
+                                        cf_field_label),
+                                    resourceId='{}.{}.{}'.format(
+                                        join.id,
+                                        measure_table.id,
+                                        cf_field.id)))
+
+                        if isinstance(obj, Device):
+                            join.add(
+                                measure_table.id,
+                                '{dim_table}.{key_field} == {measure_table}.device_key'
+                                .format(
+                                    dim_table=dim_table.id,
+                                    key_field=key_field.id,
+                                    measure_table=measure_table.id))
+                        else:
+                            join.add(
+                                measure_table.id,
+                                '{dim_table}.{key_field} == {measure_table}.component_key'
+                                .format(
+                                    dim_table=dim_table.id,
+                                    key_field=key_field.id,
+                                    measure_table=measure_table.id))
+
+                        join.add(
+                            'dim_date',
+                            '{measure_table}.date_key == {date_table}.date_key'
+                            .format(
+                                measure_table=measure_table.id,
+                                date_table='dim_date'))
+
+
+class Schema(object):
+    def __init__(self):
+        self.itemGroups = collections.OrderedDict()
+        self.items = collections.OrderedDict()
+        self.tables = collections.OrderedDict()
+        self.joins = collections.OrderedDict()
+
+    def add_itemGroup(self, itemGroup):
+        self.itemGroups[itemGroup.id] = itemGroup
+        return self.itemGroups[itemGroup.id]
+
+    def add_item(self, item):
+        self.items[item.id] = item
+        return self.items[item.id]
+
+    def add_table(self, table):
+        self.tables[table.id] = table
+        return self.tables[table.id]
+
+    def add_join(self, join):
+        self.joins[join.id] = join
+        return self.joins[join.id]
+
+    def get_join(self, id, default=None):
+        return self.joins.get(id, default)
+
+    def xml(self):
+        return E.schema(
+            E.itemGroups(*[x.xml() for x in self.itemGroups.values()]),
+            E.items(*[x.xml() for x in self.items.values()]),
+            E.resources(*[x.xml() for x in self.tables.values()] + [x.xml() for x in self.joins.values()]),
+            xmlns='http://www.jaspersoft.com/2007/SL/XMLSchema',
+            version='1.0')
+
+
+class ItemGroup(object):
+    def __init__(self, id, label, resourceId):
+        self.id = id
+        self.label = label
+        self.resourceId = resourceId
+        self.itemGroups = collections.OrderedDict()
+        self.items = collections.OrderedDict()
+
+    def add_itemGroup(self, itemGroup):
+        self.itemGroups[itemGroup.id] = itemGroup
+        return self.itemGroups[itemGroup.id]
+
+    def add_item(self, item):
+        self.items[item.id] = item
+        return self.items[item.id]
+
+    def xml(self):
+        return E.itemGroup(
+            E.itemGroups(*[x.xml() for x in self.itemGroups.values()]),
+            E.items(*[x.xml() for x in self.items.values()]),
+            id=self.id,
+            label=self.label,
+            description='',
+            resourceId=self.resourceId)
+
+
+class Item(object):
+    def __init__(self, id, label, resourceId):
+        self.id = id
+        self.label = label
+        self.resourceId = resourceId
+
+    def xml(self):
+        raise NotImplementedError
+
+
+class DimensionItem(Item):
+    def xml(self):
+        return E.item(
+            id=self.id,
+            label=self.label,
+            dimensionOrMeasure='Dimension',
+            resourceId=self.resourceId)
+
+
+class MeasureItem(Item):
+    def __init__(self, id, label, resourceId, defaultAgg='Average'):
+        super(MeasureItem, self).__init__(id, label, resourceId)
+        self.defaultAgg = defaultAgg
+
+    def xml(self):
+        return E.item(
+            id=self.id,
+            label=self.label,
+            dimensionOrMeasure='Measure',
+            resourceId=self.resourceId,
+            defaultAgg=self.defaultAgg)
+
+
+class Resource(object):
+    def __init__(self, id, tableName):
+        self.id = id
+        self.tableName = tableName
+
+    def xml(self):
+        raise NotImplementedError
+
+
+class Table(Resource):
+    def __init__(self, id, tableName):
+        super(Table, self).__init__(id, tableName)
+        self.fields = collections.OrderedDict()
+
+    def add_field(self, field):
+        self.fields[field.id] = field
+        return self.fields[field.id]
+
+    def xml(self):
+        return E.jdbcTable(
+            E.fieldList(*[x.xml() for x in self.fields.values()]),
+            id=self.id,
+            datasourceId=ZENOSS_DATASOURCE_NAME,
+            tableName=self.tableName)
+
+
+class Join(Table):
+    def __init__(self, id, tableName):
+        super(Join, self).__init__(id, tableName)
+        self.joins = collections.OrderedDict()
+
+    def add(self, remote_table, clause):
+        if remote_table not in self.joins:
+            self.joins[remote_table] = set()
+
+        self.joins[remote_table].add(clause)
+
+    @property
+    def joinStrings(self):
+        template = 'left outer join {remote_table} {remote_table} on ({clauses})'
+
+        if 'dim_date' in self.joins:
+            date_clauses = self.joins.pop('dim_date')
+        else:
+            date_clauses = None
+
+        for remote_table, clauses in self.joins.items():
+            yield template.format(
+                remote_table=remote_table,
+                clauses=' and '.join(clauses))
+
+        if date_clauses:
+            yield template.format(
+                remote_table='dim_date',
+                clauses=' and '.join(date_clauses))
+
+    def xml(self):
+        return E.jdbcTable(
+            E.fieldList(*[x.xml() for x in self.fields.values()]),
+            E.joinInfo(
+                alias=self.tableName,
+                referenceId=self.tableName),
+            E.joinedDataSetList(
+                *[E.joinedDataSetRef(E.joinString(x)) for x in self.joinStrings]),
+            id=self.id,
+            datasourceId=ZENOSS_DATASOURCE_NAME,
+            tableName=self.tableName)
+
+
+class Field(object):
+    def __init__(self, id, type, dataSetExpression=None):
+        self.id = id
+        self.type = type
+        self.dataSetExpression = dataSetExpression
+
+    def xml(self):
+        attributes = {
+            'id': self.id,
+            'type': self.type,
+            }
+
+        if self.dataSetExpression:
+            attributes['dataSetExpression'] = self.dataSetExpression
+
+        return E.field(**attributes)
+
+
+if __name__ == '__main__':
+    creator = AnalyticsBundleCreator(connect=True)
+    creator.run()

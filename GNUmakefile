@@ -24,7 +24,7 @@ egg:
 	# setup.py will call 'make build' before creating the egg
 	python setup.py bdist_egg
 
-.PHONY: build
+.PHONY: build analytics
 
 build:
 
@@ -38,4 +38,14 @@ clean:
 	cd $(TXSSHCLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
 	cd $(LIB_DIR) ; rm -Rf *.egg site.py easy-install.pth ; cd $(SRC_DIR)
 	find . -name '*.pyc' | xargs rm -f
+
+analytics:
+	rm -f ZenPacks/zenoss/OpenStackInfrastructure/analytics/analytics-bundle.zip
+	mkdir -p analytics/resources/public/OpenStackInfrastructure_ZenPack
+	./create-analytics-bundle \
+		--folder="OpenStackInfrastructure ZenPack" \
+		--domain="OpenStackInfrastructure Domain" \
+		--device=ostack
+	cd analytics; zip -r ../ZenPacks/zenoss/OpenStackInfrastructure/analytics/analytics-bundle.zip *
+
 
