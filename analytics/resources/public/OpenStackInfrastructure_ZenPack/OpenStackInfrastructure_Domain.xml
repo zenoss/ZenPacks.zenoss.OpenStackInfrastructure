@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<semanticLayerDataSource exportedWithPermissions="false">
+  <folder>/public/OpenStackInfrastructure_ZenPack</folder>
+  <name>OpenStackInfrastructure_Domain</name>
+  <version>1</version>
+  <label>OpenStackInfrastructure Domain</label>
+  <schema>
+    <localResource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" dataFile="schema.xml.data" exportedWithPermissions="false" xsi:type="fileResource">
+      <folder>/public/OpenStackInfrastructure_ZenPack/OpenStackInfrastructure_Domain_files</folder>
+      <name>schema.xml</name>
+      <version>0</version>
+      <label>schema</label>
+      <description>schema</description>
+      <fileType>xml</fileType>
+    </localResource>
+  </schema>
+  <dataSource>
+    <alias>zenoss_reporting</alias>
+    <dataSourceReference>
+      <uri>/organizations/zenoss/Data_Sources/zenoss_reporting</uri>
+    </dataSourceReference>
+  </dataSource>
+</semanticLayerDataSource>

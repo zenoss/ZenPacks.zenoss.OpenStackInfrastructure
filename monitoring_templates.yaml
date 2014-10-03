@@ -11,7 +11,10 @@
       severity: 'Clear'
 
       datapoints:
-        cpuUtilization: GAUGE_MIN_0_ALIAS
+        cpuUtilization:
+          rrdmin: 0
+          aliases:
+            cpu__pct: ""
 
     diskReadRequestsRate:
       type: OpenStack Ceilometer Perf AMQP
@@ -19,7 +22,10 @@
       severity: 'Clear'
 
       datapoints:
-        diskReadRequestsRate: GAUGE_MIN_0_ALIAS
+        diskReadRequestsRate:
+          rrdmin: 0
+          aliases:
+            disk_reads__persec: ""
 
     diskWriteRequestsRate:
       type: OpenStack Ceilometer Perf AMQP
@@ -27,7 +33,10 @@
       severity: 'Clear'
 
       datapoints:
-        diskWriteRequestsRate: GAUGE_MIN_0_ALIAS
+        diskWriteRequestsRate:
+          rrdmin: 0
+          aliases:
+            disk_writes__persec: ""
 
     diskReadBytesRate:
       type: OpenStack Ceilometer Perf AMQP
@@ -35,7 +44,10 @@
       severity: 'Clear'
 
       datapoints:
-        diskReadBytesRate: GAUGE_MIN_0_ALIAS
+        diskReadBytesRate:
+          rrdmin: 0
+          aliases:
+            disk_read__bytessec: ""
 
     diskWriteBytesRate:
       type: OpenStack Ceilometer Perf AMQP
@@ -43,7 +55,10 @@
       severity: 'Clear'
 
       datapoints:
-        diskWriteBytesRate: GAUGE_MIN_0_ALIAS
+        diskWriteBytesRate:
+          rrdmin: 0
+          aliases:
+            disk_write__bytessec: ""
 
   graphs:
     CPU Utilization:
@@ -94,7 +109,11 @@
       severity: 'Clear'
 
       datapoints:
-        networkIncomingPacketsRate: GAUGE_MIN_0_ALIAS
+        networkIncomingPacketsRate:
+          rrdmin: 0
+          aliases:
+            if_received_packets__persec: ""
+
 
     networkOutgoingPacketsRate:
       type: OpenStack Ceilometer Perf AMQP
@@ -102,7 +121,10 @@
       severity: 'Clear'
 
       datapoints:
-        networkOutgoingPacketsRate: GAUGE_MIN_0_ALIAS
+        networkOutgoingPacketsRate:
+          rrdmin: 0
+          aliases:
+            if_sent_packets__persec: ""
 
     networkIncomingBytesRate:
       type: OpenStack Ceilometer Perf AMQP
@@ -110,7 +132,10 @@
       severity: 'Clear'
 
       datapoints:
-        networkIncomingBytesRate: GAUGE_MIN_0_ALIAS
+        networkIncomingBytesRate:
+          rrdmin: 0
+          aliases:
+            if_received__bytessec: ""
 
     networkOutgoingBytesRate:
       type: OpenStack Ceilometer Perf AMQP
@@ -118,7 +143,10 @@
       severity: 'Clear'
 
       datapoints:
-        networkOutgoingBytesRate: GAUGE_MIN_0_ALIAS
+        networkOutgoingBytesRate:
+          rrdmin: 0
+          aliases:
+            if_sent__bytessec: ""
 
   graphs:
     Network Packet Rate:
@@ -162,8 +190,10 @@
       commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/queue_counts.py '${here/id}'
       cycletime: 300
       datapoints:
-        eventQueueCount: GAUGE_MIN_0_ALIAS
-        perfQueueCount: GAUGE_MIN_0_ALIAS
+        eventQueueCount:
+          rrdmin: 0
+        perfQueueCount:
+          rrdmin: 0
       parser: ZenPacks.zenoss.OpenStackInfrastructure.parsers.OpenStackQueue
       type: COMMAND
       usessh: false
@@ -172,31 +202,107 @@
       commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/poll_openstack.py '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}' '${here/zOpenStackAuthUrl}' '${here/zOpenStackRegionName}'
       cycletime: 300
       datapoints:
-        flavorTotalCount: GAUGE_MIN_0_ALIAS
-        imageActiveCount: GAUGE_MIN_0_ALIAS
-        imageFailedCount: GAUGE_MIN_0_ALIAS
-        imageOtherCount: GAUGE_MIN_0_ALIAS
-        imagePreparingCount: GAUGE_MIN_0_ALIAS
-        imageQueuedCount: GAUGE_MIN_0_ALIAS
-        imageSavingCount: GAUGE_MIN_0_ALIAS
-        imageTotalCount: GAUGE_MIN_0_ALIAS
-        imageUnknownCount: GAUGE_MIN_0_ALIAS
-        serverActiveCount: GAUGE_MIN_0_ALIAS
-        serverBuildCount: GAUGE_MIN_0_ALIAS
-        serverDeleteIpCount: GAUGE_MIN_0_ALIAS
-        serverHardRebootCount: GAUGE_MIN_0_ALIAS
-        serverOtherCount: GAUGE_MIN_0_ALIAS
-        serverPasswordCount: GAUGE_MIN_0_ALIAS
-        serverPrepResizeCount: GAUGE_MIN_0_ALIAS
-        serverQueueResizeCount: GAUGE_MIN_0_ALIAS
-        serverRebootCount: GAUGE_MIN_0_ALIAS
-        serverRebuildCount: GAUGE_MIN_0_ALIAS
-        serverRescueCount: GAUGE_MIN_0_ALIAS
-        serverResizeCount: GAUGE_MIN_0_ALIAS
-        serverSuspendedCount: GAUGE_MIN_0_ALIAS
-        serverTotalCount: GAUGE_MIN_0_ALIAS
-        serverUnknownCount: GAUGE_MIN_0_ALIAS
-        serverVerifyResizeCount: GAUGE_MIN_0_ALIAS
+        flavorTotalCount:
+          rrdmin: 0
+          aliases:
+            flavor_total__count: ""
+        imageActiveCount:
+          rrdmin: 0
+          aliases:
+            image_active__count: ""
+        imageFailedCount:
+          rrdmin: 0
+          aliases:
+            image_failed__count: ""
+        imageOtherCount:
+          rrdmin: 0
+          aliases:
+            image_other__count: ""
+        imagePreparingCount:
+          rrdmin: 0
+          aliases:
+            image_preparing__count: ""
+        imageQueuedCount:
+          rrdmin: 0
+          aliases:
+            image_queued__count: ""
+        imageSavingCount:
+          rrdmin: 0
+          aliases:
+            image_saving__count: ""
+        imageTotalCount:
+          rrdmin: 0
+          aliases:
+            image_total__count: ""
+        imageUnknownCount:
+          rrdmin: 0
+          aliases:
+            image_unknown__count: ""
+        serverActiveCount:
+          rrdmin: 0
+          aliases:
+            server_active__count: ""
+        serverBuildCount:
+          rrdmin: 0
+          aliases:
+            server_build__count: ""
+        serverDeleteIpCount:
+          rrdmin: 0
+          aliases:
+            server_delete__count: ""
+        serverHardRebootCount:
+          rrdmin: 0
+          aliases:
+            server_hard_reboot__count: ""
+        serverOtherCount:
+          rrdmin: 0
+          aliases:
+            server_other__count: ""
+        serverPasswordCount:
+          rrdmin: 0
+          aliases:
+            server_password__count: ""
+        serverPrepResizeCount:
+          rrdmin: 0
+          aliases:
+            server_prep_resize__count: ""
+        serverQueueResizeCount:
+          rrdmin: 0
+          aliases:
+            server_queue_resize__count: ""
+        serverRebootCount:
+          rrdmin: 0
+          aliases:
+            server_reboot__count: ""
+        serverRebuildCount:
+          rrdmin: 0
+          aliases:
+            server_rebuild__count: ""
+        serverRescueCount:
+          rrdmin: 0
+          aliases:
+            server_rescue__count: ""
+        serverResizeCount:
+          rrdmin: 0
+          aliases:
+            server_resize__count: ""
+        serverSuspendedCount:
+          rrdmin: 0
+          aliases:
+            server_suspended__count: ""
+        serverTotalCount:
+          rrdmin: 0
+          aliases:
+            server_total__count: ""
+        serverUnknownCount:
+          rrdmin: 0
+          aliases:
+            server_unknown__count: ""
+        serverVerifyResizeCount:
+          rrdmin: 0
+          aliases:
+            server_verify_resize__count: ""
+
       parser: ZenPacks.zenoss.OpenStackInfrastructure.parsers.endpoint
       type: COMMAND
       usessh: false

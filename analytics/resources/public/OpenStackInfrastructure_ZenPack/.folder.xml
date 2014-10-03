@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<folder exportedWithPermissions="false">
+  <parent>/public</parent>
+  <name>OpenStackInfrastructure_ZenPack</name>
+  <label>OpenStackInfrastructure ZenPack</label>
+  <resource>OpenStackInfrastructure_Domain</resource>
+</folder>

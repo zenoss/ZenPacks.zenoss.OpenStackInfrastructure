@@ -130,6 +130,42 @@ the model consistent.   Since most instance changes will still be caught
 without this option enabled, it is recommended to leave this disabled if your
 OpenStack environment is very large.
 
+== Zenoss Analytics ==
+
+This ZenPack provides additional support for Zenoss Analytics. Perform the
+following steps to install extra reporting resources into Zenoss Analytics
+after installing the ZenPack.
+
+# Copy analytics-bundle.zip from $ZENHOME/ZenPacks/ZenPacks.zenoss.OpenStackInfrastructure*/ZenPacks/zenoss/OpenStackInfrastructure/analytics/ on your Zenoss server.
+# Navigate to Zenoss Analytics in your browser.
+# Login as superuser.
+# Remove any existing ''OpenStackInfrastructure ZenPack'' folder.
+## Choose ''Repository'' from the ''View'' menu at the top of the page.
+## Expand ''Public'' in the list of folders.
+## Right-click on ''OpenStackInfrastructure ZenPack'' folder and choose ''Delete''.
+## Confirm deletion by clicking ''OK''.
+# Add the new ''OpenStackInfrastructure ZenPack'' folder.
+## Choose ''Server Settings'' from the ''Manage' menu at the top of the page.
+## Choose ''Import'' in the left page.
+## Remove checks from all check boxes.
+## Click ''Choose File'' to import a data file.
+## Choose the analytics-bundle.zip file copied from your Zenoss server.
+## Click ''Import''.
+
+You can now navigate back to the ''OpenStackInfrastructure ZenPack'' folder in the repository to see the following resources added by the bundle.
+
+;Domains
+* OpenStackInfrastructure Domain
+
+;Ad Hoc Views
+* TBD
+
+Domains can be used to create ad hoc views using the following steps.
+
+# Choose ''Ad Hoc View'' from the ''Create'' menu.
+# Click ''Domains'' at the top of the data chooser dialog.
+# Expand ''Public'' then ''OpenStackInfrastructure ZenPack''.
+# Choose the ''OpenStackInfrastructure Domain'' domain
 
 
 
