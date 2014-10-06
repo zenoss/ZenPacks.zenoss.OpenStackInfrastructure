@@ -1392,7 +1392,7 @@ ${here/id}
 ZenPacks.zenoss.OpenStackInfrastructure.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
 </property>
 <property type="string" id="meter" >
-CPU Utilization
+cpu_util
 </property>
 <tomanycont id='datapoints'>
 <object id='cpuUtilization' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -1830,7 +1830,7 @@ ${here/id}
 ZenPacks.zenoss.OpenStackInfrastructure.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
 </property>
 <property type="string" id="meter" >
-Inbound
+network.incoming.bytes.rate
 </property>
 <tomanycont id='datapoints'>
 <object id='networkIncomingBytesRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -1867,7 +1867,7 @@ ${here/id}
 ZenPacks.zenoss.OpenStackInfrastructure.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
 </property>
 <property type="string" id="meter" >
-Inbound
+network.incoming.packets.rate
 </property>
 <tomanycont id='datapoints'>
 <object id='networkIncomingPacketsRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -1904,7 +1904,7 @@ ${here/id}
 ZenPacks.zenoss.OpenStackInfrastructure.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
 </property>
 <property type="string" id="meter" >
-Outbound
+network.outgoing.bytes.rate
 </property>
 <tomanycont id='datapoints'>
 <object id='networkOutgoingBytesRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -1941,7 +1941,7 @@ ${here/id}
 ZenPacks.zenoss.OpenStackInfrastructure.datasources.PerfAMQPDataSource.PerfAMQPDataSourcePlugin
 </property>
 <property type="string" id="meter" >
-Outbound
+network.outgoing.packets.rate
 </property>
 <tomanycont id='datapoints'>
 <object id='networkOutgoingPacketsRate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>

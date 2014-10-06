@@ -7,7 +7,7 @@
   datasources:
     cpuUtilization:
       type: OpenStack Ceilometer Perf AMQP
-      meter: 'CPU Utilization'
+      meter: 'cpu_util'
       severity: 'Clear'
 
       datapoints:
@@ -105,7 +105,7 @@
   datasources:
     networkIncomingPacketsRate:
       type: OpenStack Ceilometer Perf AMQP
-      meter: 'Inbound'
+      meter: 'network.incoming.packets.rate'
       severity: 'Clear'
 
       datapoints:
@@ -117,7 +117,7 @@
 
     networkOutgoingPacketsRate:
       type: OpenStack Ceilometer Perf AMQP
-      meter: 'Outbound'
+      meter: 'network.outgoing.packets.rate'
       severity: 'Clear'
 
       datapoints:
@@ -128,7 +128,7 @@
 
     networkIncomingBytesRate:
       type: OpenStack Ceilometer Perf AMQP
-      meter: 'Inbound'
+      meter: 'network.incoming.bytes.rate'
       severity: 'Clear'
 
       datapoints:
@@ -139,7 +139,7 @@
 
     networkOutgoingBytesRate:
       type: OpenStack Ceilometer Perf AMQP
-      meter: 'Outbound'
+      meter: 'network.outgoing.bytes.rate'
       severity: 'Clear'
 
       datapoints:
