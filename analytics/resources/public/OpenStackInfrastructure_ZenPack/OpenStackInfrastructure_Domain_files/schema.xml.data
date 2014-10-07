@@ -363,7 +363,48 @@
       <itemGroups>
         <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_vnic_measures" description="">
           <itemGroups/>
-          <items/>
+          <items>
+            <item resourceId="JoinTree_1.daily_if_received__bytessec.fct_ts" dimensionOrMeasure="Dimension" id="daily_if_received__bytessec_fct_ts" label="if_received__bytessec / daily / TS"/>
+            <item resourceId="JoinTree_1.daily_if_received__bytessec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="daily_if_received__bytessec_fct_ts_gmt" label="if_received__bytessec / daily / TS GMT"/>
+            <item resourceId="JoinTree_1.daily_if_received__bytessec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_received__bytessec_fct_avg" label="if_received__bytessec / daily / Average"/>
+            <item resourceId="JoinTree_1.daily_if_received__bytessec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_received__bytessec_fct_max" label="if_received__bytessec / daily / Highest"/>
+            <item resourceId="JoinTree_1.daily_if_received__bytessec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_received__bytessec_fct_min" label="if_received__bytessec / daily / Lowest"/>
+            <item resourceId="JoinTree_1.hourly_if_received__bytessec.fct_ts" dimensionOrMeasure="Dimension" id="hourly_if_received__bytessec_fct_ts" label="if_received__bytessec / hourly / TS"/>
+            <item resourceId="JoinTree_1.hourly_if_received__bytessec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="hourly_if_received__bytessec_fct_ts_gmt" label="if_received__bytessec / hourly / TS GMT"/>
+            <item resourceId="JoinTree_1.hourly_if_received__bytessec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_received__bytessec_fct_avg" label="if_received__bytessec / hourly / Average"/>
+            <item resourceId="JoinTree_1.hourly_if_received__bytessec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_received__bytessec_fct_max" label="if_received__bytessec / hourly / Highest"/>
+            <item resourceId="JoinTree_1.hourly_if_received__bytessec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_received__bytessec_fct_min" label="if_received__bytessec / hourly / Lowest"/>
+            <item resourceId="JoinTree_1.daily_if_received_packets__persec.fct_ts" dimensionOrMeasure="Dimension" id="daily_if_received_packets__persec_fct_ts" label="if_received_packets__persec / daily / TS"/>
+            <item resourceId="JoinTree_1.daily_if_received_packets__persec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="daily_if_received_packets__persec_fct_ts_gmt" label="if_received_packets__persec / daily / TS GMT"/>
+            <item resourceId="JoinTree_1.daily_if_received_packets__persec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_received_packets__persec_fct_avg" label="if_received_packets__persec / daily / Average"/>
+            <item resourceId="JoinTree_1.daily_if_received_packets__persec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_received_packets__persec_fct_max" label="if_received_packets__persec / daily / Highest"/>
+            <item resourceId="JoinTree_1.daily_if_received_packets__persec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_received_packets__persec_fct_min" label="if_received_packets__persec / daily / Lowest"/>
+            <item resourceId="JoinTree_1.hourly_if_received_packets__persec.fct_ts" dimensionOrMeasure="Dimension" id="hourly_if_received_packets__persec_fct_ts" label="if_received_packets__persec / hourly / TS"/>
+            <item resourceId="JoinTree_1.hourly_if_received_packets__persec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="hourly_if_received_packets__persec_fct_ts_gmt" label="if_received_packets__persec / hourly / TS GMT"/>
+            <item resourceId="JoinTree_1.hourly_if_received_packets__persec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_received_packets__persec_fct_avg" label="if_received_packets__persec / hourly / Average"/>
+            <item resourceId="JoinTree_1.hourly_if_received_packets__persec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_received_packets__persec_fct_max" label="if_received_packets__persec / hourly / Highest"/>
+            <item resourceId="JoinTree_1.hourly_if_received_packets__persec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_received_packets__persec_fct_min" label="if_received_packets__persec / hourly / Lowest"/>
+            <item resourceId="JoinTree_1.daily_if_sent__bytessec.fct_ts" dimensionOrMeasure="Dimension" id="daily_if_sent__bytessec_fct_ts" label="if_sent__bytessec / daily / TS"/>
+            <item resourceId="JoinTree_1.daily_if_sent__bytessec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="daily_if_sent__bytessec_fct_ts_gmt" label="if_sent__bytessec / daily / TS GMT"/>
+            <item resourceId="JoinTree_1.daily_if_sent__bytessec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_sent__bytessec_fct_avg" label="if_sent__bytessec / daily / Average"/>
+            <item resourceId="JoinTree_1.daily_if_sent__bytessec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_sent__bytessec_fct_max" label="if_sent__bytessec / daily / Highest"/>
+            <item resourceId="JoinTree_1.daily_if_sent__bytessec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_sent__bytessec_fct_min" label="if_sent__bytessec / daily / Lowest"/>
+            <item resourceId="JoinTree_1.hourly_if_sent__bytessec.fct_ts" dimensionOrMeasure="Dimension" id="hourly_if_sent__bytessec_fct_ts" label="if_sent__bytessec / hourly / TS"/>
+            <item resourceId="JoinTree_1.hourly_if_sent__bytessec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="hourly_if_sent__bytessec_fct_ts_gmt" label="if_sent__bytessec / hourly / TS GMT"/>
+            <item resourceId="JoinTree_1.hourly_if_sent__bytessec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_sent__bytessec_fct_avg" label="if_sent__bytessec / hourly / Average"/>
+            <item resourceId="JoinTree_1.hourly_if_sent__bytessec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_sent__bytessec_fct_max" label="if_sent__bytessec / hourly / Highest"/>
+            <item resourceId="JoinTree_1.hourly_if_sent__bytessec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_sent__bytessec_fct_min" label="if_sent__bytessec / hourly / Lowest"/>
+            <item resourceId="JoinTree_1.daily_if_sent_packets__persec.fct_ts" dimensionOrMeasure="Dimension" id="daily_if_sent_packets__persec_fct_ts" label="if_sent_packets__persec / daily / TS"/>
+            <item resourceId="JoinTree_1.daily_if_sent_packets__persec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="daily_if_sent_packets__persec_fct_ts_gmt" label="if_sent_packets__persec / daily / TS GMT"/>
+            <item resourceId="JoinTree_1.daily_if_sent_packets__persec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_sent_packets__persec_fct_avg" label="if_sent_packets__persec / daily / Average"/>
+            <item resourceId="JoinTree_1.daily_if_sent_packets__persec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_sent_packets__persec_fct_max" label="if_sent_packets__persec / daily / Highest"/>
+            <item resourceId="JoinTree_1.daily_if_sent_packets__persec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_sent_packets__persec_fct_min" label="if_sent_packets__persec / daily / Lowest"/>
+            <item resourceId="JoinTree_1.hourly_if_sent_packets__persec.fct_ts" dimensionOrMeasure="Dimension" id="hourly_if_sent_packets__persec_fct_ts" label="if_sent_packets__persec / hourly / TS"/>
+            <item resourceId="JoinTree_1.hourly_if_sent_packets__persec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="hourly_if_sent_packets__persec_fct_ts_gmt" label="if_sent_packets__persec / hourly / TS GMT"/>
+            <item resourceId="JoinTree_1.hourly_if_sent_packets__persec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_sent_packets__persec_fct_avg" label="if_sent_packets__persec / hourly / Average"/>
+            <item resourceId="JoinTree_1.hourly_if_sent_packets__persec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_sent_packets__persec_fct_max" label="if_sent_packets__persec / hourly / Highest"/>
+            <item resourceId="JoinTree_1.hourly_if_sent_packets__persec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_sent_packets__persec_fct_min" label="if_sent_packets__persec / hourly / Lowest"/>
+          </items>
         </itemGroup>
       </itemGroups>
       <items>
@@ -391,7 +432,58 @@
       <itemGroups>
         <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_instance_measures" description="">
           <itemGroups/>
-          <items/>
+          <items>
+            <item resourceId="JoinTree_1.daily_cpu__pct.fct_ts" dimensionOrMeasure="Dimension" id="daily_cpu__pct_fct_ts" label="cpu__pct / daily / TS"/>
+            <item resourceId="JoinTree_1.daily_cpu__pct.fct_ts_gmt" dimensionOrMeasure="Dimension" id="daily_cpu__pct_fct_ts_gmt" label="cpu__pct / daily / TS GMT"/>
+            <item resourceId="JoinTree_1.daily_cpu__pct.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_cpu__pct_fct_avg" label="cpu__pct / daily / Average"/>
+            <item resourceId="JoinTree_1.daily_cpu__pct.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_cpu__pct_fct_max" label="cpu__pct / daily / Highest"/>
+            <item resourceId="JoinTree_1.daily_cpu__pct.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_cpu__pct_fct_min" label="cpu__pct / daily / Lowest"/>
+            <item resourceId="JoinTree_1.hourly_cpu__pct.fct_ts" dimensionOrMeasure="Dimension" id="hourly_cpu__pct_fct_ts" label="cpu__pct / hourly / TS"/>
+            <item resourceId="JoinTree_1.hourly_cpu__pct.fct_ts_gmt" dimensionOrMeasure="Dimension" id="hourly_cpu__pct_fct_ts_gmt" label="cpu__pct / hourly / TS GMT"/>
+            <item resourceId="JoinTree_1.hourly_cpu__pct.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_cpu__pct_fct_avg" label="cpu__pct / hourly / Average"/>
+            <item resourceId="JoinTree_1.hourly_cpu__pct.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_cpu__pct_fct_max" label="cpu__pct / hourly / Highest"/>
+            <item resourceId="JoinTree_1.hourly_cpu__pct.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_cpu__pct_fct_min" label="cpu__pct / hourly / Lowest"/>
+            <item resourceId="JoinTree_1.daily_disk_read__bytessec.fct_ts" dimensionOrMeasure="Dimension" id="daily_disk_read__bytessec_fct_ts" label="disk_read__bytessec / daily / TS"/>
+            <item resourceId="JoinTree_1.daily_disk_read__bytessec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="daily_disk_read__bytessec_fct_ts_gmt" label="disk_read__bytessec / daily / TS GMT"/>
+            <item resourceId="JoinTree_1.daily_disk_read__bytessec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_read__bytessec_fct_avg" label="disk_read__bytessec / daily / Average"/>
+            <item resourceId="JoinTree_1.daily_disk_read__bytessec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_read__bytessec_fct_max" label="disk_read__bytessec / daily / Highest"/>
+            <item resourceId="JoinTree_1.daily_disk_read__bytessec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_read__bytessec_fct_min" label="disk_read__bytessec / daily / Lowest"/>
+            <item resourceId="JoinTree_1.hourly_disk_read__bytessec.fct_ts" dimensionOrMeasure="Dimension" id="hourly_disk_read__bytessec_fct_ts" label="disk_read__bytessec / hourly / TS"/>
+            <item resourceId="JoinTree_1.hourly_disk_read__bytessec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="hourly_disk_read__bytessec_fct_ts_gmt" label="disk_read__bytessec / hourly / TS GMT"/>
+            <item resourceId="JoinTree_1.hourly_disk_read__bytessec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_read__bytessec_fct_avg" label="disk_read__bytessec / hourly / Average"/>
+            <item resourceId="JoinTree_1.hourly_disk_read__bytessec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_read__bytessec_fct_max" label="disk_read__bytessec / hourly / Highest"/>
+            <item resourceId="JoinTree_1.hourly_disk_read__bytessec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_read__bytessec_fct_min" label="disk_read__bytessec / hourly / Lowest"/>
+            <item resourceId="JoinTree_1.daily_disk_reads__persec.fct_ts" dimensionOrMeasure="Dimension" id="daily_disk_reads__persec_fct_ts" label="disk_reads__persec / daily / TS"/>
+            <item resourceId="JoinTree_1.daily_disk_reads__persec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="daily_disk_reads__persec_fct_ts_gmt" label="disk_reads__persec / daily / TS GMT"/>
+            <item resourceId="JoinTree_1.daily_disk_reads__persec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_reads__persec_fct_avg" label="disk_reads__persec / daily / Average"/>
+            <item resourceId="JoinTree_1.daily_disk_reads__persec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_reads__persec_fct_max" label="disk_reads__persec / daily / Highest"/>
+            <item resourceId="JoinTree_1.daily_disk_reads__persec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_reads__persec_fct_min" label="disk_reads__persec / daily / Lowest"/>
+            <item resourceId="JoinTree_1.hourly_disk_reads__persec.fct_ts" dimensionOrMeasure="Dimension" id="hourly_disk_reads__persec_fct_ts" label="disk_reads__persec / hourly / TS"/>
+            <item resourceId="JoinTree_1.hourly_disk_reads__persec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="hourly_disk_reads__persec_fct_ts_gmt" label="disk_reads__persec / hourly / TS GMT"/>
+            <item resourceId="JoinTree_1.hourly_disk_reads__persec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_reads__persec_fct_avg" label="disk_reads__persec / hourly / Average"/>
+            <item resourceId="JoinTree_1.hourly_disk_reads__persec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_reads__persec_fct_max" label="disk_reads__persec / hourly / Highest"/>
+            <item resourceId="JoinTree_1.hourly_disk_reads__persec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_reads__persec_fct_min" label="disk_reads__persec / hourly / Lowest"/>
+            <item resourceId="JoinTree_1.daily_disk_write__bytessec.fct_ts" dimensionOrMeasure="Dimension" id="daily_disk_write__bytessec_fct_ts" label="disk_write__bytessec / daily / TS"/>
+            <item resourceId="JoinTree_1.daily_disk_write__bytessec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="daily_disk_write__bytessec_fct_ts_gmt" label="disk_write__bytessec / daily / TS GMT"/>
+            <item resourceId="JoinTree_1.daily_disk_write__bytessec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_write__bytessec_fct_avg" label="disk_write__bytessec / daily / Average"/>
+            <item resourceId="JoinTree_1.daily_disk_write__bytessec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_write__bytessec_fct_max" label="disk_write__bytessec / daily / Highest"/>
+            <item resourceId="JoinTree_1.daily_disk_write__bytessec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_write__bytessec_fct_min" label="disk_write__bytessec / daily / Lowest"/>
+            <item resourceId="JoinTree_1.hourly_disk_write__bytessec.fct_ts" dimensionOrMeasure="Dimension" id="hourly_disk_write__bytessec_fct_ts" label="disk_write__bytessec / hourly / TS"/>
+            <item resourceId="JoinTree_1.hourly_disk_write__bytessec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="hourly_disk_write__bytessec_fct_ts_gmt" label="disk_write__bytessec / hourly / TS GMT"/>
+            <item resourceId="JoinTree_1.hourly_disk_write__bytessec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_write__bytessec_fct_avg" label="disk_write__bytessec / hourly / Average"/>
+            <item resourceId="JoinTree_1.hourly_disk_write__bytessec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_write__bytessec_fct_max" label="disk_write__bytessec / hourly / Highest"/>
+            <item resourceId="JoinTree_1.hourly_disk_write__bytessec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_write__bytessec_fct_min" label="disk_write__bytessec / hourly / Lowest"/>
+            <item resourceId="JoinTree_1.daily_disk_writes__persec.fct_ts" dimensionOrMeasure="Dimension" id="daily_disk_writes__persec_fct_ts" label="disk_writes__persec / daily / TS"/>
+            <item resourceId="JoinTree_1.daily_disk_writes__persec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="daily_disk_writes__persec_fct_ts_gmt" label="disk_writes__persec / daily / TS GMT"/>
+            <item resourceId="JoinTree_1.daily_disk_writes__persec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_writes__persec_fct_avg" label="disk_writes__persec / daily / Average"/>
+            <item resourceId="JoinTree_1.daily_disk_writes__persec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_writes__persec_fct_max" label="disk_writes__persec / daily / Highest"/>
+            <item resourceId="JoinTree_1.daily_disk_writes__persec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_writes__persec_fct_min" label="disk_writes__persec / daily / Lowest"/>
+            <item resourceId="JoinTree_1.hourly_disk_writes__persec.fct_ts" dimensionOrMeasure="Dimension" id="hourly_disk_writes__persec_fct_ts" label="disk_writes__persec / hourly / TS"/>
+            <item resourceId="JoinTree_1.hourly_disk_writes__persec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="hourly_disk_writes__persec_fct_ts_gmt" label="disk_writes__persec / hourly / TS GMT"/>
+            <item resourceId="JoinTree_1.hourly_disk_writes__persec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_writes__persec_fct_avg" label="disk_writes__persec / hourly / Average"/>
+            <item resourceId="JoinTree_1.hourly_disk_writes__persec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_writes__persec_fct_max" label="disk_writes__persec / hourly / Highest"/>
+            <item resourceId="JoinTree_1.hourly_disk_writes__persec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_writes__persec_fct_min" label="disk_writes__persec / hourly / Lowest"/>
+          </items>
         </itemGroup>
       </itemGroups>
       <items>
@@ -1259,6 +1351,102 @@
         <field type="java.lang.Integer" id="openstack_infrastructure_instance_key"/>
       </fieldList>
     </jdbcTable>
+    <jdbcTable tableName="daily_if_received__bytessec" datasourceId="zenoss_reporting" id="daily_if_received__bytessec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="hourly_if_received__bytessec" datasourceId="zenoss_reporting" id="hourly_if_received__bytessec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="daily_if_received_packets__persec" datasourceId="zenoss_reporting" id="daily_if_received_packets__persec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="hourly_if_received_packets__persec" datasourceId="zenoss_reporting" id="hourly_if_received_packets__persec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="daily_if_sent__bytessec" datasourceId="zenoss_reporting" id="daily_if_sent__bytessec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="hourly_if_sent__bytessec" datasourceId="zenoss_reporting" id="hourly_if_sent__bytessec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="daily_if_sent_packets__persec" datasourceId="zenoss_reporting" id="daily_if_sent_packets__persec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="hourly_if_sent_packets__persec" datasourceId="zenoss_reporting" id="hourly_if_sent_packets__persec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
     <jdbcTable tableName="dim_openstack_infrastructure_nova_service" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_nova_service">
       <fieldList>
         <field type="java.lang.Integer" id="openstack_infrastructure_nova_service_key"/>
@@ -1320,6 +1508,126 @@
         <field type="java.lang.Double" id="openstack_infrastructure_vnic_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_image_key"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_flavor_key"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="daily_cpu__pct" datasourceId="zenoss_reporting" id="daily_cpu__pct">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="hourly_cpu__pct" datasourceId="zenoss_reporting" id="hourly_cpu__pct">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="daily_disk_read__bytessec" datasourceId="zenoss_reporting" id="daily_disk_read__bytessec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="hourly_disk_read__bytessec" datasourceId="zenoss_reporting" id="hourly_disk_read__bytessec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="daily_disk_reads__persec" datasourceId="zenoss_reporting" id="daily_disk_reads__persec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="hourly_disk_reads__persec" datasourceId="zenoss_reporting" id="hourly_disk_reads__persec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="daily_disk_write__bytessec" datasourceId="zenoss_reporting" id="daily_disk_write__bytessec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="hourly_disk_write__bytessec" datasourceId="zenoss_reporting" id="hourly_disk_write__bytessec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="daily_disk_writes__persec" datasourceId="zenoss_reporting" id="daily_disk_writes__persec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="hourly_disk_writes__persec" datasourceId="zenoss_reporting" id="hourly_disk_writes__persec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
       </fieldList>
     </jdbcTable>
     <jdbcTable tableName="dim_openstack_infrastructure_endpoint" datasourceId="zenoss_reporting" id="JoinTree_1">
@@ -1927,6 +2235,70 @@
         <field type="java.lang.Double" id="dim_openstack_infrastructure_vnic.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_instance_key"/>
+        <field type="java.lang.Integer" id="daily_if_received__bytessec.device_key"/>
+        <field type="java.lang.Integer" id="daily_if_received__bytessec.component_key"/>
+        <field type="java.util.Date" id="daily_if_received__bytessec.date_key"/>
+        <field type="java.sql.Timestamp" id="daily_if_received__bytessec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="daily_if_received__bytessec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="daily_if_received__bytessec.fct_avg"/>
+        <field type="java.lang.Double" id="daily_if_received__bytessec.fct_max"/>
+        <field type="java.lang.Double" id="daily_if_received__bytessec.fct_min"/>
+        <field type="java.lang.Integer" id="hourly_if_received__bytessec.device_key"/>
+        <field type="java.lang.Integer" id="hourly_if_received__bytessec.component_key"/>
+        <field type="java.util.Date" id="hourly_if_received__bytessec.date_key"/>
+        <field type="java.sql.Timestamp" id="hourly_if_received__bytessec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="hourly_if_received__bytessec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="hourly_if_received__bytessec.fct_avg"/>
+        <field type="java.lang.Double" id="hourly_if_received__bytessec.fct_max"/>
+        <field type="java.lang.Double" id="hourly_if_received__bytessec.fct_min"/>
+        <field type="java.lang.Integer" id="daily_if_received_packets__persec.device_key"/>
+        <field type="java.lang.Integer" id="daily_if_received_packets__persec.component_key"/>
+        <field type="java.util.Date" id="daily_if_received_packets__persec.date_key"/>
+        <field type="java.sql.Timestamp" id="daily_if_received_packets__persec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="daily_if_received_packets__persec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="daily_if_received_packets__persec.fct_avg"/>
+        <field type="java.lang.Double" id="daily_if_received_packets__persec.fct_max"/>
+        <field type="java.lang.Double" id="daily_if_received_packets__persec.fct_min"/>
+        <field type="java.lang.Integer" id="hourly_if_received_packets__persec.device_key"/>
+        <field type="java.lang.Integer" id="hourly_if_received_packets__persec.component_key"/>
+        <field type="java.util.Date" id="hourly_if_received_packets__persec.date_key"/>
+        <field type="java.sql.Timestamp" id="hourly_if_received_packets__persec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="hourly_if_received_packets__persec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="hourly_if_received_packets__persec.fct_avg"/>
+        <field type="java.lang.Double" id="hourly_if_received_packets__persec.fct_max"/>
+        <field type="java.lang.Double" id="hourly_if_received_packets__persec.fct_min"/>
+        <field type="java.lang.Integer" id="daily_if_sent__bytessec.device_key"/>
+        <field type="java.lang.Integer" id="daily_if_sent__bytessec.component_key"/>
+        <field type="java.util.Date" id="daily_if_sent__bytessec.date_key"/>
+        <field type="java.sql.Timestamp" id="daily_if_sent__bytessec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="daily_if_sent__bytessec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="daily_if_sent__bytessec.fct_avg"/>
+        <field type="java.lang.Double" id="daily_if_sent__bytessec.fct_max"/>
+        <field type="java.lang.Double" id="daily_if_sent__bytessec.fct_min"/>
+        <field type="java.lang.Integer" id="hourly_if_sent__bytessec.device_key"/>
+        <field type="java.lang.Integer" id="hourly_if_sent__bytessec.component_key"/>
+        <field type="java.util.Date" id="hourly_if_sent__bytessec.date_key"/>
+        <field type="java.sql.Timestamp" id="hourly_if_sent__bytessec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="hourly_if_sent__bytessec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="hourly_if_sent__bytessec.fct_avg"/>
+        <field type="java.lang.Double" id="hourly_if_sent__bytessec.fct_max"/>
+        <field type="java.lang.Double" id="hourly_if_sent__bytessec.fct_min"/>
+        <field type="java.lang.Integer" id="daily_if_sent_packets__persec.device_key"/>
+        <field type="java.lang.Integer" id="daily_if_sent_packets__persec.component_key"/>
+        <field type="java.util.Date" id="daily_if_sent_packets__persec.date_key"/>
+        <field type="java.sql.Timestamp" id="daily_if_sent_packets__persec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="daily_if_sent_packets__persec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="daily_if_sent_packets__persec.fct_avg"/>
+        <field type="java.lang.Double" id="daily_if_sent_packets__persec.fct_max"/>
+        <field type="java.lang.Double" id="daily_if_sent_packets__persec.fct_min"/>
+        <field type="java.lang.Integer" id="hourly_if_sent_packets__persec.device_key"/>
+        <field type="java.lang.Integer" id="hourly_if_sent_packets__persec.component_key"/>
+        <field type="java.util.Date" id="hourly_if_sent_packets__persec.date_key"/>
+        <field type="java.sql.Timestamp" id="hourly_if_sent_packets__persec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="hourly_if_sent_packets__persec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="hourly_if_sent_packets__persec.fct_avg"/>
+        <field type="java.lang.Double" id="hourly_if_sent_packets__persec.fct_max"/>
+        <field type="java.lang.Double" id="hourly_if_sent_packets__persec.fct_min"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_key"/>
         <field type="openstack_infrastructure_nova_service_deleted_at" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_deleted_at,null,0,1)"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_name"/>
@@ -1982,6 +2354,86 @@
         <field type="java.lang.Double" id="dim_openstack_infrastructure_instance.openstack_infrastructure_vnic_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.openstack_infrastructure_image_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.openstack_infrastructure_flavor_key"/>
+        <field type="java.lang.Integer" id="daily_cpu__pct.device_key"/>
+        <field type="java.lang.Integer" id="daily_cpu__pct.component_key"/>
+        <field type="java.util.Date" id="daily_cpu__pct.date_key"/>
+        <field type="java.sql.Timestamp" id="daily_cpu__pct.fct_ts"/>
+        <field type="java.sql.Timestamp" id="daily_cpu__pct.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="daily_cpu__pct.fct_avg"/>
+        <field type="java.lang.Double" id="daily_cpu__pct.fct_max"/>
+        <field type="java.lang.Double" id="daily_cpu__pct.fct_min"/>
+        <field type="java.lang.Integer" id="hourly_cpu__pct.device_key"/>
+        <field type="java.lang.Integer" id="hourly_cpu__pct.component_key"/>
+        <field type="java.util.Date" id="hourly_cpu__pct.date_key"/>
+        <field type="java.sql.Timestamp" id="hourly_cpu__pct.fct_ts"/>
+        <field type="java.sql.Timestamp" id="hourly_cpu__pct.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="hourly_cpu__pct.fct_avg"/>
+        <field type="java.lang.Double" id="hourly_cpu__pct.fct_max"/>
+        <field type="java.lang.Double" id="hourly_cpu__pct.fct_min"/>
+        <field type="java.lang.Integer" id="daily_disk_read__bytessec.device_key"/>
+        <field type="java.lang.Integer" id="daily_disk_read__bytessec.component_key"/>
+        <field type="java.util.Date" id="daily_disk_read__bytessec.date_key"/>
+        <field type="java.sql.Timestamp" id="daily_disk_read__bytessec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="daily_disk_read__bytessec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="daily_disk_read__bytessec.fct_avg"/>
+        <field type="java.lang.Double" id="daily_disk_read__bytessec.fct_max"/>
+        <field type="java.lang.Double" id="daily_disk_read__bytessec.fct_min"/>
+        <field type="java.lang.Integer" id="hourly_disk_read__bytessec.device_key"/>
+        <field type="java.lang.Integer" id="hourly_disk_read__bytessec.component_key"/>
+        <field type="java.util.Date" id="hourly_disk_read__bytessec.date_key"/>
+        <field type="java.sql.Timestamp" id="hourly_disk_read__bytessec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="hourly_disk_read__bytessec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="hourly_disk_read__bytessec.fct_avg"/>
+        <field type="java.lang.Double" id="hourly_disk_read__bytessec.fct_max"/>
+        <field type="java.lang.Double" id="hourly_disk_read__bytessec.fct_min"/>
+        <field type="java.lang.Integer" id="daily_disk_reads__persec.device_key"/>
+        <field type="java.lang.Integer" id="daily_disk_reads__persec.component_key"/>
+        <field type="java.util.Date" id="daily_disk_reads__persec.date_key"/>
+        <field type="java.sql.Timestamp" id="daily_disk_reads__persec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="daily_disk_reads__persec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="daily_disk_reads__persec.fct_avg"/>
+        <field type="java.lang.Double" id="daily_disk_reads__persec.fct_max"/>
+        <field type="java.lang.Double" id="daily_disk_reads__persec.fct_min"/>
+        <field type="java.lang.Integer" id="hourly_disk_reads__persec.device_key"/>
+        <field type="java.lang.Integer" id="hourly_disk_reads__persec.component_key"/>
+        <field type="java.util.Date" id="hourly_disk_reads__persec.date_key"/>
+        <field type="java.sql.Timestamp" id="hourly_disk_reads__persec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="hourly_disk_reads__persec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="hourly_disk_reads__persec.fct_avg"/>
+        <field type="java.lang.Double" id="hourly_disk_reads__persec.fct_max"/>
+        <field type="java.lang.Double" id="hourly_disk_reads__persec.fct_min"/>
+        <field type="java.lang.Integer" id="daily_disk_write__bytessec.device_key"/>
+        <field type="java.lang.Integer" id="daily_disk_write__bytessec.component_key"/>
+        <field type="java.util.Date" id="daily_disk_write__bytessec.date_key"/>
+        <field type="java.sql.Timestamp" id="daily_disk_write__bytessec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="daily_disk_write__bytessec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="daily_disk_write__bytessec.fct_avg"/>
+        <field type="java.lang.Double" id="daily_disk_write__bytessec.fct_max"/>
+        <field type="java.lang.Double" id="daily_disk_write__bytessec.fct_min"/>
+        <field type="java.lang.Integer" id="hourly_disk_write__bytessec.device_key"/>
+        <field type="java.lang.Integer" id="hourly_disk_write__bytessec.component_key"/>
+        <field type="java.util.Date" id="hourly_disk_write__bytessec.date_key"/>
+        <field type="java.sql.Timestamp" id="hourly_disk_write__bytessec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="hourly_disk_write__bytessec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="hourly_disk_write__bytessec.fct_avg"/>
+        <field type="java.lang.Double" id="hourly_disk_write__bytessec.fct_max"/>
+        <field type="java.lang.Double" id="hourly_disk_write__bytessec.fct_min"/>
+        <field type="java.lang.Integer" id="daily_disk_writes__persec.device_key"/>
+        <field type="java.lang.Integer" id="daily_disk_writes__persec.component_key"/>
+        <field type="java.util.Date" id="daily_disk_writes__persec.date_key"/>
+        <field type="java.sql.Timestamp" id="daily_disk_writes__persec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="daily_disk_writes__persec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="daily_disk_writes__persec.fct_avg"/>
+        <field type="java.lang.Double" id="daily_disk_writes__persec.fct_max"/>
+        <field type="java.lang.Double" id="daily_disk_writes__persec.fct_min"/>
+        <field type="java.lang.Integer" id="hourly_disk_writes__persec.device_key"/>
+        <field type="java.lang.Integer" id="hourly_disk_writes__persec.component_key"/>
+        <field type="java.util.Date" id="hourly_disk_writes__persec.date_key"/>
+        <field type="java.sql.Timestamp" id="hourly_disk_writes__persec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="hourly_disk_writes__persec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="hourly_disk_writes__persec.fct_avg"/>
+        <field type="java.lang.Double" id="hourly_disk_writes__persec.fct_max"/>
+        <field type="java.lang.Double" id="hourly_disk_writes__persec.fct_min"/>
       </fieldList>
       <joinInfo alias="dim_openstack_infrastructure_endpoint" referenceId="dim_openstack_infrastructure_endpoint"/>
       <joinedDataSetList>
@@ -2136,37 +2588,91 @@
           <joinString>left outer join hourly_server_verify_resize__count hourly_server_verify_resize__count on (dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key == hourly_server_verify_resize__count.device_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_tenant dim_openstack_infrastructure_tenant on (dim_openstack_infrastructure_tenant.endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_tenant dim_openstack_infrastructure_tenant on (dim_openstack_infrastructure_tenant.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_region dim_openstack_infrastructure_region on (dim_openstack_infrastructure_region.endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_region dim_openstack_infrastructure_region on (dim_openstack_infrastructure_region.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_flavor dim_openstack_infrastructure_flavor on (dim_openstack_infrastructure_flavor.endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_flavor dim_openstack_infrastructure_flavor on (dim_openstack_infrastructure_flavor.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_image dim_openstack_infrastructure_image on (dim_openstack_infrastructure_image.endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_image dim_openstack_infrastructure_image on (dim_openstack_infrastructure_image.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_availability_zone dim_openstack_infrastructure_availability_zone on (dim_openstack_infrastructure_availability_zone.endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_availability_zone.parent_org_key == dim_openstack_infrastructure_region.openstack_infrastructure_region_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_availability_zone dim_openstack_infrastructure_availability_zone on (dim_openstack_infrastructure_availability_zone.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_host dim_openstack_infrastructure_host on (dim_openstack_infrastructure_host.endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_host.org_component_key == dim_openstack_infrastructure_availability_zone.openstack_infrastructure_availability_zone_key and dim_openstack_infrastructure_host.hypervisor_key == dim_openstack_infrastructure_hypervisor.openstack_infrastructure_hypervisor_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_host dim_openstack_infrastructure_host on (dim_openstack_infrastructure_host.org_component_key == dim_openstack_infrastructure_availability_zone.openstack_infrastructure_availability_zone_key and dim_openstack_infrastructure_host.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_host.openstack_infrastructure_hypervisor_key == dim_openstack_infrastructure_hypervisor.openstack_infrastructure_hypervisor_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_hypervisor dim_openstack_infrastructure_hypervisor on (dim_openstack_infrastructure_hypervisor.host_key == dim_openstack_infrastructure_host.openstack_infrastructure_host_key and dim_openstack_infrastructure_hypervisor.endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_hypervisor dim_openstack_infrastructure_hypervisor on (dim_openstack_infrastructure_hypervisor.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_hypervisor.openstack_infrastructure_host_key == dim_openstack_infrastructure_host.openstack_infrastructure_host_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_vnic dim_openstack_infrastructure_vnic on (dim_openstack_infrastructure_vnic.instance_key == dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_vnic dim_openstack_infrastructure_vnic on (dim_openstack_infrastructure_vnic.openstack_infrastructure_instance_key == dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_nova_service dim_openstack_infrastructure_nova_service on (dim_openstack_infrastructure_nova_service.org_component_key == dim_openstack_infrastructure_availability_zone.openstack_infrastructure_availability_zone_key and dim_openstack_infrastructure_nova_service.hosted_on_key == dim_openstack_infrastructure_host.openstack_infrastructure_host_key and dim_openstack_infrastructure_nova_service.endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+          <joinString>left outer join daily_if_received__bytessec daily_if_received__bytessec on (dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_key == daily_if_received__bytessec.component_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_instance dim_openstack_infrastructure_instance on (dim_openstack_infrastructure_instance.hypervisor_key == dim_openstack_infrastructure_hypervisor.openstack_infrastructure_hypervisor_key and dim_openstack_infrastructure_instance.flavor_key == dim_openstack_infrastructure_flavor.openstack_infrastructure_flavor_key and dim_openstack_infrastructure_instance.tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key and dim_openstack_infrastructure_instance.endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_instance.image_key == dim_openstack_infrastructure_image.openstack_infrastructure_image_key)</joinString>
+          <joinString>left outer join hourly_if_received__bytessec hourly_if_received__bytessec on (dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_key == hourly_if_received__bytessec.component_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_date dim_date on (hourly_server_prep_resize__count.date_key == dim_date.date_key and daily_image_failed__count.date_key == dim_date.date_key and daily_image_other__count.date_key == dim_date.date_key and hourly_server_active__count.date_key == dim_date.date_key and hourly_server_verify_resize__count.date_key == dim_date.date_key and daily_flavor_total__count.date_key == dim_date.date_key and hourly_server_reboot__count.date_key == dim_date.date_key and daily_server_queue_resize__count.date_key == dim_date.date_key and daily_image_saving__count.date_key == dim_date.date_key and daily_server_active__count.date_key == dim_date.date_key and daily_server_rescue__count.date_key == dim_date.date_key and daily_server_password__count.date_key == dim_date.date_key and hourly_server_password__count.date_key == dim_date.date_key and hourly_image_failed__count.date_key == dim_date.date_key and daily_server_prep_resize__count.date_key == dim_date.date_key and hourly_server_other__count.date_key == dim_date.date_key and daily_server_verify_resize__count.date_key == dim_date.date_key and daily_server_build__count.date_key == dim_date.date_key and hourly_server_rescue__count.date_key == dim_date.date_key and hourly_server_resize__count.date_key == dim_date.date_key and daily_image_active__count.date_key == dim_date.date_key and hourly_server_build__count.date_key == dim_date.date_key and hourly_server_delete__count.date_key == dim_date.date_key and daily_server_other__count.date_key == dim_date.date_key and hourly_image_preparing__count.date_key == dim_date.date_key and daily_server_unknown__count.date_key == dim_date.date_key and hourly_server_unknown__count.date_key == dim_date.date_key and daily_server_reboot__count.date_key == dim_date.date_key and daily_server_rebuild__count.date_key == dim_date.date_key and hourly_image_queued__count.date_key == dim_date.date_key and hourly_image_saving__count.date_key == dim_date.date_key and hourly_server_rebuild__count.date_key == dim_date.date_key and daily_server_hard_reboot__count.date_key == dim_date.date_key and hourly_image_active__count.date_key == dim_date.date_key and hourly_image_unknown__count.date_key == dim_date.date_key and daily_server_resize__count.date_key == dim_date.date_key and hourly_server_total__count.date_key == dim_date.date_key and hourly_image_total__count.date_key == dim_date.date_key and hourly_server_hard_reboot__count.date_key == dim_date.date_key and daily_image_preparing__count.date_key == dim_date.date_key and daily_server_suspended__count.date_key == dim_date.date_key and hourly_flavor_total__count.date_key == dim_date.date_key and daily_image_total__count.date_key == dim_date.date_key and hourly_server_queue_resize__count.date_key == dim_date.date_key and daily_image_unknown__count.date_key == dim_date.date_key and daily_server_total__count.date_key == dim_date.date_key and hourly_image_other__count.date_key == dim_date.date_key and daily_server_delete__count.date_key == dim_date.date_key and daily_image_queued__count.date_key == dim_date.date_key and hourly_server_suspended__count.date_key == dim_date.date_key)</joinString>
+          <joinString>left outer join daily_if_received_packets__persec daily_if_received_packets__persec on (dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_key == daily_if_received_packets__persec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join hourly_if_received_packets__persec hourly_if_received_packets__persec on (dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_key == hourly_if_received_packets__persec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join daily_if_sent__bytessec daily_if_sent__bytessec on (dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_key == daily_if_sent__bytessec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join hourly_if_sent__bytessec hourly_if_sent__bytessec on (dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_key == hourly_if_sent__bytessec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join daily_if_sent_packets__persec daily_if_sent_packets__persec on (dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_key == daily_if_sent_packets__persec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join hourly_if_sent_packets__persec hourly_if_sent_packets__persec on (dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_key == hourly_if_sent_packets__persec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join dim_openstack_infrastructure_nova_service dim_openstack_infrastructure_nova_service on (dim_openstack_infrastructure_nova_service.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_nova_service.openstack_infrastructure_host_key == dim_openstack_infrastructure_host.openstack_infrastructure_host_key and dim_openstack_infrastructure_nova_service.org_component_key == dim_openstack_infrastructure_availability_zone.openstack_infrastructure_availability_zone_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join dim_openstack_infrastructure_instance dim_openstack_infrastructure_instance on (dim_openstack_infrastructure_instance.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_instance.openstack_infrastructure_hypervisor_key == dim_openstack_infrastructure_hypervisor.openstack_infrastructure_hypervisor_key and dim_openstack_infrastructure_instance.openstack_infrastructure_image_key == dim_openstack_infrastructure_image.openstack_infrastructure_image_key and dim_openstack_infrastructure_instance.openstack_infrastructure_flavor_key == dim_openstack_infrastructure_flavor.openstack_infrastructure_flavor_key and dim_openstack_infrastructure_instance.openstack_infrastructure_tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join daily_cpu__pct daily_cpu__pct on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == daily_cpu__pct.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join hourly_cpu__pct hourly_cpu__pct on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == hourly_cpu__pct.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join daily_disk_read__bytessec daily_disk_read__bytessec on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == daily_disk_read__bytessec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join hourly_disk_read__bytessec hourly_disk_read__bytessec on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == hourly_disk_read__bytessec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join daily_disk_reads__persec daily_disk_reads__persec on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == daily_disk_reads__persec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join hourly_disk_reads__persec hourly_disk_reads__persec on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == hourly_disk_reads__persec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join daily_disk_write__bytessec daily_disk_write__bytessec on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == daily_disk_write__bytessec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join hourly_disk_write__bytessec hourly_disk_write__bytessec on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == hourly_disk_write__bytessec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join daily_disk_writes__persec daily_disk_writes__persec on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == daily_disk_writes__persec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join hourly_disk_writes__persec hourly_disk_writes__persec on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == hourly_disk_writes__persec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join dim_date dim_date on (hourly_server_prep_resize__count.date_key == dim_date.date_key and daily_image_failed__count.date_key == dim_date.date_key and daily_image_other__count.date_key == dim_date.date_key and hourly_server_active__count.date_key == dim_date.date_key and hourly_server_verify_resize__count.date_key == dim_date.date_key and daily_flavor_total__count.date_key == dim_date.date_key and hourly_server_reboot__count.date_key == dim_date.date_key and daily_server_queue_resize__count.date_key == dim_date.date_key and daily_image_saving__count.date_key == dim_date.date_key and daily_server_active__count.date_key == dim_date.date_key and daily_server_rescue__count.date_key == dim_date.date_key and daily_server_password__count.date_key == dim_date.date_key and hourly_if_sent__bytessec.date_key == dim_date.date_key and hourly_server_password__count.date_key == dim_date.date_key and hourly_image_failed__count.date_key == dim_date.date_key and hourly_disk_read__bytessec.date_key == dim_date.date_key and daily_server_prep_resize__count.date_key == dim_date.date_key and hourly_server_other__count.date_key == dim_date.date_key and daily_server_verify_resize__count.date_key == dim_date.date_key and daily_disk_write__bytessec.date_key == dim_date.date_key and daily_server_build__count.date_key == dim_date.date_key and hourly_server_rescue__count.date_key == dim_date.date_key and hourly_server_resize__count.date_key == dim_date.date_key and daily_image_active__count.date_key == dim_date.date_key and hourly_server_build__count.date_key == dim_date.date_key and hourly_server_delete__count.date_key == dim_date.date_key and hourly_cpu__pct.date_key == dim_date.date_key and daily_server_other__count.date_key == dim_date.date_key and daily_disk_writes__persec.date_key == dim_date.date_key and hourly_if_sent_packets__persec.date_key == dim_date.date_key and daily_if_sent_packets__persec.date_key == dim_date.date_key and hourly_image_preparing__count.date_key == dim_date.date_key and daily_server_unknown__count.date_key == dim_date.date_key and hourly_server_unknown__count.date_key == dim_date.date_key and daily_server_reboot__count.date_key == dim_date.date_key and daily_server_rebuild__count.date_key == dim_date.date_key and hourly_disk_writes__persec.date_key == dim_date.date_key and daily_disk_read__bytessec.date_key == dim_date.date_key and hourly_image_queued__count.date_key == dim_date.date_key and hourly_disk_write__bytessec.date_key == dim_date.date_key and hourly_image_saving__count.date_key == dim_date.date_key and hourly_server_rebuild__count.date_key == dim_date.date_key and daily_server_hard_reboot__count.date_key == dim_date.date_key and daily_disk_reads__persec.date_key == dim_date.date_key and hourly_image_active__count.date_key == dim_date.date_key and hourly_image_unknown__count.date_key == dim_date.date_key and daily_server_resize__count.date_key == dim_date.date_key and hourly_server_total__count.date_key == dim_date.date_key and hourly_image_total__count.date_key == dim_date.date_key and hourly_server_hard_reboot__count.date_key == dim_date.date_key and hourly_if_received_packets__persec.date_key == dim_date.date_key and hourly_disk_reads__persec.date_key == dim_date.date_key and daily_image_preparing__count.date_key == dim_date.date_key and daily_if_received__bytessec.date_key == dim_date.date_key and daily_server_suspended__count.date_key == dim_date.date_key and hourly_flavor_total__count.date_key == dim_date.date_key and daily_image_total__count.date_key == dim_date.date_key and hourly_server_queue_resize__count.date_key == dim_date.date_key and daily_image_unknown__count.date_key == dim_date.date_key and daily_server_total__count.date_key == dim_date.date_key and hourly_image_other__count.date_key == dim_date.date_key and daily_cpu__pct.date_key == dim_date.date_key and daily_server_delete__count.date_key == dim_date.date_key and daily_image_queued__count.date_key == dim_date.date_key and hourly_server_suspended__count.date_key == dim_date.date_key and daily_if_sent__bytessec.date_key == dim_date.date_key and daily_if_received_packets__persec.date_key == dim_date.date_key and hourly_if_received__bytessec.date_key == dim_date.date_key)</joinString>
         </joinedDataSetRef>
       </joinedDataSetList>
     </jdbcTable>
