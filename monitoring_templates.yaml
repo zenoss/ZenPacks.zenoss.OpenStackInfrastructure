@@ -183,6 +183,9 @@
     events:
       type: OpenStack Ceilometer Events AMQP
 
+    heartbearts:
+      type: OpenStack Ceilometer Heartbeats AMQP
+
     serviceStatus:
       type: OpenStack Nova Service Status
 

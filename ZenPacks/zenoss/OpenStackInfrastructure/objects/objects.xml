@@ -58,6 +58,26 @@ ${here/id}
 ZenPacks.zenoss.OpenStackInfrastructure.datasources.EventsAMQPDataSource.EventsAMQPDataSourcePlugin
 </property>
 </object>
+<object id='heartbearts' module='ZenPacks.zenoss.OpenStackInfrastructure.datasources.HeartbeatsAMQPDataSource' class='HeartbeatsAMQPDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+OpenStack Ceilometer Heartbeats AMQP
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="int" id="severity" mode="w" >
+3
+</property>
+<property type="string" id="cycletime" mode="w" >
+30
+</property>
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStackInfrastructure.datasources.HeartbeatsAMQPDataSource.HeartbeatsAMQPDataSourcePlugin
+</property>
+</object>
 <object id='openstack' module='Products.ZenModel.BasicDataSource' class='BasicDataSource'>
 <property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
 COMMAND
