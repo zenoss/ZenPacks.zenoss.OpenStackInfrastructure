@@ -9,6 +9,8 @@
 
 import basereportable
 from ZenPacks.zenoss.OpenStackInfrastructure.SoftwareComponent import SoftwareComponent
+from Products.Zuul.interfaces import IReportable
+from ZenPacks.zenoss.ZenETL.reportable import MARKER_LENGTH
 
 
 class BaseReportable(basereportable.BaseReportable):
@@ -32,3 +34,45 @@ class BaseReportable(basereportable.BaseReportable):
 
 class BaseReportableFactory(basereportable.BaseReportableFactory):
     pass
+
+
+class HostReportable(BaseReportable):
+
+    # add a reference to the host device, in addition to the normal
+    # exported references and properties.
+    def reportProperties(self):
+        for prop in super(HostReportable, self).reportProperties():
+            yield prop
+
+        hostDevice = self.context.proxy_device()
+        if hostDevice:
+            yield ('openstack_infrastructure_host_host_device_key',
+                   'reference',
+                   IReportable(hostDevice).sid,
+                   MARKER_LENGTH)
+        else:
+            yield ('openstack_infrastructure_host_host_device_key',
+                   'reference',
+                   None,
+                   MARKER_LENGTH)
+
+
+class InstanceReportable(BaseReportable):
+
+    # add a reference to the guest device, in addition to the normal
+    # exported references and properties.
+    def reportProperties(self):
+        for prop in super(InstanceReportable, self).reportProperties():
+            yield prop
+
+        guestDevice = self.context.guestDevice()
+        if guestDevice:
+            yield ('openstack_infrastructure_instance_guest_device_key',
+                   'reference',
+                   IReportable(guestDevice).sid,
+                   MARKER_LENGTH)
+        else:
+            yield ('openstack_infrastructure_instance_guest_device_key',
+                   'reference',
+                   None,
+                   MARKER_LENGTH)
