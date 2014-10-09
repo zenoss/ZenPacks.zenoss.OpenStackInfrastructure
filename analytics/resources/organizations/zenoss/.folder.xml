@@ -1,6 +1,2 @@
-<?xml version='1.0' encoding='utf-8'?>
-<folder exportedWithPermissions="false">
-  <parent>/organizations</parent>
-  <name>zenoss</name>
-  <label>Zenoss</label>
-</folder>
+<?xml version="1.0" encoding="UTF-8"?>
+<folder exportedWithPermissions="false"><parent>/organizations</parent><name>zenoss</name><label>Zenoss</label><description>Folder Template</description><creationDate>2014-09-12T13:22:56.000-05:00</creationDate><updateDate>2012-12-17T11:09:11.000-06:00</updateDate></folder>

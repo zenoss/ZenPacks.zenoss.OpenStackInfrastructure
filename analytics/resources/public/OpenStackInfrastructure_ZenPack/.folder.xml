@@ -1,7 +1,2 @@
-<?xml version='1.0' encoding='utf-8'?>
-<folder exportedWithPermissions="false">
-  <parent>/public</parent>
-  <name>OpenStackInfrastructure_ZenPack</name>
-  <label>OpenStackInfrastructure ZenPack</label>
-  <resource>OpenStackInfrastructure_Domain</resource>
-</folder>
+<?xml version="1.0" encoding="UTF-8"?>
+<folder exportedWithPermissions="false"><parent>/public</parent><name>OpenStackInfrastructure_ZenPack</name><label>OpenStackInfrastructure ZenPack</label><creationDate>2014-10-08T19:48:52.000-05:00</creationDate><updateDate>2014-10-08T19:48:52.000-05:00</updateDate><resource>OpenStack_Instance_List</resource><resource>OpenStackInfrastructure_Domain</resource></folder>
