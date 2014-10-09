@@ -119,6 +119,9 @@ class HeartbeatsAMQPDataSourcePlugin(PythonDataSourcePlugin):
         service = yield self.getService('ZenPacks.zenoss.OpenStackInfrastructure.services.OpenStackService')
         expected_heartbeats = yield service.callRemote('expected_ceilometer_heartbeats', config.id)
 
+        if not expected_heartbeats:
+            return
+            
         hostnames = expected_heartbeats[0]['hostnames']
         processes = expected_heartbeats[0]['processes']
 

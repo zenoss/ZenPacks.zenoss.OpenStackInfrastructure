@@ -5,6 +5,7 @@
 
   <!-- Define the reportable schema -->
 
+  <!-- Default behavior using BaseReportable: -->
   <adapter factory=".reportable.BaseReportable"
            for=".zenpacklib.Device"
            provides="Products.Zuul.interfaces.IReportable"
@@ -23,6 +24,18 @@
   <adapter factory=".reportable.BaseReportableFactory"
            for=".zenpacklib.Component"
            provides="Products.Zuul.interfaces.IReportableFactory"
+           />
+
+  <!-- Add specific overrides of the default behavior -->
+
+  <adapter factory=".reportable.HostReportable"
+           for=".Host.Host"
+           provides="Products.Zuul.interfaces.IReportable"
+           />
+
+  <adapter factory=".reportable.InstanceReportable"
+           for=".Instance.Instance"
+           provides="Products.Zuul.interfaces.IReportable"
            />
 
 </configure>

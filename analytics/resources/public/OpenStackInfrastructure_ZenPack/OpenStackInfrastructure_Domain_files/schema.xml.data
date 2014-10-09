@@ -261,6 +261,21 @@
       </itemGroups>
       <items/>
     </itemGroup>
+    <itemGroup resourceId="JoinTree_1" label="Nova Services" id="set_openstack_infrastructure_nova_service" description="">
+      <itemGroups>
+        <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_nova_service_measures" description="">
+          <itemGroups/>
+          <items/>
+        </itemGroup>
+      </itemGroups>
+      <items>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_nova_service_openstack_infrastructure_nova_service_name" label="Nova Service Name"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_nova_service_openstack_infrastructure_nova_service_resource_id" label="Ceilometer Resource ID"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_oper_status" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_nova_service_openstack_infrastructure_nova_service_oper_status" label="State"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_binary" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_nova_service_openstack_infrastructure_nova_service_binary" label="Binary"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_enabled" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_nova_service_openstack_infrastructure_nova_service_enabled" label="Enabled"/>
+      </items>
+    </itemGroup>
     <itemGroup resourceId="JoinTree_1" label="Tenants" id="set_openstack_infrastructure_tenant" description="">
       <itemGroups>
         <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_tenant_measures" description="">
@@ -319,6 +334,81 @@
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_image.openstack_infrastructure_image_image_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_image_openstack_infrastructure_image_image_id" label="Image ID"/>
       </items>
     </itemGroup>
+    <itemGroup resourceId="JoinTree_1" label="Instances" id="set_openstack_infrastructure_instance" description="">
+      <itemGroups>
+        <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_instance_measures" description="">
+          <itemGroups/>
+          <items>
+            <item resourceId="JoinTree_1.daily_cpu__pct.fct_ts" dimensionOrMeasure="Dimension" id="daily_cpu__pct_fct_ts" label="cpu__pct / daily / TS"/>
+            <item resourceId="JoinTree_1.daily_cpu__pct.fct_ts_gmt" dimensionOrMeasure="Dimension" id="daily_cpu__pct_fct_ts_gmt" label="cpu__pct / daily / TS GMT"/>
+            <item resourceId="JoinTree_1.daily_cpu__pct.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_cpu__pct_fct_avg" label="cpu__pct / daily / Average"/>
+            <item resourceId="JoinTree_1.daily_cpu__pct.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_cpu__pct_fct_max" label="cpu__pct / daily / Highest"/>
+            <item resourceId="JoinTree_1.daily_cpu__pct.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_cpu__pct_fct_min" label="cpu__pct / daily / Lowest"/>
+            <item resourceId="JoinTree_1.hourly_cpu__pct.fct_ts" dimensionOrMeasure="Dimension" id="hourly_cpu__pct_fct_ts" label="cpu__pct / hourly / TS"/>
+            <item resourceId="JoinTree_1.hourly_cpu__pct.fct_ts_gmt" dimensionOrMeasure="Dimension" id="hourly_cpu__pct_fct_ts_gmt" label="cpu__pct / hourly / TS GMT"/>
+            <item resourceId="JoinTree_1.hourly_cpu__pct.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_cpu__pct_fct_avg" label="cpu__pct / hourly / Average"/>
+            <item resourceId="JoinTree_1.hourly_cpu__pct.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_cpu__pct_fct_max" label="cpu__pct / hourly / Highest"/>
+            <item resourceId="JoinTree_1.hourly_cpu__pct.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_cpu__pct_fct_min" label="cpu__pct / hourly / Lowest"/>
+            <item resourceId="JoinTree_1.daily_disk_read__bytessec.fct_ts" dimensionOrMeasure="Dimension" id="daily_disk_read__bytessec_fct_ts" label="disk_read__bytessec / daily / TS"/>
+            <item resourceId="JoinTree_1.daily_disk_read__bytessec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="daily_disk_read__bytessec_fct_ts_gmt" label="disk_read__bytessec / daily / TS GMT"/>
+            <item resourceId="JoinTree_1.daily_disk_read__bytessec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_read__bytessec_fct_avg" label="disk_read__bytessec / daily / Average"/>
+            <item resourceId="JoinTree_1.daily_disk_read__bytessec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_read__bytessec_fct_max" label="disk_read__bytessec / daily / Highest"/>
+            <item resourceId="JoinTree_1.daily_disk_read__bytessec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_read__bytessec_fct_min" label="disk_read__bytessec / daily / Lowest"/>
+            <item resourceId="JoinTree_1.hourly_disk_read__bytessec.fct_ts" dimensionOrMeasure="Dimension" id="hourly_disk_read__bytessec_fct_ts" label="disk_read__bytessec / hourly / TS"/>
+            <item resourceId="JoinTree_1.hourly_disk_read__bytessec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="hourly_disk_read__bytessec_fct_ts_gmt" label="disk_read__bytessec / hourly / TS GMT"/>
+            <item resourceId="JoinTree_1.hourly_disk_read__bytessec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_read__bytessec_fct_avg" label="disk_read__bytessec / hourly / Average"/>
+            <item resourceId="JoinTree_1.hourly_disk_read__bytessec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_read__bytessec_fct_max" label="disk_read__bytessec / hourly / Highest"/>
+            <item resourceId="JoinTree_1.hourly_disk_read__bytessec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_read__bytessec_fct_min" label="disk_read__bytessec / hourly / Lowest"/>
+            <item resourceId="JoinTree_1.daily_disk_reads__persec.fct_ts" dimensionOrMeasure="Dimension" id="daily_disk_reads__persec_fct_ts" label="disk_reads__persec / daily / TS"/>
+            <item resourceId="JoinTree_1.daily_disk_reads__persec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="daily_disk_reads__persec_fct_ts_gmt" label="disk_reads__persec / daily / TS GMT"/>
+            <item resourceId="JoinTree_1.daily_disk_reads__persec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_reads__persec_fct_avg" label="disk_reads__persec / daily / Average"/>
+            <item resourceId="JoinTree_1.daily_disk_reads__persec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_reads__persec_fct_max" label="disk_reads__persec / daily / Highest"/>
+            <item resourceId="JoinTree_1.daily_disk_reads__persec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_reads__persec_fct_min" label="disk_reads__persec / daily / Lowest"/>
+            <item resourceId="JoinTree_1.hourly_disk_reads__persec.fct_ts" dimensionOrMeasure="Dimension" id="hourly_disk_reads__persec_fct_ts" label="disk_reads__persec / hourly / TS"/>
+            <item resourceId="JoinTree_1.hourly_disk_reads__persec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="hourly_disk_reads__persec_fct_ts_gmt" label="disk_reads__persec / hourly / TS GMT"/>
+            <item resourceId="JoinTree_1.hourly_disk_reads__persec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_reads__persec_fct_avg" label="disk_reads__persec / hourly / Average"/>
+            <item resourceId="JoinTree_1.hourly_disk_reads__persec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_reads__persec_fct_max" label="disk_reads__persec / hourly / Highest"/>
+            <item resourceId="JoinTree_1.hourly_disk_reads__persec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_reads__persec_fct_min" label="disk_reads__persec / hourly / Lowest"/>
+            <item resourceId="JoinTree_1.daily_disk_write__bytessec.fct_ts" dimensionOrMeasure="Dimension" id="daily_disk_write__bytessec_fct_ts" label="disk_write__bytessec / daily / TS"/>
+            <item resourceId="JoinTree_1.daily_disk_write__bytessec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="daily_disk_write__bytessec_fct_ts_gmt" label="disk_write__bytessec / daily / TS GMT"/>
+            <item resourceId="JoinTree_1.daily_disk_write__bytessec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_write__bytessec_fct_avg" label="disk_write__bytessec / daily / Average"/>
+            <item resourceId="JoinTree_1.daily_disk_write__bytessec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_write__bytessec_fct_max" label="disk_write__bytessec / daily / Highest"/>
+            <item resourceId="JoinTree_1.daily_disk_write__bytessec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_write__bytessec_fct_min" label="disk_write__bytessec / daily / Lowest"/>
+            <item resourceId="JoinTree_1.hourly_disk_write__bytessec.fct_ts" dimensionOrMeasure="Dimension" id="hourly_disk_write__bytessec_fct_ts" label="disk_write__bytessec / hourly / TS"/>
+            <item resourceId="JoinTree_1.hourly_disk_write__bytessec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="hourly_disk_write__bytessec_fct_ts_gmt" label="disk_write__bytessec / hourly / TS GMT"/>
+            <item resourceId="JoinTree_1.hourly_disk_write__bytessec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_write__bytessec_fct_avg" label="disk_write__bytessec / hourly / Average"/>
+            <item resourceId="JoinTree_1.hourly_disk_write__bytessec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_write__bytessec_fct_max" label="disk_write__bytessec / hourly / Highest"/>
+            <item resourceId="JoinTree_1.hourly_disk_write__bytessec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_write__bytessec_fct_min" label="disk_write__bytessec / hourly / Lowest"/>
+            <item resourceId="JoinTree_1.daily_disk_writes__persec.fct_ts" dimensionOrMeasure="Dimension" id="daily_disk_writes__persec_fct_ts" label="disk_writes__persec / daily / TS"/>
+            <item resourceId="JoinTree_1.daily_disk_writes__persec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="daily_disk_writes__persec_fct_ts_gmt" label="disk_writes__persec / daily / TS GMT"/>
+            <item resourceId="JoinTree_1.daily_disk_writes__persec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_writes__persec_fct_avg" label="disk_writes__persec / daily / Average"/>
+            <item resourceId="JoinTree_1.daily_disk_writes__persec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_writes__persec_fct_max" label="disk_writes__persec / daily / Highest"/>
+            <item resourceId="JoinTree_1.daily_disk_writes__persec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_disk_writes__persec_fct_min" label="disk_writes__persec / daily / Lowest"/>
+            <item resourceId="JoinTree_1.hourly_disk_writes__persec.fct_ts" dimensionOrMeasure="Dimension" id="hourly_disk_writes__persec_fct_ts" label="disk_writes__persec / hourly / TS"/>
+            <item resourceId="JoinTree_1.hourly_disk_writes__persec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="hourly_disk_writes__persec_fct_ts_gmt" label="disk_writes__persec / hourly / TS GMT"/>
+            <item resourceId="JoinTree_1.hourly_disk_writes__persec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_writes__persec_fct_avg" label="disk_writes__persec / hourly / Average"/>
+            <item resourceId="JoinTree_1.hourly_disk_writes__persec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_writes__persec_fct_max" label="disk_writes__persec / hourly / Highest"/>
+            <item resourceId="JoinTree_1.hourly_disk_writes__persec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_disk_writes__persec_fct_min" label="disk_writes__persec / hourly / Lowest"/>
+          </items>
+        </itemGroup>
+      </itemGroups>
+      <items>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_name" label="Instance Name"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_resource_id" label="Ceilometer Resource ID"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_hypervisor_instance_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_hypervisor_instance_name" label="Hypervisor Instance Name"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_private_ips" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_private_ips" label="Private IPs"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_backup_enabled" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_server_backup_enabled" label="Backup"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_host_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_host_name" label="hostName"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_public_ips" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_public_ips" label="Public IPs"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_backup_daily" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_server_backup_daily" label="Daily Server Backup"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_host_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_host_id" label="Host ID"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_backup_weekly" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_server_backup_weekly" label="Weekly Server Backup"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_bios_uuid" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_bios_uuid" label="BIOS UUID"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_server_id" label="Server ID"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_status" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_server_status" label="Status"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_serial_number" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_serial_number" label="BIOS Serial Number"/>
+      </items>
+    </itemGroup>
     <itemGroup resourceId="JoinTree_1" label="Availability Zones" id="set_openstack_infrastructure_availability_zone" description="">
       <itemGroups>
         <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_availability_zone_measures" description="">
@@ -359,58 +449,6 @@
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_hypervisor.openstack_infrastructure_hypervisor_hostfqdn" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_hypervisor_openstack_infrastructure_hypervisor_hostfqdn" label="FQDN"/>
       </items>
     </itemGroup>
-    <itemGroup resourceId="JoinTree_1" label="Vnics" id="set_openstack_infrastructure_vnic" description="">
-      <itemGroups>
-        <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_vnic_measures" description="">
-          <itemGroups/>
-          <items/>
-        </itemGroup>
-      </itemGroups>
-      <items>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_vnic_openstack_infrastructure_vnic_name" label="Vnic Name"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_vnic_openstack_infrastructure_vnic_resource_id" label="Ceilometer Resource ID"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_macaddress" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_vnic_openstack_infrastructure_vnic_macaddress" label="MAC Address"/>
-      </items>
-    </itemGroup>
-    <itemGroup resourceId="JoinTree_1" label="Nova Services" id="set_openstack_infrastructure_nova_service" description="">
-      <itemGroups>
-        <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_nova_service_measures" description="">
-          <itemGroups/>
-          <items/>
-        </itemGroup>
-      </itemGroups>
-      <items>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_nova_service_openstack_infrastructure_nova_service_name" label="Nova Service Name"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_nova_service_openstack_infrastructure_nova_service_resource_id" label="Ceilometer Resource ID"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_oper_status" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_nova_service_openstack_infrastructure_nova_service_oper_status" label="State"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_binary" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_nova_service_openstack_infrastructure_nova_service_binary" label="Binary"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_enabled" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_nova_service_openstack_infrastructure_nova_service_enabled" label="Enabled"/>
-      </items>
-    </itemGroup>
-    <itemGroup resourceId="JoinTree_1" label="Instances" id="set_openstack_infrastructure_instance" description="">
-      <itemGroups>
-        <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_instance_measures" description="">
-          <itemGroups/>
-          <items/>
-        </itemGroup>
-      </itemGroups>
-      <items>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_name" label="Instance Name"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_resource_id" label="Ceilometer Resource ID"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_hypervisor_instance_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_hypervisor_instance_name" label="Hypervisor Instance Name"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_private_ips" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_private_ips" label="Private IPs"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_backup_enabled" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_server_backup_enabled" label="Backup"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_host_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_host_name" label="hostName"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_public_ips" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_public_ips" label="Public IPs"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_backup_daily" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_server_backup_daily" label="Daily Server Backup"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_host_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_host_id" label="Host ID"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_backup_weekly" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_server_backup_weekly" label="Weekly Server Backup"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_bios_uuid" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_bios_uuid" label="BIOS UUID"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_server_id" label="Server ID"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_status" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_server_status" label="Status"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_serial_number" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_serial_number" label="BIOS Serial Number"/>
-      </items>
-    </itemGroup>
   </itemGroups>
   <items>
     <item resourceId="JoinTree_1.dim_date.date_date" dimensionOrMeasure="Dimension" id="dim_date_date_date" label="Date"/>
@@ -442,11 +480,11 @@
         <field type="java.lang.String" id="openstack_infrastructure_endpoint_comments"/>
         <field type="java.lang.String" id="openstack_infrastructure_endpoint_sysedge_license_mode"/>
         <field type="java.lang.Double" id="openstack_infrastructure_endpoint_priority"/>
-        <field type="java.lang.String" id="openstack_infrastructure_endpoint_z_open_stack_infrastructure_region_name"/>
+        <field type="java.lang.String" id="openstack_infrastructure_endpoint_z_open_stack_project_id"/>
         <field type="java.lang.String" id="openstack_infrastructure_endpoint_z_open_stack_ceilometer_url"/>
         <field type="java.lang.String" id="openstack_infrastructure_endpoint_z_open_stack_auth_url"/>
         <field type="java.lang.String" id="openstack_infrastructure_endpoint_z_command_username"/>
-        <field type="java.lang.String" id="openstack_infrastructure_endpoint_z_open_stack_project_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_endpoint_z_open_stack_region_name"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
@@ -1067,6 +1105,32 @@
         <field type="java.lang.Double" id="fct_min"/>
       </fieldList>
     </jdbcTable>
+    <jdbcTable tableName="dim_openstack_infrastructure_nova_service" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_nova_service">
+      <fieldList>
+        <field type="java.lang.Integer" id="openstack_infrastructure_nova_service_key"/>
+        <field type="java.sql.Timestamp" id="openstack_infrastructure_nova_service_deleted_at" dataSetExpression="if(openstack_infrastructure_nova_service_deleted_at,null,0,1)"/>
+        <field type="java.lang.String" id="openstack_infrastructure_nova_service_name"/>
+        <field type="java.lang.String" id="openstack_infrastructure_nova_service_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_nova_service_type"/>
+        <field type="java.lang.String" id="openstack_infrastructure_nova_service_uid"/>
+        <field type="java.lang.Integer" id="software_component_key"/>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.String" id="openstack_infrastructure_nova_service_snmpindex"/>
+        <field type="java.lang.Boolean" id="openstack_infrastructure_nova_service_monitor"/>
+        <field type="java.lang.String" id="openstack_infrastructure_nova_service_production_state"/>
+        <field type="java.lang.String" id="openstack_infrastructure_nova_service_pre_mw_production_state"/>
+        <field type="java.lang.String" id="openstack_infrastructure_nova_service_resource_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_nova_service_oper_status"/>
+        <field type="java.lang.String" id="openstack_infrastructure_nova_service_binary"/>
+        <field type="java.lang.String" id="openstack_infrastructure_nova_service_enabled"/>
+        <field type="java.lang.Double" id="dependencies_count"/>
+        <field type="java.lang.Double" id="dependents_count"/>
+        <field type="java.lang.Double" id="maintenance_window_count"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_host_key"/>
+        <field type="java.lang.Integer" id="org_component_key"/>
+      </fieldList>
+    </jdbcTable>
     <jdbcTable tableName="dim_openstack_infrastructure_tenant" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_tenant">
       <fieldList>
         <field type="java.lang.Integer" id="openstack_infrastructure_tenant_key"/>
@@ -1164,6 +1228,164 @@
         <field type="java.lang.Double" id="openstack_infrastructure_instance_count"/>
       </fieldList>
     </jdbcTable>
+    <jdbcTable tableName="dim_openstack_infrastructure_instance" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_instance">
+      <fieldList>
+        <field type="java.lang.Integer" id="openstack_infrastructure_instance_key"/>
+        <field type="java.sql.Timestamp" id="openstack_infrastructure_instance_deleted_at" dataSetExpression="if(openstack_infrastructure_instance_deleted_at,null,0,1)"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_name"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_type"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_uid"/>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_snmpindex"/>
+        <field type="java.lang.Boolean" id="openstack_infrastructure_instance_monitor"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_production_state"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_pre_mw_production_state"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_resource_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_hypervisor_instance_name"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_private_ips"/>
+        <field type="java.lang.Boolean" id="openstack_infrastructure_instance_server_backup_enabled"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_host_name"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_public_ips"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_server_backup_daily"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_host_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_server_backup_weekly"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_bios_uuid"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_server_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_server_status"/>
+        <field type="java.lang.String" id="openstack_infrastructure_instance_serial_number"/>
+        <field type="java.lang.Double" id="dependencies_count"/>
+        <field type="java.lang.Double" id="dependents_count"/>
+        <field type="java.lang.Double" id="maintenance_window_count"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_tenant_key"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_hypervisor_key"/>
+        <field type="java.lang.Double" id="openstack_infrastructure_vnic_count"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_image_key"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_flavor_key"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_instance_guest_device_key"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="daily_cpu__pct" datasourceId="zenoss_reporting" id="daily_cpu__pct">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="hourly_cpu__pct" datasourceId="zenoss_reporting" id="hourly_cpu__pct">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="daily_disk_read__bytessec" datasourceId="zenoss_reporting" id="daily_disk_read__bytessec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="hourly_disk_read__bytessec" datasourceId="zenoss_reporting" id="hourly_disk_read__bytessec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="daily_disk_reads__persec" datasourceId="zenoss_reporting" id="daily_disk_reads__persec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="hourly_disk_reads__persec" datasourceId="zenoss_reporting" id="hourly_disk_reads__persec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="daily_disk_write__bytessec" datasourceId="zenoss_reporting" id="daily_disk_write__bytessec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="hourly_disk_write__bytessec" datasourceId="zenoss_reporting" id="hourly_disk_write__bytessec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="daily_disk_writes__persec" datasourceId="zenoss_reporting" id="daily_disk_writes__persec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="hourly_disk_writes__persec" datasourceId="zenoss_reporting" id="hourly_disk_writes__persec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
     <jdbcTable tableName="dim_openstack_infrastructure_availability_zone" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_availability_zone">
       <fieldList>
         <field type="java.lang.Integer" id="openstack_infrastructure_availability_zone_key"/>
@@ -1211,6 +1433,7 @@
         <field type="java.lang.Double" id="software_component_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_hypervisor_key"/>
         <field type="java.lang.Integer" id="org_component_key"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_host_host_device_key"/>
       </fieldList>
     </jdbcTable>
     <jdbcTable tableName="dim_openstack_infrastructure_hypervisor" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_hypervisor">
@@ -1235,91 +1458,6 @@
         <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="openstack_infrastructure_instance_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_host_key"/>
-      </fieldList>
-    </jdbcTable>
-    <jdbcTable tableName="dim_openstack_infrastructure_vnic" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_vnic">
-      <fieldList>
-        <field type="java.lang.Integer" id="openstack_infrastructure_vnic_key"/>
-        <field type="java.sql.Timestamp" id="openstack_infrastructure_vnic_deleted_at" dataSetExpression="if(openstack_infrastructure_vnic_deleted_at,null,0,1)"/>
-        <field type="java.lang.String" id="openstack_infrastructure_vnic_name"/>
-        <field type="java.lang.String" id="openstack_infrastructure_vnic_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_vnic_type"/>
-        <field type="java.lang.String" id="openstack_infrastructure_vnic_uid"/>
-        <field type="java.lang.Integer" id="device_key"/>
-        <field type="java.lang.String" id="openstack_infrastructure_vnic_snmpindex"/>
-        <field type="java.lang.Boolean" id="openstack_infrastructure_vnic_monitor"/>
-        <field type="java.lang.String" id="openstack_infrastructure_vnic_production_state"/>
-        <field type="java.lang.String" id="openstack_infrastructure_vnic_pre_mw_production_state"/>
-        <field type="java.lang.String" id="openstack_infrastructure_vnic_resource_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_vnic_macaddress"/>
-        <field type="java.lang.Double" id="dependencies_count"/>
-        <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="maintenance_window_count"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_instance_key"/>
-      </fieldList>
-    </jdbcTable>
-    <jdbcTable tableName="dim_openstack_infrastructure_nova_service" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_nova_service">
-      <fieldList>
-        <field type="java.lang.Integer" id="openstack_infrastructure_nova_service_key"/>
-        <field type="java.sql.Timestamp" id="openstack_infrastructure_nova_service_deleted_at" dataSetExpression="if(openstack_infrastructure_nova_service_deleted_at,null,0,1)"/>
-        <field type="java.lang.String" id="openstack_infrastructure_nova_service_name"/>
-        <field type="java.lang.String" id="openstack_infrastructure_nova_service_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_nova_service_type"/>
-        <field type="java.lang.String" id="openstack_infrastructure_nova_service_uid"/>
-        <field type="java.lang.Integer" id="software_component_key"/>
-        <field type="java.lang.Integer" id="device_key"/>
-        <field type="java.lang.String" id="openstack_infrastructure_nova_service_snmpindex"/>
-        <field type="java.lang.Boolean" id="openstack_infrastructure_nova_service_monitor"/>
-        <field type="java.lang.String" id="openstack_infrastructure_nova_service_production_state"/>
-        <field type="java.lang.String" id="openstack_infrastructure_nova_service_pre_mw_production_state"/>
-        <field type="java.lang.String" id="openstack_infrastructure_nova_service_resource_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_nova_service_oper_status"/>
-        <field type="java.lang.String" id="openstack_infrastructure_nova_service_binary"/>
-        <field type="java.lang.String" id="openstack_infrastructure_nova_service_enabled"/>
-        <field type="java.lang.Double" id="dependencies_count"/>
-        <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="maintenance_window_count"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_host_key"/>
-        <field type="java.lang.Integer" id="org_component_key"/>
-      </fieldList>
-    </jdbcTable>
-    <jdbcTable tableName="dim_openstack_infrastructure_instance" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_instance">
-      <fieldList>
-        <field type="java.lang.Integer" id="openstack_infrastructure_instance_key"/>
-        <field type="java.sql.Timestamp" id="openstack_infrastructure_instance_deleted_at" dataSetExpression="if(openstack_infrastructure_instance_deleted_at,null,0,1)"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_name"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_type"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_uid"/>
-        <field type="java.lang.Integer" id="device_key"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_snmpindex"/>
-        <field type="java.lang.Boolean" id="openstack_infrastructure_instance_monitor"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_production_state"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_pre_mw_production_state"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_resource_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_hypervisor_instance_name"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_private_ips"/>
-        <field type="java.lang.Boolean" id="openstack_infrastructure_instance_server_backup_enabled"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_host_name"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_public_ips"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_server_backup_daily"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_host_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_server_backup_weekly"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_bios_uuid"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_server_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_server_status"/>
-        <field type="java.lang.String" id="openstack_infrastructure_instance_serial_number"/>
-        <field type="java.lang.Double" id="dependencies_count"/>
-        <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="maintenance_window_count"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_tenant_key"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_hypervisor_key"/>
-        <field type="java.lang.Double" id="openstack_infrastructure_vnic_count"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_image_key"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_flavor_key"/>
       </fieldList>
     </jdbcTable>
     <jdbcTable tableName="dim_openstack_infrastructure_endpoint" datasourceId="zenoss_reporting" id="JoinTree_1">
@@ -1350,11 +1488,11 @@
         <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_comments"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_sysedge_license_mode"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_priority"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_z_open_stack_infrastructure_region_name"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_z_open_stack_project_id"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_z_open_stack_ceilometer_url"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_z_open_stack_auth_url"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_z_command_username"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_z_open_stack_project_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_z_open_stack_region_name"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.dependencies_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.dependents_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.maintenance_window_count"/>
@@ -1767,6 +1905,28 @@
         <field type="java.lang.Double" id="hourly_server_verify_resize__count.fct_avg"/>
         <field type="java.lang.Double" id="hourly_server_verify_resize__count.fct_max"/>
         <field type="java.lang.Double" id="hourly_server_verify_resize__count.fct_min"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_key"/>
+        <field type="openstack_infrastructure_nova_service_deleted_at" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_deleted_at,null,0,1)"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_name"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_type"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_uid"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_nova_service.software_component_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_nova_service.device_key"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_snmpindex"/>
+        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_monitor"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_production_state"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_pre_mw_production_state"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_resource_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_oper_status"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_binary"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_enabled"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_nova_service.dependencies_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_nova_service.dependents_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_nova_service.maintenance_window_count"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_endpoint_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_host_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_nova_service.org_component_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key"/>
         <field type="openstack_infrastructure_tenant_deleted_at" id="dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_deleted_at,null,0,1)"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_name"/>
@@ -1848,6 +2008,120 @@
         <field type="java.lang.Double" id="dim_openstack_infrastructure_image.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_image.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_image.openstack_infrastructure_instance_count"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key"/>
+        <field type="openstack_infrastructure_instance_deleted_at" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_instance.openstack_infrastructure_instance_deleted_at,null,0,1)"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_name"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_type"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_uid"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.device_key"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_snmpindex"/>
+        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_monitor"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_production_state"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_pre_mw_production_state"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_resource_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_hypervisor_instance_name"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_private_ips"/>
+        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_backup_enabled"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_host_name"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_public_ips"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_backup_daily"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_host_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_backup_weekly"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_bios_uuid"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_status"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_serial_number"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_instance.dependencies_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_instance.dependents_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_instance.maintenance_window_count"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.openstack_infrastructure_endpoint_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.openstack_infrastructure_tenant_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.openstack_infrastructure_hypervisor_key"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_instance.openstack_infrastructure_vnic_count"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.openstack_infrastructure_image_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.openstack_infrastructure_flavor_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_guest_device_key"/>
+        <field type="java.lang.Integer" id="daily_cpu__pct.device_key"/>
+        <field type="java.lang.Integer" id="daily_cpu__pct.component_key"/>
+        <field type="java.util.Date" id="daily_cpu__pct.date_key"/>
+        <field type="java.sql.Timestamp" id="daily_cpu__pct.fct_ts"/>
+        <field type="java.sql.Timestamp" id="daily_cpu__pct.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="daily_cpu__pct.fct_avg"/>
+        <field type="java.lang.Double" id="daily_cpu__pct.fct_max"/>
+        <field type="java.lang.Double" id="daily_cpu__pct.fct_min"/>
+        <field type="java.lang.Integer" id="hourly_cpu__pct.device_key"/>
+        <field type="java.lang.Integer" id="hourly_cpu__pct.component_key"/>
+        <field type="java.util.Date" id="hourly_cpu__pct.date_key"/>
+        <field type="java.sql.Timestamp" id="hourly_cpu__pct.fct_ts"/>
+        <field type="java.sql.Timestamp" id="hourly_cpu__pct.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="hourly_cpu__pct.fct_avg"/>
+        <field type="java.lang.Double" id="hourly_cpu__pct.fct_max"/>
+        <field type="java.lang.Double" id="hourly_cpu__pct.fct_min"/>
+        <field type="java.lang.Integer" id="daily_disk_read__bytessec.device_key"/>
+        <field type="java.lang.Integer" id="daily_disk_read__bytessec.component_key"/>
+        <field type="java.util.Date" id="daily_disk_read__bytessec.date_key"/>
+        <field type="java.sql.Timestamp" id="daily_disk_read__bytessec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="daily_disk_read__bytessec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="daily_disk_read__bytessec.fct_avg"/>
+        <field type="java.lang.Double" id="daily_disk_read__bytessec.fct_max"/>
+        <field type="java.lang.Double" id="daily_disk_read__bytessec.fct_min"/>
+        <field type="java.lang.Integer" id="hourly_disk_read__bytessec.device_key"/>
+        <field type="java.lang.Integer" id="hourly_disk_read__bytessec.component_key"/>
+        <field type="java.util.Date" id="hourly_disk_read__bytessec.date_key"/>
+        <field type="java.sql.Timestamp" id="hourly_disk_read__bytessec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="hourly_disk_read__bytessec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="hourly_disk_read__bytessec.fct_avg"/>
+        <field type="java.lang.Double" id="hourly_disk_read__bytessec.fct_max"/>
+        <field type="java.lang.Double" id="hourly_disk_read__bytessec.fct_min"/>
+        <field type="java.lang.Integer" id="daily_disk_reads__persec.device_key"/>
+        <field type="java.lang.Integer" id="daily_disk_reads__persec.component_key"/>
+        <field type="java.util.Date" id="daily_disk_reads__persec.date_key"/>
+        <field type="java.sql.Timestamp" id="daily_disk_reads__persec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="daily_disk_reads__persec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="daily_disk_reads__persec.fct_avg"/>
+        <field type="java.lang.Double" id="daily_disk_reads__persec.fct_max"/>
+        <field type="java.lang.Double" id="daily_disk_reads__persec.fct_min"/>
+        <field type="java.lang.Integer" id="hourly_disk_reads__persec.device_key"/>
+        <field type="java.lang.Integer" id="hourly_disk_reads__persec.component_key"/>
+        <field type="java.util.Date" id="hourly_disk_reads__persec.date_key"/>
+        <field type="java.sql.Timestamp" id="hourly_disk_reads__persec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="hourly_disk_reads__persec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="hourly_disk_reads__persec.fct_avg"/>
+        <field type="java.lang.Double" id="hourly_disk_reads__persec.fct_max"/>
+        <field type="java.lang.Double" id="hourly_disk_reads__persec.fct_min"/>
+        <field type="java.lang.Integer" id="daily_disk_write__bytessec.device_key"/>
+        <field type="java.lang.Integer" id="daily_disk_write__bytessec.component_key"/>
+        <field type="java.util.Date" id="daily_disk_write__bytessec.date_key"/>
+        <field type="java.sql.Timestamp" id="daily_disk_write__bytessec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="daily_disk_write__bytessec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="daily_disk_write__bytessec.fct_avg"/>
+        <field type="java.lang.Double" id="daily_disk_write__bytessec.fct_max"/>
+        <field type="java.lang.Double" id="daily_disk_write__bytessec.fct_min"/>
+        <field type="java.lang.Integer" id="hourly_disk_write__bytessec.device_key"/>
+        <field type="java.lang.Integer" id="hourly_disk_write__bytessec.component_key"/>
+        <field type="java.util.Date" id="hourly_disk_write__bytessec.date_key"/>
+        <field type="java.sql.Timestamp" id="hourly_disk_write__bytessec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="hourly_disk_write__bytessec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="hourly_disk_write__bytessec.fct_avg"/>
+        <field type="java.lang.Double" id="hourly_disk_write__bytessec.fct_max"/>
+        <field type="java.lang.Double" id="hourly_disk_write__bytessec.fct_min"/>
+        <field type="java.lang.Integer" id="daily_disk_writes__persec.device_key"/>
+        <field type="java.lang.Integer" id="daily_disk_writes__persec.component_key"/>
+        <field type="java.util.Date" id="daily_disk_writes__persec.date_key"/>
+        <field type="java.sql.Timestamp" id="daily_disk_writes__persec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="daily_disk_writes__persec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="daily_disk_writes__persec.fct_avg"/>
+        <field type="java.lang.Double" id="daily_disk_writes__persec.fct_max"/>
+        <field type="java.lang.Double" id="daily_disk_writes__persec.fct_min"/>
+        <field type="java.lang.Integer" id="hourly_disk_writes__persec.device_key"/>
+        <field type="java.lang.Integer" id="hourly_disk_writes__persec.component_key"/>
+        <field type="java.util.Date" id="hourly_disk_writes__persec.date_key"/>
+        <field type="java.sql.Timestamp" id="hourly_disk_writes__persec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="hourly_disk_writes__persec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="hourly_disk_writes__persec.fct_avg"/>
+        <field type="java.lang.Double" id="hourly_disk_writes__persec.fct_max"/>
+        <field type="java.lang.Double" id="hourly_disk_writes__persec.fct_min"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_availability_zone.openstack_infrastructure_availability_zone_key"/>
         <field type="openstack_infrastructure_availability_zone_deleted_at" id="dim_openstack_infrastructure_availability_zone.openstack_infrastructure_availability_zone_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_availability_zone.openstack_infrastructure_availability_zone_deleted_at,null,0,1)"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_availability_zone.openstack_infrastructure_availability_zone_name"/>
@@ -1889,6 +2163,7 @@
         <field type="java.lang.Double" id="dim_openstack_infrastructure_host.software_component_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_host.openstack_infrastructure_hypervisor_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_host.org_component_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_host.openstack_infrastructure_host_host_device_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_hypervisor.openstack_infrastructure_hypervisor_key"/>
         <field type="openstack_infrastructure_hypervisor_deleted_at" id="dim_openstack_infrastructure_hypervisor.openstack_infrastructure_hypervisor_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_hypervisor.openstack_infrastructure_hypervisor_deleted_at,null,0,1)"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_hypervisor.openstack_infrastructure_hypervisor_name"/>
@@ -1909,79 +2184,6 @@
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_hypervisor.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_hypervisor.openstack_infrastructure_instance_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_hypervisor.openstack_infrastructure_host_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_key"/>
-        <field type="openstack_infrastructure_vnic_deleted_at" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_deleted_at,null,0,1)"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_name"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_type"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_uid"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_vnic.device_key"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_snmpindex"/>
-        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_monitor"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_production_state"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_pre_mw_production_state"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_resource_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_macaddress"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_vnic.dependencies_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_vnic.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_vnic.maintenance_window_count"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_endpoint_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_instance_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_key"/>
-        <field type="openstack_infrastructure_nova_service_deleted_at" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_deleted_at,null,0,1)"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_name"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_type"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_uid"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_nova_service.software_component_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_nova_service.device_key"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_snmpindex"/>
-        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_monitor"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_production_state"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_pre_mw_production_state"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_resource_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_oper_status"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_binary"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_enabled"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_nova_service.dependencies_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_nova_service.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_nova_service.maintenance_window_count"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_endpoint_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_host_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_nova_service.org_component_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key"/>
-        <field type="openstack_infrastructure_instance_deleted_at" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_instance.openstack_infrastructure_instance_deleted_at,null,0,1)"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_name"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_type"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_uid"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.device_key"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_snmpindex"/>
-        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_monitor"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_production_state"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_pre_mw_production_state"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_resource_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_hypervisor_instance_name"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_private_ips"/>
-        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_backup_enabled"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_host_name"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_public_ips"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_backup_daily"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_host_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_backup_weekly"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_bios_uuid"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_status"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_serial_number"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_instance.dependencies_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_instance.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_instance.maintenance_window_count"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.openstack_infrastructure_endpoint_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.openstack_infrastructure_tenant_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.openstack_infrastructure_hypervisor_key"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_instance.openstack_infrastructure_vnic_count"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.openstack_infrastructure_image_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.openstack_infrastructure_flavor_key"/>
       </fieldList>
       <joinInfo alias="dim_openstack_infrastructure_endpoint" referenceId="dim_openstack_infrastructure_endpoint"/>
       <joinedDataSetList>
@@ -2136,37 +2338,64 @@
           <joinString>left outer join hourly_server_verify_resize__count hourly_server_verify_resize__count on (dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key == hourly_server_verify_resize__count.device_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_tenant dim_openstack_infrastructure_tenant on (dim_openstack_infrastructure_tenant.endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_nova_service dim_openstack_infrastructure_nova_service on (dim_openstack_infrastructure_nova_service.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_nova_service.openstack_infrastructure_host_key == dim_openstack_infrastructure_host.openstack_infrastructure_host_key and dim_openstack_infrastructure_nova_service.org_component_key == dim_openstack_infrastructure_availability_zone.openstack_infrastructure_availability_zone_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_region dim_openstack_infrastructure_region on (dim_openstack_infrastructure_region.endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_tenant dim_openstack_infrastructure_tenant on (dim_openstack_infrastructure_tenant.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_flavor dim_openstack_infrastructure_flavor on (dim_openstack_infrastructure_flavor.endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_region dim_openstack_infrastructure_region on (dim_openstack_infrastructure_region.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_image dim_openstack_infrastructure_image on (dim_openstack_infrastructure_image.endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_flavor dim_openstack_infrastructure_flavor on (dim_openstack_infrastructure_flavor.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_availability_zone dim_openstack_infrastructure_availability_zone on (dim_openstack_infrastructure_availability_zone.endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_availability_zone.parent_org_key == dim_openstack_infrastructure_region.openstack_infrastructure_region_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_image dim_openstack_infrastructure_image on (dim_openstack_infrastructure_image.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_host dim_openstack_infrastructure_host on (dim_openstack_infrastructure_host.endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_host.org_component_key == dim_openstack_infrastructure_availability_zone.openstack_infrastructure_availability_zone_key and dim_openstack_infrastructure_host.hypervisor_key == dim_openstack_infrastructure_hypervisor.openstack_infrastructure_hypervisor_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_instance dim_openstack_infrastructure_instance on (dim_openstack_infrastructure_instance.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_instance.openstack_infrastructure_hypervisor_key == dim_openstack_infrastructure_hypervisor.openstack_infrastructure_hypervisor_key and dim_openstack_infrastructure_instance.openstack_infrastructure_image_key == dim_openstack_infrastructure_image.openstack_infrastructure_image_key and dim_openstack_infrastructure_instance.openstack_infrastructure_flavor_key == dim_openstack_infrastructure_flavor.openstack_infrastructure_flavor_key and dim_openstack_infrastructure_instance.openstack_infrastructure_tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_hypervisor dim_openstack_infrastructure_hypervisor on (dim_openstack_infrastructure_hypervisor.host_key == dim_openstack_infrastructure_host.openstack_infrastructure_host_key and dim_openstack_infrastructure_hypervisor.endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+          <joinString>left outer join daily_cpu__pct daily_cpu__pct on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == daily_cpu__pct.component_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_vnic dim_openstack_infrastructure_vnic on (dim_openstack_infrastructure_vnic.instance_key == dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key)</joinString>
+          <joinString>left outer join hourly_cpu__pct hourly_cpu__pct on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == hourly_cpu__pct.component_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_nova_service dim_openstack_infrastructure_nova_service on (dim_openstack_infrastructure_nova_service.org_component_key == dim_openstack_infrastructure_availability_zone.openstack_infrastructure_availability_zone_key and dim_openstack_infrastructure_nova_service.hosted_on_key == dim_openstack_infrastructure_host.openstack_infrastructure_host_key and dim_openstack_infrastructure_nova_service.endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+          <joinString>left outer join daily_disk_read__bytessec daily_disk_read__bytessec on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == daily_disk_read__bytessec.component_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_instance dim_openstack_infrastructure_instance on (dim_openstack_infrastructure_instance.hypervisor_key == dim_openstack_infrastructure_hypervisor.openstack_infrastructure_hypervisor_key and dim_openstack_infrastructure_instance.flavor_key == dim_openstack_infrastructure_flavor.openstack_infrastructure_flavor_key and dim_openstack_infrastructure_instance.tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key and dim_openstack_infrastructure_instance.endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_instance.image_key == dim_openstack_infrastructure_image.openstack_infrastructure_image_key)</joinString>
+          <joinString>left outer join hourly_disk_read__bytessec hourly_disk_read__bytessec on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == hourly_disk_read__bytessec.component_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_date dim_date on (hourly_server_prep_resize__count.date_key == dim_date.date_key and daily_image_failed__count.date_key == dim_date.date_key and daily_image_other__count.date_key == dim_date.date_key and hourly_server_active__count.date_key == dim_date.date_key and hourly_server_verify_resize__count.date_key == dim_date.date_key and daily_flavor_total__count.date_key == dim_date.date_key and hourly_server_reboot__count.date_key == dim_date.date_key and daily_server_queue_resize__count.date_key == dim_date.date_key and daily_image_saving__count.date_key == dim_date.date_key and daily_server_active__count.date_key == dim_date.date_key and daily_server_rescue__count.date_key == dim_date.date_key and daily_server_password__count.date_key == dim_date.date_key and hourly_server_password__count.date_key == dim_date.date_key and hourly_image_failed__count.date_key == dim_date.date_key and daily_server_prep_resize__count.date_key == dim_date.date_key and hourly_server_other__count.date_key == dim_date.date_key and daily_server_verify_resize__count.date_key == dim_date.date_key and daily_server_build__count.date_key == dim_date.date_key and hourly_server_rescue__count.date_key == dim_date.date_key and hourly_server_resize__count.date_key == dim_date.date_key and daily_image_active__count.date_key == dim_date.date_key and hourly_server_build__count.date_key == dim_date.date_key and hourly_server_delete__count.date_key == dim_date.date_key and daily_server_other__count.date_key == dim_date.date_key and hourly_image_preparing__count.date_key == dim_date.date_key and daily_server_unknown__count.date_key == dim_date.date_key and hourly_server_unknown__count.date_key == dim_date.date_key and daily_server_reboot__count.date_key == dim_date.date_key and daily_server_rebuild__count.date_key == dim_date.date_key and hourly_image_queued__count.date_key == dim_date.date_key and hourly_image_saving__count.date_key == dim_date.date_key and hourly_server_rebuild__count.date_key == dim_date.date_key and daily_server_hard_reboot__count.date_key == dim_date.date_key and hourly_image_active__count.date_key == dim_date.date_key and hourly_image_unknown__count.date_key == dim_date.date_key and daily_server_resize__count.date_key == dim_date.date_key and hourly_server_total__count.date_key == dim_date.date_key and hourly_image_total__count.date_key == dim_date.date_key and hourly_server_hard_reboot__count.date_key == dim_date.date_key and daily_image_preparing__count.date_key == dim_date.date_key and daily_server_suspended__count.date_key == dim_date.date_key and hourly_flavor_total__count.date_key == dim_date.date_key and daily_image_total__count.date_key == dim_date.date_key and hourly_server_queue_resize__count.date_key == dim_date.date_key and daily_image_unknown__count.date_key == dim_date.date_key and daily_server_total__count.date_key == dim_date.date_key and hourly_image_other__count.date_key == dim_date.date_key and daily_server_delete__count.date_key == dim_date.date_key and daily_image_queued__count.date_key == dim_date.date_key and hourly_server_suspended__count.date_key == dim_date.date_key)</joinString>
+          <joinString>left outer join daily_disk_reads__persec daily_disk_reads__persec on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == daily_disk_reads__persec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join hourly_disk_reads__persec hourly_disk_reads__persec on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == hourly_disk_reads__persec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join daily_disk_write__bytessec daily_disk_write__bytessec on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == daily_disk_write__bytessec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join hourly_disk_write__bytessec hourly_disk_write__bytessec on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == hourly_disk_write__bytessec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join daily_disk_writes__persec daily_disk_writes__persec on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == daily_disk_writes__persec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join hourly_disk_writes__persec hourly_disk_writes__persec on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == hourly_disk_writes__persec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join dim_openstack_infrastructure_availability_zone dim_openstack_infrastructure_availability_zone on (dim_openstack_infrastructure_availability_zone.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join dim_openstack_infrastructure_host dim_openstack_infrastructure_host on (dim_openstack_infrastructure_host.org_component_key == dim_openstack_infrastructure_availability_zone.openstack_infrastructure_availability_zone_key and dim_openstack_infrastructure_host.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_host.openstack_infrastructure_hypervisor_key == dim_openstack_infrastructure_hypervisor.openstack_infrastructure_hypervisor_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join dim_openstack_infrastructure_hypervisor dim_openstack_infrastructure_hypervisor on (dim_openstack_infrastructure_hypervisor.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_hypervisor.openstack_infrastructure_host_key == dim_openstack_infrastructure_host.openstack_infrastructure_host_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join dim_date dim_date on (hourly_server_prep_resize__count.date_key == dim_date.date_key and daily_image_failed__count.date_key == dim_date.date_key and daily_image_other__count.date_key == dim_date.date_key and hourly_server_active__count.date_key == dim_date.date_key and hourly_server_verify_resize__count.date_key == dim_date.date_key and daily_flavor_total__count.date_key == dim_date.date_key and hourly_server_reboot__count.date_key == dim_date.date_key and daily_server_queue_resize__count.date_key == dim_date.date_key and daily_image_saving__count.date_key == dim_date.date_key and daily_server_active__count.date_key == dim_date.date_key and daily_server_rescue__count.date_key == dim_date.date_key and daily_server_password__count.date_key == dim_date.date_key and hourly_server_password__count.date_key == dim_date.date_key and hourly_image_failed__count.date_key == dim_date.date_key and hourly_disk_read__bytessec.date_key == dim_date.date_key and daily_server_prep_resize__count.date_key == dim_date.date_key and hourly_server_other__count.date_key == dim_date.date_key and daily_server_verify_resize__count.date_key == dim_date.date_key and daily_disk_write__bytessec.date_key == dim_date.date_key and daily_server_build__count.date_key == dim_date.date_key and hourly_server_rescue__count.date_key == dim_date.date_key and hourly_server_resize__count.date_key == dim_date.date_key and daily_image_active__count.date_key == dim_date.date_key and hourly_server_build__count.date_key == dim_date.date_key and hourly_server_delete__count.date_key == dim_date.date_key and hourly_cpu__pct.date_key == dim_date.date_key and daily_server_other__count.date_key == dim_date.date_key and daily_disk_writes__persec.date_key == dim_date.date_key and hourly_disk_writes__persec.date_key == dim_date.date_key and hourly_image_preparing__count.date_key == dim_date.date_key and daily_server_unknown__count.date_key == dim_date.date_key and hourly_server_unknown__count.date_key == dim_date.date_key and daily_server_reboot__count.date_key == dim_date.date_key and daily_server_rebuild__count.date_key == dim_date.date_key and daily_disk_read__bytessec.date_key == dim_date.date_key and hourly_image_queued__count.date_key == dim_date.date_key and hourly_disk_write__bytessec.date_key == dim_date.date_key and hourly_image_saving__count.date_key == dim_date.date_key and hourly_server_rebuild__count.date_key == dim_date.date_key and daily_server_hard_reboot__count.date_key == dim_date.date_key and daily_disk_reads__persec.date_key == dim_date.date_key and hourly_image_active__count.date_key == dim_date.date_key and hourly_image_unknown__count.date_key == dim_date.date_key and daily_server_resize__count.date_key == dim_date.date_key and hourly_server_total__count.date_key == dim_date.date_key and hourly_image_total__count.date_key == dim_date.date_key and hourly_server_hard_reboot__count.date_key == dim_date.date_key and hourly_disk_reads__persec.date_key == dim_date.date_key and daily_image_preparing__count.date_key == dim_date.date_key and daily_server_suspended__count.date_key == dim_date.date_key and hourly_flavor_total__count.date_key == dim_date.date_key and daily_image_total__count.date_key == dim_date.date_key and hourly_server_queue_resize__count.date_key == dim_date.date_key and daily_image_unknown__count.date_key == dim_date.date_key and daily_server_total__count.date_key == dim_date.date_key and hourly_image_other__count.date_key == dim_date.date_key and daily_cpu__pct.date_key == dim_date.date_key and daily_server_delete__count.date_key == dim_date.date_key and daily_image_queued__count.date_key == dim_date.date_key and hourly_server_suspended__count.date_key == dim_date.date_key)</joinString>
         </joinedDataSetRef>
       </joinedDataSetList>
     </jdbcTable>

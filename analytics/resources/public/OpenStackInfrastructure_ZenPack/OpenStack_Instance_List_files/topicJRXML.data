@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="adhocReport" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="30" bottomMargin="30" uuid="1f55e901-0f9f-4e3d-a0a5-9cd4d4b9d871">
+	<property name="com.jaspersoft.jasperserver.api.metadata.jasperreports.domain.TopicReportUnit" value="/temp/sl_topic_706555d2-4066-4bf4-b41d-0dd8a47c0591"/>
+	<queryString language="domain">
+		<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<query xmlns="http://www.jaspersoft.com/2007/SL/XMLSchema">
+  <queryFields>
+    <queryField id="set_openstack_infrastructure_tenant.dim_openstack_infrastructure_tenant_openstack_infrastructure_tenant_name" />
+    <queryField id="set_openstack_infrastructure_region.dim_openstack_infrastructure_region_openstack_infrastructure_region_name" />
+    <queryField id="set_openstack_infrastructure_flavor.dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_name" />
+    <queryField id="set_openstack_infrastructure_flavor.dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_flavor_vcp_us" />
+    <queryField id="set_openstack_infrastructure_flavor.dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_flavor_disk" />
+    <queryField id="set_openstack_infrastructure_flavor.dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_flavor_ram" />
+    <queryField id="set_openstack_infrastructure_instance.dim_openstack_infrastructure_instance_openstack_infrastructure_instance_name" />
+    <queryField id="set_openstack_infrastructure_instance.dim_openstack_infrastructure_instance_openstack_infrastructure_instance_host_name" />
+    <queryField id="set_openstack_infrastructure_instance.dim_openstack_infrastructure_instance_openstack_infrastructure_instance_server_status" />
+    <queryField id="set_openstack_infrastructure_availability_zone.dim_openstack_infrastructure_availability_zone_openstack_infrastructure_availability_zone_name" />
+    <queryField id="set_openstack_infrastructure_host.dim_openstack_infrastructure_host_openstack_infrastructure_host_name" />
+  </queryFields>
+</query>]]>
+	</queryString>
+	<field name="set_openstack_infrastructure_tenant.dim_openstack_infrastructure_tenant_openstack_infrastructure_tenant_name" class="java.lang.String">
+		<property name="semantic.tree.uri" value="/set_openstack_infrastructure_tenant/dim_openstack_infrastructure_tenant_openstack_infrastructure_tenant_name"/>
+		<property name="adhoc.tree.uri" value="/set_openstack_infrastructure_tenant/dim_openstack_infrastructure_tenant_openstack_infrastructure_tenant_name"/>
+		<property name="resourceId" value="JoinTree_1.dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_name"/>
+		<property name="semantic.tree.sort.order" value="{&quot;set_openstack_infrastructure_host&quot;:16,&quot;dim_openstack_infrastructure_instance_openstack_infrastructure_instance_name&quot;:11,&quot;set_openstack_infrastructure_instance&quot;:10,&quot;set_openstack_infrastructure_region&quot;:3,&quot;dim_openstack_infrastructure_host_openstack_infrastructure_host_name&quot;:17,&quot;dim_openstack_infrastructure_tenant_openstack_infrastructure_tenant_name&quot;:2,&quot;dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_flavor_vcp_us&quot;:7,&quot;dim_openstack_infrastructure_instance_openstack_infrastructure_instance_server_status&quot;:13,&quot;dim_openstack_infrastructure_availability_zone_openstack_infrastructure_availability_zone_name&quot;:15,&quot;set_openstack_infrastructure_availability_zone&quot;:14,&quot;dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_name&quot;:6,&quot;dim_openstack_infrastructure_region_openstack_infrastructure_region_name&quot;:4,&quot;dim_openstack_infrastructure_instance_openstack_infrastructure_instance_host_name&quot;:12,&quot;set_openstack_infrastructure_tenant&quot;:1,&quot;dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_flavor_ram&quot;:9,&quot;set_openstack_infrastructure_flavor&quot;:5,&quot;dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_flavor_disk&quot;:8}"/>
+		<property name="dimensionOrMeasure" value="Dimension"/>
+		<property name="defaultAgg"/>
+		<property name="adhoc.display" value="Tenant Name"/>
+		<property name="defaultMask"/>
+		<property name="kind" value="DIMENSION"/>
+		<property name="adhoc.tree.labels" value="[{&quot;resourceId&quot;:&quot;JoinTree_1&quot;,&quot;label&quot;:&quot;Tenants&quot;,&quot;uri&quot;:&quot;/set_openstack_infrastructure_tenant&quot;,&quot;labelId&quot;:&quot;&quot;},{&quot;resourceId&quot;:&quot;JoinTree_1&quot;,&quot;label&quot;:&quot;Regions&quot;,&quot;uri&quot;:&quot;/set_openstack_infrastructure_region&quot;,&quot;labelId&quot;:&quot;&quot;},{&quot;resourceId&quot;:&quot;JoinTree_1&quot;,&quot;label&quot;:&quot;Flavors&quot;,&quot;uri&quot;:&quot;/set_openstack_infrastructure_flavor&quot;,&quot;labelId&quot;:&quot;&quot;},{&quot;resourceId&quot;:&quot;JoinTree_1&quot;,&quot;label&quot;:&quot;Instances&quot;,&quot;uri&quot;:&quot;/set_openstack_infrastructure_instance&quot;,&quot;labelId&quot;:&quot;&quot;},{&quot;resourceId&quot;:&quot;JoinTree_1&quot;,&quot;label&quot;:&quot;Availability Zones&quot;,&quot;uri&quot;:&quot;/set_openstack_infrastructure_availability_zone&quot;,&quot;labelId&quot;:&quot;&quot;},{&quot;resourceId&quot;:&quot;JoinTree_1&quot;,&quot;label&quot;:&quot;Hosts&quot;,&quot;uri&quot;:&quot;/set_openstack_infrastructure_host&quot;,&quot;labelId&quot;:&quot;&quot;}]"/>
+		<property name="slIsTableAsList" value="false"/>
+		<fieldDescription><![CDATA[set_openstack_infrastructure_tenant.dim_openstack_infrastructure_tenant_openstack_infrastructure_tenant_name]]></fieldDescription>
+	</field>
+	<field name="set_openstack_infrastructure_region.dim_openstack_infrastructure_region_openstack_infrastructure_region_name" class="java.lang.String">
+		<property name="semantic.tree.uri" value="/set_openstack_infrastructure_region/dim_openstack_infrastructure_region_openstack_infrastructure_region_name"/>
+		<property name="adhoc.tree.uri" value="/set_openstack_infrastructure_region/dim_openstack_infrastructure_region_openstack_infrastructure_region_name"/>
+		<property name="resourceId" value="JoinTree_1.dim_openstack_infrastructure_region.openstack_infrastructure_region_name"/>
+		<property name="semantic.tree.sort.order" value="0"/>
+		<property name="dimensionOrMeasure" value="Dimension"/>
+		<property name="defaultAgg"/>
+		<property name="adhoc.display" value="Region Name"/>
+		<property name="defaultMask"/>
+		<property name="kind" value="DIMENSION"/>
+		<fieldDescription><![CDATA[set_openstack_infrastructure_region.dim_openstack_infrastructure_region_openstack_infrastructure_region_name]]></fieldDescription>
+	</field>
+	<field name="set_openstack_infrastructure_flavor.dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_name" class="java.lang.String">
+		<property name="semantic.tree.uri" value="/set_openstack_infrastructure_flavor/dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_name"/>
+		<property name="adhoc.tree.uri" value="/set_openstack_infrastructure_flavor/dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_name"/>
+		<property name="resourceId" value="JoinTree_1.dim_openstack_infrastructure_flavor.openstack_infrastructure_flavor_name"/>
+		<property name="semantic.tree.sort.order" value="0"/>
+		<property name="dimensionOrMeasure" value="Dimension"/>
+		<property name="defaultAgg"/>
+		<property name="adhoc.display" value="Flavor Name"/>
+		<property name="defaultMask"/>
+		<property name="kind" value="DIMENSION"/>
+		<fieldDescription><![CDATA[set_openstack_infrastructure_flavor.dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_name]]></fieldDescription>
+	</field>
+	<field name="set_openstack_infrastructure_flavor.dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_flavor_vcp_us" class="java.lang.Double">
+		<property name="semantic.tree.uri" value="/set_openstack_infrastructure_flavor/dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_flavor_vcp_us"/>
+		<property name="adhoc.tree.uri" value="/set_openstack_infrastructure_flavor/dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_flavor_vcp_us"/>
+		<property name="resourceId" value="JoinTree_1.dim_openstack_infrastructure_flavor.openstack_infrastructure_flavor_flavor_vcp_us"/>
+		<property name="semantic.tree.sort.order" value="1"/>
+		<property name="dimensionOrMeasure" value="Dimension"/>
+		<property name="defaultAgg"/>
+		<property name="adhoc.display" value="VCPUs"/>
+		<property name="defaultMask"/>
+		<property name="kind" value="DIMENSION"/>
+		<fieldDescription><![CDATA[set_openstack_infrastructure_flavor.dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_flavor_vcp_us]]></fieldDescription>
+	</field>
+	<field name="set_openstack_infrastructure_flavor.dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_flavor_disk" class="java.lang.Double">
+		<property name="semantic.tree.uri" value="/set_openstack_infrastructure_flavor/dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_flavor_disk"/>
+		<property name="adhoc.tree.uri" value="/set_openstack_infrastructure_flavor/dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_flavor_disk"/>
+		<property name="resourceId" value="JoinTree_1.dim_openstack_infrastructure_flavor.openstack_infrastructure_flavor_flavor_disk"/>
+		<property name="semantic.tree.sort.order" value="2"/>
+		<property name="dimensionOrMeasure" value="Dimension"/>
+		<property name="defaultAgg"/>
+		<property name="adhoc.display" value="Disk"/>
+		<property name="defaultMask"/>
+		<property name="kind" value="DIMENSION"/>
+		<fieldDescription><![CDATA[set_openstack_infrastructure_flavor.dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_flavor_disk]]></fieldDescription>
+	</field>
+	<field name="set_openstack_infrastructure_flavor.dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_flavor_ram" class="java.lang.Double">
+		<property name="semantic.tree.uri" value="/set_openstack_infrastructure_flavor/dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_flavor_ram"/>
+		<property name="adhoc.tree.uri" value="/set_openstack_infrastructure_flavor/dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_flavor_ram"/>
+		<property name="resourceId" value="JoinTree_1.dim_openstack_infrastructure_flavor.openstack_infrastructure_flavor_flavor_ram"/>
+		<property name="semantic.tree.sort.order" value="3"/>
+		<property name="dimensionOrMeasure" value="Dimension"/>
+		<property name="defaultAgg"/>
+		<property name="adhoc.display" value="RAM"/>
+		<property name="defaultMask"/>
+		<property name="kind" value="DIMENSION"/>
+		<fieldDescription><![CDATA[set_openstack_infrastructure_flavor.dim_openstack_infrastructure_flavor_openstack_infrastructure_flavor_flavor_ram]]></fieldDescription>
+	</field>
+	<field name="set_openstack_infrastructure_instance.dim_openstack_infrastructure_instance_openstack_infrastructure_instance_name" class="java.lang.String">
+		<property name="semantic.tree.uri" value="/set_openstack_infrastructure_instance/dim_openstack_infrastructure_instance_openstack_infrastructure_instance_name"/>
+		<property name="adhoc.tree.uri" value="/set_openstack_infrastructure_instance/dim_openstack_infrastructure_instance_openstack_infrastructure_instance_name"/>
+		<property name="resourceId" value="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_name"/>
+		<property name="semantic.tree.sort.order" value="0"/>
+		<property name="dimensionOrMeasure" value="Dimension"/>
+		<property name="defaultAgg"/>
+		<property name="adhoc.display" value="Instance Name"/>
+		<property name="defaultMask"/>
+		<property name="kind" value="DIMENSION"/>
+		<fieldDescription><![CDATA[set_openstack_infrastructure_instance.dim_openstack_infrastructure_instance_openstack_infrastructure_instance_name]]></fieldDescription>
+	</field>
+	<field name="set_openstack_infrastructure_instance.dim_openstack_infrastructure_instance_openstack_infrastructure_instance_host_name" class="java.lang.String">
+		<property name="semantic.tree.uri" value="/set_openstack_infrastructure_instance/dim_openstack_infrastructure_instance_openstack_infrastructure_instance_host_name"/>
+		<property name="adhoc.tree.uri" value="/set_openstack_infrastructure_instance/dim_openstack_infrastructure_instance_openstack_infrastructure_instance_host_name"/>
+		<property name="resourceId" value="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_host_name"/>
+		<property name="semantic.tree.sort.order" value="1"/>
+		<property name="dimensionOrMeasure" value="Dimension"/>
+		<property name="defaultAgg"/>
+		<property name="adhoc.display" value="hostName"/>
+		<property name="defaultMask"/>
+		<property name="kind" value="DIMENSION"/>
+		<fieldDescription><![CDATA[set_openstack_infrastructure_instance.dim_openstack_infrastructure_instance_openstack_infrastructure_instance_host_name]]></fieldDescription>
+	</field>
+	<field name="set_openstack_infrastructure_instance.dim_openstack_infrastructure_instance_openstack_infrastructure_instance_server_status" class="java.lang.String">
+		<property name="semantic.tree.uri" value="/set_openstack_infrastructure_instance/dim_openstack_infrastructure_instance_openstack_infrastructure_instance_server_status"/>
+		<property name="adhoc.tree.uri" value="/set_openstack_infrastructure_instance/dim_openstack_infrastructure_instance_openstack_infrastructure_instance_server_status"/>
+		<property name="resourceId" value="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_status"/>
+		<property name="semantic.tree.sort.order" value="2"/>
+		<property name="dimensionOrMeasure" value="Dimension"/>
+		<property name="defaultAgg"/>
+		<property name="adhoc.display" value="Status"/>
+		<property name="defaultMask"/>
+		<property name="kind" value="DIMENSION"/>
+		<fieldDescription><![CDATA[set_openstack_infrastructure_instance.dim_openstack_infrastructure_instance_openstack_infrastructure_instance_server_status]]></fieldDescription>
+	</field>
+	<field name="set_openstack_infrastructure_availability_zone.dim_openstack_infrastructure_availability_zone_openstack_infrastructure_availability_zone_name" class="java.lang.String">
+		<property name="semantic.tree.uri" value="/set_openstack_infrastructure_availability_zone/dim_openstack_infrastructure_availability_zone_openstack_infrastructure_availability_zone_name"/>
+		<property name="adhoc.tree.uri" value="/set_openstack_infrastructure_availability_zone/dim_openstack_infrastructure_availability_zone_openstack_infrastructure_availability_zone_name"/>
+		<property name="resourceId" value="JoinTree_1.dim_openstack_infrastructure_availability_zone.openstack_infrastructure_availability_zone_name"/>
+		<property name="semantic.tree.sort.order" value="0"/>
+		<property name="dimensionOrMeasure" value="Dimension"/>
+		<property name="defaultAgg"/>
+		<property name="adhoc.display" value="Availability Zone Name"/>
+		<property name="defaultMask"/>
+		<property name="kind" value="DIMENSION"/>
+		<fieldDescription><![CDATA[set_openstack_infrastructure_availability_zone.dim_openstack_infrastructure_availability_zone_openstack_infrastructure_availability_zone_name]]></fieldDescription>
+	</field>
+	<field name="set_openstack_infrastructure_host.dim_openstack_infrastructure_host_openstack_infrastructure_host_name" class="java.lang.String">
+		<property name="semantic.tree.uri" value="/set_openstack_infrastructure_host/dim_openstack_infrastructure_host_openstack_infrastructure_host_name"/>
+		<property name="adhoc.tree.uri" value="/set_openstack_infrastructure_host/dim_openstack_infrastructure_host_openstack_infrastructure_host_name"/>
+		<property name="resourceId" value="JoinTree_1.dim_openstack_infrastructure_host.openstack_infrastructure_host_name"/>
+		<property name="semantic.tree.sort.order" value="0"/>
+		<property name="dimensionOrMeasure" value="Dimension"/>
+		<property name="defaultAgg"/>
+		<property name="adhoc.display" value="Host Name"/>
+		<property name="defaultMask"/>
+		<property name="kind" value="DIMENSION"/>
+		<fieldDescription><![CDATA[set_openstack_infrastructure_host.dim_openstack_infrastructure_host_openstack_infrastructure_host_name]]></fieldDescription>
+	</field>
+</jasperReport>

@@ -450,6 +450,7 @@ def update_schema(schema, obj):
         'perf_server_key',
         }
 
+    reportable_property_names = [x[0] for x in reportable.reportProperties()]
     relations = getattr(obj, '_relations', tuple())
     for relName, relation in relations:
         if isinstance(relation, ToOne):
@@ -461,16 +462,26 @@ def update_schema(schema, obj):
             if not remote_obj or remote_obj is obj:
                 continue
 
-            reference_property = createReferenceProperty(
-                remote_obj,
-                un_camel(relName))
-
-            if reference_property[0] in ignored_ref_keys:
-                continue
-
             remote_reportable = IReportable(remote_obj)
             remote_entity_class_name = remote_reportable.entity_class_name
             remote_table = 'dim_{}'.format(remote_entity_class_name)
+
+            # This relation may be exported in the reportable using several
+            # naming conventions.  Try all the known ones:
+            reference_property_name = None
+            for possible_name in (un_camel(relName) + '_key',
+                                  remote_entity_class_name + '_key',
+                                  un_camel(relName + '_' + remote_entity_class_name + '_key')):
+                if possible_name in reportable_property_names:
+                    reference_property_name = possible_name
+                    break
+
+            if reference_property_name is None:
+                print "Unable to find reference property for relationship %s on object class %s" % (relName, obj.__class__.__name__)
+                continue
+
+            if reference_property_name in ignored_ref_keys:
+                continue
 
             if dim_table.id != join.tableName:
                 join.add(
@@ -479,7 +490,7 @@ def update_schema(schema, obj):
                     .format(
                         remote_table=remote_table,
                         local_table=dim_table.id,
-                        reference_property=reference_property[0],
+                        reference_property=reference_property_name,
                         remote_key='{}_key'.format(remote_reportable.entity_class_name)))
 
     # Measures Set
