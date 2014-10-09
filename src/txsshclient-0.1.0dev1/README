@@ -1,0 +1,47 @@
+Description
+
+This is a twisted python asynchronous library for issueing commands and
+receiving or sending files over ssh.
+
+Usage
+
+options = {'hostname': '127.0.0.1',
+           'port': 22,
+           'user': 'user',
+           'password': 'password',
+           'identities': ['~/.ssh/id_rsa', '~/.ssh/id_dsa']
+           'buffersize': 32768}
+
+from sshclient import SSHClient
+c = SSHClient(options)
+
+options is a dictionary containing the keys for hostname, port, user, password,
+identies, and buffersize.  The password, identities, and buffersize fields are
+optional.
+
+
+        #options = {'hostname': '127.0.0.1',
+        #           'port': 22,
+        #           'user': 'user',
+        #           'password': 'password',
+        #           'identities': ['~/.ssh/id_rsa', '~/.ssh/id_dsa']
+        #           'buffersize': 32768}
+
+        self.connectionTimeout = 100  # Connection timeout in seconds
+        self.commandTimeout = None  # Timeout for the commands in seconds
+        self.maxDelay = 200  # Maximum delay in seconds before retrying to
+                            # connect.
+
+from sshclient import SSHClient
+c = SSHClient(options)
+
+# ls a remote directory.
+d=c.ls('/tmp')
+display(data):
+    print data
+d.addBoth(display)
+
+
+for more help see the builtin sshclient help.
+from sshclient import SSHClient
+help(SSHClient)

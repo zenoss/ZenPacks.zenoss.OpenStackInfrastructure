@@ -1,0 +1,229 @@
+{
+    "flavors": [
+        // {
+        //     "modname": "ZenPacks.zenoss.OpenStackInfrastructure.Flavor", 
+        //     "title": "m1.tiny", 
+        //     "flavorDisk": 1073741824, 
+        //     "id": "flavor-1", 
+        //     "flavorId": "1", 
+        //     "flavorRAM": 536870912
+        // }, 
+    ], 
+    "zones": [
+        // {
+        //     "modname": "ZenPacks.zenoss.OpenStackInfrastructure.AvailabilityZone", 
+        //     "title": "nova", 
+        //     "id": "zone-nova", 
+        //     "set_parentOrg": "region-RegionOne"
+        // }, 
+    ], 
+    "servers": [
+        // {
+        //     "set_flavor": "flavor-1", 
+        //     "hostId": "ecc0e8ac489fb80b5eb12dea869feab0177c09c0201d4b65b8d3c522", 
+        //     "resourceId": "17c396c6-35aa-4783-bb9b-17de9b49f9b6", 
+        //     "hostName": "instance5", 
+        //     "serverBackupWeekly": "DISABLED", 
+        //     "id": "server-17c396c6-35aa-4783-bb9b-17de9b49f9b6", 
+        //     "hypervisorInstanceName": "instance-00000010", 
+        //     "modname": "ZenPacks.zenoss.OpenStackInfrastructure.Instance", 
+        //     "serverBackupEnabled": false, 
+        //     "title": "instance5", 
+        //     "privateIps": [
+        //         "10.0.0.7"
+        //     ], 
+        //     "serverBackupDaily": "DISABLED", 
+        //     "publicIps": [], 
+        //     "serverStatus": "ACTIVE", 
+        //     "set_tenant": "tenant-d4bf99275541418189febeb0e4041d2f", 
+        //     "serverId": "17c396c6-35aa-4783-bb9b-17de9b49f9b6", 
+        //     "set_image": "image-1b780ba4-cfde-4ca4-8020-ac7ff870696e"
+        // }, 
+    ], 
+    "regions": [
+        // {
+        //     "modname": "ZenPacks.zenoss.OpenStackInfrastructure.Region", 
+        //     "title": "RegionOne", 
+        //     "id": "region-RegionOne"
+        // }
+    ], 
+    "hypervisors": [
+        // {
+        //     "modname": "ZenPacks.zenoss.OpenStackInfrastructure.Hypervisor", 
+        //     "title": "packstack1.1", 
+        //     "hypervisorId": 1, 
+        //     "set_hostByName": "packstack1", 
+        //     "set_instances": [
+        //         "server-17c396c6-35aa-4783-bb9b-17de9b49f9b6", 
+        //     ], 
+        //     "id": "hypervisor-1"
+        // }, 
+        {
+            "title": "node2\\.*", 
+            "set_hostByName": "node2"
+        },
+        {
+            "title": "node3\\.*", 
+            "set_hostByName": "node3"
+        },
+        {
+            "title": "node4\\.*", 
+            "set_hostByName": "node4"
+        },
+        {
+            "title": "node5\\.*", 
+            "set_hostByName": "node5"
+        },
+        {
+            "title": "node6\\.*", 
+            "set_hostByName": "node6"
+        },
+        {
+            "title": "node7\\.*", 
+            "set_hostByName": "node7"
+        }
+    ], 
+    "hosts": [
+        // {
+        //     "modname": "ZenPacks.zenoss.OpenStackInfrastructure.Host", 
+        //     "title": "packstack1", 
+        //     "hostname": "packstack1", 
+        //     "set_orgComponent": "zone-internal", 
+        //     "id": "host-packstack1"
+        // },
+        {
+            "modname": "ZenPacks.zenoss.OpenStackInfrastructure.Host", 
+            "title": "node2", 
+            "hostname": "node2", 
+            "set_orgComponent": "zone-internal", 
+            "id": "host-node2"
+        },
+        {
+            "modname": "ZenPacks.zenoss.OpenStackInfrastructure.Host", 
+            "title": "node3", 
+            "hostname": "node3", 
+            "set_orgComponent": "zone-internal", 
+            "id": "host-node3"
+        },        
+        {
+            "modname": "ZenPacks.zenoss.OpenStackInfrastructure.Host", 
+            "title": "node4", 
+            "hostname": "node4", 
+            "set_orgComponent": "zone-internal", 
+            "id": "host-node4"
+        },        
+        {
+            "modname": "ZenPacks.zenoss.OpenStackInfrastructure.Host", 
+            "title": "node5", 
+            "hostname": "node5", 
+            "set_orgComponent": "zone-internal", 
+            "id": "host-node5"
+        },        
+        {
+            "modname": "ZenPacks.zenoss.OpenStackInfrastructure.Host", 
+            "title": "node6", 
+            "hostname": "node6", 
+            "set_orgComponent": "zone-internal", 
+            "id": "host-node6"
+        },        
+        {
+            "modname": "ZenPacks.zenoss.OpenStackInfrastructure.Host", 
+            "title": "node7", 
+            "hostname": "node7", 
+            "set_orgComponent": "zone-internal", 
+            "id": "host-node7"
+        }
+    ], 
+    "images": [
+        // {
+        //     "modname": "ZenPacks.zenoss.OpenStackInfrastructure.Image", 
+        //     "imageStatus": "ACTIVE", 
+        //     "title": "cirros", 
+        //     "imageCreated": "2014-09-05T01:28:51Z", 
+        //     "imageId": "1b780ba4-cfde-4ca4-8020-ac7ff870696e", 
+        //     "imageUpdated": "2014-09-05T01:29:52Z", 
+        //     "id": "image-1b780ba4-cfde-4ca4-8020-ac7ff870696e"
+        // }
+    ], 
+    "services": [
+        // {
+        //     "binary": "nova-compute", 
+        //     "modname": "ZenPacks.zenoss.OpenStackInfrastructure.NovaService", 
+        //     "title": "nova-compute@packstack1 (nova)", 
+        //     "operStatus": "UP", 
+        //     "set_hostedOn": "host-packstack1", 
+        //     "enabled": true, 
+        //     "set_orgComponent": "zone-nova", 
+        //     "id": "service-nova-compute-packstack1-nova"
+        // },   
+        {
+            "binary": "nova-compute", 
+            "modname": "ZenPacks.zenoss.OpenStackInfrastructure.NovaService", 
+            "title": "nova-compute@node2 (nova)", 
+            "operStatus": "UP", 
+            "set_hostedOn": "host-node2", 
+            "enabled": true, 
+            "set_orgComponent": "zone-nova", 
+            "id": "service-nova-compute-node2-nova"
+        },           
+        {
+            "binary": "nova-compute", 
+            "modname": "ZenPacks.zenoss.OpenStackInfrastructure.NovaService", 
+            "title": "nova-compute@node3 (nova)", 
+            "operStatus": "UP", 
+            "set_hostedOn": "host-node3", 
+            "enabled": true, 
+            "set_orgComponent": "zone-nova", 
+            "id": "service-nova-compute-node3-nova"
+        },           
+        {
+            "binary": "nova-compute", 
+            "modname": "ZenPacks.zenoss.OpenStackInfrastructure.NovaService", 
+            "title": "nova-compute@node4 (nova)", 
+            "operStatus": "UP", 
+            "set_hostedOn": "host-node4", 
+            "enabled": true, 
+            "set_orgComponent": "zone-nova", 
+            "id": "service-nova-compute-node4-nova"
+        },           
+        {
+            "binary": "nova-compute", 
+            "modname": "ZenPacks.zenoss.OpenStackInfrastructure.NovaService", 
+            "title": "nova-compute@node5 (nova)", 
+            "operStatus": "UP", 
+            "set_hostedOn": "host-node5", 
+            "enabled": true, 
+            "set_orgComponent": "zone-nova", 
+            "id": "service-nova-compute-node5-nova"
+        },           
+        {
+            "binary": "nova-compute", 
+            "modname": "ZenPacks.zenoss.OpenStackInfrastructure.NovaService", 
+            "title": "nova-compute@node6 (nova)", 
+            "operStatus": "UP", 
+            "set_hostedOn": "host-node6", 
+            "enabled": true, 
+            "set_orgComponent": "zone-nova", 
+            "id": "service-nova-compute-node6-nova"
+        },           
+        {
+            "binary": "nova-compute", 
+            "modname": "ZenPacks.zenoss.OpenStackInfrastructure.NovaService", 
+            "title": "nova-compute@node7 (nova)", 
+            "operStatus": "UP", 
+            "set_hostedOn": "host-node7", 
+            "enabled": true, 
+            "set_orgComponent": "zone-nova", 
+            "id": "service-nova-compute-node7-nova"
+        }         
+    ], 
+    "tenants": [
+        // {
+        //     "modname": "ZenPacks.zenoss.OpenStackInfrastructure.Tenant", 
+        //     "description": "admin tenant", 
+        //     "title": "admin", 
+        //     "tenantId": "404e222c00fb4be896f845076835bc7a", 
+        //     "id": "tenant-404e222c00fb4be896f845076835bc7a"
+        // },        
+    ]
+}

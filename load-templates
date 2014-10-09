@@ -1,0 +1,428 @@
+#!/usr/bin/env python
+##############################################################################
+#
+# Copyright (C) Zenoss, Inc. 2014, all rights reserved.
+#
+# This content is made available according to terms specified in
+# License.zenoss under the directory where your Zenoss product is installed.
+#
+##############################################################################
+
+"""Build monitoring templates from a YAML input file.
+
+Look at monitoring_templates.yaml in the same directory for an example
+of what the YAML schema should be.
+
+WARNING: This will delete and recreate the named monitoring templates.
+         So it can potentially be very destructive.
+"""
+
+import logging
+LOG = logging.getLogger()
+
+import os
+import re
+import sys
+import types
+
+
+def die(msg, *args):
+    LOG.fatal(msg, *args)
+    sys.exit(1)
+
+
+try:
+    import Globals
+except ImportError:
+    die('Must be run as the zenoss user. Try "su - zenoss" first.')
+
+from Products.ZenUtils.Utils import unused
+unused(Globals)
+
+from Products.ZenUtils.ZenScriptBase import ZenScriptBase
+dmd = ZenScriptBase(connect=True).dmd
+
+# ZenScriptBase breaks logging. We'll fix it.
+LOG.removeHandler(LOG.handlers[0])
+logging.basicConfig(
+    format='%(message)s',
+    level=logging.DEBUG if os.environ.get('DEBUG') else logging.INFO)
+
+from transaction import commit
+
+try:
+    import yaml
+    import yaml.constructor
+except ImportError:
+    die('PyYAML must be installed. Try "easy_install PyYAML" first.')
+
+try:
+    # included in standard lib from Python 2.7
+    from collections import OrderedDict
+except ImportError:
+    # try importing the backported drop-in replacement
+    # it's available on PyPI
+    try:
+        from ordereddict import OrderedDict
+    except ImportError:
+        die('ordereddict must be installed. Try "easy_install ordereddict" first.')
+
+from Products.ZenModel.ComplexGraphPoint import ComplexGraphPoint
+from Products.ZenModel.DeviceClass import DeviceClass
+from Products.ZenModel.GraphDefinition import GraphDefinition
+from Products.ZenModel.GraphPoint import GraphPoint
+from Products.ZenModel.DataPointGraphPoint import DataPointGraphPoint
+from Products.ZenModel.RRDDataPoint import RRDDataPoint
+from Products.ZenModel.RRDDataSource import RRDDataSource
+from Products.ZenModel.RRDTemplate import RRDTemplate
+from Products.ZenModel.ThresholdClass import ThresholdClass
+
+
+class OrderedDictYAMLLoader(yaml.Loader):
+    """
+    A YAML loader that loads mappings into ordered dictionaries.
+
+    This is used to allow graph definitions to be sequenced naturally
+    without having to specify a sequence attribute.
+    """
+
+    def __init__(self, *args, **kwargs):
+        yaml.Loader.__init__(self, *args, **kwargs)
+
+        self.add_constructor(u'tag:yaml.org,2002:map', type(self).construct_yaml_map)
+        self.add_constructor(u'tag:yaml.org,2002:omap', type(self).construct_yaml_map)
+
+    def construct_yaml_map(self, node):
+        data = OrderedDict()
+        yield data
+        value = self.construct_mapping(node)
+        data.update(value)
+
+    def construct_mapping(self, node, deep=False):
+        if isinstance(node, yaml.MappingNode):
+            self.flatten_mapping(node)
+        else:
+            raise yaml.constructor.ConstructorError(
+                None, None,
+                'expected a mapping node, but found %s' % node.id,
+                node.start_mark)
+
+        mapping = OrderedDict()
+        for key_node, value_node in node.value:
+            key = self.construct_object(key_node, deep=deep)
+            try:
+                hash(key)
+            except TypeError, exc:
+                raise yaml.constructor.ConstructorError(
+                    'while constructing a mapping',
+                    node.start_mark, 'found unacceptable key (%s)' % exc,
+                    key_node.start_mark)
+
+            value = self.construct_object(value_node, deep=deep)
+            mapping[key] = value
+        return mapping
+
+
+def main():
+    data = {}
+
+    if len(sys.argv) < 2:
+        LOG.info("STDIN: loading YAML")
+        data.update(yaml.load(sys.stdin.read(), OrderedDictYAMLLoader) or {})
+    else:
+        for filename in sys.argv[1:]:
+            LOG.info("{}: loading YAML".format(filename))
+            with open(filename, 'r') as yaml_file:
+                data.update(yaml.load(yaml_file, OrderedDictYAMLLoader) or {})
+
+    for template_path, template_cfg in data.items():
+        add_template(template_path, template_cfg)
+
+    commit()
+
+
+def log_for(obj, msg, level=logging.DEBUG):
+    '''
+    Log msg for obj at level.
+    '''
+    parts = None
+    if isinstance(obj, DeviceClass):
+        parts = (
+            obj.getOrganizerName(),)
+    elif isinstance(obj, RRDTemplate):
+        parts = (
+            obj.deviceClass().getOrganizerName(),
+            obj.id)
+    elif isinstance(obj, (RRDDataSource, ThresholdClass, GraphDefinition)):
+        parts = (
+            obj.rrdTemplate().deviceClass().getOrganizerName(),
+            obj.rrdTemplate().id,
+            obj.id)
+    elif isinstance(obj, RRDDataPoint):
+        parts = (
+            obj.datasource().rrdTemplate().deviceClass().getOrganizerName(),
+            obj.datasource().rrdTemplate().id,
+            obj.datasource().id,
+            obj.id)
+    elif isinstance(obj, GraphPoint):
+        parts = (
+            obj.graphDef().rrdTemplate().deviceClass().getOrganizerName(),
+            obj.graphDef().rrdTemplate().id,
+            obj.graphDef().id,
+            obj.id)
+    else:
+        parts = ()
+
+    LOG.log(level, '%s: %s', ' - '.join(parts), msg)
+
+
+def get_severity(value):
+    '''
+    Return numeric severity given a string representation of severity.
+    '''
+    try:
+        severity = int(value)
+    except (TypeError, ValueError):
+        severity = {
+            'crit': 5, 'critical': 5,
+            'err': 4, 'error': 4,
+            'warn': 3, 'warning': 3,
+            'info': 2, 'information': 2, 'informational': 2,
+            'debug': 1, 'debugging': 1,
+            'clear': 0,
+            }.get(value.lower())
+
+    if severity is None:
+        die("'%s' is not a valid value for severity.", value)
+
+    return severity
+
+
+def apply_properties(obj, cfg, ignore=None):
+    if ignore:
+        for propname in ignore:
+            if propname in cfg:
+                del(cfg[propname])
+
+    given_properties = set(cfg)
+    valid_properties = set(x['id'] for x in obj._properties)
+    invalid_properties = given_properties - valid_properties
+
+    if len(invalid_properties) == 1:
+        die("%s is an invalid %s property. Valid properties: %s",
+            list(invalid_properties)[0],
+            obj.__class__.__name__,
+            ', '.join(valid_properties))
+
+    elif len(invalid_properties) > 1:
+        die("%s are invalid %s properties. Valid properties: %s",
+            ', '.join(invalid_properties),
+            obj.__class__.__name__,
+            ', '.join(valid_properties))
+
+    # Map severity names to values.
+    if 'severity' in cfg:
+        cfg['severity'] = get_severity(cfg['severity'])
+
+    # TODO: Detect property type and do conversion.
+
+    # Apply cfg items directly to datasource attributes.
+    for k, v in cfg.items():
+        if k not in ('type', 'datapoints'):
+            log_for(obj, "{} = {}".format(k, v), level=logging.DEBUG)
+            setattr(obj, k, v)
+
+
+def add_template(path, cfg):
+    if '/' not in path:
+        die("%s is not a path. Include device class and template name", path)
+
+    path_parts = path.split('/')
+    id_ = path_parts[-1]
+    cfg['deviceClass'] = '/'.join(path_parts[:-1])
+
+    device_class = dmd.Devices.createOrganizer(cfg['deviceClass'])
+
+    existing_template = device_class.rrdTemplates._getOb(id_, None)
+    if existing_template:
+        log_for(existing_template, "replacing template", level=logging.INFO)
+        device_class.rrdTemplates._delObject(id_)
+
+    device_class.manage_addRRDTemplate(id_)
+    template = device_class.rrdTemplates._getOb(id_)
+
+    if not existing_template:
+        log_for(template, "adding template", level=logging.INFO)
+
+    if 'targetPythonClass' in cfg:
+        log_for(
+            template,
+            "targetPythonClass = {}".format(cfg['targetPythonClass']))
+
+        template.targetPythonClass = cfg['targetPythonClass']
+
+    if 'description' in cfg:
+        log_for(
+            template,
+            "description = {}".format(cfg['description']))
+
+        template.description = cfg['description']
+
+    if 'thresholds' in cfg:
+        log_for(
+            template, "adding {} thresholds".format(len(cfg['thresholds'])))
+        for threshold_id, threshold_cfg in cfg['thresholds'].items():
+            add_threshold(template, threshold_id, threshold_cfg)
+
+    if 'datasources' in cfg:
+        log_for(template, "adding {} datasources".format(len(cfg['datasources'])))
+        for datasource_id, datasource_cfg in cfg['datasources'].items():
+            add_datasource(template, datasource_id, datasource_cfg)
+
+    if 'graphs' in cfg:
+        log_for(template, "adding {} graphs".format(len(cfg['graphs'])))
+        for graph_id, graph_cfg in cfg['graphs'].items():
+            add_graph(template, graph_id, graph_cfg)
+
+
+def add_datasource(template, id_, cfg):
+    datasource_types = dict(template.getDataSourceOptions())
+
+    if 'type' not in cfg:
+        die('No type for %s/%s. Valid types: %s',
+            template.id, id_, ', '.join(datasource_types))
+
+    type_ = datasource_types.get(cfg['type'])
+    if not type_:
+        die("%s is an invalid datasource type. Valid types: %s",
+            cfg['type'], ', '.join(datasource_types))
+
+    # Map severity names to values.
+    if 'severity' in cfg:
+        cfg['severity'] = get_severity(cfg['severity'])
+
+    datasource = template.manage_addRRDDataSource(id_, type_)
+    log_for(datasource, "adding datasource")
+
+    if 'datapoints' in cfg:
+        log_for(template, "adding {} datapoints".format(len(cfg['datapoints'])))
+        for datapoint_id, datapoint_cfg in cfg['datapoints'].items():
+            add_datapoint(datasource, datapoint_id, datapoint_cfg)
+
+    apply_properties(datasource, cfg, ignore=['type', 'datapoints'])
+
+
+def add_datapoint(datasource, id_, cfg):
+    datapoint = datasource.manage_addRRDDataPoint(id_)
+    log_for(datapoint, "adding datapoint")
+
+    # Handle cfg shortcuts like DERIVE_MIN_0 and GAUGE_MIN_0_MAX_100.
+    if isinstance(cfg, types.StringTypes):
+        log_for(datapoint, "using shortcut syntax")
+        if 'DERIVE' in cfg.upper():
+            log_for(datapoint, "rrdtype = {}".format('DERIVE'))
+            datapoint.rrdtype = 'DERIVE'
+
+        min_match = re.search(r'MIN_(\d+)', cfg, re.IGNORECASE)
+        if min_match:
+            rrdmin = min_match.group(1)
+            log_for(datapoint, "rrdmin = {}".format(rrdmin))
+            datapoint.rrdmin = rrdmin
+
+        max_match = re.search(r'MAX_(\d+)', cfg, re.IGNORECASE)
+        if max_match:
+            rrdmax = max_match.group(1)
+            log_for(datapoint, "rrdmax = {}".format(rrdmax))
+            datapoint.rrdmax = rrdmax
+
+        return
+
+    if 'aliases' in cfg:
+        log_for(datapoint, "adding {} aliases".format(len(cfg['aliases'])))
+        for alias_id, formula in cfg['aliases'].items():
+            datapoint.addAlias(alias_id, formula)
+            alias = datapoint.aliases._getOb(alias_id)
+            log_for(alias, "adding alias".format(alias_id))
+            log_for(alias, "formula = {}".format(formula))
+
+    apply_properties(datapoint, cfg, ignore=['aliases'])
+
+
+def add_threshold(template, id_, cfg):
+    if 'type' not in cfg:
+        # Default to MinMaxThreshold since they're the most common.
+        cfg['type'] = 'MinMaxThreshold'
+
+    if 'dsnames' not in cfg and 'dsname' not in cfg:
+        die("'%s' threshold has no dsname or dsnames attribute", id_)
+
+    # Shorthand for thresholds that only have one datapoint.
+    if 'dsname' in cfg:
+        cfg['dsnames'] = cfg['dsname']
+        del(cfg['dsname'])
+
+    if isinstance(cfg['dsnames'], types.StringTypes):
+        cfg['dsnames'] = [cfg['dsnames']]
+
+    # Shorthand for datapoints that have the same name as their datasource.
+    for i, dsname in enumerate(cfg['dsnames']):
+        if '_' not in dsname:
+            cfg['dsnames'][i] = '_'.join((dsname, dsname))
+
+    threshold_types = dict((y, x) for x, y in template.getThresholdClasses())
+    type_ = threshold_types.get(cfg['type'])
+    if not type_:
+        die("'%s' is an invalid threshold type. Valid types: %s",
+            cfg['type'], ', '.join(threshold_types))
+
+    threshold = template.manage_addRRDThreshold(id_, cfg['type'])
+    log_for(threshold, "adding threshold")
+    apply_properties(threshold, cfg, ignore=['type'])
+
+
+def add_graph(template, id_, cfg):
+    graph = template.manage_addGraphDefinition(id_)
+    log_for(graph, "adding graph")
+
+    if 'graphpoints' in cfg:
+        log_for(graph, "adding {} graphpoints".format(len(cfg['graphpoints'])))
+        for graphpoint_id, graphpoint_cfg in cfg['graphpoints'].items():
+            add_graphpoint(graph, graphpoint_id, graphpoint_cfg)
+
+    apply_properties(graph, cfg, ignore=['graphpoints'])
+
+
+def add_graphpoint(graph, id_, cfg):
+    graphpoint = graph.createGraphPoint(DataPointGraphPoint, id_)
+    log_for(graphpoint, "adding graphpoint")
+
+    # Shorthand for datapoints that have the same name as their datasource.
+    if '_' not in cfg.get('dpName', '_'):
+        cfg['dpName'] = '_'.join((cfg['dpName'], cfg['dpName']))
+
+    # Validate lineType.
+    if 'lineType' in cfg:
+        valid_linetypes = [x[1] for x in ComplexGraphPoint.lineTypeOptions]
+
+        if cfg['lineType'].upper() in valid_linetypes:
+            cfg['lineType'] = cfg['lineType'].upper()
+        else:
+            die("'%s' is not a valid graphpoint lineType. Valid lineTypes: %s",
+                cfg['lineType'], ', '.join(valid_linetypes))
+
+    # Allow color to be specified by color_index instead of directly. This is
+    # useful when you want to keep the normal progression of colors, but need
+    # to add some DONTDRAW graphpoints for calculations.
+    if 'colorindex' in cfg:
+        try:
+            colorindex = int(cfg['colorindex']) % len(GraphPoint.colors)
+        except (TypeError, ValueError):
+            die("graphpoint colorindex must be numeric.")
+
+        cfg['color'] = GraphPoint.colors[colorindex].lstrip('#')
+
+    apply_properties(graphpoint, cfg, ignore=['colorindex', 'graphpoints'])
+
+
+if __name__ == '__main__':
+    main()

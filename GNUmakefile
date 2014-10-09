@@ -1,7 +1,7 @@
 ###########################################################################
 #
 # This program is part of Zenoss Core, an open source monitoring platform.
-# Copyright (C) 2011, Zenoss Inc.
+# Copyright (C) 2014, Zenoss Inc.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 or (at your
@@ -13,8 +13,8 @@
 
 PYTHON=python
 SRC_DIR=$(PWD)/src
-NOVACLIENT_DIR=$(SRC_DIR)/python-novaclient
-ZP_DIR=$(PWD)/ZenPacks/zenoss/OpenStack
+TXSSHCLIENT_DIR=$(SRC_DIR)/txsshclient-0.1.0dev1
+ZP_DIR=$(PWD)/ZenPacks/zenoss/OpenStackInfrastructure
 BIN_DIR=$(ZP_DIR)/bin
 LIB_DIR=$(ZP_DIR)/lib
 
@@ -24,19 +24,28 @@ egg:
 	# setup.py will call 'make build' before creating the egg
 	python setup.py bdist_egg
 
+.PHONY: build analytics
+
 build:
-	git submodule init ; \
-	GIT_SSL_NO_VERIFY=true git submodule update ; \
-	cd $(NOVACLIENT_DIR) ; \
-		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" \
-		$(PYTHON) setup.py install \
-		--install-lib="$(LIB_DIR)" \
-		--install-scripts="$(BIN_DIR)"
+
+	# Now build all the build dependencies for this zenpack.
+	cd $(TXSSHCLIENT_DIR) && \
+		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
+			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
 
 clean:
 	rm -rf build dist *.egg-info
-	find . -name '*.pyc' | xargs rm
-	cd $(NOVACLIENT_DIR) ; rm -rf build dist *.egg-info
-	rm -f $(BIN_DIR)/nova
-	cd $(LIB_DIR) ; rm -Rf *.egg site.py easy-install.pth
+	cd $(TXSSHCLIENT_DIR) ; rm -rf build dist *.egg-info ; cd $(SRC_DIR)
+	cd $(LIB_DIR) ; rm -Rf *.egg site.py easy-install.pth ; cd $(SRC_DIR)
+	find . -name '*.pyc' | xargs rm -f
+
+analytics:
+	rm -f ZenPacks/zenoss/OpenStackInfrastructure/analytics/analytics-bundle.zip
+	mkdir -p analytics/resources/public/OpenStackInfrastructure_ZenPack
+	./create-analytics-bundle \
+		--folder="OpenStackInfrastructure ZenPack" \
+		--domain="OpenStackInfrastructure Domain" \
+		--device=ostack
+	cd analytics; zip -r ../ZenPacks/zenoss/OpenStackInfrastructure/analytics/analytics-bundle.zip *
+
 

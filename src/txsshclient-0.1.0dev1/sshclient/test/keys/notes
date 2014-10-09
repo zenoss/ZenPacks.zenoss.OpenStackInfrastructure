@@ -1,0 +1,43 @@
+# Update test_common and test_auth auth keys.
+# these are less secure due to a bug in older versions of twisted.
+# these are using DES3 instead of AES that newer versions
+# of ssh-keygen would generate.
+# https://twistedmatrix.com/trac/ticket/5496
+
+# Use 'foo' for passphrase
+openssl genrsa -des3 -out server_key 1024
+
+# strip the passphase used before 
+#'foo' when prompted
+openssl rsa -in server_key -out server_key_no_passphrase
+
+# change the permissions
+chmod 600 server_key*
+
+# Create the pub key file
+ssh-keygen -y -f server_key_no_passphrase > server_key_no_passphrase.pub
+
+
+#Create the testUser key
+# passphrase 'test1'
+openssl genrsa -des3 -out id_test_rsa 1024
+
+# change the permissions
+chmod 600 server_key*
+
+# enter test1 to decrypt the key and create the pubfile
+ssh-keygen -y -f id_test_rsa > id_test_rsa.pub
+
+
+# Create the testUser2 key which is the testUser1 key but without the
+# passphrase
+
+# enter 'test1' to decrypt the key
+openssl rsa -in id_test_rsa id_test_rsa_insecure
+
+# change the permissions
+chmod 600 server_key*
+
+ssh-keygen -y -f id_test_rsa_insecure > id_test_rsa_insecure.pub
+
+

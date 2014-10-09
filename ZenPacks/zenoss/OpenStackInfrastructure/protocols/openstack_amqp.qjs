@@ -1,0 +1,64 @@
+{
+    "content_types" : {
+    },
+    "exchanges" : {
+        "$OpenStackInbound" : {
+            "name" : "zenoss.openstack.ceilometer",
+            "type" : "topic",
+            "durable" : true,
+            "auto_delete" : false,
+            "description" : "Perf and Event messages are sent from OpenStack Ceilometer to this exchange for zenoss collectors to process",
+            "content_types" : []
+        },
+        "$OpenStackInboundHeartbeats" : {
+            "name" : "zenoss.openstack.heartbeats",
+            "type" : "topic",
+            "durable" : true,
+            "auto_delete" : false,
+            "description" : "Heartbeat messages are sent from OpenStack Ceilometer to this exchange for zenoss collectors to process",
+            "content_types" : []
+        }        
+    },
+    "queues" : {    
+        "$OpenStackInboundPerf" : {
+            "name" : "zenoss.queues.openstack.ceilometer.{device}.perf",
+            "durable" : true,
+            "exclusive" : false,
+            "auto_delete" : false,
+            "description" : "Queue for Zenoss collectors to consume messages from Openstack Ceilometer",
+            "bindings" : [
+                {
+                    "exchange" : "$OpenStackInbound",
+                    "routing_key": "zenoss.openstack.{device}.meter.#"
+                }
+            ]
+        },
+        "$OpenStackInboundEvent" : {
+            "name" : "zenoss.queues.openstack.ceilometer.{device}.event",
+            "durable" : true,
+            "exclusive" : false,
+            "auto_delete" : false,
+            "description" : "Queue for Zenoss collectors to consume messages from Openstack Ceilometer",
+            "bindings" : [
+                {
+                    "exchange" : "$OpenStackInbound",
+                    "routing_key": "zenoss.openstack.{device}.event.#"
+                }                
+            ]
+        },
+        "$OpenStackInboundHeartbeat" : {
+            "name" : "zenoss.queues.openstack.ceilometer.{device}.heartbeat",
+            "durable" : false,
+            "exclusive" : true,
+            "auto_delete" : true,
+            "description" : "Queue for Zenoss collectors to consume messages from Openstack Ceilometer heartbeat",
+            "bindings" : [
+                {
+                    "exchange" : "$OpenStackInboundHeartbeats",
+                    "routing_key": "zenoss.openstack.heartbeat.{device}.#"
+                }
+            ]
+        }
+    }
+}
+

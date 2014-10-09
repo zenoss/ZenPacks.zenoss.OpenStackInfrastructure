@@ -1,48 +1,205 @@
-This ZenPack allows for monitoring of OpenStack. This means that you can monitor the flavors, images and servers from a user or consumer perspective. OpenStack API versions 1.0 and 1.1 are supported. Please watch the [http://www.youtube.com/watch?v=-43gnQLbX9g Monitoring OpenStack] video for a quick introduction that covers most of the details below.
 
-{{note}} The video is of an early version of the ZenPack that doesn't have as many options when adding an OpenStack endpoint. See the usage notes below for help with the new fields available on the ''Add OpenStack'' dialog.
+This ZenPack allows for monitoring of OpenStack from a service provider perspective.  This means that in addition to the user-oriented components supported in the regular OpenStack ZenPack (instances, flavors, images), the underlying OpenStack servers and software are monitored.
 
-<blockquote>
-OpenStack is a global collaboration of developers and cloud computing technologists producing the ubiquitous open source cloud computing platform for public and private clouds. The project aims to deliver solutions for all types of clouds by being simple to implement, massively scalable, and feature rich. The technology consists of a series of interrelated projects delivering various components for a cloud infrastructure solution.
-</blockquote>
+== Prerequisites ==
 
-== Usage ==
-Once the OpenStack ZenPack is installed you can begin monitoring by going to the infrastructure screen and clicking the normal button for adding devices. You'll find a new option labeled, "Add OpenStack."
+* OpenStack (Icehouse or newer)
+* Ceilometer
+** A zenoss-specific ceilometer plugin must be installed on your ceilometer nodes (see below)
+** If you do not have ceilometer installed and configured properly, some graphs will be black, and Zenoss will not detect changes (such as new instances or instance state changes) until a full model operation is performed.
+* SSH credentials to the linux devices in your openstack environment
+** Configure the zCommandUsername/zCommandPassword properties on the /Devices/Server/SSH/Linux/NovaHost device class.
+** If your linux devices are already managed under Zenoss, move them into /Devices/Server/SSH/Linux/NovaHost
+* Administrative credentials for your OpenStack environment
+** Username, password, keystone URL, Region
+
+== Basic Usage ==
+
+Once the OpenStack ZenPack is installed and you can begin monitoring by going to the infrastructure screen and clicking the normal button for adding devices. You'll find a new option labeled, "Add OpenStack Endpoint (Infrastructure)."
 
 Choose that option and you'll be presented with a dialog asking for the following inputs.
 
-# Username - Same username used to login to OpenStack web interface
-# API Key - Can be found by going to "Your Account/API Access"
-# Project ID - This can be left blank if you don't know what it is
-# Auth URL - For Rackspace this would be https://auth.api.rackspacecloud.com/v1.0
-# Region Name - This can be left blank if you don't know what it is
+# Device To Create - name to use for this device in zenoss.  Should not be an actual hostname, since that name will be used when the host is registered as a linux device.
+# Auth URL - A keystone URL, such as http://<hostname>:5000/v2.0/
+# Username, Password / API Key, Project/Tenant ID - *Administrative* credentials to your zenoss instance.
+# Region Name - choose the correct region from the dropdown.  You may only choose one, so each region you wish to manage must be registered as a separate endpoint in zenoss.
+# Ceilometer URL - Will auto-populate based on the other selections.
 
 Once you click Add, Zenoss will contact the OpenStack API and discover servers, images and flavors. Once it is complete you'll find a new device in the OpenStack device class with the same name as the hostname or IP you entered into the dialog. Click into this new device to see everything that was discovered.
 
 The following types of elements are discovered.
-* Servers
+* Tenants
+* Instances (Servers)
+* vNICs
 * Images
 * Flavors
+* Nova API Endpoints
+* Regions
+* Availability Zones
+* Hosts
+* Nova Services (processes supporting nova servers)
+* Hypervisors
 
 The following metrics are collected.
-* Total Servers and Servers by State
-** States: Active, Build, Rebuild, Suspended, Queue Resize, Prep Resize, Resize, Verify Resize, Password, Rescue, Reboot, Hard Reboot, Delete IP, Unknown, Other
-* Total Images and Images by State
-** States: Active, Saving, Preparing, Queued, Failed, Unknown, Other
-* Total Flavors
+* Images 
+	Total Images
+	Images by State
+* Flavors
+	Total Flavors
+* Instance Metrics
+	Total Instances
+	Instances by State
+	CPU Utilization (percent)
+    Disk Requests (requests/sec)
+    Disk IO Rate (bytes/sec)
+* Vnic Metrics
+    Network Packet Rate (packets/sec)
+    Network Throughput (bytes/sec)
+* Host Metrics (Zenoss Linux OS monitoring)
+	Load Average
+	CPU Utilization
+	Free Memory
+	Free Swap
+	IO
+* Nova Service Metrics (Zenoss Process monitoring)
+	CPU Utilization
+	Memory Utilization
+	Process Counts per Service
 
-Status monitoring is performed on servers and images with the following mapping of state to Zenoss event severity.
+All metrics collected by OpenStack Ceilometer may be collected and graphed in 
+Zenoss, and all events processed through ceilometer are exposed via the
+Zenoss Event Console.
 
-;Servers State to Severity Mapping
-: Reboot, Hard Reboot, Build, Rebuild, Rescue, Unknown == Critical
-: Resize == Error
-: Prep Resize, Delete IP == Warning
-: Suspended, Queue Resize, Verify Resize, Password == Info
-: Active == Clear
 
-;Images State to Severity Mapping
-: Failed, Unknown == Critical
-: Queued, Saving, Preparing == Info
-: Active == Clear
+==Ceilometer Enablement==
 
-If you are also using Zenoss to monitor the guest operating system running within the server Zenoss will present the graphs for that operating system when the graphs option is chosen for the OpenStack server.
+Although you may add an openstack device to zenoss, as shown above, event and
+performance data will not be collected until the following steps are performed.
+
+===Zenoss Configuration Steps===
+
+On your zenoss host, you must run the following command as the zenoss user:
+<syntaxhighlight lang="bash">
+   /opt/zenoss/bin/openstack_amqp_config
+</syntaxhighlight>
+
+It will create a new user in rabbitmq and set up its permissions.  It will 
+print out the proper values to use for amqp_hostname, amqp_port, amqp_userid,
+amqp_password, and amqp_virtualhost during ceilometer configuration (see below)
+
+===OpenStack Ceilometer Configuration Steps===
+
+Zenoss relies upon a ceilometer dispatcher plugin to ship raw event and
+metering data from ceilometer to Zenoss for storage in the Zenoss event 
+and performance databases.   This integration is done by publishing messages
+to Zenoss's RabbitMQ server.
+
+This dispatcher should be installed on all nodes running any ceilometer, but
+particularly those running ceilometer-collector or ceilometer-agent-notification.
+
+To install it, perform the following steps on each of these openstack nodes (NOT
+on the zenoss collector):
+
+<syntaxhighlight lang="bash">
+  sudo pip -q install --force-reinstall https://github.com/zenoss/ceilometer_zenoss/archive/master.zip
+  sudo cp /usr/lib/python2.6/site-packages/ceilometer_zenoss/event_definitions.yaml /etc/ceilometer/
+</syntaxhighlight>
+
+Edit /etc/ceilometer/ceilometer.conf, and add the following lines to the
+appropriate sections:
+
+<syntaxhighlight lang="text">
+  [DEFAULT]
+  dispatcher=zenoss
+  
+  [notification]
+  store_events=True
+</syntaxhighlight>
+
+Also add the [dispatcher_zenoss] section reported by openstack_amqp_config above.
+
+===Optional Steps===
+
+====VM State Changes====
+
+By default, instance state changes will be captured by Zenoss when certain 
+events occur, for example, when an instance is shut down, the state change
+to SHUTDOWN will be reflected in Zenoss.
+
+However, certain state changes that don't correspond to another defined event
+may not be picked up until the next time zenoss models the environment.
+
+If you would like to reduce the likelihood of this occurring, you can configure
+OpenStack Nova to send an event (through ceilometer) to zenoss whenever
+any VM state change occurs by adding the following to nova.conf:
+
+<syntaxhighlight lang="text">
+  [DEFAULT]
+  notify_on_state_change=vm_state
+</syntaxhighlight>  
+
+Note that this will cause increased event load, both on OpenStack and Zenoss,
+and additional processing within the event transforms in Zenoss to keep
+the model consistent.   Since most instance changes will still be caught
+without this option enabled, it is recommended to leave this disabled if your
+OpenStack environment is very large.
+
+====Increasing Polling Interval====
+
+Zenoss will process performance datapoints from ceilometer every 5 minutes, but
+by default, ceilometer will only produce one datapoint every 10 minutes.   This
+can be adjusted by modifying the "interval: 600" line in your
+pipeline.yaml file (typically /etc/ceilomster/pipeline.yaml) to 300 seconds.
+
+== Zenoss Analytics ==
+
+This ZenPack provides additional support for Zenoss Analytics. Perform the
+following steps to install extra reporting resources into Zenoss Analytics
+after installing the ZenPack.
+
+# Copy analytics-bundle.zip from $ZENHOME/ZenPacks/ZenPacks.zenoss.OpenStackInfrastructure*/ZenPacks/zenoss/OpenStackInfrastructure/analytics/ on your Zenoss server.
+# Navigate to Zenoss Analytics in your browser.
+# Login as superuser.
+# Remove any existing ''OpenStackInfrastructure ZenPack'' folder.
+## Choose ''Repository'' from the ''View'' menu at the top of the page.
+## Expand ''Public'' in the list of folders.
+## Right-click on ''OpenStackInfrastructure ZenPack'' folder and choose ''Delete''.
+## Confirm deletion by clicking ''OK''.
+# Add the new ''OpenStackInfrastructure ZenPack'' folder.
+## Choose ''Server Settings'' from the ''Manage' menu at the top of the page.
+## Choose ''Import'' in the left page.
+## Remove checks from all check boxes.
+## Click ''Choose File'' to import a data file.
+## Choose the analytics-bundle.zip file copied from your Zenoss server.
+## Click ''Import''.
+
+You can now navigate back to the ''OpenStackInfrastructure ZenPack'' folder in the repository to see the following resources added by the bundle.
+
+;Domains
+* OpenStackInfrastructure Domain
+
+;Ad Hoc Views
+* OpenStack Instance List
+
+Domains can be used to create ad hoc views using the following steps.
+
+# Choose ''Ad Hoc View'' from the ''Create'' menu.
+# Click ''Domains'' at the top of the data chooser dialog.
+# Expand ''Public'' then ''OpenStackInfrastructure ZenPack''.
+# Choose the ''OpenStackInfrastructure Domain'' domain
+
+
+== Known Issues ==
+
+# ZEN-14805: Ceilometer AMQP Heartbeat monitoring expects ceilometer-collector and ceilometer-agent-notification to run on a single host
+## Most commonly, these processes would run on a single controller node, so this will not impact most users.   No workaround available.
+# ZEN-14585: The same endpoint can not be monitored both as user and an infrastructure endpoints.
+## Workaround: If you have been previously monitoring the endpoint as a User endpoint, delete the device before you re-add it as an Infrastructure endpoint.
+# ZEN-14491: A stacktrace may occur during the initial modeling of the device
+## The trace will contain the error "ValueError: expected txn status 'Active' or 'Doomed', but it's 'Committed'"
+## Workaround: Disregard the error.  You may also manually model the device to confirm that no further errors are reported.
+
+== Changes ==
+
+;2.0.0
+* Initial Release

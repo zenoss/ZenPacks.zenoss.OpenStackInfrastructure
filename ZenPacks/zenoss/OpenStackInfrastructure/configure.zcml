@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    >
+
+    <!-- Device Loaders -->
+    <utility
+        name="openstackinfrastructure_account"
+        provides="Products.ZenModel.interfaces.IDeviceLoader"
+        component=".deviceloaders.OpenStackInfrastructureLoader"
+        />
+
+    <!-- API: Routers -->
+    <include package="Products.ZenUtils.extdirect.zope" file="meta.zcml"/>
+
+    <browser:directRouter
+        name="openstackinfrastructure_router"
+        for="*"
+        class=".api.OpenStackInfrastructureRouter"
+        namespace="Zenoss.remote"
+        permission="zenoss.View"
+        />
+
+    <!-- API: Facades -->
+    <adapter
+        name="openstackinfrastructure"
+        provides=".api.IOpenStackInfrastructureFacade"
+        for="*"
+        factory=".api.OpenStackInfrastructureFacade"
+        />
+
+    <!-- API: Infos -->
+    <adapter
+        provides=".datasources.PerfAMQPDataSource.IPerfAMQPDataSourceInfo"
+        for=".datasources.PerfAMQPDataSource.PerfAMQPDataSource"
+        factory=".datasources.PerfAMQPDataSource.PerfAMQPDataSourceInfo"
+        />
+
+    <adapter
+        provides=".datasources.EventsAMQPDataSource.IEventsAMQPDataSourceInfo"
+        for=".datasources.EventsAMQPDataSource.EventsAMQPDataSource"
+        factory=".datasources.EventsAMQPDataSource.EventsAMQPDataSourceInfo"
+        />
+
+    <!-- Device Links -->
+    <configure zcml:condition="have zenoss:IExpandedLinkProvider">
+        <!-- hosts -->
+        <subscriber
+            provides='Products.ZenModel.interfaces.IExpandedLinkProvider'
+            for='Products.ZenModel.Device.Device'
+            factory='.DeviceProxyComponent.DeviceLinkProvider'
+            />
+
+        <!-- instances -->
+        <subscriber
+            provides='Products.ZenModel.interfaces.IExpandedLinkProvider'
+            for='Products.ZenModel.Device.Device'
+            factory='.Instance.DeviceLinkProvider'
+            />
+
+    </configure>
+
+    <!-- Endpoint cleanup -->
+    <subscriber
+        for="ZenPacks.zenoss.OpenStackInfrastructure.Endpoint.Endpoint
+             OFS.interfaces.IObjectWillBeMovedEvent"
+        handler=".Endpoint.onDeviceDeleted"
+        />
+
+
+
+    <!-- DeviceProxyComponent cleanup -->
+    <subscriber
+        for="Products.ZenModel.Device.Device
+             OFS.interfaces.IObjectWillBeMovedEvent"
+        handler=".DeviceProxyComponent.onDeviceDeleted"
+        />
+
+    <subscriber
+        for=".DeviceProxyComponent.DeviceProxyComponent
+             OFS.interfaces.IObjectWillBeMovedEvent"
+        handler=".DeviceProxyComponent.onDeviceProxyComponentDeleted"
+        />
+
+    <!-- DeviceProxyComponent event handling -->
+    <include package="Products.ZenEvents" file="meta.zcml"/>
+    <postEventPlugin plugin=".DeviceProxyComponent.PostEventPlugin"/>
+
+    <!-- Analytics -->
+    <include file="reportable.zcml"
+             xmlns:zcml="http://namespaces.zope.org/zcml"
+             zcml:condition="installed ZenPacks.zenoss.ZenETL" />
+
+    <!-- Impact (special cases) -->
+    <configure zcml:condition="installed ZenPacks.zenoss.Impact">
+        <include package="ZenPacks.zenoss.Impact" file="meta.zcml"/>
+
+        <subscriber
+            provides="ZenPacks.zenoss.Impact.impactd.interfaces.IRelationshipDataProvider"
+            for="Products.ZenModel.Device.Device"
+            factory=".impact.HostDeviceRelationsProvider"
+            />
+
+        <subscriber
+            provides="ZenPacks.zenoss.Impact.impactd.interfaces.IRelationshipDataProvider"
+            for="Products.ZenModel.Device.Device"
+            factory=".impact.GuestDeviceRelationsProvider"
+            />
+
+        <subscriber
+            provides="ZenPacks.zenoss.Impact.impactd.interfaces.IRelationshipDataProvider"
+            for="Products.ZenModel.OSProcess.OSProcess"
+            factory=".impact.OSProcessRelationsProvider"
+            />
+    </configure>
+
+</configure>
