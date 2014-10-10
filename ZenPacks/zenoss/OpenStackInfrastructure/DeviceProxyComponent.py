@@ -209,6 +209,19 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
 
         return graphs
 
+    def getGraphObjects(self, drange=None):
+        """
+        Return graph definitions for this software comoponent, along with
+        any graphs from the associated OSProcess component.
+        This method is for 5.x compatibility
+        """
+        graphs = super(DeviceProxyComponent, self).getGraphObjects()
+        device = self.proxy_device()
+        if device:
+            graphs.extend(device.getGraphObjects())
+        return graphs
+
+
 
 class DeviceLinkProvider(object):
     '''
