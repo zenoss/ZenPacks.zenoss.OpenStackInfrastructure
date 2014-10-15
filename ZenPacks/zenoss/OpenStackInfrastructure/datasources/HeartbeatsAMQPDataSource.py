@@ -119,6 +119,9 @@ class HeartbeatsAMQPDataSourcePlugin(PythonDataSourcePlugin):
         service = yield self.getService('ZenPacks.zenoss.OpenStackInfrastructure.services.OpenStackService')
         expected_heartbeats = yield service.callRemote('expected_ceilometer_heartbeats', config.id)
 
+        if not expected_heartbeats:
+            return
+            
         hostnames = expected_heartbeats[0]['hostnames']
         processes = expected_heartbeats[0]['processes']
 
@@ -168,7 +171,7 @@ class HeartbeatsAMQPDataSourcePlugin(PythonDataSourcePlugin):
                         'device': device_id,
                         'severity': ZenEventClasses.Warning,
                         'eventKey': host + '_' + proc,
-                        'summary': 'Have not heard from '+ \
+                        'summary': 'No heartbeats received from '+ \
                                    proc + ' on ' + host + \
                                    ' for more than ' + \
                                    str(MAX_TIME_LAPSE) + ' seconds. ' + \
@@ -179,15 +182,14 @@ class HeartbeatsAMQPDataSourcePlugin(PythonDataSourcePlugin):
 
                     from pprint import pformat
                     log.error(pformat(evt))
-
                 else:
 
                     evt = {
                         'device': device_id,
                         'severity': ZenEventClasses.Clear,
                         'eventKey': host + '_' + proc,
-                        'summary': 'Clear event for '+ \
-                                   proc + ' on ' + host,
+                        'summary': 'Process '+ \
+                                   proc + ' on ' + host + ' is sending heartbeats normally.',
                         'eventClassKey': 'openStackCeilometerHeartbeat',
                     }
 
@@ -220,6 +222,7 @@ class HeartbeatsAMQPDataSourcePlugin(PythonDataSourcePlugin):
             msg['lastheard'] = contentbody['timestamp']
 
             last_heard_heartbeats[hostname][processname] = msg
+            log.debug("Received heartbeat from %s / %s" % (hostname, processname))
 
             amqp.acknowledge(message)
 

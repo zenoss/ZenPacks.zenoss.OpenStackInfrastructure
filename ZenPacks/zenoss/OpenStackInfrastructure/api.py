@@ -92,7 +92,7 @@ class OpenStackInfrastructureFacade(ZuulFacade):
             'zCommandPassword': api_key,
             'zOpenStackProjectId': project_id,
             'zOpenStackAuthUrl': auth_url,
-            'zOpenStackInfrastructureRegionName': region_name,
+            'zOpenStackRegionName': region_name,
             'zOpenStackCeilometerUrl': ceilometer_url
             }
 

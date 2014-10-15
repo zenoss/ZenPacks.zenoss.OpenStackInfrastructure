@@ -172,18 +172,18 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         return device
 
     def claim_proxy_device(self, device):
-        LOG.info("%s component '%s' is now linked to device '%s'" % (self.meta_type, self.name(), device.name()))
+        LOG.debug("%s component '%s' is now linked to device '%s'" % (self.meta_type, self.name(), device.name()))
         device.openstackProxyComponentUUID = IGlobalIdentifier(self).getGUID()
         self.openstackProxyDeviceUUID = IGlobalIdentifier(device).getGUID()
 
     def release_proxy_device(self):
         device = GUIDManager(self.dmd).getObject(getattr(self, 'openstackProxyDeviceUUID', None))
         if device:
-            LOG.info("device %s is now detached from %s component '%s'" % (device.name(), self.meta_type, self.name()))
+            LOG.debug("device %s is now detached from %s component '%s'" % (device.name(), self.meta_type, self.name()))
             device.openstackProxyComponentUUID = None
 
         self.openstackProxyDeviceUUID = None
-        LOG.info("%s component '%s' is now detached from any devices" % (self.meta_type, self.name()))
+        LOG.debug("%s component '%s' is now detached from any devices" % (self.meta_type, self.name()))
 
     def devicelink_descr(self):
         '''
@@ -208,6 +208,19 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
                 graphs.append(device_graph)
 
         return graphs
+
+    def getGraphObjects(self, drange=None):
+        """
+        Return graph definitions for this software comoponent, along with
+        any graphs from the associated OSProcess component.
+        This method is for 5.x compatibility
+        """
+        graphs = super(DeviceProxyComponent, self).getGraphObjects()
+        device = self.proxy_device()
+        if device:
+            graphs.extend(device.getGraphObjects())
+        return graphs
+
 
 
 class DeviceLinkProvider(object):

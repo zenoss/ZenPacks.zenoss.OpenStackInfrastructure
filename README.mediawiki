@@ -1,7 +1,20 @@
-This ZenPack allows for monitoring of OpenStack from a service provider perspective.  This means that in addition to the user-oriented components supported in the regular OpenStack ZenPack (instances, flavors, images), the underlying OpenStack servers and software is monitored.
 
+This ZenPack allows for monitoring of OpenStack from a service provider perspective.  This means that in addition to the user-oriented components supported in the regular OpenStack ZenPack (instances, flavors, images), the underlying OpenStack servers and software are monitored.
+
+== Prerequisites ==
+
+* OpenStack (Icehouse or newer)
+* Ceilometer
+** A zenoss-specific ceilometer plugin must be installed on your ceilometer nodes (see below)
+** If you do not have ceilometer installed and configured properly, some graphs will be black, and Zenoss will not detect changes (such as new instances or instance state changes) until a full model operation is performed.
+* SSH credentials to the linux devices in your openstack environment
+** Configure the zCommandUsername/zCommandPassword properties on the /Devices/Server/SSH/Linux/NovaHost device class.
+** If your linux devices are already managed under Zenoss, move them into /Devices/Server/SSH/Linux/NovaHost
+* Administrative credentials for your OpenStack environment
+** Username, password, keystone URL, Region
 
 == Basic Usage ==
+
 Once the OpenStack ZenPack is installed and you can begin monitoring by going to the infrastructure screen and clicking the normal button for adding devices. You'll find a new option labeled, "Add OpenStack Endpoint (Infrastructure)."
 
 Choose that option and you'll be presented with a dialog asking for the following inputs.
@@ -9,8 +22,8 @@ Choose that option and you'll be presented with a dialog asking for the followin
 # Device To Create - name to use for this device in zenoss.  Should not be an actual hostname, since that name will be used when the host is registered as a linux device.
 # Auth URL - A keystone URL, such as http://<hostname>:5000/v2.0/
 # Username, Password / API Key, Project/Tenant ID - *Administrative* credentials to your zenoss instance.
-# Region Name - choose the correct region from the dropdown
-# Ceilometer URL - should auto-populate based on the other selections.
+# Region Name - choose the correct region from the dropdown.  You may only choose one, so each region you wish to manage must be registered as a separate endpoint in zenoss.
+# Ceilometer URL - Will auto-populate based on the other selections.
 
 Once you click Add, Zenoss will contact the OpenStack API and discover servers, images and flavors. Once it is complete you'll find a new device in the OpenStack device class with the same name as the hostname or IP you entered into the dialog. Click into this new device to see everything that was discovered.
 
@@ -87,7 +100,6 @@ particularly those running ceilometer-collector or ceilometer-agent-notification
 To install it, perform the following steps on each of these openstack nodes (NOT
 on the zenoss collector):
 
-
 <syntaxhighlight lang="bash">
   sudo pip -q install --force-reinstall https://github.com/zenoss/ceilometer_zenoss/archive/master.zip
   sudo cp /usr/lib/python2.6/site-packages/ceilometer_zenoss/event_definitions.yaml /etc/ceilometer/
@@ -106,7 +118,9 @@ appropriate sections:
 
 Also add the [dispatcher_zenoss] section reported by openstack_amqp_config above.
 
-===Optional Step===
+===Optional Steps===
+
+====VM State Changes====
 
 By default, instance state changes will be captured by Zenoss when certain 
 events occur, for example, when an instance is shut down, the state change
@@ -130,8 +144,60 @@ the model consistent.   Since most instance changes will still be caught
 without this option enabled, it is recommended to leave this disabled if your
 OpenStack environment is very large.
 
+====Increasing Polling Interval====
+
+Zenoss will process performance datapoints from ceilometer every 5 minutes, but
+by default, ceilometer will only produce one datapoint every 10 minutes.   This
+can be adjusted by modifying the "interval: 600" line in your
+pipeline.yaml file (typically /etc/ceilomster/pipeline.yaml) to 300 seconds.
+
+== Zenoss Analytics ==
+
+This ZenPack provides additional support for Zenoss Analytics. Perform the
+following steps to install extra reporting resources into Zenoss Analytics
+after installing the ZenPack.
+
+# Copy analytics-bundle.zip from $ZENHOME/ZenPacks/ZenPacks.zenoss.OpenStackInfrastructure*/ZenPacks/zenoss/OpenStackInfrastructure/analytics/ on your Zenoss server.
+# Navigate to Zenoss Analytics in your browser.
+# Login as superuser.
+# Remove any existing ''OpenStackInfrastructure ZenPack'' folder.
+## Choose ''Repository'' from the ''View'' menu at the top of the page.
+## Expand ''Public'' in the list of folders.
+## Right-click on ''OpenStackInfrastructure ZenPack'' folder and choose ''Delete''.
+## Confirm deletion by clicking ''OK''.
+# Add the new ''OpenStackInfrastructure ZenPack'' folder.
+## Choose ''Server Settings'' from the ''Manage' menu at the top of the page.
+## Choose ''Import'' in the left page.
+## Remove checks from all check boxes.
+## Click ''Choose File'' to import a data file.
+## Choose the analytics-bundle.zip file copied from your Zenoss server.
+## Click ''Import''.
+
+You can now navigate back to the ''OpenStackInfrastructure ZenPack'' folder in the repository to see the following resources added by the bundle.
+
+;Domains
+* OpenStackInfrastructure Domain
+
+;Ad Hoc Views
+* OpenStack Instance List
+
+Domains can be used to create ad hoc views using the following steps.
+
+# Choose ''Ad Hoc View'' from the ''Create'' menu.
+# Click ''Domains'' at the top of the data chooser dialog.
+# Expand ''Public'' then ''OpenStackInfrastructure ZenPack''.
+# Choose the ''OpenStackInfrastructure Domain'' domain
 
 
+== Known Issues ==
+
+# ZEN-14805: Ceilometer AMQP Heartbeat monitoring expects ceilometer-collector and ceilometer-agent-notification to run on a single host
+## Most commonly, these processes would run on a single controller node, so this will not impact most users.   No workaround available.
+# ZEN-14585: The same endpoint can not be monitored both as user and an infrastructure endpoints.
+## Workaround: If you have been previously monitoring the endpoint as a User endpoint, delete the device before you re-add it as an Infrastructure endpoint.
+# ZEN-14491: A stacktrace may occur during the initial modeling of the device
+## The trace will contain the error "ValueError: expected txn status 'Active' or 'Doomed', but it's 'Committed'"
+## Workaround: Disregard the error.  You may also manually model the device to confirm that no further errors are reported.
 
 == Changes ==
 
