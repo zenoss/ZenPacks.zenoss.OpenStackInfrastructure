@@ -1,10 +1,11 @@
 #!/bin/sh -x
 
 yum update -y
-yum install emacs mongodb wget telnet
+yum install -y emacs wget telnet
 yum install -y http://rdo.fedorapeople.org/rdo-release.rpm
 yum install -y openstack-packstack
-packstack --allinone --os-ceilometer-install=y --os-controller-host=192.168.2.11 --os-compute-hosts=192.168.2.11 --os-network-hosts=192.168.2.11 --vcenter-host=192.168.2.11 --amqp-host=192.168.2.11 --mysql-host=192.168.2.11 --mongodb-host=192.168.2.11 --novanetwork-pubif=eth1 --novanetwork-fixed-range=192.168.32.0/22 --novanetwork-floating-range=10.3.4.0/22 --os-neutron-ml2-type-drivers=local --os-neutron-ml2-tenant-network-types=local --os-neutron-ml2-mechanism-drivers=openvswitch
+
+packstack --allinone --os-ceilometer-install=y --os-controller-host=192.168.2.11 --os-compute-hosts=192.168.2.11 --os-network-hosts=192.168.2.11 --vcenter-host=192.168.2.11 --amqp-host=192.168.2.11 --mariadb-host=192.168.2.11 --mongodb-host=192.168.2.11 --novanetwork-pubif=eth1 --novanetwork-fixed-range=192.168.32.0/22 --novanetwork-floating-range=10.3.4.0/22 --os-neutron-ml2-type-drivers=local --os-neutron-ml2-tenant-network-types=local --os-neutron-ml2-mechanism-drivers=openvswitch --use-epel=y
 
 # Fix libvirt hypervisor so it can run nested under virtualbox.
 openstack-config --set /etc/nova/nova.conf libvirt virt_type qemu
@@ -21,7 +22,7 @@ for e in neutron-dhcp-agent neutron-l3-agent neutron-metadata-agent neutron-open
 service rabbitmq-server restart
 #    (http://<host>:15672/ - log in as guest/guest)
 
-# When using openvpn, it can picks up a bogus domain name that keeps horizon's 
+# When using openvpn, it can picks up a bogus domain name that keeps horizon's
 # vhost form working.
 perl -p -i -e 's/\.openvpn//g' /etc/httpd/conf.d/15-horizon_vhost.conf /etc/openstack-dashboard/local_settings
 service httpd  restart
