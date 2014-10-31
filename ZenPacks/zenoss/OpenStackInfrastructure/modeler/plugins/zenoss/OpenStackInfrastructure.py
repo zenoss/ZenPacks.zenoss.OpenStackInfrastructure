@@ -34,6 +34,7 @@ add_local_lib_path()
 from apiclients.novaapiclient import NovaAPIClient, NotFoundError
 from apiclients.keystoneapiclient import KeystoneAPIClient
 
+from lib.neutronclient.v2_0.client import Client as NeutronAPIClient
 
 class OpenStackInfrastructure(PythonPlugin):
     deviceProperties = PythonPlugin.deviceProperties + (
@@ -68,6 +69,18 @@ class OpenStackInfrastructure(PythonPlugin):
         results['tenants'] = result['tenants']
         log.debug('tenants: %s\n' % str(results['tenants']))
 
+        nclient = NeutronAPIClient(
+            username=device.zCommandUsername,
+            password=device.zCommandPassword,
+            endpoint_url=device.zOpenStackAuthUrl,
+            auth_url='http://192.168.56.122:35357/v2.0/',
+            region_name=device.zOpenStackRegionName,
+            tenant_name=device.zOpenStackProjectId,
+            )
+        nclient.format = 'json'
+        nclient.httpclient.endpoint_url='http://192.168.56.122:9696/'
+        nclient.httpclient.authenticate_and_fetch_endpoint_url()
+
         result = yield client.flavors(detailed=True, is_public=None)
         results['flavors'] = result['flavors']
         log.debug('flavors: %s\n' % str(results['flavors']))
@@ -89,6 +102,29 @@ class OpenStackInfrastructure(PythonPlugin):
         result = yield client.services()
         results['services'] = result['services']
         log.debug('services: %s\n' % str(results['services']))
+
+        # non twisted neutron
+        # import pdb;pdb.set_trace()
+        agents = nclient.list_agents()
+        results['agents'] = agents['agents']
+
+        networks = nclient.list_networks()
+        results['networks'] = networks['networks']
+
+        subnets = nclient.list_subnets()
+        results['subnets'] = subnets['subnets']
+
+        routers = nclient.list_routers()
+        results['routers'] = routers['routers']
+
+        ports = nclient.list_ports()
+        results['ports'] = ports['ports']
+
+        security_groups = nclient.list_security_groups()
+        results['security_groups'] = security_groups['security_groups']
+
+        floatingips = nclient.list_floatingips()
+        results['floatingips'] = floatingips['floatingips']
 
         returnValue(results)
 
@@ -383,6 +419,150 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_orgComponent=region_id
                 )))
 
+        # agent
+        agents = []
+        # import pdb;pdb.set_trace()
+        for agent in results['agents']:
+            agents.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.Agent',
+                data=dict(
+                    id='agent-{0}'.format(agent['id']),
+                    title=agent['binary'],
+                    type=agent['agent_type'],               # true/false
+                    host=agent['host'],
+                    alive=agent['alive'],                      # ACTIVE
+                )))
+
+        # networking
+        networks = []
+        for net in results['networks']:
+            tenant_name = [tenant['name'] for tenant in results['tenants'] \
+                           if tenant['enabled'] == True and \
+                              tenant['id'] == net['tenant_id']]
+            cidrs = ""
+            for snetid in net['subnets']:
+                for subnet in results['subnets']:
+                    if subnet['id'] == snetid:
+                        cidrs = cidrs + subnet['cidr']
+            networks.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.Network',
+                data=dict(
+                    id='network-{0}'.format(net['id']),
+                    title=net['name'],
+                    netState=net['admin_state_up'],               # true/false
+                    netExternal=net['router:external'],           # TRUE/FALSE
+                    tenant_=tenant_name[0],
+                    netStatus=net['status'],                      # ACTIVE
+                    netType=net['provider:network_type'].upper(), # local/global
+                    subnet_=cidrs
+                )))
+
+        # subnet
+        subnets = []
+        for subnet in results['subnets']:
+            tenant_name = [tenant['name'] for tenant in results['tenants'] \
+                           if tenant['enabled'] == True and \
+                              tenant['id'] == subnet['tenant_id']]
+            network_name = [network['name'] for network in results['networks'] \
+                            if network['status'] == 'ACTIVE' and \
+                               network['id'] == subnet['network_id']]
+            subnets.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.Subnet',
+                data=dict(
+                    id='subnet-{0}'.format(subnet['id']),
+                    title=subnet['name'],
+                    cidr=subnet['cidr'],
+                    dns=subnet['dns_nameservers'],
+                    tenant_=tenant_name[0],
+                    network_=network_name[0],
+                    gateway=subnet['gateway_ip'],
+                    )))
+
+
+        # router
+        routers = []
+        for router in results['routers']:
+            tenant_name = [tenant['name'] for tenant in results['tenants'] \
+                           if tenant['enabled'] == True and \
+                              tenant['id'] == router['tenant_id']]
+            network_name = [network['name'] for network in results['networks'] \
+                            if network['status'] == 'ACTIVE' and \
+                               network['id'] == router['external_gateway_info']['network_id']]
+            routers.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.Router',
+                data=dict(
+                    id='router-{0}'.format(router['id']),
+                    title=router['name'],
+                    status=router['status'],
+                    tenant_=tenant_name[0],
+                    gateway=network_name[0],
+                    routes=router['routes'],
+                )))
+
+        # port
+        ports = []
+        # import pdb;pdb.set_trace()
+        for port in results['ports']:
+            if not port['tenant_id']:
+                continue
+
+            tenant_name = [tenant['name'] for tenant in results['tenants'] \
+                           if tenant['enabled'] == True and \
+                              tenant['id'] == port['tenant_id']]
+            network_name = [network['name'] for network in results['networks'] \
+                            if network['status'] == 'ACTIVE' and \
+                               network['id'] == port['network_id']]
+            ports.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.Port',
+                data=dict(
+                    id='port-{0}'.format(port['id']),
+                    network_=network_name[0],
+                    status=port['status'],
+                    tenant_=tenant_name[0],
+                    # gateway=network_name[0],
+                    host=port['binding:host_id'],
+                    mac=port['mac_address'],
+                    owner=port['device_owner'],
+                    # type_=port['binding:vif_type'],
+                    )))
+
+        # security_group
+        security_groups = []
+        for sg in results['security_groups']:
+            tenant_name = [tenant['name'] for tenant in results['tenants'] \
+                           if tenant['enabled'] == True and \
+                              tenant['id'] == sg['tenant_id']]
+            security_groups.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.SecurityGroup',
+                data=dict(
+                    id='security_group-{0}'.format(sg['id']),
+                    title=sg['name'],
+                    tenant_=tenant_name[0],
+                    )))
+
+        # # floatingip
+        floatingips = []
+        for floatingip in results['floatingips']:
+            tenant_name = [tenant['name'] for tenant in results['tenants'] \
+                           if tenant['enabled'] == True and \
+                              tenant['id'] == floatingip['tenant_id']]
+            network_name = [network['name'] for network in results['networks'] \
+                            if network['status'] == 'ACTIVE' and \
+                               network['id'] == floatingip['external_gateway_info']['network_id']]
+            router_name = [router['name'] for router in results['routers'] \
+                            if router['status'] == 'ACTIVE' and \
+                               router['id'] == floatingip['router_id']]
+            floatingips.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.FloatingIp',
+                data=dict(
+                    id='floatingip-{0}'.format(floatingip['id']),
+                    title=floatingip['name'],
+                    status=floatingip['status'],
+                    network_=network_name[0],
+                    tenant_=tenant_name[0],
+                    router_=router_name[0],
+                    )))
+
         objmaps = {
             'flavors': flavors,
             'hosts': hosts,
@@ -392,7 +572,14 @@ class OpenStackInfrastructure(PythonPlugin):
             'servers': servers,
             'services': services,
             'tenants': tenants,
-            'zones': zones.values()
+            'zones': zones.values(),
+            'agents': agents,
+            'networks': networks,
+            'subnets': subnets,
+            'routers': routers,
+            'ports': ports,
+            'security_groups': security_groups,
+            'floatingips': floatingips,
         }
 
         # If the user has provided a list of static objectmaps to
@@ -450,7 +637,9 @@ class OpenStackInfrastructure(PythonPlugin):
         # Apply the objmaps in the right order.
         componentsMap = RelationshipMap(relname='components')
         for i in ('tenants', 'regions', 'flavors', 'images', 'servers', 'zones',
-                  'hosts', 'hypervisors', 'services'):
+                  'hosts', 'hypervisors', 'services',
+                  'agents', 'networks', 'subnets', 'routers', 'ports', 'security_groups', 'floatingips',
+                 ):
             for objmap in objmaps[i]:
                 componentsMap.append(objmap)
 
