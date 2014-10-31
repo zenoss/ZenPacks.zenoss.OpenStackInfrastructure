@@ -30,6 +30,11 @@ RELATIONSHIPS_YUML = """
 // containing
 [Endpoint]++components-endpoint1[OpenstackComponent]
 [Instance]++-[Vnic]
+[NeutronAgent]++-[Agent]
+[Network]++-[Subnet]
+[Network]++-[Port]
+[Network]++-[FloatingIp]
+//[SecurityGroup]++-[SecurityGroupRule]
 // non-containing 1:M
 [OrgComponent]*parentOrg-childOrgs1[OrgComponent]
 [Host]1hostedSoftware-hostedOn*[SoftwareComponent]
@@ -38,6 +43,9 @@ RELATIONSHIPS_YUML = """
 [Flavor]1-.-*[Instance]
 [Image]1-.-*[Instance]
 [Tenant]1-.-*[Instance]
+[Tenant]1-.-*[Network]
+[Tenant]1-.-*[Router]
+[Tenant]1-.-*[SecurityGroup]
 [Hypervisor]1-.-*[Instance]
 // non-containing 1:1
 [Hypervisor]1-.-1[Host]
@@ -452,6 +460,159 @@ CFG = zenpacklib.ZenPackSpec(
                 'impacted_by': ['host'],
             }
         },
+
+        'NeutronAgent': {
+            'base': 'SoftwareComponent',
+            'filter_display': False,
+        },
+
+        'Agent': {
+            'base': 'NeutronAgent',
+            'meta_type': 'OpenStackInfrastructureAgent',
+            'label': 'Agent',
+            'order': 11,
+            'properties': {
+                'agentId':     {'grid_display': False,
+                                'label': 'Agent ID'},
+                'type':        {'label': 'Type'},
+                'host':        {'label': 'Host'},
+                'alive':       {'label': 'Alive'},               # true or false
+            },
+            'relationships': {
+                'neutronAgent': {'grid_display': False},
+            },
+        },
+
+        'Network': {
+            'base': 'LogicalComponent',
+            'meta_type': 'OpenStackInfrastructureNetwork',
+            'label': 'Network',
+            'order': 12,
+            'properties': {
+                'netId':       {'grid_display': False,
+                                'label': 'Network ID'},
+                'tenant_':     {'label': 'Tenant',
+                                'order': 12.6},
+                'netStatus':   {'label': 'Status',
+                                'order': 12.7},
+                'netState':    {'label': 'State'},
+                'netExternal': {'label': 'External',
+                                'order': 12.8},
+                'subnet_':     {'label': 'Subnet',
+                                'order': 12.9},
+                'netType':     {'label': 'Type',
+                                'order': 12.10},
+            },
+            'relationships': {
+                'tenant':      {'grid_display': False},
+                'ports':       {'grid_display': False},
+                'subnets':     {'grid_display': False},
+                },
+        },
+
+        'Subnet': {
+            'base': 'LogicalComponent',
+            'meta_type': 'OpenStackInfrastructureSubnet',
+            'label': 'Subnet',
+            'order': 14,
+            'properties': {
+                'subnetId':    {'grid_display': False,
+                                'label': 'Subnet ID'},
+                'cidr':        {'label': 'CIDR'},
+                'dns':         {'label': 'DNS'},
+                'gateway':     {'label': 'Gateway'},
+                'tenant_':     {'label': 'Tenant'},
+                'network_':    {'label': 'Network'},
+            }
+        },
+
+        'Router': {
+            'base': 'LogicalComponent',
+            'meta_type': 'OpenStackInfrastructureRouter',
+            'label': 'Router',
+            'order': 15,
+            'properties': {
+                'routerId':    {'grid_display': False,
+                                'label': 'Router ID'},
+                'tenant_':     {'label': 'Tenant'},
+                'gateway':     {'label': 'Gateway'},
+                'status':      {'label': 'Status'},
+                'routes':      {'label': 'Routes'},
+            },
+            'relationships': {
+                'tenant':      {'grid_display': False},
+            },
+        },
+
+        'Port': {         # more info?
+            'base': 'LogicalComponent',
+            'meta_type': 'OpenStackInfrastructurePort',
+            'label': 'Port',
+            'order': 16,
+            'properties': {
+                'portId':      {'grid_display': False,
+                                'label': 'Port ID'},
+                'title':       {'grid_display': False,
+                                'label': 'Title'},
+                'name':        {'grid_display': False,
+                                'label': 'Name'},
+                'netId':       {'label': 'Network'},
+                'tenant_':     {'label': 'Tenant'},
+                'host':        {'label': 'Host'},
+                'owner':       {'label': 'Owner'},
+                'status':      {'label': 'Status'},
+                'mac':         {'label': 'MAC'},
+                'network_':    {'label': 'Network'},
+                # 'type_':       {'label': 'Type'},
+                # 'gateway':       {'label': 'Gateway'},
+            },
+            'relationships': {
+                'network':     {'grid_display': False},
+            },
+        },
+
+        'SecurityGroup': {
+            'base': 'LogicalComponent',
+            'meta_type': 'OpenStackInfrastructureSecurityGroup',
+            'label': 'Security Group',
+            'order': 17,
+            'properties': {
+                'sgId':        {'grid_display': False,
+                                'label': 'Security Group ID'},
+                'tenant_':     {'label': 'Tenant'},
+        #              'rules':       {'label': 'Rules'},
+            },
+        },
+
+        # 'SecurityGroupRule': {
+        #     'base': 'LogicalComponent',
+        #     'meta_type': 'OpenStackInfrastructureSecurityGroupRule',
+        #     'label': 'Security Group Rule',
+        #     'order': 18,
+        #     'properties': {
+        #         'sgrId':       {'grid_display': False,
+        #                          'label': 'Security Group ID'},
+        #         'sgId':        {'label': 'Security Group'},
+        #         'direction':   {'label': 'Direction'},          # ingress, egress
+        #         'type':        {'label': 'Type'},               # ipv4, ipv6
+        #     }
+        # },
+
+        'FloatingIp': {
+            'base': 'LogicalComponent',
+            'meta_type': 'OpenStackInfrastructureFloatingIp',
+            'label': 'Floating IP',
+            'order': 19,
+            'properties': {
+                'sgrId':       {'grid_display': False,
+                                'label': 'Security Group ID'},
+                'addr':        {'label': 'Address'},
+                'network_':    {'label': 'Network'},
+                'tenant_':     {'label': 'Tenant'},
+                'router_':     {'label': 'Router'},
+            }
+        },
+
 
     },
 
