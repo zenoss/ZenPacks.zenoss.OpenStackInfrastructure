@@ -87,11 +87,6 @@ class NeutronAPIClient(object):
         self._token = None
 
     @property
-    def networks(self):
-        """Return entry-point to the API."""
-        return self._apis.setdefault('network', API(self, '/networks'))
-
-    @property
     def agents(self):
         """Return entry-point to the API."""
         return self._apis.setdefault('agents', API(self, "/agents"))

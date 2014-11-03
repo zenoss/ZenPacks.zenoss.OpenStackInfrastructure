@@ -69,37 +69,30 @@ class OpenStackInfrastructureNeutron(PythonPlugin):
         result = yield neutron_client.agents()
         results['agents'] = result['agents']
         log.debug('agents: %s\n' % str(results['agents']))
-        import pdb;pdb.set_trace()
 
         result = yield neutron_client.networks()
         results['networks'] = result['networks']
         log.debug('networks: %s\n' % str(results['networks']))
-        import pdb;pdb.set_trace()
 
         result = yield neutron_client.subnets()
         results['subnets'] = result['subnets']
         log.debug('subnets: %s\n' % str(results['subnets']))
-        import pdb;pdb.set_trace()
 
         result = yield neutron_client.routers()
         results['routers'] = result['routers']
         log.debug('routers: %s\n' % str(results['routers']))
-        import pdb;pdb.set_trace()
 
         result = yield neutron_client.ports()
         results['ports'] = result['ports']
         log.debug('ports: %s\n' % str(results['ports']))
-        import pdb;pdb.set_trace()
 
         result = yield neutron_client.security_groups()
         results['security_groups'] = result['security_groups']
         log.debug('security_groups: %s\n' % str(results['security_groups']))
-        import pdb;pdb.set_trace()
 
         result = yield neutron_client.floatingips()
         results['floatingips'] = result['floatingips']
         log.debug('floatingips: %s\n' % str(results['floatingips']))
-        import pdb;pdb.set_trace()
 
         returnValue(results)
 
