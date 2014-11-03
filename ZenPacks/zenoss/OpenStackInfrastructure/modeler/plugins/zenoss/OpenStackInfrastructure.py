@@ -33,8 +33,9 @@ add_local_lib_path()
 
 from apiclients.novaapiclient import NovaAPIClient, NotFoundError
 from apiclients.keystoneapiclient import KeystoneAPIClient
+from apiclients.neutronapiclient import NeutronAPIClient
 
-from lib.neutronclient.v2_0.client import Client as NeutronAPIClient
+# from lib.neutronclient.v2_0.client import Client as NeutronAPIClient
 
 class OpenStackInfrastructure(PythonPlugin):
     deviceProperties = PythonPlugin.deviceProperties + (
@@ -69,17 +70,13 @@ class OpenStackInfrastructure(PythonPlugin):
         results['tenants'] = result['tenants']
         log.debug('tenants: %s\n' % str(results['tenants']))
 
-        nclient = NeutronAPIClient(
+        neutron_client = NeutronAPIClient(
             username=device.zCommandUsername,
             password=device.zCommandPassword,
-            endpoint_url=device.zOpenStackAuthUrl,
-            auth_url='http://192.168.56.122:35357/v2.0/',
+            auth_url=device.zOpenStackAuthUrl,
+            project_id=device.zOpenStackProjectId,
             region_name=device.zOpenStackRegionName,
-            tenant_name=device.zOpenStackProjectId,
             )
-        nclient.format = 'json'
-        nclient.httpclient.endpoint_url='http://192.168.56.122:9696/'
-        nclient.httpclient.authenticate_and_fetch_endpoint_url()
 
         result = yield client.flavors(detailed=True, is_public=None)
         results['flavors'] = result['flavors']
@@ -103,28 +100,33 @@ class OpenStackInfrastructure(PythonPlugin):
         results['services'] = result['services']
         log.debug('services: %s\n' % str(results['services']))
 
-        # non twisted neutron
-        # import pdb;pdb.set_trace()
-        agents = nclient.list_agents()
-        results['agents'] = agents['agents']
+        result = yield neutron_client.agents()
+        results['agents'] = result['agents']
+        log.debug('agents: %s\n' % str(results['agents']))
 
-        networks = nclient.list_networks()
-        results['networks'] = networks['networks']
+        result = yield neutron_client.networks()
+        results['networks'] = result['networks']
+        log.debug('networks: %s\n' % str(results['networks']))
 
-        subnets = nclient.list_subnets()
-        results['subnets'] = subnets['subnets']
+        result = yield neutron_client.subnets()
+        results['subnets'] = result['subnets']
+        log.debug('subnets: %s\n' % str(results['subnets']))
 
-        routers = nclient.list_routers()
-        results['routers'] = routers['routers']
+        result = yield neutron_client.routers()
+        results['routers'] = result['routers']
+        log.debug('routers: %s\n' % str(results['routers']))
 
-        ports = nclient.list_ports()
-        results['ports'] = ports['ports']
+        result = yield neutron_client.ports()
+        results['ports'] = result['ports']
+        log.debug('ports: %s\n' % str(results['ports']))
 
-        security_groups = nclient.list_security_groups()
-        results['security_groups'] = security_groups['security_groups']
+        result = yield neutron_client.security_groups()
+        results['security_groups'] = result['security_groups']
+        log.debug('security_groups: %s\n' % str(results['security_groups']))
 
-        floatingips = nclient.list_floatingips()
-        results['floatingips'] = floatingips['floatingips']
+        result = yield neutron_client.floatingips()
+        results['floatingips'] = result['floatingips']
+        log.debug('floatingips: %s\n' % str(results['floatingips']))
 
         returnValue(results)
 
@@ -452,9 +454,10 @@ class OpenStackInfrastructure(PythonPlugin):
                     netState=net['admin_state_up'],               # true/false
                     netExternal=net['router:external'],           # TRUE/FALSE
                     tenant_=tenant_name[0],
+                    # set_net_tenant_id='tenant-{0}'.format(tenant_id),    # tenant-a3a2901f2fd14f808401863e3628a858
                     netStatus=net['status'],                      # ACTIVE
                     netType=net['provider:network_type'].upper(), # local/global
-                    subnet_=cidrs
+                    subnet_=cidrs,
                 )))
 
         # subnet
