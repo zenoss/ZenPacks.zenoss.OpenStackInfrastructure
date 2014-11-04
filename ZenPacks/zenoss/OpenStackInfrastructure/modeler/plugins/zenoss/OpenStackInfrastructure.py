@@ -35,6 +35,8 @@ from apiclients.novaapiclient import NovaAPIClient, NotFoundError
 from apiclients.keystoneapiclient import KeystoneAPIClient
 from apiclients.neutronapiclient import NeutronAPIClient
 
+from ZenPacks.zenoss.OpenStackInfrastructure.modeler.plugins.zenoss.ModelerPluginNeutron import ModelerPluginNeutron
+
 # from lib.neutronclient.v2_0.client import Client as NeutronAPIClient
 
 class OpenStackInfrastructure(PythonPlugin):
@@ -70,14 +72,6 @@ class OpenStackInfrastructure(PythonPlugin):
         results['tenants'] = result['tenants']
         log.debug('tenants: %s\n' % str(results['tenants']))
 
-        neutron_client = NeutronAPIClient(
-            username=device.zCommandUsername,
-            password=device.zCommandPassword,
-            auth_url=device.zOpenStackAuthUrl,
-            project_id=device.zOpenStackProjectId,
-            region_name=device.zOpenStackRegionName,
-            )
-
         result = yield client.flavors(detailed=True, is_public=None)
         results['flavors'] = result['flavors']
         log.debug('flavors: %s\n' % str(results['flavors']))
@@ -100,33 +94,17 @@ class OpenStackInfrastructure(PythonPlugin):
         results['services'] = result['services']
         log.debug('services: %s\n' % str(results['services']))
 
-        result = yield neutron_client.agents()
-        results['agents'] = result['agents']
-        log.debug('agents: %s\n' % str(results['agents']))
+        # Neutron
+        neutron_client = ModelerPluginNeutron(
+            username=device.zCommandUsername,
+            password=device.zCommandPassword,
+            auth_url=device.zOpenStackAuthUrl,
+            project_id=device.zOpenStackProjectId,
+            region_name=device.zOpenStackRegionName,
+            )
 
-        result = yield neutron_client.networks()
-        results['networks'] = result['networks']
-        log.debug('networks: %s\n' % str(results['networks']))
-
-        result = yield neutron_client.subnets()
-        results['subnets'] = result['subnets']
-        log.debug('subnets: %s\n' % str(results['subnets']))
-
-        result = yield neutron_client.routers()
-        results['routers'] = result['routers']
-        log.debug('routers: %s\n' % str(results['routers']))
-
-        result = yield neutron_client.ports()
-        results['ports'] = result['ports']
-        log.debug('ports: %s\n' % str(results['ports']))
-
-        result = yield neutron_client.security_groups()
-        results['security_groups'] = result['security_groups']
-        log.debug('security_groups: %s\n' % str(results['security_groups']))
-
-        result = yield neutron_client.floatingips()
-        results['floatingips'] = result['floatingips']
-        log.debug('floatingips: %s\n' % str(results['floatingips']))
+        neutronResults = yield neutron_client.collect()
+        results.update(neutronResults)
 
         returnValue(results)
 
@@ -438,14 +416,11 @@ class OpenStackInfrastructure(PythonPlugin):
         # networking
         networks = []
         for net in results['networks']:
-            tenant_name = [tenant['name'] for tenant in results['tenants'] \
-                           if tenant['enabled'] == True and \
-                              tenant['id'] == net['tenant_id']]
             cidrs = ""
             for snetid in net['subnets']:
                 for subnet in results['subnets']:
                     if subnet['id'] == snetid:
-                        cidrs = cidrs + subnet['cidr']
+                        cidrs = subnet['cidr']
             networks.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Network',
                 data=dict(
@@ -453,8 +428,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     title=net['name'],
                     netState=net['admin_state_up'],               # true/false
                     netExternal=net['router:external'],           # TRUE/FALSE
-                    tenant_=tenant_name[0],
-                    # set_net_tenant_id='tenant-{0}'.format(tenant_id),    # tenant-a3a2901f2fd14f808401863e3628a858
+                    set_tenant='tenant-{0}'.format(net['tenant_id']),    # tenant-a3a2901f2fd14f808401863e3628a858
                     netStatus=net['status'],                      # ACTIVE
                     netType=net['provider:network_type'].upper(), # local/global
                     subnet_=cidrs,
@@ -463,9 +437,6 @@ class OpenStackInfrastructure(PythonPlugin):
         # subnet
         subnets = []
         for subnet in results['subnets']:
-            tenant_name = [tenant['name'] for tenant in results['tenants'] \
-                           if tenant['enabled'] == True and \
-                              tenant['id'] == subnet['tenant_id']]
             network_name = [network['name'] for network in results['networks'] \
                             if network['status'] == 'ACTIVE' and \
                                network['id'] == subnet['network_id']]
@@ -476,8 +447,8 @@ class OpenStackInfrastructure(PythonPlugin):
                     title=subnet['name'],
                     cidr=subnet['cidr'],
                     dns=subnet['dns_nameservers'],
-                    tenant_=tenant_name[0],
-                    network_=network_name[0],
+                    # network_=network_name[0],
+                    set_network='network-{0}'.format(subnet['network_id']),
                     gateway=subnet['gateway_ip'],
                     )))
 
@@ -485,9 +456,6 @@ class OpenStackInfrastructure(PythonPlugin):
         # router
         routers = []
         for router in results['routers']:
-            tenant_name = [tenant['name'] for tenant in results['tenants'] \
-                           if tenant['enabled'] == True and \
-                              tenant['id'] == router['tenant_id']]
             network_name = [network['name'] for network in results['networks'] \
                             if network['status'] == 'ACTIVE' and \
                                network['id'] == router['external_gateway_info']['network_id']]
@@ -497,9 +465,9 @@ class OpenStackInfrastructure(PythonPlugin):
                     id='router-{0}'.format(router['id']),
                     title=router['name'],
                     status=router['status'],
-                    tenant_=tenant_name[0],
                     gateway=network_name[0],
                     routes=router['routes'],
+                    set_tenant='tenant-{0}'.format(router['tenant_id']),    # tenant-a3a2901f2fd14f808401863e3628a858
                 )))
 
         # port
@@ -520,11 +488,12 @@ class OpenStackInfrastructure(PythonPlugin):
                 data=dict(
                     id='port-{0}'.format(port['id']),
                     network_=network_name[0],
+                    # set_network='network-{0}'.format(port['network_id']),
                     status=port['status'],
                     tenant_=tenant_name[0],
                     # gateway=network_name[0],
                     host=port['binding:host_id'],
-                    mac=port['mac_address'],
+                    mac=port['mac_address'].upper(),
                     owner=port['device_owner'],
                     # type_=port['binding:vif_type'],
                     )))
@@ -532,15 +501,12 @@ class OpenStackInfrastructure(PythonPlugin):
         # security_group
         security_groups = []
         for sg in results['security_groups']:
-            tenant_name = [tenant['name'] for tenant in results['tenants'] \
-                           if tenant['enabled'] == True and \
-                              tenant['id'] == sg['tenant_id']]
             security_groups.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.SecurityGroup',
                 data=dict(
                     id='security_group-{0}'.format(sg['id']),
                     title=sg['name'],
-                    tenant_=tenant_name[0],
+                    set_tenant='tenant-{0}'.format(sg['tenant_id']),    # tenant-a3a2901f2fd14f808401863e3628a858
                     )))
 
         # # floatingip
