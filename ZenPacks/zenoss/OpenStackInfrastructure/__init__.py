@@ -202,7 +202,8 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'tenantId':   {'grid_display': False,
                                'label': 'Tenant ID'},
-                'description': {'label': 'Description'},
+                'description': {'label': 'Description',
+                                'content_width': 180},
             },
             'dynamicview_views': ['service_view'],
             'dynamicview_relations': {
@@ -474,9 +475,15 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'agentId':     {'grid_display': False,
                                 'label': 'Agent ID'},
-                'type':        {'label': 'Type'},
-                'host':        {'label': 'Host'},
-                'alive':       {'label': 'Alive'},               # true or false
+                'host':        {'label': 'Host',
+                                'order': 11.1,
+                                'content_width': 100},
+                'type':        {'label': 'Type',
+                                'order': 11.2,
+                                'content_width': 120},
+                'alive':       {'label': 'Alive',
+                                'order': 11.3,
+                                'content_width': 50},               # true or false
             },
             'relationships': {
                 'neutronAgent': {'grid_display': False},
@@ -491,17 +498,20 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'netId':       {'grid_display': False,
                                 'label': 'Network ID'},
-                'tenant_':     {'label': 'Tenant',
-                                'order': 12.6},
                 'netStatus':   {'label': 'Status',
-                                'order': 12.7},
-                'netState':    {'label': 'State'},
+                                'order': 12.7,
+                                'content_width': 60},
+                'netState':    {'label': 'State',
+                                'content_width': 60},
                 'netExternal': {'label': 'External',
-                                'order': 12.8},
+                                'order': 12.8,
+                                'content_width': 60},
                 'subnet_':     {'label': 'Subnet',
-                                'order': 12.9},
+                                'order': 12.9,
+                                'content_width': 100},
                 'netType':     {'label': 'Type',
-                                'order': 12.10},
+                                'order': 12.10,
+                                'content_width': 60},
             },
             'relationships': {
                 'tenant':      {'grid_display': False},
@@ -518,11 +528,11 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'subnetId':    {'grid_display': False,
                                 'label': 'Subnet ID'},
-                'cidr':        {'label': 'CIDR'},
+                'cidr':        {'label': 'CIDR',
+                                'content_width': 100},
                 'dns':         {'label': 'DNS'},
-                'gateway':     {'label': 'Gateway'},
-                'tenant_':     {'label': 'Tenant'},
-                'network_':    {'label': 'Network'},
+                'gateway':     {'label': 'Gateway',
+                                'content_width': 100},
             }
         },
 
@@ -534,13 +544,9 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'routerId':    {'grid_display': False,
                                 'label': 'Router ID'},
-                'tenant_':     {'label': 'Tenant'},
                 'gateway':     {'label': 'Gateway'},
                 'status':      {'label': 'Status'},
                 'routes':      {'label': 'Routes'},
-            },
-            'relationships': {
-                'tenant':      {'grid_display': False},
             },
         },
 
@@ -556,12 +562,12 @@ CFG = zenpacklib.ZenPackSpec(
                                 'label': 'Title'},
                 'name':        {'grid_display': False,
                                 'label': 'Name'},
-                'netId':       {'label': 'Network'},
-                'tenant_':     {'label': 'Tenant'},
                 'host':        {'label': 'Host'},
-                'owner':       {'label': 'Owner'},
+                'owner':       {'label': 'Owner',
+                                'content_width': 120},
                 'status':      {'label': 'Status'},
-                'mac':         {'label': 'MAC'},
+                'mac':         {'label': 'MAC',
+                                'content_width': 120},
                 'network_':    {'label': 'Network'},
                 # 'type_':       {'label': 'Type'},
                 # 'gateway':       {'label': 'Gateway'},
@@ -579,7 +585,6 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'sgId':        {'grid_display': False,
                                 'label': 'Security Group ID'},
-                'tenant_':     {'label': 'Tenant'},
         #              'rules':       {'label': 'Rules'},
             },
         },
