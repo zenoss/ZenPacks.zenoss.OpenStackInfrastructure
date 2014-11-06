@@ -24,17 +24,21 @@ import httplib
 import json
 
 import logging
-log = logging.getLogger('zen.OpenStack.neutronapiclient')
+# logging.basicConfig()
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger('zen.OpenStackInfrastructure.apiclients.neutronapiclient.py')
+
+# class NullHandler(logging.Handler):
+#     def emit(self, record):
+#             pass
 
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.web import client as txwebclient
 from twisted.web.error import Error
-from twisted.internet import reactor
-import urllib
 
-import Globals
-from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path
-add_local_lib_path()
+# import Globals
+# from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path
+# add_local_lib_path()
 
 
 __all__ = [
@@ -82,65 +86,25 @@ class NeutronAPIClient(object):
         self.project_id = project_id
         self.region_name = region_name
 
-        self._apis = {}
+        self._api = None
         self._neutron_url = None
         self._token = None
 
     @property
-    def agents(self):
+    def api(self):
         """Return entry-point to the API."""
-        return self._apis.setdefault('agents', API(self, "/agents"))
+        if not self._api:
+            # self._api = API(self, 'api')
+            self._api = API(self, '')
 
-    @property
-    def floatingips(self):
-        """Return entry-point to the API."""
-        return self._apis.setdefault('floatingips', API(self, '/floatingips'))
-
-    @property
-    def networks(self):
-        """Return entry-point to the API."""
-        return self._apis.setdefault('networks', API(self, '/networks'))
-
-    @property
-    def ports(self):
-        """Return entry-point to the API."""
-        return self._apis.setdefault('ports', API(self, '/ports'))
-
-    @property
-    def routers(self):
-        """aka instances."""
-        return self._apis.setdefault('routers', API(self, "/routers"))
-
-    @property
-    def security_groups(self):
-        """Return entry-point to the API."""
-        return self._apis.setdefault('security_groups', API(self, "/security-groups"))
-
-    @property
-    def subnets(self):
-        """Return entry-point to the API."""
-        return self._apis.setdefault('subnets', API(self, "/subnets"))
+        return self._api
 
     def __getitem__(self, name):
-        if name == 'agents':
-            return self.agents
-        elif name == 'networks':
-            return self.networks
-        elif name == 'ports':
-            return self.ports
-        elif name == 'routers':
-            return self.routers
-        elif name == 'security_groups':
-            return self.security_groups
-        elif name == 'subnets':
-            return self.subnets
-        elif name == 'floatingips':
-            return self.floatingips
+        if name == 'api':
+            return self.api
 
         raise TypeError(
-            "%r object is not subscriptable (except for agents" +
-            ", floatingips, networks, ports, routers, securitygroups" +
-            ", subnets",
+            "%r object is not subscriptable (except for api)",
             self.__class__.__name__)
 
     @inlineCallbacks
@@ -281,12 +245,18 @@ class API(object):
 
     """Wrapper for each element of an API path including the leaf.  """
 
+    # def __init__(self, client, path='api'):
     def __init__(self, client, path=''):
         self.client = client
         self.path = path
         self._apis = {}
 
     def __getattr__(self, name):
+        # class is a frequently-used API path, but it won't work because
+        # it's a Python reserved word. Add aliases for it.
+        if name in ('klass', 'cls', '_class'):
+            name = 'class'
+
         if name not in self._apis:
             self._apis[name] = API(self.client, '/'.join((self.path, name)))
 
@@ -296,72 +266,30 @@ class API(object):
         return getattr(self, name)
 
     def __call__(self, data=None, params=None, **kwargs):
-        # update self.path based on kwargs
+
+        path = self.path
+
+        log.info("Entering API.__call__() ")
+        # update self.path and filter urls based on kwargs
         if kwargs:
-            qparams = {}
-            if kwargs.has_key('detailed') and kwargs['detailed']:
-                detail = '/detail' if kwargs['detailed'] else ""
-                self.path += '%s' % detail
 
-        #     # is_public is ternary - None means give all flavors.
-        #     # By default Nova assumes True and gives admins public flavors
-        #     # and flavors from their own projects only.
-            if self.path.find('agents') > -1 and \
-                kwargs.has_key('is_public') and \
-                kwargs['is_public'] is not None:
-                qparams['is_public'] = kwargs['is_public']
-                if qparams:
-                    self.path += '?%s' % urllib.urlencode(qparams)
+            if 'id' in kwargs and kwargs['id'] is not None:
+                path += '/%s' % kwargs['id']
 
-            if self.path.find('networks') > -1 and \
-                kwargs.has_key('zone') and \
-                kwargs['zone'] is not None:
-                self.path += '?zone=%s' % kwargs['zone']
+        # update the final path and attache the .json postfix
+        path = "v2.0%s.json" % path
 
-            if self.path.find('subnets') > -1 and \
-                kwargs.has_key('limit') and \
-                kwargs['limit'] is not None:
-                self.path += '?limit=%d' % int(kwargs['limit'])
+        # Testing fields... Must put below more generally
+        if 'fields' in kwargs and kwargs['fields'] is not None:
+            fields = []
+            for f in kwargs['fields']:
+                fields.append('fields=%s' % f)
 
-            if self.path.find('ports') > -1:
-                params = {}
-                if kwargs.has_key('search_opts') and \
-                   kwargs['search_opts'] is not None:
-                    for opt, val in kwargs['search_opts'].iteritems():
-                        if val:
-                            params[opt] = val
-                if kwargs.has_key('marker'):
-                    params['marker'] = kwargs['marker']
-                if kwargs.has_key('limit'):
-                    params['limit'] = int(kwargs['limit'])
-                query_string = "?%s" % urllib.urlencode(params) if params else ""
-                self.path += '%s' % query_string
+            path += '?%s' % '&'.join(fields)
 
-            if self.path.find('security-groups') > -1:
-                filters = []
-                if kwargs.has_key('host') and \
-                    kwargs['host'] is not None:
-                    filters.append("router=%s" % kwargs['router'])
-                if kwargs.has_key('binary') and \
-                    kwargs['binary'] is not None:
-                    filters.append("binary=%s" % kwargs['binary'])
-                if filters:
-                    self.path += "?%s" % "&".join(filters)
+        print path
 
-            if self.path.find('routers') > -1 and \
-                kwargs.has_key('router_match') and \
-                kwargs['router_match'] is not None and \
-                kwargs.has_key('routers'):
-                target = 'routers' if kwargs['routers'] else 'search'
-                self.path += '/%s/%s' % (
-                    urllib.quote(kwargs['router_match'], safe=''),
-                    target)
-
-        # update self.path again
-        self.path = "v2.0%s.json" % self.path
-
-        return self.client.api_call(
-            self.path, data=data, params=params, **kwargs)
+        return self.client.api_call(path, data=data, params=params, **kwargs)
 
 
 # Exceptions #########################################################
@@ -375,35 +303,72 @@ class NeutronError(Exception):
 class BadRequestError(NeutronError):
 
     """Wrapper for HTTP 400 Bad Request error."""
-
     pass
 
 
 class UnauthorizedError(NeutronError):
 
     """Wrapper for HTTP 401 Unauthorized error."""
-
     pass
 
 
 class NotFoundError(NeutronError):
 
     """Wrapper for HTTP 400 Bad Request error."""
-
     pass
 
 
 def main():
-    c = NeutronAPIClient('admin', 'password', 'http://192.168.56.122:5000/v2.0', 'admin', 'RegionOne')
+
+    from twisted.internet import reactor
+    import json
+    # import pprint
+    # pp = pprint.PrettyPrinter(indent=4)
+
+    def callback(result):
+        print "result type", type(result)
+        print "result ", result
+
+    def defer(result):
+        print "=" * 28
+        print result
+
+    c = NeutronAPIClient('admin', 'zenoss', 'http://mp8.zenoss.loc:5000/v2.0', 'admin', 'RegionOne')
     # ret = c.agents()
     # ret = c.networks()
     # ret = c.ports()
     # ret = c.routers()
     # ret = c.security_groups()
+    # ret = c.showSubnet(net_id='my_Id')
+
+    # ret = c.networks(id='af6dbc23-c491-4756-8e01-7dd86e7b44b2',
+    #                fields=['id','name','admin_state_up'])
+    # net = c.networks(fields=['id','name','status','admin_state_up'])
+
+    #-- net = c.networks(id='af6dbc23-c491-4756-8e01-7dd86e7b44b2')
+    net = c.api.networks()
+    net1 = c.api.networks(id='af6dbc23-c491-4756-8e01-7dd86e7b44b2')
+    net2 = c.api.networks(id='af6dbc23-c491-4756-8e01-7dd86e7b44b2',fields=['id'])
+    sub1 = c.api.subnets()
+    sub2 = c.api.subnets(id='3c25226f-58d5-4d4d-9641-8d1aab4cae9f')
+    # net1 = c.api.networks(id='af6dbc23-c491-4756-8e01-7dd86e7b44b2')
+    #-- net = c.security_groups(id='c9f928ed-bcda-4698-981e-c07ea22f2eb2')
+
     # ret = c.subnets()
-    ret = c.floatingips()
+    # ret.addBoth(callback)
+
+    # import pdb; pdb.set_trace()
+    reactor.callLater(2, reactor.stop)
     reactor.run()
-    print 'result ', ret.result
+
+    if not isinstance(net.result):
+        print json.dumps(net.result, sort_keys=True, indent=4)
+    print json.dumps(net1.result, sort_keys=True, indent=4)
+    print json.dumps(net2.result, sort_keys=True, indent=4)
+    print json.dumps(sub1.result, sort_keys=True, indent=4)
+    print json.dumps(sub2.result, sort_keys=True, indent=4)
+
+
     # import pdb;pdb.set_trace()
 
 if __name__ == '__main__':
