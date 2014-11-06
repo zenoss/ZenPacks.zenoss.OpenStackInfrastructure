@@ -2,7 +2,7 @@
 
 yum update -y
 yum install -y emacs wget telnet
-yum install -y http://rdo.fedorapeople.org/rdo-release.rpm
+yum install -y https://repos.fedorapeople.org/repos/openstack/openstack-icehouse/rdo-release-icehouse-4.noarch.rpm
 yum install -y openstack-packstack
 
 packstack --allinone --os-ceilometer-install=y --os-controller-host=192.168.2.11 --os-compute-hosts=192.168.2.11 --os-network-hosts=192.168.2.11 --vcenter-host=192.168.2.11 --amqp-host=192.168.2.11 --mariadb-host=192.168.2.11 --mongodb-host=192.168.2.11 --novanetwork-pubif=eth1 --novanetwork-fixed-range=192.168.32.0/22 --novanetwork-floating-range=10.3.4.0/22 --os-neutron-ml2-type-drivers=local --os-neutron-ml2-tenant-network-types=local --os-neutron-ml2-mechanism-drivers=openvswitch --use-epel=y
