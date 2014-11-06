@@ -318,20 +318,10 @@ class NotFoundError(NeutronError):
     pass
 
 
+@inlineCallbacks
 def main():
-
-    from twisted.internet import reactor
     import json
-    # import pprint
-    # pp = pprint.PrettyPrinter(indent=4)
-
-    def callback(result):
-        print "result type", type(result)
-        print "result ", result
-
-    def defer(result):
-        print "=" * 28
-        print result
+    import sys
 
     c = NeutronAPIClient('admin', 'zenoss', 'http://mp8.zenoss.loc:5000/v2.0', 'admin', 'RegionOne')
     # ret = c.agents()
@@ -346,30 +336,31 @@ def main():
     # net = c.networks(fields=['id','name','status','admin_state_up'])
 
     #-- net = c.networks(id='af6dbc23-c491-4756-8e01-7dd86e7b44b2')
-    net = c.api.networks()
-    net1 = c.api.networks(id='af6dbc23-c491-4756-8e01-7dd86e7b44b2')
-    net2 = c.api.networks(id='af6dbc23-c491-4756-8e01-7dd86e7b44b2',fields=['id'])
-    sub1 = c.api.subnets()
-    sub2 = c.api.subnets(id='3c25226f-58d5-4d4d-9641-8d1aab4cae9f')
+
+    try:
+        net = yield c.api.networks()
+    except Exception as e:
+        print >> sys.stderr, "ERROR - networks(): %s" % e
+    else:
+        json.dumps(net.result, sort_keys=True, indent=4)
+
+    try:
+        net1 = yield c.api.networks(id='af6dbc23-c491-4756-8e01-7dd86e7b44b2')
+    except Exception as e:
+        print >> sys.stderr, "ERROR - networks(<id>): %s" % e
+    else:
+        print json.dumps(net1.result, sort_keys=True, indent=4)
+
+    # sub1 = c.api.subnets()
+    # sub2 = c.api.subnets(id='3c25226f-58d5-4d4d-9641-8d1aab4cae9f')
     # net1 = c.api.networks(id='af6dbc23-c491-4756-8e01-7dd86e7b44b2')
     #-- net = c.security_groups(id='c9f928ed-bcda-4698-981e-c07ea22f2eb2')
 
-    # ret = c.subnets()
-    # ret.addBoth(callback)
+    reactor.stop()
 
-    # import pdb; pdb.set_trace()
-    reactor.callLater(2, reactor.stop)
-    reactor.run()
-
-    if not isinstance(net.result):
-        print json.dumps(net.result, sort_keys=True, indent=4)
-    print json.dumps(net1.result, sort_keys=True, indent=4)
-    print json.dumps(net2.result, sort_keys=True, indent=4)
-    print json.dumps(sub1.result, sort_keys=True, indent=4)
-    print json.dumps(sub2.result, sort_keys=True, indent=4)
-
-
-    # import pdb;pdb.set_trace()
 
 if __name__ == '__main__':
+    from twisted.internet import reactor
+
     main()
+    reactor.run()
