@@ -12,10 +12,15 @@
 Example usage:
 
     >>> c = neutronapiclient.Client(username, password, auth_url, project_id, region)
-    >>> c.networks()
+    >>> c.api.networks()
     {
         "networks": [list of networks ],
     }
+    >>> c.api.networks(id='abc-123-ak47')
+        (shows the network with specified ID)
+
+    >>> c.api.networks(id='abc-123-ak47', fields=['id', 'name'])
+        (shows the network data with restricted fields)
 
 """
 
@@ -159,6 +164,7 @@ class NeutronAPIClient(object):
         try:
             r = yield self.direct_api_call(
                 path, data=data, params=params, **kwargs)
+
         except UnauthorizedError:
             # Could be caused by expired token. Try to login.
             yield self.login()
@@ -196,14 +202,15 @@ class NeutronAPIClient(object):
 
         except Error as e:
             status = int(e.status)
-            response = json.loads(e.response)
-            text = str(response)
+            text = str(e.response)
 
             if status == httplib.UNAUTHORIZED:
                 raise UnauthorizedError(text + " (check username and password)")
             elif status == httplib.BAD_REQUEST:
                 raise BadRequestError(text)
             elif status == httplib.NOT_FOUND:
+
+                log.info("\n\tNeutroAPI Error: %s" % request.url)
                 raise NotFoundError(text)
 
             raise NeutronError(text)
@@ -248,7 +255,7 @@ class API(object):
     # def __init__(self, client, path='api'):
     def __init__(self, client, path=''):
         self.client = client
-        self.path = path
+        self.path = path.replace('_','-')
         self._apis = {}
 
     def __getattr__(self, name):
@@ -269,7 +276,7 @@ class API(object):
 
         path = self.path
 
-        log.info("Entering API.__call__() ")
+        # log.debug("Entering API.__call__() ")
         # update self.path and filter urls based on kwargs
         if kwargs:
 
@@ -287,7 +294,7 @@ class API(object):
 
             path += '?%s' % '&'.join(fields)
 
-        print path
+        # log.debug("Rest Call Path" % path)
 
         return self.client.api_call(path, data=data, params=params, **kwargs)
 
@@ -320,40 +327,36 @@ class NotFoundError(NeutronError):
 
 @inlineCallbacks
 def main():
-    import json
+    import pprint
     import sys
 
-    c = NeutronAPIClient('admin', 'zenoss', 'http://mp8.zenoss.loc:5000/v2.0', 'admin', 'RegionOne')
-    # ret = c.agents()
-    # ret = c.networks()
-    # ret = c.ports()
-    # ret = c.routers()
-    # ret = c.security_groups()
-    # ret = c.showSubnet(net_id='my_Id')
-
-    # ret = c.networks(id='af6dbc23-c491-4756-8e01-7dd86e7b44b2',
-    #                fields=['id','name','admin_state_up'])
-    # net = c.networks(fields=['id','name','status','admin_state_up'])
-
-    #-- net = c.networks(id='af6dbc23-c491-4756-8e01-7dd86e7b44b2')
+    cc = NeutronAPIClient('admin', 'zenoss', 'http://mp8.zenoss.loc:5000/v2.0', 'admin', 'RegionOne')
 
     try:
-        net = yield c.api.networks()
+        sec = yield cc.api.ity_up_rules()
     except Exception as e:
-        print >> sys.stderr, "ERROR - networks(): %s" % e
+
+        log.info("\n\t in_main: NeutroAPI: broken stuff in call")
+        # print >> sys.stderr, "main: ERROR : %s" % e
+        # print "Error output : %s" % e.message
+        # print "Error dir : %s" % e.__class__
+
     else:
-        json.dumps(net.result, sort_keys=True, indent=4)
+        pprint.pprint(sec)
 
     try:
-        net1 = yield c.api.networks(id='af6dbc23-c491-4756-8e01-7dd86e7b44b2')
+        net1 = yield cc.api.networks()
+        net2 = yield cc.api.networks(id='af6dbc23-c491-4756-8e01-7dd86e7b44b2',
+                fields=['name','id'])
     except Exception as e:
         print >> sys.stderr, "ERROR - networks(<id>): %s" % e
     else:
-        print json.dumps(net1.result, sort_keys=True, indent=4)
+        print type(net1)
+        pprint.pprint(net1)
+        print "---------------------------------------------------------------"
+        print type(net2)
+        pprint.pprint(net2)
 
-    # sub1 = c.api.subnets()
-    # sub2 = c.api.subnets(id='3c25226f-58d5-4d4d-9641-8d1aab4cae9f')
-    # net1 = c.api.networks(id='af6dbc23-c491-4756-8e01-7dd86e7b44b2')
     #-- net = c.security_groups(id='c9f928ed-bcda-4698-981e-c07ea22f2eb2')
 
     reactor.stop()
