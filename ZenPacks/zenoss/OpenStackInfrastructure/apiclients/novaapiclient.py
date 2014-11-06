@@ -24,7 +24,9 @@ import httplib
 import json
 
 import logging
+logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('zen.OpenStack.novaapiclient')
+
 
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.web import client as txwebclient
@@ -32,9 +34,9 @@ from twisted.web.error import Error
 from twisted.internet import reactor
 import urllib
 
-import Globals
-from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path
-add_local_lib_path()
+# import Globals
+# from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path
+# add_local_lib_path()
 
 
 __all__ = [
@@ -229,7 +231,7 @@ class NovaAPIClient(object):
 
         except Error as e:
             status = int(e.status)
-            response = json.loads(e.response)
+            response = e.response
             text = str(response)
 
             if status == httplib.UNAUTHORIZED:
@@ -237,6 +239,7 @@ class NovaAPIClient(object):
             elif status == httplib.BAD_REQUEST:
                 raise BadRequestError(text)
             elif status == httplib.NOT_FOUND:
+                log.info("\n\tNeutroAPI Error: %s" % request.url)
                 raise NotFoundError(text)
 
             raise NovaError(text)
@@ -387,41 +390,33 @@ class NotFoundError(NovaError):
     pass
 
 
+@inlineCallbacks
 def main():
-    # url = ('/os-hypervisors/%s/%s' %
-    #            (urllib.quote(None, safe=''), 'servers'))
-    c = NovaAPIClient('admin', 'password', 'http://192.168.56.104:5000/v2.0', 'demo', 'RegionOne')
-#    c = NovaAPIClient('admin', '8a041d9c59dd403a', 'http://10.87.208.184:5000/v2.0', 'admin', 'RegionOne')
-    # ret = c.avzones(detailed=True)
-    # ret = c.avzones(detailed=False)
-    # ret = c.flavors()
-    # ret = c.flavors(detailed=False)
-    # ret = c.flavors(detailed=True)
-    # ret = c.flavors(detailed=True, is_public=None)
-    # ret = c.flavors(detailed=True, is_public=False)
-    # ret = c.flavors(detailed=True, is_public=True)
-    # ret = c.hosts()
-    # ret = c.hosts(zone='nova')
-    # ret = c.hosts(zone='internal')
-    ret = c.hypervisors(hypervisor_match='%', servers=True)
-    # ret = c.hypervisors(detailed=True)
-    # ret = c.hypervisors(detailed=False)
-    # ret = c.hypervisors(hypervisor_match='devstack22.yichi.local', servers=True)
-    # ret = c.hypervisors(hypervisor_match='devstack22.yichi.local', servers=False)
-    # ret = c.images()
-    # ret = c.images(detailed=True)
-    # ret = c.images(detailed=False, limit=2)
-    # ret = c.images(detailed=True, limit=2)
-    # ret = c.servers()
-    # ret = c.servers(detailed=True, limit=1)
-    # ret = c.servers(detailed=False, search_opts={'name': 'tiny1',}, limit=1)
-    # ret = c.servers(detailed=True, search_opts={'name': 'tiny1',}, limit=1)
-    # ret = c.services()
-    # ret = c.services(host='devstack22')
-    # ret = c.services(binary='nova-conductor')
-    # ret = c.services(host='devstack22', binary='nova-network')
-    reactor.run()
-    print 'result ', ret.result
+    import pprint
+
+    cc = NovaAPIClient('admin', 'zenoss', 'http://mp8.zenoss.loc:5000/v2.0', 'admin', 'RegionOne')
+
+    try:
+        sec = yield cc.hypervisors(hypervisor_match='%', servers=True)
+
+    except Exception:
+        log.info("\n\t in_main: NovaAPI: broken stuff in call")
+
+    else:
+        pprint.pprint(sec)
+
+    try:
+        sec = yield cc.XXXhypervisors(hypervisor_match='%', servers=True)
+
+    except Exception:
+        log.info("\n\t in_main: NovaAPI: broken stuff in call")
+
+    else:
+        pprint.pprint(sec)
+
+    reactor.stop()
 
 if __name__ == '__main__':
     main()
+    reactor.run()
+
