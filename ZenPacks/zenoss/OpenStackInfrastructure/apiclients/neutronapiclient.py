@@ -391,7 +391,7 @@ def main():
     # Ex5: Whatever you like
     #---------------------------------------------------------------------------
     try:
-        net5 = yield cc.api.floatingips()
+        net5 = yield cc.api.routers()
     except Exception as e:
         print >> sys.stderr, "ERROR - networks(<id>): %s" % e
     else:

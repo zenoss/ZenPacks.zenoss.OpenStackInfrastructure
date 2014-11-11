@@ -316,7 +316,6 @@ class OpenStackInfrastructure(PythonPlugin):
                 if port_id:
                     break
 
-            # import pdb;pdb.set_trace()
             servers.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Instance',
                 data=dict(
@@ -468,7 +467,6 @@ class OpenStackInfrastructure(PythonPlugin):
 
         # agent
         agents = []
-        # import pdb;pdb.set_trace()
         for agent in results['agents']:
             agents.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Agent',
@@ -523,19 +521,21 @@ class OpenStackInfrastructure(PythonPlugin):
         # router
         routers = []
         for router in results['routers']:
-            network_name = [network['name'] for network in results['networks'] \
-                            if network['status'] == 'ACTIVE' and \
-                               network['id'] == router['external_gateway_info']['network_id']]
-            routers.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStackInfrastructure.Router',
-                data=dict(
-                    id='router-{0}'.format(router['id']),
-                    title=router['name'],
-                    status=router['status'],
-                    gateway=network_name[0],
-                    routes=router['routes'],
-                    set_tenant='tenant-{0}'.format(router['tenant_id']),    # tenant-a3a2901f2fd14f808401863e3628a858
-                )))
+            if router.get('external_gateway_info'):
+
+                network_name = [network['name'] for network in results['networks'] \
+                                if network['status'] == 'ACTIVE' and \
+                                   network['id'] == router['external_gateway_info']['network_id']]
+                routers.append(ObjectMap(
+                    modname='ZenPacks.zenoss.OpenStackInfrastructure.Router',
+                    data=dict(
+                        id='router-{0}'.format(router['id']),
+                        title=router['name'],
+                        status=router['status'],
+                        gateway=network_name[0],
+                        routes=router['routes'],
+                        set_tenant='tenant-{0}'.format(router['tenant_id']),    # tenant-a3a2901f2fd14f808401863e3628a858
+                    )))
 
         # port
         ports = []
@@ -621,7 +621,8 @@ class OpenStackInfrastructure(PythonPlugin):
                               tenant['id'] == floatingip['tenant_id']]
             network_name = [network['name'] for network in results['networks'] \
                             if network['status'] == 'ACTIVE' and \
-                               network['id'] == floatingip['external_gateway_info']['network_id']]
+                               network['id'] == floatingip['floating_network_id']]
+            import pdb; pdb.set_trace()
             router_name = [router['name'] for router in results['routers'] \
                             if router['status'] == 'ACTIVE' and \
                                router['id'] == floatingip['router_id']]
@@ -629,7 +630,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.FloatingIp',
                 data=dict(
                     id='floatingip-{0}'.format(floatingip['id']),
-                    title=floatingip['name'],
+                    title=floatingip['id'],
                     status=floatingip['status'],
                     network_=network_name[0],
                     tenant_=tenant_name[0],
