@@ -14,85 +14,68 @@
 """ Get component information using OpenStack Neutron API clients """
 
 import logging
-log = logging.getLogger('zen.OpenStackNeutron')
+log = logging.getLogger('zen.OpenStackModelerPluginNeutron')
 
 import json
 import os
 import re
-import types
 
 from twisted.internet.defer import inlineCallbacks, returnValue
-
-from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
-from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
-from Products.ZenUtils.Utils import prepId
-from Products.ZenUtils.Time import isoToTimestamp, LocalDateTime
 
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path, zenpack_path
 add_local_lib_path()
 
-from apiclients.keystoneapiclient import KeystoneAPIClient
 from apiclients.neutronapiclient import NeutronAPIClient
 
-class OpenStackInfrastructureNeutron(PythonPlugin):
-    deviceProperties = PythonPlugin.deviceProperties + (
-        'zCommandUsername',
-        'zCommandPassword',
-        'zOpenStackProjectId',
-        'zOpenStackAuthUrl',
-        'zOpenStackRegionName',
-    )
+class OpenStackInfrastructureNeutron():
+    def __init__(self,
+                 username=None,
+                 password=None,
+                 auth_url=None,
+                 project_id=None,
+                 region_name=None,
+                 ):
+
+        self.username = username
+        self.password = password
+        self.auth_url = auth_url
+        self.project_id = project_id
+        self.region_name = region_name
 
     @inlineCallbacks
-    def collect(self, device, unused):
+    def collect(self):
 
         results = {}
 
-        keystone_client = KeystoneAPIClient(
-            device.zCommandUsername,
-            device.zCommandPassword,
-            device.zOpenStackAuthUrl,
-            device.zOpenStackProjectId)
-
         neutron_client = NeutronAPIClient(
-            username=device.zCommandUsername,
-            password=device.zCommandPassword,
-            auth_url=device.zOpenStackAuthUrl,
-            project_id=device.zOpenStackProjectId,
-            region_name=device.zOpenStackRegionName,
+            username=self.username,
+            password=self.password,
+            auth_url=self.auth_url,
+            project_id=self.project_id,
+            region_name=self.region_name,
             )
-
-        result = yield keystone_client.tenants()
-        results['tenants'] = result['tenants']
-        log.debug('tenants: %s\n' % str(results['tenants']))
 
         result = yield neutron_client.agents()
         results['agents'] = result['agents']
-        log.debug('agents: %s\n' % str(results['agents']))
+
 
         result = yield neutron_client.networks()
         results['networks'] = result['networks']
-        log.debug('networks: %s\n' % str(results['networks']))
 
         result = yield neutron_client.subnets()
         results['subnets'] = result['subnets']
-        log.debug('subnets: %s\n' % str(results['subnets']))
 
         result = yield neutron_client.routers()
         results['routers'] = result['routers']
-        log.debug('routers: %s\n' % str(results['routers']))
 
         result = yield neutron_client.ports()
         results['ports'] = result['ports']
-        log.debug('ports: %s\n' % str(results['ports']))
 
         result = yield neutron_client.security_groups()
         results['security_groups'] = result['security_groups']
-        log.debug('security_groups: %s\n' % str(results['security_groups']))
 
         result = yield neutron_client.floatingips()
         results['floatingips'] = result['floatingips']
-        log.debug('floatingips: %s\n' % str(results['floatingips']))
 
         returnValue(results)
 
@@ -148,7 +131,7 @@ class OpenStackInfrastructureNeutron(PythonPlugin):
                     netStatus=net['status'],                      # ACTIVE
                     netType=net['provider:network_type'].upper(), # local/global
                     subnet_=cidrs,
-                )))
+                    )))
 
         # subnet
         subnets = []
@@ -190,7 +173,7 @@ class OpenStackInfrastructureNeutron(PythonPlugin):
                     tenant_=tenant_name[0],
                     gateway=network_name[0],
                     routes=router['routes'],
-                )))
+                    )))
 
         # port
         ports = []
@@ -217,7 +200,7 @@ class OpenStackInfrastructureNeutron(PythonPlugin):
                     mac=port['mac_address'],
                     owner=port['device_owner'],
                     # type_=port['binding:vif_type'],
-                    )))
+                )))
 
         # security_group
         security_groups = []
@@ -243,8 +226,8 @@ class OpenStackInfrastructureNeutron(PythonPlugin):
                             if network['status'] == 'ACTIVE' and \
                                network['id'] == floatingip['external_gateway_info']['network_id']]
             router_name = [router['name'] for router in results['routers'] \
-                            if router['status'] == 'ACTIVE' and \
-                               router['id'] == floatingip['router_id']]
+                           if router['status'] == 'ACTIVE' and \
+                              router['id'] == floatingip['router_id']]
             floatingips.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.FloatingIp',
                 data=dict(
@@ -264,7 +247,7 @@ class OpenStackInfrastructureNeutron(PythonPlugin):
             'ports': ports,
             'security_groups': security_groups,
             'floatingips': floatingips,
-        }
+            }
 
         # If the user has provided a list of static objectmaps to
         # slap on the ends of the ones we discovered dynamically, add them in.

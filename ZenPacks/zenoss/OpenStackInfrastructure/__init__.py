@@ -33,7 +33,6 @@ RELATIONSHIPS_YUML = """
 [NeutronAgent]++-[Agent]
 [Network]++-[Subnet]
 [Network]++-[Port]
-[Network]++-[FloatingIp]
 //[SecurityGroup]++-[SecurityGroupRule]
 // non-containing 1:M
 [OrgComponent]*parentOrg-childOrgs1[OrgComponent]
@@ -46,8 +45,10 @@ RELATIONSHIPS_YUML = """
 [Tenant]1-.-*[Network]
 [Tenant]1-.-*[Router]
 [Tenant]1-.-*[SecurityGroup]
+[Tenant]1-.-*[FloatingIp]
 [Hypervisor]1-.-*[Instance]
 // non-containing 1:1
+//[Port]1-.-*[Instance]
 [Hypervisor]1-.-1[Host]
 """
 
@@ -475,12 +476,12 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'agentId':     {'grid_display': False,
                                 'label': 'Agent ID'},
-                'host':        {'label': 'Host',
-                                'order': 11.1,
-                                'content_width': 100},
                 'type':        {'label': 'Type',
-                                'order': 11.2,
+                                'order': 11.1,
                                 'content_width': 120},
+                'state':        {'label': 'Admin State Up',
+                                'order': 11.2,
+                                'content_width': 80},
                 'alive':       {'label': 'Alive',
                                 'order': 11.3,
                                 'content_width': 50},               # true or false
@@ -558,11 +559,9 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'portId':      {'grid_display': False,
                                 'label': 'Port ID'},
-                'title':       {'grid_display': False,
-                                'label': 'Title'},
-                'name':        {'grid_display': False,
-                                'label': 'Name'},
-                'host':        {'label': 'Host'},
+                # 'title':       {'grid_display': False,
+                #                 'label': 'Title'},
+                # 'host':        {'label': 'Host'},
                 'owner':       {'label': 'Owner',
                                 'content_width': 120},
                 'status':      {'label': 'Status'},

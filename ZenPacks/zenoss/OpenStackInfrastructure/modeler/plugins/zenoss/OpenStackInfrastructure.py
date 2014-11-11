@@ -14,7 +14,7 @@
 """ Get component information using OpenStack API clients """
 
 import logging
-log = logging.getLogger('zen.OpenStack')
+log = logging.getLogger('zen.OpenStackInfrastructure')
 
 import json
 import os
@@ -35,7 +35,7 @@ from apiclients.novaapiclient import NovaAPIClient, NotFoundError
 from apiclients.keystoneapiclient import KeystoneAPIClient
 from apiclients.neutronapiclient import NeutronAPIClient
 
-from ZenPacks.zenoss.OpenStackInfrastructure.modeler.plugins.zenoss.ModelerPluginNeutron import ModelerPluginNeutron
+# from ZenPacks.zenoss.OpenStackInfrastructure.modeler.plugins.zenoss.OpenStackInfrastructureNeutron import OpenStackInfrastructureNeutron
 
 # from lib.neutronclient.v2_0.client import Client as NeutronAPIClient
 
@@ -95,7 +95,18 @@ class OpenStackInfrastructure(PythonPlugin):
         log.debug('services: %s\n' % str(results['services']))
 
         # Neutron
-        neutron_client = ModelerPluginNeutron(
+        # neutron_client = OpenStackInfrastructureNeutron(
+        #     username=device.zCommandUsername,
+        #     password=device.zCommandPassword,
+        #     auth_url=device.zOpenStackAuthUrl,
+        #     project_id=device.zOpenStackProjectId,
+        #     region_name=device.zOpenStackRegionName,
+        #     )
+        #
+        # neutronResults = yield neutron_client.collect()
+        # results.update(neutronResults)
+
+        neutron_client = NeutronAPIClient(
             username=device.zCommandUsername,
             password=device.zCommandPassword,
             auth_url=device.zOpenStackAuthUrl,
@@ -103,8 +114,27 @@ class OpenStackInfrastructure(PythonPlugin):
             region_name=device.zOpenStackRegionName,
             )
 
-        neutronResults = yield neutron_client.collect()
-        results.update(neutronResults)
+        result = yield neutron_client.agents()
+        results['agents'] = result['agents']
+
+
+        result = yield neutron_client.networks()
+        results['networks'] = result['networks']
+
+        result = yield neutron_client.subnets()
+        results['subnets'] = result['subnets']
+
+        result = yield neutron_client.routers()
+        results['routers'] = result['routers']
+
+        result = yield neutron_client.ports()
+        results['ports'] = result['ports']
+
+        result = yield neutron_client.security_groups()
+        results['security_groups'] = result['security_groups']
+
+        result = yield neutron_client.floatingips()
+        results['floatingips'] = result['floatingips']
 
         returnValue(results)
 
@@ -251,6 +281,42 @@ class OpenStackInfrastructure(PythonPlugin):
 
             tenant_id = server['tenant_id']
 
+            # port info
+            port_id = ''
+            port_name = ''
+            for port in results['ports']:
+                if 'private' in server['addresses']:
+                    for iface in server['addresses']['private']:
+                        if iface['OS-EXT-IPS-MAC:mac_addr'] != port['mac_address']:
+                            continue
+
+                        for fixed_ip in port['fixed_ips']:
+                            if iface['addr'] == fixed_ip['ip_address']:
+                                port_id = port['id']
+                                port_name = port['name']
+                                break
+
+                        if port_id:
+                            break
+
+                if 'public' in server['addresses']:
+                    for iface in server['addresses']['public']:
+                        if iface['OS-EXT-IPS-MAC:mac_addr'] != port['mac_address']:
+                            continue
+
+                        for fixed_ip in port['fixed_ips']:
+                            if iface['addr'] == fixed_ip['ip_address']:
+                                port_id = port['id']
+                                port_name = port['name']
+                                break
+
+                        if port_id:
+                            break
+
+                if port_id:
+                    break
+
+            # import pdb;pdb.set_trace()
             servers.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Instance',
                 data=dict(
@@ -267,6 +333,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_flavor='flavor-{0}'.format(flavor_id),    # flavor-performance1-1
                     set_image='image-{0}'.format(image_id),       # image-346eeba5-a122-42f1-94e7-06cb3c53f690
                     set_tenant='tenant-{0}'.format(tenant_id),    # tenant-a3a2901f2fd14f808401863e3628a858
+                    # set_port='port-{0}'.format(port_id),
                     hostId=server['hostId'],                      # a84303c0021aa53c7e749cbbbfac265f
                     hostName=server['name']                       # cloudserver01
                 )))
@@ -409,7 +476,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     id='agent-{0}'.format(agent['id']),
                     title=agent['binary'],
                     type=agent['agent_type'],               # true/false
-                    host=agent['host'],
+                    state=agent['admin_state_up'],               # true/false
                     alive=agent['alive'],                      # ACTIVE
                 )))
 
@@ -472,17 +539,52 @@ class OpenStackInfrastructure(PythonPlugin):
 
         # port
         ports = []
-        # import pdb;pdb.set_trace()
         for port in results['ports']:
             if not port['tenant_id']:
                 continue
 
-            tenant_name = [tenant['name'] for tenant in results['tenants'] \
-                           if tenant['enabled'] == True and \
-                              tenant['id'] == port['tenant_id']]
             network_name = [network['name'] for network in results['networks'] \
                             if network['status'] == 'ACTIVE' and \
                                network['id'] == port['network_id']]
+            server_id = ''
+            server_name = ''
+            for server in results['servers']:
+                if 'private' in server['addresses']:
+                    for iface in server['addresses']['private']:
+                        if iface['OS-EXT-IPS-MAC:mac_addr'] != port['mac_address']:
+                            continue
+
+                        for fixed_ip in port['fixed_ips']:
+                            if iface['addr'] == fixed_ip['ip_address']:
+                                server_id = server['id']
+                                server_name = server['name']
+                                break
+
+                        if server_id:
+                            break
+
+                if 'public' in server['addresses']:
+                    for iface in server['addresses']['public']:
+                        if iface['OS-EXT-IPS-MAC:mac_addr'] != port['mac_address']:
+                            continue
+
+                        for fixed_ip in port['fixed_ips']:
+                            if iface['addr'] == fixed_ip['ip_address']:
+                                server_id = server['id']
+                                server_name = server['name']
+                                break
+
+
+                        if server_id:
+                            break
+
+                if server_id:
+                    break
+
+            instance_id = ''
+            if server_id:
+                instance_id = 'instance-{0}'.format(server_id)
+            # import pdb;pdb.set_trace()
             ports.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Port',
                 data=dict(
@@ -490,12 +592,14 @@ class OpenStackInfrastructure(PythonPlugin):
                     network_=network_name[0],
                     # set_network='network-{0}'.format(port['network_id']),
                     status=port['status'],
-                    tenant_=tenant_name[0],
                     # gateway=network_name[0],
-                    host=port['binding:host_id'],
+                    # host=port['binding:host_id'],
+                    # set_host='host-packstack',
                     mac=port['mac_address'].upper(),
                     owner=port['device_owner'],
                     # type_=port['binding:vif_type'],
+                    #set_instance=instance_id,
+                    #instance_=server_name,
                     )))
 
         # security_group
@@ -619,4 +723,5 @@ class OpenStackInfrastructure(PythonPlugin):
             )
         )
 
+        log.info("returning componentsMap, endpointObjMap")
         return (componentsMap, endpointObjMap)
