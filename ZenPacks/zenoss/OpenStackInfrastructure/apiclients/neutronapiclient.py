@@ -9,6 +9,10 @@
 
 """neutronapiclient - Client library for the OpenStack Neutron API.
 
+   *Note*: API calls that have dashes '-', must be replaced with underscores
+   becuase of python syntax restrictions.
+   IE: Use c.api.security_groups() instead of c.api.security-groups()
+
 Example usage:
 
     >>> c = neutronapiclient.Client(username, password, auth_url, project_id, region)
@@ -210,7 +214,7 @@ class NeutronAPIClient(object):
                 raise BadRequestError(text)
             elif status == httplib.NOT_FOUND:
 
-                log.info("\n\tNeutroAPI Error: %s" % request.url)
+                log.info("\n\tNeutronAPI Error: %s" % request.url)
                 raise NotFoundError(text)
 
             raise NeutronError(text)
@@ -276,7 +280,6 @@ class API(object):
 
         path = self.path
 
-        # log.debug("Entering API.__call__() ")
         # update self.path and filter urls based on kwargs
         if kwargs:
 
@@ -292,9 +295,11 @@ class API(object):
             for f in kwargs['fields']:
                 fields.append('fields=%s' % f)
 
+            # print "fields = %s" % fields
+
             path += '?%s' % '&'.join(fields)
 
-        # log.debug("Rest Call Path" % path)
+        log.debug("Rest Call Path = %s" % path)
 
         return self.client.api_call(path, data=data, params=params, **kwargs)
 
@@ -332,32 +337,67 @@ def main():
 
     cc = NeutronAPIClient('admin', 'zenoss', 'http://mp8.zenoss.loc:5000/v2.0', 'admin', 'RegionOne')
 
+    #---------------------------------------------------------------------------
+    # Examples
+    #---------------------------------------------------------------------------
+
+    #---------------------------------------------------------------------------
+    # Ex1. Get extensions, of alias fwaas, use the dot-api syntax:
+    #---------------------------------------------------------------------------
+
     try:
-        sec = yield cc.api.ity_up_rules()
+        sec = yield cc.api.extensions.fwaas()
     except Exception as e:
-
         log.info("\n\t in_main: NeutroAPI: broken stuff in call")
-        # print >> sys.stderr, "main: ERROR : %s" % e
-        # print "Error output : %s" % e.message
-        # print "Error dir : %s" % e.__class__
-
     else:
         pprint.pprint(sec)
+        print "---------------------------------------------------------------"
 
+    #---------------------------------------------------------------------------
+    # Ex2: Just list the networks, in full
+    #---------------------------------------------------------------------------
     try:
         net1 = yield cc.api.networks()
+    except Exception as e:
+        print >> sys.stderr, "ERROR - networks(<id>): %s" % e
+    else:
+        pprint.pprint(net1)
+        print "---------------------------------------------------------------"
+
+    #---------------------------------------------------------------------------
+    # Ex3: List the network of a particular ID, filter by name, id
+    #---------------------------------------------------------------------------
+    try:
         net2 = yield cc.api.networks(id='af6dbc23-c491-4756-8e01-7dd86e7b44b2',
                 fields=['name','id'])
     except Exception as e:
         print >> sys.stderr, "ERROR - networks(<id>): %s" % e
     else:
-        print type(net1)
-        pprint.pprint(net1)
-        print "---------------------------------------------------------------"
-        print type(net2)
         pprint.pprint(net2)
+        print "---------------------------------------------------------------"
 
-    #-- net = c.security_groups(id='c9f928ed-bcda-4698-981e-c07ea22f2eb2')
+    #---------------------------------------------------------------------------
+    # Ex4: List the network of a particular ID, filter by name, id
+    #---------------------------------------------------------------------------
+    try:
+        net4 = yield cc.api.networks(fields=['subnets'])
+    except Exception as e:
+        print >> sys.stderr, "ERROR - networks(<id>): %s" % e
+    else:
+        pprint.pprint(net4)
+        print "---------------------------------------------------------------"
+
+    #---------------------------------------------------------------------------
+    # Ex5: Whatever you like
+    #---------------------------------------------------------------------------
+    try:
+        net5 = yield cc.api.security_groups(id='c547396e-adcc-45bf-b0f7-d55484d0fa06')
+        # cc.api.security_groups()
+    except Exception as e:
+        print >> sys.stderr, "ERROR - networks(<id>): %s" % e
+    else:
+        pprint.pprint(net5)
+        print "---------------------------------------------------------------"
 
     reactor.stop()
 
