@@ -9,13 +9,22 @@
 
 """neutronapiclient - Client library for the OpenStack Neutron API.
 
+   *Note*: API calls that have dashes '-', must be replaced with underscores
+   becuase of python syntax restrictions.
+   IE: Use c.api.security_groups() instead of c.api.security-groups()
+
 Example usage:
 
     >>> c = neutronapiclient.Client(username, password, auth_url, project_id, region)
-    >>> c.networks()
+    >>> c.api.networks()
     {
         "networks": [list of networks ],
     }
+    >>> c.api.networks(id='abc-123-ak47')
+        (shows the network with specified ID)
+
+    >>> c.api.networks(id='abc-123-ak47', fields=['id', 'name'])
+        (shows the network data with restricted fields)
 
 """
 
@@ -24,17 +33,21 @@ import httplib
 import json
 
 import logging
-log = logging.getLogger('zen.OpenStack.neutronapiclient')
+# logging.basicConfig()
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger('zen.OpenStackInfrastructure.apiclients.neutronapiclient.py')
+
+# class NullHandler(logging.Handler):
+#     def emit(self, record):
+#             pass
 
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.web import client as txwebclient
 from twisted.web.error import Error
-from twisted.internet import reactor
-import urllib
 
-import Globals
-from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path
-add_local_lib_path()
+# import Globals
+# from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path
+# add_local_lib_path()
 
 
 __all__ = [
@@ -82,65 +95,25 @@ class NeutronAPIClient(object):
         self.project_id = project_id
         self.region_name = region_name
 
-        self._apis = {}
+        self._api = None
         self._neutron_url = None
         self._token = None
 
     @property
-    def agents(self):
+    def api(self):
         """Return entry-point to the API."""
-        return self._apis.setdefault('agents', API(self, "/agents"))
+        if not self._api:
+            # self._api = API(self, 'api')
+            self._api = API(self, '')
 
-    @property
-    def floatingips(self):
-        """Return entry-point to the API."""
-        return self._apis.setdefault('floatingips', API(self, '/floatingips'))
-
-    @property
-    def networks(self):
-        """Return entry-point to the API."""
-        return self._apis.setdefault('networks', API(self, '/networks'))
-
-    @property
-    def ports(self):
-        """Return entry-point to the API."""
-        return self._apis.setdefault('ports', API(self, '/ports'))
-
-    @property
-    def routers(self):
-        """aka instances."""
-        return self._apis.setdefault('routers', API(self, "/routers"))
-
-    @property
-    def security_groups(self):
-        """Return entry-point to the API."""
-        return self._apis.setdefault('security_groups', API(self, "/security-groups"))
-
-    @property
-    def subnets(self):
-        """Return entry-point to the API."""
-        return self._apis.setdefault('subnets', API(self, "/subnets"))
+        return self._api
 
     def __getitem__(self, name):
-        if name == 'agents':
-            return self.agents
-        elif name == 'networks':
-            return self.networks
-        elif name == 'ports':
-            return self.ports
-        elif name == 'routers':
-            return self.routers
-        elif name == 'security_groups':
-            return self.security_groups
-        elif name == 'subnets':
-            return self.subnets
-        elif name == 'floatingips':
-            return self.floatingips
+        if name == 'api':
+            return self.api
 
         raise TypeError(
-            "%r object is not subscriptable (except for agents" +
-            ", floatingips, networks, ports, routers, securitygroups" +
-            ", subnets",
+            "%r object is not subscriptable (except for api)",
             self.__class__.__name__)
 
     @inlineCallbacks
@@ -195,6 +168,7 @@ class NeutronAPIClient(object):
         try:
             r = yield self.direct_api_call(
                 path, data=data, params=params, **kwargs)
+
         except UnauthorizedError:
             # Could be caused by expired token. Try to login.
             yield self.login()
@@ -232,14 +206,15 @@ class NeutronAPIClient(object):
 
         except Error as e:
             status = int(e.status)
-            response = json.loads(e.response)
-            text = str(response)
+            text = str(e.response)
 
             if status == httplib.UNAUTHORIZED:
                 raise UnauthorizedError(text + " (check username and password)")
             elif status == httplib.BAD_REQUEST:
                 raise BadRequestError(text)
             elif status == httplib.NOT_FOUND:
+
+                log.info("\n\tNeutronAPI Error: %s" % request.url)
                 raise NotFoundError(text)
 
             raise NeutronError(text)
@@ -281,12 +256,18 @@ class API(object):
 
     """Wrapper for each element of an API path including the leaf.  """
 
+    # def __init__(self, client, path='api'):
     def __init__(self, client, path=''):
         self.client = client
-        self.path = path
+        self.path = path.replace('_','-')
         self._apis = {}
 
     def __getattr__(self, name):
+        # class is a frequently-used API path, but it won't work because
+        # it's a Python reserved word. Add aliases for it.
+        if name in ('klass', 'cls', '_class'):
+            name = 'class'
+
         if name not in self._apis:
             self._apis[name] = API(self.client, '/'.join((self.path, name)))
 
@@ -296,72 +277,31 @@ class API(object):
         return getattr(self, name)
 
     def __call__(self, data=None, params=None, **kwargs):
-        # update self.path based on kwargs
+
+        path = self.path
+
+        # update self.path and filter urls based on kwargs
         if kwargs:
-            qparams = {}
-            if kwargs.has_key('detailed') and kwargs['detailed']:
-                detail = '/detail' if kwargs['detailed'] else ""
-                self.path += '%s' % detail
 
-        #     # is_public is ternary - None means give all flavors.
-        #     # By default Nova assumes True and gives admins public flavors
-        #     # and flavors from their own projects only.
-            if self.path.find('agents') > -1 and \
-                kwargs.has_key('is_public') and \
-                kwargs['is_public'] is not None:
-                qparams['is_public'] = kwargs['is_public']
-                if qparams:
-                    self.path += '?%s' % urllib.urlencode(qparams)
+            if 'id' in kwargs and kwargs['id'] is not None:
+                path += '/%s' % kwargs['id']
 
-            if self.path.find('networks') > -1 and \
-                kwargs.has_key('zone') and \
-                kwargs['zone'] is not None:
-                self.path += '?zone=%s' % kwargs['zone']
+        # update the final path and attache the .json postfix
+        path = "v2.0%s.json" % path
 
-            if self.path.find('subnets') > -1 and \
-                kwargs.has_key('limit') and \
-                kwargs['limit'] is not None:
-                self.path += '?limit=%d' % int(kwargs['limit'])
+        # Testing fields... Must put below more generally
+        if 'fields' in kwargs and kwargs['fields'] is not None:
+            fields = []
+            for f in kwargs['fields']:
+                fields.append('fields=%s' % f)
 
-            if self.path.find('ports') > -1:
-                params = {}
-                if kwargs.has_key('search_opts') and \
-                   kwargs['search_opts'] is not None:
-                    for opt, val in kwargs['search_opts'].iteritems():
-                        if val:
-                            params[opt] = val
-                if kwargs.has_key('marker'):
-                    params['marker'] = kwargs['marker']
-                if kwargs.has_key('limit'):
-                    params['limit'] = int(kwargs['limit'])
-                query_string = "?%s" % urllib.urlencode(params) if params else ""
-                self.path += '%s' % query_string
+            # print "fields = %s" % fields
 
-            if self.path.find('security-groups') > -1:
-                filters = []
-                if kwargs.has_key('host') and \
-                    kwargs['host'] is not None:
-                    filters.append("router=%s" % kwargs['router'])
-                if kwargs.has_key('binary') and \
-                    kwargs['binary'] is not None:
-                    filters.append("binary=%s" % kwargs['binary'])
-                if filters:
-                    self.path += "?%s" % "&".join(filters)
+            path += '?%s' % '&'.join(fields)
 
-            if self.path.find('routers') > -1 and \
-                kwargs.has_key('router_match') and \
-                kwargs['router_match'] is not None and \
-                kwargs.has_key('routers'):
-                target = 'routers' if kwargs['routers'] else 'search'
-                self.path += '/%s/%s' % (
-                    urllib.quote(kwargs['router_match'], safe=''),
-                    target)
+        log.debug("Rest Call Path = %s" % path)
 
-        # update self.path again
-        self.path = "v2.0%s.json" % self.path
-
-        return self.client.api_call(
-            self.path, data=data, params=params, **kwargs)
+        return self.client.api_call(path, data=data, params=params, **kwargs)
 
 
 # Exceptions #########################################################
@@ -375,36 +315,95 @@ class NeutronError(Exception):
 class BadRequestError(NeutronError):
 
     """Wrapper for HTTP 400 Bad Request error."""
-
     pass
 
 
 class UnauthorizedError(NeutronError):
 
     """Wrapper for HTTP 401 Unauthorized error."""
-
     pass
 
 
 class NotFoundError(NeutronError):
 
     """Wrapper for HTTP 400 Bad Request error."""
-
     pass
 
 
+@inlineCallbacks
 def main():
-    c = NeutronAPIClient('admin', 'password', 'http://192.168.56.122:5000/v2.0', 'admin', 'RegionOne')
-    # ret = c.agents()
-    # ret = c.networks()
-    # ret = c.ports()
-    # ret = c.routers()
-    # ret = c.security_groups()
-    # ret = c.subnets()
-    ret = c.floatingips()
-    reactor.run()
-    print 'result ', ret.result
-    # import pdb;pdb.set_trace()
+    import pprint
+    import sys
+
+    cc = NeutronAPIClient('admin', 'zenoss', 'http://mp8.zenoss.loc:5000/v2.0', 'admin', 'RegionOne')
+
+    #---------------------------------------------------------------------------
+    # Examples
+    #---------------------------------------------------------------------------
+
+    #---------------------------------------------------------------------------
+    # Ex1. Get extensions, of alias fwaas, use the dot-api syntax:
+    #---------------------------------------------------------------------------
+
+    try:
+        sec = yield cc.api.extensions.fwaas()
+    except Exception as e:
+        log.info("\n\t in_main: NeutroAPI: broken stuff in call")
+    else:
+        pprint.pprint(sec)
+        print "---------------------------------------------------------------"
+
+    #---------------------------------------------------------------------------
+    # Ex2: Just list the networks, in full
+    #---------------------------------------------------------------------------
+    try:
+        net1 = yield cc.api.networks()
+    except Exception as e:
+        print >> sys.stderr, "ERROR - networks(<id>): %s" % e
+    else:
+        pprint.pprint(net1)
+        print "---------------------------------------------------------------"
+
+    #---------------------------------------------------------------------------
+    # Ex3: List the network of a particular ID, filter by name, id
+    #---------------------------------------------------------------------------
+    try:
+        net2 = yield cc.api.networks(id='af6dbc23-c491-4756-8e01-7dd86e7b44b2',
+                fields=['name','id'])
+    except Exception as e:
+        print >> sys.stderr, "ERROR - networks(<id>): %s" % e
+    else:
+        pprint.pprint(net2)
+        print "---------------------------------------------------------------"
+
+    #---------------------------------------------------------------------------
+    # Ex4: List the network of a particular ID, filter by name, id
+    #---------------------------------------------------------------------------
+    try:
+        net4 = yield cc.api.networks(fields=['subnets'])
+    except Exception as e:
+        print >> sys.stderr, "ERROR - networks(<id>): %s" % e
+    else:
+        pprint.pprint(net4)
+        print "---------------------------------------------------------------"
+
+    #---------------------------------------------------------------------------
+    # Ex5: Whatever you like
+    #---------------------------------------------------------------------------
+    try:
+        net5 = yield cc.api.security_groups(id='c547396e-adcc-45bf-b0f7-d55484d0fa06')
+        # cc.api.security_groups()
+    except Exception as e:
+        print >> sys.stderr, "ERROR - networks(<id>): %s" % e
+    else:
+        pprint.pprint(net5)
+        print "---------------------------------------------------------------"
+
+    reactor.stop()
+
 
 if __name__ == '__main__':
+    from twisted.internet import reactor
+
     main()
+    reactor.run()
