@@ -27,7 +27,7 @@ from utils import add_local_lib_path
 add_local_lib_path()
 
 from apiclients.novaapiclient import NovaAPIClient
-
+from apiclients.neutronapiclient import NeutronAPIClient
 
 class OpenStackPoller(object):
     def __init__(self, username, api_key, project_id, auth_url, region_name):
@@ -166,8 +166,155 @@ class OpenStackPoller(object):
 
 
     @inlineCallbacks
+    def _populateAgentData(self, client, data):
+        data['agentTotalCount'] = 0
+        data['agentDHCPCount'] = 0
+        data['agentOVSCount'] = 0
+        data['agentLinuxBridgeCount'] = 0
+        data['agentHyperVCount'] = 0
+        data['agentNECCount'] = 0
+        data['agentOFACount'] = 0
+        data['agentL3Count'] = 0
+        data['agentLBCount'] = 0
+        data['agentMLNXCount'] = 0
+        data['agentMeteringCount'] = 0
+        data['agentMetadataCount'] = 0
+        data['agentSDNVECount'] = 0
+        data['agentNICSCount'] = 0
+        data['agentAliveCount'] = 0
+        data['agentDeadCount'] = 0
+
+        result = yield client.agents()
+
+        for agent in result['agents']:
+            data['agentTotalCount'] += 1
+            severity = None
+
+            if agent['agent_type'] == 'DHCP agent':
+                data['agentDHCPCount'] += 1
+                severity = 0
+            elif agent['agent_type'] == 'Open vSwitch agent':
+                data['agentOVSCount'] += 1
+                severity = 0
+            elif agent['agent_type'] == 'Linux bridge agent':
+                data['agentLinuxBridgeCount'] += 1
+                severity = 0
+            elif agent['agent_type'] == 'HyperV agent':
+                data['agentHyperVCount'] += 1
+                severity = 0
+            elif agent['agent_type'] == 'NEC plugin agent':
+                data['agentNECCount'] += 1
+                severity = 0
+            elif agent['agent_type'] == 'OFA driver agent':
+                data['agentOFACount'] += 1
+                severity = 0
+            elif agent['agent_type'] == 'L3 agent':
+                data['agentL3Count'] += 1
+                severity = 0
+            elif agent['agent_type'] == 'Loadbalancer agent':
+                data['agentLBCount'] += 1
+                severity = 0
+            elif agent['agent_type'] == 'Mellanox plugin agent':
+                data['agentMLNXCount'] += 1
+                severity = 0
+            elif agent['agent_type'] == 'Metering agent':
+                data['agentMeteringCount'] += 1
+                severity = 0
+            elif agent['agent_type'] == 'Metadata agent':
+                data['agentMetadataCount'] += 1
+                severity = 0
+            elif agent['agent_type'] == 'IBM SDN-VE agent':
+                data['agentSDNVECount'] += 1
+                severity = 0
+            elif agent['agent_type'] == 'NIC Switch agent':
+                data['agentNICSCount'] += 1
+                severity = 0
+            if agent['alive'] == True:
+                data['agentAliveCount'] += 1
+                severity = 0
+            else:
+                data['agentDeadCount'] += 1
+                severity = 5
+
+
+    @inlineCallbacks
+    def _populateNetworkData(self, client, data):
+        data['networkTotalCount'] = 0
+        data['networkActiveCount'] = 0
+        data['networkBuildCount'] = 0
+        data['networkDownCount'] = 0
+        data['networkErrorCount'] = 0
+        data['networkSharedCount'] = 0
+        data['networkExternalCount'] = 0
+        data['networkInternalCount'] = 0
+
+        result = yield client.networks()
+
+        for net in result['networks']:
+            data['networkTotalCount'] += 1
+            severity = None
+
+            if net['status'] == 'ACTIVE':
+                data['networkActiveCount'] += 1
+                severity = 0
+            elif net['status'] == 'BUILD':
+                data['networkBuildCount'] += 1
+                severity = 5
+            elif net['status'] == 'DOWN':
+                data['networkDownCount'] += 1
+                severity = 5
+            elif net['status'] == 'ERROR':
+                data['networkErrorCount'] += 1
+                severity = 5
+            if net['shared'] == True:
+                data['networkSharedCount'] += 1
+                severity = None
+            if net['router:external'] == True:
+                data['networkExternalCount'] += 1
+                severity = None
+            else:
+                data['networkInternalCount'] += 1
+                severity = None
+
+
+    @inlineCallbacks
+    def _populateRouterData(self, client, data):
+        data['routerTotalCount'] = 0
+        data['routerActiveCount'] = 0
+        data['routerBuildCount'] = 0
+        data['routerDownCount'] = 0
+        data['routerErrorCount'] = 0
+
+        result = yield client.routers()
+
+        for router in result['routers']:
+            data['routerTotalCount'] += 1
+            severity = None
+
+            if router['status'] == 'ACTIVE':
+                data['routerActiveCount'] += 1
+                severity = 0
+            elif router['status'] == 'BUILD':
+                data['routerBuildCount'] += 1
+                severity = 5
+            elif router['status'] == 'DOWN':
+                data['routerDownCount'] += 1
+                severity = 5
+            elif router['status'] == 'ERROR':
+                data['routerErrorCount'] += 1
+                severity = 5
+
+
+    @inlineCallbacks
     def getData(self):
         client = NovaAPIClient(
+            self._username,
+            self._api_key,
+            self._auth_url,
+            self._project_id,
+            self._region_name)
+
+        neutron_client = NeutronAPIClient(
             self._username,
             self._api_key,
             self._auth_url,
@@ -181,6 +328,11 @@ class OpenStackPoller(object):
             yield self._populateFlavorData(client, data)
             yield self._populateImageData(client, data)
             yield self._populateServerData(client, data)
+
+            yield self._populateNetworkData(neutron_client, data)
+            yield self._populateAgentData(neutron_client, data)
+            yield self._populateRouterData(neutron_client, data)
+            import pdb;pdb.set_trace()
 
         except Exception:
             raise

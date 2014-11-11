@@ -306,6 +306,125 @@
           aliases:
             server_verify_resize__count: ""
 
+        agentTotalCount:
+          rrdmin: 0
+          aliases:
+            agent_total__count: ""
+        agentDHCPCount:
+          rrdmin: 0
+          aliases:
+            agent_dhcp__count: ""
+        agentOVSCount:
+          rrdmin: 0
+          aliases:
+            agent_ovs__count: ""
+        agentLinuxBridgeCount:
+          rrdmin: 0
+          aliases:
+            agent_linux_bridge__count: ""
+        agentHyperVCount:
+          rrdmin: 0
+          aliases:
+            agent_hyperv__count: ""
+        agentNECCount:
+          rrdmin: 0
+          aliases:
+            agent_nec__count: ""
+        agentOFACount:
+          rrdmin: 0
+          aliases:
+            agent_ofa__count: ""
+        agentL3Count:
+          rrdmin: 0
+          aliases:
+            agent_l3__count: ""
+        agentLBCount:
+          rrdmin: 0
+          aliases:
+            agent_lb__count: ""
+        agentMLNXCount:
+          rrdmin: 0
+          aliases:
+            agent_mlnx__count: ""
+        agentMeteringCount:
+          rrdmin: 0
+          aliases:
+            agent_metering__count: ""
+        agentMetadataCount:
+          rrdmin: 0
+          aliases:
+            agent_metadata__count: ""
+        agentSDNVECount:
+          rrdmin: 0
+          aliases:
+            agent_sdnve__count: ""
+        agentNICSCount:
+          rrdmin: 0
+          aliases:
+            agent_nics__count: ""
+        agentAliveCount:
+          rrdmin: 0
+          aliases:
+            agent_alive__count: ""
+        agentDeadCount:
+          rrdmin: 0
+          aliases:
+            agent_dead__count: ""
+
+        networkTotalCount:
+          rrdmin: 0
+          aliases:
+            network_total__count: ""
+        networkActiveCount:
+          rrdmin: 0
+          aliases:
+            network_avtive__count: ""
+        networkBuildCount:
+          rrdmin: 0
+          aliases:
+            network_build__count: ""
+        networkDownCount:
+          rrdmin: 0
+          aliases:
+            network_down__count: ""
+        networkErrorCount:
+          rrdmin: 0
+          aliases:
+            network_error__count: ""
+        networkSharedCount:
+          rrdmin: 0
+          aliases:
+            network_shared__count: ""
+        networkExternalCount:
+          rrdmin: 0
+          aliases:
+            network_external__count: ""
+        networkInternalCount:
+          rrdmin: 0
+          aliases:
+            network_internal__count: ""
+
+        routerTotalCount:
+          rrdmin: 0
+          aliases:
+            router_total__count: ""
+        routerActiveCount:
+          rrdmin: 0
+          aliases:
+            router_active__count: ""
+        routerBuildCount:
+          rrdmin: 0
+          aliases:
+            router_build__count: ""
+        routerDownCount:
+          rrdmin: 0
+          aliases:
+            router_down__count: ""
+        routerErrorCount:
+          rrdmin: 0
+          aliases:
+            router_error__count: ""
+
       parser: ZenPacks.zenoss.OpenStackInfrastructure.parsers.endpoint
       type: COMMAND
       usessh: false
@@ -418,3 +537,35 @@
         performance:
           dpName: openstackQueues_perfQueueCount
           format: '%7.0lf'
+
+    Agents:
+      units: count
+      height: 100
+      width: 500
+
+      graphpoints:
+        Active:
+          dpName: openstack_imageActiveCount
+          format: '%7.0lf'
+        Failed:
+          dpName: openstack_imageFailedCount
+          format: '%7.0lf'
+        Other:
+          dpName: openstack_imageOtherCount
+          format: '%7.0lf'
+        Preparing:
+          dpName: openstack_imagePreparingCount
+          format: '%7.0lf'
+        Queued:
+          dpName: openstack_imageQueuedCount
+          format: '%7.0lf'
+        Saving:
+          dpName: openstack_imageSavingCount
+          format: '%7.0lf'
+        Total:
+          dpName: openstack_imageTotalCount
+          format: '%7.0lf'
+        Unknown:
+          dpName: openstack_imageUnknownCount
+          format: '%7.0lf'
+
