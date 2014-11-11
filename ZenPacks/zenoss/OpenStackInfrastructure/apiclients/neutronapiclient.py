@@ -391,8 +391,7 @@ def main():
     # Ex5: Whatever you like
     #---------------------------------------------------------------------------
     try:
-        net5 = yield cc.api.security_groups(id='c547396e-adcc-45bf-b0f7-d55484d0fa06')
-        # cc.api.security_groups()
+        net5 = yield cc.api.floatingips()
     except Exception as e:
         print >> sys.stderr, "ERROR - networks(<id>): %s" % e
     else:
