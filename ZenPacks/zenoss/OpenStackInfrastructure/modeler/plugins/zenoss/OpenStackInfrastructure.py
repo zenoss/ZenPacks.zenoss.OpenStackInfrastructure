@@ -583,7 +583,6 @@ class OpenStackInfrastructure(PythonPlugin):
             instance_id = ''
             if server_id:
                 instance_id = 'instance-{0}'.format(server_id)
-            # import pdb;pdb.set_trace()
             ports.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Port',
                 data=dict(
@@ -621,7 +620,6 @@ class OpenStackInfrastructure(PythonPlugin):
             network_name = [network['name'] for network in results['networks'] \
                             if network['status'] == 'ACTIVE' and \
                                network['id'] == floatingip['floating_network_id']]
-            import pdb; pdb.set_trace()
             router_name = [router['name'] for router in results['routers'] \
                             if router['status'] == 'ACTIVE' and \
                                router['id'] == floatingip['router_id']]
