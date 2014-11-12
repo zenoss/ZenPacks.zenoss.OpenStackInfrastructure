@@ -184,7 +184,7 @@ class OpenStackPoller(object):
         data['agentAliveCount'] = 0
         data['agentDeadCount'] = 0
 
-        result = yield neutron_client.api.agents()
+        result = yield neutron_client.agents()
 
         for agent in result['agents']:
             data['agentTotalCount'] += 1
@@ -248,7 +248,7 @@ class OpenStackPoller(object):
         data['networkExternalCount'] = 0
         data['networkInternalCount'] = 0
 
-        result = yield neutron_client.api.networks()
+        result = yield neutron_client.networks()
 
         for net in result['networks']:
             data['networkTotalCount'] += 1
@@ -285,7 +285,7 @@ class OpenStackPoller(object):
         data['routerDownCount'] = 0
         data['routerErrorCount'] = 0
 
-        result = yield neutron_client.api.routers()
+        result = yield neutron_client.routers()
 
         for router in result['routers']:
             data['routerTotalCount'] += 1

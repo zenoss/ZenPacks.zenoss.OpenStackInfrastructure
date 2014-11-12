@@ -114,26 +114,25 @@ class OpenStackInfrastructure(PythonPlugin):
             region_name=device.zOpenStackRegionName,
             )
 
-        result = yield neutron_client.api.agents()
+        result = yield neutron_client.agents()
         results['agents'] = result['agents']
 
-
-        result = yield neutron_client.api.networks()
+        result = yield neutron_client.networks()
         results['networks'] = result['networks']
 
-        result = yield neutron_client.api.subnets()
+        result = yield neutron_client.subnets()
         results['subnets'] = result['subnets']
 
-        result = yield neutron_client.api.routers()
+        result = yield neutron_client.routers()
         results['routers'] = result['routers']
 
-        result = yield neutron_client.api.ports()
+        result = yield neutron_client.ports()
         results['ports'] = result['ports']
 
-        result = yield neutron_client.api.security_groups()
+        result = yield neutron_client.security_groups()
         results['security_groups'] = result['security_groups']
 
-        result = yield neutron_client.api.floatingips()
+        result = yield neutron_client.floatingips()
         results['floatingips'] = result['floatingips']
 
         returnValue(results)
