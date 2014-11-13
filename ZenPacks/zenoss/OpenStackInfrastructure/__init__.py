@@ -48,7 +48,6 @@ RELATIONSHIPS_YUML = """
 [Tenant]1-.-*[FloatingIp]
 [Hypervisor]1-.-*[Instance]
 // non-containing 1:1
-//[Port]1-.-*[Instance]
 [Hypervisor]1-.-1[Host]
 """
 
@@ -465,13 +464,14 @@ CFG = zenpacklib.ZenPackSpec(
 
         'NeutronAgent': {
             'base': 'SoftwareComponent',
-            'filter_display': False,
+            'meta_type': 'OpenStackInfrastructureNeutronAgent',
+            # 'filter_display': False,
         },
 
         'Agent': {
             'base': 'NeutronAgent',
             'meta_type': 'OpenStackInfrastructureAgent',
-            'label': 'Agent',
+            'label': 'Neutron Agent',
             'order': 11,
             'properties': {
                 'agentId':     {'grid_display': False,
@@ -608,12 +608,12 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Floating IP',
             'order': 19,
             'properties': {
-                'sgrId':       {'grid_display': False,
+                'floatingipId':       {'grid_display': False,
                                 'label': 'Security Group ID'},
                 'addr':        {'label': 'Address'},
                 'network_':    {'label': 'Network'},
                 'tenant_':     {'label': 'Tenant'},
-                'router_':     {'label': 'Router'},
+                'status':      {'label': 'Status'},
             }
         },
 

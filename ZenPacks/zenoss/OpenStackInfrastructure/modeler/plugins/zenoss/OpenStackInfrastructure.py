@@ -281,42 +281,6 @@ class OpenStackInfrastructure(PythonPlugin):
 
             tenant_id = server['tenant_id']
 
-            # port info
-            port_id = ''
-            port_name = ''
-            for port in results['ports']:
-                if 'private' in server['addresses']:
-                    for iface in server['addresses']['private']:
-                        if iface['OS-EXT-IPS-MAC:mac_addr'] != port['mac_address']:
-                            continue
-
-                        for fixed_ip in port['fixed_ips']:
-                            if iface['addr'] == fixed_ip['ip_address']:
-                                port_id = port['id']
-                                port_name = port['name']
-                                break
-
-                        if port_id:
-                            break
-
-                if 'public' in server['addresses']:
-                    for iface in server['addresses']['public']:
-                        if iface['OS-EXT-IPS-MAC:mac_addr'] != port['mac_address']:
-                            continue
-
-                        for fixed_ip in port['fixed_ips']:
-                            if iface['addr'] == fixed_ip['ip_address']:
-                                port_id = port['id']
-                                port_name = port['name']
-                                break
-
-                        if port_id:
-                            break
-
-                if port_id:
-                    break
-
-            # import pdb;pdb.set_trace()
             servers.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Instance',
                 data=dict(
@@ -333,7 +297,6 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_flavor='flavor-{0}'.format(flavor_id),    # flavor-performance1-1
                     set_image='image-{0}'.format(image_id),       # image-346eeba5-a122-42f1-94e7-06cb3c53f690
                     set_tenant='tenant-{0}'.format(tenant_id),    # tenant-a3a2901f2fd14f808401863e3628a858
-                    # set_port='port-{0}'.format(port_id),
                     hostId=server['hostId'],                      # a84303c0021aa53c7e749cbbbfac265f
                     hostName=server['name']                       # cloudserver01
                 )))
@@ -468,12 +431,12 @@ class OpenStackInfrastructure(PythonPlugin):
 
         # agent
         agents = []
-        # import pdb;pdb.set_trace()
         for agent in results['agents']:
             agents.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Agent',
                 data=dict(
                     id='agent-{0}'.format(agent['id']),
+                    agentId=agent['id'],
                     title=agent['binary'],
                     type=agent['agent_type'],               # true/false
                     state=agent['admin_state_up'],               # true/false
@@ -492,6 +455,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Network',
                 data=dict(
                     id='network-{0}'.format(net['id']),
+                    netId=net['id'],
                     title=net['name'],
                     netState=net['admin_state_up'],               # true/false
                     netExternal=net['router:external'],           # TRUE/FALSE
@@ -511,6 +475,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Subnet',
                 data=dict(
                     id='subnet-{0}'.format(subnet['id']),
+                    subnetId=subnet['id'],
                     title=subnet['name'],
                     cidr=subnet['cidr'],
                     dns=subnet['dns_nameservers'],
@@ -530,6 +495,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Router',
                 data=dict(
                     id='router-{0}'.format(router['id']),
+                    routerId=router['id'],
                     title=router['name'],
                     status=router['status'],
                     gateway=network_name[0],
@@ -584,11 +550,11 @@ class OpenStackInfrastructure(PythonPlugin):
             instance_id = ''
             if server_id:
                 instance_id = 'instance-{0}'.format(server_id)
-            # import pdb;pdb.set_trace()
             ports.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Port',
                 data=dict(
                     id='port-{0}'.format(port['id']),
+                    portId=port['id'],
                     network_=network_name[0],
                     # set_network='network-{0}'.format(port['network_id']),
                     status=port['status'],
@@ -609,6 +575,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.SecurityGroup',
                 data=dict(
                     id='security_group-{0}'.format(sg['id']),
+                    sgId=sg['id'],
                     title=sg['name'],
                     set_tenant='tenant-{0}'.format(sg['tenant_id']),    # tenant-a3a2901f2fd14f808401863e3628a858
                     )))
@@ -621,19 +588,16 @@ class OpenStackInfrastructure(PythonPlugin):
                               tenant['id'] == floatingip['tenant_id']]
             network_name = [network['name'] for network in results['networks'] \
                             if network['status'] == 'ACTIVE' and \
-                               network['id'] == floatingip['external_gateway_info']['network_id']]
-            router_name = [router['name'] for router in results['routers'] \
-                            if router['status'] == 'ACTIVE' and \
-                               router['id'] == floatingip['router_id']]
+                               network['id'] == floatingip['floating_network_id']]
             floatingips.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.FloatingIp',
                 data=dict(
                     id='floatingip-{0}'.format(floatingip['id']),
-                    title=floatingip['name'],
+                    floatingipId=floatingip['id'],
+                    addr=floatingip['floating_ip_address'],
                     status=floatingip['status'],
                     network_=network_name[0],
                     tenant_=tenant_name[0],
-                    router_=router_name[0],
                     )))
 
         objmaps = {

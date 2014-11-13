@@ -332,7 +332,6 @@ class OpenStackPoller(object):
             yield self._populateNetworkData(neutron_client, data)
             yield self._populateAgentData(neutron_client, data)
             yield self._populateRouterData(neutron_client, data)
-            import pdb;pdb.set_trace()
 
         except Exception:
             raise

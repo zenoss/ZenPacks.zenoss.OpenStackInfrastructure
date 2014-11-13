@@ -1,5 +1,6 @@
 // OpenStackInfrastructure Internal Impacts
 [note: OpenStackInfrastructure;ZenPack{bg:aquamarine}]-[NovaEndpoint{bg:aquamarine}]
+[note: OpenStackInfrastructure;ZenPack{bg:aquamarine}]-[NeutronAgent{bg:tan}]
 [NovaEndpoint{bg:aquamarine}]1-0..*>[Host{bg:aquamarine}]
 
 [Host{bg:aquamarine}]1..*-1>[AvailabilityZone{bg:aquamarine}]
@@ -18,7 +19,17 @@
 [NovaService{bg:aquamarine}]0..1-0..*>[AvailabilityZone{bg:aquamarine}]
 [NovaAPI{bg:aquamarine}]0..1-0..*>[Region{bg:aquamarine}]
 
-
+[Network{bg:tan}]0..1-0..*>[Tenant{bg:tan}]
+[Router{bg:tan}]0..1-0..*>[Tenant{bg:tan}]
+[SecurityGroup{bg:tan}]0..1-0..*>[Tenant{bg:tan}]
+[FloatingIP{bg:tan}]0..1-0..*>[Network{bg:tan}]
+[Agent{bg:tan}]0..1-0..*>[NeutronAgent{bg:tan}]
+[Subnet{bg:tan}]0..1-0..*>[Network{bg:tan}]
+[Port{bg:tan}]0..1-0..*>[Network{bg:tan}]
+[Vnic{bg:tan}]1-0..*>[Port{bg:tan}]
+[Agent{bg:tan}]0..1-0..*>[Host{bg:tan}]
+[Router{bg:tan}]0..1-0..*>[Network{bg:tan}]
+[SecurityGroup{bg:tan}]0..1-0..*>[Instance{bg:tan}]
 
 //
 // Platform Impacts
@@ -35,4 +46,4 @@
 // CiscoUCS Impacts
 [note: Cisco UCS;ZenPack{bg:darkslateblue}]-[UCS Service Profile{bg:darkslateblue}]
 [UCS Service Profile{bg:darkslateblue}]0..1-1..*>[Linux;Device{bg:deepskyblue}]
-//
+

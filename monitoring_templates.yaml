@@ -544,28 +544,107 @@
       width: 500
 
       graphpoints:
-        Active:
-          dpName: openstack_imageActiveCount
-          format: '%7.0lf'
-        Failed:
-          dpName: openstack_imageFailedCount
-          format: '%7.0lf'
-        Other:
-          dpName: openstack_imageOtherCount
-          format: '%7.0lf'
-        Preparing:
-          dpName: openstack_imagePreparingCount
-          format: '%7.0lf'
-        Queued:
-          dpName: openstack_imageQueuedCount
-          format: '%7.0lf'
-        Saving:
-          dpName: openstack_imageSavingCount
-          format: '%7.0lf'
         Total:
-          dpName: openstack_imageTotalCount
+          dpName: openstack_agentTotalCount
           format: '%7.0lf'
-        Unknown:
-          dpName: openstack_imageUnknownCount
+        Active:
+          dpName: openstack_agentActiveCount
+          format: '%7.0lf'
+        Alive:
+          dpName: openstack_agentAliveCount
+          format: '%7.0lf'
+        Dead:
+          dpName: openstack_agentDeadCount
+          format: '%7.0lf'
+        DHCP:
+          dpName: openstack_agentDHCPCount
+          format: '%7.0lf'
+        Open vSwitch:
+          dpName: openstack_agentOVSCount
+          format: '%7.0lf'
+        Linux Bridge:
+          dpName: openstack_agentLinuxBridgeCount
+          format: '%7.0lf'
+        HyperV:
+          dpName: openstack_agentHyperVCount
+          format: '%7.0lf'
+        NEC OpenFlow:
+          dpName: openstack_agentNECCount
+          format: '%7.0lf'
+        OpenFlow Agent:
+          dpName: openstack_agentOFACount
+          format: '%7.0lf'
+        Level 3:
+          dpName: openstack_agentL3Count
+          format: '%7.0lf'
+        Load Balancer:
+          dpName: openstack_agentLBCount
+          format: '%7.0lf'
+        Mellanox:
+          dpName: openstack_agentMLNXVCount
+          format: '%7.0lf'
+        Metering:
+          dpName: openstack_agentMeteringVCount
+          format: '%7.0lf'
+        Metadata:
+          dpName: openstack_agentMetadataCount
+          format: '%7.0lf'
+        IBM SDN-VE:
+          dpName: openstack_agentSDNVECount
+          format: '%7.0lf'
+        SR-IOV NIC:
+          dpName: openstack_agentNICSCount
           format: '%7.0lf'
 
+    Networks:
+      units: count
+      height: 100
+      width: 500
+
+      graphpoints:
+        Total:
+          dpName: openstack_networkTotalCount
+          format: '%7.0lf'
+        Active:
+          dpName: openstack_networkActiveCount
+          format: '%7.0lf'
+        Build:
+          dpName: openstack_networkBuildCount
+          format: '%7.0lf'
+        Down:
+          dpName: openstack_networkDownCount
+          format: '%7.0lf'
+        Error:
+          dpName: openstack_networkErrorCount
+          format: '%7.0lf'
+        Shared:
+          dpName: openstack_networkSharedCount
+          format: '%7.0lf'
+        External:
+          dpName: openstack_networkExternalCount
+          format: '%7.0lf'
+        Internal:
+          dpName: openstack_networkInternalCount
+          format: '%7.0lf'
+
+    Routers:
+      units: count
+      height: 100
+      width: 500
+
+      graphpoints:
+        Total:
+          dpName: openstack_routerTotalCount
+          format: '%7.0lf'
+        Active:
+          dpName: openstack_routerActiveCount
+          format: '%7.0lf'
+        Build:
+          dpName: openstack_routerBuildCount
+          format: '%7.0lf'
+        Down:
+          dpName: openstack_routerDownCount
+          format: '%7.0lf'
+        Error:
+          dpName: openstack_routerErrorCount
+          format: '%7.0lf'
