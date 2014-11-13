@@ -117,7 +117,6 @@ class OpenStackInfrastructure(PythonPlugin):
         result = yield neutron_client.agents()
         results['agents'] = result['agents']
 
-
         result = yield neutron_client.networks()
         results['networks'] = result['networks']
 

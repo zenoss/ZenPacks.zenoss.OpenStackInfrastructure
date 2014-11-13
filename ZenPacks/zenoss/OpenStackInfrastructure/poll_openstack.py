@@ -166,7 +166,7 @@ class OpenStackPoller(object):
 
 
     @inlineCallbacks
-    def _populateAgentData(self, client, data):
+    def _populateAgentData(self, neutron_client, data):
         data['agentTotalCount'] = 0
         data['agentDHCPCount'] = 0
         data['agentOVSCount'] = 0
@@ -184,7 +184,7 @@ class OpenStackPoller(object):
         data['agentAliveCount'] = 0
         data['agentDeadCount'] = 0
 
-        result = yield client.agents()
+        result = yield neutron_client.agents()
 
         for agent in result['agents']:
             data['agentTotalCount'] += 1
@@ -238,7 +238,7 @@ class OpenStackPoller(object):
 
 
     @inlineCallbacks
-    def _populateNetworkData(self, client, data):
+    def _populateNetworkData(self, neutron_client, data):
         data['networkTotalCount'] = 0
         data['networkActiveCount'] = 0
         data['networkBuildCount'] = 0
@@ -248,7 +248,7 @@ class OpenStackPoller(object):
         data['networkExternalCount'] = 0
         data['networkInternalCount'] = 0
 
-        result = yield client.networks()
+        result = yield neutron_client.networks()
 
         for net in result['networks']:
             data['networkTotalCount'] += 1
@@ -278,14 +278,14 @@ class OpenStackPoller(object):
 
 
     @inlineCallbacks
-    def _populateRouterData(self, client, data):
+    def _populateRouterData(self, neutron_client, data):
         data['routerTotalCount'] = 0
         data['routerActiveCount'] = 0
         data['routerBuildCount'] = 0
         data['routerDownCount'] = 0
         data['routerErrorCount'] = 0
 
-        result = yield client.routers()
+        result = yield neutron_client.routers()
 
         for router in result['routers']:
             data['routerTotalCount'] += 1

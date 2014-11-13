@@ -32,11 +32,6 @@ from twisted.web.error import Error
 from twisted.internet import reactor
 import urllib
 
-import Globals
-from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path
-add_local_lib_path()
-
-
 __all__ = [
 
     # Exceptions
@@ -232,7 +227,7 @@ class NeutronAPIClient(object):
 
         except Error as e:
             status = int(e.status)
-            response = json.loads(e.response)
+            response = e.response
             text = str(response)
 
             if status == httplib.UNAUTHORIZED:
@@ -404,7 +399,6 @@ def main():
         print >> sys.stderr, "ERROR - networks(): %s" % e
     else:
         json.dumps(net.result, sort_keys=True, indent=4)
-
 
     reactor.stop()
 
