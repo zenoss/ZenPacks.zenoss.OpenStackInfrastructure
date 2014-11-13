@@ -7,14 +7,16 @@
 
 Vagrant.configure('2') do |config|
 
-  config.vm.hostname = "rdo-icehouse"
+  config.vm.hostname = "rdo-icehouse-computenode"
+#  config.vm.box = "centos65-x86_64-20140116"
+#  config.vm.box_url = "https://github.com/2creatives/vagrant-centos/releases/download/v6.5.3/centos65-x86_64-20140116.box"
   config.vm.box = "centos-7.0-x86_64"
   config.vm.box_url = "https://f0fff3908f081cb6461b407be80daf97f07ac418.googledrive.com/host/0BwtuV7VyVTSkUG1PM3pCeDJ4dVE/centos7.box"
 
-  config.vm.network :private_network, ip: "192.168.2.11"
+  config.vm.network :private_network, ip: "192.168.2.13"
 
   config.vm.provider :virtualbox do |vb|
-      vb.customize ["modifyvm", :id, "--memory", "4096"]
+      vb.customize ["modifyvm", :id, "--memory", "2560"]
   end
 
   config.vm.provision :shell, :path => 'bootstrap.sh'

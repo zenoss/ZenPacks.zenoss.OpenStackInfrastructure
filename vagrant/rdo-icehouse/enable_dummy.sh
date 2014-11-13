@@ -36,13 +36,13 @@ PUBLIC_NET=`neutron net-list | grep public | awk '{print $2}'`
 neutron subnet-create $PUBLIC_NET 172.25.0.0/16
 
 # Modify the list of hosts
-perl -p -i -e "s/^_FAKE_NODES =.*/_FAKE_NODES = [CONF.host, \'node2\', \'node3\', \'node4\', \'node5\', \'node6\', \'node7\']/g" /usr/lib/python2.6/site-packages/nova/virt/fake.py
+#perl -p -i -e "s/^_FAKE_NODES =.*/_FAKE_NODES = [CONF.host, \'node2\', \'node3\', \'node4\', \'node5\', \'node6\', \'node7\']/g" /usr/lib/python2.6/site-packages/nova/virt/fake.py
 
 # Bounce services:
-/etc/init.d/openstack-nova-api restart
-/etc/init.d/openstack-nova-compute restart
-/etc/init.d/openstack-nova-conductor restart
-/etc/init.d/openstack-nova-scheduler restart
+/bin/systemctl restart openstack-nova-api
+/bin/systemctl restart openstack-nova-compute
+/bin/systemctl restart openstack-nova-conductor
+/bin/systemctl restart openstack-nova-scheduler
 
 # Confirm that all 8 "hosts" are present
 nova hypervisor-list
