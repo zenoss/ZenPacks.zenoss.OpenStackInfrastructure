@@ -25,3 +25,4 @@ def optional_import(module_name, patch_module_name):
 
 
 optional_import('Products.ZenModel', 'platform')
+optional_import('Products.ZenModel', 'duplicateips')
