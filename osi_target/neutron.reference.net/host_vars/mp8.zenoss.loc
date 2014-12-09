@@ -1,0 +1,46 @@
+---
+# file: host_vars/mp*.zenoss.loc
+
+hardware:
+  primary_network_if: eth0
+  eth0:
+    mac_address: "52:54:00:ff:54:2e" # You may have to change
+    ip_address: "192.168.117.47"     # You may have to change
+    gateway: "192.168.117.1"         # You may have to change
+    dns: "192.168.117.1"             # You may have to change
+    floating_network: 192.168.117.192/26  # You *MUST* change this!
+
+#------------------------------------------------------------------------------
+# Don't change antyhing below here unless you know what you're doing.
+# Access these via syntax {{ openstack.XYZ }} 
+#------------------------------------------------------------------------------
+
+openstack:
+  KEYSTONE_ADMIN_PW: "{{keystone.OS_PASSWORD}}"
+  CONTROLLER_HOST: "{{ hardware.eth0.ip_address }}"
+  COMPUTE_HOSTS: "{{ hardware.eth0.ip_address }}"
+  NETWORK_HOSTS: "{{ hardware.eth0.ip_address }}"
+  VCENTER_HOST: "{{ hardware.eth0.ip_address }}"
+  STORAGE_HOST: "{{ hardware.eth0.ip_address }}"
+  AMQP_HOST: "{{ hardware.eth0.ip_address }}"
+  MARIADB_HOST: "{{ hardware.eth0.ip_address }}"
+  NOVA_NETWORK_FIXEDRANGE: 192.168.32.0/28
+  MONGODB_HOST: "{{ hardware.eth0.ip_address }}"
+  NOVA_NETWORK_FLOATRANGE: "{{ hardware.eth0.floating_network }}"
+  NEUTRON_ML2_TYPE_DRIVERS: local
+  NEUTRON_ML2_TENANT_NETWORK_TYPES: local
+  USE_EPEL: y
+  NEUTRON_ML2_MECHANISM_DRIVERS: openvswitch
+  NOVA_NETWORK_PUBIF: "{{ hardware.primary_network_if }}"
+
+ceilometer_cfg:
+  - { section: 'notification',      parameter: 'store_events',      value: 'True' }
+  - { section: 'DEFAULT',           parameter: 'verbose',           value: 'False' }
+  - { section: 'DEFAULT',           parameter: 'debug',             value: 'True' }
+  - { section: 'dispatcher_zenoss', parameter: 'zenoss_device',     value: 'ostack' }
+  - { section: 'dispatcher_zenoss', parameter: 'amqp_hostname',     value: '{{ openstack.AMQP_HOST }}' }
+  - { section: 'dispatcher_zenoss', parameter: 'amqp_port',         value: 5672 }
+  - { section: 'dispatcher_zenoss', parameter: 'amqp_userid',       value: 'zenoss' }
+  - { section: 'dispatcher_zenoss', parameter: 'amqp_password',     value: 'zenoss' }
+  - { section: 'dispatcher_zenoss', parameter: 'amqp_virtual_host', value: '/zenoss' }
+ 

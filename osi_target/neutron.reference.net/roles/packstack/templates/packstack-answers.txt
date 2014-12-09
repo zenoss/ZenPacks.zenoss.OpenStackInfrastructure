@@ -1,0 +1,538 @@
+[general]
+
+# Path to a Public key to install on servers. If a usable key has not
+# been installed on the remote servers the user will be prompted for a
+# password and this key will be installed so the password will not be
+# required again
+CONFIG_SSH_KEY=
+
+# Set to 'y' if you would like Packstack to install MariaDB
+CONFIG_MARIADB_INSTALL=y
+
+# Set to 'y' if you would like Packstack to install OpenStack Image
+# Service (Glance)
+CONFIG_GLANCE_INSTALL=y
+
+# Set to 'y' if you would like Packstack to install OpenStack Block
+# Storage (Cinder)
+CONFIG_CINDER_INSTALL=n
+
+# Set to 'y' if you would like Packstack to install OpenStack Compute
+# (Nova)
+CONFIG_NOVA_INSTALL=y
+
+# Set to 'y' if you would like Packstack to install OpenStack
+# Networking (Neutron). Otherwise Nova Network will be used.
+CONFIG_NEUTRON_INSTALL=y
+
+# Set to 'y' if you would like Packstack to install OpenStack
+# Dashboard (Horizon)
+CONFIG_HORIZON_INSTALL=y
+
+# Set to 'y' if you would like Packstack to install OpenStack Object
+# Storage (Swift)
+CONFIG_SWIFT_INSTALL=y
+
+# Set to 'y' if you would like Packstack to install OpenStack
+# Metering (Ceilometer)
+CONFIG_CEILOMETER_INSTALL=y
+
+# Set to 'y' if you would like Packstack to install OpenStack
+# Orchestration (Heat)
+CONFIG_HEAT_INSTALL=n
+
+# Set to 'y' if you would like Packstack to install the OpenStack
+# Client packages. An admin "rc" file will also be installed
+CONFIG_CLIENT_INSTALL=y
+
+# Comma separated list of NTP servers. Leave plain if Packstack
+# should not install ntpd on instances.
+CONFIG_NTP_SERVERS=
+
+# Set to 'y' if you would like Packstack to install Nagios to monitor
+# OpenStack hosts
+CONFIG_NAGIOS_INSTALL=no
+
+# Comma separated list of servers to be excluded from installation in
+# case you are running Packstack the second time with the same answer
+# file and don't want Packstack to touch these servers. Leave plain if
+# you don't need to exclude any server.
+EXCLUDE_SERVERS=
+
+# Set to 'y' if you want to run OpenStack services in debug mode.
+# Otherwise set to 'n'.
+CONFIG_DEBUG_MODE=n
+
+# The IP address of the server on which to install OpenStack services
+# specific to controller role such as API servers, Horizon, etc.
+CONFIG_CONTROLLER_HOST={{ openstack.CONTROLLER_HOST }}
+
+# The list of IP addresses of the server on which to install the Nova
+# compute service
+CONFIG_COMPUTE_HOSTS={{ openstack.COMPUTE_HOSTS }}
+
+# The list of IP addresses of the server on which to install the
+# network service such as Nova network or Neutron
+CONFIG_NETWORK_HOSTS={{ openstack.NETWORK_HOSTS }}
+
+# Set to 'y' if you want to use VMware vCenter as hypervisor and
+# storage. Otherwise set to 'n'.
+CONFIG_VMWARE_BACKEND=n
+
+# Set to 'y' if you want to use unsupported parameters. This should
+# be used only if you know what you are doing.Issues caused by using
+# unsupported options won't be fixed before next major release.
+CONFIG_UNSUPPORTED=n
+
+# The IP address of the VMware vCenter server
+CONFIG_VCENTER_HOST={{ openstack.VCENTER_HOST }}
+
+# The username to authenticate to VMware vCenter server
+CONFIG_VCENTER_USER=
+
+# The password to authenticate to VMware vCenter server
+CONFIG_VCENTER_PASSWORD=
+
+# The name of the vCenter cluster
+CONFIG_VCENTER_CLUSTER_NAME=
+
+# (Unsupported!) The IP address of the server on which to install
+# OpenStack services specific to storage servers such as Glance and
+# Cinder.
+CONFIG_STORAGE_HOST={{ openstack.STORAGE_HOST }}
+
+# To subscribe each server to EPEL enter "y"
+CONFIG_USE_EPEL={{ openstack.USE_EPEL }}
+
+# A comma separated list of URLs to any additional yum repositories
+# to install
+CONFIG_REPO=
+
+# To subscribe each server with Red Hat subscription manager, include
+# this with CONFIG_RH_PW
+CONFIG_RH_USER=
+
+# To subscribe each server with RHN Satellite,fill Satellite's URL
+# here. Note that either satellite's username/password or activation
+# key has to be provided
+CONFIG_SATELLITE_URL=
+
+# To subscribe each server with Red Hat subscription manager, include
+# this with CONFIG_RH_USER
+CONFIG_RH_PW=
+
+# To enable RHEL optional repos use value "y"
+CONFIG_RH_OPTIONAL=y
+
+# Specify a HTTP proxy to use with Red Hat subscription manager
+CONFIG_RH_PROXY=
+
+# Specify port of Red Hat subscription manager HTTP proxy
+CONFIG_RH_PROXY_PORT=
+
+# Specify a username to use with Red Hat subscription manager HTTP
+# proxy
+CONFIG_RH_PROXY_USER=
+
+# Specify a password to use with Red Hat subscription manager HTTP
+# proxy
+CONFIG_RH_PROXY_PW=
+
+# Username to access RHN Satellite
+CONFIG_SATELLITE_USER=
+
+# Password to access RHN Satellite
+CONFIG_SATELLITE_PW=
+
+# Activation key for subscription to RHN Satellite
+CONFIG_SATELLITE_AKEY=
+
+# Specify a path or URL to a SSL CA certificate to use
+CONFIG_SATELLITE_CACERT=
+
+# If required specify the profile name that should be used as an
+# identifier for the system in RHN Satellite
+CONFIG_SATELLITE_PROFILE=
+
+# Comma separated list of flags passed to rhnreg_ks. Valid flags are:
+# novirtinfo, norhnsd, nopackages
+CONFIG_SATELLITE_FLAGS=
+
+# Specify a HTTP proxy to use with RHN Satellite
+CONFIG_SATELLITE_PROXY=
+
+# Specify a username to use with an authenticated HTTP proxy
+CONFIG_SATELLITE_PROXY_USER=
+
+# Specify a password to use with an authenticated HTTP proxy.
+CONFIG_SATELLITE_PROXY_PW=
+
+# Set the AMQP service backend. Allowed values are: qpid, rabbitmq
+CONFIG_AMQP_BACKEND=rabbitmq
+
+# The IP address of the server on which to install the AMQP service
+CONFIG_AMQP_HOST={{ openstack.AMQP_HOST }}
+
+# Enable SSL for the AMQP service
+CONFIG_AMQP_ENABLE_SSL=n
+
+# Enable Authentication for the AMQP service
+CONFIG_AMQP_ENABLE_AUTH=n
+
+# The password for the NSS certificate database of the AMQP service
+CONFIG_AMQP_NSS_CERTDB_PW=7fef9cdd631541e0aa88e57867c7f3f9
+
+# The port in which the AMQP service listens to SSL connections
+CONFIG_AMQP_SSL_PORT=5671
+
+# The filename of the certificate that the AMQP service is going to
+# use
+CONFIG_AMQP_SSL_CERT_FILE=/etc/pki/tls/certs/amqp_selfcert.pem
+
+# The filename of the private key that the AMQP service is going to
+# use
+CONFIG_AMQP_SSL_KEY_FILE=/etc/pki/tls/private/amqp_selfkey.pem
+
+# Auto Generates self signed SSL certificate and key
+CONFIG_AMQP_SSL_SELF_SIGNED=y
+
+# User for amqp authentication
+CONFIG_AMQP_AUTH_USER=amqp_user
+
+# Password for user authentication
+CONFIG_AMQP_AUTH_PASSWORD=f3e8705ddcd44692
+
+# The IP address of the server on which to install MariaDB or IP
+# address of DB server to use if MariaDB installation was not selected
+CONFIG_MARIADB_HOST={{ openstack.MARIADB_HOST }}
+
+# Username for the MariaDB admin user
+CONFIG_MARIADB_USER=root
+
+# Password for the MariaDB admin user
+CONFIG_MARIADB_PW=a9e238f84e5a41f4
+
+# The password to use for the Keystone to access DB
+CONFIG_KEYSTONE_DB_PW=10ec30f32d0f4ba4
+
+# The token to use for the Keystone service api
+CONFIG_KEYSTONE_ADMIN_TOKEN=b941a48fd197485ebea517c80c973539
+
+# The password to use for the Keystone admin user
+CONFIG_KEYSTONE_ADMIN_PW=a0bf413a0b8d4fd9
+
+# The password to use for the Keystone demo user
+CONFIG_KEYSTONE_DEMO_PW=6e2bc04ae8de458b
+
+# Kestone token format. Use either UUID or PKI
+CONFIG_KEYSTONE_TOKEN_FORMAT=PKI
+
+# The password to use for the Glance to access DB
+CONFIG_GLANCE_DB_PW=73e0ae216499465f
+
+# The password to use for the Glance to authenticate with Keystone
+CONFIG_GLANCE_KS_PW=f60db2054cce468e
+
+# The password to use for the Cinder to access DB
+CONFIG_CINDER_DB_PW=81702339a1b84cd3
+
+# The password to use for the Cinder to authenticate with Keystone
+CONFIG_CINDER_KS_PW=f057c050d9764f0e
+
+# The Cinder backend to use, valid options are: lvm, gluster, nfs
+CONFIG_CINDER_BACKEND=lvm
+
+# Create Cinder's volumes group. This should only be done for testing
+# on a proof-of-concept installation of Cinder. This will create a
+# file-backed volume group and is not suitable for production usage.
+CONFIG_CINDER_VOLUMES_CREATE=y
+
+# Cinder's volumes group size. Note that actual volume size will be
+# extended with 3% more space for VG metadata.
+CONFIG_CINDER_VOLUMES_SIZE=20G
+
+# A single or comma separated list of gluster volume shares to mount,
+# eg: ip-address:/vol-name, domain:/vol-name
+CONFIG_CINDER_GLUSTER_MOUNTS=
+
+# A single or comma seprated list of NFS exports to mount, eg: ip-
+# address:/export-name
+CONFIG_CINDER_NFS_MOUNTS=
+
+# The password to use for the Nova to access DB
+CONFIG_NOVA_DB_PW=8e0bbd9883a149b2
+
+# The password to use for the Nova to authenticate with Keystone
+CONFIG_NOVA_KS_PW=7dd2c8649bcf4090
+
+# The overcommitment ratio for virtual to physical CPUs. Set to 1.0
+# to disable CPU overcommitment
+CONFIG_NOVA_SCHED_CPU_ALLOC_RATIO=16.0
+
+# The overcommitment ratio for virtual to physical RAM. Set to 1.0 to
+# disable RAM overcommitment
+CONFIG_NOVA_SCHED_RAM_ALLOC_RATIO=1.5
+
+# Protocol used for instance migration. Allowed values are tcp and
+# ssh. Note that by defaul nova user is created with /sbin/nologin
+# shell so that ssh protocol won't be working. To make ssh protocol
+# work you have to fix nova user on compute hosts manually.
+CONFIG_NOVA_COMPUTE_MIGRATE_PROTOCOL=tcp
+
+# Private interface for Flat DHCP on the Nova compute servers
+CONFIG_NOVA_COMPUTE_PRIVIF=lo
+
+# Nova network manager
+CONFIG_NOVA_NETWORK_MANAGER=nova.network.manager.FlatDHCPManager
+
+# Public interface on the Nova network server
+CONFIG_NOVA_NETWORK_PUBIF={{ openstack.NOVA_NETWORK_PUBIF }}
+
+# Private interface for network manager on the Nova network server
+CONFIG_NOVA_NETWORK_PRIVIF=lo
+
+# IP Range for network manager
+CONFIG_NOVA_NETWORK_FIXEDRANGE={{ openstack.NOVA_NETWORK_FIXEDRANGE }}
+
+# IP Range for Floating IP's
+CONFIG_NOVA_NETWORK_FLOATRANGE={{ openstack.NOVA_NETWORK_FLOATRANGE }}
+
+# Name of the default floating pool to which the specified floating
+# ranges are added to
+CONFIG_NOVA_NETWORK_DEFAULTFLOATINGPOOL=nova
+
+# Automatically assign a floating IP to new instances
+CONFIG_NOVA_NETWORK_AUTOASSIGNFLOATINGIP=n
+
+# First VLAN for private networks
+CONFIG_NOVA_NETWORK_VLAN_START=100
+
+# Number of networks to support
+CONFIG_NOVA_NETWORK_NUMBER=1
+
+# Number of addresses in each private subnet
+CONFIG_NOVA_NETWORK_SIZE=255
+
+# The password to use for Neutron to authenticate with Keystone
+CONFIG_NEUTRON_KS_PW=54acc4f0571b421c
+
+# The password to use for Neutron to access DB
+CONFIG_NEUTRON_DB_PW=f5609b55af9a4570
+
+# The name of the bridge that the Neutron L3 agent will use for
+# external traffic, or 'provider' if using provider networks
+CONFIG_NEUTRON_L3_EXT_BRIDGE=br-ex
+
+# The name of the L2 plugin to be used with Neutron
+CONFIG_NEUTRON_L2_PLUGIN=ml2
+
+# Neutron metadata agent password
+CONFIG_NEUTRON_METADATA_PW=5eb5c4b153164ad4
+
+# Set to 'y' if you would like Packstack to install Neutron LBaaS
+CONFIG_LBAAS_INSTALL=n
+
+# Set to 'y' if you would like Packstack to install Neutron L3
+# Metering agent
+CONFIG_NEUTRON_METERING_AGENT_INSTALL=n
+
+# Whether to configure neutron Firewall as a Service
+CONFIG_NEUTRON_FWAAS=n
+
+# A comma separated list of network type driver entrypoints to be
+# loaded from the neutron.ml2.type_drivers namespace.
+CONFIG_NEUTRON_ML2_TYPE_DRIVERS={{ openstack.NEUTRON_ML2_TYPE_DRIVERS }}
+
+# A comma separated ordered list of network_types to allocate as
+# tenant networks. The value 'local' is only useful for single-box
+# testing but provides no connectivity between hosts.
+CONFIG_NEUTRON_ML2_TENANT_NETWORK_TYPES={{ openstack.NEUTRON_ML2_TENANT_NETWORK_TYPES }}
+
+# A comma separated ordered list of networking mechanism driver
+# entrypoints to be loaded from the neutron.ml2.mechanism_drivers
+# namespace.
+CONFIG_NEUTRON_ML2_MECHANISM_DRIVERS={{ openstack.NEUTRON_ML2_MECHANISM_DRIVERS }}
+
+# A comma separated  list of physical_network names with which flat
+# networks can be created. Use * to allow flat networks with arbitrary
+# physical_network names.
+CONFIG_NEUTRON_ML2_FLAT_NETWORKS=*
+
+# A comma separated list of <physical_network>:<vlan_min>:<vlan_max>
+# or <physical_network> specifying physical_network names usable for
+# VLAN provider and tenant networks, as well as ranges of VLAN tags on
+# each available for allocation to tenant networks.
+CONFIG_NEUTRON_ML2_VLAN_RANGES=
+
+# A comma separated list of <tun_min>:<tun_max> tuples enumerating
+# ranges of GRE tunnel IDs that are available for tenant network
+# allocation. Should be an array with tun_max +1 - tun_min > 1000000
+CONFIG_NEUTRON_ML2_TUNNEL_ID_RANGES=
+
+# Multicast group for VXLAN. If unset, disables VXLAN enable sending
+# allocate broadcast traffic to this multicast group. When left
+# unconfigured, will disable multicast VXLAN mode. Should be an
+# Multicast IP (v4 or v6) address.
+CONFIG_NEUTRON_ML2_VXLAN_GROUP=
+
+# A comma separated list of <vni_min>:<vni_max> tuples enumerating
+# ranges of VXLAN VNI IDs that are available for tenant network
+# allocation. Min value is 0 and Max value is 16777215.
+CONFIG_NEUTRON_ML2_VNI_RANGES=10:100
+
+# The name of the L2 agent to be used with Neutron
+CONFIG_NEUTRON_L2_AGENT=openvswitch
+
+# The type of network to allocate for tenant networks (eg. vlan,
+# local)
+CONFIG_NEUTRON_LB_TENANT_NETWORK_TYPE=local
+
+# A comma separated list of VLAN ranges for the Neutron linuxbridge
+# plugin (eg. physnet1:1:4094,physnet2,physnet3:3000:3999)
+CONFIG_NEUTRON_LB_VLAN_RANGES=
+
+# A comma separated list of interface mappings for the Neutron
+# linuxbridge plugin (eg. physnet1:br-eth1,physnet2:br-eth2,physnet3
+# :br-eth3)
+CONFIG_NEUTRON_LB_INTERFACE_MAPPINGS=
+
+# Type of network to allocate for tenant networks (eg. vlan, local,
+# gre, vxlan)
+CONFIG_NEUTRON_OVS_TENANT_NETWORK_TYPE=vxlan
+
+# A comma separated list of VLAN ranges for the Neutron openvswitch
+# plugin (eg. physnet1:1:4094,physnet2,physnet3:3000:3999)
+CONFIG_NEUTRON_OVS_VLAN_RANGES=
+
+# A comma separated list of bridge mappings for the Neutron
+# openvswitch plugin (eg. physnet1:br-eth1,physnet2:br-eth2,physnet3
+# :br-eth3)
+CONFIG_NEUTRON_OVS_BRIDGE_MAPPINGS=
+
+# A comma separated list of colon-separated OVS bridge:interface
+# pairs. The interface will be added to the associated bridge.
+CONFIG_NEUTRON_OVS_BRIDGE_IFACES=
+
+# A comma separated list of tunnel ranges for the Neutron openvswitch
+# plugin (eg. 1:1000)
+CONFIG_NEUTRON_OVS_TUNNEL_RANGES=
+
+# The interface for the OVS tunnel. Packstack will override the IP
+# address used for tunnels on this hypervisor to the IP found on the
+# specified interface. (eg. eth1)
+CONFIG_NEUTRON_OVS_TUNNEL_IF=
+
+# VXLAN UDP port
+CONFIG_NEUTRON_OVS_VXLAN_UDP_PORT=4789
+
+# To set up Horizon communication over https set this to 'y'
+CONFIG_HORIZON_SSL=n
+
+# PEM encoded certificate to be used for ssl on the https server,
+# leave blank if one should be generated, this certificate should not
+# require a passphrase
+CONFIG_SSL_CERT=
+
+# SSL keyfile corresponding to the certificate if one was entered
+CONFIG_SSL_KEY=
+
+# PEM encoded CA certificates from which the certificate chain of the
+# server certificate can be assembled.
+CONFIG_SSL_CACHAIN=
+
+# The password to use for the Swift to authenticate with Keystone
+CONFIG_SWIFT_KS_PW=76956af23d944be3
+
+# A comma separated list of devices which to use as Swift Storage
+# device. Each entry should take the format /path/to/dev, for example
+# /dev/vdb will install /dev/vdb as Swift storage device (packstack
+# does not create the filesystem, you must do this first). If value is
+# omitted Packstack will create a loopback device for test setup
+CONFIG_SWIFT_STORAGES=
+
+# Number of swift storage zones, this number MUST be no bigger than
+# the number of storage devices configured
+CONFIG_SWIFT_STORAGE_ZONES=1
+
+# Number of swift storage replicas, this number MUST be no bigger
+# than the number of storage zones configured
+CONFIG_SWIFT_STORAGE_REPLICAS=1
+
+# FileSystem type for storage nodes
+CONFIG_SWIFT_STORAGE_FSTYPE=ext4
+
+# Shared secret for Swift
+CONFIG_SWIFT_HASH=05f801cef9604cbe
+
+# Size of the swift loopback file storage device
+CONFIG_SWIFT_STORAGE_SIZE=2G
+
+# Whether to provision for demo usage and testing. Note that
+# provisioning is only supported for all-in-one installations.
+CONFIG_PROVISION_DEMO=n
+
+# Whether to configure tempest for testing
+CONFIG_PROVISION_TEMPEST=n
+
+# The name of the Tempest Provisioning user. If you don't provide a
+# user name, Tempest will be configured in a standalone mode
+CONFIG_PROVISION_TEMPEST_USER=
+
+# The password to use for the Tempest Provisioning user
+CONFIG_PROVISION_TEMPEST_USER_PW=176cd848ad344882
+
+# The CIDR network address for the floating IP subnet
+CONFIG_PROVISION_DEMO_FLOATRANGE=172.24.4.224/28
+
+# The uri of the tempest git repository to use
+CONFIG_PROVISION_TEMPEST_REPO_URI=https://github.com/openstack/tempest.git
+
+# The revision of the tempest git repository to use
+CONFIG_PROVISION_TEMPEST_REPO_REVISION=master
+
+# Whether to configure the ovs external bridge in an all-in-one
+# deployment
+CONFIG_PROVISION_ALL_IN_ONE_OVS_BRIDGE=y
+
+# The password used by Heat user to authenticate against MySQL
+CONFIG_HEAT_DB_PW=5241307834c74613
+
+# The encryption key to use for authentication info in database
+CONFIG_HEAT_AUTH_ENC_KEY=20f1614cb5f2498a
+
+# The password to use for the Heat to authenticate with Keystone
+CONFIG_HEAT_KS_PW=f89a08f6d3e24077
+
+# Set to 'y' if you would like Packstack to install Heat CloudWatch
+# API
+CONFIG_HEAT_CLOUDWATCH_INSTALL=n
+
+# Set to 'y' if you would like Packstack to install Heat with trusts
+# as deferred auth method. If not, the stored password method will be
+# used.
+CONFIG_HEAT_USING_TRUSTS=y
+
+# Set to 'y' if you would like Packstack to install Heat
+# CloudFormation API
+CONFIG_HEAT_CFN_INSTALL=n
+
+# Name of Keystone domain for Heat
+CONFIG_HEAT_DOMAIN=heat
+
+# Name of Keystone domain admin user for Heat
+CONFIG_HEAT_DOMAIN_ADMIN=heat_admin
+
+# Password for Keystone domain admin user for Heat
+CONFIG_HEAT_DOMAIN_PASSWORD=9d742e18aeec43a8
+
+# Secret key for signing metering messages
+CONFIG_CEILOMETER_SECRET=49333516a127426e
+
+# The password to use for Ceilometer to authenticate with Keystone
+CONFIG_CEILOMETER_KS_PW=fce8d36a9cab418f
+
+# The IP address of the server on which to install MongoDB
+CONFIG_MONGODB_HOST={{ openstack.MONGODB_HOST }}
+
+# The password of the nagiosadmin user on the Nagios server
+CONFIG_NAGIOS_PW=67aadce3c89d44ea

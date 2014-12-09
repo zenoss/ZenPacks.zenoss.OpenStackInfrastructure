@@ -1,0 +1,56 @@
+---
+# This play is for PackStack
+
+#-------------------------------------------------------------------------------
+#- Preliminary System Setup, get the network services in shape etc...
+#- Install Packstack packages.
+#- Requirements: Must have a system with minimum 3GB RAM
+#-------------------------------------------------------------------------------
+
+- name: check if flavor {{flavor_tiny.name}} exists
+  shell: . /home/{{sudo_user}}/keystonerc_admin; nova flavor-show {{flavor_tiny.name}}
+  ignore_errors: true
+  register: flavor_check
+
+- name: create flavor {{flavor_tiny.name}}
+  shell: >
+    . /home/{{sudo_user}}/keystonerc_admin;
+    nova flavor-create {{flavor_tiny.name}} {{flavor_tiny.id}}
+    {{flavor_tiny.ram}} {{flavor_tiny.disk}} {{flavor_tiny.cpu}}
+  when: flavor_check.rc == 1
+
+- name: Create some users
+  keystone_user:
+     tenant={{ item }}
+     login_user=admin
+     login_password=zenoss
+     login_tenant_name=admin
+     tenant_description='Tenant {{ item }}'
+  with_items:
+    - A
+    - B
+    - C
+  ignore_errors: true
+#'
+
+- quantum_network: name={{item.name}} 
+                   tenant_name={{item.tenant_name}} 
+                   state=present
+                   provider_network_type={{item.network_type}}
+                   provider_physical_network={{item.physical_net}}
+                   provider_segmentation_id={{item.segmentation_id}}
+                   router_external={{item.router_external}}
+                   shared={{item.shared}}
+                   login_username=admin 
+                   login_password={{openstack.KEYSTONE_ADMIN_PW}}
+                   login_tenant_name=admin
+  with_items:
+    - { name: 'public', 
+        tenant_name: 'services', 
+        network_type: 'flat', 
+        physical_net: 'physnet1', 
+        segmentation_id: 1,
+        router_external: 'yes',
+        shared: 'yes'
+      }
+

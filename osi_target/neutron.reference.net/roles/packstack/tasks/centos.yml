@@ -1,0 +1,260 @@
+---
+# This play is for PackStack
+
+#-------------------------------------------------------------------------------
+#- Preliminary System Setup, get the network services in shape etc...
+#- Install Packstack packages.
+#- Requirements: Must have a system with minimum 3GB RAM
+#-------------------------------------------------------------------------------
+
+- name: "Set SELINUX"
+  selinux: policy=targeted state=permissive
+
+- name: "Disable Network Services, but leave it running during configuration!"
+  service: name={{ item }} 
+           enabled=no
+           # state=stopped: Packstack somehow needs it to be running.
+  with_items:
+    - NetworkManager
+    - firewalld
+  register: nm
+  ignore_errors: true
+
+- name: "Enable a *SANE* networking service"
+  service: name={{ item }} 
+           enabled=yes
+  with_items:
+    - network
+
+- name: "Install Repos"
+  yum: state=installed
+       name={{ item }}
+  with_items:
+    - https://rdo.fedorapeople.org/rdo-release.rpm
+    - openstack-packstack
+    - python-pip
+  ignore_errors: true
+
+# The following may not be needed later, but it is now for Centos7.
+- name: "Fix the MongoDB Puppet entry for PID file"
+  lineinfile: dest=/usr/lib/python2.7/site-packages/packstack/puppet/templates/mongodb.pp
+              line="   pidfilepath  => '/var/run/mongodb/mongod.pid',"
+              insertafter='^\s+bind_ip.*$'
+              state=present
+
+#----------------------------------------------------------------
+
+- name: "yum update"
+  yum: name=*
+       state=latest
+
+- name: "Uninstall Bad Packages"
+  yum: name={{ item }}
+       state=installed
+  with_items:
+    - firewalld
+         
+#-------------------------------------------------------------------------------
+#- Reboot the Server so that network can start working properly
+#-------------------------------------------------------------------------------
+
+- name: "Reboot Server"
+  sudo: true
+  command: reboot
+  when: nm.changed == true
+  ignore_errors: true
+
+- name: "waiting for server to come back"
+  sudo: false
+  local_action: wait_for 
+                host={{ inventory_hostname }} 
+                port=22
+                state=started
+                delay=10
+  when: nm.changed == true
+
+#-------------------------------------------------------------------------------
+#- Packstack Configuration
+#-------------------------------------------------------------------------------
+
+- name: "Check if keystonerc_admin exists. Note: Remove file to force rebuild."
+  stat: path=/root/keystonerc_admin
+  register: keystone_admin
+
+- name: "Run Packstack Installer"
+  command: packstack 
+           --allinone 
+           --provision-all-in-one-ovs-bridge=n 
+           --provision-demo=n 
+           --default-password={{ openstack.KEYSTONE_ADMIN_PW }}
+  args:
+    creates: /root/keystonerc_admin
+
+#-------------------------------------------------------------------------------
+#- External Network Configuration to allow Access to/from internal VMs
+#-------------------------------------------------------------------------------
+# You may have to change eth0 to enp2s0 in some Centos7 systems
+- name: "Setup Bridge interfaces so that instances can talk to outside world."
+  template: src={{ item }}
+            dest=/etc/sysconfig/network-scripts/{{ item }}
+  with_items:
+     - ifcfg-br-ex
+     - ifcfg-eth0
+  register: bridge_setup
+
+- name: "Restart networking service"
+  service: name=network state=restarted
+  when: bridge_setup.changed == true
+
+#-------------------------------------------------------------------------------
+#- Reconfigure various Openstack items
+#-------------------------------------------------------------------------------
+
+- name: "Fix libvirt hyervisor; Use openstack-config to configure nova.conf"
+  command: openstack-config --set /etc/nova/nova.conf
+           {{item.section}}
+           {{item.parameter}}
+           {{item.value}}
+  with_items:
+    - { section: 'libvirt', parameter: 'virt_type', value: 'qemu' } 
+    - { section: 'DEFAULT', parameter: 'notify_on_state_change', value: 'vm_state' } 
+  when: not keystone_admin.stat.exists
+
+- name: "Setup neutron/ml2 plugin.ini"
+  command: openstack-config --set /etc/neutron/plugin.ini
+           {{item.section}}
+           {{item.parameter}}
+           {{item.value}}
+  with_items:
+    - { section: 'ml2', parameter: 'type_drivers', value: 'flat,vlan,gre,vxlan' }
+    - { section: 'ml2', parameter: 'tenant_network_types', value: 'vlan,gre,vxlan' }
+    - { section: 'ml2', parameter: 'mechanism_drivers', value: 'openvswitch' }
+    - { section: 'ml2_type_flat', parameter: 'flat_networks', value: 'physnet1' }
+    - { section: 'ml2_type_vlan', parameter: 'network_vlan_ranges', value: 'physnet1:1000:2000' }
+    - { section: 'ml2_type_gre',  parameter: 'tunnel_id_ranges', value: '1:1000' }
+    - { section: 'ml2_type_vxlan',  parameter: 'vni_ranges', value: '10:100' }
+  when: not keystone_admin.stat.exists
+  register: ml2_setup
+
+- name: "Set openvswitch settings"
+  command: openstack-config --set /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini
+           {{item.section}}
+           {{item.parameter}}
+           {{item.value}}
+  with_items:
+    - { section: 'ovs', parameter: 'enable_tunneling', value: 'True' }
+    - { section: 'ovs', parameter: 'local_ip', value: '{{openstack.NETWORK_HOSTS}}' }
+    - { section: 'ovs', parameter: 'bridge_mappings', value: 'physnet1:br-ex' }
+    - { section: 'agent', parameter: 'tunnel_types', value: 'gre' }
+  when: not keystone_admin.stat.exists
+  register: openvswitch_setup
+
+- name: "Set L3 settings"
+  command: openstack-config --set /etc/neutron/l3_agent.ini
+           {{item.section}}
+           {{item.parameter}}
+           {{item.value}}
+  with_items:
+    - { section: 'DEFAULT', parameter: 'interface_driver', value: 'neutron.agent.linux.interface.OVSInterfaceDriver' }
+    - { section: 'DEFAULT', parameter: 'external_network_bridge', value: 'br-ex' }
+    - { section: 'DEFAULT', parameter: 'use_namespaces', value: 'True' }
+  when: not keystone_admin.stat.exists
+  register: l3_setup
+
+- name: "Bounce nova/neutron"
+  service: name={{item}}
+           state=restarted
+  with_items:
+    - openstack-nova-api
+    - openstack-nova-compute
+    - openstack-nova-conductor
+    - openstack-nova-scheduler
+    - neutron-dhcp-agent
+    - neutron-l3-agent
+    - neutron-metadata-agent
+    - neutron-openvswitch-agent
+    - neutron-server
+    - openvswitch
+  when: not keystone_admin.stat.exists
+
+#-------------------------------------------------------------------------------
+#- Configure RabbitMQ, Zenoss_dispatcher, Ceilometer, etc..
+#-------------------------------------------------------------------------------
+
+# Broken in current version: ansible looks for missing sbin
+# - name: Enable RabbitMQ rabbitmq_management
+#   rabbitmq_plugin: names=rabbitmq_management 
+#                    state=enabled
+#                    new_only=yes
+#                    prefix=/usr/lib/rabbitmq
+ 
+- name: "Enable RabbitMQ rabbitmq_management with command"
+  command: /usr/lib/rabbitmq/bin/rabbitmq-plugins enable rabbitmq_management
+
+- name: "Install Zenoss plugin for dispatcher_zenoss"
+  pip: name=https://github.com/zenoss/ceilometer_zenoss/archive/master.zip
+
+- name: "stat ceilometer_zenoss/event_definitions.yaml"
+  stat: path=/usr/lib/python2.7/site-packages/ceilometer_zenoss/event_definitions.yaml
+  register: ceilometer_event_definitions
+
+- name: "copy ceilometer_zenoss/event_definitions.yaml"
+  command: cp /usr/lib/python2.7/site-packages/ceilometer_zenoss/event_definitions.yaml /etc/ceilometer/
+  when: ceilometer_event_definitions.stat.exists
+
+- name: "Modify /etc/ceilometer.conf to add event_defs with replace"
+  replace: dest=/etc/ceilometer/ceilometer.conf                                            
+           regexp='^#dispatcher=database'                                       
+           replace='dispatcher=database\ndispatcher=zenoss'
+
+#-------------------------------------------------------------------------------
+# WARNING: We try to cleverly skip un-needed work. We may out-wit ourselves.
+#-------------------------------------------------------------------------------
+- name: "Use openstack-config to configure ceilometer"
+  command: openstack-config --set /etc/ceilometer/ceilometer.conf 
+           {{item.section}}
+           {{item.parameter}}
+           {{item.value}}
+  with_items: ceilometer_cfg
+  when: not keystone_admin.stat.exists
+ 
+- name: "Bounce ceilometer"
+  service: name={{item}}
+           state=restarted
+  with_items:
+    - openstack-ceilometer-alarm-evaluator
+    - openstack-ceilometer-alarm-notifier
+    - openstack-ceilometer-api
+    - openstack-ceilometer-central
+    - openstack-ceilometer-collector
+    - openstack-ceilometer-compute
+    - openstack-ceilometer-notification
+  when: not keystone_admin.stat.exists
+
+#-------------------------------------------------------------------------------
+# Configure SSH and Miscellaneous
+#-------------------------------------------------------------------------------
+- name: "Increase MaxSessions for sshd"
+  lineinfile: dest=/etc/ssh/sshd_config
+              state=present
+              regexp='^#MaxSessions 10'
+              line='MaxSessions 100'
+  notify: restart sshd
+
+#-------------------------------------------------------------------------------
+# Configure the normal user setup for testing ----------------------------------
+#-------------------------------------------------------------------------------
+#
+- name: "Setup the credentials for the privileged user"
+  command: cp /root/keystonerc_admin /home/{{ sudo_user }}/ 
+
+- name: "Setup attributes for keystonerc_admin"
+  file: path=/home/{{ sudo_user }}/keystonerc_admin
+        mode=0444
+        
+- name: "Add keystone creds to users bashrc"
+  lineinfile: dest=/home/{{sudo_user}}/.bashrc
+              line="source $HOME/keystonerc_admin"
+              insertafter=EOF
+              state=present
+

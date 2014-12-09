@@ -1,0 +1,45 @@
+---
+# This playbook contains common plays that will be run on all nodes.
+
+- name: Restart the network interface in case DHCP didn't get DNS
+  service: name=network
+           state=restarted
+
+- name: "{{ role }}: Install python apps that ansible needs"
+  command: yum install -y {{ item }}
+  with_items: 
+    - yum-utils
+    - python-paramiko
+    - python-jinja2
+    - libselinux-python
+# changed_when: False
+
+- name: "{{ role }}: Make sure yum is in a clean state"
+  command: yum-complete-transaction
+  changed_when: False
+
+- name: "{{ role }}: Upgrade base system packages"
+  yum: name=* state=latest
+  async: 420
+  poll: 5
+
+- name: "{{role}}: Remove ntpd and other anoyances"
+  yum:  name={{item}} state=absent
+  with_items: 
+    - ntp
+
+- name: "{{role}}: Install Essential (and bootstrapping) packages"
+  yum:  name={{item}} state=present
+  with_items: 
+    - cronie
+    - ntpdate
+    - sudo
+    - git
+    - wget
+
+- name: "{{role}}: Set timezone variables"
+  copy: content='ZONE="America/Chicago"'
+        dest=/etc/sysconfig/clock
+        owner=root
+        group=root
+        mode=644

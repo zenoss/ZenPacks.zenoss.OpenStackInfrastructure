@@ -1,0 +1,9 @@
+DEVICE=br-ex
+DEVICETYPE=ovs
+TYPE=OVSBridge
+BOOTPROTO=static
+IPADDR={{ hardware.eth0.ip_address }}
+NETMASK=255.255.255.0
+GATEWAY={{ hardware.eth0.gateway }}
+DNS1={{ hardware.eth0.dns }}
+ONBOOT="yes"

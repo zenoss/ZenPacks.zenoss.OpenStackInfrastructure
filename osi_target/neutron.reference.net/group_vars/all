@@ -1,0 +1,23 @@
+---
+# Variables listed here are applicable to all host groups
+
+ntpserver: us.pool.ntp.org
+sudo_user: zenoss
+sudo_group: zenoss
+sudo_groups: sudo
+sudo_gid: 1000
+sudo_home: /home/zenoss
+sudo_pass: "$6$Gum3S@lt$n9F6qLne80Grcyc0cNU3ILhwBk3K29yHz682kn6tRn85i34kyb//rsmpxd1k5YyDWPHjHBXJ5zDDuDenpkAiZ0"
+
+flavor_tiny: 
+  name: 'tiny'
+  id: '77'
+  ram: 64
+  disk: 0
+  cpu: 1
+
+keystone:
+  OS_USERNAME: admin
+  OS_TENANT_NAME: admin
+  OS_PASSWORD: zenoss
+
