@@ -4,245 +4,7 @@ mp8.zenoss.loc | success >> {
             "192.168.117.47"
         ], 
         "ansible_all_ipv6_addresses": [
-            "fe80::5054:ff:feff:542e"
-        ], 
-        "ansible_architecture": "x86_64", 
-        "ansible_bios_date": "01/01/2011", 
-        "ansible_bios_version": "Bochs", 
-        "ansible_cmdline": {
-            "BOOT_IMAGE": "/boot/vmlinuz-3.10.0-123.el7.x86_64", 
-            "LANG": "en_US.UTF-8", 
-            "crashkernel": "auto", 
-            "nomodeset": true, 
-            "quiet": true, 
-            "rhgb": true, 
-            "ro": true, 
-            "root": "UUID=60e048e3-a4a0-4857-b2e1-802826c6bf1e", 
-            "vconsole.font": "latarcyrheb-sun16", 
-            "vconsole.keymap": "us"
-        }, 
-        "ansible_date_time": {
-            "date": "2014-12-04", 
-            "day": "04", 
-            "epoch": "1417729981", 
-            "hour": "15", 
-            "iso8601": "2014-12-04T21:53:01Z", 
-            "iso8601_micro": "2014-12-04T21:53:01.773012Z", 
-            "minute": "53", 
-            "month": "12", 
-            "second": "01", 
-            "time": "15:53:01", 
-            "tz": "CST", 
-            "tz_offset": "-0600", 
-            "weekday": "Thursday", 
-            "year": "2014"
-        }, 
-        "ansible_default_ipv4": {
-            "address": "192.168.117.47", 
-            "alias": "eth0", 
-            "gateway": "192.168.117.1", 
-            "interface": "eth0", 
-            "macaddress": "52:54:00:ff:54:2e", 
-            "mtu": 1500, 
-            "netmask": "255.255.255.0", 
-            "network": "192.168.117.0", 
-            "type": "ether"
-        }, 
-        "ansible_default_ipv6": {}, 
-        "ansible_devices": {
-            "sda": {
-                "holders": [], 
-                "host": "", 
-                "model": "QEMU HARDDISK", 
-                "partitions": {
-                    "sda1": {
-                        "sectors": "2048000", 
-                        "sectorsize": 512, 
-                        "size": "1000.00 MB", 
-                        "start": "2048"
-                    }
-                }, 
-                "removable": "0", 
-                "rotational": "1", 
-                "scheduler_mode": "cfq", 
-                "sectors": "8192000", 
-                "sectorsize": "512", 
-                "size": "3.91 GB", 
-                "support_discard": "0", 
-                "vendor": "ATA"
-            }, 
-            "sr0": {
-                "holders": [], 
-                "host": "", 
-                "model": "QEMU DVD-ROM", 
-                "partitions": {}, 
-                "removable": "1", 
-                "rotational": "1", 
-                "scheduler_mode": "cfq", 
-                "sectors": "1159168", 
-                "sectorsize": "2048", 
-                "size": "2.21 GB", 
-                "support_discard": "0", 
-                "vendor": "QEMU"
-            }, 
-            "vda": {
-                "holders": [], 
-                "host": "", 
-                "model": null, 
-                "partitions": {
-                    "vda1": {
-                        "sectors": "52426752", 
-                        "sectorsize": 512, 
-                        "size": "25.00 GB", 
-                        "start": "2048"
-                    }
-                }, 
-                "removable": "0", 
-                "rotational": "1", 
-                "scheduler_mode": "deadline", 
-                "sectors": "52428800", 
-                "sectorsize": "512", 
-                "size": "25.00 GB", 
-                "support_discard": "0", 
-                "vendor": "0x1af4"
-            }
-        }, 
-        "ansible_distribution": "CentOS", 
-        "ansible_distribution_major_version": "7", 
-        "ansible_distribution_release": "Core", 
-        "ansible_distribution_version": "7.0.1406", 
-        "ansible_domain": "zenoss.loc", 
-        "ansible_env": {
-            "HOME": "/home/zenoss", 
-            "LANG": "C", 
-            "LC_COLLATE": "C", 
-            "LC_CTYPE": "C", 
-            "LESSOPEN": "||/usr/bin/lesspipe.sh %s", 
-            "LOGNAME": "zenoss", 
-            "MAIL": "/var/mail/zenoss", 
-            "PATH": "/usr/local/bin:/usr/bin", 
-            "PWD": "/home/zenoss", 
-            "SELINUX_LEVEL_REQUESTED": "", 
-            "SELINUX_ROLE_REQUESTED": "", 
-            "SELINUX_USE_CURRENT_RANGE": "", 
-            "SHELL": "/bin/bash", 
-            "SHLVL": "2", 
-            "SSH_AUTH_SOCK": "/tmp/ssh-00NHzGRGzh/agent.2109", 
-            "SSH_CLIENT": "192.168.117.10 44376 22", 
-            "SSH_CONNECTION": "192.168.117.10 44376 192.168.117.47 22", 
-            "SSH_TTY": "/dev/pts/1", 
-            "TERM": "xterm", 
-            "USER": "zenoss", 
-            "XDG_RUNTIME_DIR": "/run/user/1000", 
-            "XDG_SESSION_ID": "3", 
-            "_": "/usr/bin/python"
-        }, 
-        "ansible_eth0": {
-            "active": true, 
-            "device": "eth0", 
-            "ipv4": {
-                "address": "192.168.117.47", 
-                "netmask": "255.255.255.0", 
-                "network": "192.168.117.0"
-            }, 
-            "ipv6": [
-                {
-                    "address": "fe80::5054:ff:feff:542e", 
-                    "prefix": "64", 
-                    "scope": "link"
-                }
-            ], 
-            "macaddress": "52:54:00:ff:54:2e", 
-            "module": "virtio_net", 
-            "mtu": 1500, 
-            "promisc": false, 
-            "type": "ether"
-        }, 
-        "ansible_form_factor": "Other", 
-        "ansible_fqdn": "mp8.zenoss.loc", 
-        "ansible_hostname": "mp8", 
-        "ansible_interfaces": [
-            "lo", 
-            "eth0"
-        ], 
-        "ansible_kernel": "3.10.0-123.el7.x86_64", 
-        "ansible_lo": {
-            "active": true, 
-            "device": "lo", 
-            "ipv4": {
-                "address": "127.0.0.1", 
-                "netmask": "255.0.0.0", 
-                "network": "127.0.0.0"
-            }, 
-            "ipv6": [
-                {
-                    "address": "::1", 
-                    "prefix": "128", 
-                    "scope": "host"
-                }
-            ], 
-            "mtu": 65536, 
-            "promisc": false, 
-            "type": "loopback"
-        }, 
-        "ansible_machine": "x86_64", 
-        "ansible_memfree_mb": 3792, 
-        "ansible_memtotal_mb": 4050, 
-        "ansible_mounts": [
-            {
-                "device": "/dev/vda1", 
-                "fstype": "xfs", 
-                "mount": "/", 
-                "options": "rw,seclabel,relatime,attr2,inode64,noquota", 
-                "size_available": 25873846272, 
-                "size_total": 26829393920
-            }
-        ], 
-        "ansible_nodename": "mp8", 
-        "ansible_os_family": "RedHat", 
-        "ansible_pkg_mgr": "yum", 
-        "ansible_processor": [
-            "QEMU Virtual CPU version 2.0.0"
-        ], 
-        "ansible_processor_cores": 1, 
-        "ansible_processor_count": 1, 
-        "ansible_processor_threads_per_core": 1, 
-        "ansible_processor_vcpus": 1, 
-        "ansible_product_name": "Bochs", 
-        "ansible_product_serial": "NA", 
-        "ansible_product_uuid": "NA", 
-        "ansible_product_version": "NA", 
-        "ansible_python_version": "2.7.5", 
-        "ansible_selinux": {
-            "config_mode": "enforcing", 
-            "mode": "enforcing", 
-            "policyvers": 28, 
-            "status": "enabled", 
-            "type": "targeted"
-        }, 
-        "ansible_ssh_host_key_ecdsa_public": "AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBK0nzeJSV1Egw7m8d2s1uLnLaUIpixfT87hFook7OI9g8lh022I8uyantNTvhUyodixaEIXdZaeAzmrK7Mo2YpI=", 
-        "ansible_ssh_host_key_rsa_public": "AAAAB3NzaC1yc2EAAAADAQABAAABAQC4U9851fYFBXfTyVM9By7CKA+RABinwYD0PPbdjoRP97t7lsPidH8htitm4d2sjBob6lZkDWe9GH6Gu6m6IyBnHmzCBPKoR9ThzjJiFIfcberxppj3xpVzM/1jSdPxwm/qsY5aXAAB9gUqoyzYWT6ow218espJZ7Rf0sGcSZ5Jxt2Qx3gYDOX5dcTmxZ9q5g/4x8SulEdG39mRwE2TkiwIand3lPGIsDpZZw9VHzOxV3LVnHcgRja/jYJ7ltXCC2oLXjyWaD7VjOMrvMXeX4+DhTgxmax1FrRFPuMcBu+R4ntvXINACSNGC9SEd/VlYRGd489iFQiCpETuhhQTO/7v", 
-        "ansible_swapfree_mb": 999, 
-        "ansible_swaptotal_mb": 999, 
-        "ansible_system": "Linux", 
-        "ansible_system_vendor": "Bochs", 
-        "ansible_user_id": "zenoss", 
-        "ansible_userspace_architecture": "x86_64", 
-        "ansible_userspace_bits": "64", 
-        "ansible_virtualization_role": "guest", 
-        "ansible_virtualization_type": "kvm", 
-        "module_setup": true
-    }, 
-    "changed": false
-}
-
-mp8.zenoss.loc | success >> {
-    "ansible_facts": {
-        "ansible_all_ipv4_addresses": [
-            "192.168.117.47"
-        ], 
-        "ansible_all_ipv6_addresses": [
-            "fe80::f4a8:a8ff:fed4:644f", 
+            "fe80::7cdd:56ff:feab:5443", 
             "fe80::5054:ff:feff:542e", 
             "fe80::a0a0:73ff:fe5b:c146"
         ], 
@@ -259,12 +21,12 @@ mp8.zenoss.loc | success >> {
             }, 
             "ipv6": [
                 {
-                    "address": "fe80::f4a8:a8ff:fed4:644f", 
+                    "address": "fe80::7cdd:56ff:feab:5443", 
                     "prefix": "64", 
                     "scope": "link"
                 }
             ], 
-            "macaddress": "f6:a8:a8:d4:64:4f", 
+            "macaddress": "7e:dd:56:ab:54:43", 
             "mtu": 1500, 
             "promisc": true, 
             "type": "ether"
@@ -287,7 +49,7 @@ mp8.zenoss.loc | success >> {
         "ansible_br_tun": {
             "active": false, 
             "device": "br-tun", 
-            "macaddress": "8e:69:4a:2f:6b:49", 
+            "macaddress": "86:10:86:58:11:4e", 
             "mtu": 1500, 
             "promisc": true, 
             "type": "ether"
@@ -305,19 +67,19 @@ mp8.zenoss.loc | success >> {
             "vconsole.keymap": "us"
         }, 
         "ansible_date_time": {
-            "date": "2014-12-07", 
-            "day": "07", 
-            "epoch": "1417995913", 
-            "hour": "17", 
-            "iso8601": "2014-12-07T23:45:13Z", 
-            "iso8601_micro": "2014-12-07T23:45:13.833066Z", 
-            "minute": "45", 
+            "date": "2014-12-09", 
+            "day": "09", 
+            "epoch": "1418155089", 
+            "hour": "13", 
+            "iso8601": "2014-12-09T19:58:09Z", 
+            "iso8601_micro": "2014-12-09T19:58:09.961786Z", 
+            "minute": "58", 
             "month": "12", 
-            "second": "13", 
-            "time": "17:45:13", 
+            "second": "09", 
+            "time": "13:58:09", 
             "tz": "CST", 
             "tz_offset": "-0600", 
-            "weekday": "Sunday", 
+            "weekday": "Tuesday", 
             "year": "2014"
         }, 
         "ansible_default_ipv4": {
@@ -325,7 +87,7 @@ mp8.zenoss.loc | success >> {
             "alias": "br-ex", 
             "gateway": "192.168.117.1", 
             "interface": "br-ex", 
-            "macaddress": "f6:a8:a8:d4:64:4f", 
+            "macaddress": "7e:dd:56:ab:54:43", 
             "mtu": 1500, 
             "netmask": "255.255.255.0", 
             "network": "192.168.117.0", 
@@ -398,10 +160,14 @@ mp8.zenoss.loc | success >> {
         "ansible_env": {
             "HOME": "/home/zenoss", 
             "LANG": "C", 
-            "LC_COLLATE": "C", 
             "LC_CTYPE": "C", 
             "LOGNAME": "zenoss", 
             "MAIL": "/var/mail/zenoss", 
+            "OS_AUTH_URL": "http://192.168.117.47:5000/v2.0/", 
+            "OS_PASSWORD": "zenoss", 
+            "OS_REGION_NAME": "RegionOne", 
+            "OS_TENANT_NAME": "admin", 
+            "OS_USERNAME": "admin", 
             "PATH": "/usr/local/bin:/usr/bin", 
             "PWD": "/home/zenoss", 
             "SELINUX_LEVEL_REQUESTED": "", 
@@ -409,14 +175,14 @@ mp8.zenoss.loc | success >> {
             "SELINUX_USE_CURRENT_RANGE": "", 
             "SHELL": "/bin/bash", 
             "SHLVL": "2", 
-            "SSH_AUTH_SOCK": "/tmp/ssh-wHHjyELSRW/agent.7163", 
-            "SSH_CLIENT": "192.168.117.10 54993 22", 
-            "SSH_CONNECTION": "192.168.117.10 54993 192.168.117.47 22", 
-            "SSH_TTY": "/dev/pts/1", 
+            "SSH_AUTH_SOCK": "/tmp/ssh-Pj90p55WVn/agent.29150", 
+            "SSH_CLIENT": "192.168.117.10 44870 22", 
+            "SSH_CONNECTION": "192.168.117.10 44870 192.168.117.47 22", 
+            "SSH_TTY": "/dev/pts/2", 
             "TERM": "xterm", 
             "USER": "zenoss", 
             "XDG_RUNTIME_DIR": "/run/user/1000", 
-            "XDG_SESSION_ID": "4057", 
+            "XDG_SESSION_ID": "6944", 
             "_": "/usr/bin/python"
         }, 
         "ansible_eth0": {
@@ -467,7 +233,7 @@ mp8.zenoss.loc | success >> {
             "type": "loopback"
         }, 
         "ansible_machine": "x86_64", 
-        "ansible_memfree_mb": 205, 
+        "ansible_memfree_mb": 171, 
         "ansible_memtotal_mb": 4050, 
         "ansible_mounts": [
             {
@@ -475,7 +241,7 @@ mp8.zenoss.loc | success >> {
                 "fstype": "xfs", 
                 "mount": "/", 
                 "options": "rw,seclabel,relatime,attr2,inode64,noquota", 
-                "size_available": 24016977920, 
+                "size_available": 23979610112, 
                 "size_total": 26829393920
             }, 
             {
@@ -519,7 +285,7 @@ mp8.zenoss.loc | success >> {
         }, 
         "ansible_ssh_host_key_ecdsa_public": "AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBK0nzeJSV1Egw7m8d2s1uLnLaUIpixfT87hFook7OI9g8lh022I8uyantNTvhUyodixaEIXdZaeAzmrK7Mo2YpI=", 
         "ansible_ssh_host_key_rsa_public": "AAAAB3NzaC1yc2EAAAADAQABAAABAQC4U9851fYFBXfTyVM9By7CKA+RABinwYD0PPbdjoRP97t7lsPidH8htitm4d2sjBob6lZkDWe9GH6Gu6m6IyBnHmzCBPKoR9ThzjJiFIfcberxppj3xpVzM/1jSdPxwm/qsY5aXAAB9gUqoyzYWT6ow218espJZ7Rf0sGcSZ5Jxt2Qx3gYDOX5dcTmxZ9q5g/4x8SulEdG39mRwE2TkiwIand3lPGIsDpZZw9VHzOxV3LVnHcgRja/jYJ7ltXCC2oLXjyWaD7VjOMrvMXeX4+DhTgxmax1FrRFPuMcBu+R4ntvXINACSNGC9SEd/VlYRGd489iFQiCpETuhhQTO/7v", 
-        "ansible_swapfree_mb": 998, 
+        "ansible_swapfree_mb": 996, 
         "ansible_swaptotal_mb": 999, 
         "ansible_system": "Linux", 
         "ansible_system_vendor": "Bochs", 
@@ -557,14 +323,14 @@ mp8.zenoss.loc | success >> {
         "facter_kernelmajversion": "3.10", 
         "facter_kernelrelease": "3.10.0-123.9.3.el7.x86_64", 
         "facter_kernelversion": "3.10.0", 
-        "facter_macaddress": "f6:a8:a8:d4:64:4f", 
-        "facter_macaddress_br_ex": "f6:a8:a8:d4:64:4f", 
+        "facter_macaddress": "7e:dd:56:ab:54:43", 
+        "facter_macaddress_br_ex": "7e:dd:56:ab:54:43", 
         "facter_macaddress_br_int": "a2:a0:73:5b:c1:46", 
-        "facter_macaddress_br_tun": "8e:69:4a:2f:6b:49", 
+        "facter_macaddress_br_tun": "86:10:86:58:11:4e", 
         "facter_macaddress_eth0": "52:54:00:ff:54:2e", 
         "facter_macaddress_ovs_system": "1e:2b:83:6f:e3:e2", 
-        "facter_memoryfree": "1.21 GB", 
-        "facter_memoryfree_mb": "1236.10", 
+        "facter_memoryfree": "1.02 GB", 
+        "facter_memoryfree_mb": "1042.13", 
         "facter_memorysize": "3.96 GB", 
         "facter_memorysize_mb": "4050.61", 
         "facter_mtu_br_ex": "1500", 
@@ -629,22 +395,22 @@ mp8.zenoss.loc | success >> {
         "facter_sshfp_ecdsa": "SSHFP 3 1 aa36c10ea702ce223192d49f40f099067de4f779\nSSHFP 3 2 a6f1eb4d47c34dc0a2f1e917427a2229bfdbb6b97209dc5582dd2a1eaf8e2964", 
         "facter_sshfp_rsa": "SSHFP 1 1 e7e9932a44fcd15eb9a364c7efa07646bb33b3b1\nSSHFP 1 2 5ae117f0db662c9fb0aef1cb319ed3a69ea2128a1981d60230c75ce54f80f7ac", 
         "facter_sshrsakey": "AAAAB3NzaC1yc2EAAAADAQABAAABAQC4U9851fYFBXfTyVM9By7CKA+RABinwYD0PPbdjoRP97t7lsPidH8htitm4d2sjBob6lZkDWe9GH6Gu6m6IyBnHmzCBPKoR9ThzjJiFIfcberxppj3xpVzM/1jSdPxwm/qsY5aXAAB9gUqoyzYWT6ow218espJZ7Rf0sGcSZ5Jxt2Qx3gYDOX5dcTmxZ9q5g/4x8SulEdG39mRwE2TkiwIand3lPGIsDpZZw9VHzOxV3LVnHcgRja/jYJ7ltXCC2oLXjyWaD7VjOMrvMXeX4+DhTgxmax1FrRFPuMcBu+R4ntvXINACSNGC9SEd/VlYRGd489iFQiCpETuhhQTO/7v", 
-        "facter_swapfree": "998.73 MB", 
-        "facter_swapfree_mb": "998.73", 
+        "facter_swapfree": "996.26 MB", 
+        "facter_swapfree_mb": "996.26", 
         "facter_swapsize": "1000.00 MB", 
         "facter_swapsize_mb": "1000.00", 
         "facter_system_uptime": {
-            "days": 2, 
-            "hours": 55, 
-            "seconds": 199375, 
-            "uptime": "2 days"
+            "days": 4, 
+            "hours": 99, 
+            "seconds": 358551, 
+            "uptime": "4 days"
         }, 
         "facter_timezone": "CST", 
         "facter_uniqueid": "a8c02f75", 
-        "facter_uptime": "2 days", 
-        "facter_uptime_days": 2, 
-        "facter_uptime_hours": 55, 
-        "facter_uptime_seconds": 199375, 
+        "facter_uptime": "4 days", 
+        "facter_uptime_days": 4, 
+        "facter_uptime_hours": 99, 
+        "facter_uptime_seconds": 358551, 
         "facter_virtual": "kvm", 
         "module_setup": true
     }, 

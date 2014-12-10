@@ -2,5 +2,5 @@ DEVICE=eth0
 TYPE="OVSPort"
 DEVICETYPE="ovs"
 OVS_BRIDGE="br-ex"
-HWADDR={{ hardware.eth0.mac_address }}
+HWADDR={{ hardware.eth0.macaddress }}
 ONBOOT="yes"

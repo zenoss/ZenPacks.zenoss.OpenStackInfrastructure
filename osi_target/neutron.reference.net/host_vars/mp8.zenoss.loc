@@ -4,11 +4,14 @@
 hardware:
   primary_network_if: eth0
   eth0:
-    mac_address: "52:54:00:ff:54:2e" # You may have to change
-    ip_address: "192.168.117.47"     # You may have to change
-    gateway: "192.168.117.1"         # You may have to change
-    dns: "192.168.117.1"             # You may have to change
-    floating_network: 192.168.117.192/26  # You *MUST* change this!
+    macaddress: "{{ansible_eth0.macaddress}}"   # Make sure it matches your MAC
+    address: "{{ansible_default_ipv4.address}}" # You may have to change
+    gateway: "{{ansible_default_ipv4.gateway}}" # You may have to change
+    network: "{{ansible_default_ipv4.network}}" # You may have to change
+    dns: "192.168.117.1"                        # WARNING: *MUST* change this!
+    floating_network: 192.168.117.224/27        # WARNING: *MUST* change this!
+    dhcp_start: 192.168.117.225                 # WARNING: *MUST* change this!
+    dhcp_end: 192.168.117.254                   # WARNING: *MUST* change this!
 
 #------------------------------------------------------------------------------
 # Don't change antyhing below here unless you know what you're doing.
@@ -17,15 +20,15 @@ hardware:
 
 openstack:
   KEYSTONE_ADMIN_PW: "{{keystone.OS_PASSWORD}}"
-  CONTROLLER_HOST: "{{ hardware.eth0.ip_address }}"
-  COMPUTE_HOSTS: "{{ hardware.eth0.ip_address }}"
-  NETWORK_HOSTS: "{{ hardware.eth0.ip_address }}"
-  VCENTER_HOST: "{{ hardware.eth0.ip_address }}"
-  STORAGE_HOST: "{{ hardware.eth0.ip_address }}"
-  AMQP_HOST: "{{ hardware.eth0.ip_address }}"
-  MARIADB_HOST: "{{ hardware.eth0.ip_address }}"
+  CONTROLLER_HOST: "{{ hardware.eth0.address }}"
+  COMPUTE_HOSTS: "{{ hardware.eth0.address }}"
+  NETWORK_HOSTS: "{{ hardware.eth0.address }}"
+  VCENTER_HOST: "{{ hardware.eth0.address }}"
+  STORAGE_HOST: "{{ hardware.eth0.address }}"
+  AMQP_HOST: "{{ hardware.eth0.address }}"
+  MARIADB_HOST: "{{ hardware.eth0.address }}"
   NOVA_NETWORK_FIXEDRANGE: 192.168.32.0/28
-  MONGODB_HOST: "{{ hardware.eth0.ip_address }}"
+  MONGODB_HOST: "{{ hardware.eth0.address }}"
   NOVA_NETWORK_FLOATRANGE: "{{ hardware.eth0.floating_network }}"
   NEUTRON_ML2_TYPE_DRIVERS: local
   NEUTRON_ML2_TENANT_NETWORK_TYPES: local

@@ -6,7 +6,7 @@ default: site
 # 	ansible-playbook -i inventory -K $@.yml 
 
 vars:
-	ansible -u zenoss -k -m setup -i inventory packstack >> vars.json
+	ansible -u zenoss -k -m setup -i inventory packstack > vars.json
 
 test:
 	ansible-playbook -vvv -i inventory test.yml -Kk
