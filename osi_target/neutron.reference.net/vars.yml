@@ -1,7 +1,7 @@
 ---
 
 # -----------------------------------------------------------------------------
-# Setup Network in Neutron
+# Print facts to a file.
 # -----------------------------------------------------------------------------
 
 - hosts: packstack
@@ -20,8 +20,8 @@
 
     - name: write the facts out
       sudo: no
-      copy:
-            content='{{ setup_vars.ansible_facts | to_nice_json }}'
-            dest=/tmp/vars.json
+      copy: 
+        content: "{{ setup_vars.ansible_facts | to_nice_json }}"
+        dest: /tmp/vars.json
       delegate_to: 127.0.0.1
 

@@ -15,7 +15,7 @@ vars:
 	ansible-playbook -vvvv -i inventory vars.yml -Kk
 
 xvars:
-	ansible -u zenoss -k -m setup -i inventory packstack > vars.json
+	ansible -u zenoss -k -m setup -i inventory packstack > xvars.json
 
 test:
 	ansible-playbook -vvv -i inventory test.yml -Kk
