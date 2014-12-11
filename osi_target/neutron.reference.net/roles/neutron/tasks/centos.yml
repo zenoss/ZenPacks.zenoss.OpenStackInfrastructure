@@ -7,6 +7,7 @@
 #- Requirements: Must have a system with minimum 3GB RAM
 #-------------------------------------------------------------------------------
 
+
 - name: check if flavor {{flavor_tiny.name}} exists
   shell: . /home/{{sudo_user}}/keystonerc_admin; nova flavor-show {{flavor_tiny.name}}
   ignore_errors: true
@@ -33,7 +34,11 @@
   ignore_errors: true
 #'
 
-- quantum_network: name={{item.name}} 
+#-------------------------------------------------------------------------------
+#- Define the networks
+#-------------------------------------------------------------------------------
+- name: Define all networks. 
+  quantum_network: name={{item.name}} 
                    tenant_name={{item.tenant_name}} 
                    state=present
                    provider_network_type={{item.network_type}}
@@ -89,12 +94,16 @@
         tenant_name: 'C', 
         network_type: 'gre', 
         physical_net: null,
-        segmentation_id: 5,
+        segmentation_id: 9,
         router_external: 'no',
         shared: 'no'
       }
 
-- quantum_subnet: name={{item.name}} 
+#-------------------------------------------------------------------------------
+#- Define the Subnets of Networks
+#-------------------------------------------------------------------------------
+- name: Defaine all networks
+  quantum_subnet: name={{item.name}} 
                   network_name={{item.network_name}} 
                   cidr={{item.cidr}}
                   gateway_ip={{item.gateway}}
@@ -160,5 +169,72 @@
         enable_dhcp: True,
         allocation_pool_start: '10.1.9.100',
         allocation_pool_end: '10.1.9.140'
+      }
+
+#-------------------------------------------------------------------------------
+#- Define the Routers
+#-------------------------------------------------------------------------------
+- name: Define the routers
+  quantum_router: name={{item.name}} 
+                  state=present
+                  tenant_name={{item.tenant_name}} 
+                  login_username=admin 
+                  login_password={{openstack.KEYSTONE_ADMIN_PW}}
+                  login_tenant_name=admin
+  with_items:
+    - { name: 'router_AB', 
+        tenant_name: 'services', 
+      }
+    - { name: 'router_C', 
+        tenant_name: 'C', 
+      }
+
+#-------------------------------------------------------------------------------
+#- Add gateways to the routers
+#-------------------------------------------------------------------------------
+
+- name: Add gateways to routers
+  quantum_router_gateway: router_name={{item.name}} 
+                          state=present
+                          network_name={{item.network_name}} 
+                          login_username=admin 
+                          login_password={{openstack.KEYSTONE_ADMIN_PW}}
+                          login_tenant_name=admin
+  with_items:
+    - { name: 'router_AB', 
+        network_name: 'public', 
+      }
+    - { name: 'router_C', 
+        network_name: 'public', 
+      }
+
+#-------------------------------------------------------------------------------
+#- Connect the Subnet Interfaces to the routers. tenant_name required to match!
+#-------------------------------------------------------------------------------
+
+- name: Attach subnet to router interfaces. You must use tenant_name here!
+  quantum_router_interface: router_name={{item.router_name}} 
+                            subnet_name={{item.subnet_name}} 
+                            tenant_name={{item.tenant_name}} 
+                            state=present
+                            login_username=admin 
+                            login_password={{openstack.KEYSTONE_ADMIN_PW}}
+                            login_tenant_name=admin
+  with_items:
+    - { router_name: 'router_AB', 
+        subnet_name: 'subnet_A6', 
+        tenant_name: 'A', 
+      }
+    - { router_name: 'router_AB', 
+        subnet_name: 'subnet_B7', 
+        tenant_name: 'B', 
+      }
+    - { router_name: 'router_C', 
+        subnet_name: 'subnet_C7', 
+        tenant_name: 'C', 
+      }
+    - { router_name: 'router_C', 
+        subnet_name: 'subnet_C9', 
+        tenant_name: 'C', 
       }
 
