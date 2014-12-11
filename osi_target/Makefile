@@ -10,8 +10,8 @@ neutron:
 	chmod 700 setup.sh
 	./setup.sh neutron
 
-hi:
-	echo hi
+vars:
+	cd neutron.reference.net && $(MAKE) vars
 
 lo:
 	echo lo

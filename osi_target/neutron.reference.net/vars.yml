@@ -1,0 +1,27 @@
+---
+
+# -----------------------------------------------------------------------------
+# Setup Network in Neutron
+# -----------------------------------------------------------------------------
+
+- hosts: packstack
+  user: "{{ sudo_user }}"
+  sudo: yes
+
+  tasks:
+
+    - name: get some variables
+      setup: 
+      register: setup_vars
+
+#     - name: debug setup_vars
+#       debug:
+#             msg='{{ setup_vars.ansible_facts }}'
+
+    - name: write the facts out
+      sudo: no
+      copy:
+            content='{{ setup_vars.ansible_facts | to_nice_json }}'
+            dest=/tmp/vars.json
+      delegate_to: 127.0.0.1
+

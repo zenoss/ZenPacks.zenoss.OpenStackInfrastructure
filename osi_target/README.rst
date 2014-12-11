@@ -12,6 +12,12 @@ Overview and Definitions
 * The **Reference Network** is defined in the reference_network.png image
 * The deployment **Host** system will perform all configuration.
 * The **Target** system will be configured with Openstack/Packstack/Neutron.
+* The order of operations are:
+
+  - Setup the (local) host system with ansible
+  - Setup the Target system with common_config to set: user, pass, sudo
+  - Setup the Target system with Packstack: Adds in zenoss goodies
+  - Setup the Target system Neutron network: tenant, net, subnets, routers, vms
 
 Requirements
 ===============
@@ -40,15 +46,25 @@ Setup
 * In neutron.reference.net/group_vars/all:
 
   - Take note of the keystone settings. These should not require changes.
+    In particular make sure these are set correctly for YOUR system::
 
-* Copy the prototype variables set from
-  neutron.reference.net/host_vars/prototype.com to the ip-address or FQDN of
-  your Target system::
+      sudo_user: zenoss
+      sudo_group: zenoss
+      sudo_groups: sudo
+      sudo_gid: 1000
+      sudo_pass: This is encrypted with value of "zenoss"
 
-     cd neutron.reference.net/host_vars
-     cp prototype.com myhost.zenoss.loc
 
-* Edit the variables in neutron.reference.net/host_vars/<ip-address or FQDN>:
+* In neutron.reference.net/host_vars/
+
+  - Copy the prototype variables set from
+    neutron.reference.net/host_vars/prototype.com to the ip-address or FQDN of
+    your Target system::
+
+        cd neutron.reference.net/host_vars
+        cp proto.zenoss.loc myhost.zenoss.loc
+
+* Edit the variables in neutron.reference.net/host_vars/myhost.zenoss.loc:
    
    - Make sure all the ip addresses are correct for the defined servers.
    - Make sure all other parameters are correct for your system
@@ -58,6 +74,9 @@ Setup
   - Set the value of mpx.zenoss.loc to your Target fqdn/address: myhost.zenoss.loc
 
 * To force a rebuild, remove the file /root/keystonerc_admin on the Target
+
+* To debug your variables, there is a special make target called **vars**
+  that will output to /tmp/vars.json.
 
 Makefile
 =============
