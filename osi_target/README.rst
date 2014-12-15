@@ -7,6 +7,12 @@ that will be used to test against.
 
 Introduction
 ===============
+This build environment uses Ansible to build a Openstack network for use
+as a target. Openstack is complex and has many dependencies and services.
+It is correct to assume that the environment this tool creates is for use
+as a test target only. There are many features of Openstack that this tool
+does not provide. Do not expect the resulting environment to be free of
+numerous defects.
 
 Overview and Definitions
 -------------------------
@@ -39,9 +45,10 @@ Bugs, Problems, and Todo's
 * The Horizon web interface is unable to see and graph all network components.
 * Only one network configuration is supported
 * Only a single-host Packstack is supports.
+* Floating IP's on B7 and C7 networks are damaged when created!
 
-Requirements
-===============
+Requirements for Use
+=====================
 
 Network Requirements
 ----------------------
@@ -62,10 +69,13 @@ System Requirements
 * You have ssh'd into the Target already and accpeted its host-key in your:
   **~/.ssh/known_hosts**
 
-Setup
-=======
+Setup Instructions
+=====================
 
-* In neutron.reference.net/group_vars/all:
+* Copy this entire directory structure to your Controller system:
+  The folder that you copy it to will be called $CONTROLLER for convenience.
+
+* In $CONTROLLER/neutron.reference.net/group_vars/all:
 
   - Take note of the keystone settings. These should not require changes.
     In particular make sure these are set correctly for YOUR system::
@@ -77,13 +87,13 @@ Setup
       sudo_pass: This is encrypted with value of "zenoss"
 
 
-* In neutron.reference.net/host_vars/
+* In $CONTROLLER/neutron.reference.net/host_vars/
 
   - Copy the prototype variables set from
     neutron.reference.net/host_vars/prototype.com to the ip-address or FQDN of
     your Target system::
 
-        cd neutron.reference.net/host_vars
+        cd $CONTROLLER/neutron.reference.net/host_vars
         cp proto.zenoss.loc myhost.zenoss.loc
 
 * Edit the variables in neutron.reference.net/host_vars/myhost.zenoss.loc:
@@ -91,7 +101,7 @@ Setup
    - Make sure all the ip addresses are correct for the defined servers.
    - Make sure all other parameters are correct for your system
 
-* In neutron.reference.net/inventory:
+* In $CONTROLLER/neutron.reference.net/inventory:
 
   - Set the value of mpx.zenoss.loc to your Target fqdn/address: myhost.zenoss.loc
 
@@ -100,8 +110,12 @@ Setup
 * To debug your variables, there is a special make target called **vars**
   that will output to /tmp/vars.json.
 
-Makefile
-=============
+* WARNING: Rebuilding an environment that is not fresh install has proven to
+  be unreliable: Networks, Subnets, IPs, and Routers do not behave.
+  We recommend that you re-image a minimal system and start from scratch.
+
+Building Makefile
+==================
 
 Overview
 ------------
@@ -119,9 +133,11 @@ The top level Makefile will perform the following tasks:
 Build Targets
 --------------
 
-There are two essential build targets:
+First, cd to $CONTROLLER.
+There are three essential build targets:
 
-* make: this target will build all essential features
+
+* make: this target will build all essential features (This is the one to use)
 * packstack: This target will only build the Packstack setup
 * neutron: This target builds only the network part of neutron
 
@@ -129,3 +145,4 @@ The following make targets are for testing:
 
 * vars: This builds a diagnostic set of variables for debugging
 * test: This builds a small set of non-invasive objects for testing.
+
