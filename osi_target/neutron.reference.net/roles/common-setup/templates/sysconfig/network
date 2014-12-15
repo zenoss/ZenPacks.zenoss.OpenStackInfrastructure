@@ -1,3 +1,0 @@
-NETWORKING=yes
-HOSTNAME={{ inventory_hostname }}
-NOZEROCONF=yes

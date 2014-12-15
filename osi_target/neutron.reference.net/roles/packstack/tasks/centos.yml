@@ -11,7 +11,7 @@
   selinux: policy=targeted state=permissive
 
 - name: "Disable Network Services, but leave it running during configuration!"
-  service: name={{ item }} 
+  service: name={{ item }}
            enabled=no
            # state=stopped: Packstack somehow needs it to be running.
   with_items:
@@ -20,40 +20,46 @@
   register: nm
   ignore_errors: true
 
+
 - name: "Enable a *SANE* networking service"
-  service: name={{ item }} 
+  service: name={{ item }}
            enabled=yes
   with_items:
     - network
-
-- name: "Install Repos"
-  yum: state=installed
-       name={{ item }}
-  with_items:
-    - https://rdo.fedorapeople.org/rdo-release.rpm
-    - openstack-packstack
-    - python-pip
-  ignore_errors: true
-
-# The following may not be needed later, but it is now for Centos7.
-- name: "Fix the MongoDB Puppet entry for PID file"
-  lineinfile: dest=/usr/lib/python2.7/site-packages/packstack/puppet/templates/mongodb.pp
-              line="   pidfilepath  => '/var/run/mongodb/mongod.pid',"
-              insertafter='^\s+bind_ip.*$'
-              state=present
-
-#----------------------------------------------------------------
-
-- name: "yum update"
-  yum: name=*
-       state=latest
 
 - name: "Uninstall Bad Packages"
   yum: name={{ item }}
        state=installed
   with_items:
     - firewalld
-         
+
+- name: "Install RDO Repo"
+  yum: state=installed
+       name=https://rdo.fedorapeople.org/rdo-release.rpm
+
+- name: "Update Yum Cache"
+  yum: name=* state=latest
+
+- name: "Install Packstack Packages"
+  yum: state=installed
+       name={{ item }}
+  with_items:
+    - python-pip
+    - openstack-packstack
+  ignore_errors: true
+
+#-------------------------------------------------------------------------------
+# MongoDB has an error in its puppet setup.
+# It may not be needed later, but it is now for Centos7.
+#-------------------------------------------------------------------------------
+- name: "Fix the MongoDB Puppet entry for PID file"
+  lineinfile: dest=/usr/lib/python2.7/site-packages/packstack/puppet/templates/mongodb.pp
+              line="   pidfilepath  => '/var/run/mongodb/mongod.pid',"
+              insertafter='^\s+bind_ip.*$'
+              state=present
+
+
+
 #-------------------------------------------------------------------------------
 #- Reboot the Server so that network can start working properly
 #-------------------------------------------------------------------------------
@@ -66,8 +72,8 @@
 
 - name: "waiting for server to come back"
   sudo: false
-  local_action: wait_for 
-                host={{ inventory_hostname }} 
+  local_action: wait_for
+                host={{ inventory_hostname }}
                 port=22
                 state=started
                 delay=10
@@ -77,15 +83,15 @@
 #- Packstack Configuration
 #-------------------------------------------------------------------------------
 
-- name: "Check if keystonerc_admin exists. Note: Remove file to force rebuild."
+- name: "Check if /root/keystonerc_admin exists. Remove file to force rebuild."
   stat: path=/root/keystonerc_admin
   register: keystone_admin
 
 - name: "Run Packstack Installer"
-  command: packstack 
-           --allinone 
-           --provision-all-in-one-ovs-bridge=n 
-           --provision-demo=n 
+  command: packstack
+           --allinone
+           --provision-all-in-one-ovs-bridge=n
+           --provision-demo=n
            --default-password={{ openstack.KEYSTONE_ADMIN_PW }}
   args:
     creates: /root/keystonerc_admin
@@ -106,9 +112,9 @@
   service: name=network state=restarted
   when: bridge_setup.changed == true
 
-#-------------------------------------------------------------------------------
-#- Reconfigure various Openstack items
-#-------------------------------------------------------------------------------
+#===============================================================================
+#  Reconfigure various Openstack/Neutron items
+#===============================================================================
 
 - name: "Fix libvirt hyervisor; Use openstack-config to configure nova.conf"
   command: openstack-config --set /etc/nova/nova.conf
@@ -116,8 +122,8 @@
            {{item.parameter}}
            {{item.value}}
   with_items:
-    - { section: 'libvirt', parameter: 'virt_type', value: 'qemu' } 
-    - { section: 'DEFAULT', parameter: 'notify_on_state_change', value: 'vm_state' } 
+    - { section: 'libvirt', parameter: 'virt_type', value: 'qemu' }
+    - { section: 'DEFAULT', parameter: 'notify_on_state_change', value: 'vm_state' }
   when: not keystone_admin.stat.exists
 
 - name: "Setup neutron/ml2 plugin.ini"
@@ -130,7 +136,7 @@
     - { section: 'ml2', parameter: 'tenant_network_types', value: 'vlan,gre,vxlan' }
     - { section: 'ml2', parameter: 'mechanism_drivers', value: 'openvswitch' }
     - { section: 'ml2_type_flat', parameter: 'flat_networks', value: 'physnet1' }
-    - { section: 'ml2_type_vlan', parameter: 'network_vlan_ranges', value: 'physnet1:1000:2000' }
+    - { section: 'ml2_type_vlan', parameter: 'network_vlan_ranges', value: 'physnet1' }
     - { section: 'ml2_type_gre',  parameter: 'tunnel_id_ranges', value: '1:1000' }
     - { section: 'ml2_type_vxlan',  parameter: 'vni_ranges', value: '10:100' }
   when: not keystone_admin.stat.exists
@@ -183,11 +189,11 @@
 
 # Broken in current version: ansible looks for missing sbin
 # - name: Enable RabbitMQ rabbitmq_management
-#   rabbitmq_plugin: names=rabbitmq_management 
+#   rabbitmq_plugin: names=rabbitmq_management
 #                    state=enabled
 #                    new_only=yes
 #                    prefix=/usr/lib/rabbitmq
- 
+
 - name: "Enable RabbitMQ rabbitmq_management with command"
   command: /usr/lib/rabbitmq/bin/rabbitmq-plugins enable rabbitmq_management
 
@@ -203,21 +209,21 @@
   when: ceilometer_event_definitions.stat.exists
 
 - name: "Modify /etc/ceilometer.conf to add event_defs with replace"
-  replace: dest=/etc/ceilometer/ceilometer.conf                                            
-           regexp='^#dispatcher=database'                                       
+  replace: dest=/etc/ceilometer/ceilometer.conf
+           regexp='^#dispatcher=database'
            replace='dispatcher=database\ndispatcher=zenoss'
 
 #-------------------------------------------------------------------------------
 # WARNING: We try to cleverly skip un-needed work. We may out-wit ourselves.
 #-------------------------------------------------------------------------------
 - name: "Use openstack-config to configure ceilometer"
-  command: openstack-config --set /etc/ceilometer/ceilometer.conf 
+  command: openstack-config --set /etc/ceilometer/ceilometer.conf
            {{item.section}}
            {{item.parameter}}
            {{item.value}}
   with_items: ceilometer_cfg
   when: not keystone_admin.stat.exists
- 
+
 - name: "Bounce ceilometer"
   service: name={{item}}
            state=restarted
@@ -246,12 +252,12 @@
 #-------------------------------------------------------------------------------
 #
 - name: "Setup the credentials for the privileged user"
-  command: cp /root/keystonerc_admin /home/{{ sudo_user }}/ 
+  command: cp /root/keystonerc_admin /home/{{ sudo_user }}/
 
 - name: "Setup attributes for keystonerc_admin"
   file: path=/home/{{ sudo_user }}/keystonerc_admin
         mode=0444
-        
+
 - name: "Add keystone creds to users bashrc"
   lineinfile: dest=/home/{{sudo_user}}/.bashrc
               line="source $HOME/keystonerc_admin"

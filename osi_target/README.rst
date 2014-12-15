@@ -5,8 +5,11 @@ Setup for OpenStackInfrastructure Reference Network
 This utility sets up the OpenStackInfrastructure Zenpack's reference network
 that will be used to test against.
 
+Introduction
+===============
+
 Overview and Definitions
-==========================
+-------------------------
 
 * The main objective is to build the **Reference Network** onto a Target.
 * The **Reference Network** is defined in the reference_network.png image
@@ -19,6 +22,24 @@ Overview and Definitions
   - Setup the Target system with Packstack: Adds in zenoss goodies
   - Setup the Target system Neutron network: tenant, net, subnets, routers, vms
 
+Features and Benefits
+------------------------
+
+* Uses a simple command to build entire Openstack/Neturon environement
+* Builds the entire stack from a bare VM
+* Setups identical networks on each node so that QA comparison is uniform
+* Takes care of nearly all networking parameters
+* Extendable to multi-host Deployments
+* Has debugging and test targets
+
+Bugs, Problems, and Todo's
+------------------------------
+
+* VM's are not able to communicate out to gateway
+* The Horizon web interface is unable to see and graph all network components.
+* Only one network configuration is supported
+* Only a single-host Packstack is supports.
+
 Requirements
 ===============
 
@@ -26,7 +47,7 @@ System Requirements
 ---------------------
 
 * Your deployment Host is Centos 7 (others *may* work with minor changes).
-* Your Target for Packstack is *already* installed and must be Centos 7 
+* Your Target for Packstack is *already* installed and must be Centos 7
 * Target has a user "zenoss" with has sudo access, and a valid password
 * Target must allow for static ip address assignment
 * You have ssh'd into the Target already and accpeted its host-key in your:
@@ -35,9 +56,9 @@ System Requirements
 Network Requirements
 ----------------------
 
-* Target system must be on an isolated subnet with access to the internet. 
-* Host system has access to the Host subnet and the internet. 
-* You may need to be on an isolated network segement to access the internal 
+* Target system must be on an isolated subnet with access to the internet.
+* Host system has access to the Host subnet and the internet.
+* You may need to be on an isolated network segement to access the internal
   Packstack/Openstack VMs.
 
 Setup
@@ -65,7 +86,7 @@ Setup
         cp proto.zenoss.loc myhost.zenoss.loc
 
 * Edit the variables in neutron.reference.net/host_vars/myhost.zenoss.loc:
-   
+
    - Make sure all the ip addresses are correct for the defined servers.
    - Make sure all other parameters are correct for your system
 

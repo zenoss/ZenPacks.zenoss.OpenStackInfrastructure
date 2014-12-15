@@ -1,5 +1,4 @@
 ---
-# This play is for PackStack
 
 #-------------------------------------------------------------------------------
 #- Preliminary System Setup, get the network services in shape etc...
@@ -37,135 +36,145 @@
 #-------------------------------------------------------------------------------
 #- Define the networks
 #-------------------------------------------------------------------------------
-- name: Define all networks. 
-  quantum_network: name={{item.name}} 
-                   tenant_name={{item.tenant_name}} 
+- name: Define all networks.
+  quantum_network: name={{item.name}}
+                   tenant_name={{item.tenant_name}}
                    state=present
                    provider_network_type={{item.network_type}}
                    provider_physical_network={{item.physical_net}}
                    provider_segmentation_id={{item.segmentation_id}}
                    router_external={{item.router_external}}
                    shared={{item.shared}}
-                   login_username=admin 
+                   login_username=admin
                    login_password={{openstack.KEYSTONE_ADMIN_PW}}
                    login_tenant_name=admin
+  register: networks
   with_items:
-    - { name: 'public', 
-        tenant_name: 'services', 
-        network_type: 'flat', 
-        physical_net: 'physnet1', 
+    - { name: 'network_public',
+        tenant_name: 'services',
+        network_type: 'flat',
+        physical_net: 'physnet1',
         segmentation_id: 1,
         router_external: 'yes',
         shared: 'yes'
       }
-    - { name: 'A5', 
-        tenant_name: 'A', 
-        network_type: 'gre', 
+    - { name: 'network_A5',
+        tenant_name: 'A',
+        network_type: 'gre',
         physical_net: null,
         segmentation_id: 5,
         router_external: 'no',
         shared: 'no'
       }
-    - { name: 'A6', 
-        tenant_name: 'A', 
-        network_type: 'gre', 
+    - { name: 'network_A6',
+        tenant_name: 'A',
+        network_type: 'gre',
         physical_net: null,
         segmentation_id: 2,
         router_external: 'no',
         shared: 'no'
       }
-    - { name: 'B7', 
-        tenant_name: 'B', 
-        network_type: 'gre', 
+    - { name: 'network_B7',
+        tenant_name: 'B',
+        network_type: 'gre',
         physical_net: null,
         segmentation_id: 3,
         router_external: 'no',
         shared: 'no'
       }
-    - { name: 'C7', 
-        tenant_name: 'C', 
-        network_type: 'gre', 
+    - { name: 'network_C7',
+        tenant_name: 'C',
+        network_type: 'gre',
         physical_net: null,
         segmentation_id: 4,
         router_external: 'no',
         shared: 'no'
       }
-    - { name: 'C9', 
-        tenant_name: 'C', 
-        network_type: 'gre', 
+    - { name: 'network_C9',
+        tenant_name: 'C',
+        network_type: 'gre',
         physical_net: null,
         segmentation_id: 9,
         router_external: 'no',
         shared: 'no'
       }
 
+- name: debug network vars
+  debug:
+    msg: "{{ networks.results[0] }}"
+
+- name: debug network IDs; 0th element should be network_public
+  debug:
+    msg: "{{ networks.results[0].id }}"
+
 #-------------------------------------------------------------------------------
 #- Define the Subnets of Networks
 #-------------------------------------------------------------------------------
-- name: Defaine all networks
-  quantum_subnet: name={{item.name}} 
-                  network_name={{item.network_name}} 
+- name: Define all Subnets
+  quantum_subnet: name={{item.name}}
+                  network_name={{item.network_name}}
                   cidr={{item.cidr}}
                   gateway_ip={{item.gateway}}
-                  tenant_name={{item.tenant_name}} 
+                  tenant_name={{item.tenant_name}}
                   enable_dhcp={{item.enable_dhcp}}
                   allocation_pool_start={{item.allocation_pool_start}}
                   allocation_pool_end={{item.allocation_pool_end}}
                   state=present
-                  login_username=admin 
+                  login_username=admin
                   login_password={{openstack.KEYSTONE_ADMIN_PW}}
                   login_tenant_name=admin
+  register: subnets
   with_items:
-    - { name: 'subnet_public', 
-        network_name: 'public',
+    - { name: 'subnet_public',
+        network_name: 'network_public',
         cidr: '{{hardware.eth0.network}}/24',
         gateway: '{{hardware.eth0.gateway}}',
-        tenant_name: 'services', 
+        tenant_name: 'services',
         enable_dhcp: False,
         allocation_pool_start: '{{hardware.eth0.dhcp_start}}',
         allocation_pool_end: '{{hardware.eth0.dhcp_end}}',
       }
-    - { name: 'subnet_A5', 
-        network_name: 'A5',
+    - { name: 'subnet_A5',
+        network_name: 'network_A5',
         cidr: '10.1.5.0/24',
         gateway: '10.1.5.1',
-        tenant_name: 'A', 
+        tenant_name: 'A',
         enable_dhcp: True,
         allocation_pool_start: '10.1.5.100',
         allocation_pool_end: '10.1.5.140'
       }
-    - { name: 'subnet_A6', 
-        network_name: 'A6',
+    - { name: 'subnet_A6',
+        network_name: 'network_A6',
         cidr: '10.1.6.0/24',
         gateway: '10.1.6.1',
-        tenant_name: 'A', 
+        tenant_name: 'A',
         enable_dhcp: True,
         allocation_pool_start: '10.1.6.100',
         allocation_pool_end: '10.1.6.140'
       }
-    - { name: 'subnet_B7', 
-        network_name: 'B7',
+    - { name: 'subnet_B7',
+        network_name: 'network_B7',
         cidr: '10.1.7.0/24',
         gateway: '10.1.7.1',
-        tenant_name: 'B', 
+        tenant_name: 'B',
         enable_dhcp: True,
         allocation_pool_start: '10.1.7.100',
         allocation_pool_end: '10.1.7.140'
       }
-    - { name: 'subnet_C7', 
-        network_name: 'C7',
+    - { name: 'subnet_C7',
+        network_name: 'network_C7',
         cidr: '10.1.7.0/24',
         gateway: '10.1.7.1',
-        tenant_name: 'C', 
+        tenant_name: 'C',
         enable_dhcp: True,
         allocation_pool_start: '10.1.7.100',
         allocation_pool_end: '10.1.7.140'
       }
-    - { name: 'subnet_C9', 
-        network_name: 'C9',
+    - { name: 'subnet_C9',
+        network_name: 'network_C9',
         cidr: '10.1.9.0/24',
         gateway: '10.1.9.1',
-        tenant_name: 'C', 
+        tenant_name: 'C',
         enable_dhcp: True,
         allocation_pool_start: '10.1.9.100',
         allocation_pool_end: '10.1.9.140'
@@ -175,18 +184,18 @@
 #- Define the Routers
 #-------------------------------------------------------------------------------
 - name: Define the routers
-  quantum_router: name={{item.name}} 
+  quantum_router: name={{item.name}}
                   state=present
-                  tenant_name={{item.tenant_name}} 
-                  login_username=admin 
+                  tenant_name={{item.tenant_name}}
+                  login_username=admin
                   login_password={{openstack.KEYSTONE_ADMIN_PW}}
                   login_tenant_name=admin
   with_items:
-    - { name: 'router_AB', 
-        tenant_name: 'services', 
+    - { name: 'router_AB',
+        tenant_name: 'services',
       }
-    - { name: 'router_C', 
-        tenant_name: 'C', 
+    - { name: 'router_C',
+        tenant_name: 'C',
       }
 
 #-------------------------------------------------------------------------------
@@ -194,18 +203,18 @@
 #-------------------------------------------------------------------------------
 
 - name: Add gateways to routers
-  quantum_router_gateway: router_name={{item.name}} 
+  quantum_router_gateway: router_name={{item.name}}
                           state=present
-                          network_name={{item.network_name}} 
-                          login_username=admin 
+                          network_name={{item.network_name}}
+                          login_username=admin
                           login_password={{openstack.KEYSTONE_ADMIN_PW}}
                           login_tenant_name=admin
   with_items:
-    - { name: 'router_AB', 
-        network_name: 'public', 
+    - { name: 'router_AB',
+        network_name: 'network_public',
       }
-    - { name: 'router_C', 
-        network_name: 'public', 
+    - { name: 'router_C',
+        network_name: 'network_public',
       }
 
 #-------------------------------------------------------------------------------
@@ -213,33 +222,92 @@
 #-------------------------------------------------------------------------------
 
 - name: Attach subnet to router interfaces. You must use tenant_name here!
-  quantum_router_interface: router_name={{item.router_name}} 
-                            subnet_name={{item.subnet_name}} 
-                            tenant_name={{item.tenant_name}} 
+  quantum_router_interface: router_name={{item.router_name}}
+                            subnet_name={{item.subnet_name}}
+                            tenant_name={{item.tenant_name}}
                             state=present
-                            login_username=admin 
+                            login_username=admin
                             login_password={{openstack.KEYSTONE_ADMIN_PW}}
                             login_tenant_name=admin
   with_items:
-    - { router_name: 'router_AB', 
-        subnet_name: 'subnet_A6', 
-        tenant_name: 'A', 
+    - { router_name: 'router_AB',
+        subnet_name: 'subnet_A6',
+        tenant_name: 'A',
       }
-    - { router_name: 'router_AB', 
-        subnet_name: 'subnet_B7', 
-        tenant_name: 'B', 
+    - { router_name: 'router_AB',
+        subnet_name: 'subnet_B7',
+        tenant_name: 'B',
       }
-    - { router_name: 'router_C', 
-        subnet_name: 'subnet_C7', 
-        tenant_name: 'C', 
+    - { router_name: 'router_C',
+        subnet_name: 'subnet_C7',
+        tenant_name: 'C',
       }
-    - { router_name: 'router_C', 
-        subnet_name: 'subnet_C9', 
-        tenant_name: 'C', 
+    - { router_name: 'router_C',
+        subnet_name: 'subnet_C9',
+        tenant_name: 'C',
       }
+
+#===============================================================================
+# VM Instances
+#===============================================================================
 
 #-------------------------------------------------------------------------------
-#- Add the VM instances
+# Create the Glance Cirros Image if it does not exist --------------------------
+# http://cdn.download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img
+#-------------------------------------------------------------------------------
+- name: Install the Cirros image
+  glance_image: name=cirros
+                container_format=bare
+                disk_format=qcow2
+                state=present
+                copy_from=http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img
+                login_username=admin
+                login_password={{ openstack.KEYSTONE_ADMIN_PW }}
+                login_tenant_name=admin
+  register: cirros_image
+
+- name: Debug the cirros_id
+  debug:
+    msg: The cirros_id is {{ cirros_image.id }}
+
+#-------------------------------------------------------------------------------
+# Install all the VM's
 #-------------------------------------------------------------------------------
 
+- name: debug network vars again
+  debug:
+    msg: "{{ networks.results[0] }}"
 
+- name: Add a VM-1; Note the dash in net-id!
+  nova_compute:
+    name: '{{ item.name }}'
+    state: present
+    login_username: admin
+    login_password: '{{ openstack.KEYSTONE_ADMIN_PW }}'
+    login_tenant_name: admin
+    image_id: '{{ cirros_image.id }}'
+    wait_for: 200
+    flavor_id: 77
+    nics:
+      - net-id: "{{ item.net_id }}"
+    meta:
+      hostname: '{{ item.name }}'
+  with_items:
+    - { name: 'vm_1',
+        net_id: '{{ networks.results[0].id }}'
+      }
+    - { name: 'vm_1',
+        net_id: '{{ networks.results[0].id }}'
+      }
+    - { name: 'vm_a6',
+        net_id: '{{ networks.results[2].id }}'
+      }
+    - { name: 'vm_b7',
+        net_id: '{{ networks.results[3].id }}'
+      }
+    - { name: 'vm_c7',
+        net_id: '{{ networks.results[4].id }}'
+      }
+    - { name: 'vm_c9',
+        net_id: '{{ networks.results[5].id }}'
+      }

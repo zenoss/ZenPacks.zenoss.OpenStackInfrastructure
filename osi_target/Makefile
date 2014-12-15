@@ -1,18 +1,16 @@
-default: packstack network
-all: packstack network
-test: hi lo
+default: all
+
+all:
+	chmod 700 setup.sh
+	./setup.sh
+	cd neutron.reference.net && $(MAKE) all
 
 packstack:
-	chmod 700 setup.sh
-	./setup.sh packstack
+	cd neutron.reference.net && $(MAKE) packstack
 
 neutron:
-	chmod 700 setup.sh
-	./setup.sh neutron
+	cd neutron.reference.net && $(MAKE) neutron
 
 vars:
 	cd neutron.reference.net && $(MAKE) vars
-
-lo:
-	echo lo
 

@@ -1,3 +1,0 @@
-#! /bin/bash
-/usr/sbin/ntpdate us.pool.ntp.org &> /dev/null
-/sbin/hwclock --systohc --utc  &> /dev/null

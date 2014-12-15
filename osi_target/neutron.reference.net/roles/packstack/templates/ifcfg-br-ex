@@ -7,3 +7,4 @@ NETMASK=255.255.255.0
 GATEWAY={{ hardware.eth0.gateway }}
 DNS1={{ hardware.eth0.dns }}
 ONBOOT="yes"
+NOZEROCONF=yes

@@ -4,3 +4,4 @@ DEVICETYPE="ovs"
 OVS_BRIDGE="br-ex"
 HWADDR={{ hardware.eth0.macaddress }}
 ONBOOT="yes"
+NOZEROCONF=yes

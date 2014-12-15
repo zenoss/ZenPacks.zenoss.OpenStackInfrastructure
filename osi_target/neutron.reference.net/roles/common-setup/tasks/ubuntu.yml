@@ -13,16 +13,6 @@
     - python-selinux
   changed_when: False
 
-- name: "Install basic System Definitions "
-  template: src={{ item }} 
-            dest=/etc/{{ item }} 
-            owner=root
-            group=root
-            mode=440
-  with_items: 
-    - sudoers
-    - hostname
-
 - name: Set timezone variables
   copy: content='America/Chicago'
         dest=/etc/timezone

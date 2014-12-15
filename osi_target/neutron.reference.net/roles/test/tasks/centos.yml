@@ -8,17 +8,20 @@
 #-------------------------------------------------------------------------------
 
 - name: Debug
-  debug: msg="CONTROLLER_HOST =  {{ openstack.CONTROLLER_HOST }}" 
+  debug: msg="CONTROLLER_HOST =  {{ openstack.CONTROLLER_HOST }}"
 
 - name: Debug
-  debug: msg="gateway =  {{ hardware.eth0.gateway }}" 
+  debug: msg="gateway =  {{ hardware.eth0.gateway }}"
+
+- name: Debug DNS Compound Var
+  debug: msg="dns =  {{ hardware.eth0.dns }}"
 
 - name: Debug
-  debug: msg="value =  {{ item.value }}" 
+  debug: msg="value =  {{ item.value }}"
   with_items: ceilometer_cfg
 
 - name: Debug
-  debug: msg="OS_PASSWORD =  {{openstack.KEYSTONE_ADMIN_PW}}" 
+  debug: msg="OS_PASSWORD =  {{openstack.KEYSTONE_ADMIN_PW}}"
 
 #"
 

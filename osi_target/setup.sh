@@ -1,15 +1,7 @@
 #!/bin/bash
 
-option=$1
-if [[ -n $option ]]; then
-   echo setting up $option
-else
-   echo missing option
-   exit 0
-fi
-
 # -----------------------------------------------------------------------------
-# Grab options and determine host version
+# Setup basic local controller host.
 # -----------------------------------------------------------------------------
 
 function install_yum_packages()
@@ -66,6 +58,9 @@ ansible
 echo "Installing Required prereq Packages on your Server"
 
 distro=$(grep -shE "^ID=" /etc/os-release | sed 's/ID=//g;s/"//g')
+
+echo Linux Distribution = $distro
+
 case $distro in
 
    redhat|centos)
@@ -73,11 +68,15 @@ case $distro in
       if [ $deploy_host_version -ne 7 ]; then
          echo wrong version of redhat/centos \; must use centos or redhat 7
          exit 0
+      else
+         echo Version Verified ast Centos/RHEL 7
       fi
       install_yum_packages prereq_packages_cos7[@]
-      ;; 
+      ;;
 
    debian)
+
+      echo -e "\e[1;31m Debian is not officially supported. \e[0m"
       install_apt_packages prereq_packages_deb
       ;;
 
@@ -93,7 +92,7 @@ case $distro in
    *)
       echo Distro not found
       exit 1
-    
+
 esac
 
 
@@ -101,20 +100,10 @@ esac
 # Display documentation
 # -----------------------------------------------------------------------------
 
-echo -e "\e[1;31m Make you edit the configuration files listed in README.rst \e[0m"
-echo 
+echo -e "\e[1;31m Make sure to edit the configuration files listed in README.rst \e[0m"
+echo
 echo -e "\e[1;32m Please Hit <return> to continue or ctrl-c to stop"
 echo -e "\e[0m"
 
 read answer
-
-
-# -------------------------------------------------------------------------
-if [ -d neutron.reference.net ]; then
-   cd neutron.reference.net 
-   make $option
-   cd ..
-else
-   echo missing neutron.reference.net folder
-fi
 
