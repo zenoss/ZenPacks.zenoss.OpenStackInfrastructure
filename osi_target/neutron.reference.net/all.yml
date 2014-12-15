@@ -1,0 +1,5 @@
+---
+# All
+
+- include: packstack.yml
+- include: neutron.yml

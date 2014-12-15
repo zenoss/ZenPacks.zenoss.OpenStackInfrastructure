@@ -1,0 +1,44 @@
+#! /bin/bash
+
+if [[ $1 ]]; then
+   command=$1
+else  
+   command=restart
+fi 
+
+# Define nova services to bounce
+nova_services=(
+openstack-nova-api
+openstack-nova-compute
+openstack-nova-conductor
+openstack-nova-scheduler
+)
+
+# Define Neutron services to bounce
+neutron_services=(
+neutron-dhcp-agent
+neutron-l3-agent
+neutron-metadata-agent
+neutron-openvswitch-agent
+neutron-server
+openvswitch
+)
+
+
+# Now: bounce most of nova/neutron to pick up those config file changes
+# echo "Bouncing Nova Services"
+# for svc in ${nova_services[@]} ; do
+#    service "$svc" restart;
+# done
+
+echo "$command Nova Services"
+for svc in ${nova_services[@]} ; do
+   service "$svc" "$command";
+done
+
+echo "$command Neutron Services"
+for svc in ${neutron_services[@]} ; do
+   service "$svc" "$command";
+done
+
+
