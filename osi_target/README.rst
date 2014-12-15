@@ -96,6 +96,10 @@ Setup Instructions
         cd $CONTROLLER/neutron.reference.net/host_vars
         cp proto.zenoss.loc myhost.zenoss.loc
 
+  - Ensure that "myhost.zenoss.loc" is your actual hostname and that is has
+    a valid DNS value in your server. 
+    *Using /etc/hosts as a resolver may not work*.
+
 * Edit the variables in neutron.reference.net/host_vars/myhost.zenoss.loc:
 
    - Make sure all the ip addresses are correct for the defined servers.
