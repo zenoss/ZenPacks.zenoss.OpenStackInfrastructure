@@ -34,9 +34,9 @@
 #'
 
 #-------------------------------------------------------------------------------
-#- Define the networks
+#- Define the networks; Register network ID's in 'networks'
 #-------------------------------------------------------------------------------
-- name: Define all networks.
+- name: Define all networks. Register them as well.
   quantum_network: name={{item.name}}
                    tenant_name={{item.tenant_name}}
                    state=present
@@ -278,7 +278,47 @@
   debug:
     msg: "{{ networks.results[0] }}"
 
-- name: Add a VM-1; Note the dash in net-id!
+#-------------------------------------------------------------------------------
+# Install the 2 Flat networks
+#-------------------------------------------------------------------------------
+
+- name: Add a Flat vm_1; Note the dash in net-id!
+  nova_compute:
+    name: vm_1
+    state: present
+    login_username: admin
+    login_password: '{{ openstack.KEYSTONE_ADMIN_PW }}'
+    login_tenant_name: admin
+    image_id: '{{ cirros_image.id }}'
+    wait_for: 200
+    flavor_id: 77
+    nics: 
+      - net-id: '{{ networks.results[0].id }}'
+      - net-id: '{{ networks.results[1].id }}'
+    meta:
+      hostname: vm_1
+
+- name: Add a Flat vm_2; Note the dash in net-id!
+  nova_compute:
+    name: vm_2
+    state: present
+    login_username: admin
+    login_password: '{{ openstack.KEYSTONE_ADMIN_PW }}'
+    login_tenant_name: admin
+    image_id: '{{ cirros_image.id }}'
+    wait_for: 200
+    flavor_id: 77
+    nics: 
+      - net-id: '{{ networks.results[0].id }}'
+      - net-id: '{{ networks.results[1].id }}'
+    meta:
+      hostname: vm_2
+
+#-------------------------------------------------------------------------------
+# Install the Private net VM's
+#-------------------------------------------------------------------------------
+
+- name: Add a VMs to Other Private Networks; Note the dash in net-id!
   nova_compute:
     name: '{{ item.name }}'
     state: present
@@ -293,21 +333,23 @@
     meta:
       hostname: '{{ item.name }}'
   with_items:
-    - { name: 'vm_1',
-        net_id: '{{ networks.results[0].id }}'
-      }
-    - { name: 'vm_1',
-        net_id: '{{ networks.results[0].id }}'
-      }
-    - { name: 'vm_a6',
-        net_id: '{{ networks.results[2].id }}'
-      }
-    - { name: 'vm_b7',
-        net_id: '{{ networks.results[3].id }}'
-      }
-    - { name: 'vm_c7',
-        net_id: '{{ networks.results[4].id }}'
-      }
-    - { name: 'vm_c9',
-        net_id: '{{ networks.results[5].id }}'
-      }
+    - { name: 'vm_a6', net_id: '{{ networks.results[2].id }}' }
+    - { name: 'vm_b7', net_id: '{{ networks.results[3].id }}' }
+    - { name: 'vm_c7', net_id: '{{ networks.results[4].id }}' }
+    - { name: 'vm_c9', net_id: '{{ networks.results[5].id }}' }
+
+- name: Assing Floating IP's to VMs
+  quantum_floating_ip: 
+    state: present 
+    login_username: admin
+    login_password: '{{ openstack.KEYSTONE_ADMIN_PW }}'
+    login_tenant_name: admin
+    network_name: network_public
+    instance_name: '{{ item.name }}'
+    internal_network_name: '{{ item.internal_network }}'
+  with_items:
+    - { name: 'vm_a6', internal_network: 'network_A6' }
+    - { name: 'vm_b7', internal_network: 'network_B7' }
+    - { name: 'vm_c7', internal_network: 'network_C7' }
+    - { name: 'vm_c9', internal_network: 'network_C9' }
+

@@ -43,16 +43,6 @@ Bugs, Problems, and Todo's
 Requirements
 ===============
 
-System Requirements
----------------------
-
-* Your deployment Host is Centos 7 (others *may* work with minor changes).
-* Your Target for Packstack is *already* installed and must be Centos 7
-* Target has a user "zenoss" with has sudo access, and a valid password
-* Target must allow for static ip address assignment
-* You have ssh'd into the Target already and accpeted its host-key in your:
-  **~/.ssh/known_hosts**
-
 Network Requirements
 ----------------------
 
@@ -60,6 +50,17 @@ Network Requirements
 * Host system has access to the Host subnet and the internet.
 * You may need to be on an isolated network segement to access the internal
   Packstack/Openstack VMs.
+
+System Requirements
+---------------------
+
+* Must have: VM or baremetal box with 4GB+ ram and single ethernet card.
+* Your deployment Host is Centos 7 (others *may* work with minor changes).
+* Your Target for Packstack is *already* installed with a *minimal* Centos 7.
+* Target has a user "zenoss" with has sudo access, and a valid password
+* Target must allow for static ip address assignment
+* You have ssh'd into the Target already and accpeted its host-key in your:
+  **~/.ssh/known_hosts**
 
 Setup
 =======
