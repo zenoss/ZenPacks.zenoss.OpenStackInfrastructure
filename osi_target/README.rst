@@ -15,7 +15,7 @@ underlying tools.
 It is correct to assume that the environment this tool creates is for use
 as a test target only. There are many features of Openstack that this tool
 does not provide. Do not expect the resulting environment to be free of
-defects or to be an ideal Openstack deployment. 
+defects or to be an ideal Openstack deployment.
 
 Overview and Definitions
 -------------------------
@@ -34,11 +34,11 @@ Overview and Definitions
 Features and Benefits
 ------------------------
 
-* Uses a simple command to build entire Openstack/Neturon environement
+* Uses a simple command to build entire Openstack/Neutron environment
 * Builds the entire stack from a bare VM
 * Setups identical networks on each node so that QA comparison is uniform
 * Takes care of nearly all networking parameters
-* Extendable to multi-host Deployments
+* Extendible to multi-host Deployments
 * Has debugging and test targets
 
 Bugs, Problems, and Todo's
@@ -48,7 +48,7 @@ Bugs, Problems, and Todo's
 * The Horizon web interface is unable to see and graph all network components.
 * Only one network configuration is supported
 * Only a single-host Packstack is supports.
-* Floating IP's on B7 and C7 networks are damaged when created!
+* Floating IPs on B7 and C7 networks are sometimes damaged when created!
 
 Requirements for Use
 =====================
@@ -58,27 +58,27 @@ Network Requirements
 
 * Target system must be on an isolated subnet with access to the internet.
 * Host system has access to the Host subnet and the internet.
-* You may need to be on an isolated network segement to access the internal
+* You may need to be on an isolated network segment to access the internal
   Packstack/Openstack VMs.
 
 System Requirements
 ---------------------
 
-* Must have: VM or baremetal box with 4GB+ ram and single ethernet card.
+* Must have: VM or bare-metal box with 4GB+ ram and single ethernet card.
 * Your deployment Host is Centos 7 (others *may* work with minor changes).
 * Your Target for Packstack is *already* installed with a *minimal* Centos 7.
 * Target has a user "zenoss" with has sudo access, and a valid password
-* Target must allow for static ip address assignment
-* You have ssh'd into the Target already and accpeted its host-key in your:
+* Target must allow for static IP address assignment. (AWS won't work!)
+* You have SSH'd into the Target once and accepted its host-key in your:
   **~/.ssh/known_hosts**
 
 Setup Instructions
 =====================
 
 * Copy this entire directory structure to your Controller system:
-  The folder that you copy it to will be called $CONTROLLER for convenience.
+  The folder that you copy it to will be called $OSI_DIR for convenience.
 
-* In $CONTROLLER/neutron.reference.net/group_vars/all:
+* In $OSI_DIR/neutron.reference.net/group_vars/all:
 
   - Take note of the keystone settings. These should not require changes.
     In particular make sure these are set correctly for YOUR system::
@@ -90,17 +90,17 @@ Setup Instructions
       sudo_pass: This is encrypted with value of "zenoss"
 
 
-* In $CONTROLLER/neutron.reference.net/host_vars/
+* In $OSI_DIR/neutron.reference.net/host_vars/
 
   - Copy the prototype variables set from
-    neutron.reference.net/host_vars/prototype.com to the ip-address or FQDN of
+    neutron.reference.net/host_vars/prototype.com to the IP-address or FQDN of
     your Target system::
 
-        cd $CONTROLLER/neutron.reference.net/host_vars
+        cd $OSI_DIR/neutron.reference.net/host_vars
         cp proto.zenoss.loc myhost.zenoss.loc
 
   - Ensure that "myhost.zenoss.loc" is your actual hostname and that is has
-    a valid DNS value in your server. 
+    a valid DNS value in your server.
     *Using /etc/hosts as a resolver may not work*.
 
 * Edit the variables in neutron.reference.net/host_vars/myhost.zenoss.loc:
@@ -108,7 +108,7 @@ Setup Instructions
    - Make sure all the ip addresses are correct for the defined servers.
    - Make sure all other parameters are correct for your system
 
-* In $CONTROLLER/neutron.reference.net/inventory:
+* In $OSI_DIR/neutron.reference.net/inventory:
 
   - Set the value of mpx.zenoss.loc to your Target fqdn/address: myhost.zenoss.loc
 
@@ -124,8 +124,8 @@ Setup Instructions
 Building Makefile
 ==================
 
-Overview
-------------
+Overview of Execution
+------------------------
 
 The top level Makefile will perform the following tasks:
 
@@ -140,11 +140,10 @@ The top level Makefile will perform the following tasks:
 Build Targets
 --------------
 
-First, cd to $CONTROLLER.
+First, cd to $OSI_DIR.
 There are three essential build targets:
 
-
-* make: this target will build all essential features (This is the one to use)
+* make: this target will build all essential features (This is the primary one)
 * packstack: This target will only build the Packstack setup
 * neutron: This target builds only the network part of neutron
 
@@ -152,4 +151,31 @@ The following make targets are for testing:
 
 * vars: This builds a diagnostic set of variables for debugging
 * test: This builds a small set of non-invasive objects for testing.
+
+Specific Instruction
+---------------------
+
+* cd $OSI_DIR
+* make
+* (enter the password and <enter> for the sudo user when asked)
+* (hit <enter> again when asked for the sudo passord)
+* Here is a sample invocation::
+
+   [bash: ~]: make
+   chmod 700 setup.sh
+   Running ./setup.sh
+    -> Installing Required prereq Packages on your Server
+    .....................................................
+   Linux Distribution = Centos
+    -> Installing ansible ...............................
+   Make sure to edit the configuration files listed in README.rst
+
+    Please Hit <return> to continue or ctrl-c to stop:
+
+   cd neutron.reference.net && make all
+   make[1]: Entering directory '$OSI_TARGET/neutron.reference.net'
+   ansible-playbook -vvvvv -i inventory all.yml -Kk
+   SSH password: *************
+   sudo password [defaults to SSH password]: <ret>
+
 
