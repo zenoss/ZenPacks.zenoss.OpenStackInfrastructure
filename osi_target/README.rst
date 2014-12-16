@@ -38,6 +38,7 @@ Features and Benefits
 * Builds the entire stack from a bare VM
 * Setups identical networks on each node so that QA comparison is uniform
 * Takes care of nearly all networking parameters
+* Installs the Target Ceilometer extras required for the OSI Zenpack
 * Extendible to multi-host Deployments
 * Has debugging and test targets
 

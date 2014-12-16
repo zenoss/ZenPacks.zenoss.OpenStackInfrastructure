@@ -214,7 +214,7 @@
            replace='dispatcher=database\ndispatcher=zenoss'
 
 #-------------------------------------------------------------------------------
-# WARNING: We try to cleverly skip un-needed work. We may out-wit ourselves.
+# Configure Ceilomater
 #-------------------------------------------------------------------------------
 - name: "Use openstack-config to configure ceilometer"
   command: openstack-config --set /etc/ceilometer/ceilometer.conf
