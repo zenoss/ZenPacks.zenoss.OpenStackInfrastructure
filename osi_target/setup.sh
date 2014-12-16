@@ -58,7 +58,6 @@ ansible
 echo "Installing Required prereq Packages on your Server"
 
 distro=$(grep -shE "^ID=" /etc/os-release | sed 's/ID=//g;s/"//g')
-
 echo Linux Distribution = $distro
 
 case $distro in
@@ -69,7 +68,7 @@ case $distro in
          echo wrong version of redhat/centos \; must use centos or redhat 7
          exit 0
       else
-         echo Version Verified ast Centos/RHEL 7
+         echo Version Verified as Centos/RHEL 7
       fi
       install_yum_packages prereq_packages_cos7[@]
       ;;
@@ -100,10 +99,8 @@ esac
 # Display documentation
 # -----------------------------------------------------------------------------
 
-echo -e "\e[1;31m Make sure to edit the configuration files listed in README.rst \e[0m"
+echo -e "\e[1;31m Be sure to edit config files referenced in README.rst \e[0m"
 echo
 echo -e "\e[1;32m Please Hit <return> to continue or ctrl-c to stop"
 echo -e "\e[0m"
-
 read answer
-
