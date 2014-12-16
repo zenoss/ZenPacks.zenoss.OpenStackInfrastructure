@@ -15,14 +15,14 @@ underlying tools.
 It is correct to assume that the environment this tool creates is for use
 as a test target only. There are many features of Openstack that this tool
 does not provide. Do not expect the resulting environment to be free of
-defects or to be an ideal Openstack deployment.
+defects or to be an production-ready Openstack deployment.
 
 Overview and Definitions
 -------------------------
 
 * The main objective is to build the **Reference Network** onto a Target.
 * The **Reference Network** is defined in the reference_network.png image
-* The deployment **Control** system will perform all configuration.
+* The **Control** (deployment) system performs all configuration.
 * The **Target** system will be configured with Openstack/Packstack/Neutron.
 * The order of operations are:
 
