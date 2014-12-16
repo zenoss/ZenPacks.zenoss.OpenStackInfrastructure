@@ -7,12 +7,15 @@ that will be used to test against.
 
 Introduction
 ===============
-This build environment uses Ansible to build a Openstack network for use
-as a target. Openstack is complex and has many dependencies and services.
+This build environment builds a Openstack network for use as a target. The
+entire process is automated and does not require any knowledge of the
+underlying tools.
+
+**WARNING**: Openstack is complex and has many dependencies and services.
 It is correct to assume that the environment this tool creates is for use
 as a test target only. There are many features of Openstack that this tool
 does not provide. Do not expect the resulting environment to be free of
-numerous defects.
+defects or to be an ideal Openstack deployment. 
 
 Overview and Definitions
 -------------------------
@@ -23,7 +26,7 @@ Overview and Definitions
 * The **Target** system will be configured with Openstack/Packstack/Neutron.
 * The order of operations are:
 
-  - Setup the (local) host system with ansible
+  - Setup the (local) host system with Ansible
   - Setup the Target system with common_config to set: user, pass, sudo
   - Setup the Target system with Packstack: Adds in zenoss goodies
   - Setup the Target system Neutron network: tenant, net, subnets, routers, vms
@@ -126,7 +129,7 @@ Overview
 
 The top level Makefile will perform the following tasks:
 
-* Setup up the host system by installing ansible and needed packages.
+* Setup up the host system by installing Ansible and needed packages.
 * On the Target:
 
   - Install all required packages
