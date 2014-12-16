@@ -184,3 +184,8 @@ files listed above onto it. Then execute the following:
    ansible-playbook -vvvvv -i inventory all.yml -Kk
    SSH password: *************
    sudo password [defaults to SSH password]: <ret>
+
+Video Links
+------------------
+https://docs.google.com/a/zenoss.com/file/d/0B7N3MU9SXh19RjhGa215ckViRms/edit?usp=drive_web
+
