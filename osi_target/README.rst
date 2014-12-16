@@ -22,11 +22,11 @@ Overview and Definitions
 
 * The main objective is to build the **Reference Network** onto a Target.
 * The **Reference Network** is defined in the reference_network.png image
-* The deployment **Host** system will perform all configuration.
+* The deployment **Control** system will perform all configuration.
 * The **Target** system will be configured with Openstack/Packstack/Neutron.
 * The order of operations are:
 
-  - Setup the (local) host system with Ansible
+  - Setup the Control system with Ansible
   - Setup the Target system with common_config to set: user, pass, sudo
   - Setup the Target system with Packstack: Adds in zenoss goodies
   - Setup the Target system Neutron network: tenant, net, subnets, routers, vms
@@ -52,21 +52,25 @@ Bugs, Problems, and Todo's
 
 Requirements for Use
 =====================
+Make sure to satisfy the following requirements for all systems and networks.
 
 Network Requirements
 ----------------------
 
 * Target system must be on an isolated subnet with access to the internet.
-* Host system has access to the Host subnet and the internet.
+* Controller system has access to the Control subnet and the internet.
 * You may need to be on an isolated network segment to access the internal
   Packstack/Openstack VMs.
 
-System Requirements
----------------------
+Control System Requirements
+-------------------------------
+* Your deployment Control is Centos 7. Debian or Ubuntu *may* work.
+
+Target System Requirements
+---------------------------
 
 * Must have: VM or bare-metal box with 4GB+ ram and single ethernet card.
-* Your deployment Host is Centos 7 (others *may* work with minor changes).
-* Your Target for Packstack is *already* installed with a *minimal* Centos 7.
+* Your Target for Packstack must be installed with a *minimal* Centos 7.
 * Target has a user "zenoss" with has sudo access, and a valid password
 * Target must allow for static IP address assignment. (AWS won't work!)
 * You have SSH'd into the Target once and accepted its host-key in your:
@@ -154,6 +158,8 @@ The following make targets are for testing:
 
 Specific Instruction
 ---------------------
+Once logged in to your Control system (Centos7 recommended), copy the 
+files listed above onto it. Then execute the following:
 
 * cd $OSI_DIR
 * make
@@ -177,5 +183,3 @@ Specific Instruction
    ansible-playbook -vvvvv -i inventory all.yml -Kk
    SSH password: *************
    sudo password [defaults to SSH password]: <ret>
-
-

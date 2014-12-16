@@ -68,20 +68,20 @@ case $distro in
          echo wrong version of redhat/centos \; must use centos or redhat 7
          exit 0
       else
-         echo Version Verified as Centos/RHEL 7
+         echo Installing Centos/RHEL Control System
       fi
       install_yum_packages prereq_packages_cos7[@]
       ;;
 
    debian)
 
-      echo -e "\e[1;31m Debian is not officially supported. \e[0m"
+      echo -e "\e[1;31m Installing Debian Control system \e[0m"
       install_apt_packages prereq_packages_deb
       ;;
 
    ubuntu)
 
-      echo debian here
+      echo Installing on Ubuntu Control system
       sudo apt-get install -y software-properties-common
       sudo apt-add-repository ppa:ansible/ansible
       sudo apt-get update
@@ -89,7 +89,7 @@ case $distro in
       ;;
 
    *)
-      echo Distro not found
+      echo Distro not found. Abandon ship!
       exit 1
 
 esac
