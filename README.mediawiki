@@ -1,5 +1,8 @@
-
 This ZenPack allows for monitoring of OpenStack from a service provider perspective.  This means that in addition to the user-oriented components supported in the regular OpenStack ZenPack (instances, flavors, images), the underlying OpenStack servers and software are monitored.
+
+== Availability ==
+
+{{note}} '''''<u>To download this controlled availability release of OpenStackInfrastructure 2.0.0, please contact Zenoss Support.</u>'''''
 
 == Prerequisites ==
 
@@ -27,7 +30,8 @@ Choose that option and you'll be presented with a dialog asking for the followin
 
 Once you click Add, Zenoss will contact the OpenStack API and discover servers, images and flavors. Once it is complete you'll find a new device in the OpenStack device class with the same name as the hostname or IP you entered into the dialog. Click into this new device to see everything that was discovered.
 
-The following types of elements are discovered.
+
+;The following types of elements are discovered.
 * Tenants
 * Instances (Servers)
 * vNICs
@@ -40,33 +44,42 @@ The following types of elements are discovered.
 * Nova Services (processes supporting nova servers)
 * Hypervisors
 
-The following metrics are collected.
-* Images 
-	Total Images
-	Images by State
-* Flavors
-	Total Flavors
-* Instance Metrics
-	Total Instances
-	Instances by State
-	CPU Utilization (percent)
-    Disk Requests (requests/sec)
-    Disk IO Rate (bytes/sec)
-* Vnic Metrics
-    Network Packet Rate (packets/sec)
-    Network Throughput (bytes/sec)
-* Host Metrics (Zenoss Linux OS monitoring)
-	Load Average
-	CPU Utilization
-	Free Memory
-	Free Swap
-	IO
-* Nova Service Metrics (Zenoss Process monitoring)
-	CPU Utilization
-	Memory Utilization
-	Process Counts per Service
 
-All metrics collected by OpenStack Ceilometer may be collected and graphed in 
+;The following component level metrics are collected.
+Instances
+* CPU Utilization (percent)
+* Disk Requests (requests/sec)
+* Disk IO Rate (bytes/sec)
+Vnics
+* Network Packet Rate (packets/sec)
+* Network Throughput (bytes/sec)
+Hosts (Zenoss Linux OS monitoring)
+* Load Average (processes)
+* CPU Utilization (percent)
+* Free Memory (bytes)
+* Free Swap (bytes)
+* IO (sectors/sec)
+Nova Services (Zenoss Process monitoring)
+* CPU Utilization (percent)
+* Memory Utilization (bytes)
+* Process Count (processes)
+
+
+;The following device level metrics are collected.
+Flavors
+* Total (count)
+Images
+* Total (count)
+* Total count per image state (count)
+Servers
+* Total (count)
+* Total count per server state (count)
+Queues
+* Event (count)
+* Performance (count)
+
+
+{{note}} All metrics collected by OpenStack Ceilometer may be collected and graphed in
 Zenoss, and all events processed through ceilometer are exposed via the
 Zenoss Event Console.
 
@@ -83,14 +96,14 @@ On your zenoss host, you must run the following command as the zenoss user:
    /opt/zenoss/bin/openstack_amqp_config
 </syntaxhighlight>
 
-It will create a new user in rabbitmq and set up its permissions.  It will 
+It will create a new user in rabbitmq and set up its permissions.  It will
 print out the proper values to use for amqp_hostname, amqp_port, amqp_userid,
 amqp_password, and amqp_virtualhost during ceilometer configuration (see below)
 
 ===OpenStack Ceilometer Configuration Steps===
 
 Zenoss relies upon a ceilometer dispatcher plugin to ship raw event and
-metering data from ceilometer to Zenoss for storage in the Zenoss event 
+metering data from ceilometer to Zenoss for storage in the Zenoss event
 and performance databases.   This integration is done by publishing messages
 to Zenoss's RabbitMQ server.
 
@@ -111,18 +124,20 @@ appropriate sections:
 <syntaxhighlight lang="text">
   [DEFAULT]
   dispatcher=zenoss
-  
+
   [notification]
   store_events=True
 </syntaxhighlight>
 
 Also add the [dispatcher_zenoss] section reported by openstack_amqp_config above.
 
+{{note}} Please restart all ceilometer services on all hosts after making these changes.
+
 ===Optional Steps===
 
 ====VM State Changes====
 
-By default, instance state changes will be captured by Zenoss when certain 
+By default, instance state changes will be captured by Zenoss when certain
 events occur, for example, when an instance is shut down, the state change
 to SHUTDOWN will be reflected in Zenoss.
 
@@ -136,7 +151,7 @@ any VM state change occurs by adding the following to nova.conf:
 <syntaxhighlight lang="text">
   [DEFAULT]
   notify_on_state_change=vm_state
-</syntaxhighlight>  
+</syntaxhighlight>
 
 Note that this will cause increased event load, both on OpenStack and Zenoss,
 and additional processing within the event transforms in Zenoss to keep
@@ -189,13 +204,38 @@ Domains can be used to create ad hoc views using the following steps.
 # Choose the ''OpenStackInfrastructure Domain'' domain
 
 
+=== Service Impact and Root Cause Analysis ===
+
+When combined with the Zenoss Service Dynamics product, this ZenPack adds built-in service impact and root cause analysis capabilities for OpenStack infrastructure and instances. The service impact relationships shown in the diagram and described below are automatically added. These will be included in any services that contain one or more of the explicitly mentioned components.
+
+[[File:impact.png|thumb|320px|Impact Relationship Diagram]]
+
+;Internal Impact Relationships
+* OpenStack API endpoint failure impacts all hosts
+* Host failure impacts the zones or cells which contain it
+* Availabilty zone failure impacts the region which contains it
+* Host failure impacts any hypervisor running upon it
+* Hypervisor failure impacts the resident instances (VMs)
+* Instance failure impacts the tenant to which the instance belongs.
+* vNIC failure impacts the related instance.
+* Host failure impacts the nova services which run upon it
+* Nova service failure affects the availability zone or region that that service supports
+
+;External Impact Relationships
+* Instance failure impacts guest operating system device.
+* Cisco UCS vNIC failure impacts related host's underlying linux device  NIC.
+* Cisco UCS service profile failure impacts host's underlying linux device.
+* Host is impacted by failures of the underlying linux device.
+* OS Process failures on an underlying linux device impact the corresponding Nova Services on the host.
+
+
 == Known Issues ==
 
-# ZEN-14805: Ceilometer AMQP Heartbeat monitoring expects ceilometer-collector and ceilometer-agent-notification to run on a single host
+# [https://jira.zenoss.com/browse/ZEN-14803 ZEN-14803]: Ceilometer AMQP Heartbeat monitoring expects ceilometer-collector and ceilometer-agent-notification to run on a single host
 ## Most commonly, these processes would run on a single controller node, so this will not impact most users.   No workaround available.
-# ZEN-14585: The same endpoint can not be monitored both as user and an infrastructure endpoints.
+# [https://jira.zenoss.com/browse/ZEN-14585 ZEN-14585]: The same endpoint can not be monitored both as user and an infrastructure endpoints.
 ## Workaround: If you have been previously monitoring the endpoint as a User endpoint, delete the device before you re-add it as an Infrastructure endpoint.
-# ZEN-14491: A stacktrace may occur during the initial modeling of the device
+# [https://jira.zenoss.com/browse/ZEN-14491 ZEN-14491]: A stacktrace may occur during the initial modeling of the device
 ## The trace will contain the error "ValueError: expected txn status 'Active' or 'Doomed', but it's 'Committed'"
 ## Workaround: Disregard the error.  You may also manually model the device to confirm that no further errors are reported.
 
