@@ -3,7 +3,10 @@ Setup for OpenStackInfrastructure Reference Network
 ===================================================
 
 This utility sets up the OpenStackInfrastructure Zenpack's reference network
-that will be used to test against.
+that will be used to test against. The following diagram represents the 
+reference network:
+
+.. image:: reference_network.png
 
 Introduction
 ===============
