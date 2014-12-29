@@ -22,8 +22,10 @@ Overview and Definitions
 
 * The main objective is to build the **Reference Network** onto a Target.
 * The **Reference Network** is defined in the reference_network.png image
-* The **Control** (deployment) system performs all configuration.
+* The **Control** (deployment) system performs all configuration *to* Target.
 * The **Target** system will be configured with Openstack/Packstack/Neutron.
+* Note: You must have a separate **Control** system because of reboots and
+        network re-configurations.
 * The order of operations are:
 
   - Setup the Control system with Ansible
@@ -99,8 +101,8 @@ Setup Instructions
 * In $OSI_DIR/neutron.reference.net/host_vars/
 
   - Copy the prototype variables set from
-    neutron.reference.net/host_vars/prototype.com to the IP-address or FQDN of
-    your Target system::
+    neutron.reference.net/host_vars/proto.zenoss.com to the IP-address or FQDN
+    of your Target system::
 
         cd $OSI_DIR/neutron.reference.net/host_vars
         cp proto.zenoss.loc myhost.zenoss.loc
@@ -123,11 +125,11 @@ Setup Instructions
 * To debug your variables, there is a special make target called **vars**
   that will output to /tmp/vars.json.
 
-* WARNING: Rebuilding an environment that is not fresh install has proven to
-  be unreliable: Networks, Subnets, IPs, and Routers do not behave.
+* WARNING: Rebuilding an environment that is not a fresh Linux install has
+  proven to be unreliable: Networks, Subnets, IPs, and Routers do not behave.
   We recommend that you re-image a minimal system and start from scratch.
 
-Building Makefile
+Building with Make
 ==================
 
 Overview of Execution
@@ -146,10 +148,10 @@ The top level Makefile will perform the following tasks:
 Build Targets
 --------------
 
-First, cd to $OSI_DIR.
-There are three essential build targets:
+First, cd to $OSI_DIR. There are three essential build targets. You normally
+will use the first option:
 
-* make: this target will build all essential features (This is the primary one)
+* make: This (primary) target will build all essential features
 * packstack: This target will only build the Packstack setup
 * neutron: This target builds only the network part of neutron
 
