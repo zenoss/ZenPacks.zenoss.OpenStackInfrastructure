@@ -38,7 +38,8 @@ Features and Benefits
 * Builds the entire stack from a bare VM
 * Setups identical networks on each node so that QA comparison is uniform
 * Takes care of nearly all networking parameters
-* Installs the Target Ceilometer extras required for the OSI Zenpack
+* Installs the Target Ceilometer/RabbitMQ/Zenoss_dispatcher extras
+  as per https://github.com/zenoss/ceilometer_zenoss
 * Extendible to multi-host Deployments
 * Has debugging and test targets
 
