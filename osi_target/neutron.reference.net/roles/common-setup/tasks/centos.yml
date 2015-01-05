@@ -25,6 +25,7 @@
     - python-paramiko
     - python-jinja2
     - libselinux-python
+    - epel-release
 # changed_when: False
 
 - name: "{{ role }}: Make sure yum is in a clean state"
@@ -49,6 +50,7 @@
     - sudo
     - git
     - wget
+    - python-pip
 
 - name: "{{role}}: Set timezone variables"
   copy: content='ZONE="America/Chicago"'

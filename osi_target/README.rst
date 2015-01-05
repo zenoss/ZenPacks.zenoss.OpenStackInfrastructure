@@ -24,11 +24,12 @@ Overview and Definitions
 -------------------------
 
 * The main objective is to build the **Reference Network** onto a Target.
-* The **Reference Network** is defined in the reference_network.png image
+* The **Reference Network** (displayed above) is defined in the
+  reference_network.png image.
 * The **Control** (deployment) system performs all configuration *to* Target.
 * The **Target** system will be configured with Openstack/Packstack/Neutron.
 * Note: You must have a separate **Control** system because of reboots and
-        network re-configurations.
+  network re-configurations.
 * The order of operations are:
 
   - Setup the Control system with Ansible
