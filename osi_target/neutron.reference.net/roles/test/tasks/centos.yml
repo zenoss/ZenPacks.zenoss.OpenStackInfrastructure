@@ -1,0 +1,48 @@
+---
+# This play is for PackStack
+
+#-------------------------------------------------------------------------------
+#- Preliminary System Setup, get the network services in shape etc...
+#- Install Packstack packages.
+#- Requirements: Must have a system with minimum 3GB RAM
+#-------------------------------------------------------------------------------
+
+- name: Debug
+  debug: msg="CONTROLLER_HOST =  {{ openstack.CONTROLLER_HOST }}"
+
+- name: Debug
+  debug: msg="gateway =  {{ hardware.eth0.gateway }}"
+
+- name: Debug DNS Compound Var
+  debug: msg="dns =  {{ hardware.eth0.dns }}"
+
+- name: Debug
+  debug: msg="value =  {{ item.value }}"
+  with_items: ceilometer_cfg
+
+- name: Debug
+  debug: msg="OS_PASSWORD =  {{openstack.KEYSTONE_ADMIN_PW}}"
+
+#"
+
+- name: replace test
+  replace: dest=/tmp/ceilometer.conf
+           regexp='^#dispatcher=database'
+           replace='dispatcher=database\ndispatcher=zenoss'
+
+- name: stat ceilometer_zenoss/event_definitions.yaml
+  stat: path=/usr/lib/python2.7/site-packages/ceilometer_zenoss/event_definitions.yaml
+  register: ceilometer_event_definitions
+
+- name: Move foo to bar
+  command: cp /usr/lib/python2.7/site-packages/ceilometer_zenoss/event_definitions.yaml /tmp/
+  when: ceilometer_event_definitions.stat.exists
+
+- name: stat a file
+  stat: path=/tmp/xxx
+  register: xxx
+
+- name: See if file does not exist
+  debug: msg=" That file does not exist!"
+  when: not xxx.stat.exists
+

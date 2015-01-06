@@ -1,0 +1,84 @@
+---
+# This playbook contains common plays that will be run on all nodes.
+
+#-------------------------------------------------------------------------------
+# Include the distro specific stuff. ---------------------------------------
+#-------------------------------------------------------------------------------
+
+- include: centos.yml
+  when: ansible_os_family == 'RedHat'
+
+- include: debian.yml
+  when: ansible_distribution == 'Debian'
+
+- include: ubuntu.yml
+  when: ansible_distribution == 'Ubuntu'
+
+#-------------------------------------------------------------------------------
+# Include the generic stuff. ---------------------------------------------------
+#-------------------------------------------------------------------------------
+
+- name: Create root's bin directory
+  file:
+    path=/root/bin
+    state=directory
+
+- name: "Install root bin clients"
+  template: src={{item}}
+        dest=/{{item}}
+        owner=root
+        group=root
+        mode=0700
+  with_items:
+    - root/bin/ticktock
+    - root/bin/osi_dump_config.sh
+    - root/bin/restart_neutron
+
+- name: "Schedule ntp ticktock"
+  cron: name="ticktock" hour="2" minute=0 job="/root/bin/ticktock"
+
+- name: "Install root users profile"
+  copy: src={{ item }}
+        dest=/{{ item }}
+        owner=root
+        group=root
+        mode=600
+  with_items:
+    - root/.profile
+    - root/.bashrc
+    - root/.vimrc
+
+- name: "Add Needed Groups"
+  group: name={{ sudo_group }}
+         gid={{ sudo_gid }}
+         state=present
+
+- name: "Add primary user "
+  user: name={{ sudo_user }}
+        uid={{ sudo_gid }}
+        group={{ sudo_group }}
+        password={{ sudo_pass }}
+        shell=/bin/bash
+        state=present
+
+- name: "Check {{sudo_user}}'s directory ownership."
+  file: path={{ item }}
+        state=directory
+        owner={{ sudo_user }}
+        group={{ sudo_group }}
+        mode=700
+  with_items:
+    - /home/${sudo_user}
+
+- name: "Install sudo users profile"
+  copy: src={{ item }}
+        dest=/home/{{ item }}
+        owner={{ sudo_user }}
+        group={{ sudo_group }}
+        mode=600
+  with_items:
+    - "{{ sudo_user }}/.profile"
+    - "{{ sudo_user }}/.bashrc"
+    - "{{ sudo_user }}/.vimrc"
+
+

@@ -1,0 +1,4 @@
+# file: inventory
+
+[packstack]
+mp8.zenoss.loc
