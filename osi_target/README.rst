@@ -90,6 +90,10 @@ Setup Instructions
 * Copy this entire directory structure to your Controller system:
   The folder that you copy it to will be called $OSI_DIR for convenience.
 
+* In $OSI_DIR/neutron.reference.net/inventory:
+
+  - Set the value of xyz.zenoss.loc to your Target fqdn/address: myhost.zenoss.loc
+
 * In $OSI_DIR/neutron.reference.net/group_vars/all:
 
   - Take note of the keystone settings. These should not require changes.
@@ -102,7 +106,9 @@ Setup Instructions
       sudo_pass: This is encrypted with value of "zenoss"
 
 
-* In $OSI_DIR/neutron.reference.net/host_vars/
+* In $OSI_DIR/neutron.reference.net/host_vars/ (Optional)
+
+  - You do this **ONLY** if you need to override variables from group_vars/all
 
   - Copy the prototype variables set from
     neutron.reference.net/host_vars/proto.zenoss.com to the IP-address or FQDN
@@ -115,14 +121,10 @@ Setup Instructions
     a valid DNS value in your server.
     *Using /etc/hosts as a resolver may not work*.
 
-* Edit the variables in neutron.reference.net/host_vars/myhost.zenoss.loc:
+  - Edit the variables in neutron.reference.net/host_vars/myhost.zenoss.loc:
 
-   - Make sure all the ip addresses are correct for the defined servers.
-   - Make sure all other parameters are correct for your system
-
-* In $OSI_DIR/neutron.reference.net/inventory:
-
-  - Set the value of mpx.zenoss.loc to your Target fqdn/address: myhost.zenoss.loc
+    + Make sure all the ip addresses are correct for the defined servers.
+    + Make sure all other parameters are correct for your system
 
 * To force a rebuild, remove the file /root/keystonerc_admin on the Target
 

@@ -19,3 +19,56 @@ keystone:
   OS_TENANT_NAME: admin
   OS_PASSWORD: zenoss
 
+# -----------------------------------------------------------------------------
+
+network_prefix: "{{ ansible_default_ipv4.gateway | regex_replace('\\d{1,3}$', '') }}"
+global_gateway: "{{ network_prefix }}1"   # If your gateway is not .1, change it.
+zenoss_instance: mp6.zenoss.loc           # You *MUST* change this to your Zenoss instance.
+
+hardware:
+  primary_network_if: eth0
+  eth0:
+    macaddress: "{{ansible_eth0.macaddress}}"   # Make sure it matches your MAC
+    address: "{{ansible_default_ipv4.address}}" # You may have to change
+    gateway: "{{global_gateway}}"               # You may have to change
+    network: "{{ansible_default_ipv4.network}}" # You may have to change
+    dns: "{{global_gateway}}"                   # You may have to change
+    ntpd: "{{global_gateway}}"                  # You MAY need to change this!
+    floating_network: "{{network_prefix}}224/27" # WARNING: *MUST* change this!
+    dhcp_start: "{{network_prefix}}225"          # WARNING: *MUST* change this!
+    dhcp_end: "{{network_prefix}}254"            # WARNING: *MUST* change this!
+
+#------------------------------------------------------------------------------
+# Don't change antyhing below here unless you know what you're doing.
+# Access these via syntax {{ openstack.XYZ }} 
+#------------------------------------------------------------------------------
+
+openstack:
+  KEYSTONE_ADMIN_PW: "{{keystone.OS_PASSWORD}}"
+  CONTROLLER_HOST: "{{ hardware.eth0.address }}"
+  COMPUTE_HOSTS: "{{ hardware.eth0.address }}"
+  NETWORK_HOSTS: "{{ hardware.eth0.address }}"
+  VCENTER_HOST: "{{ hardware.eth0.address }}"
+  STORAGE_HOST: "{{ hardware.eth0.address }}"
+  AMQP_HOST: "{{ hardware.eth0.address }}"
+  MARIADB_HOST: "{{ hardware.eth0.address }}"
+  NOVA_NETWORK_FIXEDRANGE: 192.168.32.0/28
+  MONGODB_HOST: "{{ hardware.eth0.address }}"
+  NOVA_NETWORK_FLOATRANGE: "{{ hardware.eth0.floating_network }}"
+  NEUTRON_ML2_TYPE_DRIVERS: local
+  NEUTRON_ML2_TENANT_NETWORK_TYPES: local
+  USE_EPEL: y
+  NEUTRON_ML2_MECHANISM_DRIVERS: openvswitch
+  NOVA_NETWORK_PUBIF: "{{ hardware.primary_network_if }}"
+
+ceilometer_cfg:
+  - { section: 'notification',      parameter: 'store_events',      value: 'True' }
+  - { section: 'DEFAULT',           parameter: 'verbose',           value: 'False' }
+  - { section: 'DEFAULT',           parameter: 'debug',             value: 'True' }
+  - { section: 'dispatcher_zenoss', parameter: 'zenoss_device',     value: '{{zenoss_instance}}' }
+  - { section: 'dispatcher_zenoss', parameter: 'amqp_hostname',     value: '{{ inventory_hostname }}' }
+  - { section: 'dispatcher_zenoss', parameter: 'amqp_port',         value: 5672 }
+  - { section: 'dispatcher_zenoss', parameter: 'amqp_userid',       value: 'openstack' }
+  - { section: 'dispatcher_zenoss', parameter: 'amqp_password',     value: 'zenoss' }
+  - { section: 'dispatcher_zenoss', parameter: 'amqp_virtual_host', value: '/zenoss' }
+ 

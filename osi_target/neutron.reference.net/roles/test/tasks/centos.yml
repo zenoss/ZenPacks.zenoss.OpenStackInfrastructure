@@ -34,7 +34,7 @@
   stat: path=/usr/lib/python2.7/site-packages/ceilometer_zenoss/event_definitions.yaml
   register: ceilometer_event_definitions
 
-- name: Move foo to bar
+- name: Copy foo to bar
   command: cp /usr/lib/python2.7/site-packages/ceilometer_zenoss/event_definitions.yaml /tmp/
   when: ceilometer_event_definitions.stat.exists
 
