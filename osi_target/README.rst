@@ -106,7 +106,7 @@ Setup Instructions
       sudo_pass: This is encrypted with value of "zenoss"
 
 
-* In $OSI_DIR/neutron.reference.net/host_vars/ (Optional)
+* (Optional) In $OSI_DIR/neutron.reference.net/host_vars/
 
   - You do this **ONLY** if you need to override variables from group_vars/all
 
@@ -126,7 +126,7 @@ Setup Instructions
     + Make sure all the ip addresses are correct for the defined servers.
     + Make sure all other parameters are correct for your system
 
-* To force a rebuild, remove the file /root/keystonerc_admin on the Target
+* To force a rebuild, remove /root/keystonerc_admin on the Target
 
 * To debug your variables, there is a special make target called **vars**
   that will output to /tmp/vars.json.
