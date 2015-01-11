@@ -20,6 +20,18 @@ as a test target only. There are many features of Openstack that this tool
 does not provide. Do not expect the resulting environment to be free of
 defects or to be an production-ready Openstack deployment.
 
+Features and Benefits
+------------------------
+
+* Uses a simple command to build entire Openstack/Neutron environment
+* Builds the entire stack from a bare VM
+* Setups identical networks on each node so that QA comparison is uniform
+* Takes care of nearly all networking parameters
+* Installs the Target Ceilometer/RabbitMQ/Zenoss_dispatcher extras
+  as per https://github.com/zenoss/ceilometer_zenoss
+* Extendible to multi-host Deployments
+* Has debugging and test targets
+
 Overview and Definitions
 -------------------------
 
@@ -30,7 +42,7 @@ Overview and Definitions
 * The **Target** system will be configured with Openstack/Packstack/Neutron.
 * Note: You must have a separate **Control** system because of reboots and
   network re-configurations.
-* The order of operations are:
+* Detailed Operations: 
 
   - Setup the Control system with Ansible
   - Setup the Target system with common_config to set: user, pass, sudo
@@ -43,18 +55,6 @@ Overview and Definitions
     + Increase polling period to 300 sec in /etc/ceilomster/pipeline.yaml
 
   - Setup the Target system Neutron network: tenant, net, subnets, routers, vms
-
-Features and Benefits
-------------------------
-
-* Uses a simple command to build entire Openstack/Neutron environment
-* Builds the entire stack from a bare VM
-* Setups identical networks on each node so that QA comparison is uniform
-* Takes care of nearly all networking parameters
-* Installs the Target Ceilometer/RabbitMQ/Zenoss_dispatcher extras
-  as per https://github.com/zenoss/ceilometer_zenoss
-* Extendible to multi-host Deployments
-* Has debugging and test targets
 
 Bugs, Problems, and Todo's
 ------------------------------
