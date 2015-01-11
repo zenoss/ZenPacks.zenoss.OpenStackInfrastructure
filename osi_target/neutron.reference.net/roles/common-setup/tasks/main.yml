@@ -38,11 +38,11 @@
   cron: name="ticktock" hour="2" minute=0 job="/root/bin/ticktock"
 
 - name: "Install root users profile"
-  copy: src={{ item }}
-        dest=/{{ item }}
-        owner=root
-        group=root
-        mode=600
+  template: src={{ item }}
+            dest=/{{ item }}
+            owner=root
+            group=root
+            mode=600
   with_items:
     - root/.profile
     - root/.bashrc
@@ -71,11 +71,11 @@
     - /home/${sudo_user}
 
 - name: "Install sudo users profile"
-  copy: src={{ item }}
-        dest=/home/{{ item }}
-        owner={{ sudo_user }}
-        group={{ sudo_group }}
-        mode=600
+  template: src={{ item }}
+            dest=/home/{{ item }}
+            owner={{ sudo_user }}
+            group={{ sudo_group }}
+            mode=600
   with_items:
     - "{{ sudo_user }}/.profile"
     - "{{ sudo_user }}/.bashrc"

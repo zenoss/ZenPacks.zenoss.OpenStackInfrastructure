@@ -34,7 +34,13 @@ Overview and Definitions
 
   - Setup the Control system with Ansible
   - Setup the Target system with common_config to set: user, pass, sudo
-  - Setup the Target system with Packstack: Adds in zenoss goodies
+  - Setup the Target system with Packstack: As per ZP instructions:
+
+    + Add Custom Ceilometer dispatcher
+    + Modifies /etc/ceilometer/ceilometer.conf
+    + Doen't add [dispatcher_zenoss] section to ceilometer.conf
+    + Increase polling period to 300 sec in /etc/ceilomster/pipeline.yaml
+
   - Setup the Target system Neutron network: tenant, net, subnets, routers, vms
 
 Features and Benefits

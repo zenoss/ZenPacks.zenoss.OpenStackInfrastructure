@@ -46,3 +46,9 @@
   debug: msg=" That file does not exist!"
   when: not xxx.stat.exists
 
+- name: Template aliases.bash
+  sudo: False
+  template:
+    src=alias.bash
+    dest=/home/{{sudo_user}}/alias.bash
+
