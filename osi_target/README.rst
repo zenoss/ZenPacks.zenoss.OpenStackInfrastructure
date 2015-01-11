@@ -39,6 +39,7 @@ Overview and Definitions
     + Add Custom Ceilometer dispatcher
     + Modifies /etc/ceilometer/ceilometer.conf
     + Doen't add [dispatcher_zenoss] section to ceilometer.conf
+    + Sets notify_on_state_change=vm_state in nova.conf
     + Increase polling period to 300 sec in /etc/ceilomster/pipeline.yaml
 
   - Setup the Target system Neutron network: tenant, net, subnets, routers, vms
