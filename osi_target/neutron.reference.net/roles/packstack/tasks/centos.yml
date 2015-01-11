@@ -118,9 +118,7 @@
            {{item.section}}
            {{item.parameter}}
            {{item.value}}
-  with_items:
-    - { section: 'libvirt', parameter: 'virt_type', value: 'qemu' }
-    - { section: 'DEFAULT', parameter: 'notify_on_state_change', value: 'vm_state' }
+  with_items: nova_conf
   when: not keystone_admin.stat.exists
 
 - name: "Setup neutron/ml2 plugin.ini"
@@ -128,14 +126,7 @@
            {{item.section}}
            {{item.parameter}}
            {{item.value}}
-  with_items:
-    - { section: 'ml2', parameter: 'type_drivers', value: 'flat,vlan,gre,vxlan' }
-    - { section: 'ml2', parameter: 'tenant_network_types', value: 'vlan,gre,vxlan' }
-    - { section: 'ml2', parameter: 'mechanism_drivers', value: 'openvswitch' }
-    - { section: 'ml2_type_flat', parameter: 'flat_networks', value: 'physnet1' }
-    - { section: 'ml2_type_vlan', parameter: 'network_vlan_ranges', value: 'physnet1' }
-    - { section: 'ml2_type_gre',  parameter: 'tunnel_id_ranges', value: '1:1000' }
-    - { section: 'ml2_type_vxlan',  parameter: 'vni_ranges', value: '10:100' }
+  with_items: neutron_ml2_plugin
   when: not keystone_admin.stat.exists
   register: ml2_setup
 
@@ -144,11 +135,7 @@
            {{item.section}}
            {{item.parameter}}
            {{item.value}}
-  with_items:
-    - { section: 'ovs', parameter: 'enable_tunneling', value: 'True' }
-    - { section: 'ovs', parameter: 'local_ip', value: '{{openstack.NETWORK_HOSTS}}' }
-    - { section: 'ovs', parameter: 'bridge_mappings', value: 'physnet1:br-ex' }
-    - { section: 'agent', parameter: 'tunnel_types', value: 'gre' }
+  with_items: ovs_neutron_plugin
   when: not keystone_admin.stat.exists
   register: openvswitch_setup
 
@@ -157,27 +144,14 @@
            {{item.section}}
            {{item.parameter}}
            {{item.value}}
-  with_items:
-    - { section: 'DEFAULT', parameter: 'interface_driver', value: 'neutron.agent.linux.interface.OVSInterfaceDriver' }
-    - { section: 'DEFAULT', parameter: 'external_network_bridge', value: 'br-ex' }
-    - { section: 'DEFAULT', parameter: 'use_namespaces', value: 'True' }
+  with_items: neutron_l3_agent
   when: not keystone_admin.stat.exists
   register: l3_setup
 
 - name: "Bounce nova/neutron"
   service: name={{item}}
            state=restarted
-  with_items:
-    - openstack-nova-api
-    - openstack-nova-compute
-    - openstack-nova-conductor
-    - openstack-nova-scheduler
-    - neutron-dhcp-agent
-    - neutron-l3-agent
-    - neutron-metadata-agent
-    - neutron-openvswitch-agent
-    - neutron-server
-    - openvswitch
+  with_items: nova_services + neutron_services
   when: not keystone_admin.stat.exists
 
 #-------------------------------------------------------------------------------
@@ -205,10 +179,15 @@
   command: cp /usr/lib/python2.7/site-packages/ceilometer_zenoss/event_definitions.yaml /etc/ceilometer/
   when: ceilometer_event_definitions.stat.exists
 
-- name: "Modify /etc/ceilometer.conf to add event_defs with replace"
+- name: "Modify /etc/ceilometer/ceilometer.conf to add event_defs with replace"
   replace: dest=/etc/ceilometer/ceilometer.conf
            regexp='^#dispatcher=database'
            replace='dispatcher=database\ndispatcher=zenoss'
+
+- name: "Modify /etc/ceilometer/pipeline.yaml: set interval to 300s"
+  replace: dest=/etc/ceilometer/pipeline.yaml
+           regexp='interval: 600$'
+           replace='interval: 300'
 
 #-------------------------------------------------------------------------------
 # Configure Ceilomater
@@ -224,14 +203,7 @@
 - name: "Bounce ceilometer"
   service: name={{item}}
            state=restarted
-  with_items:
-    - openstack-ceilometer-alarm-evaluator
-    - openstack-ceilometer-alarm-notifier
-    - openstack-ceilometer-api
-    - openstack-ceilometer-central
-    - openstack-ceilometer-collector
-    - openstack-ceilometer-compute
-    - openstack-ceilometer-notification
+  with_items: ceilometer_services
   when: not keystone_admin.stat.exists
 
 #-------------------------------------------------------------------------------
@@ -249,10 +221,10 @@
 #-------------------------------------------------------------------------------
 #
 - name: "Setup the credentials for the privileged user"
-  command: cp /root/keystonerc_admin /home/{{ sudo_user }}/
+  command: cp /root/keystonerc_admin /home/{{sudo_user}}/
 
 - name: "Setup attributes for keystonerc_admin"
-  file: path=/home/{{ sudo_user }}/keystonerc_admin
+  file: path=/home/{{sudo_user}}/keystonerc_admin
         mode=0444
 
 - name: "Add keystone creds to users bashrc"
@@ -260,4 +232,10 @@
               line="source $HOME/keystonerc_admin"
               insertafter=EOF
               state=present
+
+- name: Template alias.bash for service restart functions
+  sudo: False
+  template:
+    src=zenoss/alias.bash
+    dest=/home/{{sudo_user}}/alias.bash
 

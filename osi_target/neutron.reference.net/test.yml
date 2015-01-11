@@ -10,4 +10,4 @@
   user: "{{sudo_user}}"
 
   roles:
-    - { role: test }
+     - { role: test, pipelining: True }

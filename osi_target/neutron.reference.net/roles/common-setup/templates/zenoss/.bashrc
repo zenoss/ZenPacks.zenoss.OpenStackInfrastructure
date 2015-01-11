@@ -48,16 +48,6 @@ if [ "$PS1" ]; then
    EDITOR=vi
    export PATH EDITOR
 
-
-
-   export ZP_TOP_DIR={{ zp_mountpoint }}/ZenPacks.zenoss.DatabaseMonitor/
-   export ZP_DIR=$ZP_TOP_DIR/ZenPacks/zenoss/DatabaseMonitor
-   export PROMPT_DIRTRIM=4
-   # export DEFAULT_ZEP_JVM_ARGS="-Djetty.host=localhost -server"
-   alias zpdir="cd $ZP_DIR"
-   alias zphome="cd $ZP_TOP_DIR"
-   alias m="ls -al $@ | less -EMsX"
-
-stty erase 
+stty erase '^?'
 fi
 
