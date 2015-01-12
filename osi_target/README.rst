@@ -14,7 +14,7 @@ This build environment builds a Openstack network for use as a target. The
 entire process is automated and does not require any knowledge of the
 underlying tools.
 
-**WARNING**: Openstack is complex and has many dependencies and services.
+**WARNING**: Openstack is complex and dynamic set of dependencies and services.
 It is correct to assume that the environment this tool creates is for use
 as a test target only. There are many features of Openstack that this tool
 does not provide. Do not expect the resulting environment to be free of
@@ -51,7 +51,7 @@ Overview and Definitions
     + Add Custom Ceilometer dispatcher
     + Modifies /etc/ceilometer/ceilometer.conf
     + Doen't add [dispatcher_zenoss] section to ceilometer.conf
-    + Sets notify_on_state_change=vm_state in nova.conf
+    + Sets VM State Changes: notify_on_state_change=vm_state in nova.conf
     + Increase polling period to 300 sec in /etc/ceilomster/pipeline.yaml
 
   - Setup the Target system Neutron network: tenant, net, subnets, routers, vms
