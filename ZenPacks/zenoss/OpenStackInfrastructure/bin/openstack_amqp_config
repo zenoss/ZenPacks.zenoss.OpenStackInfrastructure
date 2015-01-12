@@ -2,19 +2,28 @@
 
 echo $0
 
+echo "RabbitMQ Configuration"
+echo "--------------------"
+echo "If using Europa, you *MUST* use this command in a rabbitmq container"
+
 AMQP_USERID="openstack"
 AMQP_PASSWORD="[previously configured password]"
 AMQP_HOSTNAME=`zenglobalconf -p amqphost`
 AMQP_PORT=`zenglobalconf -p amqpport`
 AMQP_VIRTUAL_HOST=`zenglobalconf -p amqpvhost`
 
-echo "RabbitMQ Configuration"
-echo "--------------------"
+# If in Europa, get first IP from CONTROLPLANE_HOST_IPS, otherwise default
+if [ -z "$CONTROLPLANE_HOST_IPS" ]; then
+   AMQP_HOSTNAME=$(zenglobalconf -p amqphost)
+else
+   AMQP_HOSTNAME=$(sed "s/\s.*$// ; s/'//g" <<< $CONTROLPLANE_HOST_IPS )
+fi
+
 sudo rabbitmqctl list_users | grep $AMQP_USERID > /dev/null
 if [ "$?" = "0" ]; then
    echo "User '$AMQP_USERID' already exists in rabbitmq.  Leaving existing password in place."
    echo "If you need to change the password, use the following command:"
-   echo "   sudo rabbitmqctl change_password -p $AMQP_VIRTUAL_HOST $AMQP_USERID [newpassword]"
+   echo "   sudo rabbitmqctl change_password $AMQP_USERID [newpassword]"
    echo ""
 else
    AMQP_PASSWORD=`openssl rand -base64 15`
