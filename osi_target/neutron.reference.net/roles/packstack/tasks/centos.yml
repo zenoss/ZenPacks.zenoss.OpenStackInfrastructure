@@ -185,9 +185,9 @@
            replace='dispatcher=database\ndispatcher=zenoss'
 
 - name: "Modify /etc/ceilometer/pipeline.yaml: set interval to 300s"
-  replace: dest=/etc/ceilometer/pipeline.yaml
-           regexp='interval: 600$'
-           replace='interval: 300'
+  replace: "dest=/etc/ceilometer/pipeline.yaml
+            regexp='interval: 600$'
+            replace='interval: 300'"
 
 #-------------------------------------------------------------------------------
 # Configure Ceilomater
