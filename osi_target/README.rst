@@ -14,34 +14,11 @@ This build environment builds a Openstack network for use as a target. The
 entire process is automated and does not require any knowledge of the
 underlying tools.
 
-**WARNING**: Openstack is complex and has many dependencies and services.
+**WARNING**: Openstack is complex and dynamic set of dependencies and services.
 It is correct to assume that the environment this tool creates is for use
 as a test target only. There are many features of Openstack that this tool
 does not provide. Do not expect the resulting environment to be free of
 defects or to be an production-ready Openstack deployment.
-
-Overview and Definitions
--------------------------
-
-* The main objective is to build the **Reference Network** onto a Target.
-* The **Reference Network** (displayed above) is defined in the
-  reference_network.png image.
-* The **Control** (deployment) system performs all configuration *to* Target.
-* The **Target** system will be configured with Openstack/Packstack/Neutron.
-* Note: You must have a separate **Control** system because of reboots and
-  network re-configurations.
-* The order of operations are:
-
-  - Setup the Control system with Ansible
-  - Setup the Target system with common_config to set: user, pass, sudo
-  - Setup the Target system with Packstack: As per ZP instructions:
-
-    + Add Custom Ceilometer dispatcher
-    + Modifies /etc/ceilometer/ceilometer.conf
-    + Doen't add [dispatcher_zenoss] section to ceilometer.conf
-    + Increase polling period to 300 sec in /etc/ceilomster/pipeline.yaml
-
-  - Setup the Target system Neutron network: tenant, net, subnets, routers, vms
 
 Features and Benefits
 ------------------------
@@ -54,6 +31,30 @@ Features and Benefits
   as per https://github.com/zenoss/ceilometer_zenoss
 * Extendible to multi-host Deployments
 * Has debugging and test targets
+
+Overview and Definitions
+-------------------------
+
+* The main objective is to build the **Reference Network** onto a Target.
+* The **Reference Network** (displayed above) is defined in the
+  reference_network.png image.
+* The **Control** (deployment) system performs all configuration *to* Target.
+* The **Target** system will be configured with Openstack/Packstack/Neutron.
+* Note: You must have a separate **Control** system because of reboots and
+  network re-configurations.
+* Detailed Operations: 
+
+  - Setup the Control system with Ansible
+  - Setup the Target system with common_config to set: user, pass, sudo
+  - Setup the Target system with Packstack: As per ZP instructions:
+
+    + Add Custom Ceilometer dispatcher
+    + Modifies /etc/ceilometer/ceilometer.conf
+    + Doen't add [dispatcher_zenoss] section to ceilometer.conf
+    + Sets VM State Changes: notify_on_state_change=vm_state in nova.conf
+    + Increase polling period to 300 sec in /etc/ceilomster/pipeline.yaml
+
+  - Setup the Target system Neutron network: tenant, net, subnets, routers, vms
 
 Bugs, Problems, and Todo's
 ------------------------------

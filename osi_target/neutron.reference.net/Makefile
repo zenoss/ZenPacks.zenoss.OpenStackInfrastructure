@@ -8,6 +8,9 @@ default: all
 all:
 	ansible-playbook -vvvvv -i inventory all.yml -Kk
 
+check:
+	ansible-playbook -vvvvv -i inventory all.yml -Kk --check
+
 packstack:
 	ansible-playbook -vvvv -i inventory packstack.yml -Kk
 
