@@ -306,6 +306,125 @@
           aliases:
             server_verify_resize__count: ""
 
+        agentTotalCount:
+          rrdmin: 0
+          aliases:
+            agent_total__count: ""
+        agentDHCPCount:
+          rrdmin: 0
+          aliases:
+            agent_dhcp__count: ""
+        agentOVSCount:
+          rrdmin: 0
+          aliases:
+            agent_ovs__count: ""
+        agentLinuxBridgeCount:
+          rrdmin: 0
+          aliases:
+            agent_linux_bridge__count: ""
+        agentHyperVCount:
+          rrdmin: 0
+          aliases:
+            agent_hyperv__count: ""
+        agentNECCount:
+          rrdmin: 0
+          aliases:
+            agent_nec__count: ""
+        agentOFACount:
+          rrdmin: 0
+          aliases:
+            agent_ofa__count: ""
+        agentL3Count:
+          rrdmin: 0
+          aliases:
+            agent_l3__count: ""
+        agentLBCount:
+          rrdmin: 0
+          aliases:
+            agent_lb__count: ""
+        agentMLNXCount:
+          rrdmin: 0
+          aliases:
+            agent_mlnx__count: ""
+        agentMeteringCount:
+          rrdmin: 0
+          aliases:
+            agent_metering__count: ""
+        agentMetadataCount:
+          rrdmin: 0
+          aliases:
+            agent_metadata__count: ""
+        agentSDNVECount:
+          rrdmin: 0
+          aliases:
+            agent_sdnve__count: ""
+        agentNICSCount:
+          rrdmin: 0
+          aliases:
+            agent_nics__count: ""
+        agentAliveCount:
+          rrdmin: 0
+          aliases:
+            agent_alive__count: ""
+        agentDeadCount:
+          rrdmin: 0
+          aliases:
+            agent_dead__count: ""
+
+        networkTotalCount:
+          rrdmin: 0
+          aliases:
+            network_total__count: ""
+        networkActiveCount:
+          rrdmin: 0
+          aliases:
+            network_avtive__count: ""
+        networkBuildCount:
+          rrdmin: 0
+          aliases:
+            network_build__count: ""
+        networkDownCount:
+          rrdmin: 0
+          aliases:
+            network_down__count: ""
+        networkErrorCount:
+          rrdmin: 0
+          aliases:
+            network_error__count: ""
+        networkSharedCount:
+          rrdmin: 0
+          aliases:
+            network_shared__count: ""
+        networkExternalCount:
+          rrdmin: 0
+          aliases:
+            network_external__count: ""
+        networkInternalCount:
+          rrdmin: 0
+          aliases:
+            network_internal__count: ""
+
+        routerTotalCount:
+          rrdmin: 0
+          aliases:
+            router_total__count: ""
+        routerActiveCount:
+          rrdmin: 0
+          aliases:
+            router_active__count: ""
+        routerBuildCount:
+          rrdmin: 0
+          aliases:
+            router_build__count: ""
+        routerDownCount:
+          rrdmin: 0
+          aliases:
+            router_down__count: ""
+        routerErrorCount:
+          rrdmin: 0
+          aliases:
+            router_error__count: ""
+
       parser: ZenPacks.zenoss.OpenStackInfrastructure.parsers.endpoint
       type: COMMAND
       usessh: false
@@ -417,4 +536,115 @@
           format: '%7.0lf'
         performance:
           dpName: openstackQueues_perfQueueCount
+          format: '%7.0lf'
+
+    Agents:
+      units: count
+      height: 100
+      width: 500
+
+      graphpoints:
+        Total:
+          dpName: openstack_agentTotalCount
+          format: '%7.0lf'
+        Active:
+          dpName: openstack_agentActiveCount
+          format: '%7.0lf'
+        Alive:
+          dpName: openstack_agentAliveCount
+          format: '%7.0lf'
+        Dead:
+          dpName: openstack_agentDeadCount
+          format: '%7.0lf'
+        DHCP:
+          dpName: openstack_agentDHCPCount
+          format: '%7.0lf'
+        Open vSwitch:
+          dpName: openstack_agentOVSCount
+          format: '%7.0lf'
+        Linux Bridge:
+          dpName: openstack_agentLinuxBridgeCount
+          format: '%7.0lf'
+        HyperV:
+          dpName: openstack_agentHyperVCount
+          format: '%7.0lf'
+        NEC OpenFlow:
+          dpName: openstack_agentNECCount
+          format: '%7.0lf'
+        OpenFlow Agent:
+          dpName: openstack_agentOFACount
+          format: '%7.0lf'
+        Level 3:
+          dpName: openstack_agentL3Count
+          format: '%7.0lf'
+        Load Balancer:
+          dpName: openstack_agentLBCount
+          format: '%7.0lf'
+        Mellanox:
+          dpName: openstack_agentMLNXVCount
+          format: '%7.0lf'
+        Metering:
+          dpName: openstack_agentMeteringVCount
+          format: '%7.0lf'
+        Metadata:
+          dpName: openstack_agentMetadataCount
+          format: '%7.0lf'
+        IBM SDN-VE:
+          dpName: openstack_agentSDNVECount
+          format: '%7.0lf'
+        SR-IOV NIC:
+          dpName: openstack_agentNICSCount
+          format: '%7.0lf'
+
+    Networks:
+      units: count
+      height: 100
+      width: 500
+
+      graphpoints:
+        Total:
+          dpName: openstack_networkTotalCount
+          format: '%7.0lf'
+        Active:
+          dpName: openstack_networkActiveCount
+          format: '%7.0lf'
+        Build:
+          dpName: openstack_networkBuildCount
+          format: '%7.0lf'
+        Down:
+          dpName: openstack_networkDownCount
+          format: '%7.0lf'
+        Error:
+          dpName: openstack_networkErrorCount
+          format: '%7.0lf'
+        Shared:
+          dpName: openstack_networkSharedCount
+          format: '%7.0lf'
+        External:
+          dpName: openstack_networkExternalCount
+          format: '%7.0lf'
+        Internal:
+          dpName: openstack_networkInternalCount
+          format: '%7.0lf'
+
+    Routers:
+      units: count
+      height: 100
+      width: 500
+
+      graphpoints:
+        Total:
+          dpName: openstack_routerTotalCount
+          format: '%7.0lf'
+        Active:
+          dpName: openstack_routerActiveCount
+          format: '%7.0lf'
+        Build:
+          dpName: openstack_routerBuildCount
+          format: '%7.0lf'
+        Down:
+          dpName: openstack_routerDownCount
+          format: '%7.0lf'
+        Error:
+          dpName: openstack_routerErrorCount
           format: '%7.0lf'
