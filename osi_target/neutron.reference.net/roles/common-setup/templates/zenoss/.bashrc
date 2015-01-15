@@ -19,7 +19,7 @@ if [ "$PS1" ]; then
            . ~/alias.bash
    fi
 
-
+   alias m='ls -al | less -EMsX'
    function d()
    { 
       exec ls -l "$@" | less -EXsM 
