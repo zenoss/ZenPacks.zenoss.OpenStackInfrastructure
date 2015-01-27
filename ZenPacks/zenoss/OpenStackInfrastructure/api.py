@@ -76,7 +76,7 @@ class OpenStackInfrastructureFacade(ZuulFacade):
     def addOpenStack(self, device_name, username, api_key, project_id, auth_url,
                      ceilometer_url, region_name, collector='localhost'):
         """Add a new OpenStack endpoint to the system."""
-        parsed_url = urlparse(auth_url)
+        parsed_url = urlparse(auth_url.strip())
 
         if parsed_url.scheme == "" or parsed_url.hostname is None:
             return False, _t("'%s' is not a valid URL." % auth_url)
@@ -91,7 +91,7 @@ class OpenStackInfrastructureFacade(ZuulFacade):
             'zCommandUsername': username,
             'zCommandPassword': api_key,
             'zOpenStackProjectId': project_id,
-            'zOpenStackAuthUrl': auth_url,
+            'zOpenStackAuthUrl': auth_url.strip(),
             'zOpenStackRegionName': region_name,
             'zOpenStackCeilometerUrl': ceilometer_url
             }
