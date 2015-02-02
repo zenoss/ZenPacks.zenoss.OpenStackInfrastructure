@@ -17,6 +17,9 @@ packstack:
 neutron:
 	ansible-playbook -vvvv -i inventory neutron.yml -Kk
 
+destroy:
+	ansible-playbook -vvvv -i inventory neutron_destroy.yml -Kk
+
 vars:
 	ansible-playbook -vvvv -i inventory vars.yml -Kk
 

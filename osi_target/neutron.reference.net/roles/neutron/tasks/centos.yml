@@ -313,12 +313,13 @@
       - net-id: '{{ networks.results[1].id }}'
     meta:
       hostname: vm_2
+  ignore_errors: True
 
 #-------------------------------------------------------------------------------
 # Install the Private net VM's
 #-------------------------------------------------------------------------------
 
-- name: Add a VMs to Other Private Networks; Note the dash in net-id!
+- name: Add VMs to Other Private Networks; Note the dash in net-id!
   nova_compute:
     name: '{{ item.name }}'
     state: present
@@ -337,6 +338,7 @@
     - { name: 'vm_b7', net_id: '{{ networks.results[3].id }}' }
     - { name: 'vm_c7', net_id: '{{ networks.results[4].id }}' }
     - { name: 'vm_c9', net_id: '{{ networks.results[5].id }}' }
+  ignore_errors: True
 
 - name: Assing Floating IP's to VMs
   quantum_floating_ip: 
@@ -352,4 +354,5 @@
     - { name: 'vm_b7', internal_network: 'network_B7' }
     - { name: 'vm_c7', internal_network: 'network_C7' }
     - { name: 'vm_c9', internal_network: 'network_C9' }
+  ignore_errors: True
 
