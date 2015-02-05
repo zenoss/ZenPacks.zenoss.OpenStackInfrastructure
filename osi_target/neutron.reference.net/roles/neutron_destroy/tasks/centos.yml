@@ -7,11 +7,11 @@
 #-------------------------------------------------------------------------------
 
 - name: Tear Down Floating IP's to VMs
-  quantum_floating_ip: 
-    state: absent 
-    login_username: admin
-    login_password: '{{ openstack.KEYSTONE_ADMIN_PW }}'
-    login_tenant_name: admin
+  quantum_floating_ip:
+    state: absent
+    login_username: '{{keystone.OS_USERNAME}}'
+    login_password: '{{ keystone.OS_PASSWORD }}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
     network_name: network_public
     instance_name: '{{ item.name }}'
     internal_network_name: '{{ item.internal_network }}'
@@ -30,9 +30,9 @@
   nova_compute:
     name: '{{ item.name }}'
     state: absent
-    login_username: admin
-    login_password: '{{ openstack.KEYSTONE_ADMIN_PW }}'
-    login_tenant_name: admin
+    login_username: '{{keystone.OS_USERNAME}}'
+    login_password: '{{ keystone.OS_PASSWORD }}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
     wait_for: 200
     flavor_id: 77
   with_items:
@@ -50,9 +50,9 @@
   nova_compute:
     name: vm_2
     state: absent
-    login_username: admin
-    login_password: '{{ openstack.KEYSTONE_ADMIN_PW }}'
-    login_tenant_name: admin
+    login_username: '{{keystone.OS_USERNAME}}'
+    login_password: '{{ keystone.OS_PASSWORD }}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
     wait_for: 200
     flavor_id: 77
     meta:
@@ -68,9 +68,9 @@
   nova_compute:
     name: vm_1
     state: absent
-    login_username: admin
-    login_password: '{{ openstack.KEYSTONE_ADMIN_PW }}'
-    login_tenant_name: admin
+    login_username: '{{keystone.OS_USERNAME}}'
+    login_password: '{{ keystone.OS_PASSWORD }}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
     wait_for: 200
     flavor_id: 77
     meta:
@@ -82,18 +82,18 @@
 #===============================================================================
 
 #-------------------------------------------------------------------------------
-#- dis-Connect the Subnet Interfaces to the routers. tenant_name required 
+#- dis-Connect the Subnet Interfaces to the routers. tenant_name required
 #-------------------------------------------------------------------------------
 
 - name: Detach subnet to router interfaces. You must use tenant_name here!
-  quantum_router_interface: 
-      router_name={{item.router_name}}                                     
-      subnet_name={{item.subnet_name}}                                     
-      tenant_name={{item.tenant_name}}                                     
-      state=absent                                                         
-      login_username=admin                                                 
-      login_password={{openstack.KEYSTONE_ADMIN_PW}}                       
-      login_tenant_name=admin                        
+  quantum_router_interface:
+    router_name: '{{item.router_name}}'
+    subnet_name: '{{item.subnet_name}}'
+    tenant_name: '{{item.tenant_name}}'
+    state: absent
+    login_username: '{{keystone.OS_USERNAME}}'
+    login_password: '{{keystone.OS_PASSWORD}}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
   ignore_errors: true
   with_items:
     - { router_name: 'router_AB',
@@ -118,13 +118,13 @@
 #-------------------------------------------------------------------------------
 
 - name: Remove gateways to routers
-  quantum_router_gateway: 
-       router_name={{item.name}}                                         
-       state=absent                                                      
-       network_name={{item.network_name}}                                
-       login_username=admin                                              
-       login_password={{openstack.KEYSTONE_ADMIN_PW}}                    
-       login_tenant_name=admin                        
+  quantum_router_gateway:
+    router_name: '{{item.name}}'
+    state: absent
+    network_name: '{{item.network_name}}'
+    login_username: '{{keystone.OS_USERNAME}}'
+    login_password: '{{keystone.OS_PASSWORD}}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
   ignore_errors: true
   with_items:
     - { name: 'router_AB',
@@ -138,13 +138,13 @@
 #- un-Define the Routers
 #-------------------------------------------------------------------------------
 - name: un-Define the routers
-  quantum_router: 
-       name={{item.name}}                                        
-       state=absent                                              
-       tenant_name={{item.tenant_name}}                          
-       login_username=admin                                      
-       login_password={{openstack.KEYSTONE_ADMIN_PW}}            
-       login_tenant_name=admin                        
+  quantum_router:
+    name: '{{item.name}}'
+    state: absent
+    tenant_name: '{{item.tenant_name}}'
+    login_username: '{{keystone.OS_USERNAME}}'
+    login_password: '{{keystone.OS_PASSWORD}}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
   ignore_errors: true
   with_items:
     - { name: 'router_AB',
@@ -158,19 +158,19 @@
 #- Un-Define the Subnets of Networks
 #-------------------------------------------------------------------------------
 - name: Remove all Subnets
-  quantum_subnet: 
-         name={{item.name}}                                              
-         network_name={{item.network_name}}                              
-         cidr={{item.cidr}}                                              
-         gateway_ip={{item.gateway}}                                     
-         tenant_name={{item.tenant_name}}                                
-         enable_dhcp={{item.enable_dhcp}}                                
-         allocation_pool_start={{item.allocation_pool_start}}            
-         allocation_pool_end={{item.allocation_pool_end}}                
-         state=absent                                                    
-         login_username=admin                                            
-         login_password={{openstack.KEYSTONE_ADMIN_PW}}                  
-         login_tenant_name=admin                              
+  quantum_subnet:
+    name: '{{item.name}}'
+    network_name: '{{item.network_name}}'
+    cidr: '{{item.cidr}}'
+    gateway_ip: '{{item.gateway}}'
+    tenant_name: '{{item.tenant_name}}'
+    enable_dhcp: '{{item.enable_dhcp}}'
+    allocation_pool_start: '{{item.allocation_pool_start}}'
+    allocation_pool_end: '{{item.allocation_pool_end}}'
+    state: absent
+    login_username: '{{keystone.OS_USERNAME}}'
+    login_password: '{{keystone.OS_PASSWORD}}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
   ignore_errors: true
   with_items:
     - { name: 'subnet_public',
@@ -229,21 +229,22 @@
       }
 
 #-------------------------------------------------------------------------------
-#- Remove the networks 
+#- Remove the networks
 #-------------------------------------------------------------------------------
 - name: Remove networks.
   quantum_network:
-       name={{item.name}}                                            
-       tenant_name={{item.tenant_name}}                              
-       state=absent                                                  
-       provider_network_type={{item.network_type}}                   
-       provider_physical_network={{item.physical_net}}               
-       provider_segmentation_id={{item.segmentation_id}}             
-       router_external={{item.router_external}}                      
-       shared={{item.shared}}                                        
-       login_username=admin                                          
-       login_password={{openstack.KEYSTONE_ADMIN_PW}}                
-       login_tenant_name=admin                           
+    name: '{{item.name}}'
+    tenant_name: '{{item.tenant_name}}'
+    state: 'absent'
+    provider_network_type: '{{item.network_type}}'
+    provider_physical_network: '{{item.physical_net}}'
+    provider_segmentation_id: '{{item.segmentation_id}}'
+    router_external: '{{item.router_external}}'
+    shared: '{{item.shared}}'
+    login_username: '{{keystone.OS_USERNAME}}'
+    login_password: '{{keystone.OS_PASSWORD}}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
+  ignore_errors: true
   with_items:
     - { name: 'network_public',
         tenant_name: 'services',
@@ -296,11 +297,11 @@
 
 - name: Delete some users
   keystone_user:
-     state=absent
-     tenant={{ item }}
-     login_user=admin
-     login_password=zenoss
-     login_tenant_name=admin
+    state: absent
+    tenant: '{{item}}'
+    login_user: '{{keystone.OS_USERNAME}}'
+    login_password: '{{keystone.OS_PASSWORD}}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
   with_items:
     - A
     - B

@@ -23,7 +23,7 @@ defects or to be an production-ready Openstack deployment.
 Features and Benefits
 ------------------------
 
-* Uses a simple command to build entire Openstack/Neutron environment
+* Uses a simple commands to build/destroy entire Openstack-Neutron environment
 * Builds the entire stack from a bare VM
 * Setups identical networks on each node so that QA comparison is uniform
 * Takes care of nearly all networking parameters
@@ -32,10 +32,12 @@ Features and Benefits
 * Extendible to multi-host Deployments
 * Has debugging and test targets
 
+
 Overview and Definitions
 -------------------------
 
 * The main objective is to build the **Reference Network** onto a Target.
+* The secondary objective is to destroy the **Reference Network**.
 * The **Reference Network** (displayed above) is defined in the
   reference_network.png image.
 * The **Control** (deployment) system performs all configuration *to* Target.
@@ -148,7 +150,7 @@ Building with Make
 Overview of Execution
 ------------------------
 
-The top level Makefile will perform the following tasks:
+The top level Makefile (make) will perform the following tasks:
 
 * Setup up the host system by installing Ansible and needed packages.
 * On the Target:
@@ -172,9 +174,10 @@ The following make targets are for testing:
 
 * vars: This builds a diagnostic set of variables for debugging
 * test: This builds a small set of non-invasive objects for testing.
+* destroy: This destroys all of the Neutron network.
 
-Specific Instruction
----------------------
+Specific Build Instruction
+---------------------------
 Once logged in to your Control system (Centos7 recommended), copy the 
 files listed above onto it. Then execute the following:
 
@@ -200,6 +203,13 @@ files listed above onto it. Then execute the following:
    ansible-playbook -vvvvv -i inventory all.yml -Kk
    SSH password: *************
    sudo password [defaults to SSH password]: <ret>
+
+Specific Destroy Instruction
+-----------------------------
+
+Just type::
+
+   make destroy
 
 Video Links
 ------------------

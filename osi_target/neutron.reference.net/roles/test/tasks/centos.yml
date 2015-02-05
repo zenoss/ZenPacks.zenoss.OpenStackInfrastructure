@@ -21,7 +21,7 @@
   with_items: ceilometer_cfg
 
 - name: Debug
-  debug: msg="OS_PASSWORD =  {{openstack.KEYSTONE_ADMIN_PW}}"
+  debug: msg="OS_PASSWORD =  {{keystone.OS_PASSWORD}}"
 
 #"
 
