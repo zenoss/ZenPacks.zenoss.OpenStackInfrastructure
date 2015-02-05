@@ -89,7 +89,7 @@
            --allinone
            --provision-all-in-one-ovs-bridge=n
            --provision-demo=n
-           --default-password={{ openstack.KEYSTONE_ADMIN_PW }}
+           --default-password={{ keystone.OS_PASSWORD }}
   args:
     creates: /root/keystonerc_admin
 

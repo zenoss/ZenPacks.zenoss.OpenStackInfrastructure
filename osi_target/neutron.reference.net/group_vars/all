@@ -15,9 +15,9 @@ flavor_tiny:
   cpu: 1
 
 keystone:
-  OS_USERNAME: admin
-  OS_TENANT_NAME: admin
-  OS_PASSWORD: zenoss
+  OS_USERNAME: 'admin'
+  OS_TENANT_NAME: 'admin'
+  OS_PASSWORD: 'zenoss'
 
 # -----------------------------------------------------------------------------
 
@@ -44,7 +44,6 @@ hardware:
 #------------------------------------------------------------------------------
 
 openstack:
-  KEYSTONE_ADMIN_PW: "{{keystone.OS_PASSWORD}}"
   CONTROLLER_HOST: "{{ hardware.eth0.address }}"
   COMPUTE_HOSTS: "{{ hardware.eth0.address }}"
   NETWORK_HOSTS: "{{ hardware.eth0.address }}"
