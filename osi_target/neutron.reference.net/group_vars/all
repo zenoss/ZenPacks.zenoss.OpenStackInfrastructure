@@ -64,25 +64,35 @@ openstack:
 # Don't change antyhing below unless you *REALLY know* what you're doing.
 #------------------------------------------------------------------------------
 
+nova_conf:
+  - { section: 'libvirt',        parameter: 'virt_type',              value: 'qemu' }
+  - { section: 'DEFAULT',        parameter: 'notify_on_state_change', value: 'vm_state' }
+
+neutron_plugins_extra:
+  - { section: 'DEFAULT',        parameter: 'service_plugins',      value: 'firewall' }
+  - { section: 'DEFAULT',        parameter: 'service_plugins',      value: 'metering' }
+  - { section: 'DEFAULT',        parameter: 'service_plugins',      value: 'vpnaas' }
+  - { section: 'DEFAULT',        parameter: 'service_plugins',      value: 'lbaas' }
+
 neutron_ml2_plugin:
-  - { section: 'ml2',            parameter: 'type_drivers', value: 'flat,vlan,gre,vxlan' }
+  - { section: 'ml2',            parameter: 'type_drivers',         value: 'flat,vlan,gre,vxlan' }
   - { section: 'ml2',            parameter: 'tenant_network_types', value: 'vlan,gre,vxlan' }
-  - { section: 'ml2',            parameter: 'mechanism_drivers', value: 'openvswitch' }
-  - { section: 'ml2_type_flat',  parameter: 'flat_networks', value: 'physnet1' }
-  - { section: 'ml2_type_vlan',  parameter: 'network_vlan_ranges', value: 'physnet1' }
-  - { section: 'ml2_type_gre',   parameter: 'tunnel_id_ranges', value: '1:1000' }
-  - { section: 'ml2_type_vxlan', parameter: 'vni_ranges', value: '10:100' }
+  - { section: 'ml2',            parameter: 'mechanism_drivers',    value: 'openvswitch' }
+  - { section: 'ml2_type_flat',  parameter: 'flat_networks',        value: 'physnet1' }
+  - { section: 'ml2_type_vlan',  parameter: 'network_vlan_ranges',  value: 'physnet1' }
+  - { section: 'ml2_type_gre',   parameter: 'tunnel_id_ranges',     value: '1:1000' }
+  - { section: 'ml2_type_vxlan', parameter: 'vni_ranges',           value: '10:100' }
 
 ovs_neutron_plugin:
-  - { section: 'ovs', parameter: 'enable_tunneling', value: 'True' }
-  - { section: 'ovs', parameter: 'local_ip', value: '{{openstack.NETWORK_HOSTS}}' }
-  - { section: 'ovs', parameter: 'bridge_mappings', value: 'physnet1:br-ex' }
-  - { section: 'agent', parameter: 'tunnel_types', value: 'gre' }
+  - { section: 'ovs',            parameter: 'enable_tunneling',     value: 'True' }
+  - { section: 'ovs',            parameter: 'local_ip',             value: '{{openstack.NETWORK_HOSTS}}' }
+  - { section: 'ovs',            parameter: 'bridge_mappings',      value: 'physnet1:br-ex' }
+  - { section: 'agent',          parameter: 'tunnel_types',         value: 'gre' }
 
 neutron_l3_agent:
-  - { section: 'DEFAULT', parameter: 'interface_driver', value: 'neutron.agent.linux.interface.OVSInterfaceDriver' }
-  - { section: 'DEFAULT', parameter: 'external_network_bridge', value: 'br-ex' }
-  - { section: 'DEFAULT', parameter: 'use_namespaces', value: 'True' }
+  - { section: 'DEFAULT',        parameter: 'interface_driver',        value: 'neutron.agent.linux.interface.OVSInterfaceDriver' }
+  - { section: 'DEFAULT',        parameter: 'external_network_bridge', value: 'br-ex' }
+  - { section: 'DEFAULT',        parameter: 'use_namespaces',          value: 'True' }
 
 ceilometer_cfg:
   - { section: 'notification',      parameter: 'store_events',      value: 'True' }
@@ -95,12 +105,8 @@ ceilometer_cfg:
   - { section: 'dispatcher_zenoss', parameter: 'amqp_password',     value: 'zenoss' }
   - { section: 'dispatcher_zenoss', parameter: 'amqp_virtual_host', value: '/zenoss' }
 
-nova_conf:
-  - { section: 'libvirt', parameter: 'virt_type',              value: 'qemu' }
-  - { section: 'DEFAULT', parameter: 'notify_on_state_change', value: 'vm_state' }
-
 #------------------------------------------------------------------------------
-# Service Lists: Should be in one place so we don't have to chase them
+# Service Lists: Should be in one place so we don't have multiple locations
 #------------------------------------------------------------------------------
 
 nova_services:
