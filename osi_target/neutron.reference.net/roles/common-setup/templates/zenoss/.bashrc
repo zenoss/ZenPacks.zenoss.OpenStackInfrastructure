@@ -19,6 +19,10 @@ if [ "$PS1" ]; then
            . ~/alias.bash
    fi
 
+   if [ -f ~/keystonerc_admin ]; then
+           . ~/keystonerc_admin
+   fi
+
    alias m='ls -al | less -EMsX'
    function d()
    { 
@@ -29,7 +33,6 @@ if [ "$PS1" ]; then
    { 
       exec ls -la "$@" | less -EXsM 
    }
-
 
    function dt()
    {

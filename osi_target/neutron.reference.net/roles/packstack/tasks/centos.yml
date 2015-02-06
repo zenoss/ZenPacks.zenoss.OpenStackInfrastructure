@@ -113,6 +113,14 @@
 #  Reconfigure various Openstack/Neutron items
 #===============================================================================
 
+- name: "Add/Append plugins to neutron.conf"
+  command: openstack-config --list --set neutron.conf 
+           {{item.section}}
+           {{item.parameter}}
+           {{item.value}}
+  with_items: neutron_plugins_extra
+  when: not keystone_admin.stat.exists
+
 - name: "Fix libvirt hyervisor; Use openstack-config to configure nova.conf"
   command: openstack-config --set /etc/nova/nova.conf
            {{item.section}}
