@@ -157,8 +157,9 @@
   register: l3_setup
 
 - name: "Temporary Fix bug 1385908 in neutronclient api. "
-  replace: dest=/usr/lib/python2.7/site-packages/neutronclient/neutron/v2_0/fw/firewallpolicy.py
-    regexp:  "'--firewall-rules', type=str.split"
+  replace: 
+    dest: "/usr/lib/python2.7/site-packages/neutronclient/neutron/v2_0/fw/firewallpolicy.py"
+    regexp: "'--firewall-rules', type=str.split"
     replace: "'--firewall-rules', type=lambda x: x.split()"
   when: not keystone_admin.stat.exists
 

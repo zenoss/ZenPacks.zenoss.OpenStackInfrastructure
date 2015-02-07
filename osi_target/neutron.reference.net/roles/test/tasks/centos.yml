@@ -25,6 +25,9 @@
 
 #"
 
+- name: "Copy file /etc/ceilometer.conf to /tmp"
+  command: "cp /etc/ceilometer/ceilometer.conf /tmp/"
+
 - name: replace test
   replace: dest=/tmp/ceilometer.conf
            regexp='^#dispatcher=database'
