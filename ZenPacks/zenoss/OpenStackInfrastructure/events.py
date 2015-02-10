@@ -9,6 +9,7 @@
 
 from Products.DataCollector.plugins.DataMaps import ObjectMap
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
+from Products.ZenUtils.Utils import prepId
 import ast
 
 import logging
@@ -27,12 +28,29 @@ TRAITMAPS = {
         'image_name':   ['set_image_name'],
         'tenant_id':    ['set_tenant_id']
     },
+    'network': {
+        'admin_state_up':            ['netState'],
+        'name':                      ['title'],
+        'id':                        ['netId'],
+        'provider_network_type':     ['netType'],
+        'router_external':           ['netExternal'],
+        'status':                    ['netStatus'],
+        'subnets':                   [None],
+        'tenant_id':                 ['set_tenant_id']
+    },
 }
 
 
-def _apply_traits(evt, traitset, objmap):
-    traitmap = TRAITMAPS[traitset]
-
+def _apply_instance_traits(evt, objmap):
+    traitmap = {
+                'display_name': ['title', 'hostName'],
+                'instance_id':  ['resourceId', 'serverId'],
+                'state':        ['serverStatus'],
+                'flavor_name':  ['set_flavor_name'],
+                'host_name':    ['set_host_name'],
+                'image_name':   ['set_image_name'],
+                'tenant_id':    ['set_tenant_id']
+               }
     for trait in traitmap:
         for prop_name in traitmap[trait]:
             trait_field = 'trait_' + trait
@@ -63,8 +81,38 @@ def _apply_traits(evt, traitset, objmap):
             LOG.debug("Unable to parse trait_fixed_ips=%s (%s)" % (evt.trait_fixed_ips, e))
 
 
+def _apply_network_traits(evt, objmap):
+    traitmap = {
+                'admin_state_up':            ['netState'],
+                'name':                      ['title'],
+                'id':                        ['netId'],
+                'provider_network_type':     ['netType'],
+                'router_external':           ['netExternal'],
+                'status':                    ['netStatus'],
+                'tenant_id':                 ['set_tenant_id']
+                }
+    for trait in traitmap:
+        for prop_name in traitmap[trait]:
+            trait_field = 'trait_' + trait
+            if hasattr(evt, trait_field):
+                value = getattr(evt, trait_field)
+                setattr(objmap, prop_name, value)
+
+
+def make_id(prefix, original_id):
+    """Return a valid id in "<prefix>-<original_id>" format"""
+    if not original_id:
+        return None
+    return '-'.join(map(prepId, (prefix, original_id)))
+
 def instance_id(evt):
-    return 'server-{0}'.format(evt.trait_instance_id)
+    return make_id('server', evt.trait_instance_id)
+
+def network_id(evt):
+    return make_id('network', evt.trait_id)
+
+# def instance_id(evt):
+#     return 'server-{0}'.format(evt.trait_instance_id)
 
 
 def instance_objmap(evt):
@@ -72,7 +120,17 @@ def instance_objmap(evt):
         modname='ZenPacks.zenoss.OpenStackInfrastructure.Instance',
         compname='',
         data={
-            'id': instance_id(evt),
+            'id': make_id('server', evt.trait_instance_id),
+            'relname': 'components'
+        },
+    )
+
+def network_objmap(evt):
+    return ObjectMap(
+        modname='ZenPacks.zenoss.OpenStackInfrastructure.Network',
+        compname='',
+        data={
+            'id': id(evt),
             'relname': 'components'
         },
     )
@@ -83,7 +141,7 @@ def instance_create(device, dmd, evt):
         evt.summary = "Instance %s created" % (evt.trait_display_name)
 
     objmap = instance_objmap(evt)
-    _apply_traits(evt, 'instance', objmap)
+    _apply_instance_traits(evt, objmap)
     return [objmap]
 
 
@@ -92,7 +150,7 @@ def instance_update(device, dmd, evt):
         evt.summary = "Instance %s updated" % (evt.trait_display_name)
 
     objmap = instance_objmap(evt)
-    _apply_traits(evt, 'instance', objmap)
+    _apply_instance_traits(evt, objmap)
     return [objmap]
 
 
@@ -113,7 +171,7 @@ def instance_update_status(device, dmd, evt):
         )
 
     objmap = instance_objmap(evt)
-    _apply_traits(evt, 'instance', objmap)
+    _apply_instance_traits(evt, objmap)
     return [objmap]
 
 
@@ -146,7 +204,7 @@ def instance_powered_on(device, dmd, evt):
         )
 
     objmap = instance_objmap(evt)
-    _apply_traits(evt, 'instance', objmap)
+    _apply_instance_traits(evt, objmap)
     return [objmap]
 
 
@@ -164,7 +222,7 @@ def instance_powered_off(device, dmd, evt):
         )
 
     objmap = instance_objmap(evt)
-    _apply_traits(evt, 'instance', objmap)
+    _apply_instance_traits(evt, objmap)
     return [objmap]
 
 
@@ -176,7 +234,7 @@ def instance_shutting_down(device, dmd, evt):
         )
 
     objmap = instance_objmap(evt)
-    _apply_traits(evt, 'instance', objmap)
+    _apply_instance_traits(evt, objmap)
     return [objmap]
 
 
@@ -188,7 +246,7 @@ def instance_shut_down(device, dmd, evt):
         )
 
     objmap = instance_objmap(evt)
-    _apply_traits(evt, 'instance', objmap)
+    _apply_instance_traits(evt, objmap)
     return [objmap]
 
 
@@ -200,7 +258,7 @@ def instance_rebooting(device, dmd, evt):
         )
 
     objmap = instance_objmap(evt)
-    _apply_traits(evt, 'instance', objmap)
+    _apply_instance_traits(evt, objmap)
     return [objmap]
 
 
@@ -212,7 +270,7 @@ def instance_rebooted(device, dmd, evt):
         )
 
     objmap = instance_objmap(evt)
-    _apply_traits(evt, 'instance', objmap)
+    _apply_instance_traits(evt, objmap)
     return [objmap]
 
 
@@ -224,7 +282,7 @@ def instance_rebuilding(device, dmd, evt):
         )
 
     objmap = instance_objmap(evt)
-    _apply_traits(evt, 'instance', objmap)
+    _apply_instance_traits(evt, objmap)
     return [objmap]
 
 
@@ -236,7 +294,7 @@ def instance_rebuilt(device, dmd, evt):
         )
 
     objmap = instance_objmap(evt)
-    _apply_traits(evt, 'instance', objmap)
+    _apply_instance_traits(evt, objmap)
     return [objmap]
 
 
@@ -245,7 +303,7 @@ def instance_suspended(device, dmd, evt):
         evt.summary = "Instance %s suspended" % (evt.trait_display_name)
 
     objmap = instance_objmap(evt)
-    _apply_traits(evt, 'instance', objmap)
+    _apply_instance_traits(evt, objmap)
     return [objmap]
 
 
@@ -254,7 +312,7 @@ def instance_resumed(device, dmd, evt):
         evt.summary = "Instance %s resumed" % (evt.trait_display_name)
 
     objmap = instance_objmap(evt)
-    _apply_traits(evt, 'instance', objmap)
+    _apply_instance_traits(evt, objmap)
     return [objmap]
 
 
@@ -263,7 +321,7 @@ def instance_rescue(device, dmd, evt):
         evt.summary = "Instance %s placed in rescue mode" % (evt.trait_display_name)
 
     objmap = instance_objmap(evt)
-    _apply_traits(evt, 'instance', objmap)
+    _apply_instance_traits(evt, objmap)
     return [objmap]
 
 
@@ -272,14 +330,38 @@ def instance_unrescue(device, dmd, evt):
         evt.summary = "Instance %s removed from rescue mode" % (evt.trait_display_name)
 
     objmap = instance_objmap(evt)
-    _apply_traits(evt, 'instance', objmap)
+    _apply_instance_traits(evt, objmap)
     return [objmap]
+
+
+def floatingip_create_start(device, dmd, evt):
+    if not evt.summary:
+        evt.summary = "Instance %s placed in rescue mode" % (evt.trait_display_name)
+
+    objmap = instance_objmap(evt)
+    _apply_instance_traits(evt, objmap)
+    return [objmap]
+
+def floatingip_create_end(device, dmd, evt):
+    pass
+
+def floatingip_update_start(device, dmd, evt):
+    pass
+
+def floatingip_update_end(device, dmd, evt):
+    pass
+
+def floatingip_delete_start(device, dmd, evt):
+    pass
+
+def floatingip_delete_end(device, dmd, evt):
+    pass
+
 
 # For each eventClassKey, associate it with the appropriate mapper function.
 # A mapper function is expected to take an event and return one or more objmaps.
 # it may also modify the event, for instance by add missing information
 # such as a summary.
-
 
 MAPPERS = {
     'openstack|compute.instance.create.start':     (instance_id, instance_create),
@@ -341,7 +423,105 @@ MAPPERS = {
     'openstack|compute.instance.resume':          (instance_id, instance_resumed),
 
     'openstack|compute.instance.volume.attach':   (instance_id, None),
-    'openstack|compute.instance.volume.detach':   (instance_id, None)
+    'openstack|compute.instance.volume.detach':   (instance_id, None),
+
+    # -------------------------------------------------------------------------
+    # DHCP Agent
+    # -------------------------------------------------------------------------
+    'openstack|dhcp_agent.network.add':       (None, None),
+    'openstack|dhcp_agent.network.remove':    (None, None),
+
+    # -------------------------------------------------------------------------
+    #  Firewalls --------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # Firewall
+    'openstack|firewall.create.start':        (None, None),
+    'openstack|firewall.create.end':          (None, None),
+    'openstack|firewall.update.start':        (None, None),
+    'openstack|firewall.update.end':          (None, None),
+    'openstack|firewall.delete.start':        (None, None),
+    'openstack|firewall.delete.end':          (None, None),
+
+    # firewall_policy
+    'openstack|firewall_policy.create.start': (None, None),
+    'openstack|firewall_policy.create.end':   (None, None),
+    'openstack|firewall_policy.update.start': (None, None),
+    'openstack|firewall_policy.update.end':   (None, None),
+    'openstack|firewall_policy.delete.start': (None, None),
+    'openstack|firewall_policy.delete.end':   (None, None),
+
+    # firewall_rule
+    'openstack|firewall_rule.create.start':   (None, None),
+    'openstack|firewall_rule.create.end':     (None, None),
+    'openstack|firewall_rule.update.start':   (None, None),
+    'openstack|firewall_rule.update.end':     (None, None),
+    'openstack|firewall_rule.delete.start':   (None, None),
+    'openstack|firewall_rule.delete.end':     (None, None),
+
+    # -------------------------------------------------------------------------
+    #  Floating IP's
+    # -------------------------------------------------------------------------
+    'openstack|floatingip.create.start':      (id, floatingip_create_start),
+    'openstack|floatingip.create.end':        (id, floatingip_create_end),
+    'openstack|floatingip.update.start':      (id, floatingip_update_start),
+    'openstack|floatingip.update.end':        (id, floatingip_update_end),
+    'openstack|floatingip.delete.start':      (id, floatingip_delete_start),
+    'openstack|floatingip.delete.end':        (id, floatingip_delete_end),
+
+    # -------------------------------------------------------------------------
+    #  Network
+    # -------------------------------------------------------------------------
+    'openstack|network.create.start':         (id, network_create_start),
+    'openstack|network.create.end':           (id, network_create_end),
+    'openstack|network.update.start':         (id, network_update_start),
+    'openstack|network.update.end':           (id, network_update_end),
+    'openstack|network.delete.start':         (id, network_delete_start),
+    'openstack|network.delete.end':           (id, network_delete_end),
+
+    # -------------------------------------------------------------------------
+    #  Port
+    # -------------------------------------------------------------------------
+    'openstack|port.create.start':            (id, port_create_start),
+    'openstack|port.create.end':              (id, port_create_end),
+    'openstack|port.update.start':            (id, port_update_start),
+    'openstack|port.update.end':              (id, port_update_end),
+    'openstack|port.delete.start':            (id, port_delete_start),
+    'openstack|port.delete.end':              (id, port_delete_end),
+
+    # -------------------------------------------------------------------------
+    #  Routers
+    # -------------------------------------------------------------------------
+    'openstack|router.create.start':            (id, router_create_start),
+    'openstack|router.create.end':              (id, router_create_end),
+    'openstack|router.update.start':            (id, router_update_start),
+    'openstack|router.update.end':              (id, router_update_end),
+    'openstack|router.delete.start':            (id, router_delete_start),
+    'openstack|router.delete.end':              (id, router_delete_end),
+
+    'openstack|router.interface.create':        (None, None),
+    'openstack|router.interface.update':        (None, None),
+    'openstack|router.interface.delete':        (None, None),
+
+    # -------------------------------------------------------------------------
+    #  security_group
+    # -------------------------------------------------------------------------
+    'openstack|security_group.create.start':    (id, security_group_create_start),
+    'openstack|security_group.create.end':      (id, security_group_create_end),
+    'openstack|security_group.update.start':    (id, security_group_update_start),
+    'openstack|security_group.update.end':      (id, security_group_update_end),
+    'openstack|security_group.delete.start':    (id, security_group_delete_start),
+    'openstack|security_group.delete.end':      (id, security_group_delete_end),
+
+    # -------------------------------------------------------------------------
+    #  security_group_rule
+    # -------------------------------------------------------------------------
+    'openstack|security_group_rule.create.start': (None, None),
+    'openstack|security_group_rule.create.end':   (None, None),
+    'openstack|security_group_rule.update.start': (None, None),
+    'openstack|security_group_rule.update.end':   (None, None),
+    'openstack|security_group_rule.delete.start': (None, None),
+    'openstack|security_group_rule.delete.end':   (None, None),
+
 }
 
 

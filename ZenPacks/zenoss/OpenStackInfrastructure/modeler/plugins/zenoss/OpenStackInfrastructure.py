@@ -448,8 +448,12 @@ class OpenStackInfrastructure(PythonPlugin):
             cidrs = ""
             for snetid in net['subnets']:
                 for subnet in results['subnets']:
+                    # Note: For now we just join subnets as str.
                     if subnet['id'] == snetid:
-                        cidrs = subnet['cidr']
+                        if not cidrs:
+                            cidrs = subnet['cidr']
+                        else:
+                            cidrs += ',' + subnet['cidr']
             networks.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Network',
                 data=dict(
