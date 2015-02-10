@@ -579,7 +579,7 @@ CFG = zenpacklib.ZenPackSpec(
             },
             'relationships': {
                 'tenant':     {'grid_display': False},
-                'network':     {'grid_display': False},
+                'network':    {'grid_display': False},
             },
         },
 
@@ -619,9 +619,12 @@ CFG = zenpacklib.ZenPackSpec(
                                 'label': 'Security Group ID'},
                 'addr':        {'label': 'Address'},
                 'network_':    {'label': 'Network'},
-                'tenant_':     {'label': 'Tenant'},
+                'tenant':      {'label': 'Tenant'},
                 'status':      {'label': 'Status'},
-            }
+            },
+            'relationships': {
+                'tenant':      {'grid_display': False},
+                },
         },
 
 
