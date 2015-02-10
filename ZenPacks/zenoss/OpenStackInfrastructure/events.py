@@ -92,11 +92,11 @@ def _apply_instance_traits(evt, objmap):
         except Exception, e:
             LOG.debug("Unable to parse trait_fixed_ips=%s (%s)" % (evt.trait_fixed_ips, e))
 
-def make_id(prefix, original_id):
-    """Return a valid id in "<prefix>-<original_id>" format"""
-    if not original_id:
+def make_id(prefix, raw_id):
+    """Return a valid id in "<prefix>-<raw_id>" format"""
+    if not raw_id:
         return None
-    return '-'.join(map(prepId, (prefix, original_id)))
+    return '-'.join(map(prepId, (prefix, raw_id)))
 
 def instance_id(evt):
     return make_id('server', evt.trait_instance_id)
