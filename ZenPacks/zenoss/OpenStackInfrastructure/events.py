@@ -21,15 +21,37 @@ LOG = logging.getLogger('zen.OpenStack.events')
 NEUTRON_TRAITMAPS = {
     'network': {
         'admin_state_up':            ['netState'],
-        'name':                      ['title'],
         'id':                        ['netId'],
+        'name':                      ['title'],
         'provider_network_type':     ['netType'],
         'router_external':           ['netExternal'],
         'status':                    ['netStatus'],
-        'tenant_id':                 ['set_tenant_id']
+    },
+    'subnet': {
+        'cidr':                      ['cidr'],
+        'dns':                       ['dns_nameservers'],
+        'gateway':                   ['gateway_ip'],
+        'id':                        ['subnetId'],
+        'name':                      ['title'],
+        'network_id':                ['set_network'],
+        'router_external':           ['netExternal'],
     },
 }
 
+
+def _apply_neutron_traits(evt, traitset, objmap):
+    traitmap = NEUTRON_TRAITMAPS[traitset]
+
+    for trait in traitmap:
+        for prop_name in traitmap[trait]:
+            trait_field = 'trait_' + trait
+            if hasattr(evt, trait_field):
+                value = getattr(evt, trait_field)
+                setattr(objmap, prop_name, value)
+
+    # Set the Tenant ID
+    if hasattr(evt, 'trait_tenant_id'):
+        setattr(objmap, 'set_tenant', make_id('tenant', evt.trait_tenant_id))
 
 def _apply_instance_traits(evt, objmap):
     traitmap = {
@@ -69,26 +91,6 @@ def _apply_instance_traits(evt, objmap):
             setattr(objmap, 'privateIps', list(private_ips))
         except Exception, e:
             LOG.debug("Unable to parse trait_fixed_ips=%s (%s)" % (evt.trait_fixed_ips, e))
-
-
-def _apply_network_traits(evt, objmap):
-    traitmap = {
-                'admin_state_up':            ['netState'],
-                'name':                      ['title'],
-                'id':                        ['netId'],
-                'provider_network_type':     ['netType'],
-                'router_external':           ['netExternal'],
-                'status':                    ['netStatus'],
-                'tenant_id':                 ['set_tenant_id']
-                }
-
-    for trait in traitmap:
-        for prop_name in traitmap[trait]:
-            trait_field = 'trait_' + trait
-            if hasattr(evt, trait_field):
-                value = getattr(evt, trait_field)
-                setattr(objmap, prop_name, value)
-
 
 def make_id(prefix, original_id):
     """Return a valid id in "<prefix>-<original_id>" format"""

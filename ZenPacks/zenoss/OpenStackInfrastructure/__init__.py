@@ -43,7 +43,9 @@ RELATIONSHIPS_YUML = """
 [Image]1-.-*[Instance]
 [Tenant]1-.-*[Instance]
 [Tenant]1-.-*[Network]
+[Tenant]1-.-*[Subnet]
 [Tenant]1-.-*[Router]
+[Tenant]1-.-*[Port]
 [Tenant]1-.-*[SecurityGroup]
 [Tenant]1-.-*[FloatingIp]
 [Hypervisor]1-.-*[Instance]
@@ -423,7 +425,7 @@ CFG = zenpacklib.ZenPackSpec(
             # dynamicview impacts adaptor, because OSProcess is not part of
             # service_view, and so will not be exported from DV to impact
             # currently (ZEN-14579).
-            'impacted_by': ['osprocess_component'],            
+            'impacted_by': ['osprocess_component'],
         },
 
         'NovaDatabase': {
@@ -534,7 +536,11 @@ CFG = zenpacklib.ZenPackSpec(
                 'dns':         {'label': 'DNS'},
                 'gateway':     {'label': 'Gateway',
                                 'content_width': 100},
-            }
+            },
+            'relationships': {
+                'tenant':      {'grid_display': False},
+                },
+
         },
 
         'Router': {
@@ -572,6 +578,7 @@ CFG = zenpacklib.ZenPackSpec(
                 # 'gateway':       {'label': 'Gateway'},
             },
             'relationships': {
+                'tenant':     {'grid_display': False},
                 'network':     {'grid_display': False},
             },
         },
@@ -584,7 +591,7 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'sgId':        {'grid_display': False,
                                 'label': 'Security Group ID'},
-        #              'rules':       {'label': 'Rules'},
+                # 'rules':       {'label': 'Rules'},
             },
         },
 
