@@ -18,16 +18,7 @@ LOG = logging.getLogger('zen.OpenStack.events')
 
 # Sets of traits we can expect to get (see event_definitions.yaml on the
 # openstack side) and what objmap properties they map to.
-TRAITMAPS = {
-    'instance': {
-        'display_name': ['title', 'hostName'],
-        'instance_id':  ['resourceId', 'serverId'],
-        'state':        ['serverStatus'],
-        'flavor_name':  ['set_flavor_name'],
-        'host_name':    ['set_host_name'],
-        'image_name':   ['set_image_name'],
-        'tenant_id':    ['set_tenant_id']
-    },
+NEUTRON_TRAITMAPS = {
     'network': {
         'admin_state_up':            ['netState'],
         'name':                      ['title'],
@@ -35,7 +26,6 @@ TRAITMAPS = {
         'provider_network_type':     ['netType'],
         'router_external':           ['netExternal'],
         'status':                    ['netStatus'],
-        'subnets':                   [None],
         'tenant_id':                 ['set_tenant_id']
     },
 }
@@ -91,6 +81,7 @@ def _apply_network_traits(evt, objmap):
                 'status':                    ['netStatus'],
                 'tenant_id':                 ['set_tenant_id']
                 }
+
     for trait in traitmap:
         for prop_name in traitmap[trait]:
             trait_field = 'trait_' + trait
