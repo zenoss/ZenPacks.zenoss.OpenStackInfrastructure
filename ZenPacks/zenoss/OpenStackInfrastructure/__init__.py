@@ -571,9 +571,9 @@ CFG = zenpacklib.ZenPackSpec(
                 'owner':       {'label': 'Owner',
                                 'content_width': 120},
                 'status':      {'label': 'Status'},
-                'mac':         {'label': 'MAC',
+                'mac_address': {'label': 'MAC',
                                 'content_width': 120},
-                'network_':    {'label': 'Network'},
+                'network_name':  {'label': 'Network'},
                 # 'type_':       {'label': 'Type'},
                 # 'gateway':       {'label': 'Gateway'},
             },
@@ -615,12 +615,16 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Floating IP',
             'order': 19,
             'properties': {
-                'floatingipId':       {'grid_display': False,
-                                'label': 'Security Group ID'},
-                'addr':        {'label': 'Address'},
-                'network_':    {'label': 'Network'},
-                'tenant':      {'label': 'Tenant'},
-                'status':      {'label': 'Status'},
+                'floatingipId':           {'grid_display': False,
+                                           'label': 'Security Group ID'},
+                'fixed_ip_address':       {'label': 'Address'},
+                'floating_ip_address':    {'grid_display': False},
+                'floating_network_id':    {'grid_display': False},
+                'network_name':           {'label': 'Network'},
+                'port_id':                {'grid_display': False},
+                'router_id':              {'grid_display': False},
+                'status':                 {'label': 'Status'},
+                'tenant':                 {'label': 'Tenant'},
             },
             'relationships': {
                 'tenant':      {'grid_display': False},
@@ -630,7 +634,7 @@ CFG = zenpacklib.ZenPackSpec(
 
     },
 
-    class_relationships=zenpacklib.relationships_from_yuml(RELATIONSHIPS_YUML),
+    class_relationships = zenpacklib.relationships_from_yuml(RELATIONSHIPS_YUML),
 )
 
 CFG.create()

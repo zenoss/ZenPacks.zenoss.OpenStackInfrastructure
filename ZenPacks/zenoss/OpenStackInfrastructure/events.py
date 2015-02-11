@@ -19,6 +19,16 @@ LOG = logging.getLogger('zen.OpenStack.events')
 # Sets of traits we can expect to get (see event_definitions.yaml on the
 # openstack side) and what objmap properties they map to.
 NEUTRON_TRAITMAPS = {
+    'floatingip': {
+        'fixed_ip_address':          ['fixed_ip_address'],
+        'floating_ip_address':       ['floating_ip_address'],
+        'floating_network_id':       ['floating_network_id'],
+        'id':                        ['floatingipId'],
+        'network_name':              ['network_name'],
+        'port_id':                   ['port_id'],
+        'router_id':                 ['router_id'],
+        'status':                    ['status'],
+    },
     'network': {
         'admin_state_up':            ['netState'],
         'id':                        ['netId'],
@@ -27,16 +37,12 @@ NEUTRON_TRAITMAPS = {
         'router_external':           ['netExternal'],
         'status':                    ['netStatus'],
     },
-    'subnet': {
-        'cidr':                      ['cidr'],
-        'dns':                       ['dns_nameservers'],
-        'gateway':                   ['gateway_ip'],
-        'id':                        ['subnetId'],
-        'name':                      ['title'],
-        'network_id':                ['set_network'],
-        'router_external':           ['netExternal'],
+    'port': {
+        'admin_state_up':            ['admin_state_up'],
+        'mac_address':               ['portIdk'],
+        'id':                        ['portIdk'],
     },
-    'floatingip': {
+    'subnet': {
         'cidr':                      ['cidr'],
         'dns':                       ['dns_nameservers'],
         'gateway':                   ['gateway_ip'],

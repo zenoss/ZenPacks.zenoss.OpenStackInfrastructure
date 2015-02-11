@@ -515,39 +515,39 @@ class OpenStackInfrastructure(PythonPlugin):
             network_name = [network['name'] for network in results['networks']
                             if network['status'] == 'ACTIVE' and
                                network['id'] == port['network_id']]
-            server_id = ''
-            # server_name = ''
-            for server in results['servers']:
-                if 'private' in server['addresses']:
-                    for iface in server['addresses']['private']:
-                        if iface['OS-EXT-IPS-MAC:mac_addr'] != port['mac_address']:
-                            continue
+            # server_id = ''
+            # # server_name = ''
+            # for server in results['servers']:
+            #     if 'private' in server['addresses']:
+            #         for iface in server['addresses']['private']:
+            #             if iface['OS-EXT-IPS-MAC:mac_addr'] != port['mac_address']:
+            #                 continue
 
-                        for fixed_ip in port['fixed_ips']:
-                            if iface['addr'] == fixed_ip['ip_address']:
-                                server_id = server['id']
-                                # server_name = server['name']
-                                break
+            #             for fixed_ip in port['fixed_ips']:
+            #                 if iface['addr'] == fixed_ip['ip_address']:
+            #                     server_id = server['id']
+            #                     # server_name = server['name']
+            #                     break
 
-                        if server_id:
-                            break
+            #             if server_id:
+            #                 break
 
-                if 'public' in server['addresses']:
-                    for iface in server['addresses']['public']:
-                        if iface['OS-EXT-IPS-MAC:mac_addr'] != port['mac_address']:
-                            continue
+            #     if 'public' in server['addresses']:
+            #         for iface in server['addresses']['public']:
+            #             if iface['OS-EXT-IPS-MAC:mac_addr'] != port['mac_address']:
+            #                 continue
 
-                        for fixed_ip in port['fixed_ips']:
-                            if iface['addr'] == fixed_ip['ip_address']:
-                                server_id = server['id']
-                                # server_name = server['name']
-                                break
+            #             for fixed_ip in port['fixed_ips']:
+            #                 if iface['addr'] == fixed_ip['ip_address']:
+            #                     server_id = server['id']
+            #                     # server_name = server['name']
+            #                     break
 
-                        if server_id:
-                            break
+            #             if server_id:
+            #                 break
 
-                if server_id:
-                    break
+            #     if server_id:
+            #         break
 
             # instance_id = ''
             # if server_id:
@@ -555,20 +555,20 @@ class OpenStackInfrastructure(PythonPlugin):
             ports.append(ObjectMap(
                 modname = 'ZenPacks.zenoss.OpenStackInfrastructure.Port',
                 data = dict(
-                    id = 'port-{0}'.format(port['id']),
-                    portId = port['id'],
-                    network_ = network_name[0],
-                    # set_network = 'network-{0}'.format(port['network_id']),
-                    status = port['status'],
-                    # gateway = network_name[0],
+                    admin_state_up = port['admin_state_up'],
                     # host = port['binding:host_id'],
-                    # set_host = 'host-packstack',
-                    mac = port['mac_address'].upper(),
-                    owner = port['device_owner'],
-                    set_tenant = 'tenant-{0}'.format(port['tenant_id']),
-                    # type_ = port['binding:vif_type'],
-                    # set_instance = instance_id,
+                    id = 'port-{0}'.format(port['id']),
                     # instance_ = server_name,
+                    mac_address = port['mac_address'].upper(),
+                    network_name = network_name[0],
+                    owner = port['device_owner'],
+                    portId = port['id'],
+                    # set_host = 'host-packstack',
+                    # set_instance = instance_id,
+                    # set_network = 'network-{0}'.format(port['network_id']),
+                    set_tenant = 'tenant-{0}'.format(port['tenant_id']),
+                    status = port['status'],
+                    # type_ = port['binding:vif_type'],
                     )))
 
         # security_group
@@ -595,12 +595,15 @@ class OpenStackInfrastructure(PythonPlugin):
             floatingips.append(ObjectMap(
                 modname = 'ZenPacks.zenoss.OpenStackInfrastructure.FloatingIp',
                 data = dict(
-                    id = 'floatingip-{0}'.format(floatingip['id']),
                     floatingipId = floatingip['id'],
-                    addr = floatingip['floating_ip_address'],
-                    status = floatingip['status'],
-                    network_ = network_name[0],
+                    fixed_ip_address = floatingip['fixed_ip_address'],
+                    floating_ip_address = floatingip['floating_ip_address'],
+                    floating_network_id = floatingip['floating_network_id'],
+                    id = 'floatingip-{0}'.format(floatingip['id']),
+                    network_name = network_name[0],
+                    router_id = floatingip['router_id'],
                     set_tenant = tenant_name[0],
+                    status = floatingip['status'],
                     )))
 
         objmaps = {
