@@ -516,7 +516,7 @@ class OpenStackInfrastructure(PythonPlugin):
                             if network['status'] == 'ACTIVE' and
                                network['id'] == port['network_id']]
             server_id = ''
-            server_name = ''
+            # server_name = ''
             for server in results['servers']:
                 if 'private' in server['addresses']:
                     for iface in server['addresses']['private']:
@@ -526,7 +526,7 @@ class OpenStackInfrastructure(PythonPlugin):
                         for fixed_ip in port['fixed_ips']:
                             if iface['addr'] == fixed_ip['ip_address']:
                                 server_id = server['id']
-                                server_name = server['name']
+                                # server_name = server['name']
                                 break
 
                         if server_id:
@@ -540,7 +540,7 @@ class OpenStackInfrastructure(PythonPlugin):
                         for fixed_ip in port['fixed_ips']:
                             if iface['addr'] == fixed_ip['ip_address']:
                                 server_id = server['id']
-                                server_name = server['name']
+                                # server_name = server['name']
                                 break
 
                         if server_id:
@@ -549,9 +549,9 @@ class OpenStackInfrastructure(PythonPlugin):
                 if server_id:
                     break
 
-            instance_id = ''
-            if server_id:
-                instance_id = 'instance-{0}'.format(server_id)
+            # instance_id = ''
+            # if server_id:
+            #     instance_id = 'instance-{0}'.format(server_id)
             ports.append(ObjectMap(
                 modname = 'ZenPacks.zenoss.OpenStackInfrastructure.Port',
                 data = dict(

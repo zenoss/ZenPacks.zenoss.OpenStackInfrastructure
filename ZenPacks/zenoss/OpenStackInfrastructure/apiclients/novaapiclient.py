@@ -239,7 +239,7 @@ class NovaAPIClient(object):
             elif status == httplib.BAD_REQUEST:
                 raise BadRequestError(text)
             elif status == httplib.NOT_FOUND:
-                log.info("\n\tNeutroAPI Error: %s" % request.url)
+                log.info("\n\tNova API Error: httplib not found: %s" % request.url)
                 raise NotFoundError(text)
 
             raise NovaError(text)
@@ -406,7 +406,7 @@ def main():
         pprint.pprint(sec)
 
     try:
-        sec = yield cc.XXXhypervisors(hypervisor_match='%', servers=True)
+        sec = yield cc.hypervisors(hypervisor_match='%', servers=True)
 
     except Exception:
         log.info("\n\t in_main: NovaAPI: broken stuff in call")
