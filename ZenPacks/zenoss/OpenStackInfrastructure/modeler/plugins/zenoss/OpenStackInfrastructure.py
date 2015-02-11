@@ -552,6 +552,7 @@ class OpenStackInfrastructure(PythonPlugin):
             # instance_id = ''
             # if server_id:
             #     instance_id = 'instance-{0}'.format(server_id)
+
             ports.append(ObjectMap(
                 modname = 'ZenPacks.zenoss.OpenStackInfrastructure.Port',
                 data = dict(
@@ -561,8 +562,10 @@ class OpenStackInfrastructure(PythonPlugin):
                     # instance_ = server_name,
                     mac_address = port['mac_address'].upper(),
                     network_name = network_name[0],
+                    network_id = port['network_id'],
                     owner = port['device_owner'],
                     portId = port['id'],
+                    port_name = port['name'],
                     # set_host = 'host-packstack',
                     # set_instance = instance_id,
                     # set_network = 'network-{0}'.format(port['network_id']),

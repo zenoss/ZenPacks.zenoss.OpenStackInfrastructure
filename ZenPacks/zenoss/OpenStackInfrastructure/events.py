@@ -39,8 +39,11 @@ NEUTRON_TRAITMAPS = {
     },
     'port': {
         'admin_state_up':            ['admin_state_up'],
-        'mac_address':               ['portIdk'],
-        'id':                        ['portIdk'],
+        'network_id':                ['network_id'],
+        'mac_address':               ['mac_address'],
+        'id':                        ['portId'],
+        'name':                      ['port_name'],
+        'status':                    ['status'],
     },
     'subnet': {
         'cidr':                      ['cidr'],
