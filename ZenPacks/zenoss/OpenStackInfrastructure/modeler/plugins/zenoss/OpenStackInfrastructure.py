@@ -512,7 +512,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_tenant = 'tenant-{0}'.format(router['tenant_id']),    # tenant-a3a2901f2fd14f808401863e3628a858
                     status = router['status'],
                     subnets = list(_subnets),
-                    router_name = router['name'],
+                    title = router['name'],
                 )))
 
         # port
@@ -575,22 +575,23 @@ class OpenStackInfrastructure(PythonPlugin):
                     network_id = port['network_id'],
                     owner = port['device_owner'],
                     portId = port['id'],
-                    port_name = port['name'],
                     # set_host = 'host-packstack',
                     # set_instance = instance_id,
                     # set_network = 'network-{0}'.format(port['network_id']),
                     set_tenant = 'tenant-{0}'.format(port['tenant_id']),
                     status = port['status'],
-                    # type_ = port['binding:vif_type'],
+                    title = port['name'],
+                    vif_type = port['binding:vif_type'],
                     )))
 
         # security_group
+        # WARNING: We must use "securitygroup-{id}" for proper modeler naming
         security_groups = []
         for sg in results['security_groups']:
             security_groups.append(ObjectMap(
                 modname = 'ZenPacks.zenoss.OpenStackInfrastructure.SecurityGroup',
                 data = dict(
-                    id = 'security_group-{0}'.format(sg['id']),
+                    id = 'securitygroup-{0}'.format(sg['id']),
                     sgId = sg['id'],
                     title = sg['name'],
                     set_tenant = 'tenant-{0}'.format(sg['tenant_id']),    # tenant-a3a2901f2fd14f808401863e3628a858

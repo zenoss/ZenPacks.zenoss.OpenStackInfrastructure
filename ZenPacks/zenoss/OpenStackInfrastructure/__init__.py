@@ -551,7 +551,7 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'gateways':    {'type_': 'lines', 'label': 'Gateways'},
                 'routerId':    {'grid_display': False, 'label': 'Router ID'},
-                'router_name': {'grid_display': False, 'label': 'Router'},
+                'title':       {'grid_display': True, 'label': 'Router'},
                 'routes':      {'label': 'Routes'},
                 'status':      {'label': 'Status'},
                 'subnets':     {'type_': 'lines',
@@ -561,24 +561,21 @@ CFG = zenpacklib.ZenPackSpec(
             },
         },
 
-        'Port': {         # more info?
+        'Port': {
             'base': 'LogicalComponent',
             'meta_type': 'OpenStackInfrastructurePort',
             'label': 'Port',
             'order': 16,
             'properties': {
-                # 'title':       {'grid_display': False,
-                #                 'label': 'Title'},
-                # 'host':        {'label': 'Host'},
-                'mac_address': {'label': 'MAC', 'content_width': 120},
-                'network_id':  {'grid_display': False, 'label': 'Network ID'},
-                'network_name':  {'label': 'Network'},
-                'owner':       {'label': 'Owner', 'content_width': 120},
-                'port_name':   {'grid_display': False, 'label': 'Port Name'},
-                'portId':      {'grid_display': False, 'label': 'Port ID'},
-                'status':      {'label': 'Status'},
-                # 'type_':       {'label': 'Type'},
-                # 'gateway':       {'label': 'Gateway'},
+                'mac_address':  {'label': 'MAC', 'content_width': 120},
+                'network_id':   {'grid_display': False, 'label': 'Network ID'},
+                'network_name': {'label': 'Network'},
+                'owner':        {'label': 'Owner', 'content_width': 120},
+                'title':        {'grid_display': False, 'label': 'Port Name'},
+                'portId':       {'grid_display': False, 'label': 'Port ID'},
+                'status':       {'label': 'Status'},
+                'vif_type':     {'label': 'Type'},
+                # 'gateway':    {'label': 'Gateway'},
             },
             'relationships': {
                 'tenant':     {'grid_display': False},
@@ -592,9 +589,9 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Security Group',
             'order': 17,
             'properties': {
-                'sgId':        {'grid_display': False,
-                                'label': 'Security Group ID'},
-                # 'rules':       {'label': 'Rules'},
+                'sgId':  {'grid_display': False, 'label': 'Security Group ID'},
+                'title': {'grid_display': False, 'label': 'SG Name'},
+                # 'rules': {'label': 'Rules'},
             },
         },
 

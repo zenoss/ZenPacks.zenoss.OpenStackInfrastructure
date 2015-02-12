@@ -42,15 +42,20 @@ NEUTRON_TRAITMAPS = {
         'network_id':                ['network_id'],
         'mac_address':               ['mac_address'],
         'id':                        ['portId'],
-        'name':                      ['port_name'],
+        'name':                      ['title'],
         'status':                    ['status'],
+        'binding:vif_type':          ['vif_type'],
     },
     'router': {
         'admin_state_up':            ['admin_state_up'],
         'id':                        ['routerId'],
         'routes':                    ['routes'],
         'status':                    ['status'],
-        'name':                      ['router_name'],
+        'name':                      ['title'],
+    },
+    'security_group': {
+        'id':                        ['sgId'],
+        'name':                      ['title'],
     },
     'subnet': {
         'cidr':                      ['cidr'],
@@ -63,7 +68,43 @@ NEUTRON_TRAITMAPS = {
     },
 }
 
+# -----------------------------------------------------------------------------
+# ID Functions
+# -----------------------------------------------------------------------------
+def make_id(prefix, raw_id):
+    """Return a valid id in "<prefix>-<raw_id>" format"""
+    if not raw_id:
+        LOG.warning("Missing data for %s Id" % prefix)
+        return None
+    return prepId("{0}-{1}".format(prefix,raw_id))
 
+def instance_id(evt):
+    return make_id('server', evt.trait_instance_id)
+
+def floatingip_id(evt):
+    return make_id('floatingip'. evt.trait_id)
+
+def network_id(evt):
+    return make_id('network'. evt.trait_id)
+
+def port_id(evt):
+    return make_id('port'. evt.trait_id)
+
+def router_id(evt):
+    return make_id('router'. evt.trait_id)
+
+def securitygroup_id(evt):
+    return make_id('securitygroup'. evt.trait_id)
+
+def subnet_id(evt):
+    return make_id('subnet'. evt.trait_id)
+
+def tenant_id(evt):
+    return make_id('tenant'. evt.trait_tenant_id)
+
+# -----------------------------------------------------------------------------
+# Traitmap Functions
+# -----------------------------------------------------------------------------
 def _apply_neutron_traits(evt, traitset, objmap):
     traitmap = NEUTRON_TRAITMAPS[traitset]
 
@@ -76,7 +117,7 @@ def _apply_neutron_traits(evt, traitset, objmap):
 
     # Set the Tenant ID
     if hasattr(evt, 'trait_tenant_id'):
-        setattr(objmap, 'set_tenant', make_id('tenant', evt.trait_tenant_id))
+        setattr(objmap, 'set_tenant', tenant_id(evt))
 
 def _apply_router_gateway_info(evt, objmap):
     ''' Get the first router gateway. This should be updated to include all '''
@@ -136,35 +177,6 @@ def _apply_instance_traits(evt, objmap):
         except Exception, e:
             LOG.debug("Unable to parse trait_fixed_ips=%s (%s)" % (evt.trait_fixed_ips, e))
 
-def make_id(prefix, raw_id):
-    """Return a valid id in "<prefix>-<raw_id>" format"""
-    if not raw_id:
-        LOG.warning("Missing data for %s Id" % prefix)
-        return None
-    return prepId("{0}-{1}".format(prefix,raw_id))
-
-def instance_id(evt):
-    return make_id('server', evt.trait_instance_id)
-
-def floatingip_id(evt):
-    return make_id('floatingip'. evt.trait_id)
-
-def network_id(evt):
-    return make_id('network'. evt.trait_id)
-
-def port_id(evt):
-    return make_id('port'. evt.trait_id)
-
-def router_id(evt):
-    return make_id('router'. evt.trait_id)
-
-def security_group_id(evt):
-    return make_id('security_group'. evt.trait_id)
-
-def subnet_id(evt):
-    return make_id('subnet'. evt.trait_id)
-
-
 def instance_objmap(evt):
     return ObjectMap(
         modname='ZenPacks.zenoss.OpenStackInfrastructure.Instance',
@@ -176,9 +188,14 @@ def instance_objmap(evt):
     )
 
 def neutron_objmap(evt, Name):
-    """ Create an object map of type Name. Name must be proper module name """
+    """ Create an object map of type Name. Name must be proper module name.
+        WARNING: All Neutron events have a 'trait_id' attribute.
+                 Make sure that Name.lower() corresponds to a well defined
+                 id_function. Especially SecurityGroups!
+    """
     module = 'ZenPacks.zenoss.OpenStackInfrastructure.' + Name
-    _id = make_id(Name.lower(), evt.trait_id)
+    id_func = eval(Name.lower())
+    _id = id_func(evt)
 
     return ObjectMap(
         modname=module,
@@ -188,7 +205,9 @@ def neutron_objmap(evt, Name):
               },
     )
 
-
+# -----------------------------------------------------------------------------
+# Event Functions
+# -----------------------------------------------------------------------------
 def instance_create(device, dmd, evt):
     if not evt.summary:
         evt.summary = "Instance %s created" % (evt.trait_display_name)
@@ -528,37 +547,37 @@ def router_delete_end(device, dmd, evt):
     return [objmap]
 
 # -----------------------------------------------------------------------------
-# Security_Group Event Functions
+# SecurityGroup Event Functions: Carefull with the underscore differences
 # -----------------------------------------------------------------------------
-def security_group_create_start(device, dmd, evt):
+def securityGroup_create_start(device, dmd, evt):
     if not evt.summary:
-        evt.summary = "Creating Security_Group %s" % (evt.trait_id)
+        evt.summary = "Creating SecurityGroup %s" % (evt.trait_id)
     return []
 
-def security_group_update_start(device, dmd, evt):
+def securityGroup_update_start(device, dmd, evt):
     if not evt.summary:
-        evt.summary = "Updating Security_Group %s" % (evt.trait_id)
+        evt.summary = "Updating SecurityGroup %s" % (evt.trait_id)
     return []
 
-def security_group_update(device, dmd, evt):
+def securityGroup_update(device, dmd, evt):
     if not evt.summary:
-        evt.summary = "Setup Security_Group %s" % (evt.trait_id)
+        evt.summary = "Setup SecurityGroup %s" % (evt.trait_id)
 
-    objmap = neutron_objmap(evt, "Security_Group")
+    objmap = neutron_objmap(evt, "SecurityGroup")
     _apply_neutron_traits(evt, 'security_group', objmap)
     return [objmap]
 
-def security_group_delete_start(device, dmd, evt):
+def securityGroup_delete_start(device, dmd, evt):
     if not evt.summary:
-        evt.summary = "Deleting Security_Group %s " % (evt.trait_id)
+        evt.summary = "Deleting SecurityGroup %s " % (evt.trait_id)
     return []
 
 
-def security_group_delete_end(device, dmd, evt):
+def securityGroup_delete_end(device, dmd, evt):
     if not evt.summary:
-        evt.summary = "Security_Group %s deleted" % (evt.trait_id)
+        evt.summary = "SecurityGroup %s deleted" % (evt.trait_id)
 
-    objmap = neutron_objmap(evt, 'Security_Group')
+    objmap = neutron_objmap(evt, 'SecurityGroup')
     objmap.remove = True
     return [objmap]
 
@@ -719,16 +738,6 @@ MAPPERS = {
     'openstack|network.delete.end':          (network_id, network_delete_end),
 
     # -------------------------------------------------------------------------
-    #  Subnet
-    # -------------------------------------------------------------------------
-    'openstack|subnet.create.start':         (subnet_id, subnet_create_start),
-    'openstack|subnet.create.end':           (subnet_id, subnet_update),
-    'openstack|subnet.update.start':         (subnet_id, subnet_update_start),
-    'openstack|subnet.update.end':           (subnet_id, subnet_update),
-    'openstack|subnet.delete.start':         (subnet_id, subnet_delete_start),
-    'openstack|subnet.delete.end':           (subnet_id, subnet_delete_end),
-
-    # -------------------------------------------------------------------------
     #  Port
     # -------------------------------------------------------------------------
     'openstack|port.create.start':           (port_id, port_create_start),
@@ -753,17 +762,17 @@ MAPPERS = {
     'openstack|router.interface.delete':        (None, None),
 
     # -------------------------------------------------------------------------
-    #  security_group
+    #  Security_group
     # -------------------------------------------------------------------------
-    'openstack|security_group.create.start': (security_group_id, security_group_create_start),
-    'openstack|security_group.create.end':   (security_group_id, security_group_update),
-    'openstack|security_group.update.start': (security_group_id, security_group_update_start),
-    'openstack|security_group.update.end':   (security_group_id, security_group_update),
-    'openstack|security_group.delete.start': (security_group_id, security_group_delete_start),
-    'openstack|security_group.delete.end':   (security_group_id, security_group_delete_end),
+    'openstack|security_group.create.start': (securitygroup_id, securityGroup_create_start),
+    'openstack|security_group.create.end':   (securitygroup_id, securityGroup_update),
+    'openstack|security_group.update.start': (securitygroup_id, securityGroup_update_start),
+    'openstack|security_group.update.end':   (securitygroup_id, securityGroup_update),
+    'openstack|security_group.delete.start': (securitygroup_id, securityGroup_delete_start),
+    'openstack|security_group.delete.end':   (securitygroup_id, securityGroup_delete_end),
 
     # -------------------------------------------------------------------------
-    #  security_group_rule
+    #  Security_group_rule
     # -------------------------------------------------------------------------
     'openstack|security_group_rule.create.start': (None, None),
     'openstack|security_group_rule.create.end':   (None, None),
@@ -771,6 +780,16 @@ MAPPERS = {
     'openstack|security_group_rule.update.end':   (None, None),
     'openstack|security_group_rule.delete.start': (None, None),
     'openstack|security_group_rule.delete.end':   (None, None),
+
+    # -------------------------------------------------------------------------
+    #  Subnet
+    # -------------------------------------------------------------------------
+    'openstack|subnet.create.start':         (subnet_id, subnet_create_start),
+    'openstack|subnet.create.end':           (subnet_id, subnet_update),
+    'openstack|subnet.update.start':         (subnet_id, subnet_update_start),
+    'openstack|subnet.update.end':           (subnet_id, subnet_update),
+    'openstack|subnet.delete.start':         (subnet_id, subnet_delete_start),
+    'openstack|subnet.delete.end':           (subnet_id, subnet_delete_end),
 
 }
 
