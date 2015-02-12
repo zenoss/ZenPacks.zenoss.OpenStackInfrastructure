@@ -194,7 +194,7 @@ def neutron_objmap(evt, Name):
                  id_function. Especially SecurityGroups!
     """
     module = 'ZenPacks.zenoss.OpenStackInfrastructure.' + Name
-    id_func = eval(Name.lower())
+    id_func = eval(Name.lower() + '_id')
     _id = id_func(evt)
 
     return ObjectMap(
