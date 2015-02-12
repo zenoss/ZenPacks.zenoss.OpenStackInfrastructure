@@ -45,6 +45,13 @@ NEUTRON_TRAITMAPS = {
         'name':                      ['port_name'],
         'status':                    ['status'],
     },
+    'router': {
+        'admin_state_up':            ['admin_state_up'],
+        'id':                        ['routerId'],
+        'routes':                    ['routes'],
+        'status':                    ['status'],
+        'name':                      ['router_name'],
+    },
     'subnet': {
         'cidr':                      ['cidr'],
         'dns':                       ['dns_nameservers'],
@@ -70,6 +77,25 @@ def _apply_neutron_traits(evt, traitset, objmap):
     # Set the Tenant ID
     if hasattr(evt, 'trait_tenant_id'):
         setattr(objmap, 'set_tenant', make_id('tenant', evt.trait_tenant_id))
+
+def _apply_router_gateway_info(evt, objmap):
+    ''' Get the first router gateway. This should be updated to include all '''
+    if hasattr(evt, 'trait_external_gateway_info'):
+        gateway_info = ast.literal_eval(evt.trait_external_gateway_info)
+        external_fixed_ips = gateway_info.get('external_fixed_ips', None)
+        network_id = gateway_info.get('network_id', None)
+
+        gateways = set()
+        subnets = set()
+
+        if external_fixed_ips:
+            for _ip in external_fixed_ips:
+                gateways.add(_ip.get('ip_address', None))
+                subnets.add(_ip.get('subnet_id', None))
+
+        setattr(objmap, 'gateways', list(gateways))
+        setattr(objmap, 'subnets', list(subnets))
+        setattr(objmap, 'network_id', network_id)
 
 def _apply_instance_traits(evt, objmap):
     traitmap = {
@@ -145,26 +171,6 @@ def instance_objmap(evt):
         compname='',
         data={
             'id': instance_id(evt),
-            'relname': 'components'
-        },
-    )
-
-def network_objmap(evt):
-    return ObjectMap(
-        modname='ZenPacks.zenoss.OpenStackInfrastructure.Network',
-        compname='',
-        data={
-            'id': network_id(evt),
-            'relname': 'components'
-        },
-    )
-
-def floatingip_objmap(evt):
-    return ObjectMap(
-        modname='ZenPacks.zenoss.OpenStackInfrastructure.FloatingIp',
-        compname='',
-        data={
-            'id': id(evt),
             'relname': 'components'
         },
     )
@@ -504,6 +510,7 @@ def router_update(device, dmd, evt):
 
     objmap = neutron_objmap(evt, "Router")
     _apply_neutron_traits(evt, 'router', objmap)
+    _apply_router_gateway_info(evt, objmap)
     return [objmap]
 
 def router_delete_start(device, dmd, evt):
