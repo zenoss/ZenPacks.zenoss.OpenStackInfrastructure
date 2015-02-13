@@ -486,7 +486,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     # network_ = network_names[0],
                     set_network = 'network-{0}'.format(subnet['network_id']),
                     gateway = subnet['gateway_ip'],
-                    set_tenant = 'tenant-{0}'.format(net['tenant_id']),
+                    set_tenant = 'tenant-{0}'.format(subnet['tenant_id']),
                     )))
 
         # router
@@ -594,15 +594,15 @@ class OpenStackInfrastructure(PythonPlugin):
                     id = 'securitygroup-{0}'.format(sg['id']),
                     sgId = sg['id'],
                     title = sg['name'],
-                    set_tenant = 'tenant-{0}'.format(sg['tenant_id']),    # tenant-a3a2901f2fd14f808401863e3628a858
+                    set_tenant = 'tenant-{0}'.format(sg['tenant_id']),
                     )))
 
         # # floatingip
         floatingips = []
         for floatingip in results['floatingips']:
-            tenant_name = [tenant['name'] for tenant in results['tenants']
-                           if tenant['enabled'] is True and
-                              tenant['id'] == floatingip['tenant_id']]
+            # tenant_name = [tenant['name'] for tenant in results['tenants']
+            #                if tenant['enabled'] is True and
+            #                   tenant['id'] == floatingip['tenant_id']]
             network_names = [network['name'] for network in results['networks']
                              if network['status'] == 'ACTIVE'
                              and network['id'] == floatingip['floating_network_id']
@@ -617,7 +617,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     id = 'floatingip-{0}'.format(floatingip['id']),
                     network_name = network_names[0],
                     router_id = floatingip['router_id'],
-                    set_tenant = tenant_name[0],
+                    set_tenant = 'tenant-{0}'.format(floatingip['tenant_id']),
                     status = floatingip['status'],
                     )))
 
