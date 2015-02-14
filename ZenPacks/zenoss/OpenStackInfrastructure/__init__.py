@@ -31,8 +31,6 @@ RELATIONSHIPS_YUML = """
 [Endpoint]++components-endpoint1[OpenstackComponent]
 [Instance]++-[Vnic]
 [NeutronAgent]++-[Agent]
-[Network]++-[Subnet]
-[Network]++-[Port]
 //[SecurityGroup]++-[SecurityGroupRule]
 // non-containing 1:M
 [OrgComponent]*parentOrg-childOrgs1[OrgComponent]
@@ -49,8 +47,12 @@ RELATIONSHIPS_YUML = """
 [Tenant]1-.-*[SecurityGroup]
 [Tenant]1-.-*[FloatingIp]
 [Hypervisor]1-.-*[Instance]
+[Network]1-.-*[Subnet]
+[Network]1-.-*[Port]
 // non-containing 1:1
 [Hypervisor]1-.-1[Host]
+[Network]1-.-1[FloatingIp]
+[Network]1-.-1[Router]
 """
 
 CFG = zenpacklib.ZenPackSpec(
@@ -499,27 +501,17 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Network',
             'order': 12,
             'properties': {
-                'netId':       {'grid_display': False,
-                                'label': 'Network ID'},
-                'netStatus':   {'label': 'Status',
-                                'order': 12.7,
-                                'content_width': 60},
-                'netState':    {'label': 'State',
-                                'content_width': 60},
-                'netExternal': {'label': 'External',
-                                'order': 12.8,
-                                'content_width': 60},
-                'subnet_':     {'label': 'Subnet',
-                                'order': 12.9,
-                                'content_width': 100},
-                'netType':     {'label': 'Type',
-                                'order': 12.10,
-                                'content_width': 60},
+                'admin_state_up': {'label': 'Admin State', 'content_width': 60},
+                'netExternal':    {'label': 'External', 'order': 12.8, 'content_width': 60},
+                'netId':          {'label': 'Network ID', 'grid_display': False},
+                'netStatus':      {'label': 'Status', 'order': 12.7, 'content_width': 60},
+                'netType':        {'label': 'Type', 'order': 12.10, 'content_width': 60},
+                'title':          {'label': 'Network', 'grid_display': True},
             },
             'relationships': {
                 'tenant':      {'grid_display': False},
-                'ports':       {'grid_display': False},
-                'subnets':     {'grid_display': False},
+                'ports':       {'grid_display': False},    # Set on ports
+                'subnets':     {'grid_display': False},    # Set on subnets
                 },
         },
 
@@ -529,16 +521,14 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Subnet',
             'order': 14,
             'properties': {
-                'subnetId':    {'grid_display': False,
-                                'label': 'Subnet ID'},
-                'cidr':        {'label': 'CIDR',
-                                'content_width': 100},
-                'dns':         {'label': 'DNS'},
-                'gateway':     {'label': 'Gateway',
-                                'content_width': 100},
+                'subnetId':        {'grid_display': False, 'label': 'Subnet ID'},
+                'cidr':            {'label': 'CIDR', 'content_width': 100},
+                'dns_nameservers': {'type': 'lines', 'label': 'DNS Servers'},
+                'gateway_ip':      {'label': 'Gateway', 'content_width': 100},
             },
             'relationships': {
-                'tenant':      {'grid_display': False},
+                'tenant':    {'grid_display': False},
+                'network':   {'label': 'Network', 'content_width': 100},
                 },
 
         },
@@ -549,15 +539,18 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Router',
             'order': 15,
             'properties': {
-                'gateways':    {'type_': 'lines', 'label': 'Gateways'},
-                'routerId':    {'grid_display': False, 'label': 'Router ID'},
-                'title':       {'grid_display': True, 'label': 'Router'},
-                'routes':      {'label': 'Routes'},
-                'status':      {'label': 'Status'},
-                'subnets':     {'type_': 'lines',
-                                'label': 'Subnets',
-                                'grid_display': False},
-                'network_id':  {'grid_display': False},
+                'admin_state_up': {'label': 'AdminState', 'grid_display': False},
+                'gateways':       {'label': 'Gateways', 'type_': 'lines'},
+                'network_id':     {'grid_display': False},
+                'routerId':       {'label': 'Router ID', 'grid_display': False},
+                'routes':         {'label': 'Routes'},
+                'status':         {'label': 'Status'},
+                'subnets':        {'label': 'Subnets', 'type_': 'lines', 'grid_display': False},
+                'title':          {'label': 'Router','grid_display': True},
+            },
+            'relationships': {
+                'network':        {'label': 'Network', 'content_width': 100},
+                'tenant':         {'grid_display': False},
             },
         },
 
@@ -567,19 +560,18 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Port',
             'order': 16,
             'properties': {
-                'mac_address':  {'label': 'MAC', 'content_width': 120},
-                'network_id':   {'grid_display': False, 'label': 'Network ID'},
-                'network_name': {'label': 'Network'},
-                'owner':        {'label': 'Owner', 'content_width': 120},
-                'title':        {'grid_display': False, 'label': 'Port Name'},
-                'portId':       {'grid_display': False, 'label': 'Port ID'},
-                'status':       {'label': 'Status'},
-                'vif_type':     {'label': 'Type'},
-                # 'gateway':    {'label': 'Gateway'},
+                'admin_state_up':  {'label': 'AdminState', 'grid_display': False},
+                'device_owner':    {'label': 'Owner', 'content_width': 120},
+                'mac_address':     {'label': 'MAC', 'content_width': 120},
+                'network_id':      {'label': 'Network ID', 'grid_display': False},
+                'portId':          {'label': 'Port ID', 'grid_display': False},
+                'status':          {'label': 'Status'},
+                'title':           {'label': 'Port Name', 'grid_display': False},
+                'vif_type':        {'label': 'Type'},
             },
             'relationships': {
-                'tenant':     {'grid_display': False},
-                'network':    {'grid_display': False},
+                'tenant':          {'grid_display': False},
+                'network':         {'label': 'Network'},
             },
         },
 
@@ -589,9 +581,12 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Security Group',
             'order': 17,
             'properties': {
-                'sgId':  {'grid_display': False, 'label': 'Security Group ID'},
-                'title': {'grid_display': False, 'label': 'SG Name'},
+                'sgId':  {'grid_display': True, 'label': 'Security Group ID'},
+                'title': {'grid_display': True, 'label': 'SG Name'},
                 # 'rules': {'label': 'Rules'},
+            },
+            'relationships': {
+                'tenant':          {'grid_display': False},
             },
         },
 
@@ -615,25 +610,22 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Floating IP',
             'order': 19,
             'properties': {
-                'floatingipId':           {'grid_display': False,
-                                           'label': 'Security Group ID'},
+                'floatingipId':           {'label': 'Security Group ID',
+                                           'grid_display': False},
                 'fixed_ip_address':       {'label': 'Address'},
                 'floating_ip_address':    {'grid_display': False},
                 'floating_network_id':    {'grid_display': False},
-                'network_name':           {'label': 'Network'},
                 'port_id':                {'grid_display': False},
                 'router_id':              {'grid_display': False},
                 'status':                 {'label': 'Status'},
-                'tenant':                 {'label': 'Tenant'},
             },
             'relationships': {
-                'tenant':      {'grid_display': False},
+                'tenant':                 {'label': 'Tenant'},
+                'network':                {'label': 'Network'},
                 },
         },
 
-
     },
-
     class_relationships = zenpacklib.relationships_from_yuml(RELATIONSHIPS_YUML),
 )
 

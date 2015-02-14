@@ -24,13 +24,12 @@ NEUTRON_TRAITMAPS = {
         'floating_ip_address':       ['floating_ip_address'],
         'floating_network_id':       ['floating_network_id'],
         'id':                        ['floatingipId'],
-        'network_name':              ['network_name'],
         'port_id':                   ['port_id'],
         'router_id':                 ['router_id'],
         'status':                    ['status'],
     },
     'network': {
-        'admin_state_up':            ['netState'],
+        'admin_state_up':            ['admin_state_up'],
         'id':                        ['netId'],
         'name':                      ['title'],
         'provider_network_type':     ['netType'],
@@ -39,12 +38,14 @@ NEUTRON_TRAITMAPS = {
     },
     'port': {
         'admin_state_up':            ['admin_state_up'],
-        'network_id':                ['network_id'],
-        'mac_address':               ['mac_address'],
-        'id':                        ['portId'],
-        'name':                      ['title'],
-        'status':                    ['status'],
         'binding:vif_type':          ['vif_type'],
+        'device_owner':              ['device_owner'],
+        'id':                        ['portId'],
+        'mac_address':               ['mac_address'],
+        'name':                      ['title'],
+        'network_id':                ['network_id'],
+        'status':                    ['status'],
+        # Plus: set_tenant, set_network
     },
     'router': {
         'admin_state_up':            ['admin_state_up'],
@@ -52,6 +53,8 @@ NEUTRON_TRAITMAPS = {
         'routes':                    ['routes'],
         'status':                    ['status'],
         'name':                      ['title'],
+        # see _apply_router_gateway_info for:
+        # (gateways, subnets, network_id, # set_network)
     },
     'security_group': {
         'id':                        ['sgId'],
@@ -59,12 +62,12 @@ NEUTRON_TRAITMAPS = {
     },
     'subnet': {
         'cidr':                      ['cidr'],
-        'dns':                       ['dns_nameservers'],
-        'gateway':                   ['gateway_ip'],
+        'dns_nameservers':           ['dns_nameservers'],
+        'gateway_ip':                ['gateway_ip'],
         'id':                        ['subnetId'],
         'name':                      ['title'],
-        'network_id':                ['set_network'],
-        'router_external':           ['netExternal'],
+        'network_id':                ['subnetId'],
+        # Plus: set_tenant, set_network
     },
 }
 
@@ -105,7 +108,7 @@ def tenant_id(evt):
 # -----------------------------------------------------------------------------
 # Traitmap Functions
 # -----------------------------------------------------------------------------
-def _apply_neutron_traits(evt, traitset, objmap):
+def _apply_neutron_traits(evt, objmap, traitset):
     traitmap = NEUTRON_TRAITMAPS[traitset]
 
     for trait in traitmap:
@@ -119,12 +122,22 @@ def _apply_neutron_traits(evt, traitset, objmap):
     if hasattr(evt, 'trait_tenant_id'):
         setattr(objmap, 'set_tenant', tenant_id(evt))
 
+def _apply_trait_rel(evt, objmap, trait_name, class_rel):
+    ''' Set the class relation's set_* attribute: (ex: set_network)
+    _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
+    '''
+    if hasattr(evt, trait_name):
+        attrib_id = make_id(class_rel, getattr(evt, trait_name))
+        set_name = 'set_' + class_rel
+        setattr(objmap, set_name, attrib_id)
+
 def _apply_router_gateway_info(evt, objmap):
     ''' Get the first router gateway. This should be updated to include all '''
     if hasattr(evt, 'trait_external_gateway_info'):
         gateway_info = ast.literal_eval(evt.trait_external_gateway_info)
         external_fixed_ips = gateway_info.get('external_fixed_ips', None)
-        network_id = gateway_info.get('network_id', None)
+        network = gateway_info.get('network_id', None)
+        net_id = make_id('network', network)
 
         gateways = set()
         subnets = set()
@@ -136,7 +149,8 @@ def _apply_router_gateway_info(evt, objmap):
 
         setattr(objmap, 'gateways', list(gateways))
         setattr(objmap, 'subnets', list(subnets))
-        setattr(objmap, 'network_id', network_id)
+        setattr(objmap, 'network_id', network)
+        setattr(objmap, 'set_network', net_id)
 
 def _apply_instance_traits(evt, objmap):
     traitmap = {
@@ -423,7 +437,9 @@ def floatingip_update(device, dmd, evt):
         evt.summary = "Setup FloatingIp %s" % (evt.trait_id)
 
     objmap = neutron_objmap(evt, "FloatingIp")
-    _apply_neutron_traits(evt, 'floatingip', objmap)
+    _apply_neutron_traits(evt, objmap, 'floatingip')
+
+    _apply_trait_rel(evt, objmap, 'trait_floatingip_network_id', 'network')
     return [objmap]
 
 def floatingip_delete_start(device, dmd, evt):
@@ -458,7 +474,7 @@ def network_update(device, dmd, evt):
         evt.summary = "Setup Network %s" % (evt.trait_id)
 
     objmap = neutron_objmap(evt, "Network")
-    _apply_neutron_traits(evt, 'network', objmap)
+    _apply_neutron_traits(evt, objmap, 'network')
     return [objmap]
 
 def network_delete_start(device, dmd, evt):
@@ -493,7 +509,8 @@ def port_update(device, dmd, evt):
         evt.summary = "Setup Port %s" % (evt.trait_id)
 
     objmap = neutron_objmap(evt, "Port")
-    _apply_neutron_traits(evt, 'port', objmap)
+    _apply_neutron_traits(evt, objmap, 'port')
+    _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
     return [objmap]
 
 def port_delete_start(device, dmd, evt):
@@ -528,7 +545,7 @@ def router_update(device, dmd, evt):
         evt.summary = "Setup Router %s" % (evt.trait_id)
 
     objmap = neutron_objmap(evt, "Router")
-    _apply_neutron_traits(evt, 'router', objmap)
+    _apply_neutron_traits(evt, objmap, 'router')
     _apply_router_gateway_info(evt, objmap)
     return [objmap]
 
@@ -564,7 +581,7 @@ def securityGroup_update(device, dmd, evt):
         evt.summary = "Setup SecurityGroup %s" % (evt.trait_id)
 
     objmap = neutron_objmap(evt, "SecurityGroup")
-    _apply_neutron_traits(evt, 'security_group', objmap)
+    _apply_neutron_traits(evt, objmap, 'security_group')
     return [objmap]
 
 def securityGroup_delete_start(device, dmd, evt):
@@ -599,7 +616,8 @@ def subnet_update(device, dmd, evt):
         evt.summary = "Setup Subnet %s" % (evt.trait_id)
 
     objmap = neutron_objmap(evt, "Subnet")
-    _apply_neutron_traits(evt, 'subnet', objmap)
+    _apply_neutron_traits(evt, objmap, 'subnet')
+    _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
     return [objmap]
 
 def subnet_delete_start(device, dmd, evt):
