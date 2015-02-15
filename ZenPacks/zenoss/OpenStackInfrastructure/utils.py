@@ -261,4 +261,4 @@ def getIpInterfaceMacs(device):
         brains = cat(deviceId=device.getPrimaryId())
         macs.extend(b.macaddress for b in brains if b.macaddress)
 
-    return macs                
+    return macs

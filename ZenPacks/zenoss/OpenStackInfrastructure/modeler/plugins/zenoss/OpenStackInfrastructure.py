@@ -95,17 +95,6 @@ class OpenStackInfrastructure(PythonPlugin):
         log.debug('services: %s\n' % str(results['services']))
 
         # Neutron
-        # neutron_client = OpenStackInfrastructureNeutron(
-        #     username = device.zCommandUsername,
-        #     password = device.zCommandPassword,
-        #     auth_url = device.zOpenStackAuthUrl,
-        #     project_id = device.zOpenStackProjectId,
-        #     region_name = device.zOpenStackRegionName,
-        #     )
-        #
-        # neutronResults = yield neutron_client.collect()
-        # results.update(neutronResults)
-
         neutron_client = NeutronAPIClient(
             username = device.zCommandUsername,
             password = device.zCommandPassword,
@@ -479,6 +468,7 @@ class OpenStackInfrastructure(PythonPlugin):
         for router in results['routers']:
             _gateways = set()
             _subnets = set()
+            _network_id = None
 
             external_gateway_info = router.get('external_gateway_info')
             if external_gateway_info:
@@ -508,44 +498,6 @@ class OpenStackInfrastructure(PythonPlugin):
         for port in results['ports']:
             if not port['tenant_id']:
                 continue
-
-            # server_id = ''
-            # # server_name = ''
-            # for server in results['servers']:
-            #     if 'private' in server['addresses']:
-            #         for iface in server['addresses']['private']:
-            #             if iface['OS-EXT-IPS-MAC:mac_addr'] != port['mac_address']:
-            #                 continue
-
-            #             for fixed_ip in port['fixed_ips']:
-            #                 if iface['addr'] == fixed_ip['ip_address']:
-            #                     server_id = server['id']
-            #                     # server_name = server['name']
-            #                     break
-
-            #             if server_id:
-            #                 break
-
-            #     if 'public' in server['addresses']:
-            #         for iface in server['addresses']['public']:
-            #             if iface['OS-EXT-IPS-MAC:mac_addr'] != port['mac_address']:
-            #                 continue
-
-            #             for fixed_ip in port['fixed_ips']:
-            #                 if iface['addr'] == fixed_ip['ip_address']:
-            #                     server_id = server['id']
-            #                     # server_name = server['name']
-            #                     break
-
-            #             if server_id:
-            #                 break
-
-            #     if server_id:
-            #         break
-
-            # instance_id = ''
-            # if server_id:
-            #     instance_id = 'instance-{0}'.format(server_id)
 
             ports.append(ObjectMap(
                 modname = 'ZenPacks.zenoss.OpenStackInfrastructure.Port',

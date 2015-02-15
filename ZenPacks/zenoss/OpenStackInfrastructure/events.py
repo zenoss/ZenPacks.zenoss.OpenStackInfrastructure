@@ -27,6 +27,7 @@ NEUTRON_TRAITMAPS = {
         'port_id':                   ['port_id'],
         'router_id':                 ['router_id'],
         'status':                    ['status'],
+        # _apply_neutron_traits: set_tenant, set_network
     },
     'network': {
         'admin_state_up':            ['admin_state_up'],
@@ -35,6 +36,7 @@ NEUTRON_TRAITMAPS = {
         'provider_network_type':     ['netType'],
         'router_external':           ['netExternal'],
         'status':                    ['netStatus'],
+        # _apply_neutron_traits: set_tenant
     },
     'port': {
         'admin_state_up':            ['admin_state_up'],
@@ -45,7 +47,7 @@ NEUTRON_TRAITMAPS = {
         'name':                      ['title'],
         'network_id':                ['network_id'],
         'status':                    ['status'],
-        # Plus: set_tenant, set_network
+        # _apply_neutron_traits: set_tenant, set_network
     },
     'router': {
         'admin_state_up':            ['admin_state_up'],
@@ -53,7 +55,7 @@ NEUTRON_TRAITMAPS = {
         'routes':                    ['routes'],
         'status':                    ['status'],
         'name':                      ['title'],
-        # see _apply_router_gateway_info for:
+        # _apply_router_gateway_info:
         # (gateways, subnets, network_id, # set_network)
     },
     'security_group': {
@@ -67,7 +69,7 @@ NEUTRON_TRAITMAPS = {
         'id':                        ['subnetId'],
         'name':                      ['title'],
         'network_id':                ['subnetId'],
-        # Plus: set_tenant, set_network
+        # _apply_neutron_traits: set_tenant, set_network
     },
 }
 
