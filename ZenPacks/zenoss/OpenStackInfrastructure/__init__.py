@@ -49,10 +49,10 @@ RELATIONSHIPS_YUML = """
 [Hypervisor]1-.-*[Instance]
 [Network]1-.-*[Subnet]
 [Network]1-.-*[Port]
+[Network]1-.-*[Router]
 // non-containing 1:1
 [Hypervisor]1-.-1[Host]
 [Network]1-.-1[FloatingIp]
-[Network]1-.-1[Router]
 """
 
 CFG = zenpacklib.ZenPackSpec(
@@ -549,7 +549,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'title':          {'label': 'Router','grid_display': True},
             },
             'relationships': {
-                'network':        {'label': 'Network', 'content_width': 100},
+                'network':        {'label': 'External Network', 'content_width': 100},
                 'tenant':         {'grid_display': False},
             },
         },

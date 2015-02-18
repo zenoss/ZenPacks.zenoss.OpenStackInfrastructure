@@ -87,25 +87,25 @@ def instance_id(evt):
     return make_id('server', evt.trait_instance_id)
 
 def floatingip_id(evt):
-    return make_id('floatingip'. evt.trait_id)
+    return make_id('floatingip', evt.trait_id)
 
 def network_id(evt):
-    return make_id('network'. evt.trait_id)
+    return make_id('network', evt.trait_id)
 
 def port_id(evt):
-    return make_id('port'. evt.trait_id)
+    return make_id('port', evt.trait_id)
 
 def router_id(evt):
-    return make_id('router'. evt.trait_id)
+    return make_id('router', evt.trait_id)
 
 def securitygroup_id(evt):
-    return make_id('securitygroup'. evt.trait_id)
+    return make_id('securitygroup', evt.trait_id)
 
 def subnet_id(evt):
-    return make_id('subnet'. evt.trait_id)
+    return make_id('subnet', evt.trait_id)
 
 def tenant_id(evt):
-    return make_id('tenant'. evt.trait_tenant_id)
+    return make_id('tenant', evt.trait_tenant_id)
 
 # -----------------------------------------------------------------------------
 # Traitmap Functions
@@ -225,43 +225,35 @@ def neutron_objmap(evt, Name):
 # Event Functions
 # -----------------------------------------------------------------------------
 def instance_create(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Instance %s created" % (evt.trait_display_name)
+    evt.summary = "Instance %s created" % (evt.trait_display_name)
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
-
 
 def instance_update(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Instance %s updated" % (evt.trait_display_name)
+    evt.summary = "Instance %s updated" % (evt.trait_display_name)
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
 
-
 def instance_delete(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Instance %s deleted" % (evt.trait_display_name)
+    evt.summary = "Instance %s deleted" % (evt.trait_display_name)
 
     objmap = instance_objmap(evt)
     objmap.remove = True
     return [objmap]
 
-
 def instance_update_status(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = add_statuschange_to_msg(
+    evt.summary = add_statuschange_to_msg(
             evt,
             "Instance %s updated" % (evt.trait_display_name)
-        )
+            )
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
-
 
 def add_statuschange_to_msg(evt, msg):
     descr = ''
@@ -277,145 +269,117 @@ def add_statuschange_to_msg(evt, msg):
 
     return msg
 
-
 def instance_powering_on(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Instance %s powering on" % (evt.trait_display_name)
+    evt.summary = "Instance %s powering on" % (evt.trait_display_name)
     return []
-
 
 def instance_powered_on(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = add_statuschange_to_msg(
+    evt.summary = add_statuschange_to_msg(
             evt,
             "Instance %s powered on" % (evt.trait_display_name)
-        )
+            )
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
-
 
 def instance_powering_off(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Instance %s powering off" % (evt.trait_display_name)
+    evt.summary = "Instance %s powering off" % (evt.trait_display_name)
     return []
 
-
 def instance_powered_off(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = add_statuschange_to_msg(
+    evt.summary = add_statuschange_to_msg(
             evt,
             "Instance %s powered off" % (evt.trait_display_name)
-        )
+            )
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
-
 
 def instance_shutting_down(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = add_statuschange_to_msg(
+    evt.summary = add_statuschange_to_msg(
             evt,
             "Instance %s shutting down" % (evt.trait_display_name)
-        )
+            )
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
-
 
 def instance_shut_down(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = add_statuschange_to_msg(
+    evt.summary = add_statuschange_to_msg(
             evt,
             "Instance %s shut down" % (evt.trait_display_name)
-        )
+            )
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
-
 
 def instance_rebooting(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = add_statuschange_to_msg(
+    evt.summary = add_statuschange_to_msg(
             evt,
             "Instance %s rebooting" % (evt.trait_display_name)
-        )
+            )
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
-
 
 def instance_rebooted(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = add_statuschange_to_msg(
+    evt.summary = add_statuschange_to_msg(
             evt,
             "Instance %s rebooted" % (evt.trait_display_name)
-        )
+            )
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
-
 
 def instance_rebuilding(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = add_statuschange_to_msg(
+    evt.summary = add_statuschange_to_msg(
             evt,
             "Instance %s rebuilding" % (evt.trait_display_name)
-        )
+            )
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
-
 
 def instance_rebuilt(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = add_statuschange_to_msg(
+    evt.summary = add_statuschange_to_msg(
             evt,
             "Instance %s rebuilt" % (evt.trait_display_name)
-        )
+            )
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
-
 
 def instance_suspended(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Instance %s suspended" % (evt.trait_display_name)
+    evt.summary = "Instance %s suspended" % (evt.trait_display_name)
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
-
 
 def instance_resumed(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Instance %s resumed" % (evt.trait_display_name)
+    evt.summary = "Instance %s resumed" % (evt.trait_display_name)
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
-
 
 def instance_rescue(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Instance %s placed in rescue mode" % (evt.trait_display_name)
+    evt.summary = "Instance %s placed in rescue mode" % (evt.trait_display_name)
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
 
-
 def instance_unrescue(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Instance %s removed from rescue mode" % (evt.trait_display_name)
+    evt.summary = "Instance %s removed from rescue mode" % (evt.trait_display_name)
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
@@ -425,18 +389,15 @@ def instance_unrescue(device, dmd, evt):
 # FloatingIp
 # -----------------------------------------------------------------------------
 def floatingip_create_start(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Creating FloatingIp %s" % (evt.trait_id)
+    evt.summary = "Creating FloatingIp %s" % (evt.trait_id)
     return []
 
 def floatingip_update_start(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Updating FloatingIp %s" % (evt.trait_id)
+    evt.summary = "Updating FloatingIp %s" % (evt.trait_id)
     return []
 
 def floatingip_update(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Setup FloatingIp %s" % (evt.trait_id)
+    evt.summary = "Setup FloatingIp %s" % (evt.trait_id)
 
     objmap = neutron_objmap(evt, "FloatingIp")
     _apply_neutron_traits(evt, objmap, 'floatingip')
@@ -445,14 +406,11 @@ def floatingip_update(device, dmd, evt):
     return [objmap]
 
 def floatingip_delete_start(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Deleting FloatingIp %s " % (evt.trait_id)
+    evt.summary = "Deleting FloatingIp %s " % (evt.trait_id)
     return []
 
-
 def floatingip_delete_end(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "FloatingIp %s deleted" % (evt.trait_id)
+    evt.summary = "FloatingIp %s deleted" % (evt.trait_id)
 
     objmap = neutron_objmap(evt, 'FloatingIp')
     objmap.remove = True
@@ -462,32 +420,26 @@ def floatingip_delete_end(device, dmd, evt):
 # Network Event Functions
 # -----------------------------------------------------------------------------
 def network_create_start(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Creating Network %s" % (evt.trait_id)
+    evt.summary = "Creating Network %s" % (evt.trait_id)
     return []
 
 def network_update_start(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Updating Network %s" % (evt.trait_id)
+    evt.summary = "Updating Network %s" % (evt.trait_id)
     return []
 
 def network_update(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Setup Network %s" % (evt.trait_id)
+    evt.summary = "Setup Network %s" % (evt.trait_id)
 
     objmap = neutron_objmap(evt, "Network")
     _apply_neutron_traits(evt, objmap, 'network')
     return [objmap]
 
 def network_delete_start(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Deleting Network %s " % (evt.trait_id)
+    evt.summary = "Deleting Network %s " % (evt.trait_id)
     return []
 
-
 def network_delete_end(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Network %s deleted" % (evt.trait_id)
+    evt.summary = "Network %s deleted" % (evt.trait_id)
 
     objmap = neutron_objmap(evt, 'Network')
     objmap.remove = True
@@ -497,18 +449,15 @@ def network_delete_end(device, dmd, evt):
 # Port Event Functions
 # -----------------------------------------------------------------------------
 def port_create_start(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Creating Port %s" % (evt.trait_id)
+    evt.summary = "Creating Port %s" % (evt.trait_id)
     return []
 
 def port_update_start(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Updating Port %s" % (evt.trait_id)
+    evt.summary = "Updating Port %s" % (evt.trait_id)
     return []
 
 def port_update(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Setup Port %s" % (evt.trait_id)
+    evt.summary = "Setup Port %s" % (evt.trait_id)
 
     objmap = neutron_objmap(evt, "Port")
     _apply_neutron_traits(evt, objmap, 'port')
@@ -516,14 +465,11 @@ def port_update(device, dmd, evt):
     return [objmap]
 
 def port_delete_start(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Deleting Port %s " % (evt.trait_id)
+    evt.summary = "Deleting Port %s " % (evt.trait_id)
     return []
 
-
 def port_delete_end(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Port %s deleted" % (evt.trait_id)
+    evt.summary = "Port %s deleted" % (evt.trait_id)
 
     objmap = neutron_objmap(evt, 'Port')
     objmap.remove = True
@@ -533,18 +479,15 @@ def port_delete_end(device, dmd, evt):
 # Router Event Functions
 # -----------------------------------------------------------------------------
 def router_create_start(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Creating Router %s" % (evt.trait_id)
+    evt.summary = "Creating Router %s" % (evt.trait_id)
     return []
 
 def router_update_start(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Updating Router %s" % (evt.trait_id)
+    evt.summary = "Updating Router %s" % (evt.trait_id)
     return []
 
 def router_update(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Setup Router %s" % (evt.trait_id)
+    evt.summary = "Setup Router %s" % (evt.trait_id)
 
     objmap = neutron_objmap(evt, "Router")
     _apply_neutron_traits(evt, objmap, 'router')
@@ -552,14 +495,11 @@ def router_update(device, dmd, evt):
     return [objmap]
 
 def router_delete_start(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Deleting Router %s " % (evt.trait_id)
+    evt.summary = "Deleting Router %s " % (evt.trait_id)
     return []
 
-
 def router_delete_end(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Router %s deleted" % (evt.trait_id)
+    evt.summary = "Router %s deleted" % (evt.trait_id)
 
     objmap = neutron_objmap(evt, 'Router')
     objmap.remove = True
@@ -569,32 +509,26 @@ def router_delete_end(device, dmd, evt):
 # SecurityGroup Event Functions: Carefull with the underscore differences
 # -----------------------------------------------------------------------------
 def securityGroup_create_start(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Creating SecurityGroup %s" % (evt.trait_id)
+    evt.summary = "Creating SecurityGroup %s" % (evt.trait_id)
     return []
 
 def securityGroup_update_start(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Updating SecurityGroup %s" % (evt.trait_id)
+    evt.summary = "Updating SecurityGroup %s" % (evt.trait_id)
     return []
 
 def securityGroup_update(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Setup SecurityGroup %s" % (evt.trait_id)
+    evt.summary = "Setup SecurityGroup %s" % (evt.trait_id)
 
     objmap = neutron_objmap(evt, "SecurityGroup")
     _apply_neutron_traits(evt, objmap, 'security_group')
     return [objmap]
 
 def securityGroup_delete_start(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Deleting SecurityGroup %s " % (evt.trait_id)
+    evt.summary = "Deleting SecurityGroup %s " % (evt.trait_id)
     return []
 
-
 def securityGroup_delete_end(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "SecurityGroup %s deleted" % (evt.trait_id)
+    evt.summary = "SecurityGroup %s deleted" % (evt.trait_id)
 
     objmap = neutron_objmap(evt, 'SecurityGroup')
     objmap.remove = True
@@ -604,18 +538,15 @@ def securityGroup_delete_end(device, dmd, evt):
 # Subnet Event Functions
 # -----------------------------------------------------------------------------
 def subnet_create_start(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Creating Subnet %s" % (evt.trait_id)
+    evt.summary = "Creating Subnet %s" % (evt.trait_id)
     return []
 
 def subnet_update_start(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Updating Subnet %s" % (evt.trait_id)
+    evt.summary = "Updating Subnet %s" % (evt.trait_id)
     return []
 
 def subnet_update(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Setup Subnet %s" % (evt.trait_id)
+    evt.summary = "Setup Subnet %s" % (evt.trait_id)
 
     objmap = neutron_objmap(evt, "Subnet")
     _apply_neutron_traits(evt, objmap, 'subnet')
@@ -623,14 +554,11 @@ def subnet_update(device, dmd, evt):
     return [objmap]
 
 def subnet_delete_start(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Deleting Subnet %s " % (evt.trait_id)
+    evt.summary = "Deleting Subnet %s " % (evt.trait_id)
     return []
 
-
 def subnet_delete_end(device, dmd, evt):
-    if not evt.summary:
-        evt.summary = "Subnet %s deleted" % (evt.trait_id)
+    evt.summary = "Subnet %s deleted" % (evt.trait_id)
 
     objmap = neutron_objmap(evt, 'Subnet')
     objmap.remove = True
@@ -813,6 +741,11 @@ MAPPERS = {
 
 }
 
+
+# ==============================================================================
+#  This is the main process() function that is called by the Events Transform
+#  subsystem. See objects.xml for further detail.
+# ==============================================================================
 
 def process(evt, device, dmd, txnCommit):
     (idfunc, mapper) = MAPPERS.get(evt.eventClassKey, (None, None))

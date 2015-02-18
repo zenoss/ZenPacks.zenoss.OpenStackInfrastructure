@@ -159,7 +159,7 @@ class EventsAMQPDataSourcePlugin(PythonDataSourcePlugin):
                 'device': device_id,
                 'severity': ZenEventClasses.Info,
                 'eventKey': '',
-                'summary': '',
+                'summary': 'OpenStackInfrastructure: ' + c_event['event_type'],
                 'eventClassKey': 'openstack|' + c_event['event_type'],
             }
 
