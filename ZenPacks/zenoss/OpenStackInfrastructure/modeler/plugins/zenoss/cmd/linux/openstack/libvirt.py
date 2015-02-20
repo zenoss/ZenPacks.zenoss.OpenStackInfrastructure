@@ -49,9 +49,9 @@ class libvirt(PythonPlugin):
         manageIp = str(device.manageIp)
 
         log.info('Connecting to ssh://%s@%s:%d' % (
-             device.zCommandUsername,
-             manageIp,
-             device.zCommandPort
+            device.zCommandUsername,
+            manageIp,
+            device.zCommandPort
             ))
 
         client = SSHClient({
@@ -75,7 +75,6 @@ class libvirt(PythonPlugin):
                         log.debug("Domain not found while running virsh (rc=%s, stderr='%s')" % (d.exitCode, d.stderr))
                     else:
                         log.error("Error running virsh (rc=%s, stderr='%s')" % (d.exitCode, d.stderr))
-                    returnValue(None)
                     continue
 
                 try:
@@ -99,7 +98,7 @@ class libvirt(PythonPlugin):
                     mac = interface.find("mac/[@address]")
 
                     if target is None or mac is None:
-                        # unrecognized interface type 
+                        # unrecognized interface type
                         continue
 
                     # compute the resourceId in the same way that ceilometer's
@@ -116,7 +115,7 @@ class libvirt(PythonPlugin):
                     })
                 data[instanceUuid]['vnics'] = vnics
 
-        finally:        
+        finally:
             client.disconnect()
 
         returnValue(data)
