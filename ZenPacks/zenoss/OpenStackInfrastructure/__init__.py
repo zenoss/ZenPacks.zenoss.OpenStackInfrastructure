@@ -50,9 +50,9 @@ RELATIONSHIPS_YUML = """
 [Network]1-.-*[Subnet]
 [Network]1-.-*[Port]
 [Network]1-.-*[Router]
+[Network]1-.-*[FloatingIp]
 // non-containing 1:1
 [Hypervisor]1-.-1[Host]
-[Network]1-.-1[FloatingIp]
 """
 
 CFG = zenpacklib.ZenPackSpec(
@@ -506,7 +506,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'netId':          {'label': 'Network ID', 'grid_display': False},
                 'netStatus':      {'label': 'Status', 'order': 12.7, 'content_width': 60},
                 'netType':        {'label': 'Type', 'order': 12.10, 'content_width': 60},
-                'title':          {'label': 'Network', 'grid_display': True},
+                'title':          {'label': 'Network', 'grid_display': False},
             },
             'relationships': {
                 'tenant':      {'grid_display': False},
@@ -546,7 +546,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'routes':         {'label': 'Routes'},
                 'status':         {'label': 'Status'},
                 'subnets':        {'label': 'Subnets', 'type_': 'lines', 'grid_display': False},
-                'title':          {'label': 'Router','grid_display': True},
+                'title':          {'label': 'Router','grid_display': False},
             },
             'relationships': {
                 'network':        {'label': 'External Network', 'content_width': 100},
@@ -581,8 +581,8 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Security Group',
             'order': 17,
             'properties': {
-                'sgId':  {'grid_display': True, 'label': 'Security Group ID'},
-                'title': {'grid_display': True, 'label': 'SG Name'},
+                'sgId':  {'label': 'Security Group ID', 'grid_display': True},
+                'title': {'label': 'SG Name', 'grid_display': True},
                 # 'rules': {'label': 'Rules'},
             },
             'relationships': {
