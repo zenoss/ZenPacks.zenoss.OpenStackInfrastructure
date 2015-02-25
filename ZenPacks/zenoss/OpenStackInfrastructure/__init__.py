@@ -318,7 +318,7 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'LogicalComponent',
             'meta_type': 'OpenStackInfrastructureVnic',
             'label': 'Vnic',
-            'order': 100.5,
+            'order': 100,
             'properties': {
                 'macaddress': {'label': 'MAC Address',
                                'index_type': 'field',
@@ -452,7 +452,7 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'OpenstackComponent',   # SoftwareComponent
             'meta_type': 'OpenStackInfrastructureHypervisor',
             'label': 'Hypervisor',
-            'order': 9.1,
+            'order': 9,
             'properties': {
                 'hypervisorId':      {'grid_display': False,
                                       'label': 'Hypervisor ID'},
@@ -511,7 +511,7 @@ CFG = zenpacklib.ZenPackSpec(
             'relationships': {
                 'tenant':      {'grid_display': False},
                 'ports':       {'grid_display': True},    # Set on ports
-                'subnets':     {'grid_display': False},    # Set on subnets
+                'subnets':     {'grid_display': True},    # Set on subnets
                 },
         },
 
