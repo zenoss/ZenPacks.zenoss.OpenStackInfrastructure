@@ -318,7 +318,7 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'LogicalComponent',
             'meta_type': 'OpenStackInfrastructureVnic',
             'label': 'Vnic',
-            'order': 8.5,
+            'order': 100.5,
             'properties': {
                 'macaddress': {'label': 'MAC Address',
                                'index_type': 'field',
@@ -510,7 +510,7 @@ CFG = zenpacklib.ZenPackSpec(
             },
             'relationships': {
                 'tenant':      {'grid_display': False},
-                'ports':       {'grid_display': False},    # Set on ports
+                'ports':       {'grid_display': True},    # Set on ports
                 'subnets':     {'grid_display': False},    # Set on subnets
                 },
         },
@@ -543,7 +543,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'gateways':       {'label': 'Gateways', 'type_': 'lines'},
                 'network_id':     {'grid_display': False},
                 'routerId':       {'label': 'Router ID', 'grid_display': False},
-                'routes':         {'label': 'Routes'},
+                'routes':         {'label': 'Routes', 'grid_display': False},
                 'status':         {'label': 'Status'},
                 'subnets':        {'label': 'Subnets', 'type_': 'lines', 'grid_display': False},
                 'title':          {'label': 'Router','grid_display': False},
