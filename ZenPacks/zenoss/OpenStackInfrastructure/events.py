@@ -221,6 +221,15 @@ def neutron_objmap(evt, Name):
               },
     )
 
+def event_summary(component_name, evt):
+    """ Gives correct summary for Create/Update event messages
+    """
+    if '.create' in evt.trait_event_type:
+        action = "Created"
+    else:
+        action = "Updated"
+    return "%s %s %s" % (action, component_name, evt.trait_id)
+
 # -----------------------------------------------------------------------------
 # Event Functions
 # -----------------------------------------------------------------------------
@@ -397,7 +406,7 @@ def floatingip_update_start(device, dmd, evt):
     return []
 
 def floatingip_update(device, dmd, evt):
-    evt.summary = "Setup FloatingIp %s" % (evt.trait_id)
+    evt.summary = event_summary("FloatingIp", evt)
 
     objmap = neutron_objmap(evt, "FloatingIp")
     _apply_neutron_traits(evt, objmap, 'floatingip')
@@ -428,7 +437,7 @@ def network_update_start(device, dmd, evt):
     return []
 
 def network_update(device, dmd, evt):
-    evt.summary = "Setup Network %s" % (evt.trait_id)
+    evt.summary = event_summary("Network", evt)
 
     objmap = neutron_objmap(evt, "Network")
     _apply_neutron_traits(evt, objmap, 'network')
@@ -457,7 +466,7 @@ def port_update_start(device, dmd, evt):
     return []
 
 def port_update(device, dmd, evt):
-    evt.summary = "Setup Port %s" % (evt.trait_id)
+    evt.summary = event_summary("Port", evt)
 
     objmap = neutron_objmap(evt, "Port")
     _apply_neutron_traits(evt, objmap, 'port')
@@ -487,7 +496,7 @@ def router_update_start(device, dmd, evt):
     return []
 
 def router_update(device, dmd, evt):
-    evt.summary = "Setup Router %s" % (evt.trait_id)
+    evt.summary = event_summary("Router", evt)
 
     objmap = neutron_objmap(evt, "Router")
     _apply_neutron_traits(evt, objmap, 'router')
@@ -517,7 +526,7 @@ def securityGroup_update_start(device, dmd, evt):
     return []
 
 def securityGroup_update(device, dmd, evt):
-    evt.summary = "Setup SecurityGroup %s" % (evt.trait_id)
+    evt.summary = event_summary("SecurityGroup", evt)
 
     objmap = neutron_objmap(evt, "SecurityGroup")
     _apply_neutron_traits(evt, objmap, 'security_group')
@@ -546,7 +555,7 @@ def subnet_update_start(device, dmd, evt):
     return []
 
 def subnet_update(device, dmd, evt):
-    evt.summary = "Setup Subnet %s" % (evt.trait_id)
+    evt.summary = event_summary("Subnet", evt)
 
     objmap = neutron_objmap(evt, "Subnet")
     _apply_neutron_traits(evt, objmap, 'subnet')
