@@ -485,7 +485,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     id = 'router-{0}'.format(router['id']),
                     network_id = _network_id,
                     routerId = router['id'],
-                    routes = router['routes'],
+                    routes = list(router['routes']),
                     set_tenant = 'tenant-{0}'.format(router['tenant_id']),
                     set_network = 'network-{0}'.format(_network_id),
                     status = router['status'],
