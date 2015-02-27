@@ -115,8 +115,8 @@ def create_model_data(dmd):
 
     # Tenants
     from ZenPacks.zenoss.OpenStackInfrastructure.Tenant import Tenant
-    tenant1 = addContained(endpoint, "components", Tenant("tenant1"))
-    tenant2 = addContained(endpoint, "components", Tenant("tenant2"))
+    tenant1 = addContained(endpoint, "components", Tenant("tenant-tenant1"))
+    tenant2 = addContained(endpoint, "components", Tenant("tenant-tenant2"))
 
     # Flavor
     from ZenPacks.zenoss.OpenStackInfrastructure.Flavor import Flavor
@@ -228,7 +228,6 @@ def create_model_data(dmd):
     instance4vnic2.macaddress = 'de:ad:be:ef:04:02'
     instance4vnic2.index_object()
 
-
     # Linux guest devices (Virtual)
     # make sure that the interfaces line up.
     guest_dc = dmd.Devices.createOrganizer('/Server/SSH/Linux')
@@ -239,7 +238,8 @@ def create_model_data(dmd):
     # instance4 is not monitored by zenoss.
 
     from Products.ZenModel.IpInterface import IpInterface
-    def add_linux_interface_mac(device, interface_name, macaddress):        
+
+    def add_linux_interface_mac(device, interface_name, macaddress):
         eth_if = IpInterface(interface_name)
         device.os.interfaces._setObject(eth_if.id, eth_if)
         eth_if = device.os.interfaces._getOb(eth_if.id)
@@ -270,7 +270,7 @@ def create_model_data(dmd):
     # Add OSprocesses for each of the software components.
     from ZenPacks.zenoss.OpenStackInfrastructure.SoftwareComponent import SoftwareComponent
     from Products.ZenModel.OSProcess import OSProcess
-    for component in endpoint.components():        
+    for component in endpoint.components():
         if isinstance(component, SoftwareComponent):
             binary = component.binary
             linux_device = component.hostedOn().proxy_device()
@@ -288,4 +288,3 @@ def create_model_data(dmd):
         'phys_dc': phys_dc,
         'guest_dc': guest_dc
     }
-

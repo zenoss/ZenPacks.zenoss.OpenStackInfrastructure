@@ -2019,7 +2019,7 @@ class ClassSpec(Spec):
             ordered_columns.extend(spec.js_columns)
             width += spec.js_columns_width
 
-        if width > 750:
+        if width > 7500:
             LOG.warning(
                 "%s: %s custom columns exceed 750 pixels (%s)",
                 self.zenpack.name, self.name, width)
