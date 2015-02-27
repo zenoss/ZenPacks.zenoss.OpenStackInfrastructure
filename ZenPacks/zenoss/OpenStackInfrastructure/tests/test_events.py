@@ -14,8 +14,6 @@ Unit test for impact
 '''
 import Globals
 
-import transaction
-
 import logging
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('zen.OpenStack')
@@ -753,6 +751,114 @@ class TestEventTransforms(zenpacklib.TestCase):
         self.process_event(evt)
         self.assertTrue(instance5.serverStatus.lower() == 'active')
         self.assertTrue(evt.summary == 'Instance instance5 removed from rescue mode')
+
+    def _create_network(self, network_id):
+        ''' Build network using events and network_id'''
+
+        evt = buildEventFromDict({
+            'device': 'endpoint',
+            'eventClassKey': u'openstack|network.create.end',
+            'eventKey': u'7ccdf8c7-9d7d-4b0e-bc10-65aafa37f52c',
+            'severity': 2,
+            'summary': '',
+            'event_type': 'network.create.end',
+            'trait_id': network_id,
+            'trait_name': network_id,
+            'trait_status': 'ACTIVE',
+            'trait_tenant_id': 'dbb36d5137754461a26b970bdf8ac780',
+            'trait_admin_state_up': True,
+            'trait_router:external': False,
+        })
+
+        self.process_event(evt)
+        network = self.getObjByPath('components/network-' + network_id)
+        self.assertIsNotNone(network, msg="_create_network: Failed to create!")
+        return network
+
+    def _create_subnet(self, network_id, subnet_id):
+        ''' Build subnet_id using events and network_id.
+            The network with network_id must already exist.
+        '''
+
+        evt = buildEventFromDict({
+            'device': 'endpoint',
+            'eventClassKey': u'openstack|subnet.create.end',
+            'eventKey': u'8ccdf8c7-9d7d-4b0e-bc10-65aafa37f52c',
+            'severity': 2,
+            'summary': '',
+            'event_type': 'network.create.end',
+            'trait_id': subnet_id,
+            'trait_name': subnet_id,
+            'trait_network_id': network_id,
+            'trait_cidr': '10.10.10.0/24',
+            'trait_gateway_ip': '10.10.10.1',
+            'trait_dns_nameserver': ['10.6.1.10','10.6.1.11'],
+            'trait_admin_state_up': True,
+            'trait_router:external': False,
+            'trait_tenant_id': 'dbb36d5137754461a26b970bdf8ac780',
+        })
+
+        self.process_event(evt)
+        subnet = self.getObjByPath('components/subnet-' + subnet_id)
+        self.assertIsNotNone(subnet, msg="_create_subnet: Failed to create!")
+        return subnet
+
+    def test_create_network(self):
+
+        # ----------------------------------------------------------------------
+        # Test network.create.start
+        # ----------------------------------------------------------------------
+        evt = buildEventFromDict({
+            'device': 'endpoint',
+            'eventClassKey': u'openstack|network.create.start',
+            'eventKey': u'0ccdf8c7-9d7d-4b0e-bc10-65aafa37f52c',
+            'severity': 2,
+            'summary': '',
+            'event_type': 'network.create.start',
+            u'trait_name': 'null_net',
+        })
+        self.process_event(evt)
+        network_null = \
+            self.getObjByPath('components/network-96424e16-c96f-4616-960a-76cc2608bbf2')
+        self.assertIsNone(network_null, msg="Network_null doesn't exist!")
+
+        # ----------------------------------------------------------------------
+        # Test network.create.end
+        # ----------------------------------------------------------------------
+        evt = buildEventFromDict({
+            'device': 'endpoint',
+            'eventClassKey': u'openstack|network.create.end',
+            'eventKey': u'1ccdf8c7-9d7d-4b0e-bc10-65aafa37f52c',
+            'severity': 2,
+            'summary': '',
+            'event_type': 'network.create.end',
+            u'trait_id': 'network7',
+            u'trait_name': 'network7',
+        })
+        self.process_event(evt)
+        network_null = \
+            self.getObjByPath('components/network-network7')
+
+        self.assertIsNotNone(network_null, msg="Failure: nework7 doesn't exist!")
+
+        # ----------------------------------------------------------------------
+        # Test subnet.create.start
+        # ----------------------------------------------------------------------
+        evt = buildEventFromDict({
+            'device': 'endpoint',
+            'eventClassKey': u'openstack|subnet.create.start',
+            'eventKey': u'2ccdf8c7-9d7d-4b0e-bc10-65aafa37f52c',
+            'severity': 2,
+            'summary': '',
+            'event_type': 'subnet.create.start',
+            u'trait_id': 'network7',
+            u'trait_name': 'network7',
+        })
+        self.process_event(evt)
+        network_null = \
+            self.getObjByPath('components/network-network7')
+
+        self.assertIsNotNone(network_null, msg="Failure: nework7 doesn't exist!")
 
 
 @monkeypatch('Products.DataCollector.ApplyDataMap.ApplyDataMap')

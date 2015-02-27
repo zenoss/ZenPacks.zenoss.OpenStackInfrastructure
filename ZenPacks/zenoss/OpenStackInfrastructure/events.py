@@ -27,7 +27,7 @@ NEUTRON_TRAITMAPS = {
         'port_id':                   ['port_id'],
         'router_id':                 ['router_id'],
         'status':                    ['status'],
-        # _apply_neutron_traits: set_tenant, set_network
+        # See: _apply_neutron_traits: set_tenant, set_network
     },
     'network': {
         'admin_state_up':            ['admin_state_up'],
@@ -36,7 +36,7 @@ NEUTRON_TRAITMAPS = {
         'provider_network_type':     ['netType'],
         'router_external':           ['netExternal'],
         'status':                    ['netStatus'],
-        # _apply_neutron_traits: set_tenant
+        # See: _apply_neutron_traits: set_tenant
     },
     'port': {
         'admin_state_up':            ['admin_state_up'],
@@ -47,7 +47,7 @@ NEUTRON_TRAITMAPS = {
         'name':                      ['title'],
         'network_id':                ['network_id'],
         'status':                    ['status'],
-        # _apply_neutron_traits: set_tenant, set_network
+        # See: _apply_neutron_traits: set_tenant, set_network
     },
     'router': {
         'admin_state_up':            ['admin_state_up'],
@@ -55,7 +55,7 @@ NEUTRON_TRAITMAPS = {
         'routes':                    ['routes'],
         'status':                    ['status'],
         'name':                      ['title'],
-        # _apply_router_gateway_info:
+        # See: _apply_router_gateway_info:
         # (gateways, subnets, network_id, # set_network)
     },
     'security_group': {
@@ -64,12 +64,12 @@ NEUTRON_TRAITMAPS = {
     },
     'subnet': {
         'cidr':                      ['cidr'],
-        'dns_nameservers':           ['dns_nameservers'],
         'gateway_ip':                ['gateway_ip'],
         'id':                        ['subnetId'],
         'name':                      ['title'],
         'network_id':                ['subnetId'],
-        # _apply_neutron_traits: set_tenant, set_network
+        # See: _apply_dns_info(): dns_nameservers
+        # _apply_neutron_traits: set_tenant, set_network,
     },
 }
 
@@ -125,8 +125,8 @@ def _apply_neutron_traits(evt, objmap, traitset):
         setattr(objmap, 'set_tenant', tenant_id(evt))
 
 def _apply_trait_rel(evt, objmap, trait_name, class_rel):
-    ''' Set the class relation's set_* attribute: (ex: set_network)
-    _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
+    ''' Generic: Set the class relation's set_* attribute: (ex: set_network)
+        Ex: _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
     '''
     if hasattr(evt, trait_name):
         attrib_id = make_id(class_rel, getattr(evt, trait_name))
@@ -153,6 +153,13 @@ def _apply_router_gateway_info(evt, objmap):
         setattr(objmap, 'subnets', list(subnets))
         setattr(objmap, 'network_id', network)
         setattr(objmap, 'set_network', net_id)
+
+def _apply_dns_info(evt, objmap):
+    ''' Get the dns servers for subnets as a string'''
+    if hasattr(evt, 'trait_dns_nameservers'):
+        dns_info = ast.literal_eval(evt.trait_dns_nameservers)
+        servers = ", ".join(dns_info)
+        setattr(objmap, 'dns_nameservers', servers)
 
 def _apply_instance_traits(evt, objmap):
     traitmap = {
@@ -224,7 +231,7 @@ def neutron_objmap(evt, Name):
 def event_summary(component_name, evt):
     """ Gives correct summary for Create/Update event messages
     """
-    if '.create' in evt.trait_event_type:
+    if '.create' in evt.eventClassKey:
         action = "Created"
     else:
         action = "Updated"
@@ -429,7 +436,7 @@ def floatingip_delete_end(device, dmd, evt):
 # Network Event Functions
 # -----------------------------------------------------------------------------
 def network_create_start(device, dmd, evt):
-    evt.summary = "Creating Network %s" % (evt.trait_id)
+    evt.summary = "Creating Network %s" % (evt.trait_name)
     return []
 
 def network_update_start(device, dmd, evt):
@@ -558,6 +565,7 @@ def subnet_update(device, dmd, evt):
     evt.summary = event_summary("Subnet", evt)
 
     objmap = neutron_objmap(evt, "Subnet")
+    _apply_dns_info(evt, objmap)
     _apply_neutron_traits(evt, objmap, 'subnet')
     _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
     return [objmap]
@@ -687,7 +695,7 @@ MAPPERS = {
     # -------------------------------------------------------------------------
     #  Network
     # -------------------------------------------------------------------------
-    'openstack|network.create.start':        (network_id, network_create_start),
+    'openstack|network.create.start':        (None, network_create_start),
     'openstack|network.create.end':          (network_id, network_update),
     'openstack|network.update.start':        (network_id, network_update_start),
     'openstack|network.update.end':          (network_id, network_update),
