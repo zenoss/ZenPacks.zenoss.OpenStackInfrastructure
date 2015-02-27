@@ -761,23 +761,37 @@ class TestEventTransforms(zenpacklib.TestCase):
             'eventKey': u'7ccdf8c7-9d7d-4b0e-bc10-65aafa37f52c',
             'severity': 2,
             'summary': '',
-            'event_type': 'network.create.end',
+            'trait_admin_state_up': True,
             'trait_id': network_id,
             'trait_name': network_id,
-            'trait_status': 'ACTIVE',
-            'trait_tenant_id': 'dbb36d5137754461a26b970bdf8ac780',
-            'trait_admin_state_up': True,
             'trait_router:external': False,
+            'trait_status': 'ACTIVE',
+            'trait_tenant_id': 'tenant1',
         })
 
         self.process_event(evt)
         network = self.getObjByPath('components/network-' + network_id)
-        self.assertIsNotNone(network, msg="_create_network: Failed to create!")
+        return network
+
+    def _delete_network(self, network_id):
+        ''' Delete network using events and network_id'''
+
+        evt = buildEventFromDict({
+            'device': 'endpoint',
+            'eventClassKey': u'openstack|network.delete.end',
+            'eventKey': u'7dcdf8c7-9d7d-4b0e-bc10-65aafa37f52c',
+            'severity': 2,
+            'summary': '',
+            'trait_id': network_id,
+        })
+
+        self.process_event(evt)
+        network = self.getObjByPath('components/network-' + network_id)
         return network
 
     def _create_subnet(self, network_id, subnet_id):
         ''' Build subnet_id using events and network_id.
-            The network with network_id must already exist.
+            The network/network_id must already exist.
         '''
 
         evt = buildEventFromDict({
@@ -786,92 +800,262 @@ class TestEventTransforms(zenpacklib.TestCase):
             'eventKey': u'8ccdf8c7-9d7d-4b0e-bc10-65aafa37f52c',
             'severity': 2,
             'summary': '',
-            'event_type': 'network.create.end',
+            'trait_cidr': '10.10.10.0/24',
+            'trait_dns_nameserver': ['10.6.1.10','10.6.1.11'],
+            'trait_gateway_ip': '10.10.10.1',
             'trait_id': subnet_id,
             'trait_name': subnet_id,
             'trait_network_id': network_id,
-            'trait_cidr': '10.10.10.0/24',
-            'trait_gateway_ip': '10.10.10.1',
-            'trait_dns_nameserver': ['10.6.1.10','10.6.1.11'],
-            'trait_admin_state_up': True,
-            'trait_router:external': False,
-            'trait_tenant_id': 'dbb36d5137754461a26b970bdf8ac780',
+            'trait_tenant_id': 'tenant1',
         })
 
         self.process_event(evt)
         subnet = self.getObjByPath('components/subnet-' + subnet_id)
-        self.assertIsNotNone(subnet, msg="_create_subnet: Failed to create!")
         return subnet
 
-    def test_create_network(self):
+    def _delete_subnet(self, subnet_id):
+        ''' Delete subnet using events and subnet_id'''
 
-        # ----------------------------------------------------------------------
-        # Test network.create.start
-        # ----------------------------------------------------------------------
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'openstack|network.create.start',
-            'eventKey': u'0ccdf8c7-9d7d-4b0e-bc10-65aafa37f52c',
+            'eventClassKey': u'openstack|subnet.delete.end',
+            'eventKey': u'8dcdf8c7-9d7d-4b0e-bc10-65aafa37f52c',
             'severity': 2,
             'summary': '',
-            'event_type': 'network.create.start',
-            u'trait_name': 'null_net',
+            'trait_id': subnet_id,
         })
-        self.process_event(evt)
-        network_null = \
-            self.getObjByPath('components/network-96424e16-c96f-4616-960a-76cc2608bbf2')
-        self.assertIsNone(network_null, msg="Network_null doesn't exist!")
 
-        # ----------------------------------------------------------------------
-        # Test network.create.end
-        # ----------------------------------------------------------------------
+        self.process_event(evt)
+        subnet = self.getObjByPath('components/subnet-' + subnet_id)
+        return subnet
+
+    def _create_port(self, network_id, port_id):
+        ''' Build port_id using events and network_id.
+            The network/network_id must already exist.
+        '''
+
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'openstack|network.create.end',
-            'eventKey': u'1ccdf8c7-9d7d-4b0e-bc10-65aafa37f52c',
+            'eventClassKey': u'openstack|port.create.end',
+            'eventKey': u'9ccdf8c7-9d7d-4b0e-bc10-65aafa37f52c',
             'severity': 2,
             'summary': '',
-            'event_type': 'network.create.end',
-            u'trait_id': 'network7',
-            u'trait_name': 'network7',
+            'trait_admin_state_up': True,
+            'trait_binding:vif_type': 'ovs',
+            'trait_device_owner': 'zenoss',
+            'trait_id': port_id,
+            'trait_mac_address': 'fa:16:3e:23:bd:ce',
+            'trait_name': port_id,
+            'trait_network_id': network_id,
+            'trait_status': 'ACTIVE',
+            'trait_tenant_id': 'tenant1',
         })
+
         self.process_event(evt)
-        network_null = \
-            self.getObjByPath('components/network-network7')
+        port = self.getObjByPath('components/port-' + port_id)
+        return port
 
-        self.assertIsNotNone(network_null, msg="Failure: nework7 doesn't exist!")
+    def _delete_port(self, port_id):
+        ''' Delete port using events and port_id'''
 
-        # ----------------------------------------------------------------------
-        # Test subnet.create.start
-        # ----------------------------------------------------------------------
         evt = buildEventFromDict({
             'device': 'endpoint',
-            'eventClassKey': u'openstack|subnet.create.start',
-            'eventKey': u'2ccdf8c7-9d7d-4b0e-bc10-65aafa37f52c',
+            'eventClassKey': u'openstack|port.delete.end',
+            'eventKey': u'9dcdf8c7-9d7d-4b0e-bc10-65aafa37f52c',
             'severity': 2,
             'summary': '',
-            'event_type': 'subnet.create.start',
-            u'trait_id': 'network7',
-            u'trait_name': 'network7',
+            'trait_id': port_id,
         })
+
         self.process_event(evt)
-        network_null = \
-            self.getObjByPath('components/network-network7')
+        port = self.getObjByPath('components/port-' + port_id)
+        return port
 
-        self.assertIsNotNone(network_null, msg="Failure: nework7 doesn't exist!")
+    def _create_router(self, network_id, subnet_id, router_id):
+        ''' Build router_id using events, network_id, subnet_id.
+            The network_id, subnet_id must already exist.
+        '''
 
+        gateway_info = "{u'network_id': u'%s', u'enable_snat': True, " \
+               "u'external_fixed_ips': [{u'subnet_id':  u'%s', " \
+               "u'ip_address': u'192.168.117.226'}]}" \
+               % (network_id, subnet_id)
+
+        evt = buildEventFromDict({
+            'device': 'endpoint',
+            'eventClassKey': u'openstack|router.create.end',
+            'eventKey': u'9ccdf8c7-9d7d-4b0e-bc10-65aafa37f52c',
+            'severity': 2,
+            'summary': '',
+            'trait_admin_state_up': True,
+            'trait_id': router_id,
+            'trait_external_gateway': gateway_info,
+            'trait_name': router_id,
+            'trait_network_id': network_id,
+            'trait_routes': [],
+            'trait_status': 'ACTIVE',
+            'trait_tenant_id': 'tenant1',
+        })
+
+        self.process_event(evt)
+        router = self.getObjByPath('components/router-' + router_id)
+        return router
+
+    def _delete_router(self, router_id):
+        ''' Delete router using events and router_id'''
+
+        evt = buildEventFromDict({
+            'device': 'endpoint',
+            'eventClassKey': u'openstack|router.delete.end',
+            'eventKey': u'9dddf8c7-9d7d-4b0e-bc10-65aafa37f52c',
+            'severity': 2,
+            'summary': '',
+            'trait_id': router_id,
+        })
+
+        self.process_event(evt)
+        router = self.getObjByPath('components/router-' + router_id)
+        return router
+
+    def _create_floatingip(self, network_id, router_id, port_id, floatingip_id):
+        ''' Build floatingip_id using events, network_id, subnet_id.
+            The network_id, subnet_id must already exist.
+        '''
+
+        evt = buildEventFromDict({
+            'device': 'endpoint',
+            'eventClassKey': u'openstack|floatingip.create.end',
+            'eventKey': u'01cdf8c7-9d7d-4b0e-bc10-65aafa37f52c',
+            'severity': 2,
+            'summary': '',
+            'trait_fixed_ip_address': '10.1.7.100',
+            'trait_floating_ip_address': '10.31.7.3',
+            'trait_floating_network_id': network_id,
+            'trait_id': floatingip_id,
+            'trait_port_id': port_id,
+            'trait_router_id': router_id,
+            'trait_status': 'ACTIVE',
+            'trait_tenant_id': 'tenant1',
+        })
+
+        self.process_event(evt)
+        floatingip = self.getObjByPath('components/floatingip-' + floatingip_id)
+        return floatingip
+
+    def _delete_floatingip(self, floatingip_id):
+        ''' Delete floatingip using events and floatingip_id'''
+
+        evt = buildEventFromDict({
+            'device': 'endpoint',
+            'eventClassKey': u'openstack|floatingip.delete.end',
+            'eventKey': u'0dddf8c7-9d7d-4b0e-bc10-65aafa37f52c',
+            'severity': 2,
+            'summary': '',
+            'trait_id': floatingip_id,
+        })
+
+        self.process_event(evt)
+        floatingip = self.getObjByPath('components/floatingip-' + floatingip_id)
+        return floatingip
+
+    def _create_securitygroup(self, securitygroup_id):
+        ''' Build securitygroup_id using events.
+        '''
+
+        evt = buildEventFromDict({
+            'device': 'endpoint',
+            'eventClassKey': u'openstack|security_group.create.end',
+            'eventKey': u'bccdf8c7-9d7d-4b0e-bc10-65aafa37f52c',
+            'severity': 2,
+            'summary': '',
+            'trait_id': securitygroup_id,
+            'trait_name': securitygroup_id,
+            'trait_tenant_id': 'tenant1',
+        })
+
+        self.process_event(evt)
+        securitygroup = self.getObjByPath('components/securitygroup-' + securitygroup_id)
+        return securitygroup
+
+    def _delete_securitygroup(self, securitygroup_id):
+        ''' Delete securitygroup using events and securitygroup_id'''
+
+        evt = buildEventFromDict({
+            'device': 'endpoint',
+            'eventClassKey': u'openstack|security_group.delete.end',
+            'eventKey': u'0dddf8c7-9d7d-4b0e-bc10-65aafa37f52c',
+            'severity': 2,
+            'summary': '',
+            'trait_id': securitygroup_id,
+        })
+
+        self.process_event(evt)
+        securitygroup = self.getObjByPath('components/securitygroup-' + securitygroup_id)
+        return securitygroup
+
+    def test_network(self):
+        ''' Test Creation/Deletion of network '''
+        net = self._create_network("test")
+        self.assertIsNotNone(net, msg="Failure: nework doesn't exist!")
+
+        net = self._delete_network(net.netId)
+        self.assertIsNone(net, msg="Failure: network exists!")
+
+    def test_subnet(self):
+        ''' Test Creation/Deletion of subnet '''
+        net = self._create_network("test")
+        self.assertIsNotNone(net, msg="Subnet: network doesn't exist!")
+
+        subnet = self._create_subnet(net.netId, 'test')
+        self.assertIsNotNone(subnet, msg="Failure: subnet doesn't exist!")
+
+        subnet = self._delete_subnet(subnet.subnetId)
+        self.assertIsNone(subnet, msg="Failure: subnet exist!")
+
+    def test_port(self):
+        ''' Test Creation/Deletion of port '''
+        net = self._create_network("test")
+        self.assertIsNotNone(net, msg="CreatePort: network doesn't exist!")
+
+        port = self._create_port(net.netId, 'test')
+        self.assertIsNotNone(port, msg="CreatePort: port doesn't exist!")
+
+        port = self._delete_port(port.portId)
+        self.assertIsNone(port, msg="Failure: port exists!")
+
+    def test_router_and_floatingip(self):
+        ''' Test Creation/Deletion of port '''
+        net = self._create_network("test")
+        subnet = self._create_subnet(net.netId, 'test')
+        port = self._create_port(net.netId, 'test')
+
+        router = self._create_router(net.netId, subnet.subnetId, 'test')
+        self.assertIsNotNone(router, msg="CreateRouter: router doesn't exist!")
+
+        f_ip = self._create_floatingip(net.netId,
+                                       router.routerId,
+                                       port.portId,
+                                       'test')
+        self.assertIsNotNone(f_ip, msg="CreateRouter: FloatingIP doesn't exist!")
+
+        router = self._delete_router(router.routerId)
+        self.assertIsNone(router, msg="Failure: router exists!")
+
+        f_ip = self._delete_floatingip(f_ip.floatingipId)
+        self.assertIsNone(f_ip, msg="Failure: floatingip exists!")
+
+    def test_security_group(self):
+        ''' Test Creation/Deletion of SecurityGroup '''
+
+        securitygroup = self._create_securitygroup('test')
+        self.assertIsNotNone(securitygroup, msg="SG: securitygroup doesn't exist!")
+
+        securitygroup = self._delete_securitygroup(securitygroup.sgId)
+        self.assertIsNone(securitygroup, msg="Failure: securitygroup exists!")
 
 @monkeypatch('Products.DataCollector.ApplyDataMap.ApplyDataMap')
 def logChange(self, device, compname, eventClass, msg):
     logging.getLogger('zen.ApplyDataMap').info(msg)
-
-# My test data doesn't have properly formatted ids, so instead of
-# "tenant-tenant1", it's just "tenant1.  Rather than fix the data, we hack the
-# setter to not prefix tenant- on the front.
-@monkeypatch('ZenPacks.zenoss.OpenStackInfrastructure.Instance.Instance')
-def set_tenant_id(self, tenant_id):
-    return self.set_tenant(tenant_id)
-
 
 def test_suite():
     from unittest import TestSuite, makeSuite
