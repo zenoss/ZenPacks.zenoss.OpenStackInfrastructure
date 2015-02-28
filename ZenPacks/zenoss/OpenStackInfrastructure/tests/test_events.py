@@ -45,7 +45,7 @@ class TestEventTransforms(zenpacklib.TestCase):
         super(TestEventTransforms, self).afterSetUp()
 
         # Quiet down some noisy logging.
-        logging.getLogger('zen.OpenStackDeviceProxyComponent').setLevel(logging.ERROR)
+        # logging.getLogger('zen.OpenStackDeviceProxyComponent').setLevel(logging.ERROR)
 
     def model_data(self):
         if not hasattr(self, '_model_data'):
@@ -755,6 +755,7 @@ class TestEventTransforms(zenpacklib.TestCase):
     def _create_network(self, network_id):
         ''' Build network using events and network_id'''
 
+        log.info("Create network '%s'" % network_id)
         evt = buildEventFromDict({
             'device': 'endpoint',
             'eventClassKey': u'openstack|network.create.end',
@@ -775,6 +776,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
     def _delete_network(self, network_id):
         ''' Delete network using events and network_id'''
+        log.info("Delete network '%s'" % network_id)
 
         evt = buildEventFromDict({
             'device': 'endpoint',
@@ -793,6 +795,7 @@ class TestEventTransforms(zenpacklib.TestCase):
         ''' Build subnet_id using events and network_id.
             The network/network_id must already exist.
         '''
+        log.info("Create Subnet '%s'" % subnet_id)
 
         evt = buildEventFromDict({
             'device': 'endpoint',
@@ -815,6 +818,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
     def _delete_subnet(self, subnet_id):
         ''' Delete subnet using events and subnet_id'''
+        log.info("Delete Subnet '%s'" % subnet_id)
 
         evt = buildEventFromDict({
             'device': 'endpoint',
@@ -833,6 +837,7 @@ class TestEventTransforms(zenpacklib.TestCase):
         ''' Build port_id using events and network_id.
             The network/network_id must already exist.
         '''
+        log.info("Create port '%s'" % port_id)
 
         evt = buildEventFromDict({
             'device': 'endpoint',
@@ -857,6 +862,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
     def _delete_port(self, port_id):
         ''' Delete port using events and port_id'''
+        log.info("Delete port '%s'" % port_id)
 
         evt = buildEventFromDict({
             'device': 'endpoint',
@@ -875,6 +881,7 @@ class TestEventTransforms(zenpacklib.TestCase):
         ''' Build router_id using events, network_id, subnet_id.
             The network_id, subnet_id must already exist.
         '''
+        log.info("Create router '%s'" % router_id)
 
         gateway_info = "{u'network_id': u'%s', u'enable_snat': True, " \
                "u'external_fixed_ips': [{u'subnet_id':  u'%s', " \
@@ -903,6 +910,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
     def _delete_router(self, router_id):
         ''' Delete router using events and router_id'''
+        log.info("Delete router '%s'" % router_id)
 
         evt = buildEventFromDict({
             'device': 'endpoint',
@@ -921,6 +929,7 @@ class TestEventTransforms(zenpacklib.TestCase):
         ''' Build floatingip_id using events, network_id, subnet_id.
             The network_id, subnet_id must already exist.
         '''
+        log.info("Create floatingip '%s'" % floatingip_id)
 
         evt = buildEventFromDict({
             'device': 'endpoint',
@@ -944,6 +953,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
     def _delete_floatingip(self, floatingip_id):
         ''' Delete floatingip using events and floatingip_id'''
+        log.info("Delete floatingip '%s'" % floatingip_id)
 
         evt = buildEventFromDict({
             'device': 'endpoint',
@@ -961,6 +971,7 @@ class TestEventTransforms(zenpacklib.TestCase):
     def _create_securitygroup(self, securitygroup_id):
         ''' Build securitygroup_id using events.
         '''
+        log.info("Create securityGroup '%s'" % securitygroup_id)
 
         evt = buildEventFromDict({
             'device': 'endpoint',
@@ -979,6 +990,7 @@ class TestEventTransforms(zenpacklib.TestCase):
 
     def _delete_securitygroup(self, securitygroup_id):
         ''' Delete securitygroup using events and securitygroup_id'''
+        log.info("Delete securityGroup '%s'" % securitygroup_id)
 
         evt = buildEventFromDict({
             'device': 'endpoint',
