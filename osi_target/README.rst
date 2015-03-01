@@ -3,8 +3,10 @@ Setup for OpenStackInfrastructure Reference Network
 ===================================================
 
 This utility sets up the OpenStackInfrastructure Zenpack's reference network
-that will be used to test against. The following diagram represents the 
-reference network:
+that will be used to test against. As of now it is only suitable for a
+single-node Openstack setup.
+
+The following diagram represents the reference network:
 
 .. image:: reference_network.png
 
@@ -92,6 +94,8 @@ Target System Requirements
 * Target must allow for static IP address assignment. (AWS won't work!)
 * You have SSH'd into the Target once and accepted its host-key in your:
   **~/.ssh/known_hosts**
+* Ensure that 'Defaults env_reset' is commented out of /etc/sudoers
+* Ensure that 'requiretty' is commented out of /etc/sudoers
 
 Setup Instructions
 =====================
@@ -101,7 +105,11 @@ Setup Instructions
 
 * In $OSI_DIR/neutron.reference.net/inventory:
 
-  - Set the value of xyz.zenoss.loc to your Target fqdn/address: myhost.zenoss.loc
+  - Set the value of the [packstack] target to your Target IP 
+    address. For example if your target has the IP 10.11.12.13::
+    
+      [packstack]
+      10.11.12.13
 
 * In $OSI_DIR/neutron.reference.net/group_vars/all:
 
@@ -203,6 +211,20 @@ files listed above onto it. Then execute the following:
    ansible-playbook -vvvvv -i inventory all.yml -Kk
    SSH password: *************
    sudo password [defaults to SSH password]: <ret>
+
+Specific Build Troubleshooting
+-------------------------------
+* If you have an error in the beginning of the install process like this:
+  "ansible: ssh connection error waiting for sudo or su password prompt"
+  you should go back and ensure the /etc/sudoers is setup as in the
+  requirements.
+
+* If Ansible fails during a Reboot, just type "make" again. Sometimes the
+  reboot will confuse Ansible.
+
+Rebuilding the Neutron Network
+-------------------------------
+* make neutron  
 
 Specific Destroy Instruction
 -----------------------------

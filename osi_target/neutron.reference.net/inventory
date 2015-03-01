@@ -1,4 +1,4 @@
 # file: inventory
 
 [packstack]
-mp8.zenoss.loc
+192.168.117.46
