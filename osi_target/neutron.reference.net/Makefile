@@ -6,7 +6,7 @@ default: all
 # 	ansible-playbook -i inventory -K $@.yml 
 
 all:
-	ansible-playbook -vvvvv -i inventory all.yml -Kk
+	ansible-playbook -vvvv -i inventory all.yml -Kk
 
 check:
 	ansible-playbook -vvvvv -i inventory all.yml -Kk --check

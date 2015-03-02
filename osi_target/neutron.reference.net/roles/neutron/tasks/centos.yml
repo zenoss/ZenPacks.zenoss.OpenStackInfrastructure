@@ -127,12 +127,12 @@
   with_items:
     - { name: 'subnet_public',
         network_name: 'network_public',
-        cidr: '{{hardware.eth0.network}}/24',
-        gateway: '{{hardware.eth0.gateway}}',
+        cidr: '{{hardware.if.network}}/24',
+        gateway: '{{hardware.if.gateway}}',
         tenant_name: 'services',
         enable_dhcp: False,
-        allocation_pool_start: '{{hardware.eth0.dhcp_start}}',
-        allocation_pool_end: '{{hardware.eth0.dhcp_end}}',
+        allocation_pool_start: '{{hardware.if.dhcp_start}}',
+        allocation_pool_end: '{{hardware.if.dhcp_end}}',
       }
     - { name: 'subnet_A5',
         network_name: 'network_A5',

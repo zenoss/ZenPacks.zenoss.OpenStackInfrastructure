@@ -1,8 +1,0 @@
-DEVICE=eth0
-TYPE=Ethernet
-BOOTPROTO=dhcp
-NAME=eth0
-ONBOOT=yes
-NM_CONTROLLED=no
-NOZEROCONF=yes
-DNS1={{hardware.eth0.dns}}

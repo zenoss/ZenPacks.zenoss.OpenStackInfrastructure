@@ -21,7 +21,7 @@
   ignore_errors: true
 
 
-- name: "Enable a *SANE* networking service"
+- name: "Enable the *SANE* networking service"
   service: name={{ item }}
            enabled=yes
   with_items:
@@ -96,13 +96,13 @@
 #-------------------------------------------------------------------------------
 #- External Network Configuration to allow Access to/from internal VMs
 #-------------------------------------------------------------------------------
-# You may have to change eth0 to enp2s0 in some Centos7 systems
-- name: "Setup Bridge interfaces so that instances can talk to outside world."
-  template: src={{ item }}
-            dest=/etc/sysconfig/network-scripts/{{ item }}
+
+- name: "Setup Bridge interfaces."
+  template: src={{ item.source }}
+            dest=/etc/sysconfig/network-scripts/{{ item.dest }}
   with_items:
-     - ifcfg-br-ex
-     - ifcfg-eth0
+    - { source: 'ifcfg-br-ex', dest: 'ifcfg-br-ex' }
+    - { source: 'ifcfg-if',    dest: 'ifcfg-{{hardware.if.name}}' }
   register: bridge_setup
 
 - name: "Restart networking service"
