@@ -36,6 +36,7 @@ hardware:
     address: "{{ansible_default_ipv4.address}}"
     gateway: "{{ansible_default_ipv4.gateway}}"
     network: "{{ansible_default_ipv4.network}}"
+    netmask: "{{ansible_default_ipv4.netmask}}"
     ntpd: "{{ansible_default_ipv4.gateway}}"     # You MAY need to change this!
     dns: "{{ansible_default_ipv4.gateway}}"      # WARNING: Check your setup.
     floating_network: "{{network_prefix}}224/27" # WARNING: *MUST* change this!
