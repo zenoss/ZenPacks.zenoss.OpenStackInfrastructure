@@ -1,6 +1,29 @@
 ---
 
 #-------------------------------------------------------------------------------
+# Configure the normal user setup for testing ----------------------------------
+#-------------------------------------------------------------------------------
+#
+- name: "Setup the credentials for the privileged user"
+  command: cp /root/keystonerc_admin /home/{{sudo_user}}/
+
+- name: "Setup attributes for keystonerc_admin"
+  file: path=/home/{{sudo_user}}/keystonerc_admin
+        mode=0444
+
+- name: "Add keystone creds to users bashrc"
+  lineinfile: dest=/home/{{sudo_user}}/.bashrc
+              line="source $HOME/keystonerc_admin"
+              insertafter=EOF
+              state=present
+
+- name: Template alias.bash for service restart functions
+  sudo: False
+  template:
+    src=zenoss/alias.bash
+    dest=/home/{{sudo_user}}/alias.bash
+
+#-------------------------------------------------------------------------------
 #- Preliminary System Setup, get the network services in shape etc...
 #- Install Packstack packages.
 #- Requirements: Must have a system with minimum 3GB RAM
@@ -127,12 +150,12 @@
   with_items:
     - { name: 'subnet_public',
         network_name: 'network_public',
-        cidr: '{{hardware.eth0.network}}/24',
-        gateway: '{{hardware.eth0.gateway}}',
+        cidr: '{{hardware.if.network}}/24',
+        gateway: '{{hardware.if.gateway}}',
         tenant_name: 'services',
         enable_dhcp: False,
-        allocation_pool_start: '{{hardware.eth0.dhcp_start}}',
-        allocation_pool_end: '{{hardware.eth0.dhcp_end}}',
+        allocation_pool_start: '{{hardware.if.dhcp_start}}',
+        allocation_pool_end: '{{hardware.if.dhcp_end}}',
       }
     - { name: 'subnet_A5',
         network_name: 'network_A5',
@@ -297,6 +320,7 @@
       - net-id: '{{ networks.results[1].id }}'
     meta:
       hostname: vm_1
+  ignore_errors: True
 
 - name: Add a Flat vm_2; Note the dash in net-id!
   nova_compute:
