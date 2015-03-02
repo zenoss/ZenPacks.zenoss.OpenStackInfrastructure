@@ -1,1 +1,1 @@
-{{ inventory_hostname }}
+{{ ansible_fqdn }}

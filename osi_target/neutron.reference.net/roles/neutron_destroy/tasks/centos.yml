@@ -161,12 +161,8 @@
   quantum_subnet:
     name: '{{item.name}}'
     network_name: '{{item.network_name}}'
-    cidr: '{{item.cidr}}'
-    gateway_ip: '{{item.gateway}}'
     tenant_name: '{{item.tenant_name}}'
-    enable_dhcp: '{{item.enable_dhcp}}'
-    allocation_pool_start: '{{item.allocation_pool_start}}'
-    allocation_pool_end: '{{item.allocation_pool_end}}'
+    cidr: '{{item.cidr}}'
     state: absent
     login_username: '{{keystone.OS_USERNAME}}'
     login_password: '{{keystone.OS_PASSWORD}}'
@@ -175,57 +171,33 @@
   with_items:
     - { name: 'subnet_public',
         network_name: 'network_public',
-        cidr: '{{hardware.eth0.network}}/24',
-        gateway: '{{hardware.eth0.gateway}}',
         tenant_name: 'services',
-        enable_dhcp: False,
-        allocation_pool_start: '{{hardware.eth0.dhcp_start}}',
-        allocation_pool_end: '{{hardware.eth0.dhcp_end}}',
+        cidr: '{{hardware.if.network}}/24',
       }
     - { name: 'subnet_A5',
         network_name: 'network_A5',
-        cidr: '10.1.5.0/24',
-        gateway: '10.1.5.1',
         tenant_name: 'A',
-        enable_dhcp: True,
-        allocation_pool_start: '10.1.5.100',
-        allocation_pool_end: '10.1.5.140'
+        cidr: '10.1.5.0/24',
       }
     - { name: 'subnet_A6',
         network_name: 'network_A6',
-        cidr: '10.1.6.0/24',
-        gateway: '10.1.6.1',
         tenant_name: 'A',
-        enable_dhcp: True,
-        allocation_pool_start: '10.1.6.100',
-        allocation_pool_end: '10.1.6.140'
+        cidr: '10.1.6.0/24',
       }
     - { name: 'subnet_B7',
         network_name: 'network_B7',
-        cidr: '10.1.7.0/24',
-        gateway: '10.1.7.1',
         tenant_name: 'B',
-        enable_dhcp: True,
-        allocation_pool_start: '10.1.7.100',
-        allocation_pool_end: '10.1.7.140'
+        cidr: '10.1.6.0/24',
       }
     - { name: 'subnet_C7',
         network_name: 'network_C7',
-        cidr: '10.1.7.0/24',
-        gateway: '10.1.7.1',
         tenant_name: 'C',
-        enable_dhcp: True,
-        allocation_pool_start: '10.1.7.100',
-        allocation_pool_end: '10.1.7.140'
+        cidr: '10.1.7.0/24',
       }
     - { name: 'subnet_C9',
         network_name: 'network_C9',
-        cidr: '10.1.9.0/24',
-        gateway: '10.1.9.1',
         tenant_name: 'C',
-        enable_dhcp: True,
-        allocation_pool_start: '10.1.9.100',
-        allocation_pool_end: '10.1.9.140'
+        cidr: '10.1.9.0/24',
       }
 
 #-------------------------------------------------------------------------------

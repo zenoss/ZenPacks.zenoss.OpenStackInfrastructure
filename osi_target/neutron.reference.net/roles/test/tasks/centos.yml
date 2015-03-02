@@ -11,10 +11,10 @@
   debug: msg="CONTROLLER_HOST =  {{ openstack.CONTROLLER_HOST }}"
 
 - name: Debug
-  debug: msg="gateway =  {{ hardware.eth0.gateway }}"
+  debug: msg="gateway =  {{ hardware.if.gateway }}"
 
 - name: Debug DNS Compound Var
-  debug: msg="dns =  {{ hardware.eth0.dns }}"
+  debug: msg="dns =  {{ hardware.if.dns }}"
 
 - name: Debug
   debug: msg="value =  {{ item.value }}"

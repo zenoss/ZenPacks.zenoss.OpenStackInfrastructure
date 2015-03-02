@@ -81,4 +81,13 @@
     - "{{ sudo_user }}/.bashrc"
     - "{{ sudo_user }}/.vimrc"
 
+#-------------------------------------------------------------------------------
+# Configure SSH and Miscellaneous
+#-------------------------------------------------------------------------------
+- name: "Increase MaxSessions for sshd"
+  lineinfile: dest=/etc/ssh/sshd_config
+              state=present
+              regexp='^#MaxSessions 10'
+              line='MaxSessions 100'
+  notify: restart sshd
 
