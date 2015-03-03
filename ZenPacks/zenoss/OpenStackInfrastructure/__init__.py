@@ -109,8 +109,10 @@ CFG = zenpacklib.ZenPackSpec(
                     'zenoss.cmd.linux.process',
                     'zenoss.cmd.linux.rpm',
                     'zenoss.cmd.linux.openstack.nova',
-                    'zenoss.cmd.linux.openstack.libvirt'
-                ]
+                    'zenoss.cmd.linux.openstack.libvirt',
+                    'zenoss.cmd.linux.openstack.inifiles'
+                ],
+                'zOpenStackNeutronConfigDir': '/etc/neutron'
             }
         }
     },
@@ -397,9 +399,27 @@ CFG = zenpacklib.ZenPackSpec(
             'order': 9,
             'properties': {
                 'hostfqdn':            {'grid_display': False,
-                                        'index_type': 'field'},
+                                        'index_type': 'field',
+                                        'index_scope': 'both'},
                 'hostname':            {'grid_display': False,
-                                        'index_type': 'field'},
+                                        'index_type': 'field',
+                                        'index_scope': 'both'},
+                'neutron_core_plugin':            {'grid_display': False,
+                                                   'label': 'Neutron Core Plugin'},
+                'neutron_mechanism_drivers':      {'grid_display': False,
+                                                   'label': 'Neutron ML2 Mechanism Drivers',
+                                                   'default': [],
+                                                   'type': 'lines'},
+                'neutron_type_drivers':           {'grid_display': False,
+                                                   'label': 'Neutron ML2 Type Drivers',
+                                                   'default': [],
+                                                   'type': 'lines'},
+                'neutron_ml2_ini':                {'grid_display': False,
+                                                   'display': False,
+                                                   'default': {}},
+                'neutron_ml2_ini_keywords':       {'api_only': True,
+                                                   'index_type': 'keyword',
+                                                   'index_scope': 'global'}
             },
             'relationships': {
                 'orgComponent': {'label': 'Supporting',
