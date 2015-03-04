@@ -45,7 +45,7 @@ RELATIONSHIPS_YUML = """
 [Tenant]1-.-*[Subnet]
 [Tenant]1-.-*[Router]
 [Tenant]1-.-*[Port]
-[Tenant]1-.-*[SecurityGroup]
+# [Tenant]1-.-*[SecurityGroup]
 [Tenant]1-.-*[FloatingIp]
 [Hypervisor]1-.-*[Instance]
 [Network]1-.-*[Subnet]
@@ -205,10 +205,8 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Tenant',
             'order': 5,
             'properties': {
-                'tenantId':   {'grid_display': False,
-                               'label': 'Tenant ID'},
-                'description': {'label': 'Description',
-                                'content_width': 180},
+                'tenantId':   {'grid_display': False, 'label': 'Tenant ID'},
+                'description': {'label': 'Description','content_width': 180},
             },
             'dynamicview_views': ['service_view'],
             'dynamicview_relations': {
@@ -473,17 +471,20 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Neutron Agent',
             'order': 11,
             'properties': {
-                'agentId':     {'grid_display': False,
-                                'label': 'Agent ID'},
-                'type':        {'label': 'Type',
-                                'order': 11.1,
-                                'content_width': 120},
-                'state':        {'label': 'Admin State Up',
-                                'order': 11.2,
-                                'content_width': 80},
-                'alive':       {'label': 'Alive',
-                                'order': 11.3,
-                                'content_width': 50},               # true or false
+                'agentId':       {'grid_display': False, 'label': 'Agent ID'},
+                'type':          {'label': 'Type',
+                                  'order': 11.1,
+                                  'content_width': 120},
+                'state':          {'label': 'Admin State Up',
+                                  'order': 11.2,
+                                  'content_width': 80},
+                'alive':         {'label': 'Alive',
+                                  'order': 11.3,
+                                  'content_width': 50},               # true or false
+                'binary':        {'grid_display': False},
+                'enabled':       {'grid_display': False},
+                'operStatus':    {'grid_display': False},
+                'orgComponent':  {'grid_display': False},
             },
         },
 
@@ -567,20 +568,20 @@ CFG = zenpacklib.ZenPackSpec(
             },
         },
 
-        'SecurityGroup': {
-            'base': 'LogicalComponent',
-            'meta_type': 'OpenStackInfrastructureSecurityGroup',
-            'label': 'Security Group',
-            'order': 17,
-            'properties': {
-                'sgId':  {'label': 'Security Group ID', 'grid_display': True},
-                'title': {'label': 'SG Name', 'grid_display': True},
-                # 'rules': {'label': 'Rules'},
-            },
-            'relationships': {
-                'tenant':          {'grid_display': False},
-            },
-        },
+        # 'SecurityGroup': {
+        #     'base': 'LogicalComponent',
+        #     'meta_type': 'OpenStackInfrastructureSecurityGroup',
+        #     'label': 'Security Group',
+        #     'order': 17,
+        #     'properties': {
+        #         'sgId':  {'label': 'Security Group ID', 'grid_display': True},
+        #         'title': {'label': 'SG Name', 'grid_display': True},
+        #         # 'rules': {'label': 'Rules'},
+        #     },
+        #     'relationships': {
+        #         'tenant':          {'grid_display': False},
+        #     },
+        # },
 
         # 'SecurityGroupRule': {
         #     'base': 'LogicalComponent',

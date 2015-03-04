@@ -729,12 +729,19 @@ MAPPERS = {
     # -------------------------------------------------------------------------
     #  Security_group
     # -------------------------------------------------------------------------
-    'openstack|security_group.create.start': (securitygroup_id, securityGroup_create_start),
-    'openstack|security_group.create.end':   (securitygroup_id, securityGroup_update),
-    'openstack|security_group.update.start': (securitygroup_id, securityGroup_update_start),
-    'openstack|security_group.update.end':   (securitygroup_id, securityGroup_update),
-    'openstack|security_group.delete.start': (securitygroup_id, securityGroup_delete_start),
-    'openstack|security_group.delete.end':   (securitygroup_id, securityGroup_delete_end),
+    # 'openstack|security_group.create.start': (securitygroup_id, securityGroup_create_start),
+    # 'openstack|security_group.create.end':   (securitygroup_id, securityGroup_update),
+    # 'openstack|security_group.update.start': (securitygroup_id, securityGroup_update_start),
+    # 'openstack|security_group.update.end':   (securitygroup_id, securityGroup_update),
+    # 'openstack|security_group.delete.start': (securitygroup_id, securityGroup_delete_start),
+    # 'openstack|security_group.delete.end':   (securitygroup_id, securityGroup_delete_end),
+
+    'openstack|security_group.create.start':     (None, None),
+    'openstack|security_group.create.end':       (None, None),
+    'openstack|security_group.update.start':     (None, None),
+    'openstack|security_group.update.end':       (None, None),
+    'openstack|security_group.delete.start':     (None, None),
+    'openstack|security_group.delete.end':       (None, None),
 
     # -------------------------------------------------------------------------
     #  Security_group_rule
@@ -773,7 +780,7 @@ def process(evt, device, dmd, txnCommit):
     if mapper:
         datamaps = mapper(device, dmd, evt)
         if datamaps:
-            adm = ApplyDataMap()
+            adm = ApplyDataMap(device)
             for datamap in datamaps:
                 # LOG.debug("Applying %s" % datamap)
                 adm._applyDataMap(device, datamap)

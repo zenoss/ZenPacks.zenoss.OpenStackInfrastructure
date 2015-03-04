@@ -164,8 +164,9 @@ class OpenStackInfrastructure(PythonPlugin):
         result = yield neutron_client.ports()
         results['ports'] = result['ports']
 
-        result = yield neutron_client.security_groups()
-        results['security_groups'] = result['security_groups']
+        # result = yield neutron_client.security_groups()
+        # results['security_groups'] = result['security_groups']
+        results['security_groups'] = {}
 
         result = yield neutron_client.floatingips()
         results['floatingips'] = result['floatingips']
@@ -483,8 +484,9 @@ class OpenStackInfrastructure(PythonPlugin):
                     type = agent['agent_type'],               # true/false
                     state = agent['admin_state_up'],          # true/false
                     alive = agent['alive'],                   # ACTIVE
-                    set_dhcpSubnets = dhcp_agent_subnets,
                     set_agentRouters = l3_agent_routers,
+                    set_dhcpSubnets = dhcp_agent_subnets,
+                    set_hostedOn = 'host-{0}'.format(agent['host']),
                 )))
 
         # networking
@@ -675,8 +677,8 @@ class OpenStackInfrastructure(PythonPlugin):
         # Apply the objmaps in the right order.
         componentsMap = RelationshipMap(relname = 'components')
         for i in ('tenants', 'regions', 'flavors', 'images', 'servers', 'zones',
-                  'hosts', 'hypervisors', 'services', 'agents', 'networks',
-                  'subnets', 'routers', 'ports', 'security_groups', 'floatingips',
+                  'hosts', 'hypervisors', 'services', 'networks',
+                  'subnets', 'routers', 'ports', 'agents', 'security_groups', 'floatingips',
                   ):
             for objmap in objmaps[i]:
                 componentsMap.append(objmap)

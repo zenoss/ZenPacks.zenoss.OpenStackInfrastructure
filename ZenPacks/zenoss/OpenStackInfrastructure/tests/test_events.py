@@ -1056,14 +1056,14 @@ class TestEventTransforms(zenpacklib.TestCase):
         f_ip = self._delete_floatingip(f_ip.floatingipId)
         self.assertIsNone(f_ip, msg="Failure: floatingip exists!")
 
-    def test_security_group(self):
-        ''' Test Creation/Deletion of SecurityGroup '''
+    # def test_security_group(self):
+    #     ''' Test Creation/Deletion of SecurityGroup '''
 
-        securitygroup = self._create_securitygroup('test')
-        self.assertIsNotNone(securitygroup, msg="SG: securitygroup doesn't exist!")
+    #     securitygroup = self._create_securitygroup('test')
+    #     self.assertIsNotNone(securitygroup, msg="SG: securitygroup doesn't exist!")
 
-        securitygroup = self._delete_securitygroup(securitygroup.sgId)
-        self.assertIsNone(securitygroup, msg="Failure: securitygroup exists!")
+    #     securitygroup = self._delete_securitygroup(securitygroup.sgId)
+    #     self.assertIsNone(securitygroup, msg="Failure: securitygroup exists!")
 
 @monkeypatch('Products.DataCollector.ApplyDataMap.ApplyDataMap')
 def logChange(self, device, compname, eventClass, msg):
