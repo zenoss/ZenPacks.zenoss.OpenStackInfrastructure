@@ -106,20 +106,39 @@ class OpenStackInfrastructure(PythonPlugin):
         result = yield neutron_client.agents()
         results['agents'] = result['agents']
 
-        results['dhcp_agent_subnets'] = {}
-        for dhcp_agent_id in [str(x['id'])
-                              for x in results['agents']
-                              if x['agent_type'].lower() == 'dhcp agent']:
+        # ---------------------------------------------------------------------
+        # Insert the l3_agents - routers list
+        # ---------------------------------------------------------------------
+        for _agent in results['agents']:
+            _agent['l3_agent_routers'] = []
+            _routers = []
 
-            agent = yield neutron_client.api_call('/v2.0/agents/%s/dhcp-networks.json'
-                                                   % dhcp_agent_id)
+            if _agent['agent_type'].lower() == 'l3 agent':
+                router_data = yield \
+                    neutron_client.api_call('/v2.0/agents/%s/l3-routers'
+                                            % str(_agent['id']))
+
+                for r in router_data['routers']: _routers.append(r.get('id'))
+
+            _agent['l3_agent_routers'] = _routers
+
+        # ---------------------------------------------------------------------
+        # Insert the DHCP agents-subnets info
+        # ---------------------------------------------------------------------
+        for _agent in results['agents']:
+            _agent['dhcp_agent_subnets'] = []
             _subnets = []
 
-            for network in agent['networks']:
-                for subnet in network['subnets']:
-                    _subnets.append(subnet)
+            if _agent['agent_type'].lower() == 'dhcp agent':
+                dhcp_data = yield \
+                    neutron_client.api_call('/v2.0/agents/%s/dhcp-networks'
+                                            % str(_agent['id']))
 
-            results['dhcp_agent_subnets'][dhcp_agent_id] = _subnets
+                for network in dhcp_data['networks']:
+                    for subnet in network['subnets']:
+                        _subnets.append(subnet)
+
+            _agent['dhcp_agent_subnets'] = _subnets
 
         result = yield neutron_client.networks()
         results['networks'] = result['networks']
@@ -127,34 +146,20 @@ class OpenStackInfrastructure(PythonPlugin):
         result = yield neutron_client.subnets()
         results['subnets'] = result['subnets']
 
-        # ---------------------------------------------------------------------
-        # Please leave this code here in case we need to reference.
-        # ---------------------------------------------------------------------
-        # # Add the extra dhcp_agent_id information to the subnets items
-        # for dhcp_agent_id in [str(x['id'])
-        #                       for x in results['agents']
-        #                       if x['agent_type'].lower() == 'dhcp agent']:
-
-        #     # Loop through networks/subnets in agent.
-        #     # Associate those to results['subnets'] data
-        #     agent = yield neutron_client.api_call('/v2.0/agents/%s/dhcp-networks.json' % dhcp_agent_id)
-        #     for network in agent['networks']:
-        #         for agent_subnet in network['subnets']:
-        #             for sub in results['subnets']:
-        #                 if sub['id'] == agent_subnet:
-        #                     sub['dhcp_agent_id'] = dhcp_agent_id
-
         result = yield neutron_client.routers()
         results['routers'] = result['routers']
 
-        # Get router => L3-Agents relation data
-        for _router in results['routers']:
+        # ---------------------------------------------------------------------
+        # Please leave this code here for reference.
+        # ---------------------------------------------------------------------
+        # # Get router => L3-Agents relation data
+        # for _router in results['routers']:
 
-            l3_agents = yield neutron_client.api_call(
-                                '/v2.0/routers/%s/l3-agents'
-                                % str(_router['id'])
-                                     )
-            _router['l3_agent_list'] = [str(x['id']) for x in l3_agents['agents']]
+        #     l3_agents = yield neutron_client.api_call(
+        #                         '/v2.0/routers/%s/l3-agents'
+        #                         % str(_router['id'])
+        #                              )
+        #     _router['l3_agent_list'] = [str(x['id']) for x in l3_agents['agents']]
 
         result = yield neutron_client.ports()
         results['ports'] = result['ports']
@@ -461,14 +466,14 @@ class OpenStackInfrastructure(PythonPlugin):
         # agent
         agents = []
         for agent in results['agents']:
-            agent_id = agent['id']
 
-            # set dhcp_agent_subnets if in right agent
-            dhcp_agent_subnets = []
-            if agent_id in results['dhcp_agent_subnets']:
-                dhcp_agent_subnets = ['subnet-{0}'.format(x)
-                                      for x in
-                                      results['dhcp_agent_subnets'][agent_id]]
+            # format dhcp_agent_subnets
+            dhcp_agent_subnets = ['subnet-{0}'.format(x)
+                                  for x in agent['dhcp_agent_subnets']]
+            # format l3_agent_routers
+            l3_agent_routers = ['router-{0}'.format(x)
+                                for x in agent['l3_agent_routers']]
+
             agents.append(ObjectMap(
                 modname = 'ZenPacks.zenoss.OpenStackInfrastructure.NeutronAgent',
                 data = dict(
@@ -479,6 +484,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     state = agent['admin_state_up'],          # true/false
                     alive = agent['alive'],                   # ACTIVE
                     set_dhcpSubnets = dhcp_agent_subnets,
+                    set_agentRouters = l3_agent_routers,
                 )))
 
         # networking
@@ -528,11 +534,6 @@ class OpenStackInfrastructure(PythonPlugin):
                     _gateways.add(_ip.get('ip_address', None))
                     _subnets.add(_ip.get('subnet_id', None))
 
-            # Get the Router L3 Agents
-            # router_l3_agents = []
-            router_l3_agents = ['agent-{0}'.format(x)
-                                for x in router['l3_agent_list']]
-
             routers.append(ObjectMap(
                 modname = 'ZenPacks.zenoss.OpenStackInfrastructure.Router',
                 data = dict(
@@ -547,7 +548,6 @@ class OpenStackInfrastructure(PythonPlugin):
                     status = router['status'],
                     subnets = list(_subnets),
                     title = router['name'],
-                    set_routerAgents = router_l3_agents,
                 )))
 
         # port
