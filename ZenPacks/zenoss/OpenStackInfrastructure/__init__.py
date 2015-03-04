@@ -30,13 +30,14 @@ RELATIONSHIPS_YUML = """
 // containing
 [Endpoint]++components-endpoint1[OpenstackComponent]
 [Instance]++-[Vnic]
-[NeutronAgent]++-[Agent]
 //[SecurityGroup]++-[SecurityGroupRule]
 // non-containing 1:M
 [OrgComponent]*parentOrg-childOrgs1[OrgComponent]
 [Host]1hostedSoftware-hostedOn*[SoftwareComponent]
 [OrgComponent]1-.-*[Host]
 [OrgComponent]1-.-*[SoftwareComponent]
+[NeutronAgent]*agentRouters-.-routerAgents*[Router]
+[NeutronAgent]1dhcpSubnets-.-subnetDHCP*[Subnet]
 [Flavor]1-.-*[Instance]
 [Image]1-.-*[Instance]
 [Tenant]1-.-*[Instance]
@@ -469,12 +470,6 @@ CFG = zenpacklib.ZenPackSpec(
         'NeutronAgent': {
             'base': 'SoftwareComponent',
             'meta_type': 'OpenStackInfrastructureNeutronAgent',
-            # 'filter_display': False,
-        },
-
-        'Agent': {
-            'base': 'NeutronAgent',
-            'meta_type': 'OpenStackInfrastructureAgent',
             'label': 'Neutron Agent',
             'order': 11,
             'properties': {
@@ -489,9 +484,6 @@ CFG = zenpacklib.ZenPackSpec(
                 'alive':       {'label': 'Alive',
                                 'order': 11.3,
                                 'content_width': 50},               # true or false
-            },
-            'relationships': {
-                'neutronAgent': {'grid_display': False},
             },
         },
 
