@@ -468,9 +468,13 @@ class OpenStackInfrastructure(PythonPlugin):
         agents = []
         for agent in results['agents']:
 
+            # Get agent's host
+            agent_host = 'host-{0}'.format(agent['host'])
+
             # format dhcp_agent_subnets
             dhcp_agent_subnets = ['subnet-{0}'.format(x)
                                   for x in agent['dhcp_agent_subnets']]
+
             # format l3_agent_routers
             l3_agent_routers = ['router-{0}'.format(x)
                                 for x in agent['l3_agent_routers']]
@@ -486,7 +490,8 @@ class OpenStackInfrastructure(PythonPlugin):
                     alive = agent['alive'],                   # ACTIVE
                     set_agentRouters = l3_agent_routers,
                     set_dhcpSubnets = dhcp_agent_subnets,
-                    set_hostedOn = 'host-{0}'.format(agent['host']),
+                    set_hostedOn = agent_host,
+                    set_orgComponent = hostmap[agent_host]['org_id'],
                 )))
 
         # networking
