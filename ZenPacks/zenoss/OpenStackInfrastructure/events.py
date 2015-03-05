@@ -24,10 +24,9 @@ NEUTRON_TRAITMAPS = {
         'floating_ip_address':       ['floating_ip_address'],
         'floating_network_id':       ['floating_network_id'],
         'id':                        ['floatingipId'],
-        'port_id':                   ['port_id'],
-        'router_id':                 ['router_id'],
         'status':                    ['status'],
-        # See: _apply_neutron_traits: set_tenant, set_network
+        # See: _apply_neutron_traits: set_tenant
+        # _apply_trait_rel:  set_network, set_port, set_router
     },
     'network': {
         'admin_state_up':            ['admin_state_up'],
@@ -419,6 +418,8 @@ def floatingip_update(device, dmd, evt):
     _apply_neutron_traits(evt, objmap, 'floatingip')
 
     _apply_trait_rel(evt, objmap, 'trait_floatingip_network_id', 'network')
+    _apply_trait_rel(evt, objmap, 'trait_router_id', 'router')
+    _apply_trait_rel(evt, objmap, 'trait_port_id', 'port')
     return [objmap]
 
 def floatingip_delete_start(device, dmd, evt):

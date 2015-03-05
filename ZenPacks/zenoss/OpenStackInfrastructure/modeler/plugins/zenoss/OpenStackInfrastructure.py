@@ -603,8 +603,9 @@ class OpenStackInfrastructure(PythonPlugin):
                     floating_ip_address = floatingip['floating_ip_address'],
                     floating_network_id = floatingip['floating_network_id'],
                     id = 'floatingip-{0}'.format(floatingip['id']),
-                    router_id = floatingip['router_id'],
+                    set_router = 'router-{0}'.format(floatingip['router_id']),
                     set_network = 'network-{0}'.format(floatingip['floating_network_id']),
+                    set_port = 'port-{0}'.format(floatingip['port_id']),
                     set_tenant = 'tenant-{0}'.format(floatingip['tenant_id']),
                     status = floatingip['status'],
                     )))

@@ -31,12 +31,14 @@ RELATIONSHIPS_YUML = """
 [Endpoint]++components-endpoint1[OpenstackComponent]
 [Instance]++-[Vnic]
 // [SecurityGroup]++-[SecurityGroupRule]
+// Non-containing M:M
+[NeutronAgent]*agentRouters-.-routerAgents*[Router]
 // non-containing 1:M
 [OrgComponent]*parentOrg-childOrgs1[OrgComponent]
 [Host]1hostedSoftware-hostedOn*[SoftwareComponent]
 [OrgComponent]1-.-*[Host]
 [OrgComponent]1-.-*[SoftwareComponent]
-[NeutronAgent]*agentRouters-.-routerAgents*[Router]
+// Non-containing 1:M
 [NeutronAgent]1dhcpSubnets-.-subnetDHCP*[Subnet]
 [Flavor]1-.-*[Instance]
 [Image]1-.-*[Instance]
@@ -45,13 +47,17 @@ RELATIONSHIPS_YUML = """
 [Tenant]1-.-*[Subnet]
 [Tenant]1-.-*[Router]
 [Tenant]1-.-*[Port]
-// [Tenant]1-.-*[SecurityGroup]
 [Tenant]1-.-*[FloatingIp]
+// Hypervisor ->
 [Hypervisor]1-.-*[Instance]
+// Network ->
 [Network]1-.-*[Subnet]
 [Network]1-.-*[Port]
 [Network]1-.-*[Router]
 [Network]1-.-*[FloatingIp]
+// FloatingIps
+[Router]1-.-*[FloatingIp]
+[Port]1-.-*[FloatingIp]
 // non-containing 1:1
 [Hypervisor]1-.-1[Host]
 """
@@ -562,8 +568,8 @@ CFG = zenpacklib.ZenPackSpec(
                 'vif_type':        {'label': 'Type'},
             },
             'relationships': {
-                'tenant':          {'grid_display': False},
                 'network':         {'label': 'Network'},
+                'tenant':          {'grid_display': False},
             },
         },
 
@@ -608,12 +614,13 @@ CFG = zenpacklib.ZenPackSpec(
                 'floating_ip_address':    {'grid_display': False},
                 'floating_network_id':    {'grid_display': False},
                 'port_id':                {'grid_display': False},
-                'router_id':              {'grid_display': False},
                 'status':                 {'label': 'Status'},
             },
             'relationships': {
-                'tenant':                 {'label': 'Tenant'},
-                'network':                {'label': 'Network'},
+                'network':                {'grid_display': True},
+                'port':                   {'grid_display': True},
+                'router':                 {'grid_display': True},
+                'tenant':                 {'grid_display': True},
                 },
         },
 
