@@ -30,7 +30,7 @@ RELATIONSHIPS_YUML = """
 // containing
 [Endpoint]++components-endpoint1[OpenstackComponent]
 [Instance]++-[Vnic]
-//[SecurityGroup]++-[SecurityGroupRule]
+// [SecurityGroup]++-[SecurityGroupRule]
 // non-containing 1:M
 [OrgComponent]*parentOrg-childOrgs1[OrgComponent]
 [Host]1hostedSoftware-hostedOn*[SoftwareComponent]
@@ -45,7 +45,7 @@ RELATIONSHIPS_YUML = """
 [Tenant]1-.-*[Subnet]
 [Tenant]1-.-*[Router]
 [Tenant]1-.-*[Port]
-# [Tenant]1-.-*[SecurityGroup]
+// [Tenant]1-.-*[SecurityGroup]
 [Tenant]1-.-*[FloatingIp]
 [Hypervisor]1-.-*[Instance]
 [Network]1-.-*[Subnet]
@@ -484,7 +484,6 @@ CFG = zenpacklib.ZenPackSpec(
                 'binary':        {'grid_display': False},
                 'enabled':       {'grid_display': False},
                 'operStatus':    {'grid_display': False},
-                'orgComponent':  {'grid_display': False},
             },
         },
 
