@@ -58,6 +58,8 @@ RELATIONSHIPS_YUML = """
 // FloatingIps
 [Router]1-.-*[FloatingIp]
 [Port]1-.-*[FloatingIp]
+// Instance ->
+[Instance]1-.-*[Port]
 // non-containing 1:1
 [Hypervisor]1-.-1[Host]
 """

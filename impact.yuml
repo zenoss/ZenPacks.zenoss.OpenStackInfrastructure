@@ -27,6 +27,7 @@
 [Network{bg:tan}]0..1-0..*>[Subnet{bg:tan}]
 [Network{bg:tan}]0..1-0..*>[Port{bg:tan}]
 [Network{bg:tan}]0..1-0..*>[Router{bg:tan}]
+[Network{bg:tan}]0..1-0..*>[Instance{bg:tan}]
 // To Instance Relations
 # // [Vnic{bg:aquamarine}]0..1-0..*>[Instance{bg:aquamarine}]
 [Hypervisor{bg:aquamarine}]0..1-0..*>[Instance{bg:aquamarine}]

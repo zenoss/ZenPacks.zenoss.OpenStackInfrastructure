@@ -479,6 +479,11 @@ def port_update(device, dmd, evt):
     objmap = neutron_objmap(evt, "Port")
     _apply_neutron_traits(evt, objmap, 'port')
     _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
+
+    # If device_owner is part of compute, then add device_id as set_instance
+    if 'compute' in evt.trait_device_owner and evt.trait_device_id:
+        _apply_trait_rel(evt, objmap, 'trait_device_id', 'server')
+
     return [objmap]
 
 def port_delete_start(device, dmd, evt):

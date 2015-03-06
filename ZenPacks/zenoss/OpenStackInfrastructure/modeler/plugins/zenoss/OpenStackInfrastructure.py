@@ -243,7 +243,10 @@ class OpenStackInfrastructure(PythonPlugin):
                 )))
 
         servers = []
+        server_list = []
         for server in results['servers']:
+            server_list.append(server['id'])
+
             # Backup support is optional. Guard against it not existing.
             backup_schedule_enabled = None
             backup_schedule_daily = None
@@ -563,6 +566,11 @@ class OpenStackInfrastructure(PythonPlugin):
             if not port['tenant_id']:
                 continue
 
+            # Setup ports' set_image id
+            port_instance_id = None
+            if port['device_id'] in server_list:
+                port_instance_id = 'server-{0}'.format(port['device_id'])
+
             ports.append(ObjectMap(
                 modname = 'ZenPacks.zenoss.OpenStackInfrastructure.Port',
                 data = dict(
@@ -574,6 +582,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     portId = port['id'],
                     set_network = 'network-{0}'.format(port['network_id']),
                     set_tenant = 'tenant-{0}'.format(port['tenant_id']),
+                    set_instance = port_instance_id,
                     status = port['status'],
                     title = port['name'],
                     vif_type = port['binding:vif_type'],
