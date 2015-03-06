@@ -24,10 +24,9 @@ NEUTRON_TRAITMAPS = {
         'floating_ip_address':       ['floating_ip_address'],
         'floating_network_id':       ['floating_network_id'],
         'id':                        ['floatingipId'],
-        'port_id':                   ['port_id'],
-        'router_id':                 ['router_id'],
         'status':                    ['status'],
-        # See: _apply_neutron_traits: set_tenant, set_network
+        # See: _apply_neutron_traits: set_tenant
+        # _apply_trait_rel:  set_network, set_port, set_router
     },
     'network': {
         'admin_state_up':            ['admin_state_up'],
@@ -419,6 +418,8 @@ def floatingip_update(device, dmd, evt):
     _apply_neutron_traits(evt, objmap, 'floatingip')
 
     _apply_trait_rel(evt, objmap, 'trait_floatingip_network_id', 'network')
+    _apply_trait_rel(evt, objmap, 'trait_router_id', 'router')
+    _apply_trait_rel(evt, objmap, 'trait_port_id', 'port')
     return [objmap]
 
 def floatingip_delete_start(device, dmd, evt):
@@ -478,6 +479,11 @@ def port_update(device, dmd, evt):
     objmap = neutron_objmap(evt, "Port")
     _apply_neutron_traits(evt, objmap, 'port')
     _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
+
+    # If device_owner is part of compute, then add device_id as set_instance
+    if 'compute' in evt.trait_device_owner and evt.trait_device_id:
+        _apply_trait_rel(evt, objmap, 'trait_device_id', 'server')
+
     return [objmap]
 
 def port_delete_start(device, dmd, evt):
@@ -729,12 +735,19 @@ MAPPERS = {
     # -------------------------------------------------------------------------
     #  Security_group
     # -------------------------------------------------------------------------
-    'openstack|security_group.create.start': (securitygroup_id, securityGroup_create_start),
-    'openstack|security_group.create.end':   (securitygroup_id, securityGroup_update),
-    'openstack|security_group.update.start': (securitygroup_id, securityGroup_update_start),
-    'openstack|security_group.update.end':   (securitygroup_id, securityGroup_update),
-    'openstack|security_group.delete.start': (securitygroup_id, securityGroup_delete_start),
-    'openstack|security_group.delete.end':   (securitygroup_id, securityGroup_delete_end),
+    # 'openstack|security_group.create.start': (securitygroup_id, securityGroup_create_start),
+    # 'openstack|security_group.create.end':   (securitygroup_id, securityGroup_update),
+    # 'openstack|security_group.update.start': (securitygroup_id, securityGroup_update_start),
+    # 'openstack|security_group.update.end':   (securitygroup_id, securityGroup_update),
+    # 'openstack|security_group.delete.start': (securitygroup_id, securityGroup_delete_start),
+    # 'openstack|security_group.delete.end':   (securitygroup_id, securityGroup_delete_end),
+
+    'openstack|security_group.create.start':     (None, None),
+    'openstack|security_group.create.end':       (None, None),
+    'openstack|security_group.update.start':     (None, None),
+    'openstack|security_group.update.end':       (None, None),
+    'openstack|security_group.delete.start':     (None, None),
+    'openstack|security_group.delete.end':       (None, None),
 
     # -------------------------------------------------------------------------
     #  Security_group_rule
@@ -773,7 +786,7 @@ def process(evt, device, dmd, txnCommit):
     if mapper:
         datamaps = mapper(device, dmd, evt)
         if datamaps:
-            adm = ApplyDataMap()
+            adm = ApplyDataMap(device)
             for datamap in datamaps:
                 # LOG.debug("Applying %s" % datamap)
                 adm._applyDataMap(device, datamap)

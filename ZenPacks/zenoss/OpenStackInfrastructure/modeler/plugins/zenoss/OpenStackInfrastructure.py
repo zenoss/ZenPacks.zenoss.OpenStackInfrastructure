@@ -164,8 +164,9 @@ class OpenStackInfrastructure(PythonPlugin):
         result = yield neutron_client.ports()
         results['ports'] = result['ports']
 
-        result = yield neutron_client.security_groups()
-        results['security_groups'] = result['security_groups']
+        # result = yield neutron_client.security_groups()
+        # results['security_groups'] = result['security_groups']
+        results['security_groups'] = {}
 
         result = yield neutron_client.floatingips()
         results['floatingips'] = result['floatingips']
@@ -242,7 +243,10 @@ class OpenStackInfrastructure(PythonPlugin):
                 )))
 
         servers = []
+        server_list = []
         for server in results['servers']:
+            server_list.append(server['id'])
+
             # Backup support is optional. Guard against it not existing.
             backup_schedule_enabled = None
             backup_schedule_daily = None
@@ -467,9 +471,13 @@ class OpenStackInfrastructure(PythonPlugin):
         agents = []
         for agent in results['agents']:
 
+            # Get agent's host
+            agent_host = 'host-{0}'.format(agent['host'])
+
             # format dhcp_agent_subnets
             dhcp_agent_subnets = ['subnet-{0}'.format(x)
                                   for x in agent['dhcp_agent_subnets']]
+
             # format l3_agent_routers
             l3_agent_routers = ['router-{0}'.format(x)
                                 for x in agent['l3_agent_routers']]
@@ -483,8 +491,10 @@ class OpenStackInfrastructure(PythonPlugin):
                     type = agent['agent_type'],               # true/false
                     state = agent['admin_state_up'],          # true/false
                     alive = agent['alive'],                   # ACTIVE
-                    set_dhcpSubnets = dhcp_agent_subnets,
                     set_agentRouters = l3_agent_routers,
+                    set_dhcpSubnets = dhcp_agent_subnets,
+                    set_hostedOn = agent_host,
+                    set_orgComponent = hostmap[agent_host]['org_id'],
                 )))
 
         # networking
@@ -556,6 +566,11 @@ class OpenStackInfrastructure(PythonPlugin):
             if not port['tenant_id']:
                 continue
 
+            # Setup ports' set_image id
+            port_instance_id = None
+            if port['device_id'] in server_list:
+                port_instance_id = 'server-{0}'.format(port['device_id'])
+
             ports.append(ObjectMap(
                 modname = 'ZenPacks.zenoss.OpenStackInfrastructure.Port',
                 data = dict(
@@ -567,6 +582,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     portId = port['id'],
                     set_network = 'network-{0}'.format(port['network_id']),
                     set_tenant = 'tenant-{0}'.format(port['tenant_id']),
+                    set_instance = port_instance_id,
                     status = port['status'],
                     title = port['name'],
                     vif_type = port['binding:vif_type'],
@@ -596,8 +612,9 @@ class OpenStackInfrastructure(PythonPlugin):
                     floating_ip_address = floatingip['floating_ip_address'],
                     floating_network_id = floatingip['floating_network_id'],
                     id = 'floatingip-{0}'.format(floatingip['id']),
-                    router_id = floatingip['router_id'],
+                    set_router = 'router-{0}'.format(floatingip['router_id']),
                     set_network = 'network-{0}'.format(floatingip['floating_network_id']),
+                    set_port = 'port-{0}'.format(floatingip['port_id']),
                     set_tenant = 'tenant-{0}'.format(floatingip['tenant_id']),
                     status = floatingip['status'],
                     )))
@@ -675,8 +692,8 @@ class OpenStackInfrastructure(PythonPlugin):
         # Apply the objmaps in the right order.
         componentsMap = RelationshipMap(relname = 'components')
         for i in ('tenants', 'regions', 'flavors', 'images', 'servers', 'zones',
-                  'hosts', 'hypervisors', 'services', 'agents', 'networks',
-                  'subnets', 'routers', 'ports', 'security_groups', 'floatingips',
+                  'hosts', 'hypervisors', 'services', 'networks',
+                  'subnets', 'routers', 'ports', 'agents', 'security_groups', 'floatingips',
                   ):
             for objmap in objmaps[i]:
                 componentsMap.append(objmap)
