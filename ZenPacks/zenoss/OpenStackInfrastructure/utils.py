@@ -262,3 +262,37 @@ def getIpInterfaceMacs(device):
         macs.extend(b.macaddress for b in brains if b.macaddress)
 
     return macs
+
+def get_subnets_from_fixedips(port_fips):
+    '''get formatted list of subnets from Neutron API fixed_ip structure'''
+    subnets = set()
+    for _fip in port_fips:
+        subnets.add(_fip.get('subnet_id'))
+
+    return ['subnet-{0}'.format(x) for x in subnets]
+
+def get_port_instance(device_owner, device_id):
+    # If device_owner is part of compute, then add device_id as set_instance
+    if 'compute' in device_owner and device_id:
+        return 'server-{0}'.format(device_id)
+
+def getNetSubnetsGws_from_GwInfo(external_gateway_info):
+    ''' Return (network, subnets, gateways) from external_gateway_info
+        type(network): string
+        type(subnets): set
+        type(gateways): set
+    '''
+    external_fixed_ips = external_gateway_info.get('external_fixed_ips')
+    network = external_gateway_info.get('network_id')
+
+    gateways = set()
+    subnets = set()
+
+    if external_fixed_ips:
+        for _ip in external_fixed_ips:
+            gateways.add(_ip.get('ip_address', None))
+            subnets.add(_ip.get('subnet_id', None))
+
+    return (network, subnets, gateways)
+
+# -----------------------------------------------------------------------------

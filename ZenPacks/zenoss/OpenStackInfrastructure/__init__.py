@@ -33,33 +33,39 @@ RELATIONSHIPS_YUML = """
 // [SecurityGroup]++-[SecurityGroupRule]
 // Non-containing M:M
 [NeutronAgent]*agentRouters-.-routerAgents*[Router]
+[NeutronAgent]*agentNetworks-.-networkAgents*[Network]
+[NeutronAgent]*agentSubnets-.-subnetAgents*[Subnet]
 // non-containing 1:M
 [OrgComponent]*parentOrg-childOrgs1[OrgComponent]
 [Host]1hostedSoftware-hostedOn*[SoftwareComponent]
 [OrgComponent]1-.-*[Host]
 [OrgComponent]1-.-*[SoftwareComponent]
 // Non-containing 1:M
-[NeutronAgent]1dhcpSubnets-.-subnetDHCP*[Subnet]
+// # Can abstract Tenant -> (Instance,Network,Subnet,Router,Port,FloatingIp)
+// # Tenant-> Flavor has no support so its a blank relation
+[Tenant]1-.-*[LogicalComponent]
+// # Flavor ->
 [Flavor]1-.-*[Instance]
 [Image]1-.-*[Instance]
-[Tenant]1-.-*[Instance]
-[Tenant]1-.-*[Network]
-[Tenant]1-.-*[Subnet]
-[Tenant]1-.-*[Router]
-[Tenant]1-.-*[Port]
-[Tenant]1-.-*[FloatingIp]
 // Hypervisor ->
 [Hypervisor]1-.-*[Instance]
 // Network ->
 [Network]1-.-*[Subnet]
 [Network]1-.-*[Port]
-[Network]1-.-*[Router]
 [Network]1-.-*[FloatingIp]
-// FloatingIps
-[Router]1-.-*[FloatingIp]
-[Port]1-.-*[FloatingIp]
+// -- Routers can have common network gateway
+[Network]1-.-*[Router]
 // Instance ->
 [Instance]1-.-*[Port]
+// Ports ->
+[Port]1-.-*[FloatingIp]
+[Port]1-.-*[Subnet]
+// Router -> downstream Subnets and 1 upstream Network
+[Router]1-.-*[FloatingIp]
+// Router can connect to many subnets, a subnet can connect to several routers
+//    EG: router_AB + router_C connect to public_subnet:  subnet -> *router
+//    EG: since public network can have multiple subnets: router -> *subnet
+[Router]*-.-*[Subnet]
 // non-containing 1:1
 [Hypervisor]1-.-1[Host]
 """
@@ -203,6 +209,9 @@ CFG = zenpacklib.ZenPackSpec(
         'LogicalComponent': {
             'base': 'OpenstackComponent',
             'filter_display': False,
+            'relationships':{
+                'tenant':     {'label_width': 50, 'content_width': 50},
+            },
         },
 
         # Component Types ############################################
@@ -218,7 +227,7 @@ CFG = zenpacklib.ZenPackSpec(
             },
             'dynamicview_views': ['service_view'],
             'dynamicview_relations': {
-                'impacted_by': ['instances']
+                'impacted_by': ['tenant_impacted_by']
             }
         },
 
@@ -306,13 +315,12 @@ CFG = zenpacklib.ZenPackSpec(
             'relationships': {
                 'hypervisor': {'grid_display': False},
                 'vnics':      {'grid_display': False},
-                'tenant':     {'label_width': 50, 'content_width': 50},
                 'flavor':     {'label_width': 50, 'content_width': 50},
                 'image':      {'label_width': 50, 'content_width': 50},
             },
             'dynamicview_views': ['service_view'],
             'dynamicview_relations': {
-                'impacted_by': ['hypervisor', 'vnics'],
+                'impacted_by': ['hypervisor', 'port', 'vnics'],
                 'impacts': ['guestDevice', 'tenant']
             }
 
@@ -397,7 +405,10 @@ CFG = zenpacklib.ZenPackSpec(
             'dynamicview_relations': {
                 'openstack_link': ['hostedSoftware', 'hypervisor'],
                 'impacted_by': ['endpoint', 'proxy_device'],
-                'impacts': ['hypervisor', 'orgComponent', 'hostedSoftware'],
+                'impacts': ['hypervisor',
+                            'orgComponent',
+                            'hostedSoftware',
+                            ],
             }
         },
 
@@ -469,7 +480,7 @@ CFG = zenpacklib.ZenPackSpec(
             'dynamicview_views': ['service_view', 'openstack_view'],
             'dynamicview_relations': {
                 'impacts': ['instances'],
-                'impacted_by': ['host'],
+                'impacted_by': ['hostedSoftware'],
             }
         },
 
@@ -493,6 +504,10 @@ CFG = zenpacklib.ZenPackSpec(
                                   'content_width': 50},
                 'operStatus':    {'grid_display': False},
             },
+            'dynamicview_relations': {
+                'impacts': ['agentRouters, agentNetworks'],
+                'impacted_by': ['hostedSoftware'],
+            }
         },
 
         'Network': {
@@ -501,18 +516,20 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Network',
             'order': 12,
             'properties': {
-                'admin_state_up': {'label': 'Admin State', 'content_width': 60},
-                'netExternal':    {'label': 'External', 'order': 12.8, 'content_width': 60},
+                'admin_state_up': {'label': 'Admin State', 'content_width': 30},
+                'netExternal':    {'label': 'External', 'order': 12.8, 'content_width': 30},
                 'netId':          {'label': 'Network ID', 'grid_display': False},
-                'netStatus':      {'label': 'Status', 'order': 12.7, 'content_width': 60},
-                'netType':        {'label': 'Type', 'order': 12.10, 'content_width': 60},
+                'netStatus':      {'label': 'Status', 'order': 12.7, 'content_width': 30},
+                'netType':        {'label': 'Type', 'order': 12.10, 'content_width': 30},
                 'title':          {'label': 'Network', 'grid_display': False},
             },
             'relationships': {
-                'tenant':      {'grid_display': False},
-                'ports':       {'grid_display': True},    # Set on ports
-                'subnets':     {'grid_display': True},    # Set on subnets
+                'ports':       {'grid_display': True, 'content_width': 30},    # Set on ports
+                'subnets':     {'grid_display': True, 'content_width': 30},    # Set on subnets
                 },
+            'dynamicview_relations': {
+                'impacts': ['tenant']
+            }
         },
 
         'Subnet': {
@@ -527,10 +544,11 @@ CFG = zenpacklib.ZenPackSpec(
                 'gateway_ip':      {'label': 'Gateway', 'content_width': 100},
             },
             'relationships': {
-                'tenant':    {'grid_display': False},
                 'network':   {'label': 'Network', 'content_width': 100},
                 },
-
+            'dynamicview_relations': {
+                'impacts': ['tenant']
+            }
         },
 
         'Router': {
@@ -541,16 +559,13 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'admin_state_up': {'label': 'AdminState', 'grid_display': False},
                 'gateways':       {'label': 'Gateways', 'type_': 'lines'},
-                'network_id':     {'grid_display': False},
                 'routerId':       {'label': 'Router ID', 'grid_display': False},
                 'routes':         {'label': 'Routes', 'grid_display': False},
                 'status':         {'label': 'Status'},
-                'subnets':        {'label': 'Subnets', 'type_': 'lines', 'grid_display': False},
                 'title':          {'label': 'Router','grid_display': False},
             },
             'relationships': {
                 'network':        {'label': 'External Network', 'content_width': 100},
-                'tenant':         {'grid_display': False},
             },
         },
 
@@ -563,7 +578,6 @@ CFG = zenpacklib.ZenPackSpec(
                 'admin_state_up':  {'label': 'AdminState', 'grid_display': False},
                 'device_owner':    {'label': 'Owner', 'content_width': 120},
                 'mac_address':     {'label': 'MAC', 'content_width': 120},
-                'network_id':      {'label': 'Network ID', 'grid_display': False},
                 'portId':          {'label': 'Port ID', 'grid_display': False},
                 'status':          {'label': 'Status'},
                 'title':           {'label': 'Port Name', 'grid_display': False},
@@ -571,7 +585,6 @@ CFG = zenpacklib.ZenPackSpec(
             },
             'relationships': {
                 'network':         {'label': 'Network'},
-                'tenant':          {'grid_display': False},
             },
         },
 
@@ -622,7 +635,6 @@ CFG = zenpacklib.ZenPackSpec(
                 'network':                {'grid_display': True},
                 'port':                   {'grid_display': True},
                 'router':                 {'grid_display': True},
-                'tenant':                 {'grid_display': True},
                 },
         },
 
