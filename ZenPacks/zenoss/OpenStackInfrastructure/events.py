@@ -10,6 +10,10 @@
 from Products.DataCollector.plugins.DataMaps import ObjectMap
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
 from Products.ZenUtils.Utils import prepId
+from ZenPacks.zenoss.OpenStackInfrastructure.utils import (get_subnets_from_fixedips,
+                                                           get_port_instance,
+                                                           getNetSubnetsGws_from_GwInfo,
+                                                           )
 import ast
 
 import logging
@@ -44,7 +48,6 @@ NEUTRON_TRAITMAPS = {
         'id':                        ['portId'],
         'mac_address':               ['mac_address'],
         'name':                      ['title'],
-        'network_id':                ['network_id'],
         'status':                    ['status'],
         # See: _apply_neutron_traits: set_tenant, set_network
     },
@@ -55,7 +58,7 @@ NEUTRON_TRAITMAPS = {
         'status':                    ['status'],
         'name':                      ['title'],
         # See: _apply_router_gateway_info:
-        # (gateways, subnets, network_id, # set_network)
+        # (gateways, set_subnets, set_network)
     },
     'security_group': {
         'id':                        ['sgId'],
@@ -135,23 +138,18 @@ def _apply_trait_rel(evt, objmap, trait_name, class_rel):
 def _apply_router_gateway_info(evt, objmap):
     ''' Get the first router gateway. This should be updated to include all '''
     if hasattr(evt, 'trait_external_gateway_info'):
-        gateway_info = ast.literal_eval(evt.trait_external_gateway_info)
-        external_fixed_ips = gateway_info.get('external_fixed_ips', None)
-        network = gateway_info.get('network_id', None)
-        net_id = make_id('network', network)
+        ext_gw_info = ast.literal_eval(evt.trait_external_gateway_info)
 
         gateways = set()
         subnets = set()
+        (network, subnets, gateways) = getNetSubnetsGws_from_GwInfo(ext_gw_info)
 
-        if external_fixed_ips:
-            for _ip in external_fixed_ips:
-                gateways.add(_ip.get('ip_address', None))
-                subnets.add(_ip.get('subnet_id', None))
+        net_id = make_id('network', network)
+        subnet_ids = ['subnet-{0}'.format(x) for x in subnets]
 
         setattr(objmap, 'gateways', list(gateways))
-        setattr(objmap, 'subnets', list(subnets))
-        setattr(objmap, 'network_id', network)
         setattr(objmap, 'set_network', net_id)
+        setattr(objmap, 'set_subnets', subnet_ids)
 
 def _apply_dns_info(evt, objmap):
     ''' Get the dns servers for subnets as a string'''
@@ -483,6 +481,17 @@ def port_update(device, dmd, evt):
     # If device_owner is part of compute, then add device_id as set_instance
     if 'compute' in evt.trait_device_owner and evt.trait_device_id:
         _apply_trait_rel(evt, objmap, 'trait_device_id', 'server')
+
+    if hasattr(evt, 'evt.trait_device_id'):
+        port_instance = get_port_instance(evt.trait_device_owner,
+                                           evt.trait_device_id)
+        setattr(objmap, 'set_instance', port_instance)
+
+    # get the preformatted port_subnets from get_subnets_from_fixedips
+    if hasattr(evt, 'trait_fixed_ips'):
+        port_fips = ast.literal_eval(evt.trait_fixed_ips)
+        port_subnets = get_subnets_from_fixedips(port_fips)
+        setattr(objmap, 'set_subnets', port_subnets)
 
     return [objmap]
 
