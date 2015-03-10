@@ -320,7 +320,7 @@ CFG = zenpacklib.ZenPackSpec(
             },
             'dynamicview_views': ['service_view'],
             'dynamicview_relations': {
-                'impacted_by': ['hypervisor', 'vnics'],
+                'impacted_by': ['hypervisor', 'port', 'vnics'],
                 'impacts': ['guestDevice', 'tenant']
             }
 
@@ -527,6 +527,9 @@ CFG = zenpacklib.ZenPackSpec(
                 'ports':       {'grid_display': True, 'content_width': 30},    # Set on ports
                 'subnets':     {'grid_display': True, 'content_width': 30},    # Set on subnets
                 },
+            'dynamicview_relations': {
+                'impacts': ['tenant']
+            }
         },
 
         'Subnet': {
@@ -543,7 +546,9 @@ CFG = zenpacklib.ZenPackSpec(
             'relationships': {
                 'network':   {'label': 'Network', 'content_width': 100},
                 },
-
+            'dynamicview_relations': {
+                'impacts': ['tenant']
+            }
         },
 
         'Router': {

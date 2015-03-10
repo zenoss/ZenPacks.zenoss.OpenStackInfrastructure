@@ -11,7 +11,9 @@
 
 [Host{bg:aquamarine}]1-0..*>[Hypervisor{bg:aquamarine}]
 [Hypervisor{bg:aquamarine}]0..1-0..*>[Instance{bg:aquamarine}]
+[Vnic{bg:aquamarine}]0..1-0..*>[Instance{bg:aquamarine}]
 [Instance{bg:aquamarine}]0..1-0..*>[Tenant{bg:aquamarine}]
+[Instance{bg:aquamarine}]0..1-0..*>[GuestDevice{bg:aquamarine}]
 
 [Host{bg:aquamarine}]0..1-0..*>[NovaService{bg:aquamarine}]
 [Host{bg:aquamarine}]0..1-0..*>[NovaApi{bg:aquamarine}]
