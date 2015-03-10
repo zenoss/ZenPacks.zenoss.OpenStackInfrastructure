@@ -33,15 +33,14 @@ RELATIONSHIPS_YUML = """
 // [SecurityGroup]++-[SecurityGroupRule]
 // Non-containing M:M
 [NeutronAgent]*agentRouters-.-routerAgents*[Router]
+[NeutronAgent]*agentNetworks-.-networkAgents*[Network]
+[NeutronAgent]*agentSubnets-.-subnetAgents*[Subnet]
 // non-containing 1:M
 [OrgComponent]*parentOrg-childOrgs1[OrgComponent]
 [Host]1hostedSoftware-hostedOn*[SoftwareComponent]
 [OrgComponent]1-.-*[Host]
 [OrgComponent]1-.-*[SoftwareComponent]
 // Non-containing 1:M
-// # [NeutronAgent]1dhcpSubnets-.-subnetDHCP*[Subnet]
-[NeutronAgent]*agentSubnets-.-subnetAgents*[Subnet]
-[NeutronAgent]*agentNetworks-.-networkAgents*[Network]
 // # Can abstract Tenant -> (Instance,Network,Subnet,Router,Port,FloatingIp)
 // # Tenant-> Flavor has no support so its a blank relation
 [Tenant]1-.-*[LogicalComponent]
@@ -228,7 +227,7 @@ CFG = zenpacklib.ZenPackSpec(
             },
             'dynamicview_views': ['service_view'],
             'dynamicview_relations': {
-                'impacted_by': ['instances']
+                'impacted_by': ['tenant_impacted_by']
             }
         },
 
@@ -406,7 +405,10 @@ CFG = zenpacklib.ZenPackSpec(
             'dynamicview_relations': {
                 'openstack_link': ['hostedSoftware', 'hypervisor'],
                 'impacted_by': ['endpoint', 'proxy_device'],
-                'impacts': ['hypervisor', 'orgComponent', 'hostedSoftware'],
+                'impacts': ['hypervisor',
+                            'orgComponent',
+                            'hostedSoftware',
+                            ],
             }
         },
 
@@ -478,7 +480,7 @@ CFG = zenpacklib.ZenPackSpec(
             'dynamicview_views': ['service_view', 'openstack_view'],
             'dynamicview_relations': {
                 'impacts': ['instances'],
-                'impacted_by': ['host'],
+                'impacted_by': ['hostedSoftware'],
             }
         },
 
@@ -502,6 +504,10 @@ CFG = zenpacklib.ZenPackSpec(
                                   'content_width': 50},
                 'operStatus':    {'grid_display': False},
             },
+            'dynamicview_relations': {
+                'impacts': ['agentRouters, agentNetworks'],
+                'impacted_by': ['hostedSoftware'],
+            }
         },
 
         'Network': {
