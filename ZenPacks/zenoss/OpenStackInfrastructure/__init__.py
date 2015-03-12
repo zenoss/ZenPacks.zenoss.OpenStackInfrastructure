@@ -484,7 +484,7 @@ CFG = zenpacklib.ZenPackSpec(
             'dynamicview_views': ['service_view', 'openstack_view'],
             'dynamicview_relations': {
                 'impacts': ['instances'],
-                'impacted_by': ['hostedSoftware'],
+                'impacted_by': ['host'],
             }
         },
 
