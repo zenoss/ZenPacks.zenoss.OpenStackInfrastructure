@@ -189,6 +189,9 @@
     serviceStatus:
       type: OpenStack Nova Service Status
 
+    neutronAgentStatus:
+      type: OpenStack Neutron Agent Status
+
     openstackQueues:
       commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/queue_counts.py '${here/id}'
       cycletime: 300
@@ -445,7 +448,7 @@
       width: 500
 
       graphpoints:
-        Active: 
+        Active:
           dpName: openstack_imageActiveCount
           format: '%7.0lf'
         Failed:
