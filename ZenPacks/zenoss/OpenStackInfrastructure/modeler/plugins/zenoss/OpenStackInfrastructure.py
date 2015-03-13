@@ -497,15 +497,22 @@ class OpenStackInfrastructure(PythonPlugin):
             l3_agent_routers = ['router-{0}'.format(x)
                                 for x in agent['l3_agent_routers']]
 
+            title = '{0}@{1}'.format(agent['agent_type'], agent['host'])
             agents.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.NeutronAgent',
                 data=dict(
                     id='agent-{0}'.format(agent['id']),
+                    title=title,
+                    binary=agent['binary'],
+                    enabled=agent['admin_state_up'],
+                    operStatus={
+                        True: 'UP',
+                        False: 'DOWN'
+                    }.get(agent['alive'], 'UNKNOWN'),
+
                     agentId=agent['id'],
-                    title=agent['binary'],
-                    type=agent['agent_type'],               # true/false
-                    state=agent['admin_state_up'],          # true/false
-                    alive=agent['alive'],                   # ACTIVE
+                    type=agent['agent_type'],
+
                     set_routers=l3_agent_routers,
                     set_subnets=agent_subnets,
                     set_networks=agent_networks,
