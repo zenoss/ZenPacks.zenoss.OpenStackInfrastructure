@@ -30,7 +30,6 @@ RELATIONSHIPS_YUML = """
 // containing
 [Endpoint]++components-endpoint1[OpenstackComponent]
 [Instance]++-[Vnic]
-// [SecurityGroup]++-[SecurityGroupRule]
 // Non-containing M:M
 [NeutronAgent]*-.-*[Router]
 [NeutronAgent]*-.-*[Network]

@@ -630,7 +630,6 @@ class OpenStackInfrastructure(PythonPlugin):
             'subnets': subnets,
             'routers': routers,
             'ports': ports,
-            # 'security_groups': security_groups,
             'floatingips': floatingips,
         }
 
