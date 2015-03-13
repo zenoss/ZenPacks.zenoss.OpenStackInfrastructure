@@ -571,7 +571,7 @@ class OpenStackInfrastructure(PythonPlugin):
             external_gateway_info = router.get('external_gateway_info')
             if external_gateway_info:
                 _network_id = external_gateway_info.get('network_id')
-                for _ip in external_gateway_info['external_fixed_ips']:
+                for _ip in external_gateway_info.get('external_fixed_ips', []):
                     _gateways.add(_ip.get('ip_address', None))
                     _subnets.add(_ip.get('subnet_id', None))
 
