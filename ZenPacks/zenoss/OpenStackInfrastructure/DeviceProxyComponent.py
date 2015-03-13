@@ -100,7 +100,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         guid = IGlobalIdentifier(self).getGUID()
         device = GUIDManager(self.dmd).getObject(getattr(self, 'openstackProxyDeviceUUID', None))
         if device and getattr(device, 'openstackProxyComponentUUID', None) \
-            and device.openstackProxyComponentUUID == guid:
+                and device.openstackProxyComponentUUID == guid:
             return False
         return True
 
@@ -220,8 +220,6 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         if device:
             graphs.extend(device.getGraphObjects())
         return graphs
-
-
 
 class DeviceLinkProvider(object):
     '''

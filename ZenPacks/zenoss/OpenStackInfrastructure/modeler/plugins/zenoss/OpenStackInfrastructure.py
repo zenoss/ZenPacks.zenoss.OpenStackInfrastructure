@@ -28,7 +28,12 @@ from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
 from Products.ZenUtils.Utils import prepId
 from Products.ZenUtils.Time import isoToTimestamp, LocalDateTime
 
-from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path, zenpack_path
+from ZenPacks.zenoss.OpenStackInfrastructure.utils import (add_local_lib_path,
+                                                           zenpack_path,
+                                                           get_subnets_from_fixedips,
+                                                           get_port_instance,
+                                                           getNetSubnetsGws_from_GwInfo,
+                                                           )
 add_local_lib_path()
 
 from apiclients.novaapiclient import NovaAPIClient, NotFoundError
@@ -107,20 +112,32 @@ class OpenStackInfrastructure(PythonPlugin):
         results['agents'] = result['agents']
 
         # ---------------------------------------------------------------------
-        # Insert the l3_agents - routers list
+        # Insert the l3_agents -> (routers, networks, subnets, gateways) data
         # ---------------------------------------------------------------------
         for _agent in results['agents']:
             _agent['l3_agent_routers'] = []
-            _routers = []
+            _routers = set()
+            _subnets = set()
+            _gateways = set()
+            _networks = set()
 
             if _agent['agent_type'].lower() == 'l3 agent':
                 router_data = yield \
                     neutron_client.api_call('/v2.0/agents/%s/l3-routers'
                                             % str(_agent['id']))
 
-                for r in router_data['routers']: _routers.append(r.get('id'))
+                for r in router_data['routers']:
+                    _routers.add(r.get('id'))
+                    (net, snets, gws) = \
+                        getNetSubnetsGws_from_GwInfo(r['external_gateway_info'])
+                    _networks.add(net)
+                    _subnets = _subnets.union(snets)
+                    _gateways = _gateways.union(gws)
 
-            _agent['l3_agent_routers'] = _routers
+                _agent['l3_agent_networks'] = list(_networks)
+                _agent['l3_agent_subnets'] = list(_subnets)
+                _agent['l3_agent_gateways'] = list(_gateways)  # Not used yet
+                _agent['l3_agent_routers'] = list(_routers)
 
         # ---------------------------------------------------------------------
         # Insert the DHCP agents-subnets info
@@ -138,7 +155,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     for subnet in network['subnets']:
                         _subnets.append(subnet)
 
-            _agent['dhcp_agent_subnets'] = _subnets
+                _agent['dhcp_agent_subnets'] = _subnets
 
         result = yield neutron_client.networks()
         results['networks'] = result['networks']
@@ -243,9 +260,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 )))
 
         servers = []
-        server_list = []
         for server in results['servers']:
-            server_list.append(server['id'])
 
             # Backup support is optional. Guard against it not existing.
             backup_schedule_enabled = None
@@ -474,10 +489,25 @@ class OpenStackInfrastructure(PythonPlugin):
             # Get agent's host
             agent_host = 'host-{0}'.format(agent['host'])
 
-            # format dhcp_agent_subnets
-            dhcp_agent_subnets = ['subnet-{0}'.format(x)
+            # ------------------------------------------------------------------
+            # AgentSubnets Section
+            # ------------------------------------------------------------------
+
+            agent_subnets = []
+            agent_networks = []
+            if agent.get('dhcp_agent_subnets'):
+                agent_subnets = ['subnet-{0}'.format(x)
                                   for x in agent['dhcp_agent_subnets']]
 
+            if agent.get('l3_agent_subnets'):
+                agent_subnets = ['subnet-{0}'.format(x)
+                                  for x in agent['l3_agent_subnets']]
+
+            if agent.get('l3_agent_networks'):
+                agent_networks = ['network-{0}'.format(x)
+                                  for x in agent['l3_agent_networks']]
+
+            # ------------------------------------------------------------------
             # format l3_agent_routers
             l3_agent_routers = ['router-{0}'.format(x)
                                 for x in agent['l3_agent_routers']]
@@ -491,8 +521,9 @@ class OpenStackInfrastructure(PythonPlugin):
                     type = agent['agent_type'],               # true/false
                     state = agent['admin_state_up'],          # true/false
                     alive = agent['alive'],                   # ACTIVE
-                    set_agentRouters = l3_agent_routers,
-                    set_dhcpSubnets = dhcp_agent_subnets,
+                    set_routers = l3_agent_routers,
+                    set_subnets = agent_subnets,
+                    set_networks = agent_networks,
                     set_hostedOn = agent_host,
                     set_orgComponent = hostmap[agent_host]['org_id'],
                 )))
@@ -550,13 +581,12 @@ class OpenStackInfrastructure(PythonPlugin):
                     admin_state_up = router['admin_state_up'],
                     gateways = list(_gateways),
                     id = 'router-{0}'.format(router['id']),
-                    network_id = _network_id,
                     routerId = router['id'],
                     routes = list(router['routes']),
-                    set_tenant = 'tenant-{0}'.format(router['tenant_id']),
                     set_network = 'network-{0}'.format(_network_id),
+                    set_subnets = ['subnet-{0}'.format(x) for x in _subnets],
+                    set_tenant = 'tenant-{0}'.format(router['tenant_id']),
                     status = router['status'],
-                    subnets = list(_subnets),
                     title = router['name'],
                 )))
 
@@ -566,11 +596,6 @@ class OpenStackInfrastructure(PythonPlugin):
             if not port['tenant_id']:
                 continue
 
-            # Setup ports' set_image id
-            port_instance_id = None
-            if port['device_id'] in server_list:
-                port_instance_id = 'server-{0}'.format(port['device_id'])
-
             ports.append(ObjectMap(
                 modname = 'ZenPacks.zenoss.OpenStackInfrastructure.Port',
                 data = dict(
@@ -578,11 +603,12 @@ class OpenStackInfrastructure(PythonPlugin):
                     device_owner = port['device_owner'],
                     id = 'port-{0}'.format(port['id']),
                     mac_address = port['mac_address'].upper(),
-                    network_id = port['network_id'],
                     portId = port['id'],
+                    set_instance = get_port_instance(port['device_owner'],
+                                                     port['device_id']),
                     set_network = 'network-{0}'.format(port['network_id']),
+                    set_subnets = get_subnets_from_fixedips(port['fixed_ips']),
                     set_tenant = 'tenant-{0}'.format(port['tenant_id']),
-                    set_instance = port_instance_id,
                     status = port['status'],
                     title = port['name'],
                     vif_type = port['binding:vif_type'],
