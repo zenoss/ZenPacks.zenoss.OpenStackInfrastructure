@@ -387,12 +387,14 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_orgComponent=zone_id
                 )))
 
-        log.info("Finding hosts")
         # add any user-specified hosts which we haven't already found.
-        if device.zOpenStackNovaApiHosts:
-            log.info("  Adding zOpenStackNovaApiHosts=%s" % device.zOpenStackNovaApiHosts)
-        if device.zOpenStackExtraHosts:
-            log.info("  Adding zOpenStackExtraHosts=%s" % device.zOpenStackExtraHosts)
+        if device.zOpenStackNovaApiHosts or device.zOpenStackExtraHosts:
+            log.info("Finding additional hosts")
+
+            if device.zOpenStackNovaApiHosts:
+                log.info("  Adding zOpenStackNovaApiHosts=%s" % device.zOpenStackNovaApiHosts)
+            if device.zOpenStackExtraHosts:
+                log.info("  Adding zOpenStackExtraHosts=%s" % device.zOpenStackExtraHosts)
 
         for hostname in device.zOpenStackNovaApiHosts + device.zOpenStackExtraHosts:
             host_id = prepId("host-{0}".format(hostname))
