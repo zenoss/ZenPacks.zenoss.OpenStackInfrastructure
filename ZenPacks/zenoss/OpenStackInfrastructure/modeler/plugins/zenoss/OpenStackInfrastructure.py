@@ -165,24 +165,8 @@ class OpenStackInfrastructure(PythonPlugin):
         result = yield neutron_client.routers()
         results['routers'] = result['routers']
 
-        # ---------------------------------------------------------------------
-        # Please leave this code here for reference.
-        # ---------------------------------------------------------------------
-        # # Get router => L3-Agents relation data
-        # for _router in results['routers']:
-
-        #     l3_agents = yield neutron_client.api_call(
-        #                         '/v2.0/routers/%s/l3-agents'
-        #                         % str(_router['id'])
-        #                              )
-        #     _router['l3_agent_list'] = [str(x['id']) for x in l3_agents['agents']]
-
         result = yield neutron_client.ports()
         results['ports'] = result['ports']
-
-        # result = yield neutron_client.security_groups()
-        # results['security_groups'] = result['security_groups']
-        results['security_groups'] = {}
 
         result = yield neutron_client.floatingips()
         results['floatingips'] = result['floatingips']
@@ -613,20 +597,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     vif_type=port['binding:vif_type'],
                     )))
 
-        # security_group
-        # WARNING: We must use "securitygroup-{id}" for proper modeler naming
-        security_groups = []
-        for sg in results['security_groups']:
-            security_groups.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStackInfrastructure.SecurityGroup',
-                data=dict(
-                    id='securitygroup-{0}'.format(sg['id']),
-                    sgId=sg['id'],
-                    title=sg['name'],
-                    set_tenant='tenant-{0}'.format(sg['tenant_id']),
-                    )))
-
-        # # floatingip
+        # floatingip
         floatingips = []
         for floatingip in results['floatingips']:
             floatingips.append(ObjectMap(
@@ -659,7 +630,7 @@ class OpenStackInfrastructure(PythonPlugin):
             'subnets': subnets,
             'routers': routers,
             'ports': ports,
-            'security_groups': security_groups,
+            # 'security_groups': security_groups,
             'floatingips': floatingips,
         }
 
@@ -718,7 +689,7 @@ class OpenStackInfrastructure(PythonPlugin):
         componentsMap = RelationshipMap(relname='components')
         for i in ('tenants', 'regions', 'flavors', 'images', 'servers', 'zones',
                   'hosts', 'hypervisors', 'services', 'networks',
-                  'subnets', 'routers', 'ports', 'agents', 'security_groups', 'floatingips',
+                  'subnets', 'routers', 'ports', 'agents', 'floatingips',
                   ):
             for objmap in objmaps[i]:
                 componentsMap.append(objmap)

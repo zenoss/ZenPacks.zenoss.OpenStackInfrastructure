@@ -602,35 +602,6 @@ CFG = zenpacklib.ZenPackSpec(
             }
         },
 
-        # 'SecurityGroup': {
-        #     'base': 'LogicalComponent',
-        #     'meta_type': 'OpenStackInfrastructureSecurityGroup',
-        #     'label': 'Security Group',
-        #     'order': 17,
-        #     'properties': {
-        #         'sgId':  {'label': 'Security Group ID', 'grid_display': True},
-        #         'title': {'label': 'SG Name', 'grid_display': True},
-        #         # 'rules': {'label': 'Rules'},
-        #     },
-        #     'relationships': {
-        #         'tenant':          {'grid_display': False},
-        #     },
-        # },
-
-        # 'SecurityGroupRule': {
-        #     'base': 'LogicalComponent',
-        #     'meta_type': 'OpenStackInfrastructureSecurityGroupRule',
-        #     'label': 'Security Group Rule',
-        #     'order': 18,
-        #     'properties': {
-        #         'sgrId':       {'grid_display': False,
-        #                          'label': 'Security Group ID'},
-        #         'sgId':        {'label': 'Security Group'},
-        #         'direction':   {'label': 'Direction'},          # ingress, egress
-        #         'type':        {'label': 'Type'},               # ipv4, ipv6
-        #     }
-        # },
-
         'FloatingIp': {
             'base': 'LogicalComponent',
             'meta_type': 'OpenStackInfrastructureFloatingIp',
