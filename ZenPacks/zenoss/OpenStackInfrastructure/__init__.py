@@ -30,7 +30,6 @@ RELATIONSHIPS_YUML = """
 // containing
 [Endpoint]++components-endpoint1[OpenstackComponent]
 [Instance]++-[Vnic]
-// [SecurityGroup]++-[SecurityGroupRule]
 // Non-containing M:M
 [NeutronAgent]*-.-*[Router]
 [NeutronAgent]*-.-*[Network]
@@ -209,7 +208,7 @@ CFG = zenpacklib.ZenPackSpec(
         'LogicalComponent': {
             'base': 'OpenstackComponent',
             'filter_display': False,
-            'relationships':{
+            'relationships': {
                 'tenant': {'label_width': 50, 'content_width': 50},
             },
             'dynamicview_relations': {
@@ -227,7 +226,7 @@ CFG = zenpacklib.ZenPackSpec(
             'order': 5,
             'properties': {
                 'tenantId':   {'grid_display': False, 'label': 'Tenant ID'},
-                'description': {'label': 'Description','content_width': 180},
+                'description': {'label': 'Description', 'content_width': 180},
             },
             'dynamicview_views': ['service_view'],
             'dynamicview_relations': {
@@ -498,15 +497,6 @@ CFG = zenpacklib.ZenPackSpec(
                 'type':          {'label': 'Type',
                                   'order': 11.1,
                                   'content_width': 120},
-                'binary':        {'grid_display': False},
-                'enabled':       {'grid_display': False},
-                'state':          {'label': 'Admin State Up',
-                                  'order': 11.2,
-                                  'content_width': 80},
-                'alive':         {'label': 'Alive',
-                                  'order': 11.3,
-                                  'content_width': 50},
-                'operStatus':    {'grid_display': False},
             },
             'dynamicview_relations': {
                 'impacts': ['networks', 'subnets', 'routers'],
@@ -568,7 +558,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'routerId':       {'label': 'Router ID', 'grid_display': False},
                 'routes':         {'label': 'Routes', 'grid_display': False},
                 'status':         {'label': 'Status'},
-                'title':          {'label': 'Router','grid_display': False},
+                'title':          {'label': 'Router', 'grid_display': False},
             },
             'relationships': {
                 'network':        {'label': 'External Network', 'content_width': 100},
@@ -602,42 +592,13 @@ CFG = zenpacklib.ZenPackSpec(
             }
         },
 
-        # 'SecurityGroup': {
-        #     'base': 'LogicalComponent',
-        #     'meta_type': 'OpenStackInfrastructureSecurityGroup',
-        #     'label': 'Security Group',
-        #     'order': 17,
-        #     'properties': {
-        #         'sgId':  {'label': 'Security Group ID', 'grid_display': True},
-        #         'title': {'label': 'SG Name', 'grid_display': True},
-        #         # 'rules': {'label': 'Rules'},
-        #     },
-        #     'relationships': {
-        #         'tenant':          {'grid_display': False},
-        #     },
-        # },
-
-        # 'SecurityGroupRule': {
-        #     'base': 'LogicalComponent',
-        #     'meta_type': 'OpenStackInfrastructureSecurityGroupRule',
-        #     'label': 'Security Group Rule',
-        #     'order': 18,
-        #     'properties': {
-        #         'sgrId':       {'grid_display': False,
-        #                          'label': 'Security Group ID'},
-        #         'sgId':        {'label': 'Security Group'},
-        #         'direction':   {'label': 'Direction'},          # ingress, egress
-        #         'type':        {'label': 'Type'},               # ipv4, ipv6
-        #     }
-        # },
-
         'FloatingIp': {
             'base': 'LogicalComponent',
             'meta_type': 'OpenStackInfrastructureFloatingIp',
             'label': 'Floating IP',
             'order': 19,
             'properties': {
-                'floatingipId':           {'label': 'Security Group ID',
+                'floatingipId':           {'label': 'Floating IP ID',
                                            'grid_display': False},
                 'fixed_ip_address':       {'label': 'Address'},
                 'floating_ip_address':    {'grid_display': False},
@@ -657,7 +618,7 @@ CFG = zenpacklib.ZenPackSpec(
         },
 
     },
-    class_relationships = zenpacklib.relationships_from_yuml(RELATIONSHIPS_YUML),
+    class_relationships=zenpacklib.relationships_from_yuml(RELATIONSHIPS_YUML),
 )
 
 CFG.create()
