@@ -607,7 +607,7 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Floating IP',
             'order': 19,
             'properties': {
-                'floatingipId':           {'label': 'Security Group ID',
+                'floatingipId':           {'label': 'Floating IP ID',
                                            'grid_display': False},
                 'fixed_ip_address':       {'label': 'Address'},
                 'floating_ip_address':    {'grid_display': False},
