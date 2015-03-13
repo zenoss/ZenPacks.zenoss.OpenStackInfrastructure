@@ -32,9 +32,9 @@ RELATIONSHIPS_YUML = """
 [Instance]++-[Vnic]
 // [SecurityGroup]++-[SecurityGroupRule]
 // Non-containing M:M
-[NeutronAgent]*agentRouters-.-routerAgents*[Router]
-[NeutronAgent]*agentNetworks-.-networkAgents*[Network]
-[NeutronAgent]*agentSubnets-.-subnetAgents*[Subnet]
+[NeutronAgent]*-.-*[Router]
+[NeutronAgent]*-.-*[Network]
+[NeutronAgent]*-.-*[Subnet]
 // non-containing 1:M
 [OrgComponent]*parentOrg-childOrgs1[OrgComponent]
 [Host]1hostedSoftware-hostedOn*[SoftwareComponent]
@@ -210,8 +210,12 @@ CFG = zenpacklib.ZenPackSpec(
             'base': 'OpenstackComponent',
             'filter_display': False,
             'relationships':{
-                'tenant':     {'label_width': 50, 'content_width': 50},
+                'tenant': {'label_width': 50, 'content_width': 50},
             },
+            'dynamicview_relations': {
+                'impacts': ['tenant']
+            }
+
         },
 
         # Component Types ############################################
@@ -320,7 +324,7 @@ CFG = zenpacklib.ZenPackSpec(
             },
             'dynamicview_views': ['service_view'],
             'dynamicview_relations': {
-                'impacted_by': ['hypervisor', 'port', 'vnics'],
+                'impacted_by': ['hypervisor', 'ports', 'vnics'],
                 'impacts': ['guestDevice', 'tenant']
             }
 
@@ -480,7 +484,7 @@ CFG = zenpacklib.ZenPackSpec(
             'dynamicview_views': ['service_view', 'openstack_view'],
             'dynamicview_relations': {
                 'impacts': ['instances'],
-                'impacted_by': ['hostedSoftware'],
+                'impacted_by': ['host'],
             }
         },
 
@@ -505,8 +509,8 @@ CFG = zenpacklib.ZenPackSpec(
                 'operStatus':    {'grid_display': False},
             },
             'dynamicview_relations': {
-                'impacts': ['agentRouters, agentNetworks'],
-                'impacted_by': ['hostedSoftware'],
+                'impacts': ['networks', 'subnets', 'routers'],
+                'impacted_by': ['hostedOn'],
             }
         },
 
@@ -528,7 +532,8 @@ CFG = zenpacklib.ZenPackSpec(
                 'subnets':     {'grid_display': True, 'content_width': 30},    # Set on subnets
                 },
             'dynamicview_relations': {
-                'impacts': ['tenant']
+                'impacted_by': ['neutronAgents'],
+                'impacts': ['subnets', 'tenant']
             }
         },
 
@@ -547,7 +552,8 @@ CFG = zenpacklib.ZenPackSpec(
                 'network':   {'label': 'Network', 'content_width': 100},
                 },
             'dynamicview_relations': {
-                'impacts': ['tenant']
+                'impacted_by': ['network', 'routers', 'neutronAgents'],
+                'impacts': ['port', 'tenant']
             }
         },
 
@@ -567,6 +573,10 @@ CFG = zenpacklib.ZenPackSpec(
             'relationships': {
                 'network':        {'label': 'External Network', 'content_width': 100},
             },
+            'dynamicview_relations': {
+                'impacted_by': ['neutronAgents'],
+                'impacts': ['subnets', 'floatingIps']
+            }
         },
 
         'Port': {
@@ -586,6 +596,10 @@ CFG = zenpacklib.ZenPackSpec(
             'relationships': {
                 'network':         {'label': 'Network'},
             },
+            'dynamicview_relations': {
+                'impacted_by': ['subnets', 'floatingIps'],
+                'impacts': ['instance'],
+            }
         },
 
         # 'SecurityGroup': {
@@ -636,6 +650,10 @@ CFG = zenpacklib.ZenPackSpec(
                 'port':                   {'grid_display': True},
                 'router':                 {'grid_display': True},
                 },
+            'dynamicview_relations': {
+                'impacted_by': ['router'],
+                'impacts': ['port'],
+            }
         },
 
     },

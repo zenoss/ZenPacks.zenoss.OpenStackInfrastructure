@@ -521,9 +521,9 @@ class OpenStackInfrastructure(PythonPlugin):
                     type = agent['agent_type'],               # true/false
                     state = agent['admin_state_up'],          # true/false
                     alive = agent['alive'],                   # ACTIVE
-                    set_agentRouters = l3_agent_routers,
-                    set_agentSubnets = agent_subnets,
-                    set_agentNetworks = agent_networks,
+                    set_routers = l3_agent_routers,
+                    set_subnets = agent_subnets,
+                    set_networks = agent_networks,
                     set_hostedOn = agent_host,
                     set_orgComponent = hostmap[agent_host]['org_id'],
                 )))

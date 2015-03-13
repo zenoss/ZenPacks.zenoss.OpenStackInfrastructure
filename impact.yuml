@@ -22,13 +22,13 @@
 
 # //   [Vnic{bg:tan}]1-0..*>[Port{bg:tan}]
 [Host{bg:tan}]0..1-0..*>[NeutronAgent{bg:tan}]
-[NeutronAgent{bg:tan}]0..1-0..*>[Network{bg:tan}]
+[NeutronAgent{bg:tan}]1-*>[Network{bg:tan}]
 [NeutronAgent{bg:tan}]0..1-0..*>[Router{bg:tan}]
 [Network{bg:tan}]0..1-0..*>[Subnet{bg:tan}]
-[Router{bg:tan}]0..1-0..*>[Subnet{bg:tan}]
-[Subnet{bg:tan}]0..1-0..1>[Port{bg:tan}]
-[Subnet{bg:tan}]0..1-0..*>[Tenant{bg:tan}]
-[Network{bg:tan}]0..1-0..*>[Tenant{bg:tan}]
+[Router{bg:tan}]*-*>[Subnet{bg:tan}]
+[Subnet{bg:tan}]*-1>[Port{bg:tan}]
+[Subnet{bg:tan}]*-1>[Tenant{bg:tan}]
+[Network{bg:tan}]*-1>[Tenant{bg:tan}]
 // To Instance Relations
 # // [Vnic{bg:aquamarine}]0..1-0..*>[Instance{bg:aquamarine}]
 [Port{bg:tan}]0..1-0..1>[Instance{bg:tan}]
