@@ -3722,7 +3722,7 @@ defaultmapping
 12
 </property>
 <property type="string" id="rule" mode="w" >
-(getattr(evt, 'eventClassKey', '') or '').startswith('openstack|router.')
+(getattr(evt, 'eventClassKey', '') or '').startswith('openstack|router')
 </property>
 <property visible="True" type="string" id="zEventAction" >
 history
