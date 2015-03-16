@@ -78,26 +78,6 @@ ${here/id}
 ZenPacks.zenoss.OpenStackInfrastructure.datasources.HeartbeatsAMQPDataSource.HeartbeatsAMQPDataSourcePlugin
 </property>
 </object>
-<object id='neutronAgentStatus' module='ZenPacks.zenoss.OpenStackInfrastructure.datasources.NeutronAgentStatusDataSource' class='NeutronAgentStatusDataSource'>
-<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
-OpenStack Neutron Agent Status
-</property>
-<property type="boolean" id="enabled" mode="w" >
-True
-</property>
-<property type="string" id="component" mode="w" >
-${here/id}
-</property>
-<property type="int" id="severity" mode="w" >
-3
-</property>
-<property type="string" id="cycletime" mode="w" >
-30
-</property>
-<property type="string" id="plugin_classname" mode="w" >
-ZenPacks.zenoss.OpenStackInfrastructure.datasources.NeutronAgentStatusDataSource.NeutronAgentStatusDataSourcePlugin
-</property>
-</object>
 <object id='openstack' module='Products.ZenModel.BasicDataSource' class='BasicDataSource'>
 <property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
 COMMAND
@@ -3586,6 +3566,204 @@ drop
 </tomanycont>
 </object>
 </object>
+<object id='dhcp_agent' module='Products.ZenEvents.EventClass' class='EventClass'>
+<property visible="True" type="string" id="zEventAction" >
+history
+</property>
+<tomanycont id='instances'>
+<object id='defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+defaultmapping
+</property>
+<property type="int" id="sequence" mode="w" >
+12
+</property>
+<property type="string" id="rule" mode="w" >
+(getattr(evt, 'eventClassKey', '') or '').startswith('openstack|dhcp_agent.')
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='firewall' module='Products.ZenEvents.EventClass' class='EventClass'>
+<property visible="True" type="string" id="zEventAction" >
+history
+</property>
+<tomanycont id='instances'>
+<object id='defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+defaultmapping
+</property>
+<property type="int" id="sequence" mode="w" >
+12
+</property>
+<property type="string" id="rule" mode="w" >
+(getattr(evt, 'eventClassKey', '') or '').startswith('openstack|firewall.')
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='firewall_policy' module='Products.ZenEvents.EventClass' class='EventClass'>
+<property visible="True" type="string" id="zEventAction" >
+history
+</property>
+<tomanycont id='instances'>
+<object id='defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+defaultmapping
+</property>
+<property type="int" id="sequence" mode="w" >
+12
+</property>
+<property type="string" id="rule" mode="w" >
+(getattr(evt, 'eventClassKey', '') or '').startswith('openstack|firewall_policy.')
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='firewall_rule' module='Products.ZenEvents.EventClass' class='EventClass'>
+<property visible="True" type="string" id="zEventAction" >
+history
+</property>
+<tomanycont id='instances'>
+<object id='defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+defaultmapping
+</property>
+<property type="int" id="sequence" mode="w" >
+12
+</property>
+<property type="string" id="rule" mode="w" >
+(getattr(evt, 'eventClassKey', '') or '').startswith('openstack|firewall_rule.')
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='floatingip' module='Products.ZenEvents.EventClass' class='EventClass'>
+<property visible="True" type="string" id="zEventAction" >
+history
+</property>
+<tomanycont id='instances'>
+<object id='defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+defaultmapping
+</property>
+<property type="int" id="sequence" mode="w" >
+12
+</property>
+<property type="string" id="rule" mode="w" >
+(getattr(evt, 'eventClassKey', '') or '').startswith('openstack|floatingip.')
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='network' module='Products.ZenEvents.EventClass' class='EventClass'>
+<property visible="True" type="string" id="zEventAction" >
+history
+</property>
+<tomanycont id='instances'>
+<object id='defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+defaultmapping
+</property>
+<property type="int" id="sequence" mode="w" >
+12
+</property>
+<property type="string" id="rule" mode="w" >
+(getattr(evt, 'eventClassKey', '') or '').startswith('openstack|network.')
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='port' module='Products.ZenEvents.EventClass' class='EventClass'>
+<property visible="True" type="string" id="zEventAction" >
+history
+</property>
+<tomanycont id='instances'>
+<object id='defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+defaultmapping
+</property>
+<property type="int" id="sequence" mode="w" >
+12
+</property>
+<property type="string" id="rule" mode="w" >
+(getattr(evt, 'eventClassKey', '') or '').startswith('openstack|port.')
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='router' module='Products.ZenEvents.EventClass' class='EventClass'>
+<property visible="True" type="string" id="zEventAction" >
+history
+</property>
+<tomanycont id='instances'>
+<object id='defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+defaultmapping
+</property>
+<property type="int" id="sequence" mode="w" >
+12
+</property>
+<property type="string" id="rule" mode="w" >
+(getattr(evt, 'eventClassKey', '') or '').startswith('openstack|router.')
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='security_group' module='Products.ZenEvents.EventClass' class='EventClass'>
+<property visible="True" type="string" id="zEventAction" >
+history
+</property>
+<tomanycont id='instances'>
+<object id='defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+defaultmapping
+</property>
+<property type="int" id="sequence" mode="w" >
+12
+</property>
+<property type="string" id="rule" mode="w" >
+(getattr(evt, 'eventClassKey', '') or '').startswith('openstack|security_group.')
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='security_group_rule' module='Products.ZenEvents.EventClass' class='EventClass'>
+<property visible="True" type="string" id="zEventAction" >
+history
+</property>
+<tomanycont id='instances'>
+<object id='defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+defaultmapping
+</property>
+<property type="int" id="sequence" mode="w" >
+12
+</property>
+<property type="string" id="rule" mode="w" >
+(getattr(evt, 'eventClassKey', '') or '').startswith('openstack|security_group_rule.')
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='subnet' module='Products.ZenEvents.EventClass' class='EventClass'>
+<property visible="True" type="string" id="zEventAction" >
+history
+</property>
+<tomanycont id='instances'>
+<object id='defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+defaultmapping
+</property>
+<property type="int" id="sequence" mode="w" >
+12
+</property>
+<property type="string" id="rule" mode="w" >
+(getattr(evt, 'eventClassKey', '') or '').startswith('openstack|subnet.')
+</property>
+</object>
+</tomanycont>
+</object>
 </object>
 <!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackCeilometerHeartbeat') -->
 <object id='/zport/dmd/Events/Status/instances/openStackCeilometerHeartbeat' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
@@ -3594,36 +3772,6 @@ openStackCeilometerHeartbeat
 </property>
 <property type="int" id="sequence" mode="w" >
 12
-</property>
-</object>
-<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackIniFileAccess') -->
-<object id='/zport/dmd/Events/Status/instances/openStackIniFileAccess' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
-<property type="string" id="eventClassKey" mode="w" >
-openStackIniFileAccess
-</property>
-<property type="int" id="sequence" mode="w" >
-12
-</property>
-<property type="text" id="explanation" mode="w" >
-An openstack configuration file could not be accessed.
-</property>
-<property type="text" id="resolution" mode="w" >
-Correct the permissions so that the file is accessible.
-</property>
-</object>
-<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackIniFileOptionParsing') -->
-<object id='/zport/dmd/Events/Status/instances/openStackIniFileOptionParsing' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
-<property type="string" id="eventClassKey" mode="w" >
-openStackIniFileOptionParsing
-</property>
-<property type="int" id="sequence" mode="w" >
-12
-</property>
-<property type="text" id="explanation" mode="w" >
-A required option was not found in an ini file on the openstack host.
-</property>
-<property type="text" id="resolution" mode="w" >
-Add the required option to the file.
 </property>
 </object>
 <!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackNovaServiceStatus') -->
@@ -3639,21 +3787,6 @@ A nova service is not running properly
 </property>
 <property type="text" id="resolution" mode="w" >
 Restart the offending service.
-</property>
-</object>
-<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackNeutronAgentStatus') -->
-<object id='/zport/dmd/Events/Status/instances/openStackNeutronAgentStatus' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
-<property type="string" id="eventClassKey" mode="w" >
-openStackNeutronAgentStatus
-</property>
-<property type="int" id="sequence" mode="w" >
-12
-</property>
-<property type="text" id="explanation" mode="w" >
-A neutron agent is not running properly
-</property>
-<property type="text" id="resolution" mode="w" >
-Restart the offending agent.
 </property>
 </object>
 <!-- ('', 'zport', 'dmd', 'Manufacturers', 'OpenStack') -->
