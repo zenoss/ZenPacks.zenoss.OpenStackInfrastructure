@@ -92,9 +92,7 @@ True
 3
 </property>
 <property type="string" id="commandTemplate" mode="w" >
-${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/poll_openstack.py
-'${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}'
-'${here/zOpenStackAuthUrl}' '${here/zOpenStackRegionName}'
+${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/poll_openstack.py '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}' '${here/zOpenStackAuthUrl}' '${here/zOpenStackRegionName}'
 </property>
 <property type="int" id="cycletime" mode="w" >
 300
@@ -770,8 +768,7 @@ True
 3
 </property>
 <property type="string" id="commandTemplate" mode="w" >
-${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/queue_counts.py
-'${here/id}'
+${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/queue_counts.py '${here/id}'
 </property>
 <property type="int" id="cycletime" mode="w" >
 300
@@ -3497,7 +3494,7 @@ defaultmapping
 openstack|compute.instance.create.start
 </property>
 <property type="text" id="explanation" mode="w" >
-Default event transform for all OpenStack Ceilometer notifications. Maps to /OpenStack, history.
+Default event transform for all OpenStack Ceilometer notifications.  Maps to /OpenStack, history.
 </property>
 <property visible="True" type="string" id="zEventAction" >
 history
@@ -3518,8 +3515,7 @@ defaultmapping
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|compute.instance.')
 </property>
 <property type="text" id="explanation" mode="w" >
-All compute.instance events not otherwise mapped will be placed in the
-/OpenStackInfrastructure/compute/instance class history.
+All compute.instance events not otherwise mapped will be placed in the /OpenStackInfrastructure/compute/instance class history.
 </property>
 <property visible="True" type="string" id="zEventAction" >
 history
