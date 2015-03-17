@@ -3505,7 +3505,7 @@ process(evt, device, dmd, txnCommit)
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-10
+15
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|')
