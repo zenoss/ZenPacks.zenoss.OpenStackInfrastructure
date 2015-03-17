@@ -3495,12 +3495,12 @@ AVERAGE
 </object>
 <!-- ('', 'zport', 'dmd', 'Events', 'OpenStack') -->
 <object id='/zport/dmd/Events/OpenStack' module='Products.ZenEvents.EventClass' class='EventClass'>
-<tomanycont id='instances'>
-<object id='OpenStack Events Default' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
 <property type="text" id="transform" mode="w" >
 from ZenPacks.zenoss.OpenStackInfrastructure.events import process
 process(evt, device, dmd, txnCommit)
 </property>
+<tomanycont id='instances'>
+<object id='OpenStack Events Default' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
