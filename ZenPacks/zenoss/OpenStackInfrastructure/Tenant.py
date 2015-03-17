@@ -13,6 +13,7 @@ from . import schema
 import logging
 LOG = logging.getLogger('zen.OpenStackInfrastructureTenant')
 
+
 class Tenant(schema.Tenant):
 
     def tenant_impacted_by(self):

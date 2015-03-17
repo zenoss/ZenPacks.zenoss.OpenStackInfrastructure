@@ -97,15 +97,3 @@ class Host(schema.Host):
             self.device().name()
         )
 
-    # Wrapper for use in indexing- take the dictionary and flatten it into
-    # a list, which will be cataloged with a keyword index.
-    def neutron_ml2_ini_keywords(self):
-        keywords = []
-        for k, v in self.neutron_ml2_ini.iteritems():
-            if isinstance(v, list):
-                for lv in v:
-                    keywords.append('{}={}'.format(k, lv))
-            else:
-                keywords.append('{}={}'.format(k, v))
-
-        return keywords

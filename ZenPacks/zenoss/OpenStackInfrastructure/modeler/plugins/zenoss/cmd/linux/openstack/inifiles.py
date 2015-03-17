@@ -1,7 +1,7 @@
 ###########################################################################
 #
 # This program is part of Zenoss Core, an open source monitoring platform.
-# Copyright (C) 2014, Zenoss Inc.
+# Copyright (C) 2015, Zenoss Inc.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 or (at your
@@ -12,6 +12,7 @@
 ###########################################################################
 
 """ Gather selected INI files """
+
 
 import io
 import os.path
@@ -24,6 +25,9 @@ from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap
 from Products.ZenCollector.interfaces import IEventService
 from Products.ZenEvents import Event
+
+from ZenPacks.zenoss.OpenStackInfrastructure.interfaces import INeutronImplementationPlugin
+from ZenPacks.zenoss.OpenStackInfrastructure.neutron_integration import split_list
 
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path
 add_local_lib_path()
@@ -116,10 +120,10 @@ class inifiles(PythonPlugin):
 
         if d.exitCode != 0 or d.stderr:
             if required:
-                log.error("Unable to access required file %s (%s)" % (filepath, d.stderr))
+                log.error("Unable to access required file %s (%s)" % (filepath, d.stderr.strip()))
                 self.sendFileErrorEvent(device, filepath, d.stderr)
             else:
-                log.info("Unable to access optional file %s (%s)" % (filepath, d.stderr))
+                log.info("Unable to access optional file %s (%s)" % (filepath, d.stderr.strip()))
 
             defer.returnValue(None)
             return
@@ -152,17 +156,71 @@ class inifiles(PythonPlugin):
         self.timeout = device.zCommandCommandTimeout
 
         data = {}
-        files = ['neutron.conf', 'plugins/ml2/ml2_conf.ini']
-
-        # dummy
-        files.append('plugins/openvswitch/ovs_neutron_plugin.ini')
+        required_files = ['neutron.conf']
+        optional_files = ['plugins/ml2/ml2_conf.ini']
+        plugin_names = set()
 
         try:
-            for filename in files:
-                if filename == 'neutron.conf':
+            # Check if neutron-server runs on this machine
+            d = yield self.client.run("pgrep neutron-server", timeout=self.timeout)
+            if d.exitCode != 0:
+                # neutron isn't running on this host, so its config
+                # files are suspect, and should be ignored.
+                log.info("neutron-server not running on host- not collecting ini files")
+                defer.returnValue(data)
+                return
+
+            # Collect ini files
+            for filename in required_files:
+                if filename not in data:
                     data[filename] = yield self.read_ini(device, filename, required=True)
-                else:
+            for filename in optional_files:
+                if filename not in data:
                     data[filename] = yield self.read_ini(device, filename)
+
+            required_files = []
+            optional_files = []
+
+            if data['neutron.conf']:
+                ini = data['neutron.conf']
+                neutron_core_plugin = self.ini_get(device, filename, ini, 'DEFAULT', 'core_plugin', required=True)
+                plugin_names.add(neutron_core_plugin)
+
+            if 'plugins/ml2/ml2_conf.ini' in data:
+                mechanism_drivers = split_list(self.ini_get(
+                    device,
+                    filename,
+                    data['plugins/ml2/ml2_conf.ini'],
+                    'ml2',
+                    'mechanism_drivers',
+                    required=True) or '')
+
+                for mechanism_driver in mechanism_drivers:
+                    plugin_names.add("ml2." + mechanism_driver)
+
+            data['plugin_names'] = set()
+            for plugin_name in plugin_names:
+                plugin = zope.component.queryUtility(INeutronImplementationPlugin, plugin_name)
+                if not plugin:
+                    continue
+
+                plugin_class = plugin.__class__.__name__
+                log.info("Checking for additinal ini requirements in neutron implementation plugin '%s': %s" % (plugin_name, plugin_class))
+                data['plugin_names'].add(plugin_name)
+
+                for filename, section, option in plugin.ini_required():
+                    required_files.append(filename)
+
+                for filename, section, option in plugin.ini_optional():
+                    optional_files.append(filename)
+
+            for filename in required_files:
+                if filename not in data:
+                    data[filename] = yield self.read_ini(device, filename, required=True)
+            for filename in optional_files:
+                if filename not in data:
+                    data[filename] = yield self.read_ini(device, filename)
+
         except Exception:
             raise
         finally:
@@ -174,12 +232,20 @@ class inifiles(PythonPlugin):
         log.info("Modeler %s processing data for device %s",
                  self.name(), device.id)
 
+        if 'neutron.conf' not in results:
+            log.info("No neutron ini files to process.")
+            return
+
         data = {
             'neutron_core_plugin': None,
             'neutron_mechanism_drivers': [],
             'neutron_type_drivers': [],
-            'neutron_ml2_ini': {}
+            'set_neutron_ini': {}
         }
+
+        if 'plugin_names' not in results:
+            log.error("No neutron implementation plugins were identified, unable to continue.")
+            return
 
         if results['neutron.conf']:
             filename = 'neutron.conf'
@@ -191,19 +257,25 @@ class inifiles(PythonPlugin):
                 filename = 'plugins/ml2/ml2_conf.ini'
                 ini = results[filename]
                 if ini:
-                    data['neutron_type_drivers'] = self.ini_get(device, filename, ini, 'ml2', 'type_drivers', required=True)
-                    data['neutron_mechanism_drivers'] = self.ini_get(device, filename, ini, 'ml2', 'mechanism_drivers', required=True)
+                    data['neutron_type_drivers'] = split_list(self.ini_get(device, filename, ini, 'ml2', 'type_drivers', required=True))
+                    data['neutron_mechanism_drivers'] = split_list(self.ini_get(device, filename, ini, 'ml2', 'mechanism_drivers', required=True))
 
-        if data['neutron_mechanism_drivers']:
-            # Dummy data.  This will come from the type driver for realz.
-            mechanism_ini_config = [
-                ('plugins/openvswitch/ovs_neutron_plugin.ini', 'ovs', 'integration_bridge')
-            ]
+        for plugin_name in results['plugin_names']:
+            # See if we have any plugins registered for the core module
+            # (if not ML2) or mechanism type (if ML2)
+            plugin = zope.component.queryUtility(INeutronImplementationPlugin, plugin_name)
+            if not plugin:
+                continue
 
-            for filename, section, option in mechanism_ini_config:
-                ini = results[filename]
+            log.debug("(Process) Using plugin '%s'" % plugin_name)
+            for filename, section, option in plugin.ini_required():
+                ini = results.get(filename, None)
                 if ini:
-                    data['neutron_ml2_ini'][(filename, section, option)] = self.ini_get(device, filename, ini, section, option)
+                    data['set_neutron_ini'][(filename, section, option)] = self.ini_get(device, filename, ini, section, option, required=True)
 
-        results_om = ObjectMap(data)
-        return ObjectMap({'setApplyDataMapToOpenStackInfrastructureHost': results_om})
+            for filename, section, option in plugin.ini_optional():
+                ini = results.get(filename, None)
+                if ini:
+                    data['set_neutron_ini'][(filename, section, option)] = self.ini_get(device, filename, ini, section, option)
+
+            return ObjectMap({'setApplyDataMapToOpenStackInfrastructureEndpoint': ObjectMap(data)})

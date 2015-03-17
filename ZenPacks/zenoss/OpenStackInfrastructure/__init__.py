@@ -19,6 +19,7 @@ $ZENHOME/ZenPacks/easy-install.pth.
 """
 
 from . import zenpacklib
+from ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent import NeutronIntegrationComponent
 
 
 # Useful to avoid making literal string references to module and class names
@@ -130,6 +131,20 @@ CFG = zenpacklib.ZenPackSpec(
             'dynamicview_relations': {
                 'openstack_link': ['region'],
                 'impacts': ['hosts']
+            },
+            'properties': {
+                'neutron_core_plugin':            {'grid_display': False,
+                                                   'label': 'Neutron Core Plugin'},
+                'neutron_mechanism_drivers':      {'grid_display': False,
+                                                   'label': 'Neutron ML2 Mechanism Drivers',
+                                                   'default': [],
+                                                   'type': 'lines'},
+                'neutron_type_drivers':           {'grid_display': False,
+                                                   'label': 'Neutron ML2 Type Drivers',
+                                                   'default': [],
+                                                   'type': 'lines'},
+                'neutron_ini':                {'api_only': True,
+                                                   'default': None}
             }
         },
 
@@ -225,7 +240,9 @@ CFG = zenpacklib.ZenPackSpec(
         # Component Types ############################################
 
         'Tenant': {
-            'base': 'OpenstackComponent',
+            # Note: NeutronIntegrationComponent must be listed first so that its
+            # index_object is called.
+            'base': [NeutronIntegrationComponent, 'OpenstackComponent'],
             'meta_type': 'OpenStackInfrastructureTenant',
             'label': 'Tenant',
             'order': 5,
@@ -403,23 +420,7 @@ CFG = zenpacklib.ZenPackSpec(
                                         'index_scope': 'both'},
                 'hostname':            {'grid_display': False,
                                         'index_type': 'field',
-                                        'index_scope': 'both'},
-                'neutron_core_plugin':            {'grid_display': False,
-                                                   'label': 'Neutron Core Plugin'},
-                'neutron_mechanism_drivers':      {'grid_display': False,
-                                                   'label': 'Neutron ML2 Mechanism Drivers',
-                                                   'default': [],
-                                                   'type': 'lines'},
-                'neutron_type_drivers':           {'grid_display': False,
-                                                   'label': 'Neutron ML2 Type Drivers',
-                                                   'default': [],
-                                                   'type': 'lines'},
-                'neutron_ml2_ini':                {'grid_display': False,
-                                                   'display': False,
-                                                   'default': {}},
-                'neutron_ml2_ini_keywords':       {'api_only': True,
-                                                   'index_type': 'keyword',
-                                                   'index_scope': 'global'}
+                                        'index_scope': 'both'}
             },
             'relationships': {
                 'orgComponent': {'label': 'Supporting',
@@ -536,7 +537,7 @@ CFG = zenpacklib.ZenPackSpec(
         },
 
         'Network': {
-            'base': 'LogicalComponent',
+            'base': [NeutronIntegrationComponent, 'LogicalComponent'],
             'meta_type': 'OpenStackInfrastructureNetwork',
             'label': 'Network',
             'order': 12,
@@ -562,7 +563,7 @@ CFG = zenpacklib.ZenPackSpec(
         },
 
         'Subnet': {
-            'base': 'LogicalComponent',
+            'base': [NeutronIntegrationComponent, 'LogicalComponent'],
             'meta_type': 'OpenStackInfrastructureSubnet',
             'label': 'Subnet',
             'order': 14,
@@ -611,7 +612,7 @@ CFG = zenpacklib.ZenPackSpec(
         },
 
         'Port': {
-            'base': 'LogicalComponent',
+            'base': [NeutronIntegrationComponent, 'LogicalComponent'],
             'meta_type': 'OpenStackInfrastructurePort',
             'label': 'Port',
             'order': 16,
@@ -633,7 +634,7 @@ CFG = zenpacklib.ZenPackSpec(
                                     'label_width': 40},
             },
             'dynamicview_relations': {
-                'impacted_by': ['subnets', 'floatingIps'],
+                'impacted_by': ['subnets', 'Is'],
                 'impacts': ['instance'],
             }
         },
