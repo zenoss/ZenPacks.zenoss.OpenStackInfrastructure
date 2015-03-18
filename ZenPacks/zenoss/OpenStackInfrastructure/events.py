@@ -88,42 +88,34 @@ def make_id(prefix, raw_id):
 def instance_id(evt):
     if hasattr(evt, 'trait_instance_id'):
         return make_id('server', evt.trait_instance_id)
-    return None
 
 def floatingip_id(evt):
     if hasattr(evt, 'trait_id'):
         return make_id('floatingip', evt.trait_id)
-    return None
 
 def network_id(evt):
     if hasattr(evt, 'trait_id'):
         return make_id('network', evt.trait_id)
-    return None
 
 def port_id(evt):
     if hasattr(evt, 'trait_id'):
         return make_id('port', evt.trait_id)
-    return None
 
 def router_id(evt):
     if hasattr(evt, 'trait_id'):
         return make_id('router', evt.trait_id)
-    return None
 
 def securitygroup_id(evt):
     if hasattr(evt, 'trait_id'):
         return make_id('securitygroup', evt.trait_id)
-    return None
 
 def subnet_id(evt):
     if hasattr(evt, 'trait_id'):
         return make_id('subnet', evt.trait_id)
-    return None
 
 def tenant_id(evt):
     if hasattr(evt, 'trait_tenant_id'):
         return make_id('tenant', evt.trait_tenant_id)
-    return None
 
 # -----------------------------------------------------------------------------
 # Traitmap Functions
