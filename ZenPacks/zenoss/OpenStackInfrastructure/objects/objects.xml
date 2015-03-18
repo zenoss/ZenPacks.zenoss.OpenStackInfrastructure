@@ -3495,17 +3495,17 @@ AVERAGE
 </object>
 <!-- ('', 'zport', 'dmd', 'Events', 'OpenStack') -->
 <object id='/zport/dmd/Events/OpenStack' module='Products.ZenEvents.EventClass' class='EventClass'>
+<tomanycont id='instances'>
+<object id='OpenStack Events Default' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
 <property type="text" id="transform" mode="w" >
 from ZenPacks.zenoss.OpenStackInfrastructure.events import process
 process(evt, device, dmd, txnCommit)
 </property>
-<tomanycont id='instances'>
-<object id='OpenStack Events Default' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-15
+999
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|')
@@ -3525,11 +3525,15 @@ history
 <object id='instance' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='compute.instance default mapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-11
+59
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|compute.instance.')
@@ -3546,7 +3550,7 @@ history
 openstack|compute.instance.create.error
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+51
 </property>
 <property type="text" id="explanation" mode="w" >
 An error has occurred while creating an instance
@@ -3560,7 +3564,7 @@ An error has occurred while creating an instance
 openstack|compute.instance.exists
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+52
 </property>
 <property type="text" id="explanation" mode="w" >
 Drop compute.instance.exists events, not worth storing in event history.
@@ -3574,7 +3578,7 @@ drop
 openstack|compute.instance.exists.verified.old
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+53
 </property>
 <property type="text" id="explanation" mode="w" >
 Drop compute.instance.exists.verified.old events, not worth storing in event history.
@@ -3589,11 +3593,15 @@ drop
 <object id='dhcp_agent' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='dhcp_agent defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+100
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|dhcp_agent.')
@@ -3607,11 +3615,15 @@ history
 <object id='firewall' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='firewall defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+200
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|firewall.')
@@ -3625,11 +3637,15 @@ history
 <object id='firewall_policy' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='firewall_policy defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+210
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|firewall_policy.')
@@ -3643,11 +3659,15 @@ history
 <object id='firewall_rule' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='firewall_rule defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+220
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|firewall_rule.')
@@ -3661,11 +3681,15 @@ history
 <object id='floatingip' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='floatingip defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+300
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|floatingip.')
@@ -3679,11 +3703,15 @@ history
 <object id='network' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='network defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+400
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|network.')
@@ -3697,11 +3725,15 @@ history
 <object id='port' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='port defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+500
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|port.')
@@ -3715,11 +3747,15 @@ history
 <object id='router' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='router defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+600
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|router')
@@ -3733,11 +3769,15 @@ history
 <object id='security_group' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='security_group defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+700
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|security_group.')
@@ -3751,11 +3791,15 @@ history
 <object id='security_group_rule' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='security_group_rule defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+710
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|security_group_rule.')
@@ -3769,11 +3813,15 @@ history
 <object id='subnet' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='subnet defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+800
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|subnet.')
@@ -3952,6 +4000,9 @@ Juno (2014.2)
 <property type="boolean" id="isOS" mode="w" >
 True
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/OpenStack/Infrastructure/devices/mp8.osi/os'/>
+</tomany>
 </object>
 <object id='Kilo (2015.1)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
 <property type="string" id="name" mode="w" >
@@ -3991,6 +4042,9 @@ False
 <property type="int" id="sequence" mode="w" >
 1
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/mp8.zenoss.loc/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_ceilometer-agent-central_d84ae8d167f4cf0dd88b23eaf9896f46'/>
+</tomany>
 </object>
 <object id='ceilometer-agent-compute' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4011,6 +4065,9 @@ False
 <property type="int" id="sequence" mode="w" >
 2
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/mp8.zenoss.loc/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_ceilometer-agent-compute_5fc8a74da3b7760f22ce20fec5193f7b'/>
+</tomany>
 </object>
 <object id='ceilometer-agent-notification' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4031,6 +4088,9 @@ False
 <property type="int" id="sequence" mode="w" >
 3
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/mp8.zenoss.loc/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_ceilometer-agent-notification_a4a1e350900b5eb07144cea5f50d1b6f'/>
+</tomany>
 </object>
 <object id='ceilometer-alarm-evaluator' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4051,6 +4111,9 @@ False
 <property type="int" id="sequence" mode="w" >
 4
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/mp8.zenoss.loc/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_ceilometer-alarm-evaluator_10d6914527cfefcb13b09541aede9132'/>
+</tomany>
 </object>
 <object id='ceilometer-alarm-notifier' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4071,6 +4134,9 @@ False
 <property type="int" id="sequence" mode="w" >
 5
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/mp8.zenoss.loc/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_ceilometer-alarm-notifier_ccfeaed10eae983f40b0fa3dd0c4a50a'/>
+</tomany>
 </object>
 <object id='ceilometer-api' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4091,6 +4157,9 @@ False
 <property type="int" id="sequence" mode="w" >
 6
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/mp8.zenoss.loc/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_ceilometer-api_e20f63751491c302d39c64e4f420e3af'/>
+</tomany>
 </object>
 <object id='ceilometer-collector' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4111,6 +4180,9 @@ False
 <property type="int" id="sequence" mode="w" >
 7
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/mp8.zenoss.loc/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_ceilometer-collector_f3133f761caf692b20913d074c48f83c'/>
+</tomany>
 </object>
 <object id='neutron-dhcp-agent' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4131,6 +4203,9 @@ False
 <property type="int" id="sequence" mode="w" >
 0
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/mp8.zenoss.loc/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_neutron-dhcp-agent_7e19666dc828b66657748d8a2328e94d'/>
+</tomany>
 </object>
 <object id='neutron-l3-agent' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4151,6 +4226,9 @@ False
 <property type="int" id="sequence" mode="w" >
 0
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/mp8.zenoss.loc/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_neutron-l3-agent_d80d8425b4356e97efcee9c8c8af205b'/>
+</tomany>
 </object>
 <object id='neutron-metadata-agent' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4171,6 +4249,9 @@ False
 <property type="int" id="sequence" mode="w" >
 0
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/mp8.zenoss.loc/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_neutron-metadata-agent_355fd9371c199fc1613b46cf67863d30'/>
+</tomany>
 </object>
 <object id='neutron-openvswitch-agent' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4191,6 +4272,9 @@ False
 <property type="int" id="sequence" mode="w" >
 0
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/mp8.zenoss.loc/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_neutron-openvswitch-agent_8465304e7666a06d59cde2429d308949'/>
+</tomany>
 </object>
 <object id='neutron-server' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4211,6 +4295,9 @@ False
 <property type="int" id="sequence" mode="w" >
 0
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/mp8.zenoss.loc/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_neutron-server_89f8207966ae486745cab4ec12f5bc09'/>
+</tomany>
 </object>
 <object id='nova-api' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4231,6 +4318,9 @@ False
 <property type="int" id="sequence" mode="w" >
 15
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/mp8.zenoss.loc/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-api_b1078b0a332934613d58b7ae4cf68066'/>
+</tomany>
 </object>
 <object id='nova-cert' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4251,6 +4341,9 @@ False
 <property type="int" id="sequence" mode="w" >
 8
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/mp8.zenoss.loc/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-cert_047e600b50d8a19ae8900ffd3764d708'/>
+</tomany>
 </object>
 <object id='nova-compute' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4271,6 +4364,9 @@ False
 <property type="int" id="sequence" mode="w" >
 13
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/mp8.zenoss.loc/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-compute_386e99ddaaded93f8dd858c87b696aa8'/>
+</tomany>
 </object>
 <object id='nova-conductor' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4291,6 +4387,9 @@ False
 <property type="int" id="sequence" mode="w" >
 9
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/mp8.zenoss.loc/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-conductor_53748338af8ddf91584adca74619d475'/>
+</tomany>
 </object>
 <object id='nova-consoleauth' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4311,6 +4410,9 @@ False
 <property type="int" id="sequence" mode="w" >
 10
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/mp8.zenoss.loc/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-consoleauth_5f8bf39e0aef0d179eb90ae75c305c9b'/>
+</tomany>
 </object>
 <object id='nova-network' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4351,6 +4453,9 @@ False
 <property type="int" id="sequence" mode="w" >
 12
 </property>
+<tomany id='instances'>
+<link objid='/zport/dmd/Devices/Server/SSH/Linux/NovaHost/devices/mp8.zenoss.loc/os/processes/zport_dmd_Processes_OpenStack_osProcessClasses_nova-scheduler_bdb9f1c2f7e3285cb77004c78e86bd70'/>
+</tomany>
 </object>
 </tomanycont>
 </object>
