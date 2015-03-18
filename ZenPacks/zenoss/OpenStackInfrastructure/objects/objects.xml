@@ -3505,7 +3505,7 @@ process(evt, device, dmd, txnCommit)
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-15
+999
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|')
@@ -3525,11 +3525,15 @@ history
 <object id='instance' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='compute.instance default mapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-11
+59
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|compute.instance.')
@@ -3546,7 +3550,7 @@ history
 openstack|compute.instance.create.error
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+51
 </property>
 <property type="text" id="explanation" mode="w" >
 An error has occurred while creating an instance
@@ -3560,7 +3564,7 @@ An error has occurred while creating an instance
 openstack|compute.instance.exists
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+52
 </property>
 <property type="text" id="explanation" mode="w" >
 Drop compute.instance.exists events, not worth storing in event history.
@@ -3574,7 +3578,7 @@ drop
 openstack|compute.instance.exists.verified.old
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+53
 </property>
 <property type="text" id="explanation" mode="w" >
 Drop compute.instance.exists.verified.old events, not worth storing in event history.
@@ -3589,11 +3593,15 @@ drop
 <object id='dhcp_agent' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='dhcp_agent defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+100
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|dhcp_agent.')
@@ -3607,11 +3615,15 @@ history
 <object id='firewall' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='firewall defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+200
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|firewall.')
@@ -3625,11 +3637,15 @@ history
 <object id='firewall_policy' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='firewall_policy defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+210
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|firewall_policy.')
@@ -3643,11 +3659,15 @@ history
 <object id='firewall_rule' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='firewall_rule defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+220
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|firewall_rule.')
@@ -3661,11 +3681,15 @@ history
 <object id='floatingip' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='floatingip defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+300
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|floatingip.')
@@ -3679,11 +3703,15 @@ history
 <object id='network' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='network defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+400
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|network.')
@@ -3697,11 +3725,15 @@ history
 <object id='port' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='port defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+500
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|port.')
@@ -3715,11 +3747,15 @@ history
 <object id='router' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='router defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+600
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|router')
@@ -3733,11 +3769,15 @@ history
 <object id='security_group' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='security_group defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+700
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|security_group.')
@@ -3751,11 +3791,15 @@ history
 <object id='security_group_rule' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='security_group_rule defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+710
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|security_group_rule.')
@@ -3769,11 +3813,15 @@ history
 <object id='subnet' module='Products.ZenEvents.EventClass' class='EventClass'>
 <tomanycont id='instances'>
 <object id='subnet defaultmapping' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="text" id="transform" mode="w" >
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
 <property type="string" id="eventClassKey" mode="w" >
 defaultmapping
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+800
 </property>
 <property type="string" id="rule" mode="w" >
 (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|subnet.')
