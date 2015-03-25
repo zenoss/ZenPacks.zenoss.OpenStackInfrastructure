@@ -42,9 +42,13 @@ RELATIONSHIPS_YUML = """
 [OrgComponent]1-.-*[Host]
 [OrgComponent]1-.-*[SoftwareComponent]
 // Non-containing 1:M
-// # Can abstract Tenant -> (Instance,Network,Subnet,Router,Port,FloatingIp)
-// # Tenant-> Flavor has no support so its a blank relation
-[Tenant]1-.-*[LogicalComponent]
+// # Tenant -> * (Instance,Network,Subnet,Router,Port,FloatingIp)
+[Tenant]1-.-*[Instance]
+[Tenant]1-.-*[Network]
+[Tenant]1-.-*[Subnet]
+[Tenant]1-.-*[Router]
+[Tenant]1-.-*[Port]
+[Tenant]1-.-*[FloatingIp]
 // # Flavor ->
 [Flavor]1-.-*[Instance]
 [Image]1-.-*[Instance]
@@ -229,12 +233,6 @@ CFG = zenpacklib.ZenPackSpec(
         'LogicalComponent': {
             'base': 'OpenstackComponent',
             'filter_display': False,
-            'relationships': {
-                'tenant': {'label_width': 40, 'content_width': 50},
-            },
-            'dynamicview_relations': {
-                'impacts': ['tenant']
-            }
         },
 
         # Component Types ############################################
@@ -563,7 +561,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'ports':          {'grid_display': True, 'label_width': 25},
                 'routers':        {'grid_display': True, 'label_width': 35},
                 'subnets':        {'grid_display': True, 'label_width': 35},
-                # 'tenant':         {'grid_display': True, 'label_width': 35},
+                'tenant':         {'grid_display': True, 'label_width': 35},
                 'neutronAgents':  {'grid_display': False},
             },
             'dynamicview_relations': {
