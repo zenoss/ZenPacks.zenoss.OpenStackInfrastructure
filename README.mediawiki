@@ -104,7 +104,7 @@ following command as the zenoss user:
    $ZENHOME/ZenPacks/ZenPacks.zenoss.OpenStackInfrastructure*/ZenPacks/zenoss/OpenStackInfrastructure/bin/openstack_amqp_config
 </syntaxhighlight>
 
-This scirpt will create a new user in rabbitmq and set up its permissions.  It
+This script will create a new user in rabbitmq and set up its permissions.  It
 will print out the proper values to use for amqp_hostname, amqp_port,
 amqp_userid, amqp_password, and amqp_virtualhost during ceilometer
 configuration (see below)
