@@ -91,14 +91,23 @@ performance data will not be collected until the following steps are performed.
 
 ===Zenoss Configuration Steps===
 
-On your zenoss host, you must run the following command as the zenoss user:
+On your zenoss host in 4.X, you must run the
+
 <syntaxhighlight lang="bash">
-   /opt/zenoss/bin/openstack_amqp_config
+   openstack_amqp_config
 </syntaxhighlight>
 
-It will create a new user in rabbitmq and set up its permissions.  It will
-print out the proper values to use for amqp_hostname, amqp_port, amqp_userid,
-amqp_password, and amqp_virtualhost during ceilometer configuration (see below)
+On your rabbitmq container in 5.X, you must run the
+following command as the zenoss user:
+
+<syntaxhighlight lang="bash">
+   $ZENHOME/ZenPacks/ZenPacks.zenoss.OpenStackInfrastructure*/ZenPacks/zenoss/OpenStackInfrastructure/bin/openstack_amqp_config
+</syntaxhighlight>
+
+This script will create a new user in rabbitmq and set up its permissions.  It
+will print out the proper values to use for amqp_hostname, amqp_port,
+amqp_userid, amqp_password, and amqp_virtualhost during ceilometer
+configuration (see below)
 
 ===OpenStack Ceilometer Configuration Steps===
 
@@ -164,7 +173,7 @@ OpenStack environment is very large.
 Zenoss will process performance datapoints from ceilometer every 5 minutes, but
 by default, ceilometer will only produce one datapoint every 10 minutes.   This
 can be adjusted by modifying the "interval: 600" line in your
-pipeline.yaml file (typically /etc/ceilomster/pipeline.yaml) to 300 seconds.
+pipeline.yaml file (typically /etc/ceilometer/pipeline.yaml) to 300 seconds.
 
 == Zenoss Analytics ==
 
@@ -243,3 +252,7 @@ When combined with the Zenoss Service Dynamics product, this ZenPack adds built-
 
 ;2.0.0
 * Initial Release
+
+:2.1.0
+* Added Neutron network components
+
