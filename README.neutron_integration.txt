@@ -192,3 +192,14 @@ when it should be.
 
 If this is unavoidable, it may be required to modify the OpenStackInfrastructure
 zenpack to support your use case.
+
+
+Impact Support
+--------------
+
+The impacts_by relationship from the implementation component to the core
+component is provided automatically, but it is your responsibility to
+provide the impacts relationship from the other zenpack into openstack.
+
+To do this, your impact adapter should call the function 'get_neutron_components'
+from ZenPacks.zenoss.OpenStackInfrastructure.neutron_integration.

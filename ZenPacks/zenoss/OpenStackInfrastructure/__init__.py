@@ -257,7 +257,7 @@ CFG = zenpacklib.ZenPackSpec(
             },
             'dynamicview_views': ['service_view'],
             'dynamicview_relations': {
-                'impacted_by': ['tenant_impacted_by']
+                'impacted_by': ['tenant_impacted_by', 'implementation_components']
             }
         },
 
@@ -569,7 +569,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'neutronAgents':  {'grid_display': False},
             },
             'dynamicview_relations': {
-                'impacted_by': ['neutronAgents'],
+                'impacted_by': ['neutronAgents', 'implementation_components'],
                 'impacts': ['subnets', 'tenant']
             }
         },
@@ -602,7 +602,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'routers':        {'grid_display': True, 'label_width': 35},
             },
             'dynamicview_relations': {
-                'impacted_by': ['network', 'routers', 'neutronAgents'],
+                'impacted_by': ['network', 'routers', 'neutronAgents', 'implementation_components'],
                 'impacts': ['port', 'tenant']
             }
         },
@@ -632,7 +632,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'neutronAgents':  {'grid_display': False},
             },
             'dynamicview_relations': {
-                'impacted_by': ['neutronAgents'],
+                'impacted_by': ['neutronAgents', 'implementation_components'],
                 'impacts': ['subnets', 'floatingIps']
             }
         },
@@ -667,7 +667,7 @@ CFG = zenpacklib.ZenPackSpec(
                                     'label_width': 40},
             },
             'dynamicview_relations': {
-                'impacted_by': ['subnets', 'Is'],
+                'impacted_by': ['subnets', 'floatingIps', 'implementation_components'],
                 'impacts': ['instance'],
             }
         },
@@ -699,7 +699,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'router':                 {'grid_display': True},
                 },
             'dynamicview_relations': {
-                'impacted_by': ['router'],
+                'impacted_by': ['router', 'implementation_components'],
                 'impacts': ['port'],
             }
         },
