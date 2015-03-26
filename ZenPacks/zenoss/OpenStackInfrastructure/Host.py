@@ -96,3 +96,4 @@ class Host(schema.Host):
             self.name(),
             self.device().name()
         )
+

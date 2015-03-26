@@ -1,6 +1,8 @@
+#!/usr/bin/env python
+
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2013-2014, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2013-2015, all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -13,6 +15,10 @@ This module provides a single integration point for common ZenPacks.
 
 """
 
+# PEP-396 version. (https://www.python.org/dev/peps/pep-0396/)
+__version__ = "1.0.0dev"
+
+
 import logging
 LOG = logging.getLogger('zen.zenpacklib')
 
@@ -23,6 +29,7 @@ LOG.addHandler(logging.NullHandler())
 import collections
 import imp
 import importlib
+import inspect
 import json
 import operator
 import os
@@ -30,11 +37,18 @@ import re
 import sys
 import math
 
+if __name__ == '__main__':
+    import Globals
+    from Products.ZenUtils.Utils import unused
+    unused(Globals)
+
 from zope.browser.interfaces import IBrowserView
 from zope.component import adapts, getGlobalSiteManager
 from zope.event import notify
 from zope.interface import classImplements, implements
 from zope.interface.interface import InterfaceClass
+import zope.proxy
+from Acquisition import aq_base
 
 from Products.AdvancedQuery import Eq, Or
 from Products.AdvancedQuery.AdvancedQuery import _BaseQuery as BaseQuery
@@ -46,6 +60,12 @@ from Products.ZenModel.HWComponent import HWComponent as BaseHWComponent
 from Products.ZenModel.ManagedEntity import ManagedEntity as BaseManagedEntity
 from Products.ZenModel.ZenossSecurity import ZEN_CHANGE_DEVICE
 from Products.ZenModel.ZenPack import ZenPack as ZenPackBase
+from Products.ZenModel.CommentGraphPoint import CommentGraphPoint
+from Products.ZenModel.ComplexGraphPoint import ComplexGraphPoint
+from Products.ZenModel.ThresholdGraphPoint import ThresholdGraphPoint
+from Products.ZenModel.GraphPoint import GraphPoint
+from Products.ZenModel.DataPointGraphPoint import DataPointGraphPoint
+from Products.ZenRelations.Exceptions import ZenSchemaError
 from Products.ZenRelations.RelSchema import ToMany, ToManyCont, ToOne
 from Products.ZenRelations.ToManyContRelationship import ToManyContRelationship
 from Products.ZenRelations.ToManyRelationship import ToManyRelationship
@@ -78,6 +98,26 @@ from Products.Zuul.utils import ZuulMessageFactory as _t
 
 from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from zope.viewlet.interfaces import IViewlet
+
+try:
+    import yaml
+    import yaml.constructor
+    YAML_INSTALLED = True
+except ImportError:
+    YAML_INSTALLED = False
+
+OrderedDict = None
+
+try:
+    # included in standard lib from Python 2.7
+    from collections import OrderedDict
+except ImportError:
+    # try importing the backported drop-in replacement
+    # it's available on PyPI
+    try:
+        from ordereddict import OrderedDict
+    except ImportError:
+        OrderedDict = None
 
 # Exported symbols. These are the only symbols imported by wildcard.
 __all__ = (
@@ -113,6 +153,28 @@ class ZenPack(ZenPackBase):
     ZenPack loader that handles custom installation and removal tasks.
     """
 
+    def __init__(self, *args, **kwargs):
+        super(ZenPack, self).__init__(*args, **kwargs)
+
+        # Emable logging to stderr if the user sets the ZPL_LOG_ENABLE environment
+        # variable to this zenpack's name.   (defaults to 'DEBUG', but
+        # user may choose a different level with ZPL_LOG_LEVEL.
+        if self.id in os.environ.get('ZPL_LOG_ENABLE', ''):
+            levelName = os.environ.get('ZPL_LOG_LEVEL', 'DEBUG').upper()
+            logLevel = getattr(logging, levelName)
+
+            if logLevel:
+                # Reconfigure the logger to ensure it goes to stderr for the
+                # selected level or above.
+                LOG.propagate = False
+                LOG.setLevel(logLevel)
+                h = logging.StreamHandler(sys.stderr)
+                h.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(name)s: %(message)s'))
+                LOG.addHandler(h)
+            else:
+                LOG.error("Unrecognized ZPL_LOG_LEVEL '%s'" %
+                          os.environ.get('ZPL_LOG_LEVEL'))
+
     # NEW_COMPONENT_TYPES AND NEW_RELATIONS will be monkeypatched in
     # via zenpacklib when this class is instantiated.
 
@@ -121,6 +183,16 @@ class ZenPack(ZenPackBase):
             d.buildRelations()
 
     def install(self, app):
+
+        if not YAML_INSTALLED:
+            LOG.fatal('PyYAML is required by %s.  Try "easy_install PyYAML" first.' % self.id)
+            sys.exit(1)
+
+        if not OrderedDict:
+            LOG.fatal('ordereddict is required by %s. Try "easy_install ordereddict" first.' % self.id)
+            sys.exit(1)
+
+        # create device classes and set zProperties on them
         for dcname, dcspec in self.device_classes.iteritems():
             if dcspec.create:
                 try:
@@ -140,9 +212,66 @@ class ZenPack(ZenPackBase):
             LOG.info('Adding %s relationships to existing devices' % self.id)
             self._buildDeviceRelations()
 
+        # load monitoring templates
+        for dcname, dcspec in self.device_classes.iteritems():
+            for mtname, mtspec in dcspec.templates.iteritems():
+                mtspec.create(self.dmd)
+
     def remove(self, app, leaveObjects=False):
         from Products.Zuul.interfaces import ICatalogTool
-        if not leaveObjects:
+        if leaveObjects:
+            # Check whether the ZPL-managed monitoring templates have
+            # been modified by the user.  If so, those changes will
+            # be lost during the upgrade.
+            #
+            # Ideally, I would inspect self.packables() to find these
+            # objects, but we do not have access to that relationship
+            # at this point in the process.
+            for dcname, dcspec in self._v_specparams.device_classes.iteritems():
+                deviceclass = self.dmd.Devices.getOrganizer(dcname)
+                if deviceclass is None:
+                    LOG.warning(
+                        "DeviceClass %s has been removed at some point "
+                        "after the %s ZenPack was installed.  It will be "
+                        "reinstated if this ZenPack is upgraded or reinstalled",
+                        dcname, self.id)
+                    continue
+
+                for orig_mtname, orig_mtspec in dcspec.templates.iteritems():
+                    template = deviceclass.rrdTemplates._getOb(orig_mtname)
+                    if template is None:
+                        LOG.warning(
+                            "Monitoring template %s/%s has been removed at some point "
+                            "after the %s ZenPack was installed.  It will be "
+                            "reinstated if this ZenPack is upgraded or reinstalled",
+                            dcname, orig_mtname, self.id)
+                        continue
+
+                    installed = RRDTemplateSpecParams.fromObject(template)
+
+                    if installed != orig_mtspec:
+                        import time
+                        import difflib
+
+                        lines_installed = [x + '\n' for x in yaml.dump(installed, Dumper=Dumper).split('\n')]
+                        lines_orig_mtspec = [x + '\n' for x in yaml.dump(orig_mtspec, Dumper=Dumper).split('\n')]
+                        diff = ''.join(difflib.unified_diff(lines_orig_mtspec, lines_installed))
+
+                        # installed is not going to have cycletime in it, because it's the default.
+
+                        newname = "{}-upgrade-{}".format(orig_mtname, int(time.time()))
+                        LOG.error(
+                            "Monitoring template %s/%s has been modified "
+                            "since the %s ZenPack was installed.  These local "
+                            "changes will be lost as this ZenPack is upgraded "
+                            "or reinstalled.   Existing template will be "
+                            "renamed to '%s'.  Please review and reconcile "
+                            "local changes:\n%s",
+                            dcname, orig_mtname, self.id, newname, diff)
+
+                        deviceclass.rrdTemplates.manage_renameObject(template.id, newname)
+
+        else:
             dc = app.Devices
             for catalog in self.GLOBAL_CATALOGS:
                 catObj = getattr(dc, catalog, None)
@@ -174,8 +303,286 @@ class ZenPack(ZenPackBase):
 
         super(ZenPack, self).remove(app, leaveObjects=leaveObjects)
 
+    def manage_exportPack(self, *args, **kwargs):
+        # In order to control which objects are exported, we wrap the entire
+        # zenpack object, and the zenpackable objects it contains, in proxy
+        # objects, which allow us to override their behavior without disrupting
+        # the original objects.
 
-class ModelBase(object):
+        class FilteredZenPackable(zope.proxy.ProxyBase):
+            @zope.proxy.non_overridable
+            def objectValues(self):
+                # proxy the remote objects on ToManyContRelationships
+                return [FilteredZenPackable(x) for x in self._objects.values()]
+
+            @zope.proxy.non_overridable
+            def exportXmlRelationships(self, ofile, ignorerels=[]):
+                for rel in self.getRelationships():
+                    if rel.id in ignorerels:
+                        continue
+                    FilteredZenPackable(rel).exportXml(ofile, ignorerels)
+
+            @zope.proxy.non_overridable
+            def exportXml(self, *args, **kwargs):
+                original = zope.proxy.getProxiedObject(self).__class__.exportXml
+                path = '/'.join(self.getPrimaryPath())
+
+                if getattr(self, 'zpl_managed', False):
+                    LOG.info("Excluding %s from export (ZPL-managed object)" % path)
+                    return
+
+                original(self, *args, **kwargs)
+
+        class FilteredZenPack(zope.proxy.ProxyBase):
+            @zope.proxy.non_overridable
+            def packables(self):
+                packables = zope.proxy.getProxiedObject(self).packables()
+                return [FilteredZenPackable(x) for x in packables]
+
+        ZenPackBase.manage_exportPack(FilteredZenPack(self), args, kwargs)
+
+
+class CatalogBase(object):
+    """Base class that implements cataloging a property"""
+
+    # By Default there is no default catalog created.
+    _catalogs = {}
+
+    def search(self, name, *args, **kwargs):
+        """
+        Return iterable of matching brains in named catalog.
+        'name' is the catalog name (typically the name of a class)
+        """
+        return catalog_search(self, name, *args, **kwargs)
+
+    @classmethod
+    def class_search(cls, dmd, name, *args, **kwargs):
+        """
+        Return iterable of matching brains in named catalog.
+        'name' is the catalog name (typically the name of a class)
+        """
+
+        name = cls.__module__.replace('.', '_')
+        return catalog_search(dmd.Devices, name, *args, **kwargs)
+
+    @classmethod
+    def get_catalog_name(cls, name, scope):
+        if scope == 'device':
+            return '{}Search'.format(name)
+        else:
+            name = cls.__module__.replace('.', '_')
+            return '{}Search'.format(name)
+
+    @classmethod
+    def class_get_catalog(cls, dmd, name, scope, create=True):
+        """Return catalog by name."""
+        spec = cls._get_catalog_spec(name)
+        if not spec:
+            return
+
+        if scope == 'device':
+            raise ValueError("device scoped catalogs are only available from device or component objects, not classes")
+        else:
+            try:
+                return getattr(dmd.Devices, cls.get_catalog_name(name, scope))
+            except AttributeError:
+                if create:
+                    return cls._class_create_catalog(dmd, name, 'global')
+        return
+
+    def get_catalog(self, name, scope, create=True):
+        """Return catalog by name."""
+
+        spec = self._get_catalog_spec(name)
+        if not spec:
+            return
+
+        if scope == 'device':
+            try:
+                return getattr(self.device(), self.get_catalog_name(name, scope))
+            except AttributeError:
+                if create:
+                    return self._create_catalog(name, 'device')
+        else:
+            try:
+                return getattr(self.dmd.Devices, self.get_catalog_name(name, scope))
+            except AttributeError:
+                if create:
+                    return self._create_catalog(name, 'global')
+        return
+
+    @classmethod
+    def get_catalog_scopes(cls, name):
+        """Return catalog scopes by name."""
+        spec = cls._get_catalog_spec(name)
+        if not spec:
+            []
+
+        scopes = [spec['indexes'][x].get('scope', 'device') for x in spec['indexes']]
+        if 'both' in scopes:
+            scopes = [x for x in scopes if x != 'both']
+            scopes.append('device')
+            scopes.append('global')
+        return set(scopes)
+
+    @classmethod
+    def class_get_catalogs(cls, dmd, whiteList=None):
+        """Return all catalogs for this class."""
+
+        catalogs = []
+        for name in cls._catalogs:
+            for scope in cls.get_catalog_scopes(name):
+                if scope == 'device':
+                    # device scoped catalogs are not available at the class level
+                    continue
+
+                if not whiteList:
+                    catalogs.append(cls.class_get_catalog(dmd, name, scope))
+                else:
+                    if scope in whiteList:
+                        catalogs.append(cls.class_get_catalog(dmd, name, scope, create=False))
+        return catalogs
+
+    def get_catalogs(self, whiteList=None):
+        """Return all catalogs for this class."""
+        catalogs = []
+        for name in self._catalogs:
+            for scope in self.get_catalog_scopes(name):
+                if not whiteList:
+                    catalogs.append(self.get_catalog(name, scope))
+                else:
+                    if scope in whiteList:
+                        catalogs.append(self.get_catalog(name, scope, create=False))
+        return catalogs
+
+    @classmethod
+    def _get_catalog_spec(cls, name):
+        if not hasattr(cls, '_catalogs'):
+            LOG.error("%s has no catalogs defined", cls)
+            return
+
+        spec = cls._catalogs.get(name)
+        if not spec:
+            LOG.error("%s catalog definition is missing", name)
+            return
+
+        if not isinstance(spec, dict):
+            LOG.error("%s catalog definition is not a dict", name)
+            return
+
+        if not spec.get('indexes'):
+            LOG.error("%s catalog definition has no indexes", name)
+            return
+
+        return spec
+
+    @classmethod
+    def _class_create_catalog(cls, dmd, name, scope='device'):
+        """Create and return catalog defined by name."""
+        from Products.ZCatalog.ZCatalog import manage_addZCatalog
+
+        spec = cls._get_catalog_spec(name)
+        if not spec:
+            return
+
+        if scope == 'device':
+            raise ValueError("device scoped catalogs may only be created from the device or component object, not classes")
+        else:
+            catalog_name = cls.get_catalog_name(name, scope)
+            deviceClass = dmd.Devices
+
+            if not hasattr(deviceClass, catalog_name):
+                manage_addZCatalog(deviceClass, catalog_name, catalog_name)
+
+            zcatalog = deviceClass._getOb(catalog_name)
+
+        cls._create_indexes(zcatalog, spec)
+        return zcatalog
+
+    def _create_catalog(self, name, scope='device'):
+        """Create and return catalog defined by name."""
+        from Products.ZCatalog.ZCatalog import manage_addZCatalog
+
+        spec = self._get_catalog_spec(name)
+        if not spec:
+            return
+
+        if scope == 'device':
+            catalog_name = self.get_catalog_name(name, scope)
+
+            device = self.device()
+            if not hasattr(device, catalog_name):
+                manage_addZCatalog(device, catalog_name, catalog_name)
+
+            zcatalog = device._getOb(catalog_name)
+        else:
+            catalog_name = self.get_catalog_name(name, scope)
+            deviceClass = self.dmd.Devices
+
+            if not hasattr(deviceClass, catalog_name):
+                manage_addZCatalog(deviceClass, catalog_name, catalog_name)
+
+            zcatalog = deviceClass._getOb(catalog_name)
+
+        self._create_indexes(zcatalog, spec)
+        return zcatalog
+
+    @classmethod
+    def _create_indexes(cls, zcatalog, spec):
+        from Products.ZCatalog.Catalog import CatalogError
+        from Products.Zuul.interfaces import ICatalogTool
+        catalog = zcatalog._catalog
+
+        classname = spec.get(
+            'class', 'Products.ZenModel.DeviceComponent.DeviceComponent')
+
+        for propname, propdata in spec['indexes'].items():
+            index_type = propdata.get('type')
+            if not index_type:
+                LOG.error("%s index has no type", propname)
+                return
+
+            index_factory = {
+                'field': makeFieldIndex,
+                'keyword': makeKeywordIndex,
+                }.get(index_type.lower())
+
+            if not index_factory:
+                LOG.error("%s is not a valid index type", index_type)
+                return
+
+            try:
+                catalog.addIndex(propname, index_factory(propname))
+                catalog.addColumn(propname)
+            except CatalogError:
+                # Index already exists.
+                pass
+            else:
+                # the device if it's a device scoped catalog, or dmd.Devices
+                # if it's a global scoped catalog.
+                context = zcatalog.getParentNode()
+
+                # reindex all objects of this type so they are added to the
+                # catalog.
+                results = ICatalogTool(context).search(types=(classname,))
+                for result in results:
+                    if hasattr(result.getObject(), 'index_object'):
+                        result.getObject().index_object()
+
+    def index_object(self, idxs=None):
+        """Index in all configured catalogs."""
+        for catalog in self.get_catalogs():
+            if catalog:
+                catalog.catalog_object(self, self.getPrimaryId())
+
+    def unindex_object(self):
+        """Unindex from all configured catalogs."""
+        for catalog in self.get_catalogs():
+            if catalog:
+                catalog.uncatalog_object(self.getPrimaryId())
+
+
+class ModelBase(CatalogBase):
 
     """Base class for ZenPack model classes."""
 
@@ -192,9 +599,6 @@ class DeviceBase(ModelBase):
     types.
 
     """
-
-    def search(self, name, *args, **kwargs):
-        return catalog_search(self, name, *args, **kwargs)
 
 
 class ComponentBase(ModelBase):
@@ -241,156 +645,6 @@ class ComponentBase(ModelBase):
                 # (Products.ZenMessaging.queuemessaging.adapters) implementation
                 # expects device() to return None, not to throw an exception.
                 return None
-
-    def get_catalog_name(self, name, scope):
-        if scope == 'device':
-            return '{}Search'.format(name)
-        else:
-            name = self.__module__.replace('.', '_')
-            return '{}Search'.format(name)
-
-    def get_catalog(self, name, scope, create=True):
-        """Return catalog by name."""
-        spec = self._get_catalog_spec(name)
-        if not spec:
-            return
-
-        if scope == 'device':
-            try:
-                return getattr(self.device(), self.get_catalog_name(name, scope))
-            except AttributeError:
-                if create:
-                    return self._create_catalog(name, 'device')
-        else:
-            try:
-                return getattr(self.dmd.Device, self.get_catalog_name(name, scope))
-            except AttributeError:
-                if create:
-                    return self._create_catalog(name, 'global')
-        return
-
-    def get_catalog_scopes(self, name):
-        """Return catalog scopes by name."""
-        spec = self._get_catalog_spec(name)
-        if not spec:
-            []
-
-        scopes = [spec['indexes'][x].get('scope', 'device') for x in spec['indexes']]
-        if 'both' in scopes:
-            scopes = [x for x in scopes if x != 'both']
-            scopes.append('device')
-            scopes.append('global')
-        return set(scopes)
-
-    def get_catalogs(self, whiteList=None):
-        """Return all catalogs for this class."""
-        catalogs = []
-        for name in self._catalogs:
-            for scope in self.get_catalog_scopes(name):
-                if not whiteList:
-                    catalogs.append(self.get_catalog(name, scope))
-                else:
-                    if scope in whiteList:
-                        catalogs.append(self.get_catalog(name, scope, create=False))
-        return catalogs
-
-    def _get_catalog_spec(self, name):
-        if not hasattr(self, '_catalogs'):
-            LOG.error("%s has no catalogs defined", self.id)
-            return
-
-        spec = self._catalogs.get(name)
-        if not spec:
-            LOG.error("%s catalog definition is missing", name)
-            return
-
-        if not isinstance(spec, dict):
-            LOG.error("%s catalog definition is not a dict", name)
-            return
-
-        if not spec.get('indexes'):
-            LOG.error("%s catalog definition has no indexes", name)
-            return
-
-        return spec
-
-    def _create_catalog(self, name, scope='device'):
-        """Create and return catalog defined by name."""
-        from Products.ZCatalog.Catalog import CatalogError
-        from Products.ZCatalog.ZCatalog import manage_addZCatalog
-
-        from Products.Zuul.interfaces import ICatalogTool
-
-        spec = self._get_catalog_spec(name)
-        if not spec:
-            return
-
-        if scope == 'device':
-            catalog_name = self.get_catalog_name(name, scope)
-
-            device = self.device()
-            if not hasattr(device, catalog_name):
-                manage_addZCatalog(device, catalog_name, catalog_name)
-
-            zcatalog = device._getOb(catalog_name)
-        else:
-            catalog_name = self.get_catalog_name(name, scope)
-            deviceClass = self.dmd.Devices
-
-            if not hasattr(deviceClass, catalog_name):
-                manage_addZCatalog(deviceClass, catalog_name, catalog_name)
-
-            zcatalog = deviceClass._getOb(catalog_name)
-
-        catalog = zcatalog._catalog
-
-        classname = spec.get(
-            'class', 'Products.ZenModel.DeviceComponent.DeviceComponent')
-
-        for propname, propdata in spec['indexes'].items():
-            index_type = propdata.get('type')
-            if not index_type:
-                LOG.error("%s index has no type", propname)
-                return
-
-            index_factory = {
-                'field': makeFieldIndex,
-                'keyword': makeKeywordIndex,
-                }.get(index_type.lower())
-
-            if not index_factory:
-                LOG.error("%s is not a valid index type", index_type)
-                return
-
-            try:
-                catalog.addIndex(propname, index_factory(propname))
-                catalog.addColumn(propname)
-            except CatalogError:
-                # Index already exists.
-                pass
-            else:
-                if scope == 'device':
-                    results = ICatalogTool(device).search(types=(classname,))
-                else:
-                    results = ICatalogTool(deviceClass).search(types=(classname,))
-
-                for result in results:
-                    if hasattr(result.getObject(), 'index_object'):
-                        result.getObject().index_object()
-
-        return zcatalog
-
-    def index_object(self, idxs=None):
-        """Index in all configured catalogs."""
-        for catalog in self.get_catalogs():
-            if catalog:
-                catalog.catalog_object(self, self.getPrimaryId())
-
-    def unindex_object(self):
-        """Unindex from all configured catalogs."""
-        for catalog in self.get_catalogs():
-            if catalog:
-                catalog.uncatalog_object(self.getPrimaryId())
 
     def getIdForRelationship(self, relationship):
         """Return id in ToOne relationship or None."""
@@ -730,7 +984,25 @@ def DeviceTypeFactory(name, bases):
     """Return a "ZenPackified" device class given bases tuple."""
     all_bases = (DeviceBase,) + bases
 
-    return type(name, all_bases, {})
+    def index_object(self, idxs=None, noips=False):
+        for base in all_bases:
+            if hasattr(base, 'index_object'):
+                try:
+                    base.index_object(self, idxs=idxs, noips=noips)
+                except TypeError:
+                    base.index_object(self)
+
+    def unindex_object(self):
+        for base in all_bases:
+            if hasattr(base, 'unindex_object'):
+                base.unindex_object(self)
+
+    attributes = {
+        'index_object': index_object,
+        'unindex_object': unindex_object,
+        }
+
+    return type(name, all_bases, attributes)
 
 
 Device = DeviceTypeFactory(
@@ -818,10 +1090,36 @@ FACET_BLACKLIST = (
 
 
 class Spec(object):
-
     """Abstract base class for specifications."""
 
-    def specs_from_param(self, spec_type, param_name, param_dict):
+    source_location = None
+    speclog = None
+
+    def __init__(self, _source_location=None):
+
+        class LogAdapter(logging.LoggerAdapter):
+            def process(self, msg, kwargs):
+                return '%s %s' % (self.extra['context'], msg), kwargs
+
+        self.source_location = _source_location
+        self.speclog = LogAdapter(LOG, {'context': self})
+
+    def __str__(self):
+        parts = []
+
+        if self.source_location:
+            parts.append(self.source_location)
+        if hasattr(self, 'name') and self.name:
+            if callable(self.name):
+                parts.append(self.name())
+            else:
+                parts.append(self.name)
+        else:
+            parts.append(super(Spec, self).__str__())
+
+        return "%s(%s)" % (self.__class__.__name__, ' - '.join(parts))
+
+    def specs_from_param(self, spec_type, param_name, param_dict, apply_defaults=True, leave_defaults=False):
         """Return a normalized dictionary of spec_type instances."""
         if param_dict is None:
             param_dict = {}
@@ -832,11 +1130,102 @@ class Spec(object):
                     '{}.{}'.format(spec_type.__name__, param_name),
                     type(param_dict).__name__))
         else:
-            apply_defaults(param_dict)
+            if apply_defaults:
+                _apply_defaults = globals()['apply_defaults']
+                _apply_defaults(param_dict, leave_defaults=leave_defaults)
 
-        return {
-            k: spec_type(self, k, **(fix_kwargs(v)))
-            for k, v in param_dict.iteritems()}
+        specs = OrderedDict()
+        for k, v in param_dict.iteritems():
+            specs[k] = spec_type(self, k, **(fix_kwargs(v)))
+
+        return specs
+
+    @classmethod
+    def init_params(cls):
+        """Return a dictionary describing the parameters accepted by __init__"""
+
+        argspec = inspect.getargspec(cls.__init__)
+        if argspec.defaults:
+            defaults = dict(zip(argspec.args[-len(argspec.defaults):], argspec.defaults))
+        else:
+            defaults = {}
+
+        params = OrderedDict()
+        for op, param, value in re.findall(
+            "^\s*:(type|param|yaml_param|yaml_block_style)\s+(\S+):\s*(.*)$",
+            cls.__init__.__doc__,
+            flags=re.MULTILINE
+        ):
+            if param not in params:
+                params[param] = {'description': None,
+                                 'type': None,
+                                 'yaml_param': param,
+                                 'yaml_block_style': False}
+                if param in defaults:
+                    params[param]['default'] = defaults[param]
+
+            if op == 'type':
+                params[param]['type'] = value
+
+                if 'default' not in params[param] or \
+                   params[param]['default'] is None:
+                    # For certain types, we know that None doesn't really mean
+                    # None.
+                    if params[param]['type'].startswith("dict"):
+                        params[param]['default'] = {}
+                    elif params[param]['type'].startswith("list"):
+                        params[param]['default'] = []
+                    elif params[param]['type'].startswith("SpecsParameter("):
+                        params[param]['default'] = {}
+            elif op == 'yaml_param':
+                params[param]['yaml_param'] = value
+            elif op == 'yaml_block_style':
+                params[param]['yaml_block_style'] = bool(value)
+            else:
+                params[param]['description'] = value
+
+        return params
+
+    def __eq__(self, other, ignore_params=[]):
+        if type(self) != type(other):
+            return False
+
+        params = self.init_params()
+        for p in params:
+            if p in ignore_params:
+                continue
+
+            default_p = '_%s_defaultvalue' % p
+            self_val = getattr(self, p)
+            other_val = getattr(other, p)
+            self_val_or_default = self_val or getattr(self, default_p, None)
+            other_val_or_default = other_val or getattr(other, default_p, None)
+
+            # Order doesn't matter, for purposes of comparison.  Cast it away.
+            if isinstance(self_val, collections.OrderedDict):
+                self_val = dict(self_val)
+
+            if isinstance(other_val, collections.OrderedDict):
+                other_val = dict(other_val)
+
+            if isinstance(self_val_or_default, collections.OrderedDict):
+                self_val_or_default = dict(self_val_or_default)
+
+            if isinstance(other_val_or_default, collections.OrderedDict):
+                other_val_or_default = dict(other_val_or_default)
+
+            if self_val == other_val:
+                continue
+
+            if self_val_or_default != other_val_or_default:
+                LOG.debug("Comparing %s to %s, parameter %s does not match (%s != %s)",
+                          self, other, p, self_val_or_default, other_val_or_default)
+                return False
+
+        return True
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
 
 class ZenPackSpec(Spec):
@@ -892,8 +1281,34 @@ class ZenPackSpec(Spec):
             zProperties=None,
             classes=None,
             class_relationships=None,
-            device_classes=None):
-        """TODO."""
+            device_classes=None,
+            _source_location=None):
+        """
+            Create a ZenPack Specification
+
+            :param name: Full name of the ZenPack (ZenPacks.zenoss.MyZenPack)
+            :type name: str
+            :param zProperties: zProperty Specs
+            :type zProperties: SpecsParameter(ZPropertySpec)
+            :param class_relationships: Class Relationship Specs
+            :type class_relationships: list(RelationshipSchemaSpec)
+            :yaml_block_style class_relationships: True
+            :param device_classes: DeviceClass Specs
+            :type device_classes: SpecsParameter(DeviceClassSpec)
+            :param classes: Class Specs
+            :type classes: SpecsParameter(ClassSpec)
+        """
+        super(ZenPackSpec, self).__init__(_source_location=_source_location)
+
+        # The parameters from which this zenpackspec was originally
+        # instantiated.
+        self.specparams = ZenPackSpecParams(
+            name,
+            zProperties=zProperties,
+            classes=classes,
+            class_relationships=class_relationships,
+            device_classes=device_classes)
+
         self.name = name
         self.NEW_COMPONENT_TYPES = []
         self.NEW_RELATIONS = collections.defaultdict(list)
@@ -902,38 +1317,63 @@ class ZenPackSpec(Spec):
         self.zProperties = self.specs_from_param(
             ZPropertySpec, 'zProperties', zProperties)
 
+        # Class Relationship Schema
+        self.class_relationships = []
+        if class_relationships:
+            if not isinstance(class_relationships, list):
+                raise ValueError("class_relationships must be a list, not a %s" % type(class_relationships))
+
+            for rel in class_relationships:
+                self.class_relationships.append(RelationshipSchemaSpec(self, **rel))
+
         # Classes
-        if classes:
-            for classname, classdata in classes.items():
-                if 'relationships' not in classdata:
-                    classdata['relationships'] = {}
-
-                # Merge class_relationships.
-                if class_relationships:
-                    update(
-                        classdata['relationships'],
-                        class_relationships.get(classname, {}))
-
         self.classes = self.specs_from_param(ClassSpec, 'classes', classes)
         self.imported_classes = {}
 
-        for classname, classdata in classes.iteritems():
-            relationships = classdata['relationships']
-            for relationship in relationships:
-                try:
-                    if 'schema' in relationships[relationship]:
-                        className = relationships[relationship]['schema'].remoteClass
-                        if '.' in className and className.split('.')[-1] not in self.classes:
-                            module = ".".join(className.split('.')[0:-1])
-                            kls = importClass(module)
-                            self.imported_classes[className] = kls
-                    else:
-                        LOG.error('%s: relationship %s has no schema' % (self.name, relationship))
-                except ImportError:
-                    pass
+        # Import any external classes referred to in the schema
+        for rel in self.class_relationships:
+            for relschema in (rel.left_schema, rel.right_schema):
+                className = relschema.remoteClass
+                if '.' in className and className.split('.')[-1] not in self.classes:
+                    module = ".".join(className.split('.')[0:-1])
+                    try:
+                        kls = importClass(module)
+                        self.imported_classes[className] = kls
+                    except ImportError:
+                        pass
+
+        # Class Relationships
+        if classes:
+            for classname, classdata in classes.iteritems():
+                if 'relationships' not in classdata:
+                    classdata['relationships'] = []
+
+                relationships = classdata['relationships']
+                for relationship in relationships:
+                        # We do not allow the schema to be specified directly.
+                        if 'schema' in relationships[relationship]:
+                            raise ValueError("Class '%s': 'schema' may not be defined or modified in an individual class's relationship.  Use the zenpack's class_relationships instead." % classname)
 
         for class_ in self.classes.values():
-            for relationship in class_.relationships.values():
+
+            # Link the appropriate predefined (class_relationships) schema into place on this class's relationships list.
+            for rel in self.class_relationships:
+                if class_.name == rel.left_class:
+                    if rel.left_relname not in class_.relationships:
+                        class_.relationships[rel.left_relname] = ClassRelationshipSpec(class_, rel.left_relname)
+                    class_.relationships[rel.left_relname].schema = rel.left_schema
+
+                if class_.name == rel.right_class:
+                    if rel.right_relname not in class_.relationships:
+                        class_.relationships[rel.right_relname] = ClassRelationshipSpec(class_, rel.right_relname)
+                    class_.relationships[rel.right_relname].schema = rel.right_schema
+
+            # Plumb _relations
+            for relname, relationship in class_.relationships.iteritems():
+                if not relationship.schema:
+                    LOG.error("Class '%s': no relationship schema has been defined for relationship '%s'" % (class_.name, relname))
+                    continue
+
                 if relationship.schema.remoteClass in self.imported_classes.keys():
                     remoteClass = relationship.schema.remoteClass  # Products.ZenModel.Device.Device
                     relname = relationship.schema.remoteName  # coolingFans
@@ -1003,6 +1443,9 @@ class ZenPackSpec(Spec):
             for x in self.classes.itervalues()}
 
         def getComponentTree(self, uid=None, id=None, **kwargs):
+            # We do our own sorting.
+            kwargs.pop('sorting_dict', None)
+
             # original is injected by monkeypatch.
             result = original(self, uid=uid, id=id, **kwargs)
 
@@ -1185,6 +1628,7 @@ class ZenPackSpec(Spec):
             }
 
         attributes['device_classes'] = self.device_classes
+        attributes['_v_specparams'] = self.specparams
         attributes['NEW_COMPONENT_TYPES'] = self.NEW_COMPONENT_TYPES
         attributes['NEW_RELATIONS'] = self.NEW_RELATIONS
         attributes['GLOBAL_CATALOGS'] = []
@@ -1223,8 +1667,29 @@ class DeviceClassSpec(Spec):
 
     """Initialize a DeviceClass via Python at install time."""
 
-    def __init__(self, zenpack_spec, path, create=True, zProperties=None,
-                 remove=False):
+    def __init__(
+            self,
+            zenpack_spec,
+            path,
+            create=True,
+            zProperties=None,
+            remove=False,
+            templates=None,
+            _source_location=None):
+        """
+            Create a DeviceClass Specification
+
+            :param create: Create the DeviceClass with ZenPack installation, if it does not exist?
+            :type create: bool
+            :param remove: Remove the DeviceClass when ZenPack is removed?
+            :type remove: bool
+            :param zProperties: zProperty values to set upon this DeviceClass
+            :type zProperties: dict(str)
+            :param templates: TODO
+            :type templates: SpecsParameter(RRDTemplateSpec)
+        """
+        super(DeviceClassSpec, self).__init__(_source_location=_source_location)
+
         self.zenpack_spec = zenpack_spec
         self.path = path.lstrip('/')
         self.create = bool(create)
@@ -1234,6 +1699,9 @@ class DeviceClassSpec(Spec):
             self.zProperties = {}
         else:
             self.zProperties = zProperties
+
+        self.templates = self.specs_from_param(
+            RRDTemplateSpec, 'templates', templates)
 
 
 class ZPropertySpec(Spec):
@@ -1247,8 +1715,21 @@ class ZPropertySpec(Spec):
             type_='string',
             default=None,
             category=None,
+            _source_location=None
             ):
-        """TODO."""
+        """
+            Create a ZProperty Specification
+
+            :param type_: ZProperty Type (boolean, int, float, string, password, or lines)
+            :yaml_param type_: type
+            :type type_: str
+            :param default: Default Value
+            :type default: ZPropertyDefaultValue
+            :param category: ZProperty Category.  This is used for display/sorting purposes.
+            :type category: str
+        """
+        super(ZPropertySpec, self).__init__(_source_location=_source_location)
+
         self.zenpack_spec = zenpack_spec
         self.name = name
         self.type_ = type_
@@ -1277,7 +1758,50 @@ class ZPropertySpec(Spec):
 
 class ClassSpec(Spec):
 
-    """TODO."""
+    """TODO.
+
+
+    'impacts' and 'impacted_by' will cause impact adapters to be registered, so the
+    relationship is shown in impact, but not in dynamicview. If you would like to
+    use dynamicview, you should change:
+
+        'MyComponent': {
+            'impacted_by': ['someRelationship']
+            'impacts': ['someThingElse']
+        }
+
+    To:
+
+        'MyComponent': {
+            'dynamicview_views': ['service_view'],
+            'dynamicview_relations': {
+                'impacted_by': ['someRelationship']
+                'impacts': ['someThingElse']
+            }
+        }
+
+    This will cause your impact relationship to show in both dynamicview and impact.
+
+    There is one important exception though.  Until ZEN-14579 is fixed, if your
+    relationship/method returns an object that is not itself part of service_view,
+    the dynamicview -> impact export will not include that object.
+
+    To fix this, you must use impacts/impact_by for such relationships:
+
+        'MyComponent': {
+            'dynamicview_views': ['service_view'],
+            'dynamicview_relations': {
+                'impacted_by': ['someRelationship']
+                'impacts': ['someThingElse']
+            }
+            impacted_by': ['someRelationToANonServiceViewThing']
+        }
+
+    If you need the object to appear in both DV and impact, include it in both lists.  If
+    it would already be exported to impact, because it is in service_view, only use
+    dynamicview_relations -> impacts/impacted_by, to avoid slowing down performance due
+    to double adapters doing the same thing.
+    """
 
     def __init__(
             self,
@@ -1303,9 +1827,68 @@ class ClassSpec(Spec):
             filter_display=True,
             dynamicview_views=None,
             dynamicview_group=None,
-            dynamicview_relations=None            
+            dynamicview_relations=None,
+            _source_location=None
             ):
-        """TODO."""
+        """
+            Create a Class Specification
+
+            :param base: Base Class (defaults to Component)
+            :type base: list(class)
+            :param meta_type: meta_type (defaults to class name)
+            :type meta_type: str
+            :param label: Label to use when describing this class in the
+                   UI.  If not specified, the default is to use the class name.
+            :type label: str
+            :param plural_label: Plural form of the label (default is to use the
+                  "pluralize" function on the label)
+            :type plural_label: str
+            :param short_label: If specified, this is a shorter version of the
+                   label.
+            :type short_label: str
+            :param plural_short_label:  If specified, this is a shorter version
+                   of the short_label.
+            :type plural_short_label: str
+            :param auto_expand_column: The name of the column to expand to fill
+                   available space in the grid display.  Defaults to the first
+                   column ('name').
+            :type auto_expand_column: str
+            :param label_width: Optionally overrides ZPL's label width
+                   calculation with a higher value.
+            :type label_width: int
+            :param plural_label_width: Optionally overrides ZPL's label width
+                   calculation with a higher value.
+            :type plural_label_width: int
+            :param content_width: Optionally overrides ZPL's content width
+                   calculation with a higher value.
+            :type content_width: int
+            :param icon: Filename (of a file within the zenpack's 'resources/icon'
+                   directory).  Default is the {class name}.png
+            :type icon: str
+            :param order: TODO
+            :type order: float
+            :param properties: TODO
+            :type properties: SpecsParameter(ClassPropertySpec)
+            :param relationships: TODO
+            :type relationships: SpecsParameter(ClassRelationshipSpec)
+            :param impacts: TODO
+            :type impacts: list(str)
+            :param impacted_by: TODO
+            :type impacted_by: list(str)
+            :param monitoring_templates: TODO
+            :type monitoring_templates: list(str)
+            :param filter_display: TODO
+            :type filter_display: bool
+            :param dynamicview_views: TODO
+            :type dynamicview_views: list(str)
+            :param dynamicview_group: TODO
+            :type dynamicview_group: str
+            :param dynamicview_relations: TODO
+            :type dynamicview_relations: dict
+            # TODO: should make this a spec class, not a plain dict.
+        """
+        super(ClassSpec, self).__init__(_source_location=_source_location)
+
         self.zenpack = zenpack
         self.name = name
 
@@ -1316,6 +1899,7 @@ class ClassSpec(Spec):
             bases = (base,)
 
         self.bases = bases
+        self.base = self.bases
 
         self.meta_type = meta_type or self.name
         self.label = label or self.meta_type
@@ -1413,6 +1997,8 @@ class ClassSpec(Spec):
         for base in self.bases:
             if isinstance(base, type):
                 resolved_bases.append(base)
+            elif base not in self.zenpack.classes:
+                raise ValueError("Unrecognized base class name '%s'" % base)
             else:
                 base_spec = self.zenpack.classes[base]
                 resolved_bases.append(base_spec.model_class)
@@ -1545,10 +2131,12 @@ class ClassSpec(Spec):
 
         # Add local properties and catalog indexes.
         for name, spec in self.properties.iteritems():
-            if not spec.datapoint:
+            if spec.api_backendtype == 'property':
+                # for normal properties (not methods or datapoints, apply default value)
                 attributes[name] = spec.default  # defaults to None
-            else:
-                # Lookup the datapoint and get the value from rrd
+
+            elif spec.datapoint:
+                # Provide a method to look up the datapoint and get the value from rrd
                 def datapoint_method(self, default=spec.datapoint_default, cached=spec.datapoint_cached, datapoint=spec.datapoint):
                     if cached:
                         r = self.cacheRRDValue(datapoint, default=default)
@@ -1561,6 +2149,15 @@ class ClassSpec(Spec):
                     return default
 
                 attributes[name] = datapoint_method
+
+            else:
+                # api backendtype is 'method', and it is assumed that this
+                # pre-existing method is being inherited from a parent class
+                # or will be provided by the developer.  In any case, we want
+                # to omit it from the generated schema class, so that we don't
+                # shadow an existing method with a property with a default
+                # value of 'None.'
+                pass
 
             if spec.ofs_dict:
                 properties.append(spec.ofs_dict)
@@ -1703,10 +2300,10 @@ class ClassSpec(Spec):
 
         for spec in self.containing_components:
             attr = None
-            for rel,spec in self.relationships.items():
-               if spec.remote_classname == spec.name:
-                   attr = rel
-                   continue
+            for rel, spec in self.relationships.items():
+                if spec.remote_classname == spec.name:
+                    attr = rel
+                    continue
 
             if not attr:
                 attr = relname_from_classname(spec.name)
@@ -2025,9 +2622,7 @@ class ClassSpec(Spec):
                 self.zenpack.name, self.name, width)
 
         return (
-            "Ext.define('Zenoss.component.{meta_type}Panel', {{\n"
-            "    alias: ['widget.{meta_type}Panel'],\n"
-            "    extend: 'Zenoss.component.ZPLComponentGridPanel',\n"
+            "ZC.{meta_type}Panel = Ext.extend(ZC.ZPLComponentGridPanel, {{"
             "    constructor: function(config) {{\n"
             "        config = Ext.applyIf(config||{{}}, {{\n"
             "            componentType: '{meta_type}',\n"
@@ -2038,6 +2633,8 @@ class ClassSpec(Spec):
             "        ZC.{meta_type}Panel.superclass.constructor.call(this, config);\n"
             "    }}\n"
             "}});\n"
+            "\n"
+            "Ext.reg('{meta_type}Panel', ZC.{meta_type}Panel);\n"
             .format(
                 meta_type=self.meta_type,
                 auto_expand_column=self.auto_expand_column,
@@ -2147,9 +2744,67 @@ class ClassPropertySpec(Spec):
             datapoint=None,
             datapoint_default=None,
             datapoint_cached=True,
-            index_scope='device'
+            index_scope='device',
+            _source_location=None
             ):
-        """TODO."""
+        """
+        Create a Class Property Specification
+
+            :param type_: Property Data Type (TODO (enum))
+            :yaml_param type_: type
+            :type type_: str
+            :param label: Label to use when describing this property in the
+                   UI.  If not specified, the default is to use the name of the
+                   property.
+            :type label: str
+            :param short_label: If specified, this is a shorter version of the
+                   label, used, for example, in grid table headings.
+            :type short_label: str
+            :param index_type: TODO (enum)
+            :type index_type: str
+            :param label_width: Optionally overrides ZPL's label width
+                   calculation with a higher value.
+            :type label_width: int
+            :param default: Default Value
+            :type default: str
+            :param content_width: Optionally overrides ZPL's content width
+                   calculation with a higher value.
+            :type content_width: int
+            :param display: If this is set to False, this property will be
+                   hidden from the UI completely.
+            :type display: bool
+            :param details_display: If this is set to False, this property
+                   will be hidden from the "details" portion of the UI.
+            :type details_display: bool
+            :param grid_display: If this is set to False, this property
+                   will be hidden from the "grid" portion of the UI.
+            :type grid_display: bool
+            :param renderer: Optional name of a javascript renderer to apply
+                   to this property, rather than passing the text through
+                   unformatted.
+            :type renderer: str
+            :param order: TODO
+            :type order: float
+            :param editable: TODO
+            :type editable: bool
+            :param api_only: TODO
+            :type api_only: bool
+            :param api_backendtype: TODO (enum)
+            :type api_backendtype: str
+            :param enum: TODO
+            :type enum: list(str)
+            :param datapoint: TODO (validate datapoint name)
+            :type datapoint: str
+            :param datapoint_default: TODO  - DEPRECATE (use default instead)
+            :type datapoint_default: str
+            :param datapoint_cached: TODO
+            :type datapoint_cached: bool
+            :param index_scope: TODO (enum)
+            :type index_scope: str
+
+        """
+        super(ClassPropertySpec, self).__init__(_source_location=_source_location)
+
         self.class_spec = class_spec
         self.name = name
         self.default = default
@@ -2305,6 +2960,141 @@ class ClassPropertySpec(Spec):
             ]
 
 
+class RelationshipSchemaSpec(Spec):
+    """TODO."""
+
+    def __init__(
+        self,
+        zenpack_spec=None,
+        left_class=None,
+        left_relname=None,
+        left_type=None,
+        right_type=None,
+        right_class=None,
+        right_relname=None,
+        _source_location=None
+    ):
+        """
+            Create a Relationship Schema specification.  This describes both sides
+            of a relationship (left and right).
+
+            :param left_class: TODO
+            :type left_class: class
+            :param left_relname: TODO
+            :type left_relname: str
+            :param left_type: TODO
+            :type left_type: reltype
+            :param right_type: TODO
+            :type right_type: reltype
+            :param right_class: TODO
+            :type right_class: class
+            :param right_relname: TODO
+            :type right_relname: str
+
+        """
+        super(RelationshipSchemaSpec, self).__init__(_source_location=_source_location)
+
+        if not RelationshipSchemaSpec.valid_orientation(left_type, right_type):
+            raise ZenSchemaError("In %s(%s) - (%s)%s, invalid orientation- left and right may be reversed." % (left_class, left_relname, right_relname, right_class))
+
+        self.zenpack_spec = zenpack_spec
+        self.left_class = left_class
+        self.left_relname = left_relname
+        self.left_schema = self.make_schema(left_type, right_type, right_class, right_relname)
+        self.right_class = right_class
+        self.right_relname = right_relname
+        self.right_schema = self.make_schema(right_type, left_type, left_class, left_relname)
+
+    @classmethod
+    def valid_orientation(cls, left_type, right_type):
+        # The objects in a relationship are always ordered left to right
+        # so that they can be easily compared and consistently represented.
+        #
+        # The valid combinations are:
+
+        # 1:1 - One To One
+        if right_type == 'ToOne' and left_type == 'ToOne':
+            return True
+
+        # 1:M - One To Many
+        if right_type == 'ToOne' and left_type == 'ToMany':
+            return True
+
+        # 1:MC - One To Many (Containing)
+        if right_type == 'ToOne' and left_type == 'ToManyCont':
+            return True
+
+        # M:M - Many To Many
+        if right_type == 'ToMany' and left_type == 'ToMany':
+            return True
+
+        return False
+
+    _relTypeCardinality = {
+        ToOne: '1',
+        ToMany: 'M',
+        ToManyCont: 'MC'
+    }
+
+    _relTypeClasses = {
+        "ToOne": ToOne,
+        "ToMany": ToMany,
+        "ToManyCont": ToManyCont
+    }
+
+    _relTypeNames = {
+        ToOne: "ToOne",
+        ToMany: "ToMany",
+        ToManyCont: "ToManyCont"
+    }
+
+    @property
+    def left_type(self):
+        return self._relTypeNames.get(self.right_schema.__class__)
+
+    @property
+    def right_type(self):
+        return self._relTypeNames.get(self.left_schema.__class__)
+
+    @property
+    def left_cardinality(self):
+        return self._relTypeCardinality.get(self.right_schema.__class__)
+
+    @property
+    def right_cardinality(self):
+        return self._relTypeCardinality.get(self.left_schema.__class__)
+
+    @property
+    def default_left_relname(self):
+        return relname_from_classname(self.right_class, plural=self.right_cardinality != '1')
+
+    @property
+    def default_right_relname(self):
+        return relname_from_classname(self.left_class, plural=self.left_cardinality != '1')
+
+    @property
+    def cardinality(self):
+        return '%s:%s' % (self.left_cardinality, self.right_cardinality)
+
+    def make_schema(self, relTypeName, remoteRelTypeName, remoteClass, remoteName):
+        relType = self._relTypeClasses.get(relTypeName, None)
+        if not relType:
+            raise ValueError("Unrecognized Relationship Type '%s'" % relTypeName)
+
+        remoteRelType = self._relTypeClasses.get(remoteRelTypeName, None)
+        if not remoteRelType:
+            raise ValueError("Unrecognized Relationship Type '%s'" % remoteRelTypeName)
+
+        schema = relType(remoteRelType, remoteClass, remoteName)
+
+        # Qualify unqualified classnames.
+        if '.' not in schema.remoteClass:
+            schema.remoteClass = '{}.{}'.format(
+                self.zenpack_spec.name, schema.remoteClass)
+
+        return schema
+
+
 class ClassRelationshipSpec(Spec):
 
     """TODO."""
@@ -2324,24 +3114,53 @@ class ClassRelationshipSpec(Spec):
             renderer=None,
             render_with_type=False,
             order=None,
+            _source_location=None
             ):
-        """TODO."""
+        """
+        Create a Class Relationship Specification
+
+            :param label: Label to use when describing this relationship in the
+                   UI.  If not specified, the default is to use the name of the
+                   relationship's target class.
+            :type label: str
+            :param short_label: If specified, this is a shorter version of the
+                   label, used, for example, in grid table headings.
+            :type short_label: str
+            :param label_width: Optionally overrides ZPL's label width
+                   calculation with a higher value.
+            :type label_width: int
+            :param content_width:  Optionally overrides ZPL's content width
+                   calculation with a higher value.
+            :type content_width: int
+            :param display: If this is set to False, this relationship will be
+                   hidden from the UI completely.
+            :type display: bool
+            :param details_display: If this is set to False, this relationship
+                   will be hidden from the "details" portion of the UI.
+            :type details_display: bool
+            :param grid_display:  If this is set to False, this relationship
+                   will be hidden from the "grid" portion of the UI.
+            :type grid_display: bool
+            :param renderer: The default javascript renderer for a relationship
+                   provides a link with the title of the target object,
+                   optionally with the object's type (if render_with_type is
+                   set).  If something more specific is required, a javascript
+                   renderer function name may be provided.
+            :type renderer: str
+            :param render_with_type: Indicates that when an object is linked to,
+                   it should be shown along with its type.  This is particularly
+                   useful when the relationship's target is a base class that
+                   may have several subclasses, such that the base class +
+                   target object is not sufficiently descriptive on its own.
+            :type render_with_type: bool
+            :param order: TODO
+            :type order: float
+
+        """
+        super(ClassRelationshipSpec, self).__init__(_source_location=_source_location)
+
         self.class_ = class_
         self.name = name
-
-        # Schema
-        if not schema:
-            LOG.error(
-                "no schema specified for %s relationship on %s",
-                class_.name, name)
-
-            return
-
-        # Qualify unqualified classnames.
-        if '.' not in schema.remoteClass:
-            schema.remoteClass = '{}.{}'.format(
-                self.class_.zenpack.name, schema.remoteClass)
-
         self.schema = schema
         self.label = label
         self.short_label = short_label
@@ -2406,11 +3225,11 @@ class ClassRelationshipSpec(Spec):
         """Return Info properties dict."""
         properties = {}
 
-        if not isinstance(self.schema, (ToOne)):
+        if isinstance(self.schema, (ToOne)):
+            properties[self.name] = RelationshipInfoProperty(self.name)
+        else:
             relname_count = '{}_count'.format(self.name)
             properties[relname_count] = RelationshipLengthProperty(self.name)
-
-        properties[self.name] = RelationshipInfoProperty(self.name)
 
         return properties
 
@@ -2504,7 +3323,1565 @@ class ClassRelationshipSpec(Spec):
             ]
 
 
+class RRDTemplateSpec(Spec):
+
+    """TODO."""
+
+    def __init__(
+            self,
+            deviceclass_spec,
+            name,
+            description=None,
+            targetPythonClass=None,
+            thresholds=None,
+            datasources=None,
+            graphs=None,
+            _source_location=None
+            ):
+        """
+        Create an RRDTemplate Specification
+
+
+            :param description: TODO
+            :type description: str
+            :param targetPythonClass: TODO
+            :type targetPythonClass: str
+            :param thresholds: TODO
+            :type thresholds: SpecsParameter(RRDThresholdSpec)
+            :param datasources: TODO
+            :type datasources: SpecsParameter(RRDDatasourceSpec)
+            :param graphs: TODO
+            :type graphs: SpecsParameter(GraphDefinitionSpec)
+
+        """
+        super(RRDTemplateSpec, self).__init__(_source_location=_source_location)
+
+        self.deviceclass_spec = deviceclass_spec
+        self.name = name
+        self.description = description
+        self.targetPythonClass = targetPythonClass
+
+        self.thresholds = self.specs_from_param(
+            RRDThresholdSpec, 'thresholds', thresholds)
+
+        self.datasources = self.specs_from_param(
+            RRDDatasourceSpec, 'datasources', datasources)
+
+        self.graphs = self.specs_from_param(
+            GraphDefinitionSpec, 'graphs', graphs)
+
+    def create(self, dmd):
+        device_class = dmd.Devices.createOrganizer(self.deviceclass_spec.path)
+
+        existing_template = device_class.rrdTemplates._getOb(self.name, None)
+        if existing_template:
+            self.speclog.info("replacing template")
+            device_class.rrdTemplates._delObject(self.name)
+
+        device_class.manage_addRRDTemplate(self.name)
+        template = device_class.rrdTemplates._getOb(self.name)
+
+        # Flag this as a ZPL managed object, that is, one that should not be
+        # exported to objects.xml  (contained objects will also be excluded)
+        template.zpl_managed = True
+
+        if not existing_template:
+            self.speclog.info("adding template")
+
+        if self.targetPythonClass is not None:
+            template.targetPythonClass = self.targetPythonClass
+        if self.description is not None:
+            template.description = self.description
+
+        self.speclog.debug("adding {} thresholds".format(len(self.thresholds)))
+        for threshold_id, threshold_spec in self.thresholds.items():
+            threshold_spec.create(self, template)
+
+        self.speclog.debug("adding {} datasources".format(len(self.datasources)))
+        for datasource_id, datasource_spec in self.datasources.items():
+            datasource_spec.create(self, template)
+
+        self.speclog.debug("adding {} graphs".format(len(self.graphs)))
+        for graph_id, graph_spec in self.graphs.items():
+            graph_spec.create(self, template)
+
+
+class RRDThresholdSpec(Spec):
+
+    """TODO."""
+
+    def __init__(
+            self,
+            template_spec,
+            name,
+            type_='MinMaxThreshold',
+            dsnames=None,
+            eventClass=None,
+            severity=None,
+            enabled=None,
+            extra_params=None,
+            _source_location=None
+            ):
+        """
+        Create an RRDThreshold Specification
+
+            :param type_: TODO
+            :type type_: str
+            :yaml_param type_: type
+            :param dsnames: TODO
+            :type dsnames: list(str)
+            :param eventClass: TODO
+            :type eventClass: str
+            :param severity: TODO
+            :type severity: Severity
+            :param enabled: TODO
+            :type enabled: bool
+            :param extra_params: Additional parameters that may be used by subclasses of RRDDatasource
+            :type extra_params: ExtraParams
+
+        """
+        super(RRDThresholdSpec, self).__init__(_source_location=_source_location)
+
+        self.name = name
+        self.template_spec = template_spec
+        self.dsnames = dsnames
+        self.eventClass = eventClass
+        self.severity = severity
+        self.enabled = enabled
+        self.type_ = type_
+        if extra_params is None:
+            self.extra_params = {}
+        else:
+            self.extra_params = extra_params
+
+    def create(self, templatespec, template):
+        if not self.dsnames:
+            raise ValueError("%s: threshold has no dsnames attribute", self)
+
+        # Shorthand for datapoints that have the same name as their datasource.
+        for i, dsname in enumerate(self.dsnames):
+            if '_' not in dsname:
+                self.dsnames[i] = '_'.join((dsname, dsname))
+
+        threshold_types = dict((y, x) for x, y in template.getThresholdClasses())
+        type_ = threshold_types.get(self.type_)
+        if not type_:
+            raise ValueError("'%s' is an invalid threshold type. Valid types: %s" %
+                             (self.type_, ', '.join(threshold_types)))
+
+        threshold = template.manage_addRRDThreshold(self.name, self.type_)
+        self.speclog.debug("adding threshold")
+
+        if self.dsnames is not None:
+            threshold.dsnames = self.dsnames
+        if self.eventClass is not None:
+            threshold.eventClass = self.eventClass
+        if self.severity is not None:
+            threshold.severity = self.severity
+        if self.enabled is not None:
+            threshold.enabled = self.enabled
+        if self.extra_params:
+            for param, value in self.extra_params.iteritems():
+                if param in [x['id'] for x in threshold._properties]:
+                    setattr(threshold, param, value)
+                else:
+                    raise ValueError("%s is not a valid property for threshold of type %s" % (param, type_))
+
+
+class RRDDatasourceSpec(Spec):
+
+    """TODO."""
+
+    def __init__(
+            self,
+            template_spec,
+            name,
+            sourcetype=None,
+            enabled=True,
+            component=None,
+            eventClass=None,
+            eventKey=None,
+            severity=None,
+            commandTemplate=None,
+            cycletime=None,
+            datapoints=None,
+            extra_params=None,
+            _source_location=None
+            ):
+        """
+        Create an RRDDatasource Specification
+
+            :param sourcetype: TODO
+            :type sourcetype: str
+            :yaml_param sourcetype: type
+            :param enabled: TODO
+            :type enabled: bool
+            :param component: TODO
+            :type component: str
+            :param eventClass: TODO
+            :type eventClass: str
+            :param eventKey: TODO
+            :type eventKey: str
+            :param severity: TODO
+            :type severity: Severity
+            :param commandTemplate: TODO
+            :type commandTemplate: str
+            :param cycletime: TODO
+            :type cycletime: int
+            :param datapoints: TODO
+            :type datapoints: SpecsParameter(RRDDatapointSpec)
+            :param extra_params: Additional parameters that may be used by subclasses of RRDDatasource
+            :type extra_params: ExtraParams
+
+        """
+        super(RRDDatasourceSpec, self).__init__(_source_location=_source_location)
+
+        self.template_spec = template_spec
+        self.name = name
+        self.sourcetype = sourcetype
+        self.enabled = enabled
+        self.component = component
+        self.eventClass = eventClass
+        self.eventKey = eventKey
+        self.severity = severity
+        self.commandTemplate = commandTemplate
+        self.cycletime = cycletime
+        if extra_params is None:
+            self.extra_params = {}
+        else:
+            self.extra_params = extra_params
+
+        self.datapoints = self.specs_from_param(
+            RRDDatapointSpec, 'datapoints', datapoints)
+
+    def create(self, templatespec, template):
+        datasource_types = dict(template.getDataSourceOptions())
+
+        if not self.sourcetype:
+            raise ValueError('No type for %s/%s. Valid types: %s' % (
+                             template.id, self.name, ', '.join(datasource_types)))
+
+        type_ = datasource_types.get(self.sourcetype)
+        if not type_:
+            raise ValueError("%s is an invalid datasource type. Valid types: %s" % (
+                             self.sourcetype, ', '.join(datasource_types)))
+
+        datasource = template.manage_addRRDDataSource(self.name, type_)
+        self.speclog.debug("adding datasource")
+
+        if self.enabled is not None:
+            datasource.enabled = self.enabled
+        if self.component is not None:
+            datasource.component = self.component
+        if self.eventClass is not None:
+            datasource.eventClass = self.eventClass
+        if self.eventKey is not None:
+            datasource.eventKey = self.eventKey
+        if self.severity is not None:
+            datasource.severity = self.severity
+        if self.commandTemplate is not None:
+            datasource.commandTemplate = self.commandTemplate
+        if self.cycletime is not None:
+            datasource.cycletime = self.cycletime
+
+        if self.extra_params:
+            for param, value in self.extra_params.iteritems():
+                if param in [x['id'] for x in datasource._properties]:
+                    setattr(datasource, param, value)
+                else:
+                    raise ValueError("%s is not a valid property for datasource of type %s" % (param, type_))
+
+        self.speclog.debug("adding {} datapoints".format(len(self.datapoints)))
+        for datapoint_id, datapoint_spec in self.datapoints.items():
+            datapoint_spec.create(self, datasource)
+
+
+class RRDDatapointSpec(Spec):
+
+    """TODO."""
+
+    def __init__(
+            self,
+            datasource_spec,
+            name,
+            rrdtype=None,
+            createCmd=None,
+            isrow=None,
+            rrdmin=None,
+            rrdmax=None,
+            description=None,
+            aliases=None,
+            shorthand=None,
+            extra_params=None,
+            _source_location=None
+            ):
+        """
+        Create an RRDDatapoint Specification
+
+        :param rrdtype: TODO
+        :type rrdtype: str
+        :param createCmd: TODO
+        :type createCmd: str
+        :param isrow: TODO
+        :type isrow: bool
+        :param rrdmin: TODO
+        :type rrdmin: int
+        :param rrdmax: TODO
+        :type rrdmax: int
+        :param description: TODO
+        :type description: str
+        :param aliases: TODO
+        :type aliases: dict(str)
+        :param extra_params: Additional parameters that may be used by subclasses of RRDDatapoint
+        :type extra_params: ExtraParams
+
+        """
+        super(RRDDatapointSpec, self).__init__(_source_location=_source_location)
+
+        self.datasource_spec = datasource_spec
+        self.name = name
+
+        self.rrdtype = rrdtype
+        self.createCmd = createCmd
+        self.isrow = isrow
+        self.rrdmin = rrdmin
+        self.rrdmax = rrdmax
+        self.description = description
+        if extra_params is None:
+            self.extra_params = {}
+        elif isinstance(extra_params, dict):
+            self.extra_params = extra_params
+
+        if aliases is None:
+            self.aliases = {}
+        elif isinstance(aliases, dict):
+            self.aliases = aliases
+        else:
+            raise ValueError("aliases must be specified as a dict")
+
+        if shorthand:
+            if 'DERIVE' in shorthand.upper():
+                self.rrdtype = 'DERIVE'
+
+            min_match = re.search(r'MIN_(\d+)', shorthand, re.IGNORECASE)
+            if min_match:
+                rrdmin = min_match.group(1)
+                self.rrdmin = rrdmin
+
+            max_match = re.search(r'MAX_(\d+)', shorthand, re.IGNORECASE)
+            if max_match:
+                rrdmax = max_match.group(1)
+                self.rrdmax = rrdmax
+
+    def __eq__(self, other):
+        if self.shorthand:
+            # when shorthand syntax is in use, the other values are not relevant
+            return super(RRDDatapointSpec, self).__eq__(other, ignore_params=['rrdtype', 'rrdmin', 'rrdmax'])
+        else:
+            return super(RRDDatapointSpec, self).__eq__(other)
+
+    def create(self, datasource_spec, datasource):
+        datapoint = datasource.manage_addRRDDataPoint(self.name)
+        type_ = datapoint.__class__.__name__
+        self.speclog.debug("adding datapoint of type %s" % type_)
+
+        if self.createCmd is not None:
+            datapoint.createCmd = self.createCmd
+        if self.isrow is not None:
+            datapoint.isrow = self.isrow
+        if self.rrdmin is not None:
+            datapoint.rrdmin = str(self.rrdmin)
+        if self.rrdmax is not None:
+            datapoint.rrdmax = str(self.rrdmax)
+        if self.description is not None:
+            datapoint.description = self.description
+        if self.extra_params:
+            for param, value in self.extra_params.iteritems():
+                if param in [x['id'] for x in datapoint._properties]:
+                    setattr(datapoint, param, value)
+                else:
+                    raise ValueError("%s is not a valid property for datapoint of type %s" % (param, type_))
+
+        self.speclog.debug("adding {} aliases".format(len(self.aliases)))
+        for alias_id, formula in self.aliases.items():
+            datapoint.addAlias(alias_id, formula)
+            self.speclog.debug("adding alias".format(alias_id))
+            self.speclog.debug("formula = {}".format(formula))
+
+
+class GraphDefinitionSpec(Spec):
+    """TODO."""
+
+    def __init__(
+            self,
+            template_spec,
+            name,
+            height=None,
+            width=None,
+            units=None,
+            log=None,
+            base=None,
+            miny=None,
+            maxy=None,
+            custom=None,
+            hasSummary=None,
+            graphpoints=None,
+            comments=None,
+            _source_location=None
+            ):
+        """
+        Create a GraphDefinition Specification
+
+        :param height TODO
+        :type height: int
+        :param width TODO
+        :type width: int
+        :param units TODO
+        :type units: str
+        :param log TODO
+        :type log: bool
+        :param base TODO
+        :type base: bool
+        :param miny TODO
+        :type miny: int
+        :param maxy TODO
+        :type maxy: int
+        :param custom: TODO
+        :type custom: str
+        :param hasSummary: TODO
+        :type hasSummary: bool
+        :param graphpoints: TODO
+        :type graphpoints: SpecsParameter(GraphPointSpec)
+        :param comments: TODO
+        :type comments: list(str)
+        """
+        super(GraphDefinitionSpec, self).__init__(_source_location=_source_location)
+
+        self.template_spec = template_spec
+        self.name = name
+
+        self.height = height
+        self.width = width
+        self.units = units
+        self.log = log
+        self.base = base
+        self.miny = miny
+        self.maxy = maxy
+        self.custom = custom
+        self.hasSummary = hasSummary
+        self.graphpoints = self.specs_from_param(
+            GraphPointSpec, 'graphpoints', graphpoints)
+        self.comments = comments
+
+        # TODO fix comments parsing - must always be a list.
+
+    def create(self, templatespec, template):
+        graph = template.manage_addGraphDefinition(self.name)
+        self.speclog.debug("adding graph")
+
+        if self.height is not None:
+            graph.height = self.height
+        if self.width is not None:
+            graph.width = self.width
+        if self.units is not None:
+            graph.units = self.units
+        if self.log is not None:
+            graph.log = self.log
+        if self.base is not None:
+            graph.base = self.base
+        if self.miny is not None:
+            graph.miny = self.miny
+        if self.maxy is not None:
+            graph.maxy = self.maxy
+        if self.custom is not None:
+            graph.custom = self.custom
+        if self.hasSummary is not None:
+            graph.hasSummary = self.hasSummary
+
+        if self.comments:
+            self.speclog.debug("adding {} comments".format(len(self.comments)))
+            for i, comment_text in enumerate(self.comments):
+                comment = graph.createGraphPoint(
+                    CommentGraphPoint,
+                    'comment-{}'.format(i))
+
+                comment.text = comment_text
+
+        self.speclog.debug("adding {} graphpoints".format(len(self.graphpoints)))
+        for graphpoint_id, graphpoint_spec in self.graphpoints.items():
+            graphpoint_spec.create(self, graph)
+
+
+class GraphPointSpec(Spec):
+    """TODO."""
+
+    def __init__(
+            self,
+            template_spec,
+            name=None,
+            dpName=None,
+            lineType=None,
+            lineWidth=None,
+            stacked=None,
+            format=None,
+            legend=None,
+            limit=None,
+            rpn=None,
+            cFunc=None,
+            colorindex=None,
+            color=None,
+            includeThresholds=False,
+            _source_location=None
+            ):
+        """
+        Create a GraphPoint Specification
+
+            :param dpName: TODO
+            :type dpName: str
+            :param lineType: TODO
+            :type lineType: str
+            :param lineWidth: TODO
+            :type lineWidth: int
+            :param stacked: TODO
+            :type stacked: bool
+            :param format: TODO
+            :type format: str
+            :param legend: TODO
+            :type legend: str
+            :param limit: TODO
+            :type limit: int
+            :param rpn: TODO
+            :type rpn: str
+            :param cFunc: TODO
+            :type cFunc: str
+            :param color: TODO
+            :type color: str
+            :param colorindex: TODO
+            :type colorindex: int
+            :param includeThresholds: TODO
+            :type includeThresholds: bool
+
+        """
+        super(GraphPointSpec, self).__init__(_source_location=_source_location)
+
+        self.template_spec = template_spec
+        self.name = name
+
+        self.lineType = lineType
+        self.lineWidth = lineWidth
+        self.stacked = stacked
+        self.format = format
+        self.legend = legend
+        self.limit = limit
+        self.rpn = rpn
+        self.cFunc = cFunc
+        self.color = color
+        self.includeThresholds = includeThresholds
+
+        # Shorthand for datapoints that have the same name as their datasource.
+        if '_' not in dpName:
+            self.dpName = '_'.join(dpName, dpName)
+        else:
+            self.dpName = dpName
+
+        # Allow color to be specified by color_index instead of directly. This is
+        # useful when you want to keep the normal progression of colors, but need
+        # to add some DONTDRAW graphpoints for calculations.
+        if colorindex:
+            try:
+                colorindex = int(colorindex) % len(GraphPoint.colors)
+            except (TypeError, ValueError):
+                raise ValueError("graphpoint colorindex must be numeric.")
+
+            self.color = GraphPoint.colors[colorindex].lstrip('#')
+
+        # Validate lineType.
+        if lineType:
+            valid_linetypes = [x[1] for x in ComplexGraphPoint.lineTypeOptions]
+
+            if lineType.upper() in valid_linetypes:
+                self.lineType = lineType.upper()
+            else:
+                raise ValueError("'%s' is not a valid graphpoint lineType. Valid lineTypes: %s" % (
+                                 lineType, ', '.join(valid_linetypes)))
+
+    def create(self, graph_spec, graph):
+        graphpoint = graph.createGraphPoint(DataPointGraphPoint, self.name)
+        self.speclog.debug("adding graphpoint")
+
+        graphpoint.dpName = self.dpName
+
+        if self.lineType is not None:
+            graphpoint.lineType = self.lineType
+        if self.lineWidth is not None:
+            graphpoint.lineWidth = self.lineWidth
+        if self.stacked is not None:
+            graphpoint.stacked = self.stacked
+        if self.format is not None:
+            graphpoint.format = self.format
+        if self.legend is not None:
+            graphpoint.legend = self.legend
+        if self.limit is not None:
+            graphpoint.limit = self.limit
+        if self.rpn is not None:
+            graphpoint.rpn = self.rpn
+        if self.cFunc is not None:
+            graphpoint.cFunc = self.cFunc
+        if self.color is not None:
+            graphpoint.color = self.color
+
+        if self.includeThresholds:
+            graph.addThresholdsForDataPoint(self.dpName)
+
+
+# YAML Import/Export ########################################################
+
+if YAML_INSTALLED:
+    def relschemaspec_to_str(spec):
+        # Omit relation names that are their defaults.
+        left_optrelname = "" if spec.left_relname == spec.default_left_relname else "(%s)" % spec.left_relname
+        right_optrelname = "" if spec.right_relname == spec.default_right_relname else "(%s)" % spec.right_relname
+
+        return "%s%s %s:%s %s%s" % (
+            spec.left_class,
+            left_optrelname,
+            spec.left_cardinality,
+            spec.right_cardinality,
+            right_optrelname,
+            spec.right_class
+        )
+
+    def str_to_relschemaspec(schemastr):
+        schema_pattern = re.compile(
+            r'^\s*(?P<left>\S+)'
+            r'\s+(?P<cardinality>1:1|1:M|1:MC|M:M)'
+            r'\s+(?P<right>\S+)\s*$',
+        )
+
+        class_rel_pattern = re.compile(
+            r'(\((?P<pre_relname>[^\)\s]+)\))?'
+            r'(?P<class>[^\(\s]+)'
+            r'(\((?P<post_relname>[^\)\s]+)\))?'
+        )
+
+        m = schema_pattern.search(schemastr)
+        if not m:
+            raise ValueError("RelationshipSchemaSpec '%s' is not valid" % schemastr)
+
+        ml = class_rel_pattern.search(m.group('left'))
+        if not ml:
+            raise ValueError("RelationshipSchemaSpec '%s' left side is not valid" % m.group('left'))
+
+        mr = class_rel_pattern.search(m.group('right'))
+        if not mr:
+            raise ValueError("RelationshipSchemaSpec '%s' right side is not valid" % m.group('right'))
+
+        reltypes = {
+            '1:1': ('ToOne', 'ToOne'),
+            '1:M': ('ToMany', 'ToOne'),
+            '1:MC': ('ToManyCont', 'ToOne'),
+            'M:M': ('ToMany', 'ToMany')
+        }
+
+        left_class = ml.group('class')
+        right_class = mr.group('class')
+        left_type = reltypes.get(m.group('cardinality'))[0]
+        right_type = reltypes.get(m.group('cardinality'))[1]
+
+        left_relname = ml.group('pre_relname') or ml.group('post_relname')
+        if left_relname is None:
+            left_relname = relname_from_classname(right_class, plural=left_type != 'ToOne')
+
+        right_relname = mr.group('pre_relname') or mr.group('post_relname')
+        if right_relname is None:
+            right_relname = relname_from_classname(left_class, plural=right_type != 'ToOne')
+
+        return dict(
+            left_class=left_class,
+            left_relname=left_relname,
+            left_type=left_type,
+            right_type=right_type,
+            right_class=right_class,
+            right_relname=right_relname
+        )
+
+    def class_to_str(class_):
+        return class_.__module__ + "." + class_.__name__
+
+    def str_to_class(classstr):
+
+        if classstr == 'object':
+            return object
+
+        if "." not in classstr:
+            # TODO: Support non qualfied class names, searching zenpack, zenpacklib,
+            # and ZenModel namespaces
+
+            # An unqualified class name is assumed to be referring to one in
+            # the classes defined in this ZenPackSpec.   We can't validate this,
+            # or return a class object for it, if this is the case.  So we
+            # return no class object, and the caller will assume that it
+            # it refers to a class being defined.
+            return None
+
+        modname, classname = classstr.rsplit(".", 1)
+
+        # ensure that 'zenpacklib' refers to *this* zenpacklib, if more than
+        # one is loaded in the system.
+        if modname == 'zenpacklib':
+            modname = __name__
+
+        try:
+            class_ = getattr(importlib.import_module(modname), classname)
+        except Exception, e:
+            raise ValueError("Class '%s' is not valid: %s" % (classstr, e))
+
+        return class_
+
+    def severity_to_str(value):
+        '''
+        Return string representation for severity given a numeric value.
+        '''
+        severity = {
+            5: 'crit',
+            4: 'err',
+            3: 'warn',
+            2: 'info',
+            1: 'debug',
+            0: 'clear'
+            }.get(value, None)
+
+        if severity is None:
+            raise ValueError("'%s' is not a valid value for severity.", value)
+
+        return severity
+
+    def str_to_severity(value):
+        '''
+        Return numeric severity given a string representation of severity.
+        '''
+        try:
+            severity = int(value)
+        except (TypeError, ValueError):
+            severity = {
+                'crit': 5, 'critical': 5,
+                'err': 4, 'error': 4,
+                'warn': 3, 'warning': 3,
+                'info': 2, 'information': 2, 'informational': 2,
+                'debug': 1, 'debugging': 1,
+                'clear': 0,
+                }.get(value.lower())
+
+        if severity is None:
+            raise ValueError("'%s' is not a valid value for severity." % value)
+
+        return severity
+
+    def yaml_error(loader, e, exc_info=None):
+        # Given a MarkedYAMLError exception, either log or raise
+        # the error, depending on the 'fatal' argument.
+        fatal = not getattr(loader, 'warnings', False)
+        setattr(loader, 'yaml_errored', True)
+
+        if exc_info:
+            # When we're given the original exception (which was wrapped in
+            # a MarkedYAMLError), we can provide more context for debugging.
+
+            from traceback import format_exc
+            e.note = "\nOriginal exception:\n" + format_exc(exc_info)
+
+        if fatal:
+            raise e
+
+        message = []
+
+        mark = e.context_mark or e.problem_mark
+        if mark:
+            position = "%s:%s:%s" % (mark.name, mark.line+1, mark.column+1)
+        else:
+            position = "[unknown]"
+        if e.context is not None:
+            message.append(e.context)
+
+        if e.problem is not None:
+            message.append(e.problem)
+
+        if e.note is not None:
+            message.append("(note: " + e.note + ")")
+
+        print "%s: %s" % (position, ",".join(message))
+
+    def construct_specsparameters(loader, node, spectype):
+        spec_class = {x.__name__: x for x in Spec.__subclasses__()}.get(spectype, None)
+
+        if not spec_class:
+            yaml_error(loader, yaml.constructor.ConstructorError(
+                None, None,
+                "Unrecognized Spec class %s" % spectype,
+                node.start_mark))
+            return
+
+        if not isinstance(node, yaml.MappingNode):
+            yaml_error(loader, yaml.constructor.ConstructorError(
+                None, None,
+                "expected a mapping node, but found %s" % node.id,
+                node.start_mark))
+            return
+
+        specs = OrderedDict()
+        for spec_key_node, spec_value_node in node.value:
+            try:
+                spec_key = str(loader.construct_scalar(spec_key_node))
+            except yaml.MarkedYAMLError, e:
+                yaml_error(loader, e)
+
+            specs[spec_key] = construct_spec(spec_class, loader, spec_value_node)
+
+        return specs
+
+    def represent_relschemaspec(dumper, data):
+        return dumper.represent_str(relschemaspec_to_str(data))
+
+    def construct_relschemaspec(loader, node):
+        schemastr = str(loader.construct_scalar(node))
+        return str_to_relschemaspec(schemastr)
+
+    def represent_spec(dumper, obj, yaml_tag=u'tag:yaml.org,2002:map', defaults=None):
+        """
+        Generic representer for serializing specs to YAML.  Rather than using
+        the default PyYAML representer for python objects, we very carefully
+        build up the YAML according to the parameter definitions in the __init__
+        of each spec class.  This same format is used by construct_spec (the YAML
+        constructor) to ensure that the spec objects are built consistently,
+        whether it is done via YAML or the API.
+        """
+
+        if isinstance(obj, RRDDatapointSpec) and obj.shorthand:
+            # Special case- we allow for a shorthand in specifying datapoints
+            # as specs as strings rather than explicitly as a map.
+            return dumper.represent_str(str(obj.shorthand))
+
+        mapping = OrderedDict()
+        cls = obj.__class__
+        param_defs = cls.init_params()
+        for param in param_defs:
+            type_ = param_defs[param]['type']
+
+            try:
+                value = getattr(obj, param)
+            except AttributeError:
+                raise yaml.representer.RepresenterError(
+                    "Unable to serialize %s object: %s, a supported parameter, is not accessible as a property." %
+                    (cls.__name__, param))
+                continue
+
+            # Figure out what the default value is.  First, consider the default
+            # value for this parameter (globally):
+            default_value = param_defs[param].get('default', None)
+
+            # Now, we need to handle 'DEFAULTS'.  If we're in a situation
+            # where that is supported, and we're outputting a spec that
+            # would be affected by it (not DEFAULTS itself, in other words),
+            # then we look at the default value for this parameter, in case
+            # it has changed the global default for this parameter.
+            if hasattr(obj, 'name') and obj.name != 'DEFAULTS' and defaults is not None:
+                default_value = getattr(defaults, param, default_value)
+
+            if value == default_value:
+                # If the value is a default value, we can omit it from the export.
+                continue
+
+            # If the value is null and the type is a list or dictionary, we can
+            # assume it was some optional nested data and omit it.
+            if value is None and (
+               type_.startswith('dict') or
+               type_.startswith('list') or
+               type_.startswith('SpecsParameter')):
+                continue
+
+            if type_ == 'ZPropertyDefaultValue':
+                # For zproperties, the actual data type of a default value
+                # depends on the defined type of the zProperty.
+                try:
+                    type_ = {
+                        'boolean': "bool",
+                        'int': "int",
+                        'float': "float",
+                        'string': "str",
+                        'password': "str",
+                        'lines': "list(str)"
+                    }.get(obj.type_, 'str')
+                except KeyError:
+                    type_ = "str"
+
+            yaml_param = dumper.represent_str(param_defs[param]['yaml_param'])
+            try:
+                if type_ == "bool":
+                    mapping[yaml_param] = dumper.represent_bool(value)
+                elif type_.startswith("dict"):
+                    mapping[yaml_param] = dumper.represent_dict(value)
+                elif type_ == "float":
+                    mapping[yaml_param] = dumper.represent_float(value)
+                elif type_ == "int":
+                    mapping[yaml_param] = dumper.represent_int(value)
+                elif type_ == "list(class)":
+                    # The "class" in this context is either a class reference or
+                    # a class name (string) that refers to a class defined in
+                    # this ZenPackSpec.
+                    classes = [isinstance(x, type) and class_to_str(x) or x for x in value]
+                    mapping[yaml_param] = dumper.represent_list(classes)
+                elif type_.startswith("list"):
+                    mapping[yaml_param] = dumper.represent_list(value)
+                elif type_ == "str":
+                    mapping[yaml_param] = dumper.represent_str(value)
+                elif type_ == 'RelationshipSchemaSpec':
+                    mapping[yaml_param] = dumper.represent_str(relschemaspec_to_str(value))
+                elif type_ == 'Severity':
+                    mapping[yaml_param] = dumper.represent_str(severity_to_str(value))
+                elif type_ == 'ExtraParams':
+                    # ExtraParams is a special case, where any 'extra'
+                    # parameters not otherwise defined in the init_params
+                    # definition are tacked into a dictionary with no specific
+                    # schema validation.  This is meant to be used in situations
+                    # where it is impossible to know what parameters will be
+                    # needed ahead of time, such as with a datasource
+                    # that has been subclassed and had new properties added.
+                    #
+                    # Note: the extra parameters are required to have scalar
+                    # values only.
+                    for extra_param in value:
+                        # add any values from an extraparams dict onto the spec's parameter list directly.
+                        yaml_extra_param = dumper.represent_str(extra_param)
+
+                        mapping[yaml_extra_param] = dumper.represent_data(value[extra_param])
+                else:
+                    m = re.match('^SpecsParameter\((.*)\)$', type_)
+                    if m:
+                        spectype = m.group(1)
+                        specmapping = OrderedDict()
+                        keys = sorted(value)
+                        defaults = None
+                        if 'DEFAULTS' in keys:
+                            keys.remove('DEFAULTS')
+                            keys.insert(0, 'DEFAULTS')
+                            defaults = value['DEFAULTS']
+                        for key in keys:
+                            spec = value[key]
+                            if type(spec).__name__ != spectype:
+                                raise yaml.representer.RepresenterError(
+                                    "Unable to serialize %s object (%s):  Expected an object of type %s" %
+                                    (type(spec).__name__, key, spectype))
+                            else:
+                                specmapping[dumper.represent_str(key)] = represent_spec(dumper, spec, defaults=defaults)
+
+                        specmapping_value = []
+                        node = yaml.MappingNode(yaml_tag, specmapping_value)
+                        specmapping_value.extend(specmapping.items())
+                        mapping[yaml_param] = node
+                    else:
+                        raise yaml.representer.RepresenterError(
+                            "Unable to serialize %s object: %s, a supported parameter, is of an unrecognized type (%s)." %
+                            (cls.__name__, param, type_))
+            except yaml.representer.RepresenterError:
+                raise
+            except Exception, e:
+                raise yaml.representer.RepresenterError(
+                    "Unable to serialize %s object (param %s, type %s, value %s): %s" %
+                    (cls.__name__, param, type_, value, e))
+
+            if param in param_defs and param_defs[param]['yaml_block_style']:
+                mapping[yaml_param].flow_style = False
+
+        mapping_value = []
+        node = yaml.MappingNode(yaml_tag, mapping_value)
+        mapping_value.extend(mapping.items())
+
+        # Return a node describing the mapping (dictionary) of the params
+        # used to build this spec.
+        return node
+
+    def construct_spec(cls, loader, node):
+        """
+        Generic constructor for deserializing specs from YAML.   Should be
+        the opposite of represent_spec, and works in the same manner (with its
+        parsing and validation directed by the init_params of each spec class)
+        """
+
+        if issubclass(cls, RRDDatapointSpec) and isinstance(node, yaml.ScalarNode):
+            # Special case- we allow for a shorthand in specifying datapoint specs.
+            return dict(shorthand=loader.construct_scalar(node))
+
+        param_defs = cls.init_params()
+        params = {}
+        if not isinstance(node, yaml.MappingNode):
+            yaml_error(loader, yaml.constructor.ConstructorError(
+                None, None,
+                "expected a mapping node, but found %s" % node.id,
+                node.start_mark))
+
+        params['_source_location'] = "%s: %s-%s" % (
+            os.path.basename(node.start_mark.name),
+            node.start_mark.line+1,
+            node.end_mark.line+1)
+
+        # TODO: When deserializing, we should check if required properties are present.
+
+        param_name_map = {}
+        for param in param_defs:
+            param_name_map[param_defs[param]['yaml_param']] = param
+
+        extra_params = None
+        for key in param_defs:
+            if param_defs[key]['type'] == 'ExtraParams':
+                if extra_params:
+                    yaml_error(loader, yaml.constructor.ConstructorError(
+                        None, None,
+                        "Only one ExtraParams parameter may be specified.",
+                        node.start_mark))
+                extra_params = key
+                params[extra_params] = {}
+
+        for key_node, value_node in node.value:
+            yaml_key = str(loader.construct_scalar(key_node))
+
+            if yaml_key not in param_name_map:
+                if extra_params:
+                    # If an 'extra_params' parameter is defined for this spec,
+                    # we take all unrecognized paramters and stuff them into
+                    # a single parameter, which is a dictonary of "extra" parameters.
+                    #
+                    # Note that the values of these extra parameters need to be
+                    # scalars, not nested maps or something like that.
+                    params[extra_params][yaml_key] = loader.construct_scalar(value_node)
+                    continue
+                else:
+                    yaml_error(loader, yaml.constructor.ConstructorError(
+                        None, None,
+                        "Unrecognized parameter '%s' found while processing %s" % (yaml_key, cls.__name__),
+                        key_node.start_mark))
+                    continue
+
+            key = param_name_map[yaml_key]
+            expected_type = param_defs[key]['type']
+
+            if expected_type == 'ZPropertyDefaultValue':
+                # For zproperties, the actual data type of a default value
+                # depends on the defined type of the zProperty.
+
+                try:
+                    zPropType = [x[1].value for x in node.value if x[0].value == 'type'][0]
+                except Exception:
+                    # type was not specified, so we assume the default (string)
+                    zPropType = 'string'
+
+                try:
+                    expected_type = {
+                        'boolean': "bool",
+                        'int': "int",
+                        'float': "float",
+                        'string': "str",
+                        'password': "str",
+                        'lines': "list(str)"
+                    }.get(zPropType, 'str')
+                except KeyError:
+                    yaml_error(loader, yaml.constructor.ConstructorError(
+                        None, None,
+                        "Invalid zProperty type_ '%s' for property %s found while processing %s" % (zPropType, key, cls.__name__),
+                        key_node.start_mark))
+                    continue
+
+            try:
+                if expected_type == "bool":
+                    params[key] = loader.construct_yaml_bool(value_node)
+                elif expected_type.startswith("dict(SpecsParameter("):
+                    m = re.match('^dict\(SpecsParameter\((.*)\)\)$', expected_type)
+                    if m:
+                        spectype = m.group(1)
+
+                        if not isinstance(node, yaml.MappingNode):
+                            yaml_error(loader, yaml.constructor.ConstructorError(
+                                None, None,
+                                "expected a mapping node, but found %s" % node.id,
+                                node.start_mark))
+                            continue
+                        specs = OrderedDict()
+                        for spec_key_node, spec_value_node in value_node.value:
+                            spec_key = str(loader.construct_scalar(spec_key_node))
+
+                            specs[spec_key] = construct_specsparameters(loader, spec_value_node, spectype)
+                        params[key] = specs
+                    else:
+                        raise Exception("Unable to determine specs parameter type in '%s'" % expected_type)
+                elif expected_type.startswith("dict"):
+                    params[key] = loader.construct_mapping(value_node)
+                elif expected_type == "float":
+                    params[key] = float(loader.construct_scalar(value_node))
+                elif expected_type == "int":
+                    params[key] = int(loader.construct_scalar(value_node))
+                elif expected_type == "list(class)":
+                    classnames = loader.construct_sequence(value_node)
+                    classes = []
+                    for c in classnames:
+                        class_ = str_to_class(c)
+                        if class_ is None:
+                            # local reference to a class being defined in
+                            # this zenpack.  (ideally we should verify that
+                            # the name is valid, but this is not possible
+                            # in a one-pass parsing of the yaml).
+                            classes.append(c)
+                        else:
+                            classes.append(class_)
+                    # ZPL defines "class" as either a string representing a
+                    # class in this definition, or a class object representing
+                    # an external class.
+                    params[key] = classes
+                elif expected_type == "list(RelationshipSchemaSpec)":
+                    schemaspecs = []
+                    for s in loader.construct_sequence(value_node):
+                        schemaspecs.append(str_to_relschemaspec(s))
+                    params[key] = schemaspecs
+                elif expected_type.startswith("list"):
+                    params[key] = loader.construct_sequence(value_node)
+                elif expected_type == "str":
+                    params[key] = str(loader.construct_scalar(value_node))
+                elif expected_type == 'RelationshipSchemaSpec':
+                    schemastr = str(loader.construct_scalar(value_node))
+                    params[key] = str_to_relschemaspec(schemastr)
+                elif expected_type == 'Severity':
+                    severitystr = str(loader.construct_scalar(value_node))
+                    params[key] = str_to_severity(severitystr)
+                else:
+                    m = re.match('^SpecsParameter\((.*)\)$', expected_type)
+                    if m:
+                        spectype = m.group(1)
+                        params[key] = construct_specsparameters(loader, value_node, spectype)
+                    else:
+                        raise Exception("Unhandled type '%s'" % expected_type)
+
+            except yaml.constructor.ConstructorError, e:
+                yaml_error(loader, e)
+            except Exception, e:
+                yaml_error(loader, yaml.constructor.ConstructorError(
+                    None, None,
+                    "Unable to deserialize %s object (param %s): %s" % (cls.__name__, key_node.value, e),
+                    value_node.start_mark), exc_info=sys.exc_info())
+
+        return params
+
+    def represent_zenpackspec(dumper, obj):
+        return represent_spec(dumper, obj, yaml_tag=u'!ZenPackSpec')
+
+    def construct_zenpackspec(loader, node):
+        params = construct_spec(ZenPackSpec, loader, node)
+        name = params.pop("name")
+
+        fatal = not getattr(loader, 'warnings', False)
+        yaml_errored = getattr(loader, 'yaml_errored', False)
+
+        try:
+            return ZenPackSpec(name, **params)
+        except Exception, e:
+            if yaml_errored and not fatal:
+                LOG.error("(possibly because of earlier errors) %s" % e)
+            else:
+                raise
+
+        return None
+
+    # These subclasses exist so that each copy of zenpacklib installed on a
+    # zenoss system provide their own loader (for add_constructor and yaml.load)
+    # and its own dumper (for add_representer) so that the proper methods will
+    # be used for this specific zenpacklib.
+    class Loader(yaml.Loader):
+        pass
+
+    class Dumper(yaml.Dumper):
+        pass
+
+    class WarningLoader(Loader):
+        warnings = True
+        yaml_errored = False
+
+    Dumper.add_representer(ZenPackSpec, represent_zenpackspec)
+    Dumper.add_representer(DeviceClassSpec, represent_spec)
+    Dumper.add_representer(ZPropertySpec, represent_spec)
+    Dumper.add_representer(ClassSpec, represent_spec)
+    Dumper.add_representer(ClassPropertySpec, represent_spec)
+    Dumper.add_representer(ClassRelationshipSpec, represent_spec)
+    Dumper.add_representer(RelationshipSchemaSpec, represent_relschemaspec)
+    Loader.add_constructor(u'!ZenPackSpec', construct_zenpackspec)
+
+    yaml.add_path_resolver(u'!ZenPackSpec', [], Loader=Loader)
+
+    def load_yaml(yaml_filename=None):
+        """Load YAML from yaml_filename.
+
+        Loads from zenpack.yaml in the current directory if
+        yaml_filename isn't specified.
+
+        """
+        if yaml_filename is None:
+            yaml_filename = os.path.join(
+                os.path.dirname(__file__), 'zenpack.yaml')
+
+        CFG = yaml.load(file(yaml_filename, 'r'), Loader=Loader)
+        if CFG:
+            CFG.create()
+        else:
+            LOG.error("Unable to load %s", yaml_filename)
+        return CFG
+
+    class SpecParams(object):
+        def __init__(self, **kwargs):
+            # Initialize with default values
+            params = self.__class__.init_params()
+            for param in params:
+                if 'default' in params[param]:
+                    setattr(self, param, params[param]['default'])
+
+            # Overlay any named parameters
+            self.__dict__.update(kwargs)
+
+        @classmethod
+        def init_params(cls):
+            # Pull over the params for the underlying Spec class,
+            # correcting nested Specs to SpecsParams instead.
+            try:
+                spec_base = [x for x in cls.__bases__ if issubclass(x, Spec)][0]
+            except Exception:
+                raise Exception("Spec Base Not Found for %s" % cls.__name__)
+
+            params = spec_base.init_params()
+            for p in params:
+                params[p]['type'] = params[p]['type'].replace("Spec)", "SpecParams)")
+
+            return params
+
+    class ZenPackSpecParams(SpecParams, ZenPackSpec):
+        def __init__(self, name, zProperties=None, class_relationships=None, classes=None, device_classes=None, **kwargs):
+            SpecParams.__init__(self, **kwargs)
+            self.name = name
+
+            self.zProperties = self.specs_from_param(
+                ZPropertySpecParams, 'zProperties', zProperties, leave_defaults=True)
+
+            self.class_relationships = []
+            if class_relationships:
+                if not isinstance(class_relationships, list):
+                    raise ValueError("class_relationships must be a list, not a %s" % type(class_relationships))
+
+                for rel in class_relationships:
+                    self.class_relationships.append(RelationshipSchemaSpec(self, **rel))
+
+            self.classes = self.specs_from_param(
+                ClassSpecParams, 'classes', classes, leave_defaults=True)
+
+            self.device_classes = self.specs_from_param(
+                DeviceClassSpecParams, 'device_classes', device_classes, leave_defaults=True)
+
+    class DeviceClassSpecParams(SpecParams, DeviceClassSpec):
+        def __init__(self, zenpack_spec, path, zProperties=None, templates=None, **kwargs):
+            SpecParams.__init__(self, **kwargs)
+            self.path = path
+            self.zProperties = zProperties
+            self.templates = self.specs_from_param(
+                RRDTemplateSpecParams, 'templates', templates)
+
+    class ZPropertySpecParams(SpecParams, ZPropertySpec):
+        def __init__(self, zenpack_spec, name, **kwargs):
+            SpecParams.__init__(self, **kwargs)
+            self.name = name
+
+    class ClassSpecParams(SpecParams, ClassSpec):
+        def __init__(self, zenpack_spec, name, base=None, properties=None, relationships=None, monitoring_templates=[], **kwargs):
+            SpecParams.__init__(self, **kwargs)
+            self.name = name
+
+            if isinstance(base, (tuple, list, set)):
+                self.base = tuple(base)
+            else:
+                self.base = (base,)
+
+            if isinstance(monitoring_templates, (tuple, list, set)):
+                self.monitoring_templates = list(monitoring_templates)
+            else:
+                self.monitoring_templates = [monitoring_templates]
+
+            self.properties = self.specs_from_param(
+                ClassPropertySpecParams, 'properties', properties, leave_defaults=True)
+
+            self.relationships = self.specs_from_param(
+                ClassRelationshipSpecParams, 'relationships', relationships, leave_defaults=True)
+
+    class ClassPropertySpecParams(SpecParams, ClassPropertySpec):
+        def __init__(self, class_spec, name, **kwargs):
+            SpecParams.__init__(self, **kwargs)
+            self.name = name
+
+    class ClassRelationshipSpecParams(SpecParams, ClassRelationshipSpec):
+        def __init__(self, class_spec, name, **kwargs):
+            SpecParams.__init__(self, **kwargs)
+            self.name = name
+
+    class RRDTemplateSpecParams(SpecParams, RRDTemplateSpec):
+        def __init__(self, deviceclass_spec, name, thresholds=None, datasources=None, graphs=None, **kwargs):
+            SpecParams.__init__(self, **kwargs)
+            self.name = name
+
+            self.thresholds = self.specs_from_param(
+                RRDThresholdSpecParams, 'thresholds', thresholds)
+
+            self.datasources = self.specs_from_param(
+                RRDDatasourceSpecParams, 'datasources', datasources)
+
+            self.graphs = self.specs_from_param(
+                GraphDefinitionSpecParams, 'graphs', graphs)
+
+        @classmethod
+        def fromObject(cls, template):
+            self = object.__new__(cls)
+            SpecParams.__init__(self)
+            template = aq_base(template)
+
+            self.targetPythonClass = template.targetPythonClass
+            self.description = template.description
+
+            self.thresholds = {x.id: RRDThresholdSpecParams.fromObject(x) for x in template.thresholds()}
+            self.datasources = {x.id: RRDDatasourceSpecParams.fromObject(x) for x in template.datasources()}
+            self.graphs = {x.id: GraphDefinitionSpecParams.fromObject(x) for x in template.graphDefs()}
+
+            return self
+
+    class RRDDatasourceSpecParams(SpecParams, RRDDatasourceSpec):
+        def __init__(self, template_spec, name, datapoints=None, **kwargs):
+            SpecParams.__init__(self, **kwargs)
+            self.name = name
+
+            self.datapoints = self.specs_from_param(
+                RRDDatapointSpecParams, 'datapoints', datapoints)
+
+        @classmethod
+        def fromObject(cls, datasource):
+            self = object.__new__(cls)
+            SpecParams.__init__(self)
+            datasource = aq_base(datasource)
+
+            # Weed out any values that are the same as they would by by default.
+            # We do this by instantiating a "blank" datapoint and comparing
+            # to it.
+            sample_ds = datasource.__class__(datasource.id)
+
+            self.sourcetype = datasource.sourcetype
+            for propname in ('enabled', 'component', 'eventClass', 'eventKey',
+                             'severity', 'commandTemplate', 'cycletime',):
+                if hasattr(sample_ds, propname):
+                    setattr(self, '_%s_defaultvalue' % propname, getattr(sample_ds, propname))
+                if getattr(datasource, propname, None) != getattr(sample_ds, propname, None):
+                    setattr(self, propname, getattr(datasource, propname, None))
+
+            self.extra_params = collections.OrderedDict()
+            for propname in [x['id'] for x in datasource._properties]:
+                if propname not in self.init_params():
+                    if getattr(datasource, propname, None) != getattr(sample_ds, propname, None):
+                        self.extra_params[propname] = getattr(datasource, propname, None)
+
+            self.datapoints = {x.id: RRDDatapointSpecParams.fromObject(x) for x in datasource.datapoints()}
+
+            return self
+
+    class RRDThresholdSpecParams(SpecParams, RRDThresholdSpec):
+        def __init__(self, template_spec, name, foo=None, **kwargs):
+            SpecParams.__init__(self, **kwargs)
+            self.name = name
+
+        @classmethod
+        def fromObject(cls, threshold):
+            self = object.__new__(cls)
+            SpecParams.__init__(self)
+            threshold = aq_base(threshold)
+            sample_th = threshold.__class__(threshold.id)
+
+            for propname in ('dsnames', 'eventClass', 'severity', 'type_'):
+                if hasattr(sample_th, propname):
+                    setattr(self, '_%s_defaultvalue' % propname, getattr(sample_th, propname))
+                if getattr(threshold, propname, None) != getattr(sample_th, propname, None):
+                    setattr(self, propname, getattr(threshold, propname, None))
+
+            self.extra_params = collections.OrderedDict()
+            for propname in [x['id'] for x in threshold._properties]:
+                if propname not in self.init_params():
+                    if getattr(threshold, propname, None) != getattr(sample_th, propname, None):
+                        self.extra_params[propname] = getattr(threshold, propname, None)
+
+            return self
+
+    class RRDDatapointSpecParams(SpecParams, RRDDatapointSpec):
+        def __init__(self, datasource_spec, name, shorthand=None, **kwargs):
+            SpecParams.__init__(self, **kwargs)
+            self.name = name
+            self.shorthand = shorthand
+
+        @classmethod
+        def fromObject(cls, datapoint):
+            self = object.__new__(cls)
+            SpecParams.__init__(self)
+            datapoint = aq_base(datapoint)
+            sample_dp = datapoint.__class__(datapoint.id)
+
+            for propname in ('name', 'rrdtype', 'createCmd', 'isrow', 'rrdmin',
+                             'rrdmax', 'description',):
+                if hasattr(sample_dp, propname):
+                    setattr(self, '_%s_defaultvalue' % propname, getattr(sample_dp, propname))
+                if getattr(datapoint, propname, None) != getattr(sample_dp, propname, None):
+                    setattr(self, propname, getattr(datapoint, propname, None))
+
+            if self.rrdmin is not None:
+                self.rrdmin = int(self.rrdmin)
+            if self.rrdmax is not None:
+                self.rrdmax = int(self.rrdmax)
+
+            self.aliases = {x.id: x.formula for x in datapoint.aliases()}
+
+            self.extra_params = collections.OrderedDict()
+            for propname in [x['id'] for x in datapoint._properties]:
+                if propname not in self.init_params():
+                    if getattr(datapoint, propname, None) != getattr(sample_dp, propname, None):
+                        self.extra_params[propname] = getattr(datapoint, propname, None)
+
+            # Shorthand support.  The use of the shorthand field takes
+            # over all other attributes.  So we can only use it when the rest of
+            # the attributes have default values.   This gets tricky if
+            # RRDDatapoint has been subclassed, since we don't know what
+            # the defaults are, necessarily.
+            #
+            # To do this, we actually instantiate a sample datapoint
+            # using only the shorthand values, and see if the result
+            # ends up being effectively the same as what we have.
+
+            shorthand_props = {}
+            shorthand = []
+            self.shorthand = None
+            if datapoint.rrdtype in ('GAUGE', 'DERIVE'):
+                shorthand.append(datapoint.rrdtype)
+                shorthand_props['rrdtype'] = datapoint.rrdtype
+
+                if datapoint.rrdmin:
+                    shorthand.append('MIN_%d' % int(datapoint.rrdmin))
+                    shorthand_props['rrdmin'] = datapoint.rrdmin
+
+                if datapoint.rrdmax:
+                    shorthand.append('MAX_%d' % int(datapoint.rrdmax))
+                    shorthand_props['rrdmax'] = datapoint.rrdmax
+
+                if shorthand:
+                    for prop in shorthand_props:
+                        setattr(sample_dp, prop, shorthand_props[prop])
+
+                    # Compare the current datapoint with the results
+                    # of constructing one from the shorthand syntax.
+                    #
+                    # The comparison is based on the objects.xml-style
+                    # xml representation, because it seems like that's really
+                    # the bottom line.  If they end up the same in there, then
+                    # I am certain that they are equivalent.
+
+                    import StringIO
+                    io = StringIO.StringIO()
+                    datapoint.exportXml(io)
+                    dp_xml = io.getvalue()
+                    io.close()
+
+                    io = StringIO.StringIO()
+                    sample_dp.exportXml(io)
+                    sample_dp_xml = io.getvalue()
+                    io.close()
+
+                    # Identical, so set the shorthand.  This will cause
+                    # all other properties to be ignored during
+                    # serialization to yaml.
+                    if dp_xml == sample_dp_xml:
+                        self.shorthand = '_'.join(shorthand)
+
+            return self
+
+    class GraphDefinitionSpecParams(SpecParams, GraphDefinitionSpec):
+        def __init__(self, template_spec, name, graphpoints=None, **kwargs):
+            SpecParams.__init__(self, **kwargs)
+            self.name = name
+            self.graphpoints = self.specs_from_param(
+                GraphPointSpecParams, 'graphpoints', graphpoints)
+
+        @classmethod
+        def fromObject(cls, graphdefinition):
+            self = object.__new__(cls)
+            SpecParams.__init__(self)
+            graphdefinition = aq_base(graphdefinition)
+            sample_gd = graphdefinition.__class__(graphdefinition.id)
+
+            for propname in ('height', 'width', 'units', 'log', 'base', 'miny',
+                             'maxy', 'custom', 'hasSummary', 'comments'):
+                if hasattr(sample_gd, propname):
+                    setattr(self, '_%s_defaultvalue' % propname, getattr(sample_gd, propname))
+                if getattr(graphdefinition, propname, None) != getattr(sample_gd, propname, None):
+                    setattr(self, propname, getattr(graphdefinition, propname, None))
+
+            datapoint_graphpoints = [x for x in graphdefinition.graphPoints() if isinstance(x, DataPointGraphPoint)]
+            self.graphpoints = {x.id: GraphPointSpecParams.fromObject(x, graphdefinition) for x in datapoint_graphpoints}
+
+            comment_graphpoints = [x for x in graphdefinition.graphPoints() if isinstance(x, CommentGraphPoint)]
+            if comment_graphpoints:
+                self.comments = [y.text for y in sorted(comment_graphpoints, key=lambda x: x.id)]
+
+            return self
+
+    class GraphPointSpecParams(SpecParams, GraphPointSpec):
+        def __init__(self, template_spec, name, **kwargs):
+            SpecParams.__init__(self, **kwargs)
+            self.name = name
+
+        @classmethod
+        def fromObject(cls, graphpoint, graphdefinition):
+            self = object.__new__(cls)
+            SpecParams.__init__(self)
+            graphpoint = aq_base(graphpoint)
+            graphdefinition = aq_base(graphdefinition)
+            sample_gp = graphpoint.__class__(graphpoint.id)
+
+            for propname in ('lineType', 'lineWidth', 'stacked', 'format',
+                             'legend', 'limit', 'rpn', 'cFunc', 'color', 'dpName'):
+                if hasattr(sample_gp, propname):
+                    setattr(self, '_%s_defaultvalue' % propname, getattr(sample_gp, propname))
+                if getattr(graphpoint, propname, None) != getattr(sample_gp, propname, None):
+                    setattr(self, propname, getattr(graphpoint, propname, None))
+
+            threshold_graphpoints = [x for x in graphdefinition.graphPoints() if isinstance(x, ThresholdGraphPoint)]
+
+            self.includeThresholds = False
+            if threshold_graphpoints:
+                thresholds = {x.id: x for x in graphpoint.graphDef().rrdTemplate().thresholds()}
+                for tgp in threshold_graphpoints:
+                    threshold = thresholds.get(tgp.threshId, None)
+                    if threshold:
+                        if graphpoint.dpName in threshold.dsnames:
+                            self.includeThresholds = True
+
+            return self
+
+    Dumper.add_representer(ZenPackSpecParams, represent_zenpackspec)
+    Dumper.add_representer(DeviceClassSpecParams, represent_spec)
+    Dumper.add_representer(ZPropertySpecParams, represent_spec)
+    Dumper.add_representer(ClassSpecParams, represent_spec)
+    Dumper.add_representer(ClassPropertySpecParams, represent_spec)
+    Dumper.add_representer(ClassRelationshipSpecParams, represent_spec)
+    Dumper.add_representer(RRDTemplateSpecParams, represent_spec)
+    Dumper.add_representer(RRDThresholdSpecParams, represent_spec)
+    Dumper.add_representer(RRDDatasourceSpecParams, represent_spec)
+    Dumper.add_representer(RRDDatapointSpecParams, represent_spec)
+    Dumper.add_representer(GraphDefinitionSpecParams, represent_spec)
+    Dumper.add_representer(GraphPointSpecParams, represent_spec)
+
 # Public Functions ##########################################################
+
 
 def enableTesting():
     """Enable test mode. Only call from code under tests/.
@@ -2540,14 +4917,20 @@ def enableTesting():
             import Products.ZenUI3
             zcml.load_config('configure.zcml', Products.ZenUI3)
 
-            zenpack_module_name = '.'.join(self.__module__.split('.')[:-2])
-            zenpack_module = importlib.import_module(zenpack_module_name)
+            if self.zenpack_module_name is None:
+                self.zenpack_module_name = '.'.join(self.__module__.split('.')[:-2])
+
+            try:
+                zenpack_module = importlib.import_module(self.zenpack_module_name)
+            except Exception:
+                LOG.exception("Unable to load zenpack named '%s' - is it installed? (%s)", self.zenpack_module_name)
+                raise
 
             zenpackspec = getattr(zenpack_module, 'CFG', None)
             if not zenpackspec:
                 raise NameError(
                     "name {!r} is not defined"
-                    .format('.'.join((zenpack_module_name, 'CFG'))))
+                    .format('.'.join((self.zenpack_module_name, 'CFG'))))
 
             zenpackspec.test_setup()
 
@@ -2646,7 +5029,7 @@ def relationships_from_yuml(yuml):
     string, or as a tuple or list of relationships.
 
     """
-    classes = collections.defaultdict(dict)
+    classes = []
     match_comment = re.compile(r'^\s*//').search
 
     match_line = re.compile(
@@ -2681,34 +5064,47 @@ def relationships_from_yuml(yuml):
         right_cardinality = match.group('right_cardinality')
 
         if '++' in left_cardinality:
-            left_type = ToManyCont
+            left_type = 'ToManyCont'
         elif '*' in right_cardinality:
-            left_type = ToMany
+            left_type = 'ToMany'
         else:
-            left_type = ToOne
+            left_type = 'ToOne'
 
         if '++' in right_cardinality:
-            right_type = ToManyCont
+            right_type = 'ToManyCont'
         elif '*' in left_cardinality:
-            right_type = ToMany
+            right_type = 'ToMany'
         else:
-            right_type = ToOne
+            right_type = 'ToOne'
 
         if not left_relname:
             left_relname = relname_from_classname(
-                right_class, plural=left_type != ToOne)
+                right_class, plural=left_type != 'ToOne')
 
         if not right_relname:
             right_relname = relname_from_classname(
-                left_class, plural=right_type != ToOne)
+                left_class, plural=right_type != 'ToOne')
 
-        classes[left_class][left_relname] = {
-            'schema': left_type(right_type, right_class, right_relname),
-            }
-
-        classes[right_class][right_relname] = {
-            'schema': right_type(left_type, left_class, left_relname),
-            }
+        # Order them correctly (larger one on the right)
+        if RelationshipSchemaSpec.valid_orientation(left_type, right_type):
+            classes.append(dict(
+                left_class=left_class,
+                left_relname=left_relname,
+                left_type=left_type,
+                right_type=right_type,
+                right_class=right_class,
+                right_relname=right_relname
+            ))
+        else:
+            # flip them around
+            classes.append(dict(
+                left_class=right_class,
+                left_relname=right_relname,
+                left_type=right_type,
+                right_type=left_type,
+                right_class=left_class,
+                right_relname=left_relname
+            ))
 
     return classes
 
@@ -2741,7 +5137,7 @@ def EnumInfoProperty(data, enum):
                 return Zuul.info(enum[data])
             except Exception:
                 return Zuul.info(data)
-            return Zuul.info(getattr(self._object, method_name))
+
     return property(lambda x: getter(x, data, enum))
 
 
@@ -2862,8 +5258,10 @@ def update(d, u):
 
 def catalog_search(scope, name, *args, **kwargs):
     """Return iterable of matching brains in named catalog."""
+
     catalog = getattr(scope, '{}Search'.format(name), None)
     if not catalog:
+        LOG.debug("Catalog %sSearch not found at %s.  It should be created when the first included component is indexed" % (name, scope))
         return []
 
     if args:
@@ -2880,11 +5278,11 @@ def catalog_search(scope, name, *args, **kwargs):
     return catalog(**kwargs)
 
 
-def apply_defaults(dictionary, default_defaults=None):
+def apply_defaults(dictionary, default_defaults=None, leave_defaults=False):
     """Modify dictionary to put values from DEFAULTS key into other keys.
 
-    DEFAULTS key will no longer exist in dictionary. dictionary must be
-    a dictionary of dictionaries.
+    Unless leave_defaults is set to True, the DEFAULTS key will no longer exist
+    in dictionary. dictionary must be a dictionary of dictionaries.
 
     Example usage:
 
@@ -2907,7 +5305,10 @@ def apply_defaults(dictionary, default_defaults=None):
             dictionary['DEFAULTS'].setdefault(default_key, default_value)
 
     if 'DEFAULTS' in dictionary:
-        defaults = dictionary.pop('DEFAULTS')
+        if leave_defaults:
+            defaults = dictionary.get('DEFAULTS')
+        else:
+            defaults = dictionary.pop('DEFAULTS')
         for k, v in dictionary.iteritems():
             dictionary[k] = dict(defaults, **v)
 
@@ -3184,6 +5585,85 @@ if DYNAMICVIEW_INSTALLED:
                 yield IRelatable(r)
 
 
+# Static Utilities ##########################################################
+
+def create_zenpack_srcdir(zenpack_name):
+    """Create a new ZenPack source directory."""
+    import shutil
+    import errno
+
+    print "Creating source directory for {}:".format(zenpack_name)
+
+    zenpack_name_parts = zenpack_name.split('.')
+
+    packages = reduce(
+        lambda x, y: x + ['.'.join((x[-1], y))],
+        zenpack_name_parts[1:],
+        ['ZenPacks'])
+
+    namespace_packages = packages[:-1]
+
+    # Create ZenPacks.example.Thing/ZenPacks/example/Thing directory.
+    module_directory = os.path.join(zenpack_name, *zenpack_name_parts)
+
+    try:
+        print "  - making directory: {}".format(module_directory)
+        os.makedirs(module_directory)
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            sys.exit("{} directory already exists.".format(zenpack_name))
+        else:
+            sys.exit(
+                "Failed to create {!r} directory: {}"
+                .format(zenpack_name, e.strerror))
+
+    # Create setup.py.
+    setup_py_fname = os.path.join(zenpack_name, 'setup.py')
+    print "  - creating file: {}".format(setup_py_fname)
+    with open(setup_py_fname, 'w') as setup_py_f:
+        setup_py_f.write(
+            SETUP_PY.format(
+                zenpack_name=zenpack_name,
+                namespace_packages=namespace_packages,
+                packages=packages))
+
+    # Create MANIFEST.in.
+    manifest_in_fname = os.path.join(zenpack_name, 'MANIFEST.in')
+    print "  - creating file: {}".format(manifest_in_fname)
+    with open(manifest_in_fname, 'w') as manifest_in_f:
+        manifest_in_f.write("graft ZenPacks")
+
+    # Create __init__.py files in all namespace directories.
+    for namespace_package in namespace_packages:
+        namespace_init_fname = os.path.join(
+            zenpack_name,
+            os.path.join(*namespace_package.split('.')),
+            '__init__.py')
+
+        print "  - creating file: {}".format(namespace_init_fname)
+        with open(namespace_init_fname, 'w') as namespace_init_f:
+            namespace_init_f.write(
+                "__import__('pkg_resources').declare_namespace(__name__)\n")
+
+    # Create __init__.py in ZenPack module directory.
+    init_fname = os.path.join(module_directory, '__init__.py')
+    print "  - creating file: {}".format(init_fname)
+    with open(init_fname, 'w') as init_f:
+        init_f.write(
+            "from . import zenpacklib\n\n"
+            "zenpacklib.load_yaml()\n")
+
+    # Create zenpack.yaml in ZenPack module directory.
+    yaml_fname = os.path.join(module_directory, 'zenpack.yaml')
+    print "  - creating file: {}".format(yaml_fname)
+    with open(yaml_fname, 'w') as yaml_f:
+        yaml_f.write("name: {}".format(zenpack_name))
+
+    # Copy zenpacklib.py (this file) into ZenPack module directory.
+    print "  - copying: {} to {}".format(__file__, module_directory)
+    shutil.copy(__file__, module_directory)
+
+
 # Templates #################################################################
 
 JS_LINK_FROM_GRID = """
@@ -3248,10 +5728,7 @@ Ext.apply(Zenoss.render, {
 
 });
 
-Ext.define("Zenoss.component.ZPLComponentGridPanel", {
-    alias: ["widget.ZPLComponentGridPanel"],
-    extend: "Zenoss.component.ComponentGridPanel",
-
+ZC.ZPLComponentGridPanel = Ext.extend(ZC.ComponentGridPanel, {
     subComponentGridPanel: false,
 
     jumpToEntity: function(uid, meta_type) {
@@ -3301,9 +5778,9 @@ Ext.define("Zenoss.component.ZPLComponentGridPanel", {
     }
 });
 
-Ext.define("Zenoss.ZPLRenderableDisplayField", {
-    extend: "Ext.form.DisplayField",
-    alias: ['widget.ZPLRenderableDisplayField'],
+Ext.reg('ZPLComponentGridPanel', ZC.ZPLComponentGridPanel);
+
+Zenoss.ZPLRenderableDisplayField = Ext.extend(Zenoss.DisplayField, {
     constructor: function(config) {
         if (typeof(config.renderer) == 'string') {
           config.renderer = eval(config.renderer)
@@ -3312,4 +5789,271 @@ Ext.define("Zenoss.ZPLRenderableDisplayField", {
     }
 });
 
+Ext.reg('ZPLRenderableDisplayField', 'Zenoss.ZPLRenderableDisplayField');
+
 """.strip()
+
+
+USAGE = """
+Usage: {} <command> [options]
+
+Available commands and example options:
+
+  # Create a new ZenPack source directory.
+  create ZenPacks.example.MyNewPack
+
+  # Check zenpack.yaml for errors.
+  lint zenpack.yaml
+
+  # Print yUML (http://yuml.me/) class diagram source based on zenpack.yaml.
+  class_diagram yuml zenpack.yaml
+
+  # Export existing monitoring templates to yaml.
+  dump_templates ZenPacks.example.AlreadyInstalled
+
+  # Convert a pre-release zenpacklib.ZenPackSpec to yaml.
+  py_to_yaml ZenPacks.example.AlreadyInstalled
+
+  # Print zenpacklib version.
+  version
+""".lstrip()
+
+
+SETUP_PY = """
+################################
+# These variables are overwritten by Zenoss when the ZenPack is exported
+# or saved.  Do not modify them directly here.
+# NB: PACKAGES is deprecated
+NAME = "{zenpack_name}"
+VERSION = "1.0.0dev"
+AUTHOR = "Your Name Here"
+LICENSE = ""
+NAMESPACE_PACKAGES = {namespace_packages}
+PACKAGES = {packages}
+INSTALL_REQUIRES = []
+COMPAT_ZENOSS_VERS = ""
+PREV_ZENPACK_NAME = ""
+# STOP_REPLACEMENTS
+################################
+# Zenoss will not overwrite any changes you make below here.
+
+from setuptools import setup, find_packages
+
+
+setup(
+    # This ZenPack metadata should usually be edited with the Zenoss
+    # ZenPack edit page.  Whenever the edit page is submitted it will
+    # overwrite the values below (the ones it knows about) with new values.
+    name=NAME,
+    version=VERSION,
+    author=AUTHOR,
+    license=LICENSE,
+
+    # This is the version spec which indicates what versions of Zenoss
+    # this ZenPack is compatible with
+    compatZenossVers=COMPAT_ZENOSS_VERS,
+
+    # previousZenPackName is a facility for telling Zenoss that the name
+    # of this ZenPack has changed.  If no ZenPack with the current name is
+    # installed then a zenpack of this name if installed will be upgraded.
+    prevZenPackName=PREV_ZENPACK_NAME,
+
+    # Indicate to setuptools which namespace packages the zenpack
+    # participates in
+    namespace_packages=NAMESPACE_PACKAGES,
+
+    # Tell setuptools what packages this zenpack provides.
+    packages=find_packages(),
+
+    # Tell setuptools to figure out for itself which files to include
+    # in the binary egg when it is built.
+    include_package_data=True,
+
+    # Indicate dependencies on other python modules or ZenPacks.  This line
+    # is modified by zenoss when the ZenPack edit page is submitted.  Zenoss
+    # tries to put add/delete the names it manages at the beginning of this
+    # list, so any manual additions should be added to the end.  Things will
+    # go poorly if this line is broken into multiple lines or modified to
+    # dramatically.
+    install_requires=INSTALL_REQUIRES,
+
+    # Every ZenPack egg must define exactly one zenoss.zenpacks entry point
+    # of this form.
+    entry_points={{
+        'zenoss.zenpacks': '%s = %s' % (NAME, NAME),
+    }},
+
+    # All ZenPack eggs must be installed in unzipped form.
+    zip_safe=False,
+)
+""".lstrip()
+
+
+if __name__ == '__main__':
+    from Products.ZenUtils.ZenScriptBase import ZenScriptBase
+
+    class ZPLCommand(ZenScriptBase):
+        def run(self):
+            args = sys.argv[1:]
+
+            if len(args) == 2 and args[0] == 'lint':
+                filename = args[1]
+
+                with open(filename, 'r') as file:
+                    linecount = len(file.readlines())
+
+                # Change our logging output format.
+                logging.getLogger().handlers = []
+                for logger in logging.Logger.manager.loggerDict.values():
+                    logger.handlers = []
+                handler = logging.StreamHandler(sys.stdout)
+                formatter = logging.Formatter(
+                    fmt='%s:%s:0: %%(message)s' % (filename, linecount))
+                handler.setFormatter(formatter)
+                logging.getLogger().addHandler(handler)
+
+                try:
+                    with open(filename, 'r') as stream:
+                        yaml.load(stream, Loader=WarningLoader)
+                except Exception, e:
+                    LOG.exception(e)
+
+            elif len(args) == 2 and args[0] == 'py_to_yaml':
+                zenpack_name = args[1]
+
+                self.connect()
+                zenpack = self.dmd.ZenPackManager.packs._getOb(zenpack_name)
+                if zenpack is None:
+                    LOG.error("ZenPack '%s' not found." % zenpack_name)
+                    return
+                zenpack_init_py = os.path.join(os.path.dirname(inspect.getfile(zenpack.__class__)), '__init__.py')
+
+                # create a dummy zenpacklib sufficient to be used in an
+                # __init__.py, so we can capture export the data.
+                zenpacklib_module = create_module("zenpacklib")
+                zenpacklib_module.ZenPackSpec = type('ZenPackSpec', (dict,), {})
+
+                def zpl_create(self):
+                    zenpacklib_module.CFG = dict(self)
+                zenpacklib_module.ZenPackSpec.create = zpl_create
+
+                stream = open(zenpack_init_py, 'r')
+                inputfile = stream.read()
+
+                # tweak the input slightly.
+                inputfile = re.sub(r'from .* import zenpacklib', '', inputfile)
+                inputfile = re.sub(r'__file__', '"%s"' % zenpack_init_py, inputfile)
+
+                # Kludge 'from . import' into working.
+                import site
+                site.addsitedir(os.path.dirname(zenpack_init_py))
+                inputfile = re.sub(r'from . import', 'import', inputfile)
+
+                g = dict(zenpacklib=zenpacklib_module)
+                l = dict()
+                exec inputfile in g, l
+
+                CFG = zenpacklib_module.CFG
+                CFG['name'] = zenpack_name
+
+                # convert the cfg dictionary to yaml
+                specparams = ZenPackSpecParams(**CFG)
+
+                # Dig around in ZODB and add any defined monitoring templates
+                # to the spec.
+                templates = self.zenpack_templatespecs(zenpack_name)
+                for dc_name in templates:
+                    if dc_name not in specparams.device_classes:
+                        LOG.warning("Device class '%s' was not defined in %s - adding to the YAML file.  You may need to adjust the 'create' and 'remove' options.",
+                                    dc_name, zenpack_init_py)
+                        specparams.device_classes[dc_name] = DeviceClassSpecParams(specparams, dc_name)
+
+                    # And merge in the templates we found in ZODB.
+                    specparams.device_classes[dc_name].templates.update(templates[dc_name])
+
+                outputfile = yaml.dump(specparams, Dumper=Dumper)
+
+                # tweak the yaml slightly.
+                outputfile = outputfile.replace("__builtin__.object", "object")
+
+                print outputfile
+
+            elif len(args) == 2 and args[0] == 'dump_templates':
+                zenpack_name = args[1]
+                self.connect()
+
+                templates = self.zenpack_templatespecs(zenpack_name)
+                zpsp = ZenPackSpecParams(zenpack_name, device_classes={x: {} for x in templates})
+                for dc_name in templates:
+                    zpsp.device_classes[dc_name].templates = templates[dc_name]
+
+                print yaml.dump(zpsp, Dumper=Dumper)
+
+            elif len(args) == 3 and args[0] == "class_diagram":
+                diagram_type = args[1]
+                filename = args[2]
+
+                with open(filename, 'r') as stream:
+                    CFG = yaml.load(stream, Loader=Loader)
+
+                if diagram_type == 'yuml':
+                    print "# Classes"
+                    for cname in sorted(CFG.classes):
+                        print "[{}]".format(cname)
+
+                    print "\n# Inheritence"
+                    for cname in CFG.classes:
+                        cspec = CFG.classes[cname]
+                        for baseclass in cspec.bases:
+                            if type(baseclass) != str:
+                                baseclass = aq_base(baseclass).__name__
+                            print "[{}]^-[{}]".format(baseclass, cspec.name)
+
+                    print "\n# Containing Relationships"
+                    for crspec in CFG.class_relationships:
+                        if crspec.cardinality == '1:MC':
+                            print "[{}]++{}-{}[{}]".format(
+                                crspec.left_class, crspec.left_relname,
+                                crspec.right_relname, crspec.right_class)
+
+                    print "\n# Non-Containing Relationships"
+                    for crspec in CFG.class_relationships:
+                        if crspec.cardinality == '1:1':
+                            print "[{}]{}-.-{}[{}]".format(
+                                crspec.left_class, crspec.left_relname,
+                                crspec.right_relname, crspec.right_class)
+                        if crspec.cardinality == '1:M':
+                            print "[{}]{}-.-{}++[{}]".format(
+                                crspec.left_class, crspec.left_relname,
+                                crspec.right_relname, crspec.right_class)
+                        if crspec.cardinality == 'M:M':
+                            print "[{}]++{}-.-{}++[{}]".format(
+                                crspec.left_class, crspec.left_relname,
+                                crspec.right_relname, crspec.right_class)
+                else:
+                    LOG.error("Diagram type '%s' is not supported.", diagram_type)
+
+            elif len(args) == 2 and args[0] == "create":
+                create_zenpack_srcdir(args[1])
+
+            elif len(args) == 1 and args[0] == "version":
+                print __version__
+
+            else:
+                print USAGE.format(sys.argv[0])
+
+        def zenpack_templatespecs(self, zenpack_name):
+            zenpack = self.dmd.ZenPackManager.packs._getOb(zenpack_name, None)
+            if zenpack is None:
+                LOG.error("ZenPack '%s' not found." % zenpack_name)
+                return
+
+            templates = collections.defaultdict(dict)
+            for deviceclass in [x for x in zenpack.packables() if x.meta_type == 'DeviceClass']:
+                for template in deviceclass.getAllRRDTemplates():
+                    dc_name = template.deviceClass().getOrganizerName()
+                    templates[dc_name][template.id] = RRDTemplateSpecParams.fromObject(template)
+            return templates
+
+    script = ZPLCommand()
+    script.run()
