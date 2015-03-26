@@ -19,7 +19,8 @@ $ZENHOME/ZenPacks/easy-install.pth.
 """
 
 from . import zenpacklib
-from ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent import NeutronIntegrationComponent
+
+from .NeutronIntegrationComponent import NeutronIntegrationComponent
 
 
 # Useful to avoid making literal string references to module and class names
@@ -143,7 +144,7 @@ CFG = zenpacklib.ZenPackSpec(
                                                    'label': 'Neutron ML2 Type Drivers',
                                                    'default': [],
                                                    'type': 'lines'},
-                'neutron_ini':                {'api_only': True,
+                'neutron_ini':                    {'api_only': True,
                                                    'default': None}
             }
         },
@@ -234,14 +235,11 @@ CFG = zenpacklib.ZenPackSpec(
             'dynamicview_relations': {
                 'impacts': ['tenant']
             }
-
         },
 
         # Component Types ############################################
 
         'Tenant': {
-            # Note: NeutronIntegrationComponent must be listed first so that its
-            # index_object is called.
             'base': [NeutronIntegrationComponent, 'OpenstackComponent'],
             'meta_type': 'OpenStackInfrastructureTenant',
             'label': 'Tenant',
@@ -249,6 +247,13 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'tenantId':   {'grid_display': False, 'label': 'Tenant ID'},
                 'description': {'label': 'Description', 'content_width': 180},
+                'implementation_components': {
+                    'label': 'Neutron Implementation',
+                    'grid_display': False,
+                    'type_': 'entity',
+                    'api_only': True,
+                    'api_backendtype': 'method'
+                }
             },
             'dynamicview_views': ['service_view'],
             'dynamicview_relations': {
@@ -529,7 +534,7 @@ CFG = zenpacklib.ZenPackSpec(
             #     # 'orgComponent': {'grid_display': False, },
             #     # 'orgComponents': {'render_with_type': False, },
             #     # Provide better contextual naming for the relationships in the UI.
-            },            
+            },
             'dynamicview_relations': {
                 'impacts': ['networks', 'subnets', 'routers'],
                 'impacted_by': ['hostedOn'],
@@ -548,6 +553,13 @@ CFG = zenpacklib.ZenPackSpec(
                 'netStatus':      {'label': 'Status', 'order': 12.7, 'label_width': 35},
                 'netType':        {'label': 'Type', 'order': 12.10, 'label_width': 20},
                 'title':          {'label': 'Network', 'grid_display': False},
+                'implementation_components': {
+                    'label': 'Neutron Implementation',
+                    'grid_display': False,
+                    'type_': 'entity',
+                    'api_only': True,
+                    'api_backendtype': 'method'
+                }
             },
             'relationships': {
                 'ports':          {'grid_display': True, 'label_width': 25},
@@ -555,7 +567,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'subnets':        {'grid_display': True, 'label_width': 35},
                 # 'tenant':         {'grid_display': True, 'label_width': 35},
                 'neutronAgents':  {'grid_display': False},
-                },
+            },
             'dynamicview_relations': {
                 'impacted_by': ['neutronAgents'],
                 'impacts': ['subnets', 'tenant']
@@ -573,15 +585,22 @@ CFG = zenpacklib.ZenPackSpec(
                                     'label_width': 30,
                                     'content_width': 60},
                 'dns_nameservers': {'grid_display': False},
-                'gateway_ip':      {'label': 'Gateway', 
+                'gateway_ip':      {'label': 'Gateway',
                                     'label_width': 50,
                                     'content_width': 70},
+                'implementation_components': {
+                    'label': 'Neutron Implementation',
+                    'grid_display': False,
+                    'type_': 'entity',
+                    'api_only': True,
+                    'api_backendtype': 'method'
+                }
             },
             'relationships': {
                 'network':        {'label': 'Network', 'label_width': 50},
                 'neutronAgents':  {'grid_display': False},
                 'routers':        {'grid_display': True, 'label_width': 35},
-                },
+            },
             'dynamicview_relations': {
                 'impacted_by': ['network', 'routers', 'neutronAgents'],
                 'impacts': ['port', 'tenant']
@@ -589,7 +608,7 @@ CFG = zenpacklib.ZenPackSpec(
         },
 
         'Router': {
-            'base': 'LogicalComponent',
+            'base': [NeutronIntegrationComponent, 'LogicalComponent'],
             'meta_type': 'OpenStackInfrastructureRouter',
             'label': 'Router',
             'order': 15,
@@ -600,6 +619,13 @@ CFG = zenpacklib.ZenPackSpec(
                 'routes':         {'label': 'Routes', 'grid_display': False},
                 'status':         {'label': 'Status', 'label_width': 35},
                 'title':          {'label': 'Router', 'grid_display': False},
+                'implementation_components': {
+                    'label': 'Neutron Implementation',
+                    'grid_display': False,
+                    'type_': 'entity',
+                    'api_only': True,
+                    'api_backendtype': 'method'
+                }
             },
             'relationships': {
                 'network':        {'label': 'External Network', 'content_width': 100},
@@ -624,12 +650,19 @@ CFG = zenpacklib.ZenPackSpec(
                 'status':          {'label': 'Status', 'label_width': 35},
                 'title':           {'label': 'Port Name', 'grid_display': False},
                 'vif_type':        {'label': 'Type', 'label_width': 35},
+                'implementation_components': {
+                    'label': 'Neutron Implementation',
+                    'grid_display': False,
+                    'type_': 'entity',
+                    'api_only': True,
+                    'api_backendtype': 'method'
+                }
             },
             'relationships': {
                 'network':         {'label': 'Network', 'label_width': 50},
                 'subnets':         {'grid_display': True, 'label_width': 35},
                 'floatingIps':     {'grid_display': True, 'label_width': 35},
-                'instance':        {'grid_display': True, 
+                'instance':        {'grid_display': True,
                                     'content_width': 40,
                                     'label_width': 40},
             },
@@ -640,7 +673,7 @@ CFG = zenpacklib.ZenPackSpec(
         },
 
         'FloatingIp': {
-            'base': 'LogicalComponent',
+            'base': [NeutronIntegrationComponent, 'LogicalComponent'],
             'meta_type': 'OpenStackInfrastructureFloatingIp',
             'label': 'Floating IP',
             'order': 19,
@@ -652,6 +685,13 @@ CFG = zenpacklib.ZenPackSpec(
                 'floating_network_id':    {'grid_display': False},
                 'port_id':                {'grid_display': False},
                 'status':                 {'label': 'Status'},
+                'implementation_components': {
+                    'label': 'Neutron Implementation',
+                    'grid_display': False,
+                    'type_': 'entity',
+                    'api_only': True,
+                    'api_backendtype': 'method'
+                }
             },
             'relationships': {
                 'network':                {'grid_display': True},

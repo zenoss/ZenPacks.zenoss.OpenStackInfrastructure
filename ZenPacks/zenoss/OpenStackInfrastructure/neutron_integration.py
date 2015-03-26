@@ -115,7 +115,7 @@ class BaseNeutronImplementationComponent(object):
     def getNeutronIntegrationKeys(self):
         return []
 
-    def index_object(self, **kwargs):
+    def index_object(self, idxs=None):
         if self.neutron_plugin_name is None:
             raise ValueError("neutron_plugin_name must be set in subclass %s" % self.__class__)
 

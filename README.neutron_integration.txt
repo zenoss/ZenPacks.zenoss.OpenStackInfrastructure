@@ -165,8 +165,8 @@ class Network(DeviceComponent):
 
         return ['ml2.myswitch' + '|'.join(keyvalues)]
 
-    def index_object(self, **kwargs):
-        super(Network, self).index_object(kwargs)
+    def index_object(self, idxs=None):
+        super(Network, self).index_object(idxs=idxs)
         if openstack:
             index_implementation_object(self)
 

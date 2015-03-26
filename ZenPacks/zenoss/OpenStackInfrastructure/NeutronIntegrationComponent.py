@@ -12,7 +12,6 @@ log = logging.getLogger('zen.OpenStack.neutron_integration')
 
 import zope.component
 
-from . import zenpacklib
 
 from Products.Zuul.interfaces import ICatalogTool
 
@@ -83,14 +82,41 @@ class NeutronIntegrationComponent(object):
         catalog = get_neutron_implementation_catalog(self.dmd)
         return [brain.getObject() for brain in catalog(getNeutronIntegrationKeys=keys)]
 
-    def index_object(self, **kwargs):
-        zenpacklib.CatalogBase.index_object(self)
+    def index_object(self, idxs=None):
+        from .OpenstackComponent import OpenstackComponent
+        super(OpenstackComponent, self).index_object(idxs=idxs)
 
         catalog = get_neutron_core_catalog(self.dmd)
         catalog.catalog_object(self, self.getPrimaryId())
 
     def unindex_object(self):
-        zenpacklib.CatalogBase.unindex_object(self)
+        from .OpenstackComponent import OpenstackComponent
+        super(OpenstackComponent, self).unindex_object()
 
         catalog = get_neutron_core_catalog(self.dmd)
         catalog.uncatalog_object(self.getPrimaryId())
+
+    def getDefaultGraphDefs(self, drange=None):
+        """
+        Return graph definitions for this component along with all graphs
+        from the implementation components
+        """
+        from .OpenstackComponent import OpenstackComponent
+        graphs = super(OpenstackComponent, self).getDefaultGraphDefs(drange=drange)
+        for component in self.implementation_components():
+            for graphdef in component.getDefaultGraphDefs(drange, drange=drange):
+                graphs.append(graphdef)
+
+        return graphs
+
+    def getGraphObjects(self, drange=None):
+        """
+        Return graph definitions for this software comoponent, along with
+        any graphs from the associated implementation components.
+        This method is for 5.x compatibility
+        """
+        from .OpenstackComponent import OpenstackComponent
+        graphs = super(OpenstackComponent, self).getGraphObjects(self)
+        for component in self.implementation_components():
+            graphs.extend(component.getGraphObjects())
+        return graphs
