@@ -1,15 +1,26 @@
 #!/usr/bin/env python
 
 ##############################################################################
+# This program is part of zenpacklib, the ZenPack API.
+# Copyright (C) 2013-2015  Zenoss, Inc.
 #
-# Copyright (C) Zenoss, Inc. 2013-2015, all rights reserved.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version.
 #
-# This content is made available according to terms specified in
-# License.zenoss under the directory where your Zenoss product is installed.
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
 #
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+# USA.
 ##############################################################################
 
-"""zenpacklib - ZenPack API abstraction.
+"""zenpacklib - ZenPack API.
 
 This module provides a single integration point for common ZenPacks.
 
@@ -1302,12 +1313,15 @@ class ZenPackSpec(Spec):
 
         # The parameters from which this zenpackspec was originally
         # instantiated.
-        self.specparams = ZenPackSpecParams(
-            name,
-            zProperties=zProperties,
-            classes=classes,
-            class_relationships=class_relationships,
-            device_classes=device_classes)
+        if YAML_INSTALLED:
+            self.specparams = ZenPackSpecParams(
+                name,
+                zProperties=zProperties,
+                classes=classes,
+                class_relationships=class_relationships,
+                device_classes=device_classes)
+        else:
+            self.specparams = None
 
         self.name = name
         self.NEW_COMPONENT_TYPES = []
@@ -5030,7 +5044,7 @@ def relationships_from_yuml(yuml):
 
     """
     classes = []
-    match_comment = re.compile(r'^\s*//').search
+    match_comment = re.compile(r'^//').search
 
     match_line = re.compile(
         r'\[(?P<left_classname>[^\]]+)\]'
@@ -5048,13 +5062,17 @@ def relationships_from_yuml(yuml):
         yuml_lines = yuml.strip().splitlines()
 
     for line in yuml_lines:
+        line = line.strip()
+
+        if not line:
+            continue
+
         if match_comment(line):
             continue
 
         match = match_line(line)
         if not match:
-            LOG.error("parse error in relationships_from_yuml at %s" % line)
-            continue
+            raise ValueError("parse error in relationships_from_yuml at %s" % line)
 
         left_class = match.group('left_classname')
         right_class = match.group('right_classname')
