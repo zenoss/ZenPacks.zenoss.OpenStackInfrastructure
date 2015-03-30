@@ -81,7 +81,7 @@ def get_neutron_core_catalog(dmd):
             pass
 
         else:
-            from ZenPacks.zenoss.OpenStackInfrastructure.neutron_implementation import all_core_components
+            from .NeutronIntegrationComponent import all_core_components
 
             for obj in all_core_components(dmd):
                 catalog.catalog_object(obj, obj.getPrimaryId())
