@@ -11,14 +11,22 @@
 #
 ###########################################################################
 
-import json
+import logging
+LOG = logging.getLogger('zen.OpenStackInfrastructure.parsers.%s' % __name__)
 
+import json
 from Products.ZenRRD.CommandParser import CommandParser
 
 
 class endpoint(CommandParser):
     def processResults(self, cmd, result):
-        data = json.loads(cmd.result.output)
+
+        try:
+            data = json.loads(cmd.result.output)
+        except ValueError:
+            LOG.error("Invalid JSON: cmd.result.output: %s", cmd.result.output)
+            return
+
         dp_map = dict([(dp.id, dp) for dp in cmd.points])
 
         for name, dp in dp_map.items():
