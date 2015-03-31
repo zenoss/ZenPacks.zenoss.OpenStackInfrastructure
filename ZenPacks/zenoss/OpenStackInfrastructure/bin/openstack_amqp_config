@@ -36,8 +36,13 @@ fi
 sudo rabbitmqctl clear_permissions -p "$AMQP_VIRTUAL_HOST" "$AMQP_USERID"
 sudo rabbitmqctl set_permissions -p "$AMQP_VIRTUAL_HOST" "$AMQP_USERID" 'zenoss.openstack.*' 'zenoss.openstack.*' '^$'
 
+
+
+CURRENTDIR=$(dirname $(realpath -s $0))
+PARENTDIR=$(dirname $CURRENTDIR)
+
 # Create any required exchanges
-$ZENHOME/libexec/openstack_amqp_init.py
+$PARENTDIR/openstack_amqp_init.py
 
 echo ""
 echo "OpenStack Configuration"
