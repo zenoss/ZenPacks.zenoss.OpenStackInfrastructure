@@ -91,17 +91,14 @@ performance data will not be collected until the following steps are performed.
 
 ===Zenoss Configuration Steps===
 
-On your zenoss host in 4.X, you must run the
+On the zenoss host in Zenoss 4.X, or rabbitmq container in Zenoss 5.X: 
+
+* ssh in as the zenoss user:
+* export ZP_DIR=$ZENHOME/ZenPacks/ZenPacks.zenoss.OpenStackInfrastructure*
+* Now execute:
 
 <syntaxhighlight lang="bash">
-   openstack_amqp_config
-</syntaxhighlight>
-
-On your rabbitmq container in 5.X, you must run the
-following command as the zenoss user:
-
-<syntaxhighlight lang="bash">
-   $ZENHOME/ZenPacks/ZenPacks.zenoss.OpenStackInfrastructure*/ZenPacks/zenoss/OpenStackInfrastructure/bin/openstack_amqp_config
+   $ZPDIR/ZenPacks/zenoss/OpenStackInfrastructure/bin/openstack_amqp_config
 </syntaxhighlight>
 
 This script will create a new user in rabbitmq and set up its permissions.  It
