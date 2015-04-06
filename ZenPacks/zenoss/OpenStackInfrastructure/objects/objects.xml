@@ -774,30 +774,24 @@ True
 </object>
 </tomanycont>
 </object>
-<object id='openstackQueues' module='Products.ZenModel.BasicDataSource' class='BasicDataSource'>
+<object id='openstackQueues' module='ZenPacks.zenoss.OpenStackInfrastructure.datasources.QueueSizeDataSource' class='QueueSizeDataSource'>
 <property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
-COMMAND
+OpenStack AMQP Queue Size
 </property>
 <property type="boolean" id="enabled" mode="w" >
 True
 </property>
-<property type="string" id="eventClass" mode="w" >
-/Cmd/Fail
+<property type="string" id="component" mode="w" >
+${here/id}
 </property>
 <property type="int" id="severity" mode="w" >
 3
 </property>
-<property type="string" id="commandTemplate" mode="w" >
-${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/queue_counts.py '${here/id}'
-</property>
-<property type="int" id="cycletime" mode="w" >
+<property type="string" id="cycletime" mode="w" >
 300
 </property>
-<property type="boolean" id="usessh" mode="w" >
-False
-</property>
-<property type="string" id="parser" mode="w" >
-ZenPacks.zenoss.OpenStackInfrastructure.parsers.OpenStackQueue
+<property type="string" id="plugin_classname" mode="w" >
+ZenPacks.zenoss.OpenStackInfrastructure.datasources.QueueSizeDataSource.QueueSizeDataSourcePlugin
 </property>
 <tomanycont id='datapoints'>
 <object id='eventQueueCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>

@@ -193,16 +193,13 @@
       type: OpenStack Neutron Agent Status
 
     openstackQueues:
-      commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/queue_counts.py '${here/id}'
       cycletime: 300
+      type: OpenStack AMQP Queue Size
       datapoints:
         eventQueueCount:
           rrdmin: 0
         perfQueueCount:
           rrdmin: 0
-      parser: ZenPacks.zenoss.OpenStackInfrastructure.parsers.OpenStackQueue
-      type: COMMAND
-      usessh: false
 
     openstack:
       commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/poll_openstack.py '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}' '${here/zOpenStackAuthUrl}' '${here/zOpenStackRegionName}'
