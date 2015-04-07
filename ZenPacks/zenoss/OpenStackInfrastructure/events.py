@@ -13,6 +13,7 @@ from Products.ZenUtils.Utils import prepId
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import (get_subnets_from_fixedips,
                                                            get_port_instance,
                                                            getNetSubnetsGws_from_GwInfo,
+                                                           get_port_fixedips,
                                                            )
 import ast
 
@@ -499,7 +500,9 @@ def port_update(device, dmd, evt):
     if hasattr(evt, 'trait_fixed_ips'):
         port_fips = ast.literal_eval(evt.trait_fixed_ips)
         port_subnets = get_subnets_from_fixedips(port_fips)
+        port_fixedips = get_port_fixedips(port_fips)
         setattr(objmap, 'set_subnets', port_subnets)
+        setattr(objmap, 'fixed_ip_list', port_fixedips)
 
     return [objmap]
 
