@@ -27,7 +27,7 @@ This module provides a single integration point for common ZenPacks.
 """
 
 # PEP-396 version. (https://www.python.org/dev/peps/pep-0396/)
-__version__ = "1.0.0dev"
+__version__ = "1.1.0dev"
 
 
 import logging
@@ -194,15 +194,6 @@ class ZenPack(ZenPackBase):
             d.buildRelations()
 
     def install(self, app):
-
-        if not YAML_INSTALLED:
-            LOG.fatal('PyYAML is required by %s.  Try "easy_install PyYAML" first.' % self.id)
-            sys.exit(1)
-
-        if not OrderedDict:
-            LOG.fatal('ordereddict is required by %s. Try "easy_install ordereddict" first.' % self.id)
-            sys.exit(1)
-
         # create device classes and set zProperties on them
         for dcname, dcspec in self.device_classes.iteritems():
             if dcspec.create:
@@ -229,6 +220,9 @@ class ZenPack(ZenPackBase):
                 mtspec.create(self.dmd)
 
     def remove(self, app, leaveObjects=False):
+        if self._v_specparams is None:
+            return
+
         from Products.Zuul.interfaces import ICatalogTool
         if leaveObjects:
             # Check whether the ZPL-managed monitoring templates have
@@ -320,18 +314,21 @@ class ZenPack(ZenPackBase):
         # objects, which allow us to override their behavior without disrupting
         # the original objects.
 
-        class FilteredZenPackable(zope.proxy.ProxyBase):
+        import Acquisition
+
+        class FilteredZenPackable(zope.proxy.ProxyBase, Acquisition.Explicit):
             @zope.proxy.non_overridable
             def objectValues(self):
                 # proxy the remote objects on ToManyContRelationships
-                return [FilteredZenPackable(x) for x in self._objects.values()]
+                return [FilteredZenPackable(x).__of__(x.aq_parent) for x in self._objects.values()]
 
             @zope.proxy.non_overridable
             def exportXmlRelationships(self, ofile, ignorerels=[]):
                 for rel in self.getRelationships():
                     if rel.id in ignorerels:
                         continue
-                    FilteredZenPackable(rel).exportXml(ofile, ignorerels)
+                    filtered_rel = FilteredZenPackable(rel).__of__(rel.aq_parent)
+                    filtered_rel.exportXml(ofile, ignorerels)
 
             @zope.proxy.non_overridable
             def exportXml(self, *args, **kwargs):
@@ -348,7 +345,7 @@ class ZenPack(ZenPackBase):
             @zope.proxy.non_overridable
             def packables(self):
                 packables = zope.proxy.getProxiedObject(self).packables()
-                return [FilteredZenPackable(x) for x in packables]
+                return [FilteredZenPackable(x).__of__(x.aq_parent) for x in packables]
 
         ZenPackBase.manage_exportPack(FilteredZenPack(self), args, kwargs)
 
@@ -991,9 +988,103 @@ class ComponentFormBuilder(BaseComponentFormBuilder):
                     item['renderer'] = renderer
 
 
+class ClassProperty(property):
+
+    """Decorator that works like @property for class methods.
+
+    The @property decorator doesn't work for class methods. This
+    @ClassProperty decorator does, but only for getters.
+
+    """
+    def __get__(self, cls, owner):
+        return self.fget.__get__(None, owner)()
+
+
+def ModelTypeFactory(name, bases):
+    """Return a "ZenPackified" model class given name and bases tuple."""
+
+    @ClassProperty
+    @classmethod
+    def _properties(cls):
+        """Return _properties value.
+
+        This is implemented as a property method to deal with cases
+        where ZenPacks loaded after ours in easy-install.pth monkeypatch
+        _properties on one of our base classes.
+
+        """
+        properties = OrderedDict()
+        for base in bases:
+            if hasattr(base, '_properties'):
+                for base_propdict in base._properties:
+                    # In the case of multiple bases having properties by
+                    # the same id, we want to use the first one. This is
+                    # consistent with Python method resolution order.
+                    properties.setdefault(base_propdict['id'], base_propdict)
+
+        if hasattr(cls, '_v_local_properties'):
+            for local_propdict in cls._v_local_properties:
+                # In the case of a local property having a property with
+                # the same id as one of the bases, we use the local
+                # property.
+                properties[local_propdict['id']] = local_propdict
+
+    @ClassProperty
+    @classmethod
+    def _relations(cls):
+        """Return _relations property
+
+        This is implemented as a property method to deal with cases
+        where ZenPacks loaded after ours in easy-install.pth monkeypatch
+        _relations on one of our base classes.
+
+        """
+        relations = OrderedDict()
+        for base in bases:
+            if hasattr(base, '_relations'):
+                for base_name, base_schema in base._relations:
+                    # In the case of multiple bases having relationships
+                    # by the same name, we want to use the first one.
+                    # This is consistent with Python method resolution
+                    # order.
+                    relations.setdefault(base_name, base_schema)
+
+        if hasattr(cls, '_v_local_relations'):
+            for local_name, local_schema in cls._v_local_relations:
+                # In the case of a local relationship having a
+                # relationship by the same name as one of the bases, we
+                # use the local relationship.
+                relations[local_name] = local_schema
+
+        return tuple(relations.items())
+
+    def index_object(self, idxs=None):
+        for base in bases:
+            if hasattr(base, 'index_object'):
+                try:
+                    base.index_object(self, idxs=idxs)
+                except TypeError:
+                    base.index_object(self)
+
+    def unindex_object(self):
+        for base in bases:
+            if hasattr(base, 'unindex_object'):
+                base.unindex_object(self)
+
+    attributes = {
+        '_relations': _relations,
+        'index_object': index_object,
+        'unindex_object': unindex_object,
+        }
+
+    return type(name, bases, attributes)
+
+
 def DeviceTypeFactory(name, bases):
     """Return a "ZenPackified" device class given bases tuple."""
     all_bases = (DeviceBase,) + bases
+
+    device_type = ModelTypeFactory(name, all_bases)
 
     def index_object(self, idxs=None, noips=False):
         for base in all_bases:
@@ -1003,17 +1094,9 @@ def DeviceTypeFactory(name, bases):
                 except TypeError:
                     base.index_object(self)
 
-    def unindex_object(self):
-        for base in all_bases:
-            if hasattr(base, 'unindex_object'):
-                base.unindex_object(self)
+    device_type.index_object = index_object
 
-    attributes = {
-        'index_object': index_object,
-        'unindex_object': unindex_object,
-        }
-
-    return type(name, all_bases, attributes)
+    return device_type
 
 
 Device = DeviceTypeFactory(
@@ -1022,32 +1105,11 @@ Device = DeviceTypeFactory(
 
 def ComponentTypeFactory(name, bases):
     """Return a "ZenPackified" component class given bases tuple."""
-    all_bases = (ComponentBase,) + bases
-
-    def index_object(self, idxs=None):
-        for base in all_bases:
-            if hasattr(base, 'index_object'):
-                try:
-                    base.index_object(self, idxs=idxs)
-                except TypeError:
-                    base.index_object(self)
-
-    def unindex_object(self):
-        for base in all_bases:
-            if hasattr(base, 'unindex_object'):
-                base.unindex_object(self)
-
-    attributes = {
-        'index_object': index_object,
-        'unindex_object': unindex_object,
-        }
-
-    return type(name, all_bases, attributes)
+    return ModelTypeFactory(name, (ComponentBase,) + bases)
 
 
 Component = ComponentTypeFactory(
     'Component', (BaseDeviceComponent, BaseManagedEntity))
-
 
 HardwareComponent = ComponentTypeFactory(
     'HardwareComponent', (BaseHWComponent,))
@@ -1475,6 +1537,8 @@ class ZenPackSpec(Spec):
     def register_browser_resources(self):
         """Register browser resources if they exist."""
         zenpack_path = get_zenpack_path(self.name)
+        if not zenpack_path:
+            return
 
         resource_path = os.path.join(zenpack_path, 'resources')
         if not os.path.isdir(resource_path):
@@ -2134,10 +2198,6 @@ class ClassSpec(Spec):
 
         # First inherit from bases.
         for base in self.resolved_bases:
-            if hasattr(base, '_properties'):
-                properties.extend(base._properties)
-            if hasattr(base, '_relations'):
-                relations.extend(base._relations)
             if hasattr(base, '_templates'):
                 templates.extend(base._templates)
             if hasattr(base, '_catalogs'):
@@ -2199,8 +2259,8 @@ class ClassSpec(Spec):
         # Add local templates.
         templates.extend(self.monitoring_templates)
 
-        attributes['_properties'] = tuple(properties)
-        attributes['_relations'] = tuple(relations)
+        attributes['_v_local_properties'] = tuple(properties)
+        attributes['_v_local_relations'] = tuple(relations)
         attributes['_templates'] = tuple(templates)
         attributes['_catalogs'] = catalogs
 
@@ -4527,24 +4587,6 @@ if YAML_INSTALLED:
 
     yaml.add_path_resolver(u'!ZenPackSpec', [], Loader=Loader)
 
-    def load_yaml(yaml_filename=None):
-        """Load YAML from yaml_filename.
-
-        Loads from zenpack.yaml in the current directory if
-        yaml_filename isn't specified.
-
-        """
-        if yaml_filename is None:
-            yaml_filename = os.path.join(
-                os.path.dirname(__file__), 'zenpack.yaml')
-
-        CFG = yaml.load(file(yaml_filename, 'r'), Loader=Loader)
-        if CFG:
-            CFG.create()
-        else:
-            LOG.error("Unable to load %s", yaml_filename)
-        return CFG
-
     class SpecParams(object):
         def __init__(self, **kwargs):
             # Initialize with default values
@@ -4894,7 +4936,46 @@ if YAML_INSTALLED:
     Dumper.add_representer(GraphDefinitionSpecParams, represent_spec)
     Dumper.add_representer(GraphPointSpecParams, represent_spec)
 
+
 # Public Functions ##########################################################
+
+def load_yaml(yaml_filename=None):
+    """Load YAML from yaml_filename.
+
+    Loads from zenpack.yaml in the current directory if
+    yaml_filename isn't specified.
+
+    """
+    if YAML_INSTALLED:
+        if yaml_filename is None:
+            yaml_filename = os.path.join(
+                os.path.dirname(__file__), 'zenpack.yaml')
+
+        CFG = yaml.load(file(yaml_filename, 'r'), Loader=Loader)
+    else:
+        zenpack_name = None
+
+        # Guess ZenPack name from the path.
+        dirname = __file__
+        while dirname != '/':
+            dirname = os.path.dirname(dirname)
+            basename = os.path.basename(dirname)
+            if basename.startswith('ZenPacks.'):
+                zenpack_name = basename
+                break
+
+        LOG.error(
+            '%s requires PyYAML. Run "easy_install PyYAML".',
+            zenpack_name or 'ZenPack')
+
+        # Create a simple ZenPackSpec that should be harmless.
+        CFG = ZenPackSpec(name=zenpack_name or 'NoYAML')
+
+    if CFG:
+        CFG.create()
+    else:
+        LOG.error("Unable to load %s", yaml_filename)
+    return CFG
 
 
 def enableTesting():
@@ -5230,7 +5311,10 @@ OrderAndValue = collections.namedtuple('OrderAndValue', ['order', 'value'])
 def get_zenpack_path(zenpack_name):
     """Return filesystem path for given ZenPack."""
     zenpack_module = importlib.import_module(zenpack_name)
-    return os.path.dirname(zenpack_module.__file__)
+    if hasattr(zenpack_module, '__file__'):
+        return os.path.dirname(zenpack_module.__file__)
+    else:
+        return None
 
 
 def ordered_values(iterable):
@@ -5610,6 +5694,9 @@ def create_zenpack_srcdir(zenpack_name):
     import shutil
     import errno
 
+    if os.path.exists(zenpack_name):
+        sys.exit("{} directory already exists.".format(zenpack_name))
+
     print "Creating source directory for {}:".format(zenpack_name)
 
     zenpack_name_parts = zenpack_name.split('.')
@@ -5649,7 +5736,7 @@ def create_zenpack_srcdir(zenpack_name):
     manifest_in_fname = os.path.join(zenpack_name, 'MANIFEST.in')
     print "  - creating file: {}".format(manifest_in_fname)
     with open(manifest_in_fname, 'w') as manifest_in_f:
-        manifest_in_f.write("graft ZenPacks")
+        manifest_in_f.write("graft ZenPacks\n")
 
     # Create __init__.py files in all namespace directories.
     for namespace_package in namespace_packages:
@@ -5675,11 +5762,11 @@ def create_zenpack_srcdir(zenpack_name):
     yaml_fname = os.path.join(module_directory, 'zenpack.yaml')
     print "  - creating file: {}".format(yaml_fname)
     with open(yaml_fname, 'w') as yaml_f:
-        yaml_f.write("name: {}".format(zenpack_name))
+        yaml_f.write("name: {}\n".format(zenpack_name))
 
     # Copy zenpacklib.py (this file) into ZenPack module directory.
     print "  - copying: {} to {}".format(__file__, module_directory)
-    shutil.copy(__file__, module_directory)
+    shutil.copy2(__file__, module_directory)
 
 
 # Templates #################################################################
