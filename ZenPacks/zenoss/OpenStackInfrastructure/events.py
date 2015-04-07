@@ -145,20 +145,21 @@ def _apply_trait_rel(evt, objmap, trait_name, class_rel):
         setattr(objmap, set_name, attrib_id)
 
 def _apply_router_gateway_info(evt, objmap):
-    ''' Get the first router gateway. This should be updated to include all '''
+    ''' Get the router gateways, network, and subnets'''
     if hasattr(evt, 'trait_external_gateway_info'):
+
         ext_gw_info = ast.literal_eval(evt.trait_external_gateway_info)
+        if ext_gw_info is not None:
+            gateways = set()
+            subnets = set()
+            (network, subnets, gateways) = getNetSubnetsGws_from_GwInfo(ext_gw_info)
 
-        gateways = set()
-        subnets = set()
-        (network, subnets, gateways) = getNetSubnetsGws_from_GwInfo(ext_gw_info)
+            net_id = make_id('network', network)
+            subnet_ids = ['subnet-{0}'.format(x) for x in subnets]
 
-        net_id = make_id('network', network)
-        subnet_ids = ['subnet-{0}'.format(x) for x in subnets]
-
-        setattr(objmap, 'gateways', list(gateways))
-        setattr(objmap, 'set_network', net_id)
-        setattr(objmap, 'set_subnets', subnet_ids)
+            setattr(objmap, 'gateways', list(gateways))
+            setattr(objmap, 'set_network', net_id)
+            setattr(objmap, 'set_subnets', subnet_ids)
 
 def _apply_dns_info(evt, objmap):
     ''' Get the dns servers for subnets as a string'''
