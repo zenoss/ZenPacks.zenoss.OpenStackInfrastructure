@@ -585,8 +585,9 @@ class OpenStackInfrastructure(PythonPlugin):
         # port
         ports = []
         for port in results['ports']:
-            if not port['tenant_id']:
-                continue
+            port_tenant = None
+            if port['tenant_id']:
+                port_tenant = 'tenant-{0}'.format(port['tenant_id'])
 
             ports.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Port',
@@ -600,7 +601,7 @@ class OpenStackInfrastructure(PythonPlugin):
                                                    port['device_id']),
                     set_network='network-{0}'.format(port['network_id']),
                     set_subnets=get_subnets_from_fixedips(port['fixed_ips']),
-                    set_tenant='tenant-{0}'.format(port['tenant_id']),
+                    set_tenant=port_tenant,
                     status=port['status'],
                     title=port['name'],
                     vif_type=port['binding:vif_type'],
