@@ -34,6 +34,7 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import (
     get_subnets_from_fixedips,
     get_port_instance,
     getNetSubnetsGws_from_GwInfo,
+    get_port_fixedips,
 )
 
 add_local_lib_path()
@@ -594,6 +595,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 data=dict(
                     admin_state_up=port['admin_state_up'],
                     device_owner=port['device_owner'],
+                    fixed_ip_list=get_port_fixedips(port['fixed_ips']),
                     id='port-{0}'.format(port['id']),
                     mac_address=port['mac_address'].upper(),
                     portId=port['id'],

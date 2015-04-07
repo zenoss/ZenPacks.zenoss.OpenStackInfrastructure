@@ -263,6 +263,14 @@ def getIpInterfaceMacs(device):
 
     return macs
 
+def get_port_fixedips(port_fips):
+    '''get formatted list of fixed_ip's from Neutron API fixed_ip structure'''
+    fixed_ips = set()
+    for _fip in port_fips:
+        fixed_ips.add(_fip.get('ip_address'))
+
+    return ', '.join(fixed_ips)
+
 def get_subnets_from_fixedips(port_fips):
     '''get formatted list of subnets from Neutron API fixed_ip structure'''
     subnets = set()
