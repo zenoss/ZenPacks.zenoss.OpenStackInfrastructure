@@ -294,11 +294,16 @@ def getNetSubnetsGws_from_GwInfo(external_gateway_info):
     gateways = set()
     subnets = set()
 
+    if not external_gateway_info:
+        return (network, subnets, gateways)
+
+    # Network may exist even if fixed_ips dont
+    network = external_gateway_info.get('network_id')
+
     external_fixed_ips = external_gateway_info.get('external_fixed_ips')
     if not external_fixed_ips:
         return (network, subnets, gateways)
 
-    network = external_gateway_info.get('network_id')
     for _ip in external_fixed_ips:
         gateways.add(_ip.get('ip_address', None))
         subnets.add(_ip.get('subnet_id', None))
