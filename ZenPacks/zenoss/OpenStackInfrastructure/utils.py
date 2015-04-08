@@ -290,16 +290,18 @@ def getNetSubnetsGws_from_GwInfo(external_gateway_info):
         type(subnets): set
         type(gateways): set
     '''
-    external_fixed_ips = external_gateway_info.get('external_fixed_ips')
-    network = external_gateway_info.get('network_id')
-
+    network = None
     gateways = set()
     subnets = set()
 
-    if external_fixed_ips:
-        for _ip in external_fixed_ips:
-            gateways.add(_ip.get('ip_address', None))
-            subnets.add(_ip.get('subnet_id', None))
+    external_fixed_ips = external_gateway_info.get('external_fixed_ips')
+    if not external_fixed_ips:
+        return (network, subnets, gateways)
+
+    network = external_gateway_info.get('network_id')
+    for _ip in external_fixed_ips:
+        gateways.add(_ip.get('ip_address', None))
+        subnets.add(_ip.get('subnet_id', None))
 
     return (network, subnets, gateways)
 

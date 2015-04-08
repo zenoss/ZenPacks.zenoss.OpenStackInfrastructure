@@ -130,7 +130,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     _routers.add(r.get('id'))
                     (net, snets, gws) = \
                         getNetSubnetsGws_from_GwInfo(r['external_gateway_info'])
-                    _networks.add(net)
+                    if net: _networks.add(net)
                     _subnets = _subnets.union(snets)
                     _gateways = _gateways.union(gws)
 
