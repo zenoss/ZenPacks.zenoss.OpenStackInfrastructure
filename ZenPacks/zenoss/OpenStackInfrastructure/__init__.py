@@ -209,6 +209,8 @@ CFG = zenpacklib.ZenPackSpec(
             'filter_display': False,
             'relationships': {
                 # Provide better contextual naming for the relationships in the UI.
+                # 'hostedOn': {'grid_display': False},
+                'hostedOn': {'order': -1, 'content_width': 100},
                 'orgComponent': {'grid_display': False,
                                  'label': 'Supporting',
                                  'render_with_type': True,
@@ -298,53 +300,44 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Instance',
             'order': 8,
             'properties': {
-                'serverId':            {'grid_display': False,
-                                        'label': 'Server ID'},   # 847424
-                'serverStatus':        {'label': 'Status',
-                                        'label_width': 65,
-                                        'order': 3.3},            # ACTIVE
-                'serverBackupEnabled': {'type_': 'boolean',
-                                        'label': 'Backup',        # False
-                                        'grid_display': False},   # DISABLED
-                'serverBackupDaily':   {'grid_display': False,
-                                        'label': 'Daily Server Backup'},   # DISABLED
-                'serverBackupWeekly':  {'grid_display': False,
-                                        'label': 'Weekly Server Backup'},   # DISABLED
-                'publicIps':           {'type_': 'lines',
-                                        'label': 'Public IPs',
-                                        'label_width': 75,
-                                        'order': 3.1},            # ['50.57.74.222']
-                'privateIps':          {'type_': 'lines',
-                                        'label': 'Private IPs',
-                                        'label_width': 75,
-                                        'order': 3.2},            # ['10.182.13.13']
-                'biosUuid':            {'label': 'BIOS UUID',
-                                        'grid_display': False},
-                'serialNumber':        {'label': 'BIOS Serial Number',
-                                        'grid_display': False,
-                                        'index_type': 'field',
-                                        'index_scope': 'global'},
-
-                # The name this insance is known by within the hypervisor (for instance,
-                # for libvirt, it would be something like 'instance-00000001')
+                'biosUuid':               {'label': 'BIOS UUID', 'grid_display': False},
+                'host':                   {'order': 3.0, 'label': 'Host',
+                                              'type_': 'entity',
+                                              'api_only': True,
+                                              'api_backendtype': 'method'},
+                'hostId':                 {'grid_display': False, 'label': 'Host ID'},
+                'hostName':               {'grid_display': False, 'index_type': 'field'},
                 'hypervisorInstanceName': {'label': 'Hypervisor Instance Name',
-                                           'grid_display': False},
-
-                'hostId':              {'grid_display': False,
-                                        'label': 'Host ID'},   # a84303c0021aa53c7e749cbbbfac265f
-                'hostName':            {'grid_display': False,
-                                        'index_type': 'field'},   # devstack1
-                'host': {'label': 'Host',   # link to the host this is running on.
-                         'type_': 'entity',
-                         'api_only': True,
-                         'api_backendtype': 'method',
-                         'order': 3.4}
+                                              'grid_display': False},
+                'privateIps':             {'order': 3.2, 'type_': 'lines',
+                                              'label': 'Private IPs',
+                                              'label_width': 100,},
+                'publicIps':              {'order': 3.1, 'type_': 'lines',
+                                              'label': 'Floating IPs',
+                                              'label_width': 100,},
+                'serialNumber':           {'label': 'BIOS Serial Number',
+                                              'grid_display': False,
+                                              'index_type': 'field',
+                                              'index_scope': 'global'},
+                'serverBackupDaily':      {'grid_display': False,
+                                              'label': 'Daily Server Backup'},
+                'serverBackupEnabled':    {'type_': 'boolean',
+                                              'label': 'Backup',
+                                              'grid_display': False},
+                'serverBackupWeekly':     {'grid_display': False,
+                                              'label': 'Weekly Server Backup'},
+                'serverId':               {'grid_display': False, 'label': 'Server ID'},
+                'serverStatus':           {'order': 3.5, 'label':
+                                              'Status', 'label_width': 65,},
             },
             'relationships': {
+                # 'host':       {'order': 1.0, 'label': 'Host'},
                 'hypervisor': {'grid_display': False},
-                'vnics':      {'grid_display': False},
-                'flavor':     {'label_width': 50, 'content_width': 50},
-                'image':      {'label_width': 50, 'content_width': 50},
+                'ports':      {'grid_display': False, 'label': 'Ports'},
+                'vnics':      {'grid_display': False, 'label': 'Vnics'},
+                'flavor':     {'order': 1.1, 'label_width': 35, 'content_width': 35},
+                'image':      {'order': 1.2, 'label_width': 35, 'content_width': 35},
+                'tenant':     {'order': 1.3, 'label_width': 45, 'content_width': 45},
             },
             'dynamicview_views': ['service_view'],
             'dynamicview_relations': {
@@ -363,10 +356,24 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Vnic',
             'order': 100,
             'properties': {
-                'macaddress': {'label': 'MAC Address',
-                               'index_type': 'field',
-                               'index_scope': 'global'}
+                'macaddress': {
+                    'order': 1.0,
+                    'content_width': 120,
+                    'label': 'MAC Address',
+                    'index_type': 'field',
+                    'index_scope': 'global',
+                    'renderer':
+                    'Zenoss.render.openstack_uppercase_renderer', },
+                'instance': {'label': 'Instance',   # link to the host this is running on.
+                         'type_': 'entity',
+                         'api_only': True,
+                         'api_backendtype': 'method',
+                         'order': 1.4}
+
             },
+            'relationships': {
+                'instance':   {'grid_display': False},
+                },
             'dynamicview_views': ['service_view'],
             'dynamicview_relations': {
                 'impacts': ['instance']
@@ -518,15 +525,19 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Neutron Agent',
             'order': 11,
             'properties': {
-                'agentId':       {'grid_display': False},
-                'type':          {'label': 'Type',
-                                  'order': 11.1,
+                'agentId':    {'grid_display': False},
+                'operStatus': {'order': 1100.9,
+                                  'label': 'Status',
+                                  'label_width': 40,
+                                  'renderer': 'Zenoss.render.openstack_ServiceOperStatus'},
+                'type':       {'label': 'Type',
+                                  'order': 1.1,
                                   'content_width': 60},
             },
             'relationships': {
-                'networks':      {'label_width': 40},
-                'subnets':       {'label_width': 35},
-                'routers':       {'label_width': 35},
+                'networks':      {'order': 1.1, 'label_width': 40},
+                'subnets':       {'order': 1.2, 'label_width': 35},
+                'routers':       {'order': 1.3, 'label_width': 35},
             },
             'dynamicview_relations': {
                 'impacts': ['networks', 'subnets', 'routers'],
@@ -540,12 +551,14 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Network',
             'order': 12,
             'properties': {
-                'admin_state_up': {'label': 'Admin State', 'content_width': 30},
+                'admin_state_up': {'order': 2.20, 'label': 'AdminState',
+                                     'label_width': 54,
+                                     'renderer': 'Zenoss.render.openstack_ServiceEnabledStatus'},
                 'netExternal':    {'grid_display': False},
-                'netId':          {'label': 'Network ID', 'grid_display': False},
-                'netStatus':      {'label': 'Status', 'order': 12.7, 'label_width': 35},
-                'netType':        {'label': 'Type', 'order': 12.10, 'label_width': 20},
-                'title':          {'label': 'Network', 'grid_display': False},
+                'netId':          {'grid_display': False},
+                'netStatus':      {'order': 2.19, 'label': 'Status', 'label_width': 35},
+                'netType':        {'order': 2.10, 'label': 'Type', 'label_width': 30},
+                'title':          {'grid_display': False},
                 'implementation_components': {
                     'label': 'Neutron Implementation',
                     'grid_display': False,
@@ -555,11 +568,12 @@ CFG = zenpacklib.ZenPackSpec(
                 }
             },
             'relationships': {
-                'ports':          {'grid_display': True, 'label_width': 25},
-                'routers':        {'grid_display': True, 'label_width': 35},
-                'subnets':        {'grid_display': True, 'label_width': 35},
-                'tenant':         {'grid_display': True, 'label_width': 35},
+                'floatingIps':    {'grid_display': False},
                 'neutronAgents':  {'grid_display': False},
+                'ports':          {'order': 1.1, 'label_width': 25},
+                'routers':        {'order': 1.2, 'label_width': 35},
+                'subnets':        {'order': 1.3, 'label_width': 35},
+                'tenant':         {'order': 1.5, 'label_width': 45, 'content_width': 45},
             },
             'dynamicview_relations': {
                 'impacted_by': ['neutronAgents', 'implementation_components'],
@@ -574,13 +588,9 @@ CFG = zenpacklib.ZenPackSpec(
             'order': 14,
             'properties': {
                 'subnetId':        {'grid_display': False},
-                'cidr':            {'label': 'CIDR',
-                                    'label_width': 30,
-                                    'content_width': 60},
+                'cidr':            {'order': 1.1, 'label': 'CIDR', 'label_width': 50, 'content_width': 70},
                 'dns_nameservers': {'grid_display': False},
-                'gateway_ip':      {'label': 'Gateway',
-                                    'label_width': 50,
-                                    'content_width': 70},
+                'gateway_ip':      {'label': 'Gateway', 'label_width': 50, 'content_width': 70},
                 'implementation_components': {
                     'label': 'Neutron Implementation',
                     'grid_display': False,
@@ -590,9 +600,11 @@ CFG = zenpacklib.ZenPackSpec(
                 }
             },
             'relationships': {
-                'network':        {'label': 'Network', 'label_width': 50},
+                'network':        {'order': 2.0, 'label': 'Network', 'label_width': 50},
                 'neutronAgents':  {'grid_display': False},
-                'routers':        {'grid_display': True, 'label_width': 35},
+                'port':           {'order': 2.1, 'label_width': 45},
+                'routers':        {'order': 2.2, 'label_width': 35},
+                'tenant':         {'order': 2.3, 'label_width': 45, 'content_width': 45},
             },
             'dynamicview_relations': {
                 'impacted_by': ['network', 'routers', 'neutronAgents', 'implementation_components'],
@@ -606,12 +618,12 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Router',
             'order': 15,
             'properties': {
-                'admin_state_up': {'label': 'AdminState', 'grid_display': False},
-                'gateways':       {'label': 'Gateways', 'type_': 'lines'},
-                'routerId':       {'label': 'Router ID', 'grid_display': False},
-                'routes':         {'label': 'Routes', 'grid_display': False},
-                'status':         {'label': 'Status', 'label_width': 35},
-                'title':          {'label': 'Router', 'grid_display': False},
+                'admin_state_up': {'order': 1.1, 'label': 'AdminState', 'grid_display': False},
+                'gateways':       {'order': 1.2, 'label': 'Gateways', 'type_': 'lines'},
+                'routerId':       {'order': 1.3, 'label': 'Router ID', 'grid_display': False},
+                'routes':         {'order': 1.4, 'label': 'Routes', 'grid_display': False},
+                'status':         {'order': 1.5, 'label': 'Status', 'label_width': 35},
+                'title':          {'order': 1.6, 'label': 'Router', 'grid_display': False},
                 'implementation_components': {
                     'label': 'Neutron Implementation',
                     'grid_display': False,
@@ -621,8 +633,11 @@ CFG = zenpacklib.ZenPackSpec(
                 }
             },
             'relationships': {
-                'network':        {'label': 'External Network', 'content_width': 100},
+                'floatingIps':    {'order': 2.3, 'label': 'FloatingIPs', 'label_width': 44},
+                'network':        {'order': 2.1, 'label': 'External Net', 'content_width': 90},
                 'neutronAgents':  {'grid_display': False},
+                'subnets':        {'order': 2.2, 'label': 'Subnets', 'label_width': 35},
+                'tenant':         {'order': 2.4, 'label_width': 45, 'content_width': 45},
             },
             'dynamicview_relations': {
                 'impacted_by': ['neutronAgents', 'implementation_components'],
@@ -687,25 +702,23 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Floating IP',
             'order': 19,
             'properties': {
-                'floatingipId':           {'label': 'Floating IP ID',
-                                           'grid_display': False},
-                'fixed_ip_address':       {'label': 'Address'},
-                'floating_ip_address':    {'grid_display': False},
-                'floating_network_id':    {'grid_display': False},
-                'port_id':                {'grid_display': False},
-                'status':                 {'label': 'Status'},
+                'floatingipId':           {'grid_display': False},
+                'fixed_ip_address':       {'order': 2.2, 'label_width': 60, 'label': 'Attached IP'},
+                'floating_ip_address':    {'order': 2.3, 'label_width': 60, 'label': 'Floating IP'},
+                'status':                 {'order': 2.6, 'label_width': 35, 'label': 'Status'},
                 'implementation_components': {
                     'label': 'Neutron Implementation',
                     'grid_display': False,
                     'type_': 'entity',
                     'api_only': True,
                     'api_backendtype': 'method'
-                }
+                },
             },
             'relationships': {
-                'network':                {'grid_display': True},
-                'port':                   {'grid_display': True},
-                'router':                 {'grid_display': True},
+                'network':        {'order': 1.1, 'label_width': 40, 'grid_display': False},
+                'port':           {'order': 1.2, 'label_width': 40},
+                'router':         {'order': 1.3, 'label_width': 30, 'content_width': 45},
+                'tenant':         {'order': 1.4, 'label_width': 45, 'content_width': 45},
                 },
             'dynamicview_relations': {
                 'impacted_by': ['router', 'implementation_components'],
