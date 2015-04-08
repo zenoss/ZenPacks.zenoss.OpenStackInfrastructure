@@ -255,6 +255,14 @@ CFG = zenpacklib.ZenPackSpec(
                     'api_backendtype': 'method'
                 }
             },
+            'relationships': {
+                'instances': {'label_width': 50},
+                'networks': {'label_width': 50},
+                'subnets': {'label_width': 50},
+                'routers': {'label_width': 50},
+                'ports': {'label_width': 50},
+                'floatingIps': {'label_width': 70},
+            },
             'dynamicview_views': ['service_view'],
             'dynamicview_relations': {
                 'impacted_by': ['instances', 'networks', 'subnets', 'implementation_components']
@@ -526,7 +534,7 @@ CFG = zenpacklib.ZenPackSpec(
             'order': 11,
             'properties': {
                 'agentId':    {'grid_display': False},
-                'operStatus': {'order': 1100.9,
+                'operStatus': {'order': 11.100,
                                   'label': 'Status',
                                   'label_width': 40,
                                   'renderer': 'Zenoss.render.openstack_ServiceOperStatus'},
