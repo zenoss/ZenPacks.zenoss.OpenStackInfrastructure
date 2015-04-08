@@ -55,6 +55,10 @@ Ext.apply(Zenoss.render, {
         }
     },
 
+    openstack_uppercase_renderer: function(value) {
+        return value.toUpperCase();
+    },
+
     openstack_uid_renderer: function(uid, name) {
         // Just straight up links to the object.
         var parts;
