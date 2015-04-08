@@ -149,7 +149,7 @@ def _apply_router_gateway_info(evt, objmap):
     if hasattr(evt, 'trait_external_gateway_info'):
 
         ext_gw_info = ast.literal_eval(evt.trait_external_gateway_info)
-        if ext_gw_info is not None:
+        if ext_gw_info:
             gateways = set()
             subnets = set()
             (network, subnets, gateways) = getNetSubnetsGws_from_GwInfo(ext_gw_info)
