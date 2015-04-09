@@ -145,6 +145,7 @@ class OpenStackInfrastructure(PythonPlugin):
         for _agent in results['agents']:
             _agent['dhcp_agent_subnets'] = []
             _subnets = []
+            _networks = []
 
             if _agent['agent_type'].lower() == 'dhcp agent':
                 dhcp_data = yield \
@@ -152,10 +153,12 @@ class OpenStackInfrastructure(PythonPlugin):
                                             % str(_agent['id']))
 
                 for network in dhcp_data['networks']:
+                    _networks.append(network.get('id'))
                     for subnet in network['subnets']:
                         _subnets.append(subnet)
 
                 _agent['dhcp_agent_subnets'] = _subnets
+                _agent['dhcp_agent_networks'] = _networks
 
         result = yield neutron_client.networks()
         results['networks'] = result['networks']
@@ -481,6 +484,10 @@ class OpenStackInfrastructure(PythonPlugin):
 
             agent_subnets = []
             agent_networks = []
+            if agent.get('dhcp_agent_networks'):
+                agent_networks = ['network-{0}'.format(x)
+                                  for x in agent['dhcp_agent_networks']]
+
             if agent.get('dhcp_agent_subnets'):
                 agent_subnets = ['subnet-{0}'.format(x)
                                  for x in agent['dhcp_agent_subnets']]
