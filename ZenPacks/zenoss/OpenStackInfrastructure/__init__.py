@@ -761,8 +761,9 @@ class ZenPack(schema.ZenPack):
         super(ZenPack, self).remove(app, leaveObjects=leaveObjects)
 
     def chmodScripts(self):
-        for script in ('poll_openstack.py', 'openstack_amqp_init.py',
-                       'queue_counts.py', 'openstack_helper.py'):
+        for script in ('poll_openstack.py',
+                       'openstack_amqp_init.py',
+                       'openstack_helper.py'):
             os.system('chmod 0755 {0}'.format(self.path(script)))
 
 # Patch last to avoid import recursion problems.
