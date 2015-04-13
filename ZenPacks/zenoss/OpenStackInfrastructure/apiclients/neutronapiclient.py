@@ -214,6 +214,12 @@ class NeutronAPIClient(object):
             client.api_call('/networks', data={'data': 'value'})
 
         """
+
+        # it could happen that OpenStack's Endpoints do not have '/'
+        # in front of 'v2.0/xxx', which will be OpenStack bug.
+        # add '/' if this is the case
+        if path[0] != '/':
+            path = '/' + path
         request = self._get_request(path, data=data, params=params, **kwargs)
         log.debug("Request URL: %s" % request.url)
 
