@@ -391,6 +391,14 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_orgComponent=zone_id
                 )))
 
+        # Find all hosts which have a neutron agent on them.
+        for agent in results['agents']:
+            host_id = prepId("host-{0}".format(agent['host']))
+            hostmap[host_id] = {
+                'hostname': agent['host'],
+                'org_id': region_id
+            }
+
         # add any user-specified hosts which we haven't already found.
         if device.zOpenStackNovaApiHosts or device.zOpenStackExtraHosts:
             log.info("Finding additional hosts")
