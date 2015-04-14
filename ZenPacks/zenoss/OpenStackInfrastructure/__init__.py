@@ -118,7 +118,8 @@ CFG = zenpacklib.ZenPackSpec(
                     'zenoss.cmd.linux.openstack.libvirt',
                     'zenoss.cmd.linux.openstack.inifiles'
                 ],
-                'zOpenStackNeutronConfigDir': '/etc/neutron'
+                'zOpenStackNeutronConfigDir': '/etc/neutron',
+                'zSshConcurrentSessions': 5,
             }
         }
     },
