@@ -28,7 +28,7 @@ from Products.Five import zcml
 from Products.ZenUtils.guid.interfaces import IGUIDManager
 from Products.ZenUtils.Utils import monkeypatch
 
-from ZenPacks.zenoss.OpenStackInfrastructure.tests.test_utils import (
+from ZenPacks.zenoss.OpenStackInfrastructure.tests.utils import (
      require_zenpack,
      create_model_data,
      addContained, addNonContained,
