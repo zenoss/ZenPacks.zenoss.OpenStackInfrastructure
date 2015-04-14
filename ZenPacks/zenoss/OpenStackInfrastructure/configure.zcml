@@ -116,4 +116,13 @@
             />
     </configure>
 
+    <!-- Call Home -->
+    <configure zcml:condition="have callHomeDeviceLink">
+        <subscriber
+            provides="Products.ZenCallHome.IDeviceResource"
+            factory=".callhome.OSIResource"
+            for=".Endpoint.Endpoint"
+            />
+    </configure>
+
 </configure>
