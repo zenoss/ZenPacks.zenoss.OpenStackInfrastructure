@@ -5012,7 +5012,7 @@ def enableTesting():
             import Products.ZenUI3
             zcml.load_config('configure.zcml', Products.ZenUI3)
 
-            if self.zenpack_module_name is None:
+            if not hasattr(self, 'zenpack_module_name') or self.zenpack_module_name is None:
                 self.zenpack_module_name = '.'.join(self.__module__.split('.')[:-2])
 
             try:

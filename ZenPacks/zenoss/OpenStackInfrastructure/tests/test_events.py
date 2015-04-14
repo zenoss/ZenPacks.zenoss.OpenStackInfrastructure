@@ -22,7 +22,7 @@ from zExceptions import NotFound
 from Products.ZenEvents.Event import buildEventFromDict
 from Products.ZenUtils.Utils import monkeypatch
 
-from ZenPacks.zenoss.OpenStackInfrastructure.tests.test_utils import create_model_data
+from ZenPacks.zenoss.OpenStackInfrastructure.tests.utils import create_model_data
 
 from Products.ZenUtils.Utils import unused
 unused(Globals)
@@ -146,7 +146,7 @@ class TestEventTransforms(zenpacklib.TestCase):
     def _create_instance5(self):
         # # Dummy up the instance (as if test_instance_creation had run, and we had instance5 in the system)
 
-        from ZenPacks.zenoss.OpenStackInfrastructure.tests.test_utils import addContained, addNonContained
+        from ZenPacks.zenoss.OpenStackInfrastructure.tests.utils import addContained, addNonContained
         from ZenPacks.zenoss.OpenStackInfrastructure.Instance import Instance
         instance1 = self.getObjByPath('components/instance1')
         instance5 = self.getObjByPath('components/server-instance5')
