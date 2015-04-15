@@ -38,7 +38,7 @@ sudo rabbitmqctl set_permissions -p "$AMQP_VIRTUAL_HOST" "$AMQP_USERID" 'zenoss.
 
 
 
-CURRENTDIR=$(dirname $(realpath -s $0))
+CURRENTDIR="$(dirname "$(which "$0")")"
 PARENTDIR=$(dirname $CURRENTDIR)
 
 # Create any required exchanges
