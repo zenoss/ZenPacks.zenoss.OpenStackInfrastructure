@@ -75,7 +75,7 @@ def openstack_instanceList(self):
 
     host = self.openstack_hostComponent()
     try:
-        return [(x.id, x.hypervisorInstanceName) for x in host.hypervisor().instances()]
+        return [(x.id, x.serverId) for x in host.hypervisor().instances()]
     except AttributeError:
         return []
 
