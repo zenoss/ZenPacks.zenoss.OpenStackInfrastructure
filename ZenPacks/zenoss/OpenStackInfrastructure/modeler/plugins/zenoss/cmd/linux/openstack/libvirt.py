@@ -65,8 +65,8 @@ class libvirt(PythonPlugin):
         data = {}
 
         try:
-            for instanceId, instanceName in device.openstack_instanceList:
-                cmd = "virsh --readonly -c 'qemu:///system' dumpxml '%s'" % instanceName
+            for instanceId, instanceUUID in device.openstack_instanceList:
+                cmd = "virsh --readonly -c 'qemu:///system' dumpxml '%s'" % instanceUUID
                 log.info("Running %s" % cmd)
                 d = yield client.run(cmd, timeout=timeout)
 
@@ -105,7 +105,7 @@ class libvirt(PythonPlugin):
                     # net pollster does.
                     vnicName = str(target.get('dev'))
                     zenossVnicId = 'vnic-%s-%s' % (instanceUuid, vnicName)
-                    ceilometerResourceId = '%s-%s-%s' % (instanceName, instanceUuid, vnicName)
+                    ceilometerResourceId = '%s-%s-%s' % (instanceUUID, instanceUuid, vnicName)
 
                     vnics.append({
                         'id': zenossVnicId,
