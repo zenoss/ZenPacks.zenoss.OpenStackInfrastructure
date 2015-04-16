@@ -33,6 +33,37 @@ Ext.onReady(function() {
         box.removeField('snmpDescr');
         box.removeField('snmpCommunity');
         box.removeField('snmpVersion');
+
+        box.addField({name: 'region_title',
+            fieldLabel: _t('Region Name'),
+            xtype: 'displayfield'});
+        box.addField({name: 'numberZones',
+            fieldLabel: _t('Number of Availability Zones'),
+            xtype: 'displayfield'});
+        box.addField({name: 'numberHosts',
+            fieldLabel: _t('Number of Hosts'),
+            xtype: 'displayfield'});
+        box.addField({name: 'numberNovaServices',
+            fieldLabel: _t('Number of Nova Services'),
+            xtype: 'displayfield'});
+        box.addField({name: 'numberNeutronAgents',
+            fieldLabel: _t('Number of Neutron Agents'),
+            xtype: 'displayfield'});
+        box.addField({name: 'numberFloatingips',
+            fieldLabel: _t('Number of Floating IP Addresses'),
+            xtype: 'displayfield'});
+        box.addField({name: 'numberTenants',
+            fieldLabel: _t('Number of Tenants'),
+            xtype: 'displayfield'});
+        box.addField({name: 'numberInstances',
+            fieldLabel: _t('Number of Virtual Machines'),
+            xtype: 'displayfield'});
+        box.addField({name: 'numberNetworks',
+            fieldLabel: _t('Number of Networks'),
+            xtype: 'displayfield'});
+        box.addField({name: 'numberRouters',
+            fieldLabel: _t('Number of Routers'),
+            xtype: 'displayfield'});
     });
 });
 
