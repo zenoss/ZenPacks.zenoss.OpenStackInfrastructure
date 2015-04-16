@@ -135,10 +135,19 @@ CFG = zenpacklib.ZenPackSpec(
             'dynamicview_views': ['service_view', 'openstack_view'],
             'dynamicview_group': 'Devices',
             'dynamicview_relations': {
-                'openstack_link': ['region'],
                 'impacts': ['hosts']
             },
             'properties': {
+                'region_title' :        {'grid_display': False},
+                'numberZones' :         {'grid_display': False},
+                'numberHosts' :         {'grid_display': False},
+                'numberNovaServices' :  {'grid_display': False},
+                'numberNeutronAgents' : {'grid_display': False},
+                'numberTenants' :       {'grid_display': False},
+                'numberInstances' :     {'grid_display': False},
+                'numberNetworks':       {'grid_display': False},
+                'numberRouters':        {'grid_display': False},
+                'numberFloatingips':    {'grid_display': False},
                 'neutron_core_plugin':            {'grid_display': False,
                                                    'label': 'Neutron Core Plugin'},
                 'neutron_mechanism_drivers':      {'grid_display': False,
@@ -386,19 +395,6 @@ CFG = zenpacklib.ZenPackSpec(
             'dynamicview_views': ['service_view'],
             'dynamicview_relations': {
                 'impacts': ['instance']
-            }
-        },
-
-        'Region': {
-            'base': 'OrgComponent',
-            'meta_type': 'OpenStackInfrastructureRegion',
-            'label': 'Region',
-            'order': 1,
-            'dynamicview_views': ['service_view', 'openstack_view'],
-            'dynamicview_relations': {
-                'openstack_link': ['childOrgs', 'softwareComponents'],
-                'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'],  # inherit
-                'impacts': ['parentOrg'],  # inherit
             }
         },
 

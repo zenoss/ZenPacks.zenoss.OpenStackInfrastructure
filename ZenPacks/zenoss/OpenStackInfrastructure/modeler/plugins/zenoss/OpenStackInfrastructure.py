@@ -193,12 +193,6 @@ class OpenStackInfrastructure(PythonPlugin):
                 )))
 
         region_id = prepId("region-{0}".format(device.zOpenStackRegionName))
-        region = ObjectMap(
-            modname='ZenPacks.zenoss.OpenStackInfrastructure.Region',
-            data=dict(
-                id=region_id,
-                title=device.zOpenStackRegionName
-            ))
 
         flavors = []
         for flavor in results['flavors']:
@@ -353,17 +347,17 @@ class OpenStackInfrastructure(PythonPlugin):
             host_id = prepId("host-{0}".format(service['host']))
             zone_id = prepId("zone-{0}".format(service['zone']))
 
-            hostmap[host_id] = {
-                'hostname': service['host'],
-                'org_id': zone_id
-            }
+            if host_id not in hostmap:
+                hostmap[host_id] = {
+                    'hostname': service['host'],
+                    'org_id': zone_id
+                }
 
             zones.setdefault(zone_id, ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.AvailabilityZone',
                 data=dict(
                     id=zone_id,
                     title=service['zone'],
-                    set_parentOrg=region_id
                 )))
 
             # Currently, nova-api doesn't show in the nova service list.
@@ -391,12 +385,16 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_orgComponent=zone_id
                 )))
 
-        # Find all hosts which have a neutron agent on them.
+        # Find all hosts which have neutron agents on them.
+        # which are not yet included in hostmap
         for agent in results['agents']:
             host_id = prepId("host-{0}".format(agent['host']))
+            if host_id in hostmap:
+                continue
+
             hostmap[host_id] = {
                 'hostname': agent['host'],
-                'org_id': region_id
+                'org_id': ''
             }
 
         # add any user-specified hosts which we haven't already found.
@@ -410,9 +408,12 @@ class OpenStackInfrastructure(PythonPlugin):
 
         for hostname in device.zOpenStackNovaApiHosts + device.zOpenStackExtraHosts:
             host_id = prepId("host-{0}".format(hostname))
+            if host_id in hostmap:
+                continue
+
             hostmap[host_id] = {
                 'hostname': hostname,
-                'org_id': region_id
+                'org_id': ''
             }
 
         hosts = []
@@ -646,7 +647,6 @@ class OpenStackInfrastructure(PythonPlugin):
             'hosts': hosts,
             'hypervisors': hypervisors,
             'images': images,
-            'regions': [region],
             'servers': servers,
             'services': services,
             'tenants': tenants,
@@ -710,9 +710,28 @@ class OpenStackInfrastructure(PythonPlugin):
                     if added_count > 0:
                         log.info("  Added %d new objectmaps to %s" % (added_count, key))
 
+        ep = ObjectMap(
+            modname='ZenPacks.zenoss.OpenStackInfrastructure.Endpoint',
+            data=dict(
+                region_title=device.zOpenStackRegionName,
+                numberZones=len(zones),
+                numberHosts=len(hosts),
+                numberNovaServices=len(services),
+                numberNeutronAgents=len(agents),
+                numberTenants=len(tenants),
+                numberInstances=len(servers),
+                numberNetworks=len(networks),
+                numberRouters=len(routers),
+                numberFloatingips=len(floatingips),
+            ))
+
+        maps = []
+
+        maps.append(ep)
+
         # Apply the objmaps in the right order.
         componentsMap = RelationshipMap(relname='components')
-        for i in ('tenants', 'regions', 'flavors', 'images', 'servers', 'zones',
+        for i in ('tenants', 'flavors', 'images', 'servers', 'zones',
                   'hosts', 'hypervisors', 'services', 'networks',
                   'subnets', 'routers', 'ports', 'agents', 'floatingips',
                   ):
@@ -726,4 +745,7 @@ class OpenStackInfrastructure(PythonPlugin):
             )
         )
 
-        return (componentsMap, endpointObjMap)
+        maps.append(componentsMap)
+        maps.append(endpointObjMap)
+
+        return maps
