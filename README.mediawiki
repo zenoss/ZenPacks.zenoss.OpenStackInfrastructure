@@ -2,7 +2,7 @@ This ZenPack allows for monitoring of OpenStack from a service provider perspect
 
 == Availability ==
 
-{{note}} '''''<u>To download this controlled availability release of OpenStackInfrastructure 2.0.0, please contact Zenoss Support.</u>'''''
+{{note}} This ZenPack is currently in a controlled availability state for Zenoss customers. Please contact prodmgmt@zenoss.com before deploying the ZenPack.
 
 == Prerequisites ==
 
