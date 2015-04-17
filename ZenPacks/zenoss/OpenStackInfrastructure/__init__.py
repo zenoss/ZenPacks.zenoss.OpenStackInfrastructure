@@ -394,6 +394,7 @@ CFG = zenpacklib.ZenPackSpec(
             'meta_type': 'OpenStackInfrastructureRegion',
             'label': 'Region',
             'order': 1,
+            'filter_hide_from': ['Region', 'Cell', 'AvailabilityZone'],
             'dynamicview_views': ['service_view', 'openstack_view'],
             'dynamicview_relations': {
                 'openstack_link': ['childOrgs', 'softwareComponents'],
@@ -407,6 +408,7 @@ CFG = zenpacklib.ZenPackSpec(
             'meta_type': 'OpenStackInfrastructureCell',
             'label': 'Cell',
             'order': 3,
+            'filter_hide_from': ['Region', 'Cell', 'AvailabilityZone'],
             'dynamicview_views': ['service_view', 'openstack_view'],
             'dynamicview_relations': {
                 'openstack_link': ['childOrgs', 'hosts', 'softwareComponents'],
@@ -420,6 +422,7 @@ CFG = zenpacklib.ZenPackSpec(
             'meta_type': 'OpenStackInfrastructureAvailabilityZone',
             'label': 'Availability Zone',
             'order': 2,
+            'filter_hide_from': ['AvailabilityZone'],
             'dynamicview_views': ['service_view', 'openstack_view'],
             'dynamicview_relations': {
                 'openstack_link': ['childOrgs', 'hosts', 'softwareComponents'],
