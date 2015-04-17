@@ -840,7 +840,7 @@ class ComponentBase(ModelBase):
             for stream in streams:
                 recurse = any([pattern.match(relpath) for pattern in stream])
 
-                LOG.debug("[%s] matching %s against %s: %s" % (root.meta_type, relpath, [x.pattern for x in stream], recurse))
+                LOG.log(9, "[%s] matching %s against %s: %s" % (root.meta_type, relpath, [x.pattern for x in stream], recurse))
 
                 if not recurse:
                     continue
@@ -5125,7 +5125,7 @@ def enableTesting():
             import Products.ZenUI3
             zcml.load_config('configure.zcml', Products.ZenUI3)
 
-            if self.zenpack_module_name is None:
+            if not hasattr(self, 'zenpack_module_name') or self.zenpack_module_name is None:
                 self.zenpack_module_name = '.'.join(self.__module__.split('.')[:-2])
 
             try:
