@@ -105,7 +105,7 @@ class libvirt(PythonPlugin):
                     # net pollster does.
                     vnicName = str(target.get('dev'))
                     zenossVnicId = 'vnic-%s-%s' % (instanceName, vnicName)
-                    ceilometerResourceId = '%s-%s-%s' % (instanceUUID, instanceName, vnicName)
+                    ceilometerResourceId = '%s-%s-%s' % (instanceName, instanceUUID, vnicName)
 
                     vnics.append({
                         'id': zenossVnicId,
