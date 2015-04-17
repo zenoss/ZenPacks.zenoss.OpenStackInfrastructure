@@ -81,7 +81,7 @@ class libvirt(PythonPlugin):
                     tree = etree.fromstring(d.output)
 
                     instanceName = str(tree.xpath("/domain/name/text()")[0])
-                    zenossInstanceId = 'server-%s' % (instanceName)
+                    zenossInstanceId = 'server-%s' % (instanceUUID)
                     data[instanceName] = {
                         'id': zenossInstanceId,
                         'serialNumber': str(tree.xpath("/domain/sysinfo/system/entry[@name='serial']/text()")[0]),
@@ -104,7 +104,7 @@ class libvirt(PythonPlugin):
                     # compute the resourceId in the same way that ceilometer's
                     # net pollster does.
                     vnicName = str(target.get('dev'))
-                    zenossVnicId = 'vnic-%s-%s' % (instanceName, vnicName)
+                    zenossVnicId = 'vnic-%s-%s' % (instanceUUID, vnicName)
                     ceilometerResourceId = '%s-%s-%s' % (instanceName, instanceUUID, vnicName)
 
                     vnics.append({
@@ -113,7 +113,7 @@ class libvirt(PythonPlugin):
                         'macaddress': str(mac.get('address')),
                         'resourceId': ceilometerResourceId
                     })
-                data[instanceName]['vnics'] = vnics
+                data[instanceUUID]['vnics'] = vnics
 
         finally:
             client.disconnect()
