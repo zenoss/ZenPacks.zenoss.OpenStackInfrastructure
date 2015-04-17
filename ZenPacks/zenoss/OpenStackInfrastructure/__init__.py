@@ -227,6 +227,9 @@ CFG = zenpacklib.ZenPackSpec(
                                'label_width': 20,
                                'renderer': 'Zenoss.render.openstack_ServiceOperStatus'}
             },
+            'extra_paths': [
+                ('orgComponent', '(parentOrg)+')
+            ]
 
             # these are inherited by child classes:
             #   'impacted_by': ['hostedOn', 'osprocess_component']
