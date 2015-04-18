@@ -762,9 +762,6 @@ class ZenPack(schema.ZenPack):
         self.chmodScripts()
 
     def remove(self, app, leaveObjects=False):
-        if not leaveObjects:
-            self.removeScriptSymlinks()
-
         super(ZenPack, self).remove(app, leaveObjects=leaveObjects)
 
     def chmodScripts(self):
