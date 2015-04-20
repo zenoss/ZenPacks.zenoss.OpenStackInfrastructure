@@ -82,7 +82,7 @@ class libvirt(PythonPlugin):
 
                     instanceName = str(tree.xpath("/domain/name/text()")[0])
                     zenossInstanceId = 'server-%s' % (instanceUUID)
-                    data[instanceName] = {
+                    data[instanceUUID] = {
                         'id': zenossInstanceId,
                         'serialNumber': str(tree.xpath("/domain/sysinfo/system/entry[@name='serial']/text()")[0]),
                         'biosUuid': str(tree.xpath("/domain/sysinfo/system/entry[@name='uuid']/text()")[0])
