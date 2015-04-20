@@ -583,6 +583,10 @@ class OpenStackInfrastructure(PythonPlugin):
                     _gateways.add(_ip.get('ip_address', None))
                     _subnets.add(_ip.get('subnet_id', None))
 
+            _network = None
+            if _network_id:
+                _network = 'network-{0}'.format(_network_id)
+
             routers.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Router',
                 data=dict(
@@ -591,7 +595,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     id='router-{0}'.format(router['id']),
                     routerId=router['id'],
                     routes=list(router['routes']),
-                    set_network='network-{0}'.format(_network_id),
+                    set_network=_network,
                     set_subnets=['subnet-{0}'.format(x) for x in _subnets],
                     set_tenant='tenant-{0}'.format(router['tenant_id']),
                     status=router['status'],
