@@ -62,9 +62,11 @@ RELATIONSHIPS_YUML = """
 [Network]1-.-*[Router]
 // Instance ->
 [Instance]1-.-*[Port]
-// Ports ->
+// # Ports* <-> * Subnets:
+//   Port can have many subnets via fixed_ips.
+//   Many Ports can associate to a single Subnet
+[Port]*-.-*[Subnet]
 [Port]1-.-*[FloatingIp]
-[Port]1-.-*[Subnet]
 // Router -> downstream Subnets and 1 upstream Network
 [Router]1-.-*[FloatingIp]
 // Router can connect to many subnets, a subnet can connect to several routers
@@ -617,7 +619,7 @@ CFG = zenpacklib.ZenPackSpec(
             'relationships': {
                 'network':        {'order': 2.0, 'label': 'Network', 'label_width': 50},
                 'neutronAgents':  {'grid_display': False},
-                'port':           {'order': 2.1, 'label_width': 45},
+                'ports':          {'order': 2.1, 'label_width': 45},
                 'routers':        {'order': 2.2, 'label_width': 35},
                 'tenant':         {'order': 2.3, 'label_width': 45, 'content_width': 45},
             },
