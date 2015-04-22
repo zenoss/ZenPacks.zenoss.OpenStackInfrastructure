@@ -197,13 +197,15 @@ def _apply_instance_traits(evt, objmap):
             fixed_ips = ast.literal_eval(evt.trait_fixed_ips)
             public_ips = set()
             private_ips = set()
+            # Assume: Fixed_ips are private, floating_ips are external/public:
             for ip in fixed_ips:
-                if ip['label'].lower() == "public":
-                    public_ips.add(ip['address'])
-                else:
-                    private_ips.add(ip['address'])
-            setattr(objmap, 'publicIps', list(public_ips))
+                private_ips.add(ip['address'])
+                for fip in ip['floating_ips']:
+                    public_ips.add(fip)
             setattr(objmap, 'privateIps', list(private_ips))
+            # public_ips may not be listed, so don't delete existing ones.
+            if public_ips:
+                setattr(objmap, 'publicIps', list(public_ips))
         except Exception, e:
             LOG.debug("Unable to parse trait_fixed_ips=%s (%s)" % (evt.trait_fixed_ips, e))
 

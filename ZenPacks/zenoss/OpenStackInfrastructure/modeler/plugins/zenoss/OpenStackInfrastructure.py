@@ -19,7 +19,6 @@ log = logging.getLogger('zen.OpenStackInfrastructure')
 import json
 import os
 import re
-import types
 
 from twisted.internet.defer import inlineCallbacks, returnValue
 
@@ -263,46 +262,30 @@ class OpenStackInfrastructure(PythonPlugin):
                 backup_schedule_daily = 'DISABLED'
                 backup_schedule_weekly = 'DISABLED'
 
-            # The methods for accessing a server's IP addresses have changed a
-            # lot. We'll try as many as we know.
+            # Get and classify IP addresses into public and private: (fixed/floating)
             public_ips = set()
             private_ips = set()
 
-            if 'public_ip' in server and server['public_ip']:
-                if isinstance(server['public_ip'], types.StringTypes):
-                    public_ips.add(server['public_ip'])
-                elif isinstance(server['public_ip'], types.ListType):
-                    public_ips.update(server['public_ip'])
+            access_ipv4 = server.get('accessIPv4')
+            if access_ipv4:
+                public_ips.add(access_ipv4)
 
-            if 'private_ip' in server and server['private_ip']:
-                if isinstance(server['private_ip'], types.StringTypes):
-                    private_ips.add(server['private_ip'])
-                elif isinstance(server['private_ip'], types.ListType):
-                    if isinstance(server['private_ip'][0], types.StringTypes):
-                        private_ips.update(server['private_ip'])
-                    else:
-                        for address in server['private_ip']:
+            access_ipv6 = server.get('accessIPv6')
+            if access_ipv6:
+                public_ips.add(access_ipv6)
+
+            address_group = server.get('addresses')
+            if address_group:
+                for network_name, net_addresses in address_group.items():
+                    for address in net_addresses:
+                        if address.get('OS-EXT-IPS:type') == 'fixed':
                             private_ips.add(address['addr'])
-
-            if 'accessIPv4' in server and server['accessIPv4']:
-                public_ips.add(server['accessIPv4'])
-
-            if 'accessIPv6' in server and server['accessIPv6']:
-                public_ips.add(server['accessIPv6'])
-
-            if 'addresses' in server and server['addresses']:
-                for network_name, addresses in server['addresses'].items():
-                    for address in addresses:
-                        if 'public' in network_name.lower():
-                            if isinstance(address, types.DictionaryType):
-                                public_ips.add(address['addr'])
-                            elif isinstance(address, types.StringTypes):
-                                public_ips.add(address)
+                        elif address.get('OS-EXT-IPS:type') == 'floating':
+                            public_ips.add(address['addr'])
                         else:
-                            if isinstance(address, types.DictionaryType):
-                                private_ips.add(address['addr'])
-                            elif isinstance(address, types.StringTypes):
-                                private_ips.add(address)
+                            log.info("Address type not found for %s", address['addr'])
+                            log.info("Adding %s to private_ips", address['addr'])
+                            private_ips.add(address['addr'])
 
             # Flavor and Image IDs could be specified two different ways.
             flavor_id = None

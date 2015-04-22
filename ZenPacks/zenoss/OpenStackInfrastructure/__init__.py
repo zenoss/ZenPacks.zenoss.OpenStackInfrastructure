@@ -324,7 +324,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'hypervisorInstanceName': {'label': 'Hypervisor Instance Name',
                                               'grid_display': False},
                 'privateIps':             {'order': 3.2, 'type_': 'lines',
-                                              'label': 'Private IPs',
+                                              'label': 'Fixed IPs',
                                               'label_width': 100,},
                 'publicIps':              {'order': 3.1, 'type_': 'lines',
                                               'label': 'Floating IPs',
