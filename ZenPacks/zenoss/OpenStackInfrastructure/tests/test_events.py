@@ -140,8 +140,8 @@ class TestEventTransforms(zenpacklib.TestCase):
         })
         self.process_event(evt)
 
-        self.assertTrue(instance5.publicIps == [u'172.24.4.229'])
-        self.assertTrue(instance5.privateIps is None or instance5.privateIps == [])
+        self.assertTrue(instance5.privateIps == [u'172.24.4.229'])
+        self.assertTrue(instance5.publicIps is None or instance5.publicIps == [])
 
     def _create_instance5(self):
         # # Dummy up the instance (as if test_instance_creation had run, and we had instance5 in the system)
