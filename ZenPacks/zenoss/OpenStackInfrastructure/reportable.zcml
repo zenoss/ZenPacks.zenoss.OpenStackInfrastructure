@@ -28,6 +28,11 @@
 
   <!-- Add specific overrides of the default behavior -->
 
+  <adapter factory=".reportable.AvailabilityZoneReportable"
+           for=".AvailabilityZone.AvailabilityZone"
+           provides="Products.Zuul.interfaces.IReportable"
+           />
+
   <adapter factory=".reportable.HostReportable"
            for=".Host.Host"
            provides="Products.Zuul.interfaces.IReportable"

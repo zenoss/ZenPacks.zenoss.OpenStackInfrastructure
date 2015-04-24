@@ -12,13 +12,13 @@
 
 Example usage::
 
-    rm -f ZenPacks/zenoss/CiscoUCS/analytics/analytics-bundle.zip ;\
+    rm -f ZenPacks/zenoss/OpenStackInfrastructure/analytics/analytics-bundle.zip ;\
     ./create-analytics-bundle \
-        --folder="Cisco UCS ZenPack" \
-        --domain="Cisco UCS CIMC Domain" \
-        --device=c220-sim ;\
+        --folder="OpenStackInfrastructure ZenPack" \
+        --domain="OpenStackInfrastructure Domain" \
+        --device=<OpenStackInfrastructure device> ;\
     pushd analytics ;\
-    zip -r ../ZenPacks/zenoss/CiscoUCS/analytics/analytics-bundle.zip * ;\
+    zip -r ../ZenPacks/zenoss/OpenStackInfrastructure/analytics/analytics-bundle.zip * ;\
     popd
 
 """

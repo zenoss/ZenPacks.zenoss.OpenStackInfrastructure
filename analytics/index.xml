@@ -1,2 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<export><property name="pathProcessorId" value="zip"/><property name="jsVersion" value="5.5.0 PRO"/><module id="repositoryResources"><folder>/public/OpenStackInfrastructure_ZenPack</folder></module></export>
+<?xml version='1.0' encoding='utf-8'?>
+<export>
+  <property name="pathProcessorId" value="zip"/>
+  <property name="jsVersion" value="5.2.0 PRO"/>
+  <module id="repositoryResources">
+    <folder>/public/OpenStackInfrastructure_ZenPack</folder>
+  </module>
+</export>
