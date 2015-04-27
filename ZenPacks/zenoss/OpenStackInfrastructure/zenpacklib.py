@@ -1390,15 +1390,12 @@ class ZenPackSpec(Spec):
 
         # The parameters from which this zenpackspec was originally
         # instantiated.
-        if YAML_INSTALLED:
-            self.specparams = ZenPackSpecParams(
-                name,
-                zProperties=zProperties,
-                classes=classes,
-                class_relationships=class_relationships,
-                device_classes=device_classes)
-        else:
-            self.specparams = None
+        self.specparams = ZenPackSpecParams(
+            name,
+            zProperties=zProperties,
+            classes=classes,
+            class_relationships=class_relationships,
+            device_classes=device_classes)
 
         self.name = name
         self.id_prefix = name.replace(".", "_")
@@ -4103,6 +4100,357 @@ class GraphPointSpec(Spec):
             graph.addThresholdsForDataPoint(self.dpName)
 
 
+# SpecParams ################################################################
+
+class SpecParams(object):
+    def __init__(self, **kwargs):
+        # Initialize with default values
+        params = self.__class__.init_params()
+        for param in params:
+            if 'default' in params[param]:
+                setattr(self, param, params[param]['default'])
+
+        # Overlay any named parameters
+        self.__dict__.update(kwargs)
+
+    @classmethod
+    def init_params(cls):
+        # Pull over the params for the underlying Spec class,
+        # correcting nested Specs to SpecsParams instead.
+        try:
+            spec_base = [x for x in cls.__bases__ if issubclass(x, Spec)][0]
+        except Exception:
+            raise Exception("Spec Base Not Found for %s" % cls.__name__)
+
+        params = spec_base.init_params()
+        for p in params:
+            params[p]['type'] = params[p]['type'].replace("Spec)", "SpecParams)")
+
+        return params
+
+
+class ZenPackSpecParams(SpecParams, ZenPackSpec):
+    def __init__(self, name, zProperties=None, class_relationships=None, classes=None, device_classes=None, **kwargs):
+        SpecParams.__init__(self, **kwargs)
+        self.name = name
+
+        self.zProperties = self.specs_from_param(
+            ZPropertySpecParams, 'zProperties', zProperties, leave_defaults=True)
+
+        self.class_relationships = []
+        if class_relationships:
+            if not isinstance(class_relationships, list):
+                raise ValueError("class_relationships must be a list, not a %s" % type(class_relationships))
+
+            for rel in class_relationships:
+                self.class_relationships.append(RelationshipSchemaSpec(self, **rel))
+
+        self.classes = self.specs_from_param(
+            ClassSpecParams, 'classes', classes, leave_defaults=True)
+
+        self.device_classes = self.specs_from_param(
+            DeviceClassSpecParams, 'device_classes', device_classes, leave_defaults=True)
+
+
+class DeviceClassSpecParams(SpecParams, DeviceClassSpec):
+    def __init__(self, zenpack_spec, path, zProperties=None, templates=None, **kwargs):
+        SpecParams.__init__(self, **kwargs)
+        self.path = path
+        self.zProperties = zProperties
+        self.templates = self.specs_from_param(
+            RRDTemplateSpecParams, 'templates', templates)
+
+
+class ZPropertySpecParams(SpecParams, ZPropertySpec):
+    def __init__(self, zenpack_spec, name, **kwargs):
+        SpecParams.__init__(self, **kwargs)
+        self.name = name
+
+
+class ClassSpecParams(SpecParams, ClassSpec):
+    def __init__(self, zenpack_spec, name, base=None, properties=None, relationships=None, monitoring_templates=[], **kwargs):
+        SpecParams.__init__(self, **kwargs)
+        self.name = name
+
+        if isinstance(base, (tuple, list, set)):
+            self.base = tuple(base)
+        else:
+            self.base = (base,)
+
+        if isinstance(monitoring_templates, (tuple, list, set)):
+            self.monitoring_templates = list(monitoring_templates)
+        else:
+            self.monitoring_templates = [monitoring_templates]
+
+        self.properties = self.specs_from_param(
+            ClassPropertySpecParams, 'properties', properties, leave_defaults=True)
+
+        self.relationships = self.specs_from_param(
+            ClassRelationshipSpecParams, 'relationships', relationships, leave_defaults=True)
+
+
+class ClassPropertySpecParams(SpecParams, ClassPropertySpec):
+    def __init__(self, class_spec, name, **kwargs):
+        SpecParams.__init__(self, **kwargs)
+        self.name = name
+
+
+class ClassRelationshipSpecParams(SpecParams, ClassRelationshipSpec):
+    def __init__(self, class_spec, name, **kwargs):
+        SpecParams.__init__(self, **kwargs)
+        self.name = name
+
+
+class RRDTemplateSpecParams(SpecParams, RRDTemplateSpec):
+    def __init__(self, deviceclass_spec, name, thresholds=None, datasources=None, graphs=None, **kwargs):
+        SpecParams.__init__(self, **kwargs)
+        self.name = name
+
+        self.thresholds = self.specs_from_param(
+            RRDThresholdSpecParams, 'thresholds', thresholds)
+
+        self.datasources = self.specs_from_param(
+            RRDDatasourceSpecParams, 'datasources', datasources)
+
+        self.graphs = self.specs_from_param(
+            GraphDefinitionSpecParams, 'graphs', graphs)
+
+    @classmethod
+    def fromObject(cls, template):
+        self = object.__new__(cls)
+        SpecParams.__init__(self)
+        template = aq_base(template)
+
+        self.targetPythonClass = template.targetPythonClass
+        self.description = template.description
+
+        self.thresholds = {x.id: RRDThresholdSpecParams.fromObject(x) for x in template.thresholds()}
+        self.datasources = {x.id: RRDDatasourceSpecParams.fromObject(x) for x in template.datasources()}
+        self.graphs = {x.id: GraphDefinitionSpecParams.fromObject(x) for x in template.graphDefs()}
+
+        return self
+
+
+class RRDDatasourceSpecParams(SpecParams, RRDDatasourceSpec):
+    def __init__(self, template_spec, name, datapoints=None, **kwargs):
+        SpecParams.__init__(self, **kwargs)
+        self.name = name
+
+        self.datapoints = self.specs_from_param(
+            RRDDatapointSpecParams, 'datapoints', datapoints)
+
+    @classmethod
+    def fromObject(cls, datasource):
+        self = object.__new__(cls)
+        SpecParams.__init__(self)
+        datasource = aq_base(datasource)
+
+        # Weed out any values that are the same as they would by by default.
+        # We do this by instantiating a "blank" datapoint and comparing
+        # to it.
+        sample_ds = datasource.__class__(datasource.id)
+
+        self.sourcetype = datasource.sourcetype
+        for propname in ('enabled', 'component', 'eventClass', 'eventKey',
+                         'severity', 'commandTemplate', 'cycletime',):
+            if hasattr(sample_ds, propname):
+                setattr(self, '_%s_defaultvalue' % propname, getattr(sample_ds, propname))
+            if getattr(datasource, propname, None) != getattr(sample_ds, propname, None):
+                setattr(self, propname, getattr(datasource, propname, None))
+
+        self.extra_params = collections.OrderedDict()
+        for propname in [x['id'] for x in datasource._properties]:
+            if propname not in self.init_params():
+                if getattr(datasource, propname, None) != getattr(sample_ds, propname, None):
+                    self.extra_params[propname] = getattr(datasource, propname, None)
+
+        self.datapoints = {x.id: RRDDatapointSpecParams.fromObject(x) for x in datasource.datapoints()}
+
+        return self
+
+
+class RRDThresholdSpecParams(SpecParams, RRDThresholdSpec):
+    def __init__(self, template_spec, name, foo=None, **kwargs):
+        SpecParams.__init__(self, **kwargs)
+        self.name = name
+
+    @classmethod
+    def fromObject(cls, threshold):
+        self = object.__new__(cls)
+        SpecParams.__init__(self)
+        threshold = aq_base(threshold)
+        sample_th = threshold.__class__(threshold.id)
+
+        for propname in ('dsnames', 'eventClass', 'severity', 'type_'):
+            if hasattr(sample_th, propname):
+                setattr(self, '_%s_defaultvalue' % propname, getattr(sample_th, propname))
+            if getattr(threshold, propname, None) != getattr(sample_th, propname, None):
+                setattr(self, propname, getattr(threshold, propname, None))
+
+        self.extra_params = collections.OrderedDict()
+        for propname in [x['id'] for x in threshold._properties]:
+            if propname not in self.init_params():
+                if getattr(threshold, propname, None) != getattr(sample_th, propname, None):
+                    self.extra_params[propname] = getattr(threshold, propname, None)
+
+        return self
+
+
+class RRDDatapointSpecParams(SpecParams, RRDDatapointSpec):
+    def __init__(self, datasource_spec, name, shorthand=None, **kwargs):
+        SpecParams.__init__(self, **kwargs)
+        self.name = name
+        self.shorthand = shorthand
+
+    @classmethod
+    def fromObject(cls, datapoint):
+        self = object.__new__(cls)
+        SpecParams.__init__(self)
+        datapoint = aq_base(datapoint)
+        sample_dp = datapoint.__class__(datapoint.id)
+
+        for propname in ('name', 'rrdtype', 'createCmd', 'isrow', 'rrdmin',
+                         'rrdmax', 'description',):
+            if hasattr(sample_dp, propname):
+                setattr(self, '_%s_defaultvalue' % propname, getattr(sample_dp, propname))
+            if getattr(datapoint, propname, None) != getattr(sample_dp, propname, None):
+                setattr(self, propname, getattr(datapoint, propname, None))
+
+        if self.rrdmin is not None:
+            self.rrdmin = int(self.rrdmin)
+        if self.rrdmax is not None:
+            self.rrdmax = int(self.rrdmax)
+
+        self.aliases = {x.id: x.formula for x in datapoint.aliases()}
+
+        self.extra_params = collections.OrderedDict()
+        for propname in [x['id'] for x in datapoint._properties]:
+            if propname not in self.init_params():
+                if getattr(datapoint, propname, None) != getattr(sample_dp, propname, None):
+                    self.extra_params[propname] = getattr(datapoint, propname, None)
+
+        # Shorthand support.  The use of the shorthand field takes
+        # over all other attributes.  So we can only use it when the rest of
+        # the attributes have default values.   This gets tricky if
+        # RRDDatapoint has been subclassed, since we don't know what
+        # the defaults are, necessarily.
+        #
+        # To do this, we actually instantiate a sample datapoint
+        # using only the shorthand values, and see if the result
+        # ends up being effectively the same as what we have.
+
+        shorthand_props = {}
+        shorthand = []
+        self.shorthand = None
+        if datapoint.rrdtype in ('GAUGE', 'DERIVE'):
+            shorthand.append(datapoint.rrdtype)
+            shorthand_props['rrdtype'] = datapoint.rrdtype
+
+            if datapoint.rrdmin:
+                shorthand.append('MIN_%d' % int(datapoint.rrdmin))
+                shorthand_props['rrdmin'] = datapoint.rrdmin
+
+            if datapoint.rrdmax:
+                shorthand.append('MAX_%d' % int(datapoint.rrdmax))
+                shorthand_props['rrdmax'] = datapoint.rrdmax
+
+            if shorthand:
+                for prop in shorthand_props:
+                    setattr(sample_dp, prop, shorthand_props[prop])
+
+                # Compare the current datapoint with the results
+                # of constructing one from the shorthand syntax.
+                #
+                # The comparison is based on the objects.xml-style
+                # xml representation, because it seems like that's really
+                # the bottom line.  If they end up the same in there, then
+                # I am certain that they are equivalent.
+
+                import StringIO
+                io = StringIO.StringIO()
+                datapoint.exportXml(io)
+                dp_xml = io.getvalue()
+                io.close()
+
+                io = StringIO.StringIO()
+                sample_dp.exportXml(io)
+                sample_dp_xml = io.getvalue()
+                io.close()
+
+                # Identical, so set the shorthand.  This will cause
+                # all other properties to be ignored during
+                # serialization to yaml.
+                if dp_xml == sample_dp_xml:
+                    self.shorthand = '_'.join(shorthand)
+
+        return self
+
+
+class GraphDefinitionSpecParams(SpecParams, GraphDefinitionSpec):
+    def __init__(self, template_spec, name, graphpoints=None, **kwargs):
+        SpecParams.__init__(self, **kwargs)
+        self.name = name
+        self.graphpoints = self.specs_from_param(
+            GraphPointSpecParams, 'graphpoints', graphpoints)
+
+    @classmethod
+    def fromObject(cls, graphdefinition):
+        self = object.__new__(cls)
+        SpecParams.__init__(self)
+        graphdefinition = aq_base(graphdefinition)
+        sample_gd = graphdefinition.__class__(graphdefinition.id)
+
+        for propname in ('height', 'width', 'units', 'log', 'base', 'miny',
+                         'maxy', 'custom', 'hasSummary', 'comments'):
+            if hasattr(sample_gd, propname):
+                setattr(self, '_%s_defaultvalue' % propname, getattr(sample_gd, propname))
+            if getattr(graphdefinition, propname, None) != getattr(sample_gd, propname, None):
+                setattr(self, propname, getattr(graphdefinition, propname, None))
+
+        datapoint_graphpoints = [x for x in graphdefinition.graphPoints() if isinstance(x, DataPointGraphPoint)]
+        self.graphpoints = {x.id: GraphPointSpecParams.fromObject(x, graphdefinition) for x in datapoint_graphpoints}
+
+        comment_graphpoints = [x for x in graphdefinition.graphPoints() if isinstance(x, CommentGraphPoint)]
+        if comment_graphpoints:
+            self.comments = [y.text for y in sorted(comment_graphpoints, key=lambda x: x.id)]
+
+        return self
+
+
+class GraphPointSpecParams(SpecParams, GraphPointSpec):
+    def __init__(self, template_spec, name, **kwargs):
+        SpecParams.__init__(self, **kwargs)
+        self.name = name
+
+    @classmethod
+    def fromObject(cls, graphpoint, graphdefinition):
+        self = object.__new__(cls)
+        SpecParams.__init__(self)
+        graphpoint = aq_base(graphpoint)
+        graphdefinition = aq_base(graphdefinition)
+        sample_gp = graphpoint.__class__(graphpoint.id)
+
+        for propname in ('lineType', 'lineWidth', 'stacked', 'format',
+                         'legend', 'limit', 'rpn', 'cFunc', 'color', 'dpName'):
+            if hasattr(sample_gp, propname):
+                setattr(self, '_%s_defaultvalue' % propname, getattr(sample_gp, propname))
+            if getattr(graphpoint, propname, None) != getattr(sample_gp, propname, None):
+                setattr(self, propname, getattr(graphpoint, propname, None))
+
+        threshold_graphpoints = [x for x in graphdefinition.graphPoints() if isinstance(x, ThresholdGraphPoint)]
+
+        self.includeThresholds = False
+        if threshold_graphpoints:
+            thresholds = {x.id: x for x in graphpoint.graphDef().rrdTemplate().thresholds()}
+            for tgp in threshold_graphpoints:
+                threshold = thresholds.get(tgp.threshId, None)
+                if threshold:
+                    if graphpoint.dpName in threshold.dsnames:
+                        self.includeThresholds = True
+
+        return self
+
+
 # YAML Import/Export ########################################################
 
 if YAML_INSTALLED:
@@ -4699,342 +5047,6 @@ if YAML_INSTALLED:
     Loader.add_constructor(u'!ZenPackSpec', construct_zenpackspec)
 
     yaml.add_path_resolver(u'!ZenPackSpec', [], Loader=Loader)
-
-    class SpecParams(object):
-        def __init__(self, **kwargs):
-            # Initialize with default values
-            params = self.__class__.init_params()
-            for param in params:
-                if 'default' in params[param]:
-                    setattr(self, param, params[param]['default'])
-
-            # Overlay any named parameters
-            self.__dict__.update(kwargs)
-
-        @classmethod
-        def init_params(cls):
-            # Pull over the params for the underlying Spec class,
-            # correcting nested Specs to SpecsParams instead.
-            try:
-                spec_base = [x for x in cls.__bases__ if issubclass(x, Spec)][0]
-            except Exception:
-                raise Exception("Spec Base Not Found for %s" % cls.__name__)
-
-            params = spec_base.init_params()
-            for p in params:
-                params[p]['type'] = params[p]['type'].replace("Spec)", "SpecParams)")
-
-            return params
-
-    class ZenPackSpecParams(SpecParams, ZenPackSpec):
-        def __init__(self, name, zProperties=None, class_relationships=None, classes=None, device_classes=None, **kwargs):
-            SpecParams.__init__(self, **kwargs)
-            self.name = name
-
-            self.zProperties = self.specs_from_param(
-                ZPropertySpecParams, 'zProperties', zProperties, leave_defaults=True)
-
-            self.class_relationships = []
-            if class_relationships:
-                if not isinstance(class_relationships, list):
-                    raise ValueError("class_relationships must be a list, not a %s" % type(class_relationships))
-
-                for rel in class_relationships:
-                    self.class_relationships.append(RelationshipSchemaSpec(self, **rel))
-
-            self.classes = self.specs_from_param(
-                ClassSpecParams, 'classes', classes, leave_defaults=True)
-
-            self.device_classes = self.specs_from_param(
-                DeviceClassSpecParams, 'device_classes', device_classes, leave_defaults=True)
-
-    class DeviceClassSpecParams(SpecParams, DeviceClassSpec):
-        def __init__(self, zenpack_spec, path, zProperties=None, templates=None, **kwargs):
-            SpecParams.__init__(self, **kwargs)
-            self.path = path
-            self.zProperties = zProperties
-            self.templates = self.specs_from_param(
-                RRDTemplateSpecParams, 'templates', templates)
-
-    class ZPropertySpecParams(SpecParams, ZPropertySpec):
-        def __init__(self, zenpack_spec, name, **kwargs):
-            SpecParams.__init__(self, **kwargs)
-            self.name = name
-
-    class ClassSpecParams(SpecParams, ClassSpec):
-        def __init__(self, zenpack_spec, name, base=None, properties=None, relationships=None, monitoring_templates=[], **kwargs):
-            SpecParams.__init__(self, **kwargs)
-            self.name = name
-
-            if isinstance(base, (tuple, list, set)):
-                self.base = tuple(base)
-            else:
-                self.base = (base,)
-
-            if isinstance(monitoring_templates, (tuple, list, set)):
-                self.monitoring_templates = list(monitoring_templates)
-            else:
-                self.monitoring_templates = [monitoring_templates]
-
-            self.properties = self.specs_from_param(
-                ClassPropertySpecParams, 'properties', properties, leave_defaults=True)
-
-            self.relationships = self.specs_from_param(
-                ClassRelationshipSpecParams, 'relationships', relationships, leave_defaults=True)
-
-    class ClassPropertySpecParams(SpecParams, ClassPropertySpec):
-        def __init__(self, class_spec, name, **kwargs):
-            SpecParams.__init__(self, **kwargs)
-            self.name = name
-
-    class ClassRelationshipSpecParams(SpecParams, ClassRelationshipSpec):
-        def __init__(self, class_spec, name, **kwargs):
-            SpecParams.__init__(self, **kwargs)
-            self.name = name
-
-    class RRDTemplateSpecParams(SpecParams, RRDTemplateSpec):
-        def __init__(self, deviceclass_spec, name, thresholds=None, datasources=None, graphs=None, **kwargs):
-            SpecParams.__init__(self, **kwargs)
-            self.name = name
-
-            self.thresholds = self.specs_from_param(
-                RRDThresholdSpecParams, 'thresholds', thresholds)
-
-            self.datasources = self.specs_from_param(
-                RRDDatasourceSpecParams, 'datasources', datasources)
-
-            self.graphs = self.specs_from_param(
-                GraphDefinitionSpecParams, 'graphs', graphs)
-
-        @classmethod
-        def fromObject(cls, template):
-            self = object.__new__(cls)
-            SpecParams.__init__(self)
-            template = aq_base(template)
-
-            self.targetPythonClass = template.targetPythonClass
-            self.description = template.description
-
-            self.thresholds = {x.id: RRDThresholdSpecParams.fromObject(x) for x in template.thresholds()}
-            self.datasources = {x.id: RRDDatasourceSpecParams.fromObject(x) for x in template.datasources()}
-            self.graphs = {x.id: GraphDefinitionSpecParams.fromObject(x) for x in template.graphDefs()}
-
-            return self
-
-    class RRDDatasourceSpecParams(SpecParams, RRDDatasourceSpec):
-        def __init__(self, template_spec, name, datapoints=None, **kwargs):
-            SpecParams.__init__(self, **kwargs)
-            self.name = name
-
-            self.datapoints = self.specs_from_param(
-                RRDDatapointSpecParams, 'datapoints', datapoints)
-
-        @classmethod
-        def fromObject(cls, datasource):
-            self = object.__new__(cls)
-            SpecParams.__init__(self)
-            datasource = aq_base(datasource)
-
-            # Weed out any values that are the same as they would by by default.
-            # We do this by instantiating a "blank" datapoint and comparing
-            # to it.
-            sample_ds = datasource.__class__(datasource.id)
-
-            self.sourcetype = datasource.sourcetype
-            for propname in ('enabled', 'component', 'eventClass', 'eventKey',
-                             'severity', 'commandTemplate', 'cycletime',):
-                if hasattr(sample_ds, propname):
-                    setattr(self, '_%s_defaultvalue' % propname, getattr(sample_ds, propname))
-                if getattr(datasource, propname, None) != getattr(sample_ds, propname, None):
-                    setattr(self, propname, getattr(datasource, propname, None))
-
-            self.extra_params = collections.OrderedDict()
-            for propname in [x['id'] for x in datasource._properties]:
-                if propname not in self.init_params():
-                    if getattr(datasource, propname, None) != getattr(sample_ds, propname, None):
-                        self.extra_params[propname] = getattr(datasource, propname, None)
-
-            self.datapoints = {x.id: RRDDatapointSpecParams.fromObject(x) for x in datasource.datapoints()}
-
-            return self
-
-    class RRDThresholdSpecParams(SpecParams, RRDThresholdSpec):
-        def __init__(self, template_spec, name, foo=None, **kwargs):
-            SpecParams.__init__(self, **kwargs)
-            self.name = name
-
-        @classmethod
-        def fromObject(cls, threshold):
-            self = object.__new__(cls)
-            SpecParams.__init__(self)
-            threshold = aq_base(threshold)
-            sample_th = threshold.__class__(threshold.id)
-
-            for propname in ('dsnames', 'eventClass', 'severity', 'type_'):
-                if hasattr(sample_th, propname):
-                    setattr(self, '_%s_defaultvalue' % propname, getattr(sample_th, propname))
-                if getattr(threshold, propname, None) != getattr(sample_th, propname, None):
-                    setattr(self, propname, getattr(threshold, propname, None))
-
-            self.extra_params = collections.OrderedDict()
-            for propname in [x['id'] for x in threshold._properties]:
-                if propname not in self.init_params():
-                    if getattr(threshold, propname, None) != getattr(sample_th, propname, None):
-                        self.extra_params[propname] = getattr(threshold, propname, None)
-
-            return self
-
-    class RRDDatapointSpecParams(SpecParams, RRDDatapointSpec):
-        def __init__(self, datasource_spec, name, shorthand=None, **kwargs):
-            SpecParams.__init__(self, **kwargs)
-            self.name = name
-            self.shorthand = shorthand
-
-        @classmethod
-        def fromObject(cls, datapoint):
-            self = object.__new__(cls)
-            SpecParams.__init__(self)
-            datapoint = aq_base(datapoint)
-            sample_dp = datapoint.__class__(datapoint.id)
-
-            for propname in ('name', 'rrdtype', 'createCmd', 'isrow', 'rrdmin',
-                             'rrdmax', 'description',):
-                if hasattr(sample_dp, propname):
-                    setattr(self, '_%s_defaultvalue' % propname, getattr(sample_dp, propname))
-                if getattr(datapoint, propname, None) != getattr(sample_dp, propname, None):
-                    setattr(self, propname, getattr(datapoint, propname, None))
-
-            if self.rrdmin is not None:
-                self.rrdmin = int(self.rrdmin)
-            if self.rrdmax is not None:
-                self.rrdmax = int(self.rrdmax)
-
-            self.aliases = {x.id: x.formula for x in datapoint.aliases()}
-
-            self.extra_params = collections.OrderedDict()
-            for propname in [x['id'] for x in datapoint._properties]:
-                if propname not in self.init_params():
-                    if getattr(datapoint, propname, None) != getattr(sample_dp, propname, None):
-                        self.extra_params[propname] = getattr(datapoint, propname, None)
-
-            # Shorthand support.  The use of the shorthand field takes
-            # over all other attributes.  So we can only use it when the rest of
-            # the attributes have default values.   This gets tricky if
-            # RRDDatapoint has been subclassed, since we don't know what
-            # the defaults are, necessarily.
-            #
-            # To do this, we actually instantiate a sample datapoint
-            # using only the shorthand values, and see if the result
-            # ends up being effectively the same as what we have.
-
-            shorthand_props = {}
-            shorthand = []
-            self.shorthand = None
-            if datapoint.rrdtype in ('GAUGE', 'DERIVE'):
-                shorthand.append(datapoint.rrdtype)
-                shorthand_props['rrdtype'] = datapoint.rrdtype
-
-                if datapoint.rrdmin:
-                    shorthand.append('MIN_%d' % int(datapoint.rrdmin))
-                    shorthand_props['rrdmin'] = datapoint.rrdmin
-
-                if datapoint.rrdmax:
-                    shorthand.append('MAX_%d' % int(datapoint.rrdmax))
-                    shorthand_props['rrdmax'] = datapoint.rrdmax
-
-                if shorthand:
-                    for prop in shorthand_props:
-                        setattr(sample_dp, prop, shorthand_props[prop])
-
-                    # Compare the current datapoint with the results
-                    # of constructing one from the shorthand syntax.
-                    #
-                    # The comparison is based on the objects.xml-style
-                    # xml representation, because it seems like that's really
-                    # the bottom line.  If they end up the same in there, then
-                    # I am certain that they are equivalent.
-
-                    import StringIO
-                    io = StringIO.StringIO()
-                    datapoint.exportXml(io)
-                    dp_xml = io.getvalue()
-                    io.close()
-
-                    io = StringIO.StringIO()
-                    sample_dp.exportXml(io)
-                    sample_dp_xml = io.getvalue()
-                    io.close()
-
-                    # Identical, so set the shorthand.  This will cause
-                    # all other properties to be ignored during
-                    # serialization to yaml.
-                    if dp_xml == sample_dp_xml:
-                        self.shorthand = '_'.join(shorthand)
-
-            return self
-
-    class GraphDefinitionSpecParams(SpecParams, GraphDefinitionSpec):
-        def __init__(self, template_spec, name, graphpoints=None, **kwargs):
-            SpecParams.__init__(self, **kwargs)
-            self.name = name
-            self.graphpoints = self.specs_from_param(
-                GraphPointSpecParams, 'graphpoints', graphpoints)
-
-        @classmethod
-        def fromObject(cls, graphdefinition):
-            self = object.__new__(cls)
-            SpecParams.__init__(self)
-            graphdefinition = aq_base(graphdefinition)
-            sample_gd = graphdefinition.__class__(graphdefinition.id)
-
-            for propname in ('height', 'width', 'units', 'log', 'base', 'miny',
-                             'maxy', 'custom', 'hasSummary', 'comments'):
-                if hasattr(sample_gd, propname):
-                    setattr(self, '_%s_defaultvalue' % propname, getattr(sample_gd, propname))
-                if getattr(graphdefinition, propname, None) != getattr(sample_gd, propname, None):
-                    setattr(self, propname, getattr(graphdefinition, propname, None))
-
-            datapoint_graphpoints = [x for x in graphdefinition.graphPoints() if isinstance(x, DataPointGraphPoint)]
-            self.graphpoints = {x.id: GraphPointSpecParams.fromObject(x, graphdefinition) for x in datapoint_graphpoints}
-
-            comment_graphpoints = [x for x in graphdefinition.graphPoints() if isinstance(x, CommentGraphPoint)]
-            if comment_graphpoints:
-                self.comments = [y.text for y in sorted(comment_graphpoints, key=lambda x: x.id)]
-
-            return self
-
-    class GraphPointSpecParams(SpecParams, GraphPointSpec):
-        def __init__(self, template_spec, name, **kwargs):
-            SpecParams.__init__(self, **kwargs)
-            self.name = name
-
-        @classmethod
-        def fromObject(cls, graphpoint, graphdefinition):
-            self = object.__new__(cls)
-            SpecParams.__init__(self)
-            graphpoint = aq_base(graphpoint)
-            graphdefinition = aq_base(graphdefinition)
-            sample_gp = graphpoint.__class__(graphpoint.id)
-
-            for propname in ('lineType', 'lineWidth', 'stacked', 'format',
-                             'legend', 'limit', 'rpn', 'cFunc', 'color', 'dpName'):
-                if hasattr(sample_gp, propname):
-                    setattr(self, '_%s_defaultvalue' % propname, getattr(sample_gp, propname))
-                if getattr(graphpoint, propname, None) != getattr(sample_gp, propname, None):
-                    setattr(self, propname, getattr(graphpoint, propname, None))
-
-            threshold_graphpoints = [x for x in graphdefinition.graphPoints() if isinstance(x, ThresholdGraphPoint)]
-
-            self.includeThresholds = False
-            if threshold_graphpoints:
-                thresholds = {x.id: x for x in graphpoint.graphDef().rrdTemplate().thresholds()}
-                for tgp in threshold_graphpoints:
-                    threshold = thresholds.get(tgp.threshId, None)
-                    if threshold:
-                        if graphpoint.dpName in threshold.dsnames:
-                            self.includeThresholds = True
-
-            return self
 
     Dumper.add_representer(ZenPackSpecParams, represent_zenpackspec)
     Dumper.add_representer(DeviceClassSpecParams, represent_spec)
