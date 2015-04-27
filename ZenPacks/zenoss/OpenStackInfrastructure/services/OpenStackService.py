@@ -21,22 +21,26 @@ class OpenStackService(HubService):
         device = self.dmd.Devices.findDeviceByIdExact(endpoint_id)
 
         result = []
-        for host in device.getDeviceComponents(type='OpenStackInfrastructureHost'):
-            hostnames = set()
-            hostnames.add(host.hostname)
-            if host.hostfqdn:
-                hostnames.add(host.hostfqdn)
+        try:
+            for host in device.getDeviceComponents(type='OpenStackInfrastructureHost'):
+                hostnames = set()
+                hostnames.add(host.hostname)
+                if host.hostfqdn:
+                    hostnames.add(host.hostfqdn)
 
-            processes = set()
-            for process in host.proxy_device().getDeviceComponents(type='OSProcess'):
-                process_name = process.osProcessClass().id
-                if process_name in ('ceilometer-agent-notification', 'ceilometer-collector'):
-                    processes.add(process_name)
+                processes = set()
+                for process in host.proxy_device().getDeviceComponents(type='OSProcess'):
+                    process_name = process.osProcessClass().id
+                    if process_name in ('ceilometer-agent-notification', 'ceilometer-collector'):
+                        processes.add(process_name)
 
-            if processes:
-                result.append(dict(
-                    hostnames=list(hostnames),
-                    processes=list(processes)
-                ))
+                if processes:
+                    result.append(dict(
+                        hostnames=list(hostnames),
+                        processes=list(processes)
+                    ))
+
+        except AttributeError:
+            log.error("Device Error %s on endpoint_id %s") % (device, endpoint_id)
 
         return result
