@@ -40,7 +40,7 @@ class OpenStackService(HubService):
                         processes=list(processes)
                     ))
 
-        except AttributeError:
+        except Exception:
             log.error("Device Error %s on endpoint_id %s") % (device, endpoint_id)
 
         return result
