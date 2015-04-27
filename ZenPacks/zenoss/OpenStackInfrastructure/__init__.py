@@ -197,7 +197,7 @@ CFG = zenpacklib.ZenPackSpec(
             'filter_display': False,
             'relationships': {
                 # Provide better contextual naming for the relationships in the UI.
-                'parentOrg': {'label': 'Parent', 'order': 1.0},
+                'parentOrg': {'grid_display': False, 'label': 'Parent', 'order': 1.0},
                 'childOrgs': {'label': 'Children', 'order': 1.1},
             },
             # these are inherited by child classes:
@@ -300,12 +300,14 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Image',
             'order': 10,
             'properties': {
-                'imageId':      {'grid_display': False,
-                                 'label': 'Image ID'},
-                'imageStatus':  {'label': 'Status'},
-                'imageCreated': {'label': 'Created'},
-                'imageUpdated': {'label': 'Updated'},
-            }
+                'imageId':      {'grid_display': False, 'label': 'Image ID'},
+                'imageCreated': {'order': 3.1, 'label_width': 95, 'label': 'Created'},
+                'imageUpdated': {'order': 3.2, 'label_width': 95, 'label': 'Updated'},
+                'imageStatus':  {'order': 3.5, 'label_width': 40, 'label': 'Status'},
+            },
+            'relationships': {
+                'instances':      {'order': 1.3, 'label_width': 50, 'content_width': 10},
+            },
         },
 
         'Instance': {
@@ -451,7 +453,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'orgComponent': {'label': 'Supporting',
                                  'render_with_type': True,
                                  'order': 1.0,
-                                 'content_width': 150}  # need to fix the default width for render_with_type
+                                 'content_width': 110}  # need to fix the default width for render_with_type
             },
             'dynamicview_views': ['service_view', 'openstack_view'],
             'dynamicview_relations': {
