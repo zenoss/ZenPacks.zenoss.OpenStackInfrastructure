@@ -36,6 +36,19 @@ class BaseReportableFactory(basereportable.BaseReportableFactory):
     pass
 
 
+class AvailabilityZoneReportable(BaseReportable):
+
+    def reportProperties(self):
+        # allow table join between avalability zone and region.
+        for prop in super(AvailabilityZoneReportable, self).reportProperties():
+            yield prop
+
+        yield ('openstack_infrastructure_region_key',
+               'reference',
+               IReportable(self.context.device().getDeviceComponents(
+                   type='OpenStackInfrastructureRegion')[0]).sid,
+               MARKER_LENGTH)
+
 class HostReportable(BaseReportable):
 
     # add a reference to the host device, in addition to the normal
