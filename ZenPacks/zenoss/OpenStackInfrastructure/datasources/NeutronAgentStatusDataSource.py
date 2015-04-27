@@ -50,7 +50,7 @@ class NeutronAgentStatusDataSource(PythonDataSource):
 
     # NeutronAgentStatusDataSource
 
-    _properties = PythonDataSource._properties + ( )
+    _properties = PythonDataSource._properties + ()
 
 
 class INeutronAgentStatusDataSourceInfo(IPythonDataSourceInfo):
@@ -113,7 +113,7 @@ class NeutronAgentStatusDataSourcePlugin(PythonDataSourcePlugin):
 
         results = {}
 
-        log.info('Requesting agent-list')
+        log.debug('Requesting agent-list')
         result = yield client.agents()
         results['agents'] = result['agents']
 
