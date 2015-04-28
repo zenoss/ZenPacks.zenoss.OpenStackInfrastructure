@@ -121,7 +121,7 @@ on the zenoss collector):
 
 <syntaxhighlight lang="bash">
   sudo pip -q install --force-reinstall https://github.com/zenoss/ceilometer_zenoss/archive/master.zip
-  sudo cp /usr/lib/python2.6/site-packages/ceilometer_zenoss/event_definitions.yaml /etc/ceilometer/
+  sudo cp /usr/lib/*/site-packages/ceilometer_zenoss/event_definitions.yaml /etc/ceilometer/
 </syntaxhighlight>
 
 Edit /etc/ceilometer/ceilometer.conf, and add the following lines to the
