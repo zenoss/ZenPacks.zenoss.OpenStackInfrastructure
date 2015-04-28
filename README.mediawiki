@@ -120,8 +120,9 @@ To install it, perform the following steps on each of these openstack nodes (NOT
 on the zenoss collector):
 
 <syntaxhighlight lang="bash">
+  python_dir=$(python -V 2>&1 | sed -n 's/Python \+\(\w\.\w\).*/python\1/p')
   sudo pip -q install --force-reinstall https://github.com/zenoss/ceilometer_zenoss/archive/master.zip
-  sudo cp /usr/lib/python2.6/site-packages/ceilometer_zenoss/event_definitions.yaml /etc/ceilometer/
+  sudo cp /usr/lib/$python_dir/site-packages/ceilometer_zenoss/event_definitions.yaml /etc/ceilometer/
 </syntaxhighlight>
 
 Edit /etc/ceilometer/ceilometer.conf, and add the following lines to the
