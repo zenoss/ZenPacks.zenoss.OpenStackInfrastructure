@@ -197,7 +197,7 @@ CFG = zenpacklib.ZenPackSpec(
             'filter_display': False,
             'relationships': {
                 # Provide better contextual naming for the relationships in the UI.
-                'parentOrg': {'label': 'Parent', 'order': 1.0},
+                'parentOrg': {'label': 'Parent Region', 'order': 1.0},
                 'childOrgs': {'label': 'Children', 'order': 1.1},
                 'hosts':     {'label': 'Host', 'order': 1.0},
                 'softwareComponents': {'label_width': 150},
