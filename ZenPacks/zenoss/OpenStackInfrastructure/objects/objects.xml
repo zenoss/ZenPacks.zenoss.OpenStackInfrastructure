@@ -1418,7 +1418,7 @@ AVERAGE
 </object>
 </tomanycont>
 </object>
-<object id='Images' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<object id='Images and Snapshots' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
 <property type="int" id="height" mode="w" >
 100
 </property>
@@ -2002,7 +2002,7 @@ openstackQueues_eventQueueCount
 AVERAGE
 </property>
 </object>
-<object id='performance' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<object id='Performance' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
 <property type="long" id="sequence" mode="w" >
 1
 </property>
@@ -2354,7 +2354,7 @@ openstack_serverHardRebootCount
 AVERAGE
 </property>
 </object>
-<object id='Other' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<object id='Shutdown or Paused' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
 <property type="long" id="sequence" mode="w" >
 4
 </property>

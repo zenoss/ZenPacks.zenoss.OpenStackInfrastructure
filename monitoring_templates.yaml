@@ -439,7 +439,7 @@
         Total:
           dpName: openstack_flavorTotalCount
           format: '%7.0lf'
-    Images:
+    Images and Snapshots:
       units: count
       height: 100
       width: 500
@@ -488,7 +488,7 @@
         Hard Reboot:
           dpName: openstack_serverHardRebootCount
           format: '%7.0lf'
-        Other:
+        Shutdown or Paused:
           dpName: openstack_serverOtherCount
           format: '%7.0lf'
         Password:
@@ -534,7 +534,7 @@
         Event:
           dpName: openstackQueues_eventQueueCount
           format: '%7.0lf'
-        performance:
+        Performance:
           dpName: openstackQueues_perfQueueCount
           format: '%7.0lf'
 
