@@ -27,7 +27,7 @@ This module provides a single integration point for common ZenPacks.
 """
 
 # PEP-396 version. (https://www.python.org/dev/peps/pep-0396/)
-__version__ = "1.1.0dev"
+__version__ = "1.0.1"
 
 
 import logging
@@ -312,12 +312,15 @@ class ZenPack(ZenPackBase):
 
         super(ZenPack, self).remove(app, leaveObjects=leaveObjects)
 
-    def manage_exportPack(self, *args, **kwargs):
-        # In order to control which objects are exported, we wrap the entire
-        # zenpack object, and the zenpackable objects it contains, in proxy
-        # objects, which allow us to override their behavior without disrupting
-        # the original objects.
+    def manage_exportPack(self, download="no", REQUEST=None):
+        """Export ZenPack to $ZENHOME/export directory.
 
+        In order to control which objects are exported, we wrap the
+        entire zenpack object, and the zenpackable objects it contains,
+        in proxy objects, which allow us to override their behavior
+        without disrupting the original objects.
+
+        """
         import Acquisition
 
         class FilteredZenPackable(zope.proxy.ProxyBase, Acquisition.Explicit):
@@ -351,7 +354,10 @@ class ZenPack(ZenPackBase):
                 packables = zope.proxy.getProxiedObject(self).packables()
                 return [FilteredZenPackable(x).__of__(x.aq_parent) for x in packables]
 
-        ZenPackBase.manage_exportPack(FilteredZenPack(self), args, kwargs)
+        return ZenPackBase.manage_exportPack(
+            FilteredZenPack(self),
+            download=download,
+            REQUEST=REQUEST)
 
 
 class CatalogBase(object):
@@ -657,6 +663,18 @@ class ComponentBase(ModelBase):
                 # (Products.ZenMessaging.queuemessaging.adapters) implementation
                 # expects device() to return None, not to throw an exception.
                 return None
+
+    def getStatus(self, statClass='/Status'):
+        """Return the status number for this component.
+
+        Overridden to default statClass to /Status instead of
+        /Status/<self.meta_type>. Current practices do not include using
+        a separate event class for each component meta_type. The event
+        class plus component field already convey this level of
+        information.
+
+        """
+        return BaseDeviceComponent.getStatus(self, statClass=statClass)
 
     def getIdForRelationship(self, relationship):
         """Return id in ToOne relationship or None."""
@@ -4046,7 +4064,7 @@ class GraphPointSpec(Spec):
 
         # Shorthand for datapoints that have the same name as their datasource.
         if '_' not in dpName:
-            self.dpName = '_'.join(dpName, dpName)
+            self.dpName = '{0}_{0}'.format(dpName)
         else:
             self.dpName = dpName
 

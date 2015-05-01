@@ -252,4 +252,7 @@ When combined with the Zenoss Service Dynamics product, this ZenPack adds built-
 
 :2.1.0
 * Added Neutron network components
+* Update Impact models for Neutron
+* Update multiple UI interfaces
+* Upgrade to ZenPackLib 1.0.1
 
