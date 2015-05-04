@@ -162,7 +162,7 @@ class NovaAPIClient(object):
 
         r = {}
         try:
-            r = yield self.direct_api_call('/tokens', data=body)
+            r = yield self.direct_api_call('tokens', data=body)
         except Error:
             log.error("Error from login: %s" % str(Error))
 
