@@ -113,7 +113,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
 
         results = {}
 
-        log.info('Requesting services')
+        log.debug('Requesting services')
         result = yield client.services()
         results['services'] = result['services']
 
