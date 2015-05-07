@@ -211,6 +211,7 @@ CFG = zenpacklib.ZenPackSpec(
         'SoftwareComponent': {
             'base': 'OpenstackComponent',
             'label': 'Software Component',
+            'label_width': 120,
             'filter_display': False,
             'relationships': {
                 # Provide better contextual naming for the relationships in the UI.
@@ -672,13 +673,13 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Port',
             'order': 16,
             'properties': {
-                'admin_state_up':  {'label': 'AdminState',
-                                    'label_width': 35,
-                                    'content_width': 30,
+                'admin_state_up':  {'label': 'Admin State',
+                                    'label_width': 60,
+                                    'content_width': 50,
                                     'order': 1.20,
                                     'renderer': 'Zenoss.render.openstack_ServiceEnabledStatus'},
                 'device_owner':    {'grid_display': True, 'order': 1.18},
-                'fixed_ip_list':   {'grid_display': True, 'order': 1.12},
+                'fixed_ip_list':   {'label': 'Fixed IP List', 'label_width': 60, 'order': 1.12},
                 'mac_address':     {'label': 'MAC',
                                     'content_width': 105,
                                     'order': 1.14},
