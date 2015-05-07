@@ -266,9 +266,11 @@ class NovaAPIClient(object):
             headers['X-Auth-Token'] = self._token
 
         if self._nova_url is not None and method == 'GET':
-            auth_url = self._nova_url
+            auth_url = self._nova_url.strip()
         else:
-            auth_url = self.auth_url
+            auth_url = self.auth_url.strip()
+        if auth_url[-1] != '/':
+            auth_url = auth_url + '/'
         return Request(
             auth_url + path,
             method=method,
