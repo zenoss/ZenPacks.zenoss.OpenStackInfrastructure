@@ -106,7 +106,7 @@ class NeutronIntegrationComponent(object):
         from .OpenstackComponent import OpenstackComponent
         graphs = super(OpenstackComponent, self).getDefaultGraphDefs(drange=drange)
         for component in self.implementation_components():
-            for graphdef in component.getDefaultGraphDefs(drange, drange=drange):
+            for graphdef in component.getDefaultGraphDefs(drange=drange):
                 graphs.append(graphdef)
 
         return graphs
@@ -118,7 +118,7 @@ class NeutronIntegrationComponent(object):
         This method is for 5.x compatibility
         """
         from .OpenstackComponent import OpenstackComponent
-        graphs = super(OpenstackComponent, self).getGraphObjects()
+        graphs = super(OpenstackComponent, self).getGraphObjects(drange=drange)
         for component in self.implementation_components():
-            graphs.extend(component.getGraphObjects())
+            graphs.extend(component.getGraphObjects(drange=drange))
         return graphs
