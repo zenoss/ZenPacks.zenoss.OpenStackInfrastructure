@@ -42,6 +42,8 @@ def all_core_components(dmd):
 
 class NeutronIntegrationComponent(object):
 
+    """Mixin for model classes that have Neutron integrations."""
+
     def getNeutronIntegrationKeys(self):
         methodname = {
             'OpenStackInfrastructureTenant':     'getTenantIntegrationKeys',
