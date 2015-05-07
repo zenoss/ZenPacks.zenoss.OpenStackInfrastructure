@@ -303,8 +303,8 @@ CFG = zenpacklib.ZenPackSpec(
             'order': 10,
             'properties': {
                 'imageId':      {'grid_display': False, 'label': 'Image ID'},
-                'imageCreated': {'order': 3.1, 'label_width': 95, 'label': 'Created'},
-                'imageUpdated': {'order': 3.2, 'label_width': 95, 'label': 'Updated'},
+                'imageCreated': {'order': 3.1, 'label_width': 140, 'label': 'Created'},
+                'imageUpdated': {'order': 3.2, 'label_width': 140, 'label': 'Updated'},
                 'imageStatus':  {'order': 3.5, 'label_width': 40, 'label': 'Status'},
             },
             'relationships': {
