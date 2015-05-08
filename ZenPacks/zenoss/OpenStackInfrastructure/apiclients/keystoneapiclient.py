@@ -143,6 +143,7 @@ class KeystoneAPIClient(object):
         r = yield self.direct_api_call('/tokens', data=body)
 
         self._token = r['access']['token']['id'].encode('ascii', 'ignore')
+        self._serviceCatalog = r['access']['serviceCatalog']
         for sc in r['access']['serviceCatalog']:
             if sc['type'] == 'identity' and sc['name'] == 'keystone':
                 self._keystone_url = sc['endpoints'][0]['adminURL'].encode(
