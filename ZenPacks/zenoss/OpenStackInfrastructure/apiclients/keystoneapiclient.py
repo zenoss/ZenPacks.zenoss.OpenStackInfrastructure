@@ -78,6 +78,7 @@ class KeystoneAPIClient(object):
         self._apis = {}
         self._keystone_url = None
         self._token = None
+        self._serviceCatalog = None
 
     @property
     def endpoints(self):
@@ -148,7 +149,17 @@ class KeystoneAPIClient(object):
             if sc['type'] == 'identity' and sc['name'] == 'keystone':
                 self._keystone_url = sc['endpoints'][0]['adminURL'].encode(
                     'ascii', 'ignore')
+
+        self._serviceCatalog = r['access']['serviceCatalog']
+
         returnValue(r)
+
+    @inlineCallbacks
+    def serviceCatalog(self):
+        if self._serviceCatalog is None:
+            yield self.login()
+
+        returnValue(self._serviceCatalog)
 
     @inlineCallbacks
     def api_call(self, path, data=None, params=None, **kwargs):
