@@ -68,31 +68,39 @@ class KeystoneAPIClient(object):
 
     """Twisted asynchronous Keystone client."""
 
-    def __init__(self, username, password, auth_url, project_id):
+    def __init__(self, username, password, auth_url, project_id, admin=False):
         """Create Keystone API client."""
         self.username = username
         self.password = password
         self.auth_url = auth_url
         self.project_id = project_id
+        self.admin = admin
 
         self._apis = {}
         self._keystone_url = None
         self._token = None
         self._serviceCatalog = None
 
+    def _admin_only(self, api_method):
+        if self.admin is False:
+            raise BadRequestError("'%s' is only available in the Identity admin API v2.0" % api_method)
+
     @property
     def endpoints(self):
         """Return entry-point to the API."""
+        self._admin_only()
         return self._apis.setdefault('endpoints', API(self, '/endpoints'))
 
     @property
     def roles(self):
         """Return entry-point to the API."""
+        self._admin_only()
         return self._apis.setdefault('roles', API(self, '/OS-KSADM/roles'))
 
     @property
     def services(self):
         """Return entry-point to the API."""
+        self._admin_only()
         return self._apis.setdefault('services',
                                      API(self, '/OS-KSADM/services'))
 
@@ -104,6 +112,7 @@ class KeystoneAPIClient(object):
     @property
     def users(self):
         """Return entry-point to the API."""
+        self._admin_only()
         return self._apis.setdefault('users', API(self, '/users'))
 
     def __getitem__(self, name):
@@ -145,10 +154,14 @@ class KeystoneAPIClient(object):
 
         self._token = r['access']['token']['id'].encode('ascii', 'ignore')
         self._serviceCatalog = r['access']['serviceCatalog']
-        for sc in r['access']['serviceCatalog']:
-            if sc['type'] == 'identity' and sc['name'] == 'keystone':
-                self._keystone_url = sc['endpoints'][0]['adminURL'].encode(
-                    'ascii', 'ignore')
+
+        if self.admin is True:
+            # switch from the Identity API (usually port 5000) to the Identity
+            # Admin API (usually port 35357)
+            for sc in r['access']['serviceCatalog']:
+                if sc['type'] == 'identity' and sc['name'] == 'keystone':
+                    self._keystone_url = sc['endpoints'][0]['adminURL'].encode(
+                        'ascii', 'ignore')
 
         self._serviceCatalog = r['access']['serviceCatalog']
 
