@@ -174,7 +174,7 @@ class NovaAPIClient(object):
             self._service_catalog = r['access']['serviceCatalog']
             for sc in r['access']['serviceCatalog']:
                 if sc['type'] == 'compute' and sc['name'] == 'nova':
-                    self._nova_url = sc['endpoints'][0]['adminURL'].encode('ascii', 'ignore')
+                    self._nova_url = sc['endpoints'][0]['publicURL'].encode('ascii', 'ignore')
                     break
 
         returnValue(r)

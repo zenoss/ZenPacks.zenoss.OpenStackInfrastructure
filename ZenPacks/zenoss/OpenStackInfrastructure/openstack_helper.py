@@ -37,10 +37,11 @@ class OpenstackHelper(object):
             auth_url=auth_url,
         )
 
-        regions = set()
-        endpoints = yield client.endpoints()
-        for endpoint in endpoints['endpoints']:
-            regions.add(endpoint['region'])
+        serviceCatalog = yield client.serviceCatalog()
+
+        ep = []
+        [ep.extend(x['endpoints']) for x in serviceCatalog]
+        regions = set([x['region'] for x in ep])
 
         returnValue([{'key': c, 'label': c} for c in sorted(regions)])
 
@@ -56,17 +57,13 @@ class OpenstackHelper(object):
             auth_url=auth_url,
         )
 
-        services = yield client.services()
-        endpoints = yield client.endpoints()
+        serviceCatalog = yield client.serviceCatalog()
 
-        for service in services['OS-KSADM:services']:
-            if service['type'] == 'metering' and service['enabled'] is True:
-
-                # look at the endpoints for this service:
-                for endpoint in [ep for ep in endpoints['endpoints']
-                                 if ep['service_id'] == service['id']]:
+        for sc in serviceCatalog:
+            if sc['type'] == 'metering':
+                for endpoint in sc['endpoints']:
                     if endpoint['region'] == region_name:
-                        returnValue(endpoint['publicurl'])
+                        returnValue(str(endpoint['publicURL']))
                         return
 
         # never found one.
