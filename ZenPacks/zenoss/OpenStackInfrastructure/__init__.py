@@ -451,6 +451,7 @@ CFG = zenpacklib.ZenPackSpec(
             'order': 9,
             'properties': {
                 'hostfqdn':            {'grid_display': False,
+                                        'label': 'FQDN',
                                         'index_type': 'field'},
                 'hostname':            {'grid_display': False,
                                         'index_type': 'field'}

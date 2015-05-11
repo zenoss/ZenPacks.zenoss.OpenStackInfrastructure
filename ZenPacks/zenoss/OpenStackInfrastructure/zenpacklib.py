@@ -6036,7 +6036,7 @@ Zenoss.ZPL_{zenpack_id_prefix}_RenderableDisplayField = Ext.extend(Zenoss.Displa
         Zenoss.ZPL_{zenpack_id_prefix}_RenderableDisplayField.superclass.constructor.call(this, config);
     },
     valueToRaw: function(value) {
-        if (typeof(value) == 'boolean') {
+        if (typeof(value) == 'boolean' || typeof(value) == 'object') {
             return value;
         } else {
             return Zenoss.ZPL_{zenpack_id_prefix}_RenderableDisplayField.superclass.valueToRaw(value);
