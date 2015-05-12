@@ -12,6 +12,9 @@ log = logging.getLogger('zen.OpenStack.neutron_integration')
 
 from zope.interface import implements
 import zope.component
+from zope.event import notify
+from Products.Zuul.catalog.events import IndexingEvent
+
 
 from .catalogs import get_neutron_implementation_catalog, get_neutron_core_catalog
 from .interfaces import INeutronImplementationPlugin, INeutronImplementationComponent
@@ -31,6 +34,7 @@ def reindex_core_components(dmd):
     log.info("Reindexing all core neutron components")
     for obj in all_core_components(dmd):
         obj.index_object()
+        notify(IndexingEvent(obj))
 
 
 def reindex_implementation_components(dmd):
