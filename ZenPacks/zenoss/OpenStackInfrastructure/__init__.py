@@ -768,13 +768,39 @@ import logging
 log = logging.getLogger('zen.OpenStack')
 
 from Products.ZenUtils.Utils import unused
+from OFS.CopySupport import CopyError
+
 from . import schema
 
 
 class ZenPack(schema.ZenPack):
     def install(self, app):
+        self._migrate_productversions()
+
         super(ZenPack, self).install(app)
         self.chmodScripts()
+
+    def _migrate_productversions(self):
+        # Rename products for openstack versions which did not yet have names
+        # in previous versions of the zenpack.   This can not be done in a
+        # traditional migrate script because it needs to happen before
+        # objects.xml is loaded.
+        rename_versions = {
+            "2015.2": "Liberty (2015.2)"
+        }
+        try:
+            os_products = self.dmd.getObjByPath("Manufacturers/OpenStack/products")
+        except KeyError:
+            # First time installing the zenpack.. no prior versions in there.
+            pass
+        else:
+            for old_version, new_version in rename_versions.iteritems():
+                if old_version in os_products.objectIds():
+                    try:
+                        os_products.manage_renameObject(old_version, new_version)
+                        log.debug("Migrated version '%s' to '%s'" % (old_version, new_version))
+                    except CopyError:
+                        raise Exception("Version '%s' is invalid or already in use." % new_version)
 
     def remove(self, app, leaveObjects=False):
         super(ZenPack, self).remove(app, leaveObjects=leaveObjects)

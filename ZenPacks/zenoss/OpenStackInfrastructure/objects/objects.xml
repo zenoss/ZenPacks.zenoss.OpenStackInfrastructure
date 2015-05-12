@@ -3907,7 +3907,7 @@ http://www.openstack.org/
 []
 </property>
 <tomanycont id='products'>
-<object id='2015.2' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<object id='Liberty (2015.2)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
 <property type="string" id="name" mode="w" >
 Liberty (2015.2)
 </property>
