@@ -11,6 +11,7 @@ AMQP_PASSWORD="[previously configured password]"
 AMQP_HOSTNAME=`zenglobalconf -p amqphost`
 AMQP_PORT=`zenglobalconf -p amqpport`
 AMQP_VIRTUAL_HOST=`zenglobalconf -p amqpvhost`
+DEFAULT_IP=$(ip route get 8.8.8.8 | head -1 | cut -d' ' -f8)
 
 # If in Europa, get first IP from CONTROLPLANE_HOST_IPS, otherwise default
 if [ -z "$CONTROLPLANE_HOST_IPS" ]; then
@@ -59,18 +60,20 @@ echo "    [dispatcher_zenoss]"
 echo "    "
 echo "    zenoss_device = [device that the openstack environment is registered as in zenoss]"
 echo "    "
-echo "    amqp_hostname = $AMQP_HOSTNAME"
 echo "    amqp_port = $AMQP_PORT"
 echo "    amqp_userid = $AMQP_USERID"
 echo "    amqp_password = $AMQP_PASSWORD"
 echo "    amqp_virtual_host = $AMQP_VIRTUAL_HOST"
+echo "    amqp_hostname = [The correct AMQP system IP or hostname (see below)]"
+echo "    "
+echo " ----------------------------------------------------------------"
+echo " Note: Setting a Correct amqp_hostname in OpenStack Ceilometer"
+echo " ----------------------------------------------------------------"
+echo " * Your current Zenoss amqp_hostname is set to '$AMQP_HOSTNAME'."
+echo ""
+echo "  => If this differs from your default interface, $DEFAULT_IP, must find the"
+echo "     appropriate entry for your amqp_hostname in ceilometer.conf."
+echo "     It must be an accessible interface from your OpenStack system,"
+echo "     and that interface must be one that accepts AMQP connections for "
+echo "     your Zenoss installation."
 
-case "$AMQP_HOSTNAME" in 
-	localhost* | 127.0.0* )
-		echo ""
-		echo ""
-		echo "WARNING: amqp_hostname appears to be localhost- you will need to"
-		echo "         specify a different IP so that your openstack environment"
-		echo "         can reach rabbitmq from the outside."
-		;;
-esac
