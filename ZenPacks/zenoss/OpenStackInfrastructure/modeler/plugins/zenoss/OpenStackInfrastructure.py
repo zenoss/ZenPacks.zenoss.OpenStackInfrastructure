@@ -19,8 +19,11 @@ log = logging.getLogger('zen.OpenStackInfrastructure')
 import json
 import os
 import re
+import itertools
 
 from twisted.internet.defer import inlineCallbacks, returnValue
+from twisted.internet.error import ConnectError, TimeoutError
+
 
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
@@ -39,7 +42,7 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import (
 add_local_lib_path()
 
 from apiclients.novaapiclient import NovaAPIClient, NotFoundError
-from apiclients.keystoneapiclient import KeystoneAPIClient
+from apiclients.keystoneapiclient import KeystoneAPIClient, KeystoneError
 from apiclients.neutronapiclient import NeutronAPIClient
 
 
@@ -53,6 +56,16 @@ class OpenStackInfrastructure(PythonPlugin):
         'zOpenStackNovaApiHosts',
         'zOpenStackExtraHosts',
     )
+
+    _keystonev2errmsg = """
+        Unable to connect to keystone Identity Admin API v2.0 to retrieve tenant
+        list.  Tenant names will be unknown (tenants will show with their IDs only)
+        until this is corrected, either by opening access to the admin API endpoint
+        as listed in the keystone service catalog, or by configuring zOpenStackAuthUrl
+        to point to a different, accessible endpoint which supports both the public and
+        admin APIs.  (This may be as simple as changing the port in the URL from
+        5000 to 35357)  Details: %s
+    """
 
     @inlineCallbacks
     def collect(self, device, unused):
@@ -68,13 +81,30 @@ class OpenStackInfrastructure(PythonPlugin):
             device.zCommandUsername,
             device.zCommandPassword,
             device.zOpenStackAuthUrl,
-            device.zOpenStackProjectId)
+            device.zOpenStackProjectId,
+            admin=True)
 
         results = {}
 
-        result = yield keystone_client.tenants()
-        results['tenants'] = result['tenants']
-        log.debug('tenants: %s\n' % str(results['tenants']))
+        results['tenants'] = []
+        try:
+            result = yield keystone_client.tenants()
+            results['tenants'] = result['tenants']
+            log.debug('tenants: %s\n' % str(results['tenants']))
+
+        except (ConnectError, TimeoutError), e:
+            log.error(self._keystonev2errmsg, e)
+        except KeystoneError, e:
+            if len(e.args):
+                if isinstance(e.args[0], ConnectError) or \
+                   isinstance(e.args[0], TimeoutError):
+                    log.error(self._keystonev2errmsg, e.args[0])
+                else:
+                    log.error(self._keystonev2errmsg, e)
+            else:
+                log.error(self._keystonev2errmsg, e)
+        except Exception, e:
+            log.error(self._keystonev2errmsg, e)
 
         result = yield client.flavors(detailed=True, is_public=None)
         results['flavors'] = result['flavors']
@@ -645,6 +675,27 @@ class OpenStackInfrastructure(PythonPlugin):
             'ports': ports,
             'floatingips': floatingips,
         }
+
+        # If we have references to tenants which we did not discover during
+        # (keystone) modeling, create dummy records for them.
+        all_tenant_ids = set()
+        for objmap in itertools.chain.from_iterable(objmaps.values()):
+            try:
+                all_tenant_ids.add(objmap.set_tenant)
+            except AttributeError:
+                pass
+
+        all_tenant_ids.remove(None)
+        known_tenant_ids = set([x.id for x in tenants])
+        for tenant_id in all_tenant_ids - known_tenant_ids:
+            tenants.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.Tenant',
+                data=dict(
+                    id=tenant_id,
+                    title=str(tenant_id),
+                    description=str(tenant_id),
+                    tenantId=tenant_id[7:]  # strip tenant- prefix
+                )))
 
         # If the user has provided a list of static objectmaps to
         # slap on the ends of the ones we discovered dynamically, add them in.
