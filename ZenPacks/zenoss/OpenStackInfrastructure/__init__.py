@@ -453,7 +453,8 @@ CFG = zenpacklib.ZenPackSpec(
                 'hostfqdn':            {'grid_display': False,
                                         'label': 'FQDN',
                                         'index_type': 'field'},
-                'hostname':            {'grid_display': False,
+                'hostname':            {'label': 'Host Name',
+                                        'grid_display': False,
                                         'index_type': 'field'}
             },
             'relationships': {
@@ -577,7 +578,7 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Network',
             'order': 12,
             'properties': {
-                'admin_state_up': {'order': 2.20, 'label': 'AdminState',
+                'admin_state_up': {'order': 2.20, 'label': 'Admin State',
                                      'label_width': 54,
                                      'renderer': 'Zenoss.render.openstack_ServiceEnabledStatus'},
                 'netExternal':    {'grid_display': False, 'label': 'Net External'},
@@ -644,7 +645,7 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Router',
             'order': 15,
             'properties': {
-                'admin_state_up': {'order': 1.1, 'label': 'AdminState', 'grid_display': False},
+                'admin_state_up': {'order': 1.1, 'label': 'Admin State', 'grid_display': False},
                 'gateways':       {'order': 1.2, 'label': 'Gateways', 'type_': 'lines'},
                 'routerId':       {'order': 1.3, 'label': 'Router ID', 'grid_display': False},
                 'routes':         {'order': 1.4, 'label': 'Routes', 'grid_display': False},
@@ -660,7 +661,7 @@ CFG = zenpacklib.ZenPackSpec(
             },
             'relationships': {
                 'floatingIps':    {'order': 2.3, 'label': 'Floating IPs', 'label_width': 60},
-                'network':        {'order': 2.1, 'label': 'External Net', 'content_width': 90},
+                'network':        {'order': 2.1, 'label': 'External Network', 'content_width': 90},
                 'neutronAgents':  {'grid_display': False},
                 'subnets':        {'order': 2.2, 'label': 'Subnets', 'label_width': 40},
                 'tenant':         {'order': 2.4, 'label_width': 45, 'content_width': 50},
@@ -693,7 +694,7 @@ CFG = zenpacklib.ZenPackSpec(
                                     'label': 'Port ID',
                                     'label_width': 40},
                 'status':          {'label': 'Status', 'label_width': 35, 'order': 1.19},
-                'title':           {'grid_display': False},
+                'title':           {'label': 'Title', 'grid_display': False},
                 'vif_type':        {'label': 'Type',
                                     'label_width': 30,
                                     'order': 1.13},
@@ -733,8 +734,8 @@ CFG = zenpacklib.ZenPackSpec(
             'order': 19,
             'properties': {
                 'floatingipId':           {'grid_display': False, 'label': 'Floating ID'},
-                'fixed_ip_address':       {'order': 2.2, 'label_width': 60, 'label': 'Attached IP'},
-                'floating_ip_address':    {'order': 2.3, 'label_width': 60, 'label': 'Floating IP'},
+                'fixed_ip_address':       {'order': 2.2, 'label_width': 80, 'content_width': 80, 'label': 'Attached IP'},
+                'floating_ip_address':    {'order': 2.3, 'label_width': 80, 'content_width': 80, 'label': 'Floating IP'},
                 'status':                 {'order': 2.6, 'label_width': 35, 'label': 'Status'},
                 'implementation_components': {
                     'label': 'Neutron Implementation',
