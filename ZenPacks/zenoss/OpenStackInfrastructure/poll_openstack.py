@@ -183,6 +183,8 @@ class OpenStackPoller(object):
         data['agentNICSCount'] = 0
         data['agentAliveCount'] = 0
         data['agentDeadCount'] = 0
+        data['agentMLNXCount'] = 0
+        data['agentMeteringCount'] = 0
 
         result = yield neutron_client.agents()
 
@@ -229,7 +231,7 @@ class OpenStackPoller(object):
             elif agent['agent_type'] == 'NIC Switch agent':
                 data['agentNICSCount'] += 1
                 severity = 0
-            if agent['alive'] == True:
+            if agent['alive'] is True:
                 data['agentAliveCount'] += 1
                 severity = 0
             else:
@@ -266,10 +268,10 @@ class OpenStackPoller(object):
             elif net['status'] == 'ERROR':
                 data['networkErrorCount'] += 1
                 severity = 5
-            if net['shared'] == True:
+            if net['shared'] is True:
                 data['networkSharedCount'] += 1
                 severity = None
-            if net['router:external'] == True:
+            if net['router:external'] is True:
                 data['networkExternalCount'] += 1
                 severity = None
             else:
