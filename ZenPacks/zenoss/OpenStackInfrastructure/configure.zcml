@@ -7,7 +7,7 @@
 
     <!-- Device Loaders -->
     <utility
-        name="openstackinfrastructure_account"
+        name="openstackinfrastructure"
         provides="Products.ZenModel.interfaces.IDeviceLoader"
         component=".deviceloaders.OpenStackInfrastructureLoader"
         />
