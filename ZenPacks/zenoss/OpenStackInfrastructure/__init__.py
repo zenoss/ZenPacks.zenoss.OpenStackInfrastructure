@@ -554,12 +554,12 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'agentId':    {'grid_display': False, 'label': 'Agent ID'},
                 'operStatus': {'order': 11.100,
-                                  'label': 'Status',
-                                  'label_width': 40,
-                                  'renderer': 'Zenoss.render.openstack_ServiceOperStatus'},
+                               'label': 'Status',
+                               'label_width': 40,
+                               'renderer': 'Zenoss.render.openstack_ServiceOperStatus'},
                 'type':       {'label': 'Type',
-                                  'order': 1.1,
-                                  'content_width': 60},
+                               'order': 1.1,
+                               'content_width': 60},
             },
             'relationships': {
                 'networks':      {'order': 1.1, 'label_width': 45},
