@@ -78,11 +78,11 @@
       graphpoints:
         Read:
           dpName: diskReadRequestsRate
-          format: "%5.2lf"
+          format: "%7.2lf%s"
 
         Write:
           dpName: diskWriteRequestsRate
-          format: "%5.2lf"
+          format: "%7.2lf%s"
 
     Disk IO Rate:
       units: bytes/sec
@@ -91,11 +91,11 @@
       graphpoints:
         Read:
           dpName: diskReadBytesRate
-          format: "%5.2lf"
+          format: "%7.2lf%s"
 
         Write:
           dpName: diskWriteBytesRate
-          format: "%5.2lf"
+          format: "%7.2lf%s"
 
 
 /OpenStack/Infrastructure/Vnic:
@@ -156,11 +156,11 @@
       graphpoints:
         Inbound:
           dpName: networkIncomingPacketsRate
-          format: "%5.2lf"
+          format: "%7.2lf%s"
 
         Outbound:
           dpName: networkOutgoingPacketsRate
-          format: "%5.2lf"
+          format: "%7.2lf%s"
 
     Network Throughput:
       units: bytes/sec
@@ -169,11 +169,11 @@
       graphpoints:
         Inbound:
           dpName: networkIncomingBytesRate
-          format: "%5.2lf"
+          format: "%7.2lf%s"
 
         Outbound:
           dpName: networkOutgoingBytesRate
-          format: "%5.2lf"
+          format: "%7.2lf%s"
 
 /OpenStack/Infrastructure/Endpoint:
   description: "OpenStackInfrastructure: Endpoint Monitoring"
