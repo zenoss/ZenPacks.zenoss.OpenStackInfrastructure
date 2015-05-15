@@ -566,6 +566,7 @@ CFG = zenpacklib.ZenPackSpec(
                 'subnets':       {'order': 1.2, 'label_width': 40},
                 'routers':       {'order': 1.3, 'label_width': 40},
             },
+            'dynamicview_views': ['service_view', 'openstack_view'],
             'dynamicview_relations': {
                 'impacts': ['networks', 'subnets', 'routers'],
                 'impacted_by': ['hostedOn'],
