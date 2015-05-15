@@ -128,7 +128,11 @@ def _apply_neutron_traits(evt, objmap, traitset):
         for prop_name in traitmap[trait]:
             trait_field = 'trait_' + trait
             if hasattr(evt, trait_field):
-                value = getattr(evt, trait_field)
+                # Cast trait_admin_state_up to boolean for renderers
+                if trait_field == 'trait_admin_state_up':
+                    value = getattr(evt, 'trait_admin_state_up').lower() == 'true'
+                else:
+                    value = getattr(evt, trait_field)
                 setattr(objmap, prop_name, value)
 
     # Set the Tenant ID
