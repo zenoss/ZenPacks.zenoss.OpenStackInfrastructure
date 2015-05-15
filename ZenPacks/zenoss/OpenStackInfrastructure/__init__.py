@@ -554,22 +554,29 @@ CFG = zenpacklib.ZenPackSpec(
             'properties': {
                 'agentId':    {'grid_display': False, 'label': 'Agent ID'},
                 'operStatus': {'order': 11.100,
-                                  'label': 'Status',
-                                  'label_width': 40,
-                                  'renderer': 'Zenoss.render.openstack_ServiceOperStatus'},
+                               'label': 'Status',
+                               'label_width': 40,
+                               'renderer': 'Zenoss.render.openstack_ServiceOperStatus'},
                 'type':       {'label': 'Type',
-                                  'order': 1.1,
-                                  'content_width': 60},
+                               'order': 1.1,
+                               'content_width': 60},
             },
             'relationships': {
                 'networks':      {'order': 1.1, 'label_width': 45},
                 'subnets':       {'order': 1.2, 'label_width': 40},
                 'routers':       {'order': 1.3, 'label_width': 40},
             },
+            'dynamicview_views': ['service_view', 'openstack_view'],
             'dynamicview_relations': {
                 'impacts': ['networks', 'subnets', 'routers'],
                 'impacted_by': ['hostedOn'],
-            }
+            },
+
+            # we use a normal impact adaptor for osprocess_component, rather than
+            # dynamicview impacts adaptor, because OSProcess is not part of
+            # service_view, and so will not be exported from DV to impact
+            # currently (ZEN-14579).
+            'impacted_by': ['osprocess_component'],
         },
 
         'Network': {
