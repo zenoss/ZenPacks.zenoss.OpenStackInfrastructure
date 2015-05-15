@@ -570,7 +570,13 @@ CFG = zenpacklib.ZenPackSpec(
             'dynamicview_relations': {
                 'impacts': ['networks', 'subnets', 'routers'],
                 'impacted_by': ['hostedOn'],
-            }
+            },
+
+            # we use a normal impact adaptor for osprocess_component, rather than
+            # dynamicview impacts adaptor, because OSProcess is not part of
+            # service_view, and so will not be exported from DV to impact
+            # currently (ZEN-14579).
+            'impacted_by': ['osprocess_component'],
         },
 
         'Network': {
