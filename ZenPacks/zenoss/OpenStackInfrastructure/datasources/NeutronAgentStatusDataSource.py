@@ -139,7 +139,7 @@ class NeutronAgentStatusDataSourcePlugin(PythonDataSourcePlugin):
 
                 )))
 
-            if agent['admin_state_up'] != 'true':
+            if not agent['admin_state_up']:
                 data['events'].append({
                     'device': config.id,
                     'component': agent_id,
