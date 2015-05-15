@@ -111,7 +111,7 @@ class OpenStackPoller(object):
         data['serverUnknownCount'] = 0
         data['serverOtherCount'] = 0
 
-        result = yield client.servers(detailed=True)
+        result = yield client.servers(detailed=True, search_opts={'all_tenants': 1})
 
         for server in result['servers']:
             data['serverTotalCount'] += 1
