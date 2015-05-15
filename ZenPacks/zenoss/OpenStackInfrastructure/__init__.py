@@ -330,7 +330,8 @@ CFG = zenpacklib.ZenPackSpec(
                                            'label': 'Host Name',
                                            'index_type': 'field'},
                 'guestDevice':            {'label': 'Guest',   # link to the guest instance, if known
-                                           'type_': 'entity',
+                                           # 'type_': 'entity',
+                                           'renderer': 'Zenoss.render.openstack_uid_renderer',  # workaround to link to a different device
                                            'api_only': True,
                                            'api_backendtype': 'method'},
                 'hypervisorInstanceName': {'label': 'Hypervisor Instance Name',
