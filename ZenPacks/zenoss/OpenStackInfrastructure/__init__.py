@@ -329,8 +329,12 @@ CFG = zenpacklib.ZenPackSpec(
                 'hostName':               {'grid_display': False,
                                            'label': 'Host Name',
                                            'index_type': 'field'},
+                'guestDevice':            {'label': 'Guest',   # link to the guest instance, if known
+                                           'type_': 'entity',
+                                           'api_only': True,
+                                           'api_backendtype': 'method'},
                 'hypervisorInstanceName': {'label': 'Hypervisor Instance Name',
-                                              'grid_display': False},
+                                           'grid_display': False},
                 'privateIps':             {'order': 3.2, 'type_': 'lines',
                                               'label': 'Fixed IPs',
                                               'label_width': 90,},
