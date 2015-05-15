@@ -652,7 +652,8 @@ CFG = zenpacklib.ZenPackSpec(
             'label': 'Router',
             'order': 15,
             'properties': {
-                'admin_state_up': {'order': 1.1, 'label': 'Admin State', 'grid_display': False},
+                'admin_state_up': {'order': 1.1, 'label': 'Admin State', 'grid_display': False,
+                                   'renderer': 'Zenoss.render.openstack_ServiceEnabledStatus'},
                 'gateways':       {'order': 1.2, 'label': 'Gateways', 'type_': 'lines'},
                 'routerId':       {'order': 1.3, 'label': 'Router ID', 'grid_display': False},
                 'routes':         {'order': 1.4, 'label': 'Routes', 'grid_display': False},
