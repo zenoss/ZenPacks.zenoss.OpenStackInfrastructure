@@ -92,8 +92,7 @@ class Host(schema.Host):
         The description to put on the proxy device's expanded links section when linking
         back to this component.
         '''
-        return 'Host %s in OpenStack instance %s' % (
+        return 'Host %s in OpenStack %s' % (
             self.name(),
             self.device().name()
         )
-
