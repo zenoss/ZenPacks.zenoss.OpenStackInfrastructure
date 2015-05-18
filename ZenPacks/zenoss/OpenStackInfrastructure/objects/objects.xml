@@ -863,35 +863,6 @@ True
 4
 </property>
 <tomanycont id='graphPoints'>
-<object id='Active' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
-<property type="long" id="sequence" mode="w" >
-1
-</property>
-<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
-LINE
-</property>
-<property type="long" id="lineWidth" mode="w" >
-1
-</property>
-<property type="boolean" id="stacked" mode="w" >
-False
-</property>
-<property type="string" id="format" mode="w" >
-%7.0lf
-</property>
-<property type="string" id="legend" mode="w" >
-${graphPoint/id}
-</property>
-<property type="long" id="limit" mode="w" >
--1
-</property>
-<property type="string" id="dpName" mode="w" >
-openstack_agentActiveCount
-</property>
-<property type="string" id="cFunc" mode="w" >
-AVERAGE
-</property>
-</object>
 <object id='Alive' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
 <property type="long" id="sequence" mode="w" >
 2
@@ -1147,7 +1118,7 @@ ${graphPoint/id}
 -1
 </property>
 <property type="string" id="dpName" mode="w" >
-openstack_agentMLNXVCount
+openstack_agentMLNXCount
 </property>
 <property type="string" id="cFunc" mode="w" >
 AVERAGE
@@ -1205,7 +1176,7 @@ ${graphPoint/id}
 -1
 </property>
 <property type="string" id="dpName" mode="w" >
-openstack_agentMeteringVCount
+openstack_agentMeteringCount
 </property>
 <property type="string" id="cFunc" mode="w" >
 AVERAGE
