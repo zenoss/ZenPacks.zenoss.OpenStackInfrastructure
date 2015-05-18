@@ -13,12 +13,13 @@ log = logging.getLogger('zen.OpenStack.HeartbeatsAMQP')
 import json
 from time import time
 from functools import partial
+from pprint import pformat
 
 from twisted.internet import defer
 from twisted.internet.defer import inlineCallbacks, returnValue
 
 import zope.component
-from zope.component import adapts, getUtility, queryUtility
+from zope.component import adapts, getUtility
 from zope.interface import implements
 
 from Products.ZenCollector.interfaces import ICollector
@@ -33,7 +34,6 @@ from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import (
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import result_errmsg, sleep
 from zenoss.protocols.interfaces import IAMQPConnectionInfo, IQueueSchema
 from zenoss.protocols.twisted.amqp import AMQPFactory
-from ZenPacks.zenoss.OpenStackInfrastructure.Endpoint import Endpoint
 
 
 class HeartbeatsAMQPDataSource(PythonDataSource):
@@ -121,9 +121,6 @@ class HeartbeatsAMQPDataSourcePlugin(PythonDataSourcePlugin):
 
         if not expected_heartbeats:
             return
-            
-        hostnames = expected_heartbeats[0]['hostnames']
-        processes = expected_heartbeats[0]['processes']
 
         # During the first collect run, we spin up the AMQP listener.  After
         # that, no active collecting is done in the collect() method.
@@ -154,44 +151,61 @@ class HeartbeatsAMQPDataSourcePlugin(PythonDataSourcePlugin):
         data = self.new_data()
         device_id = config.id
 
-        for host in last_heard_heartbeats.keys():
-            if host not in hostnames:
-                continue
+        for host in expected_heartbeats:
+            hostname = host['hostnames'][0]
+            possible_hostnames = host['hostnames']
+            required_processes = host['processes']
 
-            for proc in last_heard_heartbeats[host].keys():
-                if proc not in processes:
-                    continue
+            heartbeat_hostname = None
+            for possible_hostname in possible_hostnames:
+                if possible_hostname in last_heard_heartbeats:
+                    heartbeat_hostname = possible_hostname
+                    break
 
-                # diff > MAX_TIME_LAPSE?
-                time_diff = time() - \
-                    last_heard_heartbeats[host][proc]['lastheard']
-                if time_diff > MAX_TIME_LAPSE:
+            process_heartbeats = {}
 
+            if heartbeat_hostname is None:
+                # We have not heard a heartbeat from this host under
+                # any of its possible hostnames (short name, fqdn)
+                #
+                # So there won't be any process heartbeats, and we will
+                # consider them all to be down.
+                process_heartbeats = {}
+            else:
+                process_heartbeats = last_heard_heartbeats[heartbeat_hostname]
+
+            for proc in required_processes:
+                if proc not in process_heartbeats:
                     evt = {
                         'device': device_id,
                         'severity': ZenEventClasses.Warning,
-                        'eventKey': host + '_' + proc,
-                        'summary': 'No heartbeats received from '+ \
-                                   proc + ' on ' + host + \
-                                   ' for more than ' + \
-                                   str(MAX_TIME_LAPSE) + ' seconds. ' + \
-                                   'Please check its status. ' + \
-                                   'Restart it if necessary',
+                        'eventKey': hostname + '_' + proc,
+                        'summary': "No heartbeats received from '%s' on %s.  Check the host and process status." % (proc, hostname),
                         'eventClassKey': 'openStackCeilometerHeartbeat',
                     }
-
-                    from pprint import pformat
                     log.error(pformat(evt))
                 else:
+                    # diff > MAX_TIME_LAPSE?
+                    time_diff = time() - \
+                        process_heartbeats[proc]['lastheard']
 
-                    evt = {
-                        'device': device_id,
-                        'severity': ZenEventClasses.Clear,
-                        'eventKey': host + '_' + proc,
-                        'summary': 'Process '+ \
-                                   proc + ' on ' + host + ' is sending heartbeats normally.',
-                        'eventClassKey': 'openStackCeilometerHeartbeat',
-                    }
+                    if time_diff > MAX_TIME_LAPSE:
+                        evt = {
+                            'device': device_id,
+                            'severity': ZenEventClasses.Warning,
+                            'eventKey': hostname + '_' + proc,
+                            'summary': "No heartbeats received from '%s' on %s for more than %d seconds.  Check its status and restart it if necessary." % (proc, hostname, MAX_TIME_LAPSE),
+                            'eventClassKey': 'openStackCeilometerHeartbeat',
+                        }
+                        log.error(pformat(evt))
+                    else:
+                        evt = {
+                            'device': device_id,
+                            'severity': ZenEventClasses.Clear,
+                            'eventKey': hostname + '_' + proc,
+                            'summary': "Process '%s' on %s is sending heartbeats normally." % (proc, hostname),
+                            'eventClassKey': 'openStackCeilometerHeartbeat',
+                        }
 
                 data['events'].append(evt)
 
