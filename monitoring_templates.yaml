@@ -547,9 +547,6 @@
         Total:
           dpName: openstack_agentTotalCount
           format: '%7.0lf'
-        Active:
-          dpName: openstack_agentActiveCount
-          format: '%7.0lf'
         Alive:
           dpName: openstack_agentAliveCount
           format: '%7.0lf'
@@ -581,10 +578,10 @@
           dpName: openstack_agentLBCount
           format: '%7.0lf'
         Mellanox:
-          dpName: openstack_agentMLNXVCount
+          dpName: openstack_agentMLNXCount
           format: '%7.0lf'
         Metering:
-          dpName: openstack_agentMeteringVCount
+          dpName: openstack_agentMeteringCount
           format: '%7.0lf'
         Metadata:
           dpName: openstack_agentMetadataCount
