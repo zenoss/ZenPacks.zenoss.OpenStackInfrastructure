@@ -20,11 +20,13 @@ import json
 import os
 import re
 import itertools
+from urlparse import urlparse
+import socket
 
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.internet.error import ConnectError, TimeoutError
 
-
+from Products.ZenUtils.IpUtil import isip, asyncIpLookup
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
 from Products.ZenUtils.Utils import prepId
@@ -37,6 +39,7 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import (
     get_port_instance,
     getNetSubnetsGws_from_GwInfo,
     get_port_fixedips,
+    sleep
 )
 
 add_local_lib_path()
@@ -203,6 +206,30 @@ class OpenStackInfrastructure(PythonPlugin):
 
         result = yield neutron_client.floatingips()
         results['floatingips'] = result['floatingips']
+
+        # Do some DNS lookups as well.
+        hostnames = set([x['host'] for x in results['services']])
+        hostnames.update([x['host'] for x in results['agents']])
+        hostnames.update(device.zOpenStackExtraHosts)
+        hostnames.update(device.zOpenStackNovaApiHosts)
+        hostnames.add(urlparse(device.zOpenStackAuthUrl.strip()).hostname)
+        results['resolved_hostnames'] = {}
+        for hostname in sorted(hostnames):
+            if isip(hostname):
+                results['resolved_hostnames'][hostname] = hostname
+                continue
+
+            for i in range(1, 4):
+                try:
+                    host_ip = yield asyncIpLookup(hostname)
+                    results['resolved_hostnames'][hostname] = host_ip
+                    break
+                except socket.gaierror, e:
+                    # temporary dns issue- try again.
+                    log.error("resolve %s: (attempt %d/3): %s" % (hostname, i, e))
+                    yield sleep(2)
+                except Exception, e:
+                    log.error("resolve %s: %s" % (hostname, e))
 
         returnValue(results)
 
@@ -471,13 +498,29 @@ class OpenStackInfrastructure(PythonPlugin):
         # Place it on the user-specified hosts, or also find it if it's
         # in the nova-service list (which we ignored earlier). It should not
         # be, under icehouse, at least, but just in case this changes..)
-        nova_api_hosts = device.zOpenStackNovaApiHosts
+        nova_api_hosts = set(device.zOpenStackNovaApiHosts)
         for service in results['services']:
             if service['binary'] == 'nova-api':
                 if service['host'] not in nova_api_hosts:
-                    nova_api_hosts.append(service['host'])
+                    nova_api_hosts.add(service['host'])
 
-        for hostname in nova_api_hosts:
+        # Look to see if the hostname or IP in the auth url corresponds
+        # directly to a host we know about.  If so, add it to the nova
+        # api hosts.
+        authHostname = urlparse(device.zOpenStackAuthUrl.strip()).hostname
+        authIp = results['resolved_hostnames'].get(authHostname, authHostname)
+        for host in hosts:
+            if host.hostname == authHostname:
+                nova_api_hosts.add(host.hostname)
+            else:
+                hostIp = results['resolved_hostnames'].get(host.hostname, host.hostname)
+                if hostIp == authIp:
+                    nova_api_hosts.add(host.hostname)
+
+        if not nova_api_hosts:
+            log.warning("No nova-api hosts have been identified.   You must set zOpenStackNovaApiHosts to the list of hosts upon which nova-api runs.")
+
+        for hostname in sorted(nova_api_hosts):
             title = '{0}@{1} ({2})'.format('nova-api', hostname, device.zOpenStackRegionName)
             host_id = prepId("host-{0}".format(hostname))
             nova_api_id = prepId('service-nova-api-{0}-{1}'.format(service['host'], device.zOpenStackRegionName))
