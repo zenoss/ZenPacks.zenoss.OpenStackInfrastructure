@@ -2325,35 +2325,6 @@ openstack_serverHardRebootCount
 AVERAGE
 </property>
 </object>
-<object id='Shutdown or Paused' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
-<property type="long" id="sequence" mode="w" >
-4
-</property>
-<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
-LINE
-</property>
-<property type="long" id="lineWidth" mode="w" >
-1
-</property>
-<property type="boolean" id="stacked" mode="w" >
-False
-</property>
-<property type="string" id="format" mode="w" >
-%7.0lf
-</property>
-<property type="string" id="legend" mode="w" >
-${graphPoint/id}
-</property>
-<property type="long" id="limit" mode="w" >
--1
-</property>
-<property type="string" id="dpName" mode="w" >
-openstack_serverOtherCount
-</property>
-<property type="string" id="cFunc" mode="w" >
-AVERAGE
-</property>
-</object>
 <object id='Password' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
 <property type="long" id="sequence" mode="w" >
 5
@@ -2552,6 +2523,35 @@ ${graphPoint/id}
 </property>
 <property type="string" id="dpName" mode="w" >
 openstack_serverResizeCount
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+<object id='Shutdown or Paused' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+4
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%7.0lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+openstack_serverOtherCount
 </property>
 <property type="string" id="cFunc" mode="w" >
 AVERAGE
@@ -2978,7 +2978,7 @@ LINE
 False
 </property>
 <property type="string" id="format" mode="w" >
-%5.2lf
+%7.2lf%s
 </property>
 <property type="string" id="legend" mode="w" >
 ${graphPoint/id}
@@ -3007,7 +3007,7 @@ LINE
 False
 </property>
 <property type="string" id="format" mode="w" >
-%5.2lf
+%7.2lf%s
 </property>
 <property type="string" id="legend" mode="w" >
 ${graphPoint/id}
@@ -3067,7 +3067,7 @@ LINE
 False
 </property>
 <property type="string" id="format" mode="w" >
-%5.2lf
+%7.2lf%s
 </property>
 <property type="string" id="legend" mode="w" >
 ${graphPoint/id}
@@ -3096,7 +3096,7 @@ LINE
 False
 </property>
 <property type="string" id="format" mode="w" >
-%5.2lf
+%7.2lf%s
 </property>
 <property type="string" id="legend" mode="w" >
 ${graphPoint/id}
@@ -3319,7 +3319,7 @@ LINE
 False
 </property>
 <property type="string" id="format" mode="w" >
-%5.2lf
+%7.2lf%s
 </property>
 <property type="string" id="legend" mode="w" >
 ${graphPoint/id}
@@ -3348,7 +3348,7 @@ LINE
 False
 </property>
 <property type="string" id="format" mode="w" >
-%5.2lf
+%7.2lf%s
 </property>
 <property type="string" id="legend" mode="w" >
 ${graphPoint/id}
@@ -3408,7 +3408,7 @@ LINE
 False
 </property>
 <property type="string" id="format" mode="w" >
-%5.2lf
+%7.2lf%s
 </property>
 <property type="string" id="legend" mode="w" >
 ${graphPoint/id}
@@ -3437,7 +3437,7 @@ LINE
 False
 </property>
 <property type="string" id="format" mode="w" >
-%5.2lf
+%7.2lf%s
 </property>
 <property type="string" id="legend" mode="w" >
 ${graphPoint/id}
@@ -3878,17 +3878,6 @@ http://www.openstack.org/
 []
 </property>
 <tomanycont id='products'>
-<object id='Liberty (2015.2)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
-<property type="string" id="name" mode="w" >
-Liberty (2015.2)
-</property>
-<property type="lines" id="productKeys" mode="w" >
-['2015.2.1', '2015.2.2', '2015.2.3', '2015.2.4', '2015.2.5', '2015.2.6', '2015.2.7', '2015.2.8', '2015.2.9', '2015.2.10']
-</property>
-<property type="boolean" id="isOS" mode="w" >
-True
-</property>
-</object>
 <object id='2016.1' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
 <property type="string" id="name" mode="w" >
 2016.1
@@ -3972,6 +3961,17 @@ Kilo (2015.1)
 </property>
 <property type="lines" id="productKeys" mode="w" >
 ['2015.1.1', '2015.1.2', '2015.1.3', '2015.1.4', '2015.1.5', '2015.1.6', '2015.1.7', '2015.1.8', '2015.1.9', '2015.1.10']
+</property>
+<property type="boolean" id="isOS" mode="w" >
+True
+</property>
+</object>
+<object id='Liberty (2015.2)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<property type="string" id="name" mode="w" >
+Liberty (2015.2)
+</property>
+<property type="lines" id="productKeys" mode="w" >
+['2015.2.1', '2015.2.2', '2015.2.3', '2015.2.4', '2015.2.5', '2015.2.6', '2015.2.7', '2015.2.8', '2015.2.9', '2015.2.10']
 </property>
 <property type="boolean" id="isOS" mode="w" >
 True
