@@ -109,6 +109,8 @@ class OpenStackInfrastructure(PythonPlugin):
         except Exception, e:
             log.error(self._keystonev2errmsg, e)
 
+        results['nova_url'] = yield client.nova_url()
+
         result = yield client.flavors(detailed=True, is_public=None)
         results['flavors'] = result['flavors']
         log.debug('flavors: %s\n' % str(results['flavors']))
@@ -212,7 +214,11 @@ class OpenStackInfrastructure(PythonPlugin):
         hostnames.update([x['host'] for x in results['agents']])
         hostnames.update(device.zOpenStackExtraHosts)
         hostnames.update(device.zOpenStackNovaApiHosts)
-        hostnames.add(urlparse(device.zOpenStackAuthUrl.strip()).hostname)
+        try:
+            hostnames.add(urlparse(results['nova_url']).hostname)
+        except Exception, e:
+            log.warning("Unable to determine nova URL for nova-api component discovery: %s" % e)
+
         results['resolved_hostnames'] = {}
         for hostname in sorted(hostnames):
             if isip(hostname):
@@ -507,15 +513,18 @@ class OpenStackInfrastructure(PythonPlugin):
         # Look to see if the hostname or IP in the auth url corresponds
         # directly to a host we know about.  If so, add it to the nova
         # api hosts.
-        authHostname = urlparse(device.zOpenStackAuthUrl.strip()).hostname
-        authIp = results['resolved_hostnames'].get(authHostname, authHostname)
-        for host in hosts:
-            if host.hostname == authHostname:
-                nova_api_hosts.add(host.hostname)
-            else:
-                hostIp = results['resolved_hostnames'].get(host.hostname, host.hostname)
-                if hostIp == authIp:
+        try:
+            apiHostname = urlparse(results['nova_url']).hostname
+            apiIp = results['resolved_hostnames'].get(apiHostname, apiHostname)
+            for host in hosts:
+                if host.hostname == apiHostname:
                     nova_api_hosts.add(host.hostname)
+                else:
+                    hostIp = results['resolved_hostnames'].get(host.hostname, host.hostname)
+                    if hostIp == apiIp:
+                        nova_api_hosts.add(host.hostname)
+        except Exception, e:
+            log.warning("Unable to perform nova-api component discovery: %s" % e)
 
         if not nova_api_hosts:
             log.warning("No nova-api hosts have been identified.   You must set zOpenStackNovaApiHosts to the list of hosts upon which nova-api runs.")
