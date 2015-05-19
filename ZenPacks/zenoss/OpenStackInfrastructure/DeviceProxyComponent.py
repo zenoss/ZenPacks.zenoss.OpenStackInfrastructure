@@ -17,7 +17,7 @@ from zope.event import notify
 from zope.interface import implements
 
 from ZODB.transact import transact
-from OFS.interfaces import IObjectWillBeAddedEvent
+from OFS.interfaces import IObjectWillBeAddedEvent, IObjectWillBeMovedEvent
 from Products.Zuul.catalog.events import IndexingEvent
 from Products.ZenEvents.interfaces import IPostEventPlugin
 from Products.ZenUtils.guid.interfaces import IGlobalIdentifier
@@ -34,7 +34,7 @@ def onDeviceDeleted(object, event):
     (Note: we may re-create the device automatically next time someone tries to access
     self.proxy_device, though)
     '''
-    if not IObjectWillBeAddedEvent.providedBy(event):
+    if not IObjectWillBeAddedEvent.providedBy(event) and not IObjectWillBeMovedEvent.providedBy(event):
         if hasattr(object, 'openstackProxyComponentUUID'):
             component = GUIDManager(object.dmd).getObject(getattr(object, 'openstackProxyComponentUUID', None))
             if component:
