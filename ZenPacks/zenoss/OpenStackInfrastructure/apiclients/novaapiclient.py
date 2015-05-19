@@ -180,6 +180,12 @@ class NovaAPIClient(object):
         returnValue(r)
 
     @inlineCallbacks
+    def nova_url(self):
+        if not self._nova_url:
+            yield self.login()
+        returnValue(self._nova_url)
+
+    @inlineCallbacks
     def api_call(self, path, data=None, params=None, **kwargs):
         """Wrap direct_api_call for convenience purposes.
 
