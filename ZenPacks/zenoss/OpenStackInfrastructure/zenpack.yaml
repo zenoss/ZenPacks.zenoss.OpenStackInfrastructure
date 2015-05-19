@@ -950,6 +950,7 @@ classes: !ZenPackSpec
     meta_type: OpenStackInfrastructureNovaDatabase
     label: NovaDatabase
     order: 7.2
+    filter_hide_from: [Region, Cell, AvailabilityZone, Host]
     # --------------------------------------------------------------------------
     # We use a normal impact adaptor for osprocess_component, rather than 
     # dynamicview impacts adaptor, because OSProcess is not part of 
