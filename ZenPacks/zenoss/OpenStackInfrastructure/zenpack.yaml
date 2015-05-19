@@ -1,0 +1,1290 @@
+name: ZenPacks.zenoss.OpenStackInfrastructure
+zProperties: !ZenPackSpec
+  DEFAULTS:
+    category: OpenStack
+  zOpenStackCeilometerUrl: {}
+  zOpenStackExtraHosts:
+    type: lines
+  zOpenStackHostDeviceClass:
+    default: /Server/SSH/Linux/NovaHost
+  zOpenStackNovaApiHosts:
+    type: lines
+class_relationships:
+# Containing Relations
+- Endpoint(components) 1:MC OpenstackComponent
+- Instance 1:MC Vnic
+# Non-Containing Relations
+- NeutronAgent M:M Router
+- NeutronAgent M:M Network
+- NeutronAgent M:M Subnet
+# Non-containing 1:M  
+- OrgComponent(childOrgs) 1:M (parentOrg)OrgComponent
+- Host(hostedSoftware) 1:M (hostedOn)SoftwareComponent
+- OrgComponent 1:M Host
+- OrgComponent 1:M SoftwareComponent
+# Tenant -> * (Instance,Network,Subnet,Router,Port,FloatingIp)
+- Tenant 1:M Instance
+- Tenant 1:M Network
+- Tenant 1:M Subnet
+- Tenant 1:M Router
+- Tenant 1:M Port
+- Tenant 1:M FloatingIp
+# Flavor
+- Flavor 1:M Instance
+- Image 1:M Instance
+# Hypervisor
+- Hypervisor 1:M Instance
+# Network ->
+#    Routers can have a common network gateway
+- Network 1:M Subnet
+- Network 1:M Port
+- Network 1:M FloatingIp
+- Network 1:M Router
+- Instance 1:M Port
+#  Ports* <-> *Subnets:
+#     Port can have many subnets via fixed_ips.
+#     Many Ports can associate to a single Subnet
+- Port M:M Subnet
+- Port 1:M FloatingIp
+# Router -> downstream Subnets and 1 upstream Network
+#    Router can connect to many subnets, a subnet can connect to several routers
+#    EG: router_AB + router_C connect to public_subnet:  subnet -> *router
+#    EG: since public network can have multiple subnets: router -> *subnet
+- Router 1:M FloatingIp
+- Router M:M Subnet
+- Hypervisor 1:1 Host
+device_classes: !ZenPackSpec
+  /Server/SSH/Linux/NovaHost:
+    zProperties:
+      zCollectorPlugins: [zenoss.cmd.uname, zenoss.cmd.uname_a, zenoss.cmd.df, zenoss.cmd.linux.cpuinfo,
+        zenoss.cmd.linux.memory, zenoss.cmd.linux.ifconfig, zenoss.cmd.linux.netstat_an,
+        zenoss.cmd.linux.netstat_rn, zenoss.cmd.linux.process, zenoss.cmd.linux.rpm,
+        zenoss.cmd.linux.openstack.nova, zenoss.cmd.linux.openstack.libvirt, zenoss.cmd.linux.openstack.inifiles]
+      zOpenStackNeutronConfigDir: /etc/neutron
+      zSshConcurrentSessions: 5
+  /OpenStack: {}
+  /OpenStack/Infrastructure:
+    remove: true
+    zProperties:
+      zCollectorPlugins:
+        - zenoss.OpenStackInfrastructure
+      zCommandCommandTimeout: 300
+      zDeviceTemplates:
+        - Endpoint
+      zPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Endpoint
+      zSnmpMonitorIgnore: true
+    templates:
+      Endpoint:
+        description: 'OpenStackInfrastructure: Endpoint Monitoring'
+        targetPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Endpoint
+        datasources:
+          events:
+            type: OpenStack Ceilometer Events AMQP
+            cycletime: 30
+          heartbearts:
+            type: OpenStack Ceilometer Heartbeats AMQP
+            cycletime: 30
+          neutronAgentStatus:
+            type: OpenStack Neutron Agent Status
+            cycletime: 30
+          openstack:
+            type: COMMAND
+            commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/poll_openstack.py
+              '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}'
+              '${here/zOpenStackAuthUrl}' '${here/zOpenStackRegionName}'
+            datapoints:
+              agentAliveCount:
+                aliases: {agent_alive__count: null}
+              agentDHCPCount:
+                aliases: {agent_dhcp__count: null}
+              agentDeadCount:
+                aliases: {agent_dead__count: null}
+              agentHyperVCount:
+                aliases: {agent_hyperv__count: null}
+              agentL3Count:
+                aliases: {agent_l3__count: null}
+              agentLBCount:
+                aliases: {agent_lb__count: null}
+              agentLinuxBridgeCount:
+                aliases: {agent_linux_bridge__count: null}
+              agentMLNXCount:
+                aliases: {agent_mlnx__count: null}
+              agentMetadataCount:
+                aliases: {agent_metadata__count: null}
+              agentMeteringCount:
+                aliases: {agent_metering__count: null}
+              agentNECCount:
+                aliases: {agent_nec__count: null}
+              agentNICSCount:
+                aliases: {agent_nics__count: null}
+              agentOFACount:
+                aliases: {agent_ofa__count: null}
+              agentOVSCount:
+                aliases: {agent_ovs__count: null}
+              agentSDNVECount:
+                aliases: {agent_sdnve__count: null}
+              agentTotalCount:
+                aliases: {agent_total__count: null}
+              flavorTotalCount:
+                aliases: {flavor_total__count: null}
+              imageActiveCount:
+                aliases: {image_active__count: null}
+              imageFailedCount:
+                aliases: {image_failed__count: null}
+              imageOtherCount:
+                aliases: {image_other__count: null}
+              imagePreparingCount:
+                aliases: {image_preparing__count: null}
+              imageQueuedCount:
+                aliases: {image_queued__count: null}
+              imageSavingCount:
+                aliases: {image_saving__count: null}
+              imageTotalCount:
+                aliases: {image_total__count: null}
+              imageUnknownCount:
+                aliases: {image_unknown__count: null}
+              networkActiveCount:
+                aliases: {network_avtive__count: null}
+              networkBuildCount:
+                aliases: {network_build__count: null}
+              networkDownCount:
+                aliases: {network_down__count: null}
+              networkErrorCount:
+                aliases: {network_error__count: null}
+              networkExternalCount:
+                aliases: {network_external__count: null}
+              networkInternalCount:
+                aliases: {network_internal__count: null}
+              networkSharedCount:
+                aliases: {network_shared__count: null}
+              networkTotalCount:
+                aliases: {network_total__count: null}
+              routerActiveCount:
+                aliases: {router_active__count: null}
+              routerBuildCount:
+                aliases: {router_build__count: null}
+              routerDownCount:
+                aliases: {router_down__count: null}
+              routerErrorCount:
+                aliases: {router_error__count: null}
+              routerTotalCount:
+                aliases: {router_total__count: null}
+              serverActiveCount:
+                aliases: {server_active__count: null}
+              serverBuildCount:
+                aliases: {server_build__count: null}
+              serverDeleteIpCount:
+                aliases: {server_delete__count: null}
+              serverHardRebootCount:
+                aliases: {server_hard_reboot__count: null}
+              serverOtherCount:
+                aliases: {server_other__count: null}
+              serverPasswordCount:
+                aliases: {server_password__count: null}
+              serverPrepResizeCount:
+                aliases: {server_prep_resize__count: null}
+              serverQueueResizeCount:
+                aliases: {server_queue_resize__count: null}
+              serverRebootCount:
+                aliases: {server_reboot__count: null}
+              serverRebuildCount:
+                aliases: {server_rebuild__count: null}
+              serverRescueCount:
+                aliases: {server_rescue__count: null}
+              serverResizeCount:
+                aliases: {server_resize__count: null}
+              serverSuspendedCount:
+                aliases: {server_suspended__count: null}
+              serverTotalCount:
+                aliases: {server_total__count: null}
+              serverUnknownCount:
+                aliases: {server_unknown__count: null}
+              serverVerifyResizeCount:
+                aliases: {server_verify_resize__count: null}
+            parser: ZenPacks.zenoss.OpenStackInfrastructure.parsers.endpoint
+          openstackQueues:
+            type: OpenStack AMQP Queue Size
+            cycletime: 300
+            datapoints:
+              eventQueueCount: {}
+              perfQueueCount: {}
+          serviceStatus:
+            type: OpenStack Nova Service Status
+            cycletime: 30
+        graphs:
+          Agents:
+            units: count
+            graphpoints:
+              Alive:
+                dpName: openstack_agentAliveCount
+                format: '%7.0lf'
+              DHCP:
+                dpName: openstack_agentDHCPCount
+                format: '%7.0lf'
+              Dead:
+                dpName: openstack_agentDeadCount
+                format: '%7.0lf'
+              HyperV:
+                dpName: openstack_agentHyperVCount
+                format: '%7.0lf'
+              IBM SDN-VE:
+                dpName: openstack_agentSDNVECount
+                format: '%7.0lf'
+              Level 3:
+                dpName: openstack_agentL3Count
+                format: '%7.0lf'
+              Linux Bridge:
+                dpName: openstack_agentLinuxBridgeCount
+                format: '%7.0lf'
+              Load Balancer:
+                dpName: openstack_agentLBCount
+                format: '%7.0lf'
+              Mellanox:
+                dpName: openstack_agentMLNXCount
+                format: '%7.0lf'
+              Metadata:
+                dpName: openstack_agentMetadataCount
+                format: '%7.0lf'
+              Metering:
+                dpName: openstack_agentMeteringCount
+                format: '%7.0lf'
+              NEC OpenFlow:
+                dpName: openstack_agentNECCount
+                format: '%7.0lf'
+              Open vSwitch:
+                dpName: openstack_agentOVSCount
+                format: '%7.0lf'
+              OpenFlow Agent:
+                dpName: openstack_agentOFACount
+                format: '%7.0lf'
+              SR-IOV NIC:
+                dpName: openstack_agentNICSCount
+                format: '%7.0lf'
+              Total:
+                dpName: openstack_agentTotalCount
+                format: '%7.0lf'
+          Flavors:
+            units: count
+            graphpoints:
+              Total:
+                dpName: openstack_flavorTotalCount
+                format: '%7.0lf'
+          Images and Snapshots:
+            units: count
+            graphpoints:
+              Active:
+                dpName: openstack_imageActiveCount
+                format: '%7.0lf'
+              Failed:
+                dpName: openstack_imageFailedCount
+                format: '%7.0lf'
+              Other:
+                dpName: openstack_imageOtherCount
+                format: '%7.0lf'
+              Preparing:
+                dpName: openstack_imagePreparingCount
+                format: '%7.0lf'
+              Queued:
+                dpName: openstack_imageQueuedCount
+                format: '%7.0lf'
+              Saving:
+                dpName: openstack_imageSavingCount
+                format: '%7.0lf'
+              Total:
+                dpName: openstack_imageTotalCount
+                format: '%7.0lf'
+              Unknown:
+                dpName: openstack_imageUnknownCount
+                format: '%7.0lf'
+          Networks:
+            units: count
+            graphpoints:
+              Active:
+                dpName: openstack_networkActiveCount
+                format: '%7.0lf'
+              Build:
+                dpName: openstack_networkBuildCount
+                format: '%7.0lf'
+              Down:
+                dpName: openstack_networkDownCount
+                format: '%7.0lf'
+              Error:
+                dpName: openstack_networkErrorCount
+                format: '%7.0lf'
+              External:
+                dpName: openstack_networkExternalCount
+                format: '%7.0lf'
+              Internal:
+                dpName: openstack_networkInternalCount
+                format: '%7.0lf'
+              Shared:
+                dpName: openstack_networkSharedCount
+                format: '%7.0lf'
+              Total:
+                dpName: openstack_networkTotalCount
+                format: '%7.0lf'
+          Queues:
+            units: count
+            graphpoints:
+              Event:
+                dpName: openstackQueues_eventQueueCount
+                format: '%7.0lf'
+              Performance:
+                dpName: openstackQueues_perfQueueCount
+                format: '%7.0lf'
+          Routers:
+            units: count
+            graphpoints:
+              Active:
+                dpName: openstack_routerActiveCount
+                format: '%7.0lf'
+              Build:
+                dpName: openstack_routerBuildCount
+                format: '%7.0lf'
+              Down:
+                dpName: openstack_routerDownCount
+                format: '%7.0lf'
+              Error:
+                dpName: openstack_routerErrorCount
+                format: '%7.0lf'
+              Total:
+                dpName: openstack_routerTotalCount
+                format: '%7.0lf'
+          Servers:
+            units: count
+            graphpoints:
+              Active:
+                dpName: openstack_serverActiveCount
+                format: '%7.0lf'
+              Build:
+                dpName: openstack_serverBuildCount
+                format: '%7.0lf'
+              Delete IP:
+                dpName: openstack_serverDeleteIpCount
+                format: '%7.0lf'
+              Hard Reboot:
+                dpName: openstack_serverHardRebootCount
+                format: '%7.0lf'
+              Password:
+                dpName: openstack_serverPasswordCount
+                format: '%7.0lf'
+              Prep Resize:
+                dpName: openstack_serverPrepResizeCount
+                format: '%7.0lf'
+              Queue Resize:
+                dpName: openstack_serverQueueResizeCount
+                format: '%7.0lf'
+              Reboot:
+                dpName: openstack_serverRebootCount
+                format: '%7.0lf'
+              Rebuild:
+                dpName: openstack_serverRebuildCount
+                format: '%7.0lf'
+              Rescue:
+                dpName: openstack_serverRescueCount
+                format: '%7.0lf'
+              Resize:
+                dpName: openstack_serverResizeCount
+                format: '%7.0lf'
+              Shutdown or Paused:
+                dpName: openstack_serverOtherCount
+                format: '%7.0lf'
+              Suspended:
+                dpName: openstack_serverSuspendedCount
+                format: '%7.0lf'
+              Total:
+                dpName: openstack_serverTotalCount
+                format: '%7.0lf'
+              Unknown:
+                dpName: openstack_serverUnknownCount
+                format: '%7.0lf'
+              Verify Resize:
+                dpName: openstack_serverVerifyResizeCount
+                format: '%7.0lf'
+      Instance:
+        description: 'OpenStackInfrastructure: Instance Monitoring'
+        targetPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Instance
+        datasources:
+          cpuUtilization:
+            type: OpenStack Ceilometer Perf AMQP
+            severity: clear
+            cycletime: 300
+            datapoints:
+              cpuUtilization:
+                aliases: {cpu__pct: null}
+            meter: cpu_util
+          diskReadBytesRate:
+            type: OpenStack Ceilometer Perf AMQP
+            severity: clear
+            cycletime: 300
+            datapoints:
+              diskReadBytesRate:
+                aliases: {disk_read__bytessec: null}
+            meter: disk.read.bytes.rate
+          diskReadRequestsRate:
+            type: OpenStack Ceilometer Perf AMQP
+            severity: clear
+            cycletime: 300
+            datapoints:
+              diskReadRequestsRate:
+                aliases: {disk_reads__persec: null}
+            meter: disk.read.requests.rate
+          diskWriteBytesRate:
+            type: OpenStack Ceilometer Perf AMQP
+            severity: clear
+            cycletime: 300
+            datapoints:
+              diskWriteBytesRate:
+                aliases: {disk_write__bytessec: null}
+            meter: disk.write.bytes.rate
+          diskWriteRequestsRate:
+            type: OpenStack Ceilometer Perf AMQP
+            severity: clear
+            cycletime: 300
+            datapoints:
+              diskWriteRequestsRate:
+                aliases: {disk_writes__persec: null}
+            meter: disk.write.requests.rate
+        graphs:
+          CPU Utilization:
+            units: percent
+            miny: 0
+            maxy: 100
+            graphpoints:
+              CPU Utilization:
+                dpName: cpuUtilization_cpuUtilization
+                format: '%5.2lf'
+          Disk IO Rate:
+            units: bytes/sec
+            miny: 0
+            graphpoints:
+              Read:
+                dpName: diskReadBytesRate_diskReadBytesRate
+                format: '%7.2lf%s'
+              Write:
+                dpName: diskWriteBytesRate_diskWriteBytesRate
+                format: '%7.2lf%s'
+          Disk Requests:
+            units: requests/sec
+            miny: 0
+            graphpoints:
+              Read:
+                dpName: diskReadRequestsRate_diskReadRequestsRate
+                format: '%7.2lf%s'
+              Write:
+                dpName: diskWriteRequestsRate_diskWriteRequestsRate
+                format: '%7.2lf%s'
+      Vnic:
+        description: 'OpenStackInfrastructure: Vnic Monitoring'
+        targetPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Vnic
+        datasources:
+          networkIncomingBytesRate:
+            type: OpenStack Ceilometer Perf AMQP
+            severity: clear
+            cycletime: 300
+            datapoints:
+              networkIncomingBytesRate:
+                aliases: {if_received__bytessec: null}
+            meter: network.incoming.bytes.rate
+          networkIncomingPacketsRate:
+            type: OpenStack Ceilometer Perf AMQP
+            severity: clear
+            cycletime: 300
+            datapoints:
+              networkIncomingPacketsRate:
+                aliases: {if_received_packets__persec: null}
+            meter: network.incoming.packets.rate
+          networkOutgoingBytesRate:
+            type: OpenStack Ceilometer Perf AMQP
+            severity: clear
+            cycletime: 300
+            datapoints:
+              networkOutgoingBytesRate:
+                aliases: {if_sent__bytessec: null}
+            meter: network.outgoing.bytes.rate
+          networkOutgoingPacketsRate:
+            type: OpenStack Ceilometer Perf AMQP
+            severity: clear
+            cycletime: 300
+            datapoints:
+              networkOutgoingPacketsRate:
+                aliases: {if_sent_packets__persec: null}
+            meter: network.outgoing.packets.rate
+        graphs:
+          Network Packet Rate:
+            units: packets/sec
+            miny: 0
+            graphpoints:
+              Inbound:
+                dpName: networkIncomingPacketsRate_networkIncomingPacketsRate
+                format: '%7.2lf%s'
+              Outbound:
+                dpName: networkOutgoingPacketsRate_networkOutgoingPacketsRate
+                format: '%7.2lf%s'
+          Network Throughput:
+            units: bytes/sec
+            miny: 0
+            graphpoints:
+              Inbound:
+                dpName: networkIncomingBytesRate_networkIncomingBytesRate
+                format: '%7.2lf%s'
+              Outbound:
+                dpName: networkOutgoingBytesRate_networkOutgoingBytesRate
+                format: '%7.2lf%s'
+classes: !ZenPackSpec
+  #-----------------------------------------------------------------------------
+  # Base Device Class Types
+  #-----------------------------------------------------------------------------
+  Endpoint:
+    base: [zenpacklib.Device]
+    meta_type: OpenStackInfrastructureEndpoint
+    label: OpenStack Endpoint
+    order: 1
+    properties:
+      neutron_core_plugin:
+        label: Neutron Core Plugin
+        grid_display: false
+      neutron_ini:
+        api_only: true
+      neutron_mechanism_drivers:
+        type: lines
+        label: Neutron ML2 Mechanism Drivers
+        default: []
+        grid_display: false
+      neutron_type_drivers:
+        type: lines
+        label: Neutron ML2 Type Drivers
+        default: []
+        grid_display: false
+    dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Devices
+    dynamicview_relations:
+      impacts: [hosts]
+      openstack_link: [region]
+  KeystoneEndpoint:
+    base: [Endpoint]
+    meta_type: OpenStackInfrastructureKeystoneEndpoint
+    label: Keystone Endpoint
+    order: 2
+  NovaEndpoint:
+    base: [Endpoint]
+    meta_type: OpenStackInfrastructureNovaEndpoint
+    label: Nova Endpoint
+    order: 3
+  #-----------------------------------------------------------------------------
+  # Component Base Class Types
+  #-----------------------------------------------------------------------------
+  OpenstackComponent:
+    # Component Base Type
+    base: [zenpacklib.Component]
+    properties:
+      resourceId:
+        label: Ceilometer Resource ID
+        grid_display: false
+    filter_display: false
+  DeviceProxyComponent:
+    # Component Base Type
+    base: [OpenstackComponent]
+    properties:
+      proxy_device:
+        label: Device
+        # Workaround to link to a different device
+        renderer: Zenoss.render.openstack_uid_renderer
+        api_only: true
+        api_backendtype: method
+    filter_display: false
+  OrgComponent:
+    # Component Base Type
+    base: [OpenstackComponent]
+    relationships:
+      # Provide better contextual naming for the relationships in the UI.
+      #    These are inherited by child classes:
+      #    'impacted_by': ['childOrgs', 'hosts', 'softwareComponents'],
+      #    'impacts': ['parentOrg']
+      childOrgs:
+        label: Children
+        order: 1.1
+      hosts:
+        label: Host
+        order: 1.0
+      parentOrg:
+        label: Parent Region
+        order: 1.0
+      softwareComponents:
+        label_width: 150
+    filter_display: false
+  SoftwareComponent:
+    # Component Base Type
+    base: [OpenstackComponent]
+    label: Software Component
+    label_width: 120
+    properties:
+      binary:
+        label: Binary
+        grid_display: false
+        order: 1
+      enabled:
+        label: Enabled
+        label_width: 35
+        renderer: Zenoss.render.openstack_ServiceEnabledStatus
+        order: 2
+      operStatus:
+        label: State
+        label_width: 20
+        renderer: Zenoss.render.openstack_ServiceOperStatus
+        order: 3
+    relationships:
+      hostedOn:
+        content_width: 100
+        order: !!float '-1'
+      orgComponent:
+        label: Supporting
+        # Need to fix the default width for render_with_type
+        content_width: 0
+        grid_display: false
+        render_with_type: true
+        order: 1.0
+    filter_display: false
+    extra_paths:
+    - ['orgComponent', '(parentOrg)+']
+  LogicalComponent:
+    base: [OpenstackComponent]
+    filter_display: false
+  #-----------------------------------------------------------------------------
+  # Component Class Types
+  #-----------------------------------------------------------------------------
+  Tenant:
+    base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, OpenstackComponent]
+    meta_type: OpenStackInfrastructureTenant
+    label: Tenant
+    order: 5
+    properties:
+      description:
+        label: Description
+        content_width: 40
+      implementation_components:
+        type: entity
+        label: Neutron Implementation
+        grid_display: false
+        api_only: true
+        api_backendtype: method
+      tenantId:
+        label: Tenant ID
+        grid_display: false
+    relationships:
+      floatingIps:
+        label_width: 70
+      instances:
+        label_width: 50
+      networks:
+        label_width: 50
+      ports:
+        label_width: 50
+      routers:
+        label_width: 50
+      subnets:
+        label_width: 50
+    dynamicview_views: [service_view]
+    dynamicview_relations:
+      impacted_by: [instances, networks, subnets, implementation_components]
+  Flavor:
+    base: [LogicalComponent]
+    meta_type: OpenStackInfrastructureFlavor
+    label: Flavor
+    order: 10
+    properties:
+      flavorDisk:
+        type: int
+        label: Disk
+        renderer: Zenoss.render.bytesString
+      flavorId:
+        label: Flavor ID
+        grid_display: false
+      flavorRAM:
+        type: int
+        label: RAM
+        renderer: Zenoss.render.bytesString
+      flavorVCPUs:
+        type: int
+        label: VCPUs
+  Image:
+    base: [LogicalComponent]
+    meta_type: OpenStackInfrastructureImage
+    label: Image
+    order: 10
+    properties:
+      imageCreated:
+        label: Created
+        label_width: 140
+        order: 3.1
+      imageId:
+        label: Image ID
+        grid_display: false
+      imageStatus:
+        label: Status
+        label_width: 40
+        order: 3.5
+      imageUpdated:
+        label: Updated
+        label_width: 140
+        order: 3.2
+    relationships:
+      instances:
+        label_width: 50
+        content_width: 10
+        order: 1.3
+  Instance:
+  # ----------------------------------------------------------------------------
+  # Note: By (nova) design, hostId is a hash of the actual underlying host and
+  # project, and is designed to allow users of a specific project to tell if
+  # two VMs are on the same host, nothing more.  It is not a unique identifier
+  # of hosts (compute nodes).
+  # ----------------------------------------------------------------------------
+    base: [LogicalComponent]
+    meta_type: OpenStackInfrastructureInstance
+    label: Instance
+    order: 8
+    properties:
+      biosUuid:
+        label: BIOS UUID
+        grid_display: false
+      guestDevice:
+      # link to the guest instance, if known
+        label: Guest
+        # workaround to link to a different device
+        renderer: Zenoss.render.openstack_uid_renderer
+        api_only: true
+        api_backendtype: method
+      host:
+        type: entity
+        label: Host
+        label_width: 90
+        order: 3.0
+        api_only: true
+        api_backendtype: method
+      hostId:
+        label: Host ID
+        grid_display: false
+      hostName:
+        label: Host Name
+        index_type: field
+        grid_display: false
+      hypervisorInstanceName:
+        label: Hypervisor Instance Name
+        grid_display: false
+      privateIps:
+        type: lines
+        label: Fixed IPs
+        label_width: 90
+        order: 3.2
+      publicIps:
+        type: lines
+        label: Floating IPs
+        label_width: 90
+        order: 3.1
+      serialNumber:
+        label: BIOS Serial Number
+        index_type: field
+        grid_display: false
+        index_scope: global
+      serverBackupDaily:
+        label: Daily Server Backup
+        grid_display: false
+      serverBackupEnabled:
+        type: boolean
+        label: Backup
+        grid_display: false
+      serverBackupWeekly:
+        label: Weekly Server Backup
+        grid_display: false
+      serverId:
+        label: Server ID
+        grid_display: false
+      serverStatus:
+        label: Status
+        label_width: 65
+        order: 3.5
+    relationships:
+      flavor:
+        label_width: 35
+        content_width: 35
+        order: 1.1
+      hypervisor:
+        grid_display: false
+      image:
+        label_width: 35
+        content_width: 35
+        order: 1.2
+      ports:
+        label: Ports
+        grid_display: false
+      tenant:
+        label_width: 45
+        content_width: 45
+        order: 1.3
+      vnics:
+        label: Vnics
+        grid_display: false
+    dynamicview_views: [service_view]
+    dynamicview_relations:
+      impacted_by: [hypervisor, ports, vnics]
+      impacts: [guestDevice, tenant]
+  Vnic:
+    base: [LogicalComponent]
+    meta_type: OpenStackInfrastructureVnic
+    label: Vnic
+    order: 100
+    properties:
+      instance:
+        type: entity
+        label: Instance
+        order: 1.4
+        api_only: true
+        api_backendtype: method
+      macaddress:
+        label: MAC Address
+        index_type: field
+        content_width: 120
+        renderer: Zenoss.render.openstack_uppercase_renderer
+        order: 1.0
+        index_scope: global
+    relationships:
+      instance:
+        grid_display: false
+    dynamicview_views: [service_view]
+    dynamicview_relations:
+      impacts: [instance]
+  Region:
+    base: [OrgComponent]
+    meta_type: OpenStackInfrastructureRegion
+    label: Region
+    order: 1
+    filter_hide_from: [Region, Cell, AvailabilityZone]
+    dynamicview_views: [service_view, openstack_view]
+    dynamicview_relations:
+      impacted_by: [childOrgs, hosts, softwareComponents]
+      impacts: [parentOrg]
+      openstack_link: [childOrgs, softwareComponents]
+  Cell:
+    base: [OrgComponent]
+    meta_type: OpenStackInfrastructureCell
+    label: Cell
+    order: 3
+    filter_hide_from: [Region, Cell, AvailabilityZone]
+    dynamicview_views: [service_view, openstack_view]
+    dynamicview_relations:
+      impacted_by: [childOrgs, hosts, softwareComponents]
+      impacts: [parentOrg]
+      openstack_link: [childOrgs, hosts, softwareComponents]
+  AvailabilityZone:
+    base: [OrgComponent]
+    meta_type: OpenStackInfrastructureAvailabilityZone
+    label: Availability Zone
+    order: 2
+    filter_hide_from: [AvailabilityZone]
+    dynamicview_views: [service_view, openstack_view]
+    dynamicview_relations:
+      impacted_by: [childOrgs, hosts, softwareComponents]
+      impacts: [parentOrg]
+      openstack_link: [childOrgs, hosts, softwareComponents]
+  Host:
+    base: [DeviceProxyComponent]
+    meta_type: OpenStackInfrastructureHost
+    label: Host
+    order: 9
+    properties:
+      hostfqdn:
+        label: FQDN
+        index_type: field
+        grid_display: false
+      hostname:
+        label: Host Name
+        index_type: field
+        grid_display: false
+    relationships:
+      orgComponent:
+        label: Supporting
+        # need to fix the default width for render_with_type
+        content_width: 110
+        render_with_type: true
+        order: 1.0
+    dynamicview_views: [service_view, openstack_view]
+    dynamicview_relations:
+      impacted_by: [endpoint, proxy_device]
+      impacts: [hypervisor, orgComponent, hostedSoftware]
+      openstack_link: [hostedSoftware, hypervisor]
+  NovaService:
+    base: [SoftwareComponent]
+    meta_type: OpenStackInfrastructureNovaService
+    label: Nova Service
+    order: 7
+    # --------------------------------------------------------------------------
+    # We use a normal impact adaptor for osprocess_component, rather than 
+    # dynamicview impacts adaptor, because OSProcess is not part of 
+    # service_view, and so will not be exported from DV to impact  currently
+    # (ZEN-14579).
+    # --------------------------------------------------------------------------
+    impacted_by: [osprocess_component]
+    dynamicview_views: [service_view, openstack_view]
+    dynamicview_relations:
+      impacted_by: [hostedOn]
+      impacts: [orgComponent]
+  NovaApi:
+    base: [SoftwareComponent]
+    meta_type: OpenStackInfrastructureNovaApi
+    label: Nova API
+    order: 7.1
+    # --------------------------------------------------------------------------
+    # We use a normal impact adaptor for osprocess_component, rather than 
+    # dynamicview impacts adaptor, because OSProcess is not part of 
+    # service_view, and so will not be exported from DV to impact  currently
+    # (ZEN-14579).
+    # --------------------------------------------------------------------------
+    impacted_by: [osprocess_component]
+    dynamicview_views: [service_view, openstack_view]
+    dynamicview_relations:
+      impacted_by: [hostedOn]
+      impacts: [orgComponent]
+  NovaDatabase:
+    base: [SoftwareComponent]
+    meta_type: OpenStackInfrastructureNovaDatabase
+    label: NovaDatabase
+    order: 7.2
+    # --------------------------------------------------------------------------
+    # We use a normal impact adaptor for osprocess_component, rather than 
+    # dynamicview impacts adaptor, because OSProcess is not part of 
+    # service_view, and so will not be exported from DV to impact  currently
+    # (ZEN-14579).
+    # --------------------------------------------------------------------------
+    impacted_by: [osprocess_component]
+    dynamicview_views: [service_view, openstack_view]
+    dynamicview_relations:
+      impacted_by: [hostedOn]
+      impacts: [orgComponent]
+  Hypervisor:
+    base: [OpenstackComponent]
+    meta_type: OpenStackInfrastructureHypervisor
+    label: Hypervisor
+    order: 9
+    properties:
+      hostfqdn:
+        label: FQDN
+        grid_display: false
+      hypervisorId:
+        label: Hypervisor ID
+        grid_display: false
+    dynamicview_views: [service_view, openstack_view]
+    dynamicview_relations:
+      impacted_by: [host]
+      impacts: [instances]
+  #-----------------------------------------------------------------------------
+  # Neutron-Component Class Types
+  #-----------------------------------------------------------------------------
+  NeutronAgent:
+    base: [SoftwareComponent]
+    meta_type: OpenStackInfrastructureNeutronAgent
+    label: Neutron Agent
+    order: 11
+    properties:
+      agentId:
+        label: Agent ID
+        grid_display: false
+      operStatus:
+        label: Status
+        label_width: 40
+        renderer: Zenoss.render.openstack_ServiceOperStatus
+        order: 11.1
+      type:
+        label: Type
+        content_width: 60
+        order: 1.1
+    relationships:
+      networks:
+        label_width: 45
+        order: 1.1
+      routers:
+        label_width: 40
+        order: 1.3
+      subnets:
+        label_width: 40
+        order: 1.2
+    # --------------------------------------------------------------------------
+    # We use a normal impact adaptor for osprocess_component, rather than 
+    # dynamicview impacts adaptor, because OSProcess is not part of 
+    # service_view, and so will not be exported from DV to impact  currently
+    # (ZEN-14579).
+    # --------------------------------------------------------------------------
+    impacted_by: [osprocess_component]
+    dynamicview_views: [service_view, openstack_view]
+    dynamicview_relations:
+      impacted_by: [hostedOn]
+      impacts: [networks, subnets, routers]
+  Network:
+    base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, LogicalComponent]
+    meta_type: OpenStackInfrastructureNetwork
+    label: Network
+    order: 12
+    properties:
+      admin_state_up:
+        label: Admin State
+        label_width: 54
+        renderer: Zenoss.render.openstack_ServiceEnabledStatus
+        order: 2.2
+      implementation_components:
+        type: entity
+        label: Neutron Implementation
+        grid_display: false
+        api_only: true
+        api_backendtype: method
+      netExternal:
+        label: Net External
+        grid_display: false
+      netId:
+        label: Net ID
+        grid_display: false
+      netStatus:
+        label: Status
+        label_width: 35
+        order: 2.19
+      netType:
+        label: Type
+        label_width: 40
+        order: 2.1
+      title:
+        label: Title
+        grid_display: false
+    relationships:
+      floatingIps:
+        grid_display: false
+      neutronAgents:
+        grid_display: false
+      ports:
+        label_width: 25
+        order: 1.1
+      routers:
+        label_width: 40
+        order: 1.2
+      subnets:
+        label_width: 40
+        order: 1.3
+      tenant:
+        label_width: 50
+        order: 1.5
+    dynamicview_relations:
+      impacted_by: [neutronAgents, implementation_components]
+      impacts: [subnets, tenant]
+  Subnet:
+    base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, LogicalComponent]
+    meta_type: OpenStackInfrastructureSubnet
+    label: Subnet
+    order: 14
+    properties:
+      cidr:
+        label: CIDR
+        label_width: 90
+        content_width: 70
+        order: 1.1
+      dns_nameservers:
+        label: DNS Nameservers
+        grid_display: false
+      gateway_ip:
+        label: Gateway
+        label_width: 50
+        content_width: 90
+      implementation_components:
+        type: entity
+        label: Neutron Implementation
+        grid_display: false
+        api_only: true
+        api_backendtype: method
+      subnetId:
+        label: Subnet ID
+        grid_display: false
+    relationships:
+      network:
+        label: Network
+        label_width: 80
+        order: 2.0
+      neutronAgents:
+        grid_display: false
+      ports:
+        label_width: 35
+        order: 2.1
+      routers:
+        label_width: 45
+        order: 2.2
+      tenant:
+        label_width: 50
+        order: 2.3
+    dynamicview_relations:
+      impacted_by: [network, routers, neutronAgents, implementation_components]
+      impacts: [port, tenant]
+  Router:
+    base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, LogicalComponent]
+    meta_type: OpenStackInfrastructureRouter
+    label: Router
+    order: 15
+    properties:
+      admin_state_up:
+        label: Admin State
+        grid_display: false
+        renderer: Zenoss.render.openstack_ServiceEnabledStatus
+        order: 1.1
+      gateways:
+        type: lines
+        label: Gateways
+        order: 1.2
+      implementation_components:
+        type: entity
+        label: Neutron Implementation
+        grid_display: false
+        api_only: true
+        api_backendtype: method
+      routerId:
+        label: Router ID
+        grid_display: false
+        order: 1.3
+      routes:
+        label: Routes
+        grid_display: false
+        order: 1.4
+      status:
+        label: Status
+        label_width: 35
+        order: 1.5
+      title:
+        label: Router
+        grid_display: false
+        order: 1.6
+    relationships:
+      floatingIps:
+        label: Floating IPs
+        label_width: 60
+        order: 2.3
+      network:
+        label: External Network
+        content_width: 90
+        order: 2.1
+      neutronAgents:
+        grid_display: false
+      subnets:
+        label: Subnets
+        label_width: 40
+        order: 2.2
+      tenant:
+        label_width: 45
+        content_width: 50
+        order: 2.4
+    dynamicview_relations:
+      impacted_by: [neutronAgents, implementation_components]
+      impacts: [subnets, floatingIps]
+  Port:
+    base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, LogicalComponent]
+    meta_type: OpenStackInfrastructurePort
+    label: Port
+    order: 16
+    properties:
+      admin_state_up:
+        label: Admin State
+        label_width: 60
+        content_width: 50
+        renderer: Zenoss.render.openstack_ServiceEnabledStatus
+        order: 1.2
+      device_owner:
+        label: Device Owner
+        grid_display: false
+        order: 1.18
+      fixed_ip_list:
+        label: Fixed IPs
+        label_width: 70
+        order: 1.12
+      implementation_components:
+        type: entity
+        label: Neutron Implementation
+        grid_display: false
+        api_only: true
+        api_backendtype: method
+      mac_address:
+        label: MAC
+        content_width: 105
+        order: 1.14
+      portId:
+        label: Port ID
+        label_width: 40
+        grid_display: false
+      status:
+        label: Status
+        label_width: 35
+        order: 1.19
+      title:
+        label: Title
+        grid_display: false
+      vif_type:
+        label: Type
+        label_width: 30
+        order: 1.13
+    relationships:
+      floatingIps:
+        grid_display: false
+      instance:
+        label_width: 40
+        content_width: 40
+        order: 1.1
+      network:
+        label: Network
+        label_width: 40
+        order: 1.2
+      subnets:
+        grid_display: false
+      tenant:
+        label_width: 35
+        content_width: 35
+        order: 1.3
+    dynamicview_relations:
+      impacted_by: [subnets, floatingIps, implementation_components]
+      impacts: [instance]
+  FloatingIp:
+    base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, LogicalComponent]
+    meta_type: OpenStackInfrastructureFloatingIp
+    label: Floating IP
+    order: 19
+    properties:
+      fixed_ip_address:
+        label: Attached IP
+        content_width: 80
+        order: 2.2
+      floating_ip_address:
+        label: Floating IP
+        content_width: 80
+        order: 2.3
+      floatingipId:
+        label: Floating ID
+        grid_display: false
+      implementation_components:
+        type: entity
+        label: Neutron Implementation
+        grid_display: false
+        api_only: true
+        api_backendtype: method
+      status:
+        label: Status
+        label_width: 35
+        order: 2.6
+    relationships:
+      network:
+        label_width: 40
+        grid_display: false
+        order: 1.1
+      port:
+        label_width: 90
+        order: 1.2
+      router:
+        label_width: 50
+        order: 1.3
+      tenant:
+        label_width: 50
+        order: 1.4
+    dynamicview_relations:
+      impacted_by: [router, implementation_components]
+      impacts: [port]
+
