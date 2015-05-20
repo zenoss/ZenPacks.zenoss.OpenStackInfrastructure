@@ -408,7 +408,7 @@ device_classes: !ZenPackSpec
           cpuUtilization:
             type: OpenStack Ceilometer Perf AMQP
             severity: clear
-            cycletime: 300
+            cycletime: 600
             datapoints:
               cpuUtilization:
                 aliases: {cpu__pct: null}
@@ -416,7 +416,7 @@ device_classes: !ZenPackSpec
           diskReadBytesRate:
             type: OpenStack Ceilometer Perf AMQP
             severity: clear
-            cycletime: 300
+            cycletime: 600
             datapoints:
               diskReadBytesRate:
                 aliases: {disk_read__bytessec: null}
@@ -424,7 +424,7 @@ device_classes: !ZenPackSpec
           diskReadRequestsRate:
             type: OpenStack Ceilometer Perf AMQP
             severity: clear
-            cycletime: 300
+            cycletime: 600
             datapoints:
               diskReadRequestsRate:
                 aliases: {disk_reads__persec: null}
@@ -432,7 +432,7 @@ device_classes: !ZenPackSpec
           diskWriteBytesRate:
             type: OpenStack Ceilometer Perf AMQP
             severity: clear
-            cycletime: 300
+            cycletime: 600
             datapoints:
               diskWriteBytesRate:
                 aliases: {disk_write__bytessec: null}
@@ -440,7 +440,7 @@ device_classes: !ZenPackSpec
           diskWriteRequestsRate:
             type: OpenStack Ceilometer Perf AMQP
             severity: clear
-            cycletime: 300
+            cycletime: 600
             datapoints:
               diskWriteRequestsRate:
                 aliases: {disk_writes__persec: null}
@@ -481,7 +481,7 @@ device_classes: !ZenPackSpec
           networkIncomingBytesRate:
             type: OpenStack Ceilometer Perf AMQP
             severity: clear
-            cycletime: 300
+            cycletime: 600
             datapoints:
               networkIncomingBytesRate:
                 aliases: {if_received__bytessec: null}
@@ -489,7 +489,7 @@ device_classes: !ZenPackSpec
           networkIncomingPacketsRate:
             type: OpenStack Ceilometer Perf AMQP
             severity: clear
-            cycletime: 300
+            cycletime: 600
             datapoints:
               networkIncomingPacketsRate:
                 aliases: {if_received_packets__persec: null}
@@ -497,7 +497,7 @@ device_classes: !ZenPackSpec
           networkOutgoingBytesRate:
             type: OpenStack Ceilometer Perf AMQP
             severity: clear
-            cycletime: 300
+            cycletime: 600
             datapoints:
               networkOutgoingBytesRate:
                 aliases: {if_sent__bytessec: null}
@@ -505,7 +505,7 @@ device_classes: !ZenPackSpec
           networkOutgoingPacketsRate:
             type: OpenStack Ceilometer Perf AMQP
             severity: clear
-            cycletime: 300
+            cycletime: 600
             datapoints:
               networkOutgoingPacketsRate:
                 aliases: {if_sent_packets__persec: null}
