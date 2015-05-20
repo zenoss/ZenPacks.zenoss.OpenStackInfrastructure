@@ -1119,7 +1119,7 @@ classes: !ZenPackSpec
         order: 2.3
     dynamicview_relations:
       impacted_by: [network, routers, neutronAgents, implementation_components]
-      impacts: [port, tenant]
+      impacts: [ports, tenant]
   Router:
     base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, LogicalComponent]
     meta_type: OpenStackInfrastructureRouter
