@@ -17,7 +17,7 @@ class_relationships:
 - NeutronAgent M:M Router
 - NeutronAgent M:M Network
 - NeutronAgent M:M Subnet
-# Non-containing 1:M  
+# Non-containing 1:M
 - OrgComponent(childOrgs) 1:M (parentOrg)OrgComponent
 - Host(hostedSoftware) 1:M (hostedOn)SoftwareComponent
 - OrgComponent 1:M Host
@@ -919,8 +919,8 @@ classes: !ZenPackSpec
     label: Nova Service
     order: 7
     # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for osprocess_component, rather than 
-    # dynamicview impacts adaptor, because OSProcess is not part of 
+    # We use a normal impact adaptor for osprocess_component, rather than
+    # dynamicview impacts adaptor, because OSProcess is not part of
     # service_view, and so will not be exported from DV to impact  currently
     # (ZEN-14579).
     # --------------------------------------------------------------------------
@@ -935,8 +935,8 @@ classes: !ZenPackSpec
     label: Nova API
     order: 7.1
     # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for osprocess_component, rather than 
-    # dynamicview impacts adaptor, because OSProcess is not part of 
+    # We use a normal impact adaptor for osprocess_component, rather than
+    # dynamicview impacts adaptor, because OSProcess is not part of
     # service_view, and so will not be exported from DV to impact  currently
     # (ZEN-14579).
     # --------------------------------------------------------------------------
@@ -952,8 +952,8 @@ classes: !ZenPackSpec
     order: 7.2
     filter_hide_from: [Region, Cell, AvailabilityZone, Host]
     # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for osprocess_component, rather than 
-    # dynamicview impacts adaptor, because OSProcess is not part of 
+    # We use a normal impact adaptor for osprocess_component, rather than
+    # dynamicview impacts adaptor, because OSProcess is not part of
     # service_view, and so will not be exported from DV to impact  currently
     # (ZEN-14579).
     # --------------------------------------------------------------------------
@@ -1010,8 +1010,8 @@ classes: !ZenPackSpec
         label_width: 40
         order: 1.2
     # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for osprocess_component, rather than 
-    # dynamicview impacts adaptor, because OSProcess is not part of 
+    # We use a normal impact adaptor for osprocess_component, rather than
+    # dynamicview impacts adaptor, because OSProcess is not part of
     # service_view, and so will not be exported from DV to impact  currently
     # (ZEN-14579).
     # --------------------------------------------------------------------------
