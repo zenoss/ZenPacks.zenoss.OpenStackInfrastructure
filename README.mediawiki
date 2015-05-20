@@ -1,51 +1,81 @@
-This ZenPack allows for monitoring of OpenStack from a service provider perspective.  This means that in addition to the user-oriented components supported in the regular OpenStack ZenPack (instances, flavors, images), the underlying OpenStack servers and software are monitored.
+
+This ZenPack allows for monitoring of OpenStack from a service provider
+perspective.  This means that in addition to the user-oriented components
+supported in the regular OpenStack ZenPack (instances, flavors, images), the
+underlying OpenStack servers and software are monitored.
 
 == Availability ==
 
-{{note}} This ZenPack is currently in a controlled availability state for Zenoss customers. Please contact prodmgmt@zenoss.com before deploying the ZenPack.
+{{note}} This ZenPack is currently in a controlled availability state for
+Zenoss customers. Please contact prodmgmt@zenoss.com before deploying the
+ZenPack.
 
 == Prerequisites ==
 
 * OpenStack (Icehouse or newer)
 * Ceilometer
-** A zenoss-specific ceilometer plugin must be installed on your ceilometer nodes (see below)
+** A Zenoss-specific ceilometer plugin must be installed on your ceilometer nodes (see below)
 ** If you do not have ceilometer installed and configured properly, some graphs will be black, and Zenoss will not detect changes (such as new instances or instance state changes) until a full model operation is performed.
-* SSH credentials to the linux devices in your openstack environment
+* PyYAML needs to be installed in order to use the YAML configuration
+** All 5.X versions of Zenoss have PyYAML already installed
+** Only 4.2.4 SP763 or 4.2.5 SP378 or earlier affected
+** You will have to add this Python package to your Zenoss installation otherwise
+** Update to the latest RPS or "easy_install pyyaml" manually if required.
+* SSH credentials to the Linux devices in your OpenStack environment
 ** Configure the zCommandUsername/zCommandPassword properties on the /Devices/Server/SSH/Linux/NovaHost device class.
-** If your linux devices are already managed under Zenoss, move them into /Devices/Server/SSH/Linux/NovaHost
+** If your Linux devices are already managed under Zenoss, move them into /Devices/Server/SSH/Linux/NovaHost
 * Administrative credentials for your OpenStack environment
 ** Username, password, keystone URL, Region
 
 == Basic Usage ==
 
-Once the OpenStack ZenPack is installed and you can begin monitoring by going to the infrastructure screen and clicking the normal button for adding devices. You'll find a new option labeled, "Add OpenStack Endpoint (Infrastructure)."
+Once the OpenStack ZenPack is installed and you can begin monitoring by going
+to the infrastructure screen and clicking the normal button for adding devices.
+You'll find a new option labeled, "Add OpenStack Endpoint (Infrastructure)."
 
 Choose that option and you'll be presented with a dialog asking for the following inputs.
 
-# Device To Create - name to use for this device in zenoss.  Should not be an actual hostname, since that name will be used when the host is registered as a linux device.
+# Device To Create - name to use for this device in Zenoss.  Should not be an actual hostname, since that name will be used when the host is registered as a Linux device.
 # Auth URL - A keystone URL, such as http://<hostname>:5000/v2.0/
-# Username, Password / API Key, Project/Tenant ID - *Administrative* credentials to your zenoss instance.
-# Region Name - choose the correct region from the dropdown.  You may only choose one, so each region you wish to manage must be registered as a separate endpoint in zenoss.
+# Username, Password/API Key, Project/Tenant ID - *Administrative* credentials to your Zenoss instance.
+# Region Name - choose the correct region from the dropdown.  You may only choose one, so each region you wish to manage must be registered as a separate endpoint in Zenoss.
 # Ceilometer URL - Will auto-populate based on the other selections.
 
-Once you click Add, Zenoss will contact the OpenStack API and discover servers, images and flavors. Once it is complete you'll find a new device in the OpenStack device class with the same name as the hostname or IP you entered into the dialog. Click into this new device to see everything that was discovered.
+Once you click Add, Zenoss will contact the OpenStack API and discover servers,
+images and flavors. Once it is complete you'll find a new device in the
+OpenStack device class with the same name as the hostname or IP you entered
+into the dialog. Click into this new device to see everything that was
+discovered.
 
 
-;The following types of elements are discovered.
+===Organizational Elements===
+;The following organizational elements are discovered:
+
+* Regions
+* Availability Zones
 * Tenants
+
+;The following virtual-machine elements are discovered:
+
+* Nova Services (processes supporting nova servers)
 * Instances (Servers)
-* vNICs
+* Hosts
+* Hypervisors
 * Images
 * Flavors
 * Nova API Endpoints
-* Regions
-* Availability Zones
-* Hosts
-* Nova Services (processes supporting nova servers)
-* Hypervisors
 
+;The following network elements are discovered:
+* Neutron Agents
+* Networks
+* Subnets
+* Routers
+* Ports
+* Floating-Ips
+* vNICs
 
-;The following component level metrics are collected.
+===Metrics===
+;The following component level metrics are collected:
 Instances
 * CPU Utilization (percent)
 * Disk Requests (requests/sec)
@@ -63,37 +93,49 @@ Nova Services (Zenoss Process monitoring)
 * CPU Utilization (percent)
 * Memory Utilization (bytes)
 * Process Count (processes)
+Neutron Agents
+* CPU Utilization (percent)
+* Memory Utilization (bytes)
+* Process Count (processes)
 
 
-;The following device level metrics are collected.
+;The following device level metrics are collected:
 Flavors
 * Total (count)
 Images
 * Total (count)
-* Total count per image state (count)
+* Total count per image state
 Servers
 * Total (count)
-* Total count per server state (count)
+* Total count per server state
 Queues
 * Event (count)
 * Performance (count)
+Agents
+* Total (count)
+* Total count per agent type
+Networks
+* Total (count)
+* Total count per network state
+Routers
+* Total (count)
+* Total count per router state
 
 
 {{note}} All metrics collected by OpenStack Ceilometer may be collected and graphed in
 Zenoss, and all events processed through ceilometer are exposed via the
 Zenoss Event Console.
 
-
 ==Ceilometer Enablement==
 
-Although you may add an openstack device to zenoss, as shown above, event and
+Although you may add an OpenStack device to Zenoss, as shown above, event and
 performance data will not be collected until the following steps are performed.
 
 ===Zenoss Configuration Steps===
 
-On the zenoss host in Zenoss 4.X, or rabbitmq container in Zenoss 5.X: 
+On the Zenoss host in Zenoss 4.X, or rabbitmq container in Zenoss 5.X: 
 
-* ssh in as the zenoss user:
+* ssh in as the Zenoss user:
 * export ZP_DIR=$ZENHOME/ZenPacks/ZenPacks.zenoss.OpenStackInfrastructure*
 * Now execute:
 
@@ -116,8 +158,8 @@ to Zenoss's RabbitMQ server.
 This dispatcher should be installed on all nodes running any ceilometer, but
 particularly those running ceilometer-collector or ceilometer-agent-notification.
 
-To install it, perform the following steps on each of these openstack nodes (NOT
-on the zenoss collector):
+To install it, perform the following steps on each of these OpenStack nodes (NOT
+on the Zenoss collector):
 
 <syntaxhighlight lang="bash">
   sudo pip -q install --force-reinstall https://github.com/zenoss/ceilometer_zenoss/archive/master.zip
@@ -148,10 +190,10 @@ events occur, for example, when an instance is shut down, the state change
 to SHUTDOWN will be reflected in Zenoss.
 
 However, certain state changes that don't correspond to another defined event
-may not be picked up until the next time zenoss models the environment.
+may not be picked up until the next time Zenoss models the environment.
 
 If you would like to reduce the likelihood of this occurring, you can configure
-OpenStack Nova to send an event (through ceilometer) to zenoss whenever
+OpenStack Nova to send an event (through ceilometer) to Zenoss whenever
 any VM state change occurs by adding the following to nova.conf:
 
 <syntaxhighlight lang="text">
@@ -212,27 +254,48 @@ Domains can be used to create ad hoc views using the following steps.
 
 === Service Impact and Root Cause Analysis ===
 
-When combined with the Zenoss Service Dynamics product, this ZenPack adds built-in service impact and root cause analysis capabilities for OpenStack infrastructure and instances. The service impact relationships shown in the diagram and described below are automatically added. These will be included in any services that contain one or more of the explicitly mentioned components.
+When combined with the Zenoss Service Dynamics product, this ZenPack adds
+built-in service impact and root cause analysis capabilities for OpenStack
+infrastructure and instances. The service impact relationships shown in the
+diagram and described below are automatically added. These will be included in
+any services that contain one or more of the explicitly mentioned components.
 
 [[File:impact.png|thumb|320px|Impact Relationship Diagram]]
 
+====Recommended Impact Setup====
+
+Since most components will be related to Tenants and Region we recommend:
+
+* Navigate to Services (Impact)
+* Add a Dynamic Service to your Services tab
+* Add all Tenants to the Dynamic Service
+* Add all Regions to the Dynamic Service
+
+====Impact Relations====
+
+Component failures will affect Impact as follows:
+
 ;Internal Impact Relationships
-* OpenStack API endpoint failure impacts all hosts
-* Host failure impacts the zones or cells which contain it
-* Availabilty zone failure impacts the region which contains it
-* Host failure impacts any hypervisor running upon it
-* Hypervisor failure impacts the resident instances (VMs)
-* Instance failure impacts the tenant to which the instance belongs.
-* vNIC failure impacts the related instance.
-* Host failure impacts the nova services which run upon it
-* Nova service failure affects the availability zone or region that that service supports
+* OpenStack API endpoint impacts all Hosts
+* Availabilty zone impacts associated Region
+* Host impacts associated Hypervisors, Nova Services, Cells, Nova Apis, and Neutron Agents
+* Hypervisor impacts the resident Instances (VMs)
+* Nova Service affects the Availability Zone or Region that it supports
+* Instance impacts the associated Tenant
+* vNIC impacts the related Instance.
+* Port impacts associated Instance
+* Subnet impacts associated Ports
+* Floating-IP impacts associated Port
+* Network impacts associated Subnets and Tenants
+* Router impacts associated Subnets and Floating-ips
+* Neutron Agent impacts associated Networks, Subnets and Routers
 
 ;External Impact Relationships
-* Instance failure impacts guest operating system device.
-* Cisco UCS vNIC failure impacts related host's underlying linux device  NIC.
-* Cisco UCS service profile failure impacts host's underlying linux device.
-* Host is impacted by failures of the underlying linux device.
-* OS Process failures on an underlying linux device impact the corresponding Nova Services on the host.
+* Instance impacts guest operating system device.
+* Cisco UCS vNIC impacts related host's underlying Linux device NIC.
+* Cisco UCS service profile impacts host's underlying Linux device.
+* Host impacted by associated Linux device.
+* OS Processes on an underlying Linux device impact corresponding Nova Services on Host.
 
 
 == Known Issues ==
@@ -244,15 +307,19 @@ When combined with the Zenoss Service Dynamics product, this ZenPack adds built-
 # [https://jira.zenoss.com/browse/ZEN-14491 ZEN-14491]: A stacktrace may occur during the initial modeling of the device
 ## The trace will contain the error "ValueError: expected txn status 'Active' or 'Doomed', but it's 'Committed'"
 ## Workaround: Disregard the error.  You may also manually model the device to confirm that no further errors are reported.
+# [https://jira.zenoss.com/browse/ZEN-17905]: Nova APIs component: Grey icons for Enabled and State after model/monitor. 
+## OpenStack nova service API does not provide information about Nova-API, so its status is, in fact, unknown.
 
 == Changes ==
 
 ;2.0.0
 * Initial Release
 
-:2.1.0
+;2.1.0
 * Added Neutron network components
 * Update Impact models for Neutron
 * Update multiple UI interfaces
 * Upgrade to ZenPackLib 1.0.1
+* Add ML2 Pluggin Capability
+* Add OpenvSwitch Integration
 

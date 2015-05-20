@@ -13,7 +13,7 @@
 [Hypervisor{bg:aquamarine}]1-*>[Instance{bg:aquamarine}]
 [Vnic{bg:aquamarine}]1-*>[Instance{bg:aquamarine}]
 [Instance{bg:aquamarine}]1-*>[Tenant{bg:aquamarine}]
-[Instance{bg:aquamarine}]1-*>[GuestDevice{bg:aquamarine}]
+[Instance{bg:aquamarine}]1-*>[GuestDevice{bg:purple}]
 
 [Host{bg:aquamarine}]1-*>[NovaService{bg:aquamarine}]
 [Host{bg:aquamarine}]1-*>[NovaApi{bg:aquamarine}]
@@ -27,7 +27,7 @@
 [NeutronAgent{bg:tan}]*-*>[Subnet{bg:tan}]
 [Network{bg:tan}]*-*>[Subnet{bg:tan}]
 [Router{bg:tan}]*-*>[Subnet{bg:tan}]
-[Subnet{bg:tan}]*-1>[Port{bg:tan}]
+[Subnet{bg:tan}]*-*>[Port{bg:tan}]
 [Subnet{bg:tan}]*-1>[Tenant{bg:tan}]
 [Network{bg:tan}]*-1>[Tenant{bg:tan}]
 // To Instance Relations
