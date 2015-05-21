@@ -13,9 +13,10 @@ ZenPack.
 == Prerequisites ==
 
 * OpenStack (Icehouse or newer)
-* Ceilometer
-** A Zenoss-specific ceilometer plugin must be installed on your ceilometer nodes (see below)
-** If you do not have ceilometer installed and configured properly, some graphs will be black, and Zenoss will not detect changes (such as new instances or instance state changes) until a full model operation is performed.
+* Ceilometer-OpenStack compatible with your version of OpenStack
+* ceilomater_zenoss 1.0.0+ (https://github.com/zenoss/ceilometer_zenoss)
+** This Zenoss-specific plugin must be installed on your ceilometer nodes (see below)
+** If not installed and configured properly, some graphs will be black, and Zenoss will not detect changes (such as new instances or instance state changes) until a full model operation is performed.
 * PyYAML needs to be installed in order to use the YAML configuration
 ** All 5.X versions of Zenoss have PyYAML already installed
 ** Only 4.2.4 SP763 or 4.2.5 SP378 or earlier affected
