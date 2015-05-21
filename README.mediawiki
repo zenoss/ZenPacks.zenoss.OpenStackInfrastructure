@@ -38,7 +38,7 @@ Choose that option and you'll be presented with a dialog asking for the followin
 # Device To Create - name to use for this device in Zenoss.  Should not be an actual hostname, since that name will be used when the host is registered as a Linux device.
 # Auth URL - A keystone URL, such as http://<hostname>:5000/v2.0/
 # Username, Password/API Key, Project/Tenant ID - *Administrative* credentials to your Zenoss instance.
-# Region Name - choose the correct region from the dropdown.  You may only choose one, so each region you wish to manage must be registered as a separate endpoint in Zenoss.
+# Region Name - choose the correct region from the drop-down.  You may only choose one, so each region you wish to manage must be registered as a separate endpoint in Zenoss.
 # Ceilometer URL - Will auto-populate based on the other selections.
 
 Once you click Add, Zenoss will contact the OpenStack API and discover servers,
@@ -80,7 +80,7 @@ Instances
 * CPU Utilization (percent)
 * Disk Requests (requests/sec)
 * Disk IO Rate (bytes/sec)
-Vnics
+vNICs
 * Network Packet Rate (packets/sec)
 * Network Throughput (bytes/sec)
 Hosts (Zenoss Linux OS monitoring)
@@ -133,7 +133,7 @@ performance data will not be collected until the following steps are performed.
 
 ===Zenoss Configuration Steps===
 
-On the Zenoss host in Zenoss 4.X, or rabbitmq container in Zenoss 5.X: 
+On the Zenoss host in Zenoss 4.X, or RabbitMQ container in Zenoss 5.X: 
 
 * ssh in as the Zenoss user:
 * export ZP_DIR=$ZENHOME/ZenPacks/ZenPacks.zenoss.OpenStackInfrastructure*
@@ -143,7 +143,7 @@ On the Zenoss host in Zenoss 4.X, or rabbitmq container in Zenoss 5.X:
    $ZPDIR/ZenPacks/zenoss/OpenStackInfrastructure/bin/openstack_amqp_config
 </syntaxhighlight>
 
-This script will create a new user in rabbitmq and set up its permissions.  It
+This script will create a new user in RabbitMQ and set up its permissions.  It
 will print out the proper values to use for amqp_hostname, amqp_port,
 amqp_userid, amqp_password, and amqp_virtualhost during ceilometer
 configuration (see below)
@@ -284,7 +284,7 @@ Component failures will affect Impact as follows:
 * Instance impacts the associated Tenant
 * vNIC impacts the related Instance.
 * Port impacts associated Instance
-* Subnet impacts associated Ports
+* Subnet impacts associated Ports and Tenants
 * Floating-IP impacts associated Port
 * Network impacts associated Subnets and Tenants
 * Router impacts associated Subnets and Floating-ips
@@ -295,7 +295,7 @@ Component failures will affect Impact as follows:
 * Cisco UCS vNIC impacts related host's underlying Linux device NIC.
 * Cisco UCS service profile impacts host's underlying Linux device.
 * Host impacted by associated Linux device.
-* OS Processes on an underlying Linux device impact corresponding Nova Services on Host.
+* OS Processes on an underlying Linux device impact corresponding Nova APIs and  Nova Services on Host.
 
 
 == Known Issues ==
