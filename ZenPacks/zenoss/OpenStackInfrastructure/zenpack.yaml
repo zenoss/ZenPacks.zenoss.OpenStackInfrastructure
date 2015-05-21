@@ -214,6 +214,7 @@ device_classes: !ZenPackSpec
         graphs:
           Agents:
             units: count
+            miny: 0
             graphpoints:
               Alive:
                 dpName: openstack_agentAliveCount
@@ -265,12 +266,14 @@ device_classes: !ZenPackSpec
                 format: '%7.0lf'
           Flavors:
             units: count
+            miny: 0
             graphpoints:
               Total:
                 dpName: openstack_flavorTotalCount
                 format: '%7.0lf'
           Images and Snapshots:
             units: count
+            miny: 0
             graphpoints:
               Active:
                 dpName: openstack_imageActiveCount
@@ -298,6 +301,7 @@ device_classes: !ZenPackSpec
                 format: '%7.0lf'
           Networks:
             units: count
+            miny: 0
             graphpoints:
               Active:
                 dpName: openstack_networkActiveCount
@@ -325,6 +329,7 @@ device_classes: !ZenPackSpec
                 format: '%7.0lf'
           Queues:
             units: count
+            miny: 0
             graphpoints:
               Event:
                 dpName: openstackQueues_eventQueueCount
@@ -334,6 +339,7 @@ device_classes: !ZenPackSpec
                 format: '%7.0lf'
           Routers:
             units: count
+            miny: 0
             graphpoints:
               Active:
                 dpName: openstack_routerActiveCount
@@ -352,6 +358,7 @@ device_classes: !ZenPackSpec
                 format: '%7.0lf'
           Servers:
             units: count
+            miny: 0
             graphpoints:
               Active:
                 dpName: openstack_serverActiveCount
