@@ -5,12 +5,6 @@ perspective.  This means that in addition to the user-oriented components
 supported in the regular OpenStack ZenPack (instances, flavors, images), the
 underlying OpenStack servers and software are monitored.
 
-== Availability ==
-
-{{note}} This ZenPack is currently in a controlled availability state for
-Zenoss customers. Please contact prodmgmt@zenoss.com before deploying the
-ZenPack.
-
 === Features ===
 
 * Monitors Overall OpenStack state
@@ -19,6 +13,12 @@ ZenPack.
 * Monitors Nova Services and components
 * Models and monitors Neutron Services and components
 * Impact and Root-Cause (Requires Zenoss Service Dynamics)
+
+== Availability ==
+
+{{note}} This ZenPack is currently in a controlled availability state for
+Zenoss customers. Please contact prodmgmt@zenoss.com before deploying the
+ZenPack.
 
 === Gallery ===
 
