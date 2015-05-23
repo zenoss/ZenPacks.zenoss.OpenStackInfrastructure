@@ -1,3 +1,4 @@
+__TOC__
 
 This ZenPack allows for monitoring of OpenStack from a service provider
 perspective.  This means that in addition to the user-oriented components
@@ -10,13 +11,49 @@ underlying OpenStack servers and software are monitored.
 Zenoss customers. Please contact prodmgmt@zenoss.com before deploying the
 ZenPack.
 
+=== Features ===
+
+* Monitors Overall OpenStack state
+* Monitors Nova and Neutron health
+* Monitors multiple Tenant Infrastructure
+* Monitors Nova Services and components
+* Models and monitors Neutron Services and components
+* Impact and Root-Cause (Requires Zenoss Service Dynamics)
+
+=== Gallery ===
+
+<gallery widths=125px heights=130px>
+osi_availabilityzones.png|Availability Zones
+osi_devicegraphs.png|Device Graphs
+osi_floatingips.png|Floating IP
+osi_hosts.png|Host
+osi_hypervisors.png|Hypervisor
+osi_images.png|Image
+osi_impact_instance.png|Impact Instance
+osi_impact_instance_with_floatingip.png|Impact with FloatingIP
+osi_impact_region.png|Impact Region
+osi_impact_tenant.png|Impact
+osi_instances.png|Instance
+osi_networks.png|Network
+osi_neutronagents.png|Neutron Agent
+osi_novaapis.png|Nova API
+osi_novaservices.png|Nova Service
+osi_openstackcomponentview.png|Component View
+osi_ports.png|Port
+osi_regions.png|Region
+osi_routers.png|Router
+osi_subnets.png|Subnet
+osi_tenants.png|Tenant
+osi_vnics.png|vNIC
+</gallery>
+
 == Prerequisites ==
 
 * OpenStack (Icehouse or newer)
 * Ceilometer-OpenStack compatible with your version of OpenStack
-* ceilomater_zenoss 1.0.0+ (https://github.com/zenoss/ceilometer_zenoss)
+* ceilometer_zenoss 1.0.0+ (https://github.com/zenoss/ceilometer_zenoss)
 ** This Zenoss-specific plugin must be installed on your ceilometer nodes (see below)
-** If not installed and configured properly, some graphs will be black, and Zenoss will not detect changes (such as new instances or instance state changes) until a full model operation is performed.
+** If not installed and configured properly, Instances and vNICs graphs will be blank, and Zenoss will not detect changes (such as new instances or instance state changes) until a full model is performed.
 * PyYAML needs to be installed in order to use the YAML configuration
 ** All 5.X versions of Zenoss have PyYAML already installed
 ** Only 4.2.4 SP763 or 4.2.5 SP378 or earlier affected
@@ -73,10 +110,12 @@ discovered.
 * Routers
 * Ports
 * Floating-Ips
-* vNICs
+* vNICs (from NovaHost compute device model)
 
 ===Metrics===
+
 ;The following component level metrics are collected:
+
 Instances
 * CPU Utilization (percent)
 * Disk Requests (requests/sec)
@@ -99,8 +138,8 @@ Neutron Agents
 * Memory Utilization (bytes)
 * Process Count (processes)
 
-
 ;The following device level metrics are collected:
+
 Flavors
 * Total (count)
 Images
@@ -137,7 +176,7 @@ performance data will not be collected until the following steps are performed.
 On the Zenoss host in Zenoss 4.X, or RabbitMQ container in Zenoss 5.X: 
 
 * ssh in as the Zenoss user:
-* export ZP_DIR=$ZENHOME/ZenPacks/ZenPacks.zenoss.OpenStackInfrastructure*
+* export ZPDIR=$ZENHOME/ZenPacks/ZenPacks.zenoss.OpenStackInfrastructure*
 * Now execute:
 
 <syntaxhighlight lang="bash">
@@ -210,10 +249,10 @@ OpenStack environment is very large.
 
 ====Increasing Polling Interval====
 
-Zenoss will process performance datapoints from ceilometer every 5 minutes, but
-by default, ceilometer will only produce one datapoint every 10 minutes.   This
-can be adjusted by modifying the "interval: 600" line in your
-pipeline.yaml file (typically /etc/ceilometer/pipeline.yaml) to 300 seconds.
+Zenoss will process performance datapoints from ceilometer every 10 minutes,
+since by default, ceilometer will only produce one datapoint every 10 minutes.
+This can be adjusted by modifying the "interval: 600" line in your
+pipeline.yaml file (typically /etc/ceilometer/pipeline.yaml).
 
 == Zenoss Analytics ==
 
@@ -301,20 +340,15 @@ Component failures will affect Impact as follows:
 
 == Known Issues ==
 
-# [https://jira.zenoss.com/browse/ZEN-14803 ZEN-14803]: Ceilometer AMQP Heartbeat monitoring expects ceilometer-collector and ceilometer-agent-notification to run on a single host
-## Most commonly, these processes would run on a single controller node, so this will not impact most users.   No workaround available.
 # [https://jira.zenoss.com/browse/ZEN-14585 ZEN-14585]: The same endpoint can not be monitored both as user and an infrastructure endpoints.
 ## Workaround: If you have been previously monitoring the endpoint as a User endpoint, delete the device before you re-add it as an Infrastructure endpoint.
 # [https://jira.zenoss.com/browse/ZEN-14491 ZEN-14491]: A stacktrace may occur during the initial modeling of the device
 ## The trace will contain the error "ValueError: expected txn status 'Active' or 'Doomed', but it's 'Committed'"
 ## Workaround: Disregard the error.  You may also manually model the device to confirm that no further errors are reported.
-# [https://jira.zenoss.com/browse/ZEN-17905]: Nova APIs component: Grey icons for Enabled and State after model/monitor. 
+# [https://jira.zenoss.com/browse/ZEN-17905 ZEN-17905]: Nova APIs component: Grey icons for Enabled and State after model/monitor. 
 ## OpenStack nova service API does not provide information about Nova-API, so its status is, in fact, unknown.
 
 == Changes ==
-
-;2.0.0
-* Initial Release
 
 ;2.1.0
 * Added Neutron network components
@@ -323,4 +357,8 @@ Component failures will affect Impact as follows:
 * Upgrade to ZenPackLib 1.0.1
 * Add ML2 Pluggin Capability
 * Add OpenvSwitch Integration
+
+
+;2.0.0
+* Initial Release
 
