@@ -1,5 +1,4 @@
 __TOC__
-
 This ZenPack allows for monitoring of OpenStack from a service provider
 perspective.  This means that in addition to the user-oriented components
 supported in the regular OpenStack ZenPack (instances, flavors, images), the
@@ -292,7 +291,7 @@ Domains can be used to create ad hoc views using the following steps.
 # Choose the ''OpenStackInfrastructure Domain'' domain
 
 
-=== Service Impact and Root Cause Analysis ===
+== Service Impact and Root Cause Analysis ==
 
 When combined with the Zenoss Service Dynamics product, this ZenPack adds
 built-in service impact and root cause analysis capabilities for OpenStack
@@ -302,7 +301,7 @@ any services that contain one or more of the explicitly mentioned components.
 
 [[File:impact.png|thumb|320px|Impact Relationship Diagram]]
 
-====Recommended Impact Setup====
+===Recommended Impact Setup===
 
 Since most components will be related to Tenants and Region we recommend:
 
@@ -311,7 +310,7 @@ Since most components will be related to Tenants and Region we recommend:
 * Add all Tenants to the Dynamic Service
 * Add all Regions to the Dynamic Service
 
-====Impact Relations====
+===Impact Relations===
 
 Component failures will affect Impact as follows:
 
