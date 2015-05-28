@@ -19,7 +19,7 @@ from Products.ZenUtils.Search import makeKeywordIndex
 from ZenPacks.zenoss.OpenStackInfrastructure.interfaces import INeutronImplementationPlugin
 
 def get_neutron_implementation_catalog(dmd):
-    device_class = dmd.Devices.getOrganizer('/Devices/OpenStack/Infrastructure')
+    device_class = dmd.getObjByPath('Devices/OpenStack/Infrastructure')
     catalog_name = 'neutron_implementation'
 
     try:
@@ -54,7 +54,7 @@ def get_neutron_implementation_catalog(dmd):
 
 
 def get_neutron_core_catalog(dmd):
-    device_class = dmd.Devices.getOrganizer('/Devices/OpenStack/Infrastructure')
+    device_class = dmd.getObjByPath('Devices/OpenStack/Infrastructure')
     catalog_name = 'neutron_core'
 
     try:
