@@ -66,6 +66,7 @@ osi_vnics.png|vNIC
 
 == Basic Usage ==
 
+===Device Setup via UI===
 Once the OpenStack ZenPack is installed and you can begin monitoring by going
 to the infrastructure screen and clicking the normal button for adding devices.
 You'll find a new option labeled, "Add OpenStack Endpoint (Infrastructure)."
@@ -84,6 +85,19 @@ OpenStack device class with the same name as the hostname or IP you entered
 into the dialog. Click into this new device to see everything that was
 discovered.
 
+===Device Setup via Zenbatchload===
+
+You can setup the device using *zenbatchload* as follows:
+
+<syntaxhighlight lang="bash">zenbatchload file.txt</syntaxhighlight>
+
+where *file.txt* should have the form:
+
+<syntaxhighlight lang="text">
+/Devices/OpenStack/Infrastructure loader='openstackinfrastructure', loader_arg_keys=['deviceName', 'username', 'api_key', 'project_id', 'auth_url', 'ceilometer_url', 'region_name', 'collector']
+   mp8.osi username='admin', api_key='zenoss', project_id='admin', auth_url='http://192.168.117.47:5000/v2.0/', region_name='RegionOne'</syntaxhighlight>
+
+* As before zCommandUsername/zCommandPassword properties must be set manually for /Devices/Server/SSH/Linux/NovaHost device class.
 
 ===Organizational Elements===
 ;The following organizational elements are discovered:
