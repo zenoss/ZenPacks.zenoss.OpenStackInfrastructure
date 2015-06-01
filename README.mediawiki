@@ -1,4 +1,5 @@
 __TOC__
+
 This ZenPack allows for monitoring of OpenStack from a service provider
 perspective.  This means that in addition to the user-oriented components
 supported in the regular OpenStack ZenPack (instances, flavors, images), the
@@ -73,7 +74,7 @@ You'll find a new option labeled, "Add OpenStack Endpoint (Infrastructure)."
 
 Choose that option and you'll be presented with a dialog asking for the following inputs.
 
-# Device To Create - name to use for this device in Zenoss.  Should not be an actual hostname, since that name will be used when the host is registered as a Linux device.
+# Device To Create - non-empty, non-ip, non-dns, unique name to use for this device in Zenoss. ''See note below''.
 # Auth URL - A keystone URL, such as http://<hostname>:5000/v2.0/
 # Username, Password/API Key, Project/Tenant ID - *Administrative* credentials to your Zenoss instance.
 # Region Name - choose the correct region from the drop-down.  You may only choose one, so each region you wish to manage must be registered as a separate endpoint in Zenoss.
@@ -84,6 +85,16 @@ images and flavors. Once it is complete you'll find a new device in the
 OpenStack device class with the same name as the hostname or IP you entered
 into the dialog. Click into this new device to see everything that was
 discovered.
+
+{{note|'''Device Name'''}}
+The '''Device name''' should be a non-empty, non-hostname, non-IP,
+since that name will be used when the host is registered as a Linux device. The
+name should be unique within the Zenoss environment. This is especially
+important if you are adding another device that share the same IP address or
+hostname that already exist on another device. Not doing this may result in
+devices with the same name conflicting with each other. (e.g. attempting to
+model device would show modeling results that belong to another device OR
+device would show relations that do not belong to that device)
 
 ===Device Setup via Zenbatchload===
 
@@ -186,7 +197,7 @@ performance data will not be collected until the following steps are performed.
 
 ===Zenoss Configuration Steps===
 
-On the Zenoss host in Zenoss 4.X, or RabbitMQ container in Zenoss 5.X: 
+On the Zenoss host in Zenoss 4.X, or RabbitMQ container in Zenoss 5.X:
 
 * ssh in as the Zenoss user:
 * export ZPDIR=$ZENHOME/ZenPacks/ZenPacks.zenoss.OpenStackInfrastructure*
@@ -358,7 +369,7 @@ Component failures will affect Impact as follows:
 # [https://jira.zenoss.com/browse/ZEN-14491 ZEN-14491]: A stacktrace may occur during the initial modeling of the device
 ## The trace will contain the error "ValueError: expected txn status 'Active' or 'Doomed', but it's 'Committed'"
 ## Workaround: Disregard the error.  You may also manually model the device to confirm that no further errors are reported.
-# [https://jira.zenoss.com/browse/ZEN-17905 ZEN-17905]: Nova APIs component: Grey icons for Enabled and State after model/monitor. 
+# [https://jira.zenoss.com/browse/ZEN-17905 ZEN-17905]: Nova APIs component: Grey icons for Enabled and State after model/monitor.
 ## OpenStack nova service API does not provide information about Nova-API, so its status is, in fact, unknown.
 
 == Changes ==
