@@ -14,12 +14,6 @@ underlying OpenStack servers and software are monitored.
 * Models and monitors Neutron Services and components
 * Impact and Root-Cause (Requires Zenoss Service Dynamics)
 
-== Availability ==
-
-{{note}} This ZenPack is currently in a controlled availability state for
-Zenoss customers. Please contact prodmgmt@zenoss.com before deploying the
-ZenPack.
-
 === Gallery ===
 
 <gallery widths=125px heights=130px>
