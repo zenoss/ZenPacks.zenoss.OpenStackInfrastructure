@@ -52,7 +52,7 @@ osi_vnics.png|vNIC
 * OpenStack (Icehouse or newer)
 * Ceilometer-OpenStack compatible with your version of OpenStack
 * ceilometer_zenoss 1.0.0+ (https://github.com/zenoss/ceilometer_zenoss)
-** This Zenoss-specific plugin must be installed on your ceilometer nodes (see below)
+** This Zenoss-specific plugin must be installed on your Ceilometer nodes (see below)
 ** If not installed and configured properly, Instances and vNICs graphs will be blank, and Zenoss will not detect changes (such as new instances or instance state changes) until a full model is performed.
 * PyYAML needs to be installed in order to use the YAML configuration
 ** All 5.X versions of Zenoss have PyYAML already installed
@@ -147,13 +147,13 @@ Instances
 vNICs
 * Network Packet Rate (packets/sec)
 * Network Throughput (bytes/sec)
-Hosts (Zenoss Linux OS monitoring)
+Hosts
 * Load Average (processes)
 * CPU Utilization (percent)
 * Free Memory (bytes)
 * Free Swap (bytes)
 * IO (sectors/sec)
-Nova Services (Zenoss Process monitoring)
+Nova Services
 * CPU Utilization (percent)
 * Memory Utilization (bytes)
 * Process Count (processes)
@@ -185,9 +185,8 @@ Routers
 * Total (count)
 * Total count per router state
 
-
 {{note}} All metrics collected by OpenStack Ceilometer may be collected and graphed in
-Zenoss, and all events processed through ceilometer are exposed via the
+Zenoss, and all events processed through Ceilometer are exposed via the
 Zenoss Event Console.
 
 ==Ceilometer Enablement==
@@ -214,8 +213,8 @@ configuration (see below)
 
 ===OpenStack Ceilometer Configuration Steps===
 
-Zenoss relies upon a ceilometer dispatcher plugin to ship raw event and
-metering data from ceilometer to Zenoss for storage in the Zenoss event
+Zenoss relies upon a Ceilometer dispatcher plugin to ship raw event and
+metering data from Ceilometer to Zenoss for storage in the Zenoss event
 and performance databases.   This integration is done by publishing messages
 to Zenoss's RabbitMQ server.
 
@@ -243,7 +242,7 @@ appropriate sections:
 
 Also add the [dispatcher_zenoss] section reported by openstack_amqp_config above.
 
-{{note}} Please restart all ceilometer services on all hosts after making these changes.
+{{note}} Please restart all Ceilometer services on all hosts after making these changes.
 
 ===Optional Steps===
 
@@ -273,8 +272,8 @@ OpenStack environment is very large.
 
 ====Increasing Polling Interval====
 
-Zenoss will process performance datapoints from ceilometer every 10 minutes,
-since by default, ceilometer will only produce one datapoint every 10 minutes.
+Zenoss will process performance datapoints from Ceilometer every 10 minutes,
+since by default, Ceilometer will only produce one datapoint every 10 minutes.
 This can be adjusted by modifying the "interval: 600" line in your
 pipeline.yaml file (typically /etc/ceilometer/pipeline.yaml).
 
@@ -366,7 +365,7 @@ Component failures will affect Impact as follows:
 
 # [https://jira.zenoss.com/browse/ZEN-14585 ZEN-14585]: The same endpoint can not be monitored both as user and an infrastructure endpoints.
 ## Workaround: If you have been previously monitoring the endpoint as a User endpoint, delete the device before you re-add it as an Infrastructure endpoint.
-# [https://jira.zenoss.com/browse/ZEN-14491 ZEN-14491]: A stacktrace may occur during the initial modeling of the device
+# [https://jira.zenoss.com/browse/ZEN-14491 ZEN-14491]: A stack-trace may occur during the initial modeling of the device
 ## The trace will contain the error "ValueError: expected txn status 'Active' or 'Doomed', but it's 'Committed'"
 ## Workaround: Disregard the error.  You may also manually model the device to confirm that no further errors are reported.
 # [https://jira.zenoss.com/browse/ZEN-17905 ZEN-17905]: Nova APIs component: Grey icons for Enabled and State after model/monitor.
@@ -380,7 +379,7 @@ Component failures will affect Impact as follows:
 * Update multiple UI interfaces
 * Upgrade to ZenPackLib 1.0.1
 * Add ML2 Pluggin Capability
-* Add OpenvSwitch Integration
+* Add OpenvSwitch Integration the via OpenvSwitch ZenPack
 
 
 ;2.0.0
