@@ -49,9 +49,9 @@ class libvirt(PythonPlugin):
         manageIp = str(device.manageIp)
 
         log.info('Connecting to ssh://%s@%s:%d' % (
-             device.zCommandUsername,
-             manageIp,
-             device.zCommandPort
+            device.zCommandUsername,
+            manageIp,
+            device.zCommandPort
             ))
 
         client = SSHClient({
@@ -65,8 +65,8 @@ class libvirt(PythonPlugin):
         data = {}
 
         try:
-            for instanceId, instanceName in device.openstack_instanceList:
-                cmd = "virsh --readonly -c 'qemu:///system' dumpxml '%s'" % instanceName
+            for instanceId, instanceUUID in device.openstack_instanceList:
+                cmd = "virsh --readonly -c 'qemu:///system' dumpxml '%s'" % instanceUUID
                 log.info("Running %s" % cmd)
                 d = yield client.run(cmd, timeout=timeout)
 
@@ -75,15 +75,14 @@ class libvirt(PythonPlugin):
                         log.debug("Domain not found while running virsh (rc=%s, stderr='%s')" % (d.exitCode, d.stderr))
                     else:
                         log.error("Error running virsh (rc=%s, stderr='%s')" % (d.exitCode, d.stderr))
-                    returnValue(None)
                     continue
 
                 try:
                     tree = etree.fromstring(d.output)
 
-                    instanceUuid = str(tree.xpath("/domain/uuid/text()")[0])
-                    zenossInstanceId = 'server-%s' % (instanceUuid)
-                    data[instanceUuid] = {
+                    instanceName = str(tree.xpath("/domain/name/text()")[0])
+                    zenossInstanceId = 'server-%s' % (instanceUUID)
+                    data[instanceUUID] = {
                         'id': zenossInstanceId,
                         'serialNumber': str(tree.xpath("/domain/sysinfo/system/entry[@name='serial']/text()")[0]),
                         'biosUuid': str(tree.xpath("/domain/sysinfo/system/entry[@name='uuid']/text()")[0])
@@ -99,14 +98,14 @@ class libvirt(PythonPlugin):
                     mac = interface.find("mac/[@address]")
 
                     if target is None or mac is None:
-                        # unrecognized interface type 
+                        # unrecognized interface type
                         continue
 
                     # compute the resourceId in the same way that ceilometer's
                     # net pollster does.
                     vnicName = str(target.get('dev'))
-                    zenossVnicId = 'vnic-%s-%s' % (instanceUuid, vnicName)
-                    ceilometerResourceId = '%s-%s-%s' % (instanceName, instanceUuid, vnicName)
+                    zenossVnicId = 'vnic-%s-%s' % (instanceUUID, vnicName)
+                    ceilometerResourceId = '%s-%s-%s' % (instanceName, instanceUUID, vnicName)
 
                     vnics.append({
                         'id': zenossVnicId,
@@ -114,9 +113,9 @@ class libvirt(PythonPlugin):
                         'macaddress': str(mac.get('address')),
                         'resourceId': ceilometerResourceId
                     })
-                data[instanceUuid]['vnics'] = vnics
+                data[instanceUUID]['vnics'] = vnics
 
-        finally:        
+        finally:
             client.disconnect()
 
         returnValue(data)

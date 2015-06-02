@@ -308,7 +308,9 @@ class BaseReportableFactory(ETLBaseReportableFactory):
 
                     entity_class_name = "%s_to_%s" % (
                         IReportable(self.context).entity_class_name,
-                        un_camel(importClass(relation.remoteClass, None).meta_type)
+                        un_camel(importClass(
+                            relation.remoteClass, None).meta_type).replace(
+                            "open_stack_infrastructure", "osi")
                     )
 
                     for remoteObject in related:

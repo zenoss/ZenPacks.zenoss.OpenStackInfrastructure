@@ -19,9 +19,12 @@ from zenoss.protocols.interfaces import IAMQPConnectionInfo, IQueueSchema
 from zenoss.protocols.amqp import Publisher as BlockingPublisher
 from amqplib.client_0_8.exceptions import AMQPChannelException
 from OFS.interfaces import IObjectWillBeAddedEvent
+from BTrees.OOBTree import OOBTree
 
 
 class Endpoint(schema.Endpoint):
+
+    neutron_ini = {}
 
     def hosts(self):
         return self.getDeviceComponents(type="OpenStackInfrastructureHost")
@@ -47,6 +50,29 @@ class Endpoint(schema.Endpoint):
                 component.maintain_proxy_device()
 
         return True
+
+    def set_neutron_ini(self, values):
+        if type(self.neutron_ini) == dict:
+            self.neutron_ini = OOBTree()
+
+        changed = set()
+        for k, v in values.iteritems():
+            if self.neutron_ini[k] != v:
+                self.neutron_ini[k] = v
+                changed.add(k)
+
+        if changed:
+            LOG.info("The following INI values have changed: %s" % changed)
+            LOG.info("Rebuilding neutron core integration keys.")
+            from ZenPacks.zenoss.OpenStackInfrastructure.neutron_integration \
+                import reindex_core_components
+            reindex_core_components()
+
+    def get_neutron_ini(self):
+        return dict(self.neutron_ini)
+
+    def ini_get(self, *args):
+        return self.neutron_ini.get(*args)
 
 
 # Clean up any AMQP queues we may have created for this device.

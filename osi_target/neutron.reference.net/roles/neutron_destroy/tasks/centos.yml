@@ -1,0 +1,290 @@
+---
+
+#-------------------------------------------------------------------------------
+#- Preliminary System Setup, get the network services in shape etc...
+#- Install Packstack packages.
+#- Requirements: Must have a system with minimum 3GB RAM
+#-------------------------------------------------------------------------------
+
+- name: Tear Down Floating IP's to VMs
+  quantum_floating_ip:
+    state: absent
+    login_username: '{{keystone.OS_USERNAME}}'
+    login_password: '{{ keystone.OS_PASSWORD }}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
+    network_name: network_public
+    instance_name: '{{ item.name }}'
+    internal_network_name: '{{ item.internal_network }}'
+  with_items:
+    - { name: 'vm_a6', internal_network: 'network_A6' }
+    - { name: 'vm_b7', internal_network: 'network_B7' }
+    - { name: 'vm_c7', internal_network: 'network_C7' }
+    - { name: 'vm_c9', internal_network: 'network_C9' }
+  ignore_errors: True
+
+#-------------------------------------------------------------------------------
+# Un-Install the Private net VM's
+#-------------------------------------------------------------------------------
+
+- name: Un-Add VMs to Other Private Networks; Note the dash in net-id!
+  nova_compute:
+    name: '{{ item.name }}'
+    state: absent
+    login_username: '{{keystone.OS_USERNAME}}'
+    login_password: '{{ keystone.OS_PASSWORD }}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
+    wait_for: 200
+    flavor_id: 77
+  with_items:
+    - { name: 'vm_a6' }
+    - { name: 'vm_b7' }
+    - { name: 'vm_c7' }
+    - { name: 'vm_c9' }
+  ignore_errors: true
+
+#===============================================================================
+# Un-Install all the VM's
+#===============================================================================
+
+- name: Delete a Flat vm_2; Note the dash in net-id!
+  nova_compute:
+    name: vm_2
+    state: absent
+    login_username: '{{keystone.OS_USERNAME}}'
+    login_password: '{{ keystone.OS_PASSWORD }}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
+    wait_for: 200
+    flavor_id: 77
+    meta:
+      hostname: vm_2
+  ignore_errors: true
+
+
+#-------------------------------------------------------------------------------
+# Un-Install the vm_1 Flat networks
+#-------------------------------------------------------------------------------
+
+- name: Remove a Flat vm_1; Note the dash in net-id!
+  nova_compute:
+    name: vm_1
+    state: absent
+    login_username: '{{keystone.OS_USERNAME}}'
+    login_password: '{{ keystone.OS_PASSWORD }}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
+    wait_for: 200
+    flavor_id: 77
+    meta:
+      hostname: vm_1
+  ignore_errors: true
+
+#===============================================================================
+# VM Instances
+#===============================================================================
+
+#-------------------------------------------------------------------------------
+#- dis-Connect the Subnet Interfaces to the routers. tenant_name required
+#-------------------------------------------------------------------------------
+
+- name: Detach subnet to router interfaces. You must use tenant_name here!
+  quantum_router_interface:
+    router_name: '{{item.router_name}}'
+    subnet_name: '{{item.subnet_name}}'
+    tenant_name: '{{item.tenant_name}}'
+    state: absent
+    login_username: '{{keystone.OS_USERNAME}}'
+    login_password: '{{keystone.OS_PASSWORD}}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
+  ignore_errors: true
+  with_items:
+    - { router_name: 'router_AB',
+        subnet_name: 'subnet_A6',
+        tenant_name: 'A',
+      }
+    - { router_name: 'router_AB',
+        subnet_name: 'subnet_B7',
+        tenant_name: 'B',
+      }
+    - { router_name: 'router_C',
+        subnet_name: 'subnet_C7',
+        tenant_name: 'C',
+      }
+    - { router_name: 'router_C',
+        subnet_name: 'subnet_C9',
+        tenant_name: 'C',
+      }
+
+#-------------------------------------------------------------------------------
+#- Remove gateways on routers
+#-------------------------------------------------------------------------------
+
+- name: Remove gateways to routers
+  quantum_router_gateway:
+    router_name: '{{item.name}}'
+    state: absent
+    network_name: '{{item.network_name}}'
+    login_username: '{{keystone.OS_USERNAME}}'
+    login_password: '{{keystone.OS_PASSWORD}}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
+  ignore_errors: true
+  with_items:
+    - { name: 'router_AB',
+        network_name: 'network_public',
+      }
+    - { name: 'router_C',
+        network_name: 'network_public',
+      }
+
+#-------------------------------------------------------------------------------
+#- un-Define the Routers
+#-------------------------------------------------------------------------------
+- name: un-Define the routers
+  quantum_router:
+    name: '{{item.name}}'
+    state: absent
+    tenant_name: '{{item.tenant_name}}'
+    login_username: '{{keystone.OS_USERNAME}}'
+    login_password: '{{keystone.OS_PASSWORD}}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
+  ignore_errors: true
+  with_items:
+    - { name: 'router_AB',
+        tenant_name: 'services',
+      }
+    - { name: 'router_C',
+        tenant_name: 'C',
+      }
+
+#-------------------------------------------------------------------------------
+#- Un-Define the Subnets of Networks
+#-------------------------------------------------------------------------------
+- name: Remove all Subnets
+  quantum_subnet:
+    name: '{{item.name}}'
+    network_name: '{{item.network_name}}'
+    tenant_name: '{{item.tenant_name}}'
+    cidr: '{{item.cidr}}'
+    state: absent
+    login_username: '{{keystone.OS_USERNAME}}'
+    login_password: '{{keystone.OS_PASSWORD}}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
+  ignore_errors: true
+  with_items:
+    - { name: 'subnet_public',
+        network_name: 'network_public',
+        tenant_name: 'services',
+        cidr: '{{hardware.if.network}}/24',
+      }
+    - { name: 'subnet_A5',
+        network_name: 'network_A5',
+        tenant_name: 'A',
+        cidr: '10.1.5.0/24',
+      }
+    - { name: 'subnet_A6',
+        network_name: 'network_A6',
+        tenant_name: 'A',
+        cidr: '10.1.6.0/24',
+      }
+    - { name: 'subnet_B7',
+        network_name: 'network_B7',
+        tenant_name: 'B',
+        cidr: '10.1.6.0/24',
+      }
+    - { name: 'subnet_C7',
+        network_name: 'network_C7',
+        tenant_name: 'C',
+        cidr: '10.1.7.0/24',
+      }
+    - { name: 'subnet_C9',
+        network_name: 'network_C9',
+        tenant_name: 'C',
+        cidr: '10.1.9.0/24',
+      }
+
+#-------------------------------------------------------------------------------
+#- Remove the networks
+#-------------------------------------------------------------------------------
+- name: Remove networks.
+  quantum_network:
+    name: '{{item.name}}'
+    tenant_name: '{{item.tenant_name}}'
+    state: 'absent'
+    provider_network_type: '{{item.network_type}}'
+    provider_physical_network: '{{item.physical_net}}'
+    provider_segmentation_id: '{{item.segmentation_id}}'
+    router_external: '{{item.router_external}}'
+    shared: '{{item.shared}}'
+    login_username: '{{keystone.OS_USERNAME}}'
+    login_password: '{{keystone.OS_PASSWORD}}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
+  ignore_errors: true
+  with_items:
+    - { name: 'network_public',
+        tenant_name: 'services',
+        network_type: 'flat',
+        physical_net: 'physnet1',
+        segmentation_id: 1,
+        router_external: 'yes',
+        shared: 'yes'
+      }
+    - { name: 'network_A5',
+        tenant_name: 'A',
+        network_type: 'gre',
+        physical_net: null,
+        segmentation_id: 5,
+        router_external: 'no',
+        shared: 'no'
+      }
+    - { name: 'network_A6',
+        tenant_name: 'A',
+        network_type: 'gre',
+        physical_net: null,
+        segmentation_id: 2,
+        router_external: 'no',
+        shared: 'no'
+      }
+    - { name: 'network_B7',
+        tenant_name: 'B',
+        network_type: 'gre',
+        physical_net: null,
+        segmentation_id: 3,
+        router_external: 'no',
+        shared: 'no'
+      }
+    - { name: 'network_C7',
+        tenant_name: 'C',
+        network_type: 'gre',
+        physical_net: null,
+        segmentation_id: 4,
+        router_external: 'no',
+        shared: 'no'
+      }
+    - { name: 'network_C9',
+        tenant_name: 'C',
+        network_type: 'gre',
+        physical_net: null,
+        segmentation_id: 9,
+        router_external: 'no',
+        shared: 'no'
+      }
+
+- name: Delete some users
+  keystone_user:
+    state: absent
+    tenant: '{{item}}'
+    login_user: '{{keystone.OS_USERNAME}}'
+    login_password: '{{keystone.OS_PASSWORD}}'
+    login_tenant_name: '{{keystone.OS_TENANT_NAME}}'
+  with_items:
+    - A
+    - B
+    - C
+  ignore_errors: true
+#'
+
+- name: delete flavor {{flavor_tiny.name}}
+  shell: >
+    . /home/{{sudo_user}}/keystonerc_admin;
+    nova flavor-delete {{flavor_tiny.id}}
+  ignore_errors: true
+
+

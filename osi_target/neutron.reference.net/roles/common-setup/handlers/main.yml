@@ -1,0 +1,24 @@
+---
+# Handler to handle common notifications. Handlers are called by other plays.
+# # See http://ansible.cc/docs/playbooks.html for more information about
+# handlers.
+#
+- name: restart ntp
+  service: name=ntpd state=restarted
+
+- name: restart ticktock
+  command: /root/bin/ticktock
+
+- name: update apt
+  apt: update-cache=yes
+
+- name: update yum 
+  yum: update-cache=yes
+
+- name: update_ubuntu_timezone
+  command: dpkg-reconfigure --frontend noninteractive tzdata
+
+- name: restart sshd
+  service: name=sshd state=restarted
+
+

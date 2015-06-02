@@ -70,12 +70,12 @@ def openstack_hostComponent(self):
 
 @monkeypatch('Products.ZenModel.Device.Device')
 def openstack_instanceList(self):
-    # If this is an openstack compute node, returns a list of (instance ID, hypervisor
-    # instance name) tuples for instances running on this host.
+    # If this is an openstack compute node, returns a list of
+    # (instance_ID, instance_UUID) tuples for instances running on this host.
 
     host = self.openstack_hostComponent()
     try:
-        return [(x.id, x.hypervisorInstanceName) for x in host.hypervisor().instances()]
+        return [(x.id, x.serverId) for x in host.hypervisor().instances()]
     except AttributeError:
         return []
 

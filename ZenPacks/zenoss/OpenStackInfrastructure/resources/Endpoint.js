@@ -34,6 +34,28 @@ Ext.onReady(function() {
         box.removeField('snmpCommunity');
         box.removeField('snmpVersion');
     });
+
+    /* Hide Software component, as it always empty */
+    var DEVICE_ELEMENTS = "subselecttreepaneldeviceDetailNav"
+    Ext.ComponentMgr.onAvailable(DEVICE_ELEMENTS, function(){
+        var DEVICE_PANEL = Ext.getCmp(DEVICE_ELEMENTS);
+        Ext.apply(DEVICE_PANEL, {
+            listeners: {
+                afterrender: function() {
+                    var tree = Ext.getCmp(DEVICE_PANEL.items.items[0].id);
+                    var items = tree.store.data.items;
+                    for (i in items){
+                        if (items[i].data.id.match(/software*/)){
+                            try {
+                                tree.store.remove(items[i]);
+                                tree.store.sync();
+                            } catch(err){}
+                        }
+                    }
+                }
+            }
+        })
+    })
 });
 
 
@@ -53,6 +75,10 @@ Ext.apply(Zenoss.render, {
             case false: return Zenoss.render.severity(5);
             default: return Zenoss.render.severity(1);
         }
+    },
+
+    openstack_uppercase_renderer: function(value) {
+        return value.toUpperCase();
     },
 
     openstack_uid_renderer: function(uid, name) {
@@ -80,27 +106,31 @@ Ext.apply(Zenoss.render, {
 });
 
 
-/*
- * Add the OpenStack Component View for device page.
- */
-Zenoss.nav.appendTo('Device', [{
-    id: 'openstackcomponentview',
-    text: _t('OpenStack Component View'),
-    xtype: 'dynamicview',
-    relationshipFilter: 'openstack_link',
-    viewName: 'openstack_view'
-}]);
+Ext.onReady(function(){
+    if (Ext.ClassManager.isCreated("Zenoss.dynamicview.DynamicViewComponent")) {
+        /*
+         * Add the OpenStack Component View for device page.
+         */
 
-/*
- * Enable OpenStack Component View for components as well.
- */
+        Zenoss.nav.appendTo('Device', [{
+            id: 'openstackcomponentview',
+            text: _t('OpenStack Component View'),
+            xtype: 'dynamicview',
+            relationshipFilter: 'openstack_link',
+            viewName: 'openstack_view'
+        }]);
 
- Zenoss.nav.appendTo('Component', [{
-    id: 'component_openstackcomponentview',
-    text: _t('OpenStack Component View'),
-    xtype: 'dynamicview',
-    relationshipFilter: 'openstack_link',
-    viewName: 'openstack_view'
-}]);
+        /*
+         * Enable OpenStack Component View for components as well.
+         */
 
+         Zenoss.nav.appendTo('Component', [{
+            id: 'component_openstackcomponentview',
+            text: _t('OpenStack Component View'),
+            xtype: 'dynamicview',
+            relationshipFilter: 'openstack_link',
+            viewName: 'openstack_view'
+        }]);
+    }
+});
 

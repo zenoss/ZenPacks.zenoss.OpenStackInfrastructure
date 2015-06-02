@@ -31,6 +31,7 @@ from zenoss.protocols.amqp import Publisher as BlockingPublisher
 # to have ceilometer send zenoss any events.
 
 if __name__ == '__main__':
+    zcml.load_config('meta.zcml', zope.component)
     zcml.load_config('configure.zcml', zope.component)
     zcml.load_config('configure.zcml', Products.ZenMessaging.queuemessaging)
 

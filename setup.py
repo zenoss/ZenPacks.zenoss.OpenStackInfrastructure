@@ -2,12 +2,12 @@
 # or saved.  Do not modify them directly here.
 # NB: PACKAGES is deprecated
 NAME = "ZenPacks.zenoss.OpenStackInfrastructure"
-VERSION = "2.0.0"
+VERSION = "2.1.0"
 AUTHOR = "Zenoss"
 LICENSE = "GPLv2"
 NAMESPACE_PACKAGES = [u'ZenPacks', u'ZenPacks.zenoss']
 PACKAGES = [u'ZenPacks', u'ZenPacks.zenoss', u'ZenPacks.zenoss.OpenStackInfrastructure']
-INSTALL_REQUIRES = ['ZenPacks.zenoss.PythonCollector>=1.5.2', 'ZenPacks.zenoss.OpenStack>1.2.2.9']
+INSTALL_REQUIRES = ['ZenPacks.zenoss.PythonCollector>=1.6.1', 'ZenPacks.zenoss.OpenStack>1.2.2.9']
 COMPAT_ZENOSS_VERS = ">=4.2.0"
 PREV_ZENPACK_NAME = ""
 # STOP_REPLACEMENTS
@@ -19,11 +19,10 @@ from setuptools import setup, find_packages
 import subprocess
 p = subprocess.Popen('make build', shell=True)
 
-if p.poll() == None:
+if p.poll() is None:
     p.wait()
 if p.returncode != 0:
     raise Exception('make exited with an error: %s' % p.returncode)
-
 
 setup(
     # This ZenPack metadata should usually be edited with the Zenoss

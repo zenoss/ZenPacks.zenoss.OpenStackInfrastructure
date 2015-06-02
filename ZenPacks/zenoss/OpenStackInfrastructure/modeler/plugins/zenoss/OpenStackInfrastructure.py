@@ -14,25 +14,39 @@
 """ Get component information using OpenStack API clients """
 
 import logging
-log = logging.getLogger('zen.OpenStack')
+log = logging.getLogger('zen.OpenStackInfrastructure')
 
 import json
 import os
 import re
-import types
+import itertools
+from urlparse import urlparse
+import socket
 
 from twisted.internet.defer import inlineCallbacks, returnValue
+from twisted.internet.error import ConnectError, TimeoutError
 
+from Products.ZenUtils.IpUtil import isip, asyncIpLookup
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
 from Products.ZenUtils.Utils import prepId
 from Products.ZenUtils.Time import isoToTimestamp, LocalDateTime
 
-from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path, zenpack_path
+from ZenPacks.zenoss.OpenStackInfrastructure.utils import (
+    add_local_lib_path,
+    zenpack_path,
+    get_subnets_from_fixedips,
+    get_port_instance,
+    getNetSubnetsGws_from_GwInfo,
+    get_port_fixedips,
+    sleep
+)
+
 add_local_lib_path()
 
 from apiclients.novaapiclient import NovaAPIClient, NotFoundError
-from apiclients.keystoneapiclient import KeystoneAPIClient
+from apiclients.keystoneapiclient import KeystoneAPIClient, KeystoneError
+from apiclients.neutronapiclient import NeutronAPIClient
 
 
 class OpenStackInfrastructure(PythonPlugin):
@@ -45,6 +59,16 @@ class OpenStackInfrastructure(PythonPlugin):
         'zOpenStackNovaApiHosts',
         'zOpenStackExtraHosts',
     )
+
+    _keystonev2errmsg = """
+        Unable to connect to keystone Identity Admin API v2.0 to retrieve tenant
+        list.  Tenant names will be unknown (tenants will show with their IDs only)
+        until this is corrected, either by opening access to the admin API endpoint
+        as listed in the keystone service catalog, or by configuring zOpenStackAuthUrl
+        to point to a different, accessible endpoint which supports both the public and
+        admin APIs.  (This may be as simple as changing the port in the URL from
+        5000 to 35357)  Details: %s
+    """
 
     @inlineCallbacks
     def collect(self, device, unused):
@@ -60,13 +84,32 @@ class OpenStackInfrastructure(PythonPlugin):
             device.zCommandUsername,
             device.zCommandPassword,
             device.zOpenStackAuthUrl,
-            device.zOpenStackProjectId)
+            device.zOpenStackProjectId,
+            admin=True)
 
         results = {}
 
-        result = yield keystone_client.tenants()
-        results['tenants'] = result['tenants']
-        log.debug('tenants: %s\n' % str(results['tenants']))
+        results['tenants'] = []
+        try:
+            result = yield keystone_client.tenants()
+            results['tenants'] = result['tenants']
+            log.debug('tenants: %s\n' % str(results['tenants']))
+
+        except (ConnectError, TimeoutError), e:
+            log.error(self._keystonev2errmsg, e)
+        except KeystoneError, e:
+            if len(e.args):
+                if isinstance(e.args[0], ConnectError) or \
+                   isinstance(e.args[0], TimeoutError):
+                    log.error(self._keystonev2errmsg, e.args[0])
+                else:
+                    log.error(self._keystonev2errmsg, e)
+            else:
+                log.error(self._keystonev2errmsg, e)
+        except Exception, e:
+            log.error(self._keystonev2errmsg, e)
+
+        results['nova_url'] = yield client.nova_url()
 
         result = yield client.flavors(detailed=True, is_public=None)
         results['flavors'] = result['flavors']
@@ -90,6 +133,110 @@ class OpenStackInfrastructure(PythonPlugin):
         results['services'] = result['services']
         log.debug('services: %s\n' % str(results['services']))
 
+        # Neutron
+        neutron_client = NeutronAPIClient(
+            username=device.zCommandUsername,
+            password=device.zCommandPassword,
+            auth_url=device.zOpenStackAuthUrl,
+            project_id=device.zOpenStackProjectId,
+            region_name=device.zOpenStackRegionName,
+            )
+
+        result = yield neutron_client.agents()
+        results['agents'] = result['agents']
+
+        # ---------------------------------------------------------------------
+        # Insert the l3_agents -> (routers, networks, subnets, gateways) data
+        # ---------------------------------------------------------------------
+        for _agent in results['agents']:
+            _agent['l3_agent_routers'] = []
+            _routers = set()
+            _subnets = set()
+            _gateways = set()
+            _networks = set()
+
+            if _agent['agent_type'].lower() == 'l3 agent':
+                router_data = yield \
+                    neutron_client.api_call('/v2.0/agents/%s/l3-routers'
+                                            % str(_agent['id']))
+
+                for r in router_data['routers']:
+                    _routers.add(r.get('id'))
+                    (net, snets, gws) = \
+                        getNetSubnetsGws_from_GwInfo(r['external_gateway_info'])
+                    if net: _networks.add(net)
+                    _subnets = _subnets.union(snets)
+                    _gateways = _gateways.union(gws)
+
+                _agent['l3_agent_networks'] = list(_networks)
+                _agent['l3_agent_subnets'] = list(_subnets)
+                _agent['l3_agent_gateways'] = list(_gateways)  # Not used yet
+                _agent['l3_agent_routers'] = list(_routers)
+
+        # ---------------------------------------------------------------------
+        # Insert the DHCP agents-subnets info
+        # ---------------------------------------------------------------------
+        for _agent in results['agents']:
+            _agent['dhcp_agent_subnets'] = []
+            _subnets = []
+            _networks = []
+
+            if _agent['agent_type'].lower() == 'dhcp agent':
+                dhcp_data = yield \
+                    neutron_client.api_call('/v2.0/agents/%s/dhcp-networks'
+                                            % str(_agent['id']))
+
+                for network in dhcp_data['networks']:
+                    _networks.append(network.get('id'))
+                    for subnet in network['subnets']:
+                        _subnets.append(subnet)
+
+                _agent['dhcp_agent_subnets'] = _subnets
+                _agent['dhcp_agent_networks'] = _networks
+
+        result = yield neutron_client.networks()
+        results['networks'] = result['networks']
+
+        result = yield neutron_client.subnets()
+        results['subnets'] = result['subnets']
+
+        result = yield neutron_client.routers()
+        results['routers'] = result['routers']
+
+        result = yield neutron_client.ports()
+        results['ports'] = result['ports']
+
+        result = yield neutron_client.floatingips()
+        results['floatingips'] = result['floatingips']
+
+        # Do some DNS lookups as well.
+        hostnames = set([x['host'] for x in results['services']])
+        hostnames.update([x['host'] for x in results['agents']])
+        hostnames.update(device.zOpenStackExtraHosts)
+        hostnames.update(device.zOpenStackNovaApiHosts)
+        try:
+            hostnames.add(urlparse(results['nova_url']).hostname)
+        except Exception, e:
+            log.warning("Unable to determine nova URL for nova-api component discovery: %s" % e)
+
+        results['resolved_hostnames'] = {}
+        for hostname in sorted(hostnames):
+            if isip(hostname):
+                results['resolved_hostnames'][hostname] = hostname
+                continue
+
+            for i in range(1, 4):
+                try:
+                    host_ip = yield asyncIpLookup(hostname)
+                    results['resolved_hostnames'][hostname] = host_ip
+                    break
+                except socket.gaierror, e:
+                    # temporary dns issue- try again.
+                    log.error("resolve %s: (attempt %d/3): %s" % (hostname, i, e))
+                    yield sleep(2)
+                except Exception, e:
+                    log.error("resolve %s: %s" % (hostname, e))
+
         returnValue(results)
 
     def process(self, device, results, unused):
@@ -102,8 +249,8 @@ class OpenStackInfrastructure(PythonPlugin):
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Tenant',
                 data=dict(
                     id='tenant-{0}'.format(tenant['id']),
-                    title=tenant['name'],              # nova
-                    description=tenant['description'], # tenant description
+                    title=tenant['name'],               # nova
+                    description=tenant['description'],  # tenant description
                     tenantId=tenant['id']
                 )))
 
@@ -163,6 +310,7 @@ class OpenStackInfrastructure(PythonPlugin):
 
         servers = []
         for server in results['servers']:
+
             # Backup support is optional. Guard against it not existing.
             backup_schedule_enabled = None
             backup_schedule_daily = None
@@ -177,60 +325,44 @@ class OpenStackInfrastructure(PythonPlugin):
                 backup_schedule_daily = 'DISABLED'
                 backup_schedule_weekly = 'DISABLED'
 
-            # The methods for accessing a server's IP addresses have changed a
-            # lot. We'll try as many as we know.
+            # Get and classify IP addresses into public and private: (fixed/floating)
             public_ips = set()
             private_ips = set()
 
-            if server.has_key('public_ip') and server['public_ip']:
-                if isinstance(server['public_ip'], types.StringTypes):
-                    public_ips.add(server['public_ip'])
-                elif isinstance(server['public_ip'], types.ListType):
-                    public_ips.update(server['public_ip'])
+            access_ipv4 = server.get('accessIPv4')
+            if access_ipv4:
+                public_ips.add(access_ipv4)
 
-            if server.has_key('private_ip') and server['private_ip']:
-                if isinstance(server['private_ip'], types.StringTypes):
-                    private_ips.add(server['private_ip'])
-                elif isinstance(server['private_ip'], types.ListType):
-                    if isinstance(server['private_ip'][0], types.StringTypes):
-                        private_ips.update(server['private_ip'])
-                    else:
-                        for address in server['private_ip']:
+            access_ipv6 = server.get('accessIPv6')
+            if access_ipv6:
+                public_ips.add(access_ipv6)
+
+            address_group = server.get('addresses')
+            if address_group:
+                for network_name, net_addresses in address_group.items():
+                    for address in net_addresses:
+                        if address.get('OS-EXT-IPS:type') == 'fixed':
                             private_ips.add(address['addr'])
-
-            if server.has_key('accessIPv4') and server['accessIPv4']:
-                public_ips.add(server['accessIPv4'])
-
-            if server.has_key('accessIPv6') and server['accessIPv6']:
-                public_ips.add(server['accessIPv6'])
-
-            if server.has_key('addresses') and server['addresses']:
-                for network_name, addresses in server['addresses'].items():
-                    for address in addresses:
-                        if 'public' in network_name.lower():
-                            if isinstance(address, types.DictionaryType):
-                                public_ips.add(address['addr'])
-                            elif isinstance(address, types.StringTypes):
-                                public_ips.add(address)
+                        elif address.get('OS-EXT-IPS:type') == 'floating':
+                            public_ips.add(address['addr'])
                         else:
-                            if isinstance(address, types.DictionaryType):
-                                private_ips.add(address['addr'])
-                            elif isinstance(address, types.StringTypes):
-                                private_ips.add(address)
+                            log.info("Address type not found for %s", address['addr'])
+                            log.info("Adding %s to private_ips", address['addr'])
+                            private_ips.add(address['addr'])
 
             # Flavor and Image IDs could be specified two different ways.
             flavor_id = None
-            if server.has_key('flavorId'):
+            if 'flavorId' in server:
                 flavor_id = server['flavorId']
-            elif server.has_key('flavor') and server['flavor'].has_key('id'):
+            elif 'flavor' in server and 'id' in server['flavor']:
                 flavor_id = server['flavor']['id']
 
             image_id = None
-            if server.has_key('imageId'):
+            if 'imageId' in server:
                 image_id = server['imageId']
-            elif server.has_key('image') and \
+            elif 'image' in server and \
                  isinstance(server['image'], dict) and \
-                 server['image'].has_key('id'):
+                 'id' in server['image']:
                 image_id = server['image']['id']
 
             tenant_id = server['tenant_id']
@@ -305,12 +437,22 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_orgComponent=zone_id
                 )))
 
-        log.info("Finding hosts")
+        # Find all hosts which have a neutron agent on them.
+        for agent in results['agents']:
+            host_id = prepId("host-{0}".format(agent['host']))
+            hostmap[host_id] = {
+                'hostname': agent['host'],
+                'org_id': region_id
+            }
+
         # add any user-specified hosts which we haven't already found.
-        if device.zOpenStackNovaApiHosts:
-            log.info("  Adding zOpenStackNovaApiHosts=%s" % device.zOpenStackNovaApiHosts)
-        if device.zOpenStackExtraHosts:
-            log.info("  Adding zOpenStackExtraHosts=%s" % device.zOpenStackExtraHosts)
+        if device.zOpenStackNovaApiHosts or device.zOpenStackExtraHosts:
+            log.info("Finding additional hosts")
+
+            if device.zOpenStackNovaApiHosts:
+                log.info("  Adding zOpenStackNovaApiHosts=%s" % device.zOpenStackNovaApiHosts)
+            if device.zOpenStackExtraHosts:
+                log.info("  Adding zOpenStackExtraHosts=%s" % device.zOpenStackExtraHosts)
 
         for hostname in device.zOpenStackNovaApiHosts + device.zOpenStackExtraHosts:
             host_id = prepId("host-{0}".format(hostname))
@@ -337,7 +479,7 @@ class OpenStackInfrastructure(PythonPlugin):
             hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
 
             hypervisor_servers = []
-            if hypervisor.has_key('servers'):
+            if 'servers' in hypervisor:
                 for server in hypervisor['servers']:
                     server_id = 'server-{0}'.format(server['uuid'])
                     hypervisor_servers.append(server_id)
@@ -362,13 +504,32 @@ class OpenStackInfrastructure(PythonPlugin):
         # Place it on the user-specified hosts, or also find it if it's
         # in the nova-service list (which we ignored earlier). It should not
         # be, under icehouse, at least, but just in case this changes..)
-        nova_api_hosts = device.zOpenStackNovaApiHosts
+        nova_api_hosts = set(device.zOpenStackNovaApiHosts)
         for service in results['services']:
             if service['binary'] == 'nova-api':
                 if service['host'] not in nova_api_hosts:
-                    nova_api_hosts.append(service['host'])
+                    nova_api_hosts.add(service['host'])
 
-        for hostname in nova_api_hosts:
+        # Look to see if the hostname or IP in the auth url corresponds
+        # directly to a host we know about.  If so, add it to the nova
+        # api hosts.
+        try:
+            apiHostname = urlparse(results['nova_url']).hostname
+            apiIp = results['resolved_hostnames'].get(apiHostname, apiHostname)
+            for host in hosts:
+                if host.hostname == apiHostname:
+                    nova_api_hosts.add(host.hostname)
+                else:
+                    hostIp = results['resolved_hostnames'].get(host.hostname, host.hostname)
+                    if hostIp == apiIp:
+                        nova_api_hosts.add(host.hostname)
+        except Exception, e:
+            log.warning("Unable to perform nova-api component discovery: %s" % e)
+
+        if not nova_api_hosts:
+            log.warning("No nova-api hosts have been identified.   You must set zOpenStackNovaApiHosts to the list of hosts upon which nova-api runs.")
+
+        for hostname in sorted(nova_api_hosts):
             title = '{0}@{1} ({2})'.format('nova-api', hostname, device.zOpenStackRegionName)
             host_id = prepId("host-{0}".format(hostname))
             nova_api_id = prepId('service-nova-api-{0}-{1}'.format(service['host'], device.zOpenStackRegionName))
@@ -383,6 +544,172 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_orgComponent=region_id
                 )))
 
+        # agent
+        agents = []
+        for agent in results['agents']:
+
+            # Get agent's host
+            agent_host = 'host-{0}'.format(agent['host'])
+
+            # ------------------------------------------------------------------
+            # AgentSubnets Section
+            # ------------------------------------------------------------------
+
+            agent_subnets = []
+            agent_networks = []
+            if agent.get('dhcp_agent_networks'):
+                agent_networks = ['network-{0}'.format(x)
+                                  for x in agent['dhcp_agent_networks']]
+
+            if agent.get('dhcp_agent_subnets'):
+                agent_subnets = ['subnet-{0}'.format(x)
+                                 for x in agent['dhcp_agent_subnets']]
+
+            if agent.get('l3_agent_subnets'):
+                agent_subnets = ['subnet-{0}'.format(x)
+                                 for x in agent['l3_agent_subnets']]
+
+            if agent.get('l3_agent_networks'):
+                agent_networks = ['network-{0}'.format(x)
+                                  for x in agent['l3_agent_networks']]
+
+            # ------------------------------------------------------------------
+            # format l3_agent_routers
+            l3_agent_routers = ['router-{0}'.format(x)
+                                for x in agent['l3_agent_routers']]
+
+            title = '{0}@{1}'.format(agent['agent_type'], agent['host'])
+            agents.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.NeutronAgent',
+                data=dict(
+                    id='agent-{0}'.format(agent['id']),
+                    title=title,
+                    binary=agent['binary'],
+                    enabled=agent['admin_state_up'],
+                    operStatus={
+                        True: 'UP',
+                        False: 'DOWN'
+                    }.get(agent['alive'], 'UNKNOWN'),
+
+                    agentId=agent['id'],
+                    type=agent['agent_type'],
+
+                    set_routers=l3_agent_routers,
+                    set_subnets=agent_subnets,
+                    set_networks=agent_networks,
+                    set_hostedOn=agent_host,
+                    set_orgComponent=hostmap[agent_host]['org_id'],
+                )))
+
+        # networking
+        networks = []
+        for net in results['networks']:
+            networks.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.Network',
+                data=dict(
+                    id='network-{0}'.format(net['id']),
+                    netId=net['id'],
+                    title=net['name'],
+                    admin_state_up=net['admin_state_up'],         # true/false
+                    netExternal=net['router:external'],           # true/false
+                    set_tenant='tenant-{0}'.format(net['tenant_id']),
+                    netStatus=net['status'],                      # ACTIVE
+                    netType=net['provider:network_type'].upper()  # local/global
+                )))
+
+        # subnet
+        subnets = []
+        for subnet in results['subnets']:
+            subnets.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.Subnet',
+                data=dict(
+                    cidr=subnet['cidr'],
+                    dns_nameservers=subnet['dns_nameservers'],
+                    gateway_ip=subnet['gateway_ip'],
+                    id='subnet-{0}'.format(subnet['id']),
+                    set_network='network-{0}'.format(subnet['network_id']),
+                    set_tenant='tenant-{0}'.format(subnet['tenant_id']),
+                    subnetId=subnet['id'],
+                    title=subnet['name'],
+                    )))
+
+        # router
+        routers = []
+        for router in results['routers']:
+            _gateways = set()
+            _subnets = set()
+            _network_id = None
+
+            # Get the External Gateway Data
+            external_gateway_info = router.get('external_gateway_info')
+            if external_gateway_info:
+                _network_id = external_gateway_info.get('network_id')
+                for _ip in external_gateway_info.get('external_fixed_ips', []):
+                    _gateways.add(_ip.get('ip_address', None))
+                    _subnets.add(_ip.get('subnet_id', None))
+
+            _network = None
+            if _network_id:
+                _network = 'network-{0}'.format(_network_id)
+
+            routers.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.Router',
+                data=dict(
+                    admin_state_up=router['admin_state_up'],
+                    gateways=list(_gateways),
+                    id='router-{0}'.format(router['id']),
+                    routerId=router['id'],
+                    routes=list(router['routes']),
+                    set_network=_network,
+                    set_subnets=['subnet-{0}'.format(x) for x in _subnets],
+                    set_tenant='tenant-{0}'.format(router['tenant_id']),
+                    status=router['status'],
+                    title=router['name'],
+                )))
+
+        # port
+        ports = []
+        for port in results['ports']:
+            port_tenant = None
+            if port['tenant_id']:
+                port_tenant = 'tenant-{0}'.format(port['tenant_id'])
+
+            ports.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.Port',
+                data=dict(
+                    admin_state_up=port['admin_state_up'],
+                    device_owner=port['device_owner'],
+                    fixed_ip_list=get_port_fixedips(port['fixed_ips']),
+                    id='port-{0}'.format(port['id']),
+                    mac_address=port['mac_address'].upper(),
+                    portId=port['id'],
+                    set_instance=get_port_instance(port['device_owner'],
+                                                   port['device_id']),
+                    set_network='network-{0}'.format(port['network_id']),
+                    set_subnets=get_subnets_from_fixedips(port['fixed_ips']),
+                    set_tenant=port_tenant,
+                    status=port['status'],
+                    title=port['name'],
+                    vif_type=port['binding:vif_type'],
+                    )))
+
+        # floatingip
+        floatingips = []
+        for floatingip in results['floatingips']:
+            floatingips.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.FloatingIp',
+                data=dict(
+                    floatingipId=floatingip['id'],
+                    fixed_ip_address=floatingip['fixed_ip_address'],
+                    floating_ip_address=floatingip['floating_ip_address'],
+                    id='floatingip-{0}'.format(floatingip['id']),
+                    set_router='router-{0}'.format(floatingip['router_id']),
+                    set_network='network-{0}'.format(floatingip['floating_network_id']),
+                    set_port='port-{0}'.format(floatingip['port_id']),
+                    set_tenant='tenant-{0}'.format(floatingip['tenant_id']),
+                    status=floatingip['status'],
+                    )))
+
         objmaps = {
             'flavors': flavors,
             'hosts': hosts,
@@ -392,8 +719,35 @@ class OpenStackInfrastructure(PythonPlugin):
             'servers': servers,
             'services': services,
             'tenants': tenants,
-            'zones': zones.values()
+            'zones': zones.values(),
+            'agents': agents,
+            'networks': networks,
+            'subnets': subnets,
+            'routers': routers,
+            'ports': ports,
+            'floatingips': floatingips,
         }
+
+        # If we have references to tenants which we did not discover during
+        # (keystone) modeling, create dummy records for them.
+        all_tenant_ids = set()
+        for objmap in itertools.chain.from_iterable(objmaps.values()):
+            try:
+                all_tenant_ids.add(objmap.set_tenant)
+            except AttributeError:
+                pass
+
+        all_tenant_ids.remove(None)
+        known_tenant_ids = set([x.id for x in tenants])
+        for tenant_id in all_tenant_ids - known_tenant_ids:
+            tenants.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.Tenant',
+                data=dict(
+                    id=tenant_id,
+                    title=str(tenant_id),
+                    description=str(tenant_id),
+                    tenantId=tenant_id[7:]  # strip tenant- prefix
+                )))
 
         # If the user has provided a list of static objectmaps to
         # slap on the ends of the ones we discovered dynamically, add them in.
@@ -446,11 +800,12 @@ class OpenStackInfrastructure(PythonPlugin):
                     if added_count > 0:
                         log.info("  Added %d new objectmaps to %s" % (added_count, key))
 
-
         # Apply the objmaps in the right order.
         componentsMap = RelationshipMap(relname='components')
         for i in ('tenants', 'regions', 'flavors', 'images', 'servers', 'zones',
-                  'hosts', 'hypervisors', 'services'):
+                  'hosts', 'hypervisors', 'services', 'networks',
+                  'subnets', 'routers', 'ports', 'agents', 'floatingips',
+                  ):
             for objmap in objmaps[i]:
                 componentsMap.append(objmap)
 

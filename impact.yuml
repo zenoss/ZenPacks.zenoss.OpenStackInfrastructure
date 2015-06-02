@@ -1,38 +1,53 @@
 // OpenStackInfrastructure Internal Impacts
 [note: OpenStackInfrastructure;ZenPack{bg:aquamarine}]-[NovaEndpoint{bg:aquamarine}]
-[NovaEndpoint{bg:aquamarine}]1-0..*>[Host{bg:aquamarine}]
+[note: OpenStackInfrastructure;ZenPack{bg:aquamarine}]-[NeutronAgent{bg:tan}]
+[NovaEndpoint{bg:aquamarine}]1-*>[Host{bg:aquamarine}]
 
-[Host{bg:aquamarine}]1..*-1>[AvailabilityZone{bg:aquamarine}]
-[Host{bg:aquamarine}]1..*-1>[Cell{bg:aquamarine}]
-[Cell{bg:aquamarine}]1..*-1>[Cell{bg:aquamarine}]
-[Cell{bg:aquamarine}]1..*-1>[AvailabilityZone{bg:aquamarine}]
-[AvailabilityZone{bg:aquamarine}]1..*-1>[Region{bg:aquamarine}]
+[Host{bg:aquamarine}]*-1>[AvailabilityZone{bg:aquamarine}]
+[Host{bg:aquamarine}]*-1>[Cell{bg:aquamarine}]
+[Cell{bg:aquamarine}]*-1>[Cell{bg:aquamarine}]
+[Cell{bg:aquamarine}]*-1>[AvailabilityZone{bg:aquamarine}]
+[AvailabilityZone{bg:aquamarine}]*-1>[Region{bg:aquamarine}]
 
-[Host{bg:aquamarine}]1-0..*>[Hypervisor{bg:aquamarine}]
-[Hypervisor{bg:aquamarine}]0..1-0..*>[Instance{bg:aquamarine}]
-[Vnic{bg:aquamarine}]0..1-0..*>[Instance{bg:aquamarine}]
-[Instance{bg:aquamarine}]0..1-0..*>[Tenant{bg:aquamarine}]
+[Host{bg:aquamarine}]1-*>[Hypervisor{bg:aquamarine}]
+[Hypervisor{bg:aquamarine}]1-*>[Instance{bg:aquamarine}]
+[Vnic{bg:aquamarine}]1-*>[Instance{bg:aquamarine}]
+[Instance{bg:aquamarine}]1-*>[Tenant{bg:aquamarine}]
+[Instance{bg:aquamarine}]1-*>[GuestDevice{bg:purple}]
 
-[Host{bg:aquamarine}]0..1-0..*>[NovaService{bg:aquamarine}]
-[Host{bg:aquamarine}]0..1-0..*>[NovaApi{bg:aquamarine}]
-[NovaService{bg:aquamarine}]0..1-0..*>[AvailabilityZone{bg:aquamarine}]
-[NovaAPI{bg:aquamarine}]0..1-0..*>[Region{bg:aquamarine}]
+[Host{bg:aquamarine}]1-*>[NovaService{bg:aquamarine}]
+[Host{bg:aquamarine}]1-*>[NovaApi{bg:aquamarine}]
+[NovaService{bg:aquamarine}]1-*>[AvailabilityZone{bg:aquamarine}]
+[NovaAPI{bg:aquamarine}]1-*>[Region{bg:aquamarine}]
 
-
-
+# //   [Vnic{bg:tan}]1-*>[Port{bg:tan}]
+[Host{bg:tan}]1-*>[NeutronAgent{bg:tan}]
+[NeutronAgent{bg:tan}]*-*>[Network{bg:tan}]
+[NeutronAgent{bg:tan}]*-*>[Router{bg:tan}]
+[NeutronAgent{bg:tan}]*-*>[Subnet{bg:tan}]
+[Network{bg:tan}]*-*>[Subnet{bg:tan}]
+[Router{bg:tan}]*-*>[Subnet{bg:tan}]
+[Subnet{bg:tan}]*-*>[Port{bg:tan}]
+[Subnet{bg:tan}]*-1>[Tenant{bg:tan}]
+[Network{bg:tan}]*-1>[Tenant{bg:tan}]
+// To Instance Relations
+# // [Vnic{bg:aquamarine}]1-*>[Instance{bg:aquamarine}]
+[Port{bg:tan}]1-1>[Instance{bg:tan}]
+[Router{bg:tan}]1-1>[FloatingIp{bg:tan}]
+[FloatingIp{bg:tan}]1-1>[Port{bg:tan}]
 //
 // Platform Impacts
-[note: Platform{bg:deepskyblue}]-[Guest;Device{bg:deepskyblue}]
-[Instance{bg:aquamarine}]1-0..1>[Guest;Device{bg:deepskyblue}]
+# // [note: Platform{bg:deepskyblue}]-[Guest;Device{bg:deepskyblue}]
+# // [Instance{bg:aquamarine}]1-1>[Guest;Device{bg:deepskyblue}]
 
-[note: Platform{bg:deepskyblue}]-[Linux;Device{bg:deepskyblue}]
+# //[note: Platform{bg:deepskyblue}]-[Linux;Device{bg:deepskyblue}]
 [Linux;Device{bg:deepskyblue}]1-1>[Host{bg:aquamarine}]
-[Linux;Device{bg:deepskyblue}]1-0..*>[OSProcess{bg:deepskyblue}]
-[OSProcess{bg:deepskyblue}]0..*-1>[NovaService{bg:aquamarine}]
-[OSProcess{bg:deepskyblue}]0..*-1>[NovaApi{bg:aquamarine}]
+[Linux;Device{bg:deepskyblue}]1-*>[OSProcess{bg:deepskyblue}]
+[OSProcess{bg:deepskyblue}]*-1>[NovaService{bg:aquamarine}]
+[OSProcess{bg:deepskyblue}]*-1>[NovaApi{bg:aquamarine}]
 
 //
 // CiscoUCS Impacts
-[note: Cisco UCS;ZenPack{bg:darkslateblue}]-[UCS Service Profile{bg:darkslateblue}]
-[UCS Service Profile{bg:darkslateblue}]0..1-1..*>[Linux;Device{bg:deepskyblue}]
-//
+# // [note: Cisco UCS;ZenPack{bg:darkslateblue}]-[UCS Service Profile{bg:darkslateblue}]
+[UCS Service Profile{bg:darkslateblue}]1-*>[Linux;Device{bg:deepskyblue}]
+

@@ -2,19 +2,29 @@
 
 echo $0
 
+echo "RabbitMQ Configuration"
+echo "--------------------"
+echo "If using Europa, you *MUST* use this command in a rabbitmq container"
+
 AMQP_USERID="openstack"
 AMQP_PASSWORD="[previously configured password]"
 AMQP_HOSTNAME=`zenglobalconf -p amqphost`
 AMQP_PORT=`zenglobalconf -p amqpport`
 AMQP_VIRTUAL_HOST=`zenglobalconf -p amqpvhost`
+DEFAULT_IP=$(ip route get 8.8.8.8 | head -1 | cut -d' ' -f8)
 
-echo "RabbitMQ Configuration"
-echo "--------------------"
+# If in Europa, get first IP from CONTROLPLANE_HOST_IPS, otherwise default
+if [ -z "$CONTROLPLANE_HOST_IPS" ]; then
+   AMQP_HOSTNAME=$(zenglobalconf -p amqphost)
+else
+   AMQP_HOSTNAME=$(sed "s/\s.*$// ; s/'//g" <<< $CONTROLPLANE_HOST_IPS )
+fi
+
 sudo rabbitmqctl list_users | grep $AMQP_USERID > /dev/null
 if [ "$?" = "0" ]; then
    echo "User '$AMQP_USERID' already exists in rabbitmq.  Leaving existing password in place."
    echo "If you need to change the password, use the following command:"
-   echo "   sudo rabbitmqctl change_password -p $AMQP_VIRTUAL_HOST $AMQP_USERID [newpassword]"
+   echo "   sudo rabbitmqctl change_password $AMQP_USERID [newpassword]"
    echo ""
 else
    AMQP_PASSWORD=`openssl rand -base64 15`
@@ -27,8 +37,13 @@ fi
 sudo rabbitmqctl clear_permissions -p "$AMQP_VIRTUAL_HOST" "$AMQP_USERID"
 sudo rabbitmqctl set_permissions -p "$AMQP_VIRTUAL_HOST" "$AMQP_USERID" 'zenoss.openstack.*' 'zenoss.openstack.*' '^$'
 
+
+
+CURRENTDIR="$(dirname "$(which "$0")")"
+PARENTDIR=$(dirname $CURRENTDIR)
+
 # Create any required exchanges
-$ZENHOME/libexec/openstack_amqp_init.py
+$PARENTDIR/openstack_amqp_init.py
 
 echo ""
 echo "OpenStack Configuration"
@@ -45,18 +60,20 @@ echo "    [dispatcher_zenoss]"
 echo "    "
 echo "    zenoss_device = [device that the openstack environment is registered as in zenoss]"
 echo "    "
-echo "    amqp_hostname = $AMQP_HOSTNAME"
 echo "    amqp_port = $AMQP_PORT"
 echo "    amqp_userid = $AMQP_USERID"
 echo "    amqp_password = $AMQP_PASSWORD"
 echo "    amqp_virtual_host = $AMQP_VIRTUAL_HOST"
+echo "    amqp_hostname = [The correct AMQP system IP or hostname (see below)]"
+echo "    "
+echo " ----------------------------------------------------------------"
+echo " Note: Setting a Correct amqp_hostname in OpenStack Ceilometer"
+echo " ----------------------------------------------------------------"
+echo " * Your current Zenoss amqp_hostname is set to '$AMQP_HOSTNAME'."
+echo ""
+echo "  => If this differs from your default interface, $DEFAULT_IP, must find the"
+echo "     appropriate entry for your amqp_hostname in ceilometer.conf."
+echo "     It must be an accessible interface from your OpenStack system,"
+echo "     and that interface must be one that accepts AMQP connections for "
+echo "     your Zenoss installation."
 
-case "$AMQP_HOSTNAME" in 
-	localhost* | 127.0.0* )
-		echo ""
-		echo ""
-		echo "WARNING: amqp_hostname appears to be localhost- you will need to"
-		echo "         specify a different IP so that your openstack environment"
-		echo "         can reach rabbitmq from the outside."
-		;;
-esac

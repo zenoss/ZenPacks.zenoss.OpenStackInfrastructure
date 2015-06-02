@@ -23,12 +23,18 @@ from Products.ZenModel.interfaces import IDeviceLoader
 class OpenStackInfrastructureLoader(object):
     """
     Loader for the OpenStackInfrastructure ZenPack.
+
+    Sample usage:
+
+    /Devices/OpenStack/Infrastructure loader='openstackinfrastructure', loader_arg_keys=['deviceName', 'username', 'api_key', 'project_id', 'auth_url', 'ceilometer_url', 'region_name', 'collector']
+        ostack_test username='admin', api_key='admin_password', project_id='admin', auth_url='http://10.1.2.3:5000/v2.0/', region_name='RegionOne'
+
     """
     implements(IDeviceLoader)
 
-    def load_device(self, dmd, username, api_key, project_id, auth_url,
-                    region_name=None, collector='localhost'):
+    def load_device(self, dmd, deviceName, username, api_key, project_id, auth_url,
+                    ceilometer_url=None, region_name=None, collector='localhost'):
 
         return getFacade('openstackinfrastructure', dmd).addOpenStack(
-            username, api_key, project_id, auth_url,
+            deviceName, username, api_key, project_id, auth_url, ceilometer_url,
             region_name=region_name, collector=collector)

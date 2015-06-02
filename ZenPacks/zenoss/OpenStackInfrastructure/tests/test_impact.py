@@ -28,11 +28,11 @@ from Products.Five import zcml
 from Products.ZenUtils.guid.interfaces import IGUIDManager
 from Products.ZenUtils.Utils import monkeypatch
 
-from ZenPacks.zenoss.OpenStackInfrastructure.tests.test_utils import (
-    require_zenpack,
-    create_model_data,
-    addContained, addNonContained,
-    )
+from ZenPacks.zenoss.OpenStackInfrastructure.tests.utils import (
+     require_zenpack,
+     create_model_data,
+     addContained, addNonContained,
+     )
 
 from Products.ZenUtils.Utils import unused
 unused(Globals)
@@ -179,7 +179,7 @@ class TestImpact(zenpacklib.TestCase):
         return self.model_data()['guest_dc'].getDevices()
 
     def linuxhost(self, hostid):
-        try:        
+        try:
             return self.model_data()['phys_dc'].getObjByPath('devices/' + hostid)
         except Exception:
             return None
@@ -430,8 +430,6 @@ class TestImpact(zenpacklib.TestCase):
             self.assertTrue(instance.id in impacts,
                             msg="Vnic %s impacts instance %s" % (vnic.id, instance.id))
 
-
-
     @require_zenpack('ZenPacks.zenoss.Impact')
     def test_Tenant(self):
         tenants = self.endpoint().getDeviceComponents(type='OpenStackInfrastructureTenant')
@@ -440,11 +438,9 @@ class TestImpact(zenpacklib.TestCase):
         for tenant in tenants:
             impacts, impacted_by = impacts_for(tenant)
 
-            for instance in tenant.instances():                
+            for instance in tenant.instances():
                 self.assertTrue(instance.id in impacted_by,
                                 msg="Tenant %s impacted by instance %s" % (tenant.id, instance.id))
-
-
 
     @require_zenpack('ZenPacks.zenoss.Impact')
     # Have not yet implemented openstackInstance()
@@ -484,7 +480,7 @@ class TestImpact(zenpacklib.TestCase):
                                     msg="OSProcess %s is impacts software component %s" % (osprocess.id, component.id))
                     passes += 1
 
-        self.assertTrue(passes > 0, msg="OSProcesses found with which to test")                    
+        self.assertTrue(passes > 0, msg="OSProcesses found with which to test")
 
 def test_suite():
     from unittest import TestSuite, makeSuite

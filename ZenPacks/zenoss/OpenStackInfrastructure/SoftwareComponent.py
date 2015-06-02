@@ -38,3 +38,15 @@ class SoftwareComponent(schema.SoftwareComponent):
                 graphs.append(graph)
 
         return graphs
+
+    def getGraphObjects(self, drange=None):
+        """
+        Return graph definitions for this software comoponent, along with
+        any graphs from the associated OSProcess component.
+        This method is for 5.x compatibility
+        """
+        graphs = super(SoftwareComponent, self).getGraphObjects()
+        osprocess = self.osprocess_component()
+        if osprocess:
+            graphs.extend(osprocess.getGraphObjects())
+        return graphs
