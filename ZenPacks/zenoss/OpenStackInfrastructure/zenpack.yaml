@@ -981,6 +981,12 @@ classes: !ZenPackSpec
       hypervisorId:
         label: Hypervisor ID
         grid_display: false
+      hypervisor_type:
+        label: Type
+        grid_display: false
+      hypervisor_version:
+        label: Version
+        grid_display: false
     dynamicview_views: [service_view, openstack_view]
     dynamicview_relations:
       impacted_by: [host]

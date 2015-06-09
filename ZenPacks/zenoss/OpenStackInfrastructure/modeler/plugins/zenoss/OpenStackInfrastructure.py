@@ -125,6 +125,10 @@ class OpenStackInfrastructure(PythonPlugin):
         results['hypervisors'] = result['hypervisors']
         log.debug('hypervisors: %s\n' % str(results['hypervisors']))
 
+        result = yield client.hypervisors(detailed=True)
+        results['hypervisors_detailed'] = result['hypervisors']
+        log.debug('hypervisors_detailed: %s\n' % str(results['hypervisors']))
+
         result = yield client.servers(detailed=True, search_opts={'all_tenants': 1})
         results['servers'] = result['servers']
         log.debug('servers: %s\n' % str(results['servers']))
@@ -473,6 +477,14 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_orgComponent=data['org_id']
                 )))
 
+        hypervisor_type = {}
+        hypervisor_version = {}
+        for hypervisor in results['hypervisors_detailed']:
+            hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
+
+            hypervisor_type[hypervisor_id] = hypervisor.get('hypervisor_type', None)
+            hypervisor_version[hypervisor_id] = hypervisor.get('hypervisor_version', None)
+
         hypervisors = []
         server_hypervisor_instance_name = {}
         for hypervisor in results['hypervisors']:
@@ -485,15 +497,24 @@ class OpenStackInfrastructure(PythonPlugin):
                     hypervisor_servers.append(server_id)
                     server_hypervisor_instance_name[server_id] = server['name']
 
+            hypervisor_dict = dict(
+                id=hypervisor_id,
+                title='{0}.{1}'.format(hypervisor['hypervisor_hostname'], hypervisor['id']),
+                hypervisorId=hypervisor['id'],  # 1
+                hypervisor_type=hypervisor_type.get(hypervisor_id, None),
+                hypervisor_version=hypervisor_version.get(hypervisor_id, None),
+                set_instances=hypervisor_servers,
+                set_hostByName=hypervisor['hypervisor_hostname'],
+            )
+
+            if hypervisor_dict['hypervisor_type'] == 'VMware vCenter Server':
+                # This hypervisor type does not run on a specific host, so
+                # omit the host relationship.
+                del hypervisor_dict['set_hostByName']
+
             hypervisors.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Hypervisor',
-                data=dict(
-                    id=hypervisor_id,
-                    title='{0}.{1}'.format(hypervisor['hypervisor_hostname'], hypervisor['id']),
-                    hypervisorId=hypervisor['id'],  # 1
-                    set_instances=hypervisor_servers,
-                    set_hostByName=hypervisor['hypervisor_hostname'],
-                )))
+                data=hypervisor_dict))
 
         # add hypervisor instance name to the existing server objectmaps.
         for om in servers:
