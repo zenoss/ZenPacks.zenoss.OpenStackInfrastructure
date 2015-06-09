@@ -635,7 +635,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     netExternal=net['router:external'],           # true/false
                     set_tenant='tenant-{0}'.format(net['tenant_id']),
                     netStatus=net['status'],                      # ACTIVE
-                    netType=net['provider:network_type'].upper()  # local/global
+                    netType=net.get('provider:network_type', 'UNKNOWN').upper()  # local/global
                 )))
 
         # subnet
