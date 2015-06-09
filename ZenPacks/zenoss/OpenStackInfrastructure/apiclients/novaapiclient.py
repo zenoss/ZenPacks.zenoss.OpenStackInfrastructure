@@ -304,34 +304,35 @@ class API(object):
         return getattr(self, name)
 
     def __call__(self, data=None, params=None, **kwargs):
-        # update self.path based on kwargs
+        path = self.path
+
         if kwargs:
             qparams = {}
             if kwargs.has_key('detailed') and kwargs['detailed']:
                 detail = '/detail' if kwargs['detailed'] else ""
-                self.path += '%s' % detail
+                path += '%s' % detail
 
         #     # is_public is ternary - None means give all flavors.
         #     # By default Nova assumes True and gives admins public flavors
         #     # and flavors from their own projects only.
-            if self.path.find('flavors') > -1 and \
+            if path.find('flavors') > -1 and \
                 kwargs.has_key('is_public') and \
                 kwargs['is_public'] is not None:
                 qparams['is_public'] = kwargs['is_public']
                 if qparams:
-                    self.path += '?%s' % urllib.urlencode(qparams)
+                    path += '?%s' % urllib.urlencode(qparams)
 
-            if self.path.find('hosts') > -1 and \
+            if path.find('hosts') > -1 and \
                 kwargs.has_key('zone') and \
                 kwargs['zone'] is not None:
-                self.path += '?zone=%s' % kwargs['zone']
+                path += '?zone=%s' % kwargs['zone']
 
-            if self.path.find('images') > -1 and \
+            if path.find('images') > -1 and \
                 kwargs.has_key('limit') and \
                 kwargs['limit'] is not None:
-                self.path += '?limit=%d' % int(kwargs['limit'])
+                path += '?limit=%d' % int(kwargs['limit'])
 
-            if self.path.find('servers') > -1:
+            if path.find('servers') > -1:
                 params = {}
                 if kwargs.has_key('search_opts') and \
                    kwargs['search_opts'] is not None:
@@ -343,9 +344,9 @@ class API(object):
                 if kwargs.has_key('limit'):
                     params['limit'] = int(kwargs['limit'])
                 query_string = "?%s" % urllib.urlencode(params) if params else ""
-                self.path += '%s' % query_string
+                path += '%s' % query_string
 
-            if self.path.find('services') > -1:
+            if path.find('services') > -1:
                 filters = []
                 if kwargs.has_key('host') and \
                     kwargs['host'] is not None:
@@ -354,19 +355,19 @@ class API(object):
                     kwargs['binary'] is not None:
                     filters.append("binary=%s" % kwargs['binary'])
                 if filters:
-                    self.path += "?%s" % "&".join(filters)
+                    path += "?%s" % "&".join(filters)
 
-            if self.path.find('hypervisors') > -1 and \
+            if path.find('hypervisors') > -1 and \
                 kwargs.has_key('hypervisor_match') and \
                 kwargs['hypervisor_match'] is not None and \
                 kwargs.has_key('servers'):
-                target = 'servers' if kwargs['servers'] else 'search'
-                self.path += '/%s/%s' % (
+                target = 'servers' if kwargs['servers'] else 'search'                
+                path += '/%s/%s' % (
                     urllib.quote(kwargs['hypervisor_match'], safe=''),
                     target)
 
         return self.client.api_call(
-            self.path, data=data, params=params, **kwargs)
+            path, data=data, params=params, **kwargs)
 
 
 # Exceptions #########################################################
