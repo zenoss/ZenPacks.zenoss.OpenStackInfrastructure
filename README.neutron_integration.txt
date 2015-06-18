@@ -54,7 +54,9 @@ You must also supply a neutron implementation adapter, for example, in a file ca
 
 
 from zope.interface import implements
+from zope.event import notify
 
+from Products.Zuul.catalog.events import IndexingEvent
 from Products.Zuul.interfaces import ICatalogTool
 from ZenPacks.zenoss.OpenStackInfrastructure.interfaces import INeutronImplementationPlugin
 from ZenPacks.zenoss.OpenStackInfrastructure.neutron_integration import BaseNeutronImplementationPlugin, split_list
@@ -81,7 +83,7 @@ class MySwitchNeutronImplementationPlugin(BaseNeutronImplementationPlugin):
     # on the neutron network is expected to match the "title" on the implementation zenpack's
     # Network component
     def getNetworkIntegrationKeys(self, network):
-        ip_addresses = self.ini_get(('plugins/ml2/ml2_conf.ini', 'ml2_myswitch', 'management_server_ip'))
+        ip_addresses = network.device().ini_get(('plugins/ml2/ml2_conf.ini', 'ml2_myswitch', 'management_server_ip'))
         keys = []
 
         # in this example, there can be multiple management servers, and the
@@ -95,7 +97,7 @@ class MySwitchNeutronImplementationPlugin(BaseNeutronImplementationPlugin):
                 'network',
                 self.netId,
             )
-            keys.append('ml2.myswitch:' + |'.join(keyvalues))
+            keys.append('ml2.myswitch:' + '|'.join(keyvalues))
 
         return keys
 
@@ -108,6 +110,7 @@ class MySwitchNeutronImplementationPlugin(BaseNeutronImplementationPlugin):
         for brain in results:
             obj = brain.getObject()
             obj.index_object()
+            notify(IndexingEvent(obj))
 
 
 Register your plugin in the zenpack's configure.zcml file as follows:
@@ -138,6 +141,8 @@ For components that implement an openstack neutron components:
 Each component class to implement INeutronImplementationPlugin when the
 OpenStackInfrastructure zenpack is installed:
 
+
+from zope.interface import implements
 
 try:
     from ZenPacks.zenoss.OpenStackInfrastructure.interfaces import INeutronImplementationComponent
