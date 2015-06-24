@@ -1085,8 +1085,15 @@ classes: !ZenPackSpec
         label_width: 50
         order: 1.5
     dynamicview_relations:
-      impacted_by: [neutronAgents, implementation_components]
+      impacted_by: [neutronAgents]
       impacts: [subnets, tenant]
+    # --------------------------------------------------------------------------
+    # We use a normal impact adaptor for implementation_components, rather than
+    # dynamicview impacts adaptor, because the implementation zenpack might not
+    # use dynamic view (and therefore not be in service_view) and so will not be
+    # exported from DV to impact currently (ZEN-14579).
+    # --------------------------------------------------------------------------
+    impacted_by: [implementation_components]      
   Subnet:
     base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, LogicalComponent]
     meta_type: OpenStackInfrastructureSubnet
@@ -1131,8 +1138,15 @@ classes: !ZenPackSpec
         label_width: 50
         order: 2.3
     dynamicview_relations:
-      impacted_by: [network, routers, neutronAgents, implementation_components]
+      impacted_by: [network, routers, neutronAgents]
       impacts: [ports, tenant]
+    # --------------------------------------------------------------------------
+    # We use a normal impact adaptor for implementation_components, rather than
+    # dynamicview impacts adaptor, because the implementation zenpack might not
+    # use dynamic view (and therefore not be in service_view) and so will not be
+    # exported from DV to impact currently (ZEN-14579).
+    # --------------------------------------------------------------------------
+    impacted_by: [implementation_components]
   Router:
     base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, LogicalComponent]
     meta_type: OpenStackInfrastructureRouter
@@ -1190,8 +1204,15 @@ classes: !ZenPackSpec
         content_width: 50
         order: 2.4
     dynamicview_relations:
-      impacted_by: [neutronAgents, implementation_components]
+      impacted_by: [neutronAgents]
       impacts: [subnets, floatingIps]
+    # --------------------------------------------------------------------------
+    # We use a normal impact adaptor for implementation_components, rather than
+    # dynamicview impacts adaptor, because the implementation zenpack might not
+    # use dynamic view (and therefore not be in service_view) and so will not be
+    # exported from DV to impact currently (ZEN-14579).
+    # --------------------------------------------------------------------------
+    impacted_by: [implementation_components]
   Port:
     base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, LogicalComponent]
     meta_type: OpenStackInfrastructurePort
@@ -1255,8 +1276,15 @@ classes: !ZenPackSpec
         content_width: 35
         order: 1.3
     dynamicview_relations:
-      impacted_by: [subnets, floatingIps, implementation_components]
+      impacted_by: [subnets, floatingIps]
       impacts: [instance]
+    # --------------------------------------------------------------------------
+    # We use a normal impact adaptor for implementation_components, rather than
+    # dynamicview impacts adaptor, because the implementation zenpack might not
+    # use dynamic view (and therefore not be in service_view) and so will not be
+    # exported from DV to impact currently (ZEN-14579).
+    # --------------------------------------------------------------------------
+    impacted_by: [implementation_components]
   FloatingIp:
     base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, LogicalComponent]
     meta_type: OpenStackInfrastructureFloatingIp
@@ -1299,6 +1327,13 @@ classes: !ZenPackSpec
         label_width: 50
         order: 1.4
     dynamicview_relations:
-      impacted_by: [router, implementation_components]
+      impacted_by: [router]
       impacts: [port]
+    # --------------------------------------------------------------------------
+    # We use a normal impact adaptor for implementation_components, rather than
+    # dynamicview impacts adaptor, because the implementation zenpack might not
+    # use dynamic view (and therefore not be in service_view) and so will not be
+    # exported from DV to impact currently (ZEN-14579).
+    # --------------------------------------------------------------------------
+    impacted_by: [implementation_components]
 
