@@ -278,4 +278,4 @@ class inifiles(PythonPlugin):
                 if ini:
                     data['set_neutron_ini'][(filename, section, option)] = self.ini_get(device, filename, ini, section, option)
 
-            return ObjectMap({'setApplyDataMapToOpenStackInfrastructureEndpoint': ObjectMap(data)})
+        return ObjectMap({'setApplyDataMapToOpenStackInfrastructureEndpoint': ObjectMap(data)})
