@@ -46,7 +46,7 @@ add_local_lib_path()
 
 from apiclients.novaapiclient import NovaAPIClient, NotFoundError
 from apiclients.keystoneapiclient import KeystoneAPIClient, KeystoneError
-from apiclients.neutronapiclient import NeutronAPIClient
+from apiclients.neutronapiclient import NeutronAPIClient, NotFoundError as NeutronNotFoundError
 
 
 class OpenStackInfrastructure(PythonPlugin):
@@ -146,8 +146,14 @@ class OpenStackInfrastructure(PythonPlugin):
             region_name=device.zOpenStackRegionName,
             )
 
-        result = yield neutron_client.agents()
-        results['agents'] = result['agents']
+        results['agents'] = []
+        try:
+            result = yield neutron_client.agents()
+            results['agents'] = result['agents']
+        except NeutronNotFoundError:
+            log.error("Unable to model neutron agents because the enabled neutron plugin does not support the 'agent' API extension.")
+        except Exception, e:
+            log.error('Error modeling neutron agents: %s' % e)
 
         # ---------------------------------------------------------------------
         # Insert the l3_agents -> (routers, networks, subnets, gateways) data
