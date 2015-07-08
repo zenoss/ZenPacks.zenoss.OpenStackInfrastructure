@@ -134,7 +134,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
 
         # Does a device with a matching name exist?  Claim that one.
         device = self.dmd.Devices.findDevice(self.name())
-        if device and device.getDeviceClassPath() == '/Server/SSH/Linux/NovaHost' and device.id != self.device().id:
+        if device and device.getDeviceClassPath() == device.zOpenStackHostDeviceClass and device.id != self.device().id:
             self.claim_proxy_device(device)
             return device
         else:
