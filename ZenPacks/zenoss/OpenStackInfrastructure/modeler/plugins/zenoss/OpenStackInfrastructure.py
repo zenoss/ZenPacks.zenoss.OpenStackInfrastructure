@@ -241,11 +241,17 @@ class OpenStackInfrastructure(PythonPlugin):
                     results['resolved_hostnames'][hostname] = host_ip
                     break
                 except socket.gaierror, e:
-                    # temporary dns issue- try again.
-                    log.error("resolve %s: (attempt %d/3): %s" % (hostname, i, e))
-                    yield sleep(2)
+                    if e.errno == -3:
+                        # temporary dns issue- try again.
+                        log.error("resolve %s: (attempt %d/3): %s" % (hostname, i, e))
+                        yield sleep(2)
+                        continue
+                    else:
+                        log.error("resolve %s: %s" % (hostname, e))
+                        break
                 except Exception, e:
                     log.error("resolve %s: %s" % (hostname, e))
+                    break
 
         returnValue(results)
 
@@ -764,7 +770,9 @@ class OpenStackInfrastructure(PythonPlugin):
             except AttributeError:
                 pass
 
-        all_tenant_ids.remove(None)
+        if None in all_tenant_ids:
+            all_tenant_ids.remove(None)
+
         known_tenant_ids = set([x.id for x in tenants])
         for tenant_id in all_tenant_ids - known_tenant_ids:
             tenants.append(ObjectMap(
