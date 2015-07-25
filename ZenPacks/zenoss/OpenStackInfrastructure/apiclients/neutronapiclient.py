@@ -169,7 +169,7 @@ class NeutronAPIClient(object):
             self._token = r['access']['token']['id'].encode('ascii', 'ignore')
             self._service_catalog = r['access']['serviceCatalog']
             for sc in self._service_catalog:
-                if sc['type'] == 'network' and sc['name'] == 'neutron':
+                if sc['type'] == 'network':
                     self._neutron_url = sc['endpoints'][0]['publicURL'].encode('ascii', 'ignore')
                     break
 
@@ -195,7 +195,7 @@ class NeutronAPIClient(object):
             yield self.login()
 
             # Then try the call again.
-            r = yield self.direct_pi_call(
+            r = yield self.direct_api_call(
                 path, data=data, params=params, **kwargs)
 
         returnValue(r)

@@ -205,7 +205,7 @@ class NovaAPIClient(object):
             yield self.login()
 
             # Then try the call again.
-            r = yield self.direct_pi_call(
+            r = yield self.direct_api_call(
                 path, data=data, params=params, **kwargs)
 
         returnValue(r)
