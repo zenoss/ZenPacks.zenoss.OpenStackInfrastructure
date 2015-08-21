@@ -354,6 +354,13 @@ Component failures will affect Impact as follows:
 * Host impacted by associated Linux device.
 * OS Processes on an underlying Linux device impact corresponding Nova APIs and  Nova Services on Host.
 
+== ML2 Integration ==
+
+Provides linkage between OpenStackInfrastrcuture components and relevant integrated device components; imports performance graphs from relevant integrated device components; provides impact graph relations between OpenStackInfrastrcuture components and relevant integrated device components
+
+* OpenvSwitch Integration via OpenvSwitch ZenPack
+* APIC Integration via Cisco APIC ZenPack
+* NSX Integration via NSX ZenPack
 
 == Known Issues ==
 
@@ -364,8 +371,13 @@ Component failures will affect Impact as follows:
 ## Workaround: Disregard the error.  You may also manually model the device to confirm that no further errors are reported.
 # [https://jira.zenoss.com/browse/ZEN-17905 ZEN-17905]: Nova APIs component: Grey icons for Enabled and State after model/monitor.
 ## OpenStack nova service API does not provide information about Nova-API, so its status is, in fact, unknown.
+# [https://jira.zenoss.com/browse/ZEN-19286]: If an OpenStackInfrastructure host device is created on or moved to the /Server/SSH/Linux/NovaHost class and the device name is different from the host FQDN, then the linkage between OpenStackInfrastructure device and the OpenStackInfrastructure host may not be constructed correctly.
+## Workaround: Do not create the /Server/SSH/Linux/NovaHost device separately. Just create OpenStackInfrastructure device, and it will automatically create the OpenStackInfrastructure host devices under the /Server/SSH/Linux/NovaHost class.
 
 == Changes ==
+
+;2.1.1
+* Various bug fixes
 
 ;2.1.0
 * Added Neutron network components
@@ -373,7 +385,6 @@ Component failures will affect Impact as follows:
 * Update multiple UI interfaces
 * Upgrade to ZenPackLib 1.0.1
 * Add ML2 Pluggin Capability
-* Add OpenvSwitch Integration the via OpenvSwitch ZenPack
 
 
 ;2.0.0

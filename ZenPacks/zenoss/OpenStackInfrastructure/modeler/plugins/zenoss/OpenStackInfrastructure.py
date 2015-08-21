@@ -46,7 +46,7 @@ add_local_lib_path()
 
 from apiclients.novaapiclient import NovaAPIClient, NotFoundError
 from apiclients.keystoneapiclient import KeystoneAPIClient, KeystoneError
-from apiclients.neutronapiclient import NeutronAPIClient
+from apiclients.neutronapiclient import NeutronAPIClient, NotFoundError as NeutronNotFoundError
 
 
 class OpenStackInfrastructure(PythonPlugin):
@@ -125,6 +125,10 @@ class OpenStackInfrastructure(PythonPlugin):
         results['hypervisors'] = result['hypervisors']
         log.debug('hypervisors: %s\n' % str(results['hypervisors']))
 
+        result = yield client.hypervisors(detailed=True)
+        results['hypervisors_detailed'] = result['hypervisors']
+        log.debug('hypervisors_detailed: %s\n' % str(results['hypervisors']))
+
         result = yield client.servers(detailed=True, search_opts={'all_tenants': 1})
         results['servers'] = result['servers']
         log.debug('servers: %s\n' % str(results['servers']))
@@ -142,8 +146,14 @@ class OpenStackInfrastructure(PythonPlugin):
             region_name=device.zOpenStackRegionName,
             )
 
-        result = yield neutron_client.agents()
-        results['agents'] = result['agents']
+        results['agents'] = []
+        try:
+            result = yield neutron_client.agents()
+            results['agents'] = result['agents']
+        except NeutronNotFoundError:
+            log.error("Unable to model neutron agents because the enabled neutron plugin does not support the 'agent' API extension.")
+        except Exception, e:
+            log.error('Error modeling neutron agents: %s' % e)
 
         # ---------------------------------------------------------------------
         # Insert the l3_agents -> (routers, networks, subnets, gateways) data
@@ -231,11 +241,17 @@ class OpenStackInfrastructure(PythonPlugin):
                     results['resolved_hostnames'][hostname] = host_ip
                     break
                 except socket.gaierror, e:
-                    # temporary dns issue- try again.
-                    log.error("resolve %s: (attempt %d/3): %s" % (hostname, i, e))
-                    yield sleep(2)
+                    if e.errno == -3:
+                        # temporary dns issue- try again.
+                        log.error("resolve %s: (attempt %d/3): %s" % (hostname, i, e))
+                        yield sleep(2)
+                        continue
+                    else:
+                        log.error("resolve %s: %s" % (hostname, e))
+                        break
                 except Exception, e:
                     log.error("resolve %s: %s" % (hostname, e))
+                    break
 
         returnValue(results)
 
@@ -248,7 +264,7 @@ class OpenStackInfrastructure(PythonPlugin):
             tenants.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Tenant',
                 data=dict(
-                    id='tenant-{0}'.format(tenant['id']),
+                    id=prepId('tenant-{0}'.format(tenant['id'])),
                     title=tenant['name'],               # nova
                     description=tenant['description'],  # tenant description
                     tenantId=tenant['id']
@@ -267,7 +283,7 @@ class OpenStackInfrastructure(PythonPlugin):
             flavors.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Flavor',
                 data=dict(
-                    id='flavor-{0}'.format(flavor['id']),
+                    id=prepId('flavor-{0}'.format(flavor['id'])),
                     title=flavor['name'],  # 256 server
                     flavorId=flavor['id'],  # performance1-1
                     flavorRAM=flavor['ram'] * 1024 * 1024,  # 256
@@ -300,7 +316,7 @@ class OpenStackInfrastructure(PythonPlugin):
             images.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Image',
                 data=dict(
-                    id='image-{0}'.format(image['id']),
+                    id=prepId('image-{0}'.format(image['id'])),
                     title=image['name'],  # Red Hat Enterprise Linux 5.5
                     imageId=image['id'],  # 346eeba5-a122-42f1-94e7-06cb3c53f690
                     imageStatus=image['status'],  # ACTIVE
@@ -370,7 +386,7 @@ class OpenStackInfrastructure(PythonPlugin):
             servers.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Instance',
                 data=dict(
-                    id='server-{0}'.format(server['id']),
+                    id=prepId('server-{0}'.format(server['id'])),
                     title=server['name'],   # cloudserver01
                     resourceId=server['id'],
                     serverId=server['id'],  # 847424
@@ -380,9 +396,9 @@ class OpenStackInfrastructure(PythonPlugin):
                     serverBackupWeekly=backup_schedule_weekly,    # DISABLED
                     publicIps=list(public_ips),                   # 50.57.74.222
                     privateIps=list(private_ips),                 # 10.182.13.13
-                    set_flavor='flavor-{0}'.format(flavor_id),    # flavor-performance1-1
-                    set_image='image-{0}'.format(image_id),       # image-346eeba5-a122-42f1-94e7-06cb3c53f690
-                    set_tenant='tenant-{0}'.format(tenant_id),    # tenant-a3a2901f2fd14f808401863e3628a858
+                    set_flavor=prepId('flavor-{0}'.format(flavor_id)),    # flavor-performance1-1
+                    set_image=prepId('image-{0}'.format(image_id)),       # image-346eeba5-a122-42f1-94e7-06cb3c53f690
+                    set_tenant=prepId('tenant-{0}'.format(tenant_id)),    # tenant-a3a2901f2fd14f808401863e3628a858
                     hostId=server['hostId'],                      # a84303c0021aa53c7e749cbbbfac265f
                     hostName=server['name']                       # cloudserver01
                 )))
@@ -473,6 +489,14 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_orgComponent=data['org_id']
                 )))
 
+        hypervisor_type = {}
+        hypervisor_version = {}
+        for hypervisor in results['hypervisors_detailed']:
+            hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
+
+            hypervisor_type[hypervisor_id] = hypervisor.get('hypervisor_type', None)
+            hypervisor_version[hypervisor_id] = hypervisor.get('hypervisor_version', None)
+
         hypervisors = []
         server_hypervisor_instance_name = {}
         for hypervisor in results['hypervisors']:
@@ -485,15 +509,24 @@ class OpenStackInfrastructure(PythonPlugin):
                     hypervisor_servers.append(server_id)
                     server_hypervisor_instance_name[server_id] = server['name']
 
+            hypervisor_dict = dict(
+                id=hypervisor_id,
+                title='{0}.{1}'.format(hypervisor['hypervisor_hostname'], hypervisor['id']),
+                hypervisorId=hypervisor['id'],  # 1
+                hypervisor_type=hypervisor_type.get(hypervisor_id, None),
+                hypervisor_version=hypervisor_version.get(hypervisor_id, None),
+                set_instances=hypervisor_servers,
+                set_hostByName=hypervisor['hypervisor_hostname'],
+            )
+
+            if hypervisor_dict['hypervisor_type'] == 'VMware vCenter Server':
+                # This hypervisor type does not run on a specific host, so
+                # omit the host relationship.
+                del hypervisor_dict['set_hostByName']
+
             hypervisors.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Hypervisor',
-                data=dict(
-                    id=hypervisor_id,
-                    title='{0}.{1}'.format(hypervisor['hypervisor_hostname'], hypervisor['id']),
-                    hypervisorId=hypervisor['id'],  # 1
-                    set_instances=hypervisor_servers,
-                    set_hostByName=hypervisor['hypervisor_hostname'],
-                )))
+                data=hypervisor_dict))
 
         # add hypervisor instance name to the existing server objectmaps.
         for om in servers:
@@ -582,7 +615,7 @@ class OpenStackInfrastructure(PythonPlugin):
             agents.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.NeutronAgent',
                 data=dict(
-                    id='agent-{0}'.format(agent['id']),
+                    id=prepId('agent-{0}'.format(agent['id'])),
                     title=title,
                     binary=agent['binary'],
                     enabled=agent['admin_state_up'],
@@ -607,14 +640,14 @@ class OpenStackInfrastructure(PythonPlugin):
             networks.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Network',
                 data=dict(
-                    id='network-{0}'.format(net['id']),
+                    id=prepId('network-{0}'.format(net['id'])),
                     netId=net['id'],
                     title=net['name'],
                     admin_state_up=net['admin_state_up'],         # true/false
                     netExternal=net['router:external'],           # true/false
-                    set_tenant='tenant-{0}'.format(net['tenant_id']),
+                    set_tenant=prepId('tenant-{0}'.format(net['tenant_id'])),
                     netStatus=net['status'],                      # ACTIVE
-                    netType=net['provider:network_type'].upper()  # local/global
+                    netType=net.get('provider:network_type', 'UNKNOWN').upper()  # local/global
                 )))
 
         # subnet
@@ -626,9 +659,9 @@ class OpenStackInfrastructure(PythonPlugin):
                     cidr=subnet['cidr'],
                     dns_nameservers=subnet['dns_nameservers'],
                     gateway_ip=subnet['gateway_ip'],
-                    id='subnet-{0}'.format(subnet['id']),
-                    set_network='network-{0}'.format(subnet['network_id']),
-                    set_tenant='tenant-{0}'.format(subnet['tenant_id']),
+                    id=prepId('subnet-{0}'.format(subnet['id'])),
+                    set_network=prepId('network-{0}'.format(subnet['network_id'])),
+                    set_tenant=prepId('tenant-{0}'.format(subnet['tenant_id'])),
                     subnetId=subnet['id'],
                     title=subnet['name'],
                     )))
@@ -657,12 +690,12 @@ class OpenStackInfrastructure(PythonPlugin):
                 data=dict(
                     admin_state_up=router['admin_state_up'],
                     gateways=list(_gateways),
-                    id='router-{0}'.format(router['id']),
+                    id=prepId('router-{0}'.format(router['id'])),
                     routerId=router['id'],
                     routes=list(router['routes']),
-                    set_network=_network,
-                    set_subnets=['subnet-{0}'.format(x) for x in _subnets],
-                    set_tenant='tenant-{0}'.format(router['tenant_id']),
+                    set_network=prepId(_network),
+                    set_subnets=[prepId('subnet-{0}'.format(x)) for x in _subnets],
+                    set_tenant=prepId('tenant-{0}'.format(router['tenant_id'])),
                     status=router['status'],
                     title=router['name'],
                 )))
@@ -672,7 +705,12 @@ class OpenStackInfrastructure(PythonPlugin):
         for port in results['ports']:
             port_tenant = None
             if port['tenant_id']:
-                port_tenant = 'tenant-{0}'.format(port['tenant_id'])
+                port_tenant = prepId('tenant-{0}'.format(port['tenant_id']))
+
+            port_instance = get_port_instance(port['device_owner'],
+                                              port['device_id'])
+            if port_instance:
+                port_instance = prepId(port_instance)
 
             ports.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Port',
@@ -680,13 +718,12 @@ class OpenStackInfrastructure(PythonPlugin):
                     admin_state_up=port['admin_state_up'],
                     device_owner=port['device_owner'],
                     fixed_ip_list=get_port_fixedips(port['fixed_ips']),
-                    id='port-{0}'.format(port['id']),
+                    id=prepId('port-{0}'.format(port['id'])),
                     mac_address=port['mac_address'].upper(),
                     portId=port['id'],
-                    set_instance=get_port_instance(port['device_owner'],
-                                                   port['device_id']),
-                    set_network='network-{0}'.format(port['network_id']),
-                    set_subnets=get_subnets_from_fixedips(port['fixed_ips']),
+                    set_instance=port_instance,
+                    set_network=prepId('network-{0}'.format(port['network_id'])),
+                    set_subnets=[prepId(x) for x in get_subnets_from_fixedips(port['fixed_ips'])],
                     set_tenant=port_tenant,
                     status=port['status'],
                     title=port['name'],
@@ -702,11 +739,11 @@ class OpenStackInfrastructure(PythonPlugin):
                     floatingipId=floatingip['id'],
                     fixed_ip_address=floatingip['fixed_ip_address'],
                     floating_ip_address=floatingip['floating_ip_address'],
-                    id='floatingip-{0}'.format(floatingip['id']),
-                    set_router='router-{0}'.format(floatingip['router_id']),
-                    set_network='network-{0}'.format(floatingip['floating_network_id']),
-                    set_port='port-{0}'.format(floatingip['port_id']),
-                    set_tenant='tenant-{0}'.format(floatingip['tenant_id']),
+                    id=prepId('floatingip-{0}'.format(floatingip['id'])),
+                    set_router=prepId('router-{0}'.format(floatingip['router_id'])),
+                    set_network=prepId('network-{0}'.format(floatingip['floating_network_id'])),
+                    set_port=prepId('port-{0}'.format(floatingip['port_id'])),
+                    set_tenant=prepId('tenant-{0}'.format(floatingip['tenant_id'])),
                     status=floatingip['status'],
                     )))
 
@@ -737,13 +774,15 @@ class OpenStackInfrastructure(PythonPlugin):
             except AttributeError:
                 pass
 
-        all_tenant_ids.remove(None)
+        if None in all_tenant_ids:
+            all_tenant_ids.remove(None)
+
         known_tenant_ids = set([x.id for x in tenants])
         for tenant_id in all_tenant_ids - known_tenant_ids:
             tenants.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Tenant',
                 data=dict(
-                    id=tenant_id,
+                    id=prepId(tenant_id),
                     title=str(tenant_id),
                     description=str(tenant_id),
                     tenantId=tenant_id[7:]  # strip tenant- prefix

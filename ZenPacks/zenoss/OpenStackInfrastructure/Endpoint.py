@@ -57,7 +57,7 @@ class Endpoint(schema.Endpoint):
 
         changed = set()
         for k, v in values.iteritems():
-            if self.neutron_ini[k] != v:
+            if k not in self.neutron_ini or self.neutron_ini[k] != v:
                 self.neutron_ini[k] = v
                 changed.add(k)
 
@@ -66,7 +66,7 @@ class Endpoint(schema.Endpoint):
             LOG.info("Rebuilding neutron core integration keys.")
             from ZenPacks.zenoss.OpenStackInfrastructure.neutron_integration \
                 import reindex_core_components
-            reindex_core_components()
+            reindex_core_components(self.dmd)
 
     def get_neutron_ini(self):
         return dict(self.neutron_ini)

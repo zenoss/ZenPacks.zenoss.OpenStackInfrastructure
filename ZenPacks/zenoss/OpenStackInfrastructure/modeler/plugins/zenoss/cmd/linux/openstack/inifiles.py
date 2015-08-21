@@ -193,7 +193,7 @@ class inifiles(PythonPlugin):
                     data['plugins/ml2/ml2_conf.ini'],
                     'ml2',
                     'mechanism_drivers',
-                    required=True) or '')
+                    required=False) or '')
 
                 for mechanism_driver in mechanism_drivers:
                     plugin_names.add("ml2." + mechanism_driver)
@@ -278,4 +278,4 @@ class inifiles(PythonPlugin):
                 if ini:
                     data['set_neutron_ini'][(filename, section, option)] = self.ini_get(device, filename, ini, section, option)
 
-            return ObjectMap({'setApplyDataMapToOpenStackInfrastructureEndpoint': ObjectMap(data)})
+        return ObjectMap({'setApplyDataMapToOpenStackInfrastructureEndpoint': ObjectMap(data)})

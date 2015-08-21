@@ -134,9 +134,14 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
 
         # Does a device with a matching name exist?  Claim that one.
         device = self.dmd.Devices.findDevice(self.name())
-        if device and device.id != self.device().id:
-            self.claim_proxy_device(device)
-            return device
+        if device:
+            self_pdc_path = self.proxy_deviceclass().getPrimaryPath()
+            device_path = device.getPrimaryPath()[:len(self_pdc_path)]
+            if device_path == self_pdc_path and device.id != self.device().id:
+                self.claim_proxy_device(device)
+                return device
+            else:
+                return self.create_proxy_device()
         else:
             return self.create_proxy_device()
 
