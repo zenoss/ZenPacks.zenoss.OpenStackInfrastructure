@@ -40,7 +40,7 @@ from zenoss.protocols.twisted.amqp import AMQPFactory
 # How long to cache data in memory before discarding it (data that
 # is coming from ceilometer, but not consumed by any monitoring templates).
 # Should be at least the cycle interval.
-CACHE_EXPIRE_TIME = 15*60
+CACHE_EXPIRE_TIME = 25*60
 
 
 class PerfAMQPDataSource(PythonDataSource):
