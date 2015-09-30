@@ -194,10 +194,12 @@ def sleep(sec):
 
 
 class ExpiringFIFOEntry(object):
-    def __init__(self, value, timestamp, expires):
+    def __init__(self, value, timestamp, expire_in_seconds):
+        now = time.time()
+
         self.value = value
         self.timestamp = timestamp
-        self.expires = expires
+        self.expires = now + expire_in_seconds
 
 
 class ExpiringFIFO(object):
@@ -227,7 +229,8 @@ class ExpiringFIFO(object):
 
     def add(self, value, timestamp):
         self._expire()
-        self.entries.append(ExpiringFIFOEntry(value, timestamp, timestamp + self.expireTime))
+
+        self.entries.append(ExpiringFIFOEntry(value, timestamp, self.expireTime))
 
     def get(self):
         while True:
