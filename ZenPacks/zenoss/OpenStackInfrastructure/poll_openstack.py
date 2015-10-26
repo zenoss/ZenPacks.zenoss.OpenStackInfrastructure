@@ -26,8 +26,7 @@ from twisted.internet.defer import inlineCallbacks, returnValue
 from utils import add_local_lib_path
 add_local_lib_path()
 
-from apiclients.novaapiclient import NovaAPIClient
-from apiclients.neutronapiclient import NeutronAPIClient
+from apiclients.txapiclient import APIClient
 
 class OpenStackPoller(object):
     def __init__(self, username, api_key, project_id, auth_url, region_name):
@@ -40,7 +39,7 @@ class OpenStackPoller(object):
 
     @inlineCallbacks
     def _populateFlavorData(self, client, data):
-        result = yield client.flavors(detailed=True, is_public=None)
+        result = yield client.novaflavors(detailed=True, is_public=None)
         data['flavorTotalCount'] = len(result['flavors'])
 
     @inlineCallbacks
@@ -54,7 +53,7 @@ class OpenStackPoller(object):
         data['imageFailedCount'] = 0
         data['imageOtherCount'] = 0
 
-        result = yield client.images(detailed=True, limit=None)
+        result = yield client.novaimages(detailed=True, limit=None)
 
         for image in result['images']:
             data['imageTotalCount'] += 1
@@ -111,7 +110,7 @@ class OpenStackPoller(object):
         data['serverUnknownCount'] = 0
         data['serverOtherCount'] = 0
 
-        result = yield client.servers(detailed=True, search_opts={'all_tenants': 1})
+        result = yield client.novaservers(detailed=True, search_opts={'all_tenants': 1})
 
         for server in result['servers']:
             data['serverTotalCount'] += 1
@@ -166,7 +165,7 @@ class OpenStackPoller(object):
 
 
     @inlineCallbacks
-    def _populateAgentData(self, neutron_client, data):
+    def _populateAgentData(self, client, data):
         data['agentTotalCount'] = 0
         data['agentDHCPCount'] = 0
         data['agentOVSCount'] = 0
@@ -186,7 +185,7 @@ class OpenStackPoller(object):
         data['agentMLNXCount'] = 0
         data['agentMeteringCount'] = 0
 
-        result = yield neutron_client.agents()
+        result = yield client.neutronagents()
 
         for agent in result['agents']:
             data['agentTotalCount'] += 1
@@ -240,7 +239,7 @@ class OpenStackPoller(object):
 
 
     @inlineCallbacks
-    def _populateNetworkData(self, neutron_client, data):
+    def _populateNetworkData(self, client, data):
         data['networkTotalCount'] = 0
         data['networkActiveCount'] = 0
         data['networkBuildCount'] = 0
@@ -250,7 +249,7 @@ class OpenStackPoller(object):
         data['networkExternalCount'] = 0
         data['networkInternalCount'] = 0
 
-        result = yield neutron_client.networks()
+        result = yield client.neutronnetworks()
 
         for net in result['networks']:
             data['networkTotalCount'] += 1
@@ -280,14 +279,14 @@ class OpenStackPoller(object):
 
 
     @inlineCallbacks
-    def _populateRouterData(self, neutron_client, data):
+    def _populateRouterData(self, client, data):
         data['routerTotalCount'] = 0
         data['routerActiveCount'] = 0
         data['routerBuildCount'] = 0
         data['routerDownCount'] = 0
         data['routerErrorCount'] = 0
 
-        result = yield neutron_client.routers()
+        result = yield client.neutronrouters()
 
         for router in result['routers']:
             data['routerTotalCount'] += 1
@@ -309,19 +308,11 @@ class OpenStackPoller(object):
 
     @inlineCallbacks
     def getData(self):
-        client = NovaAPIClient(
+        client = APIClient(
             self._username,
             self._api_key,
             self._auth_url,
-            self._project_id,
-            self._region_name)
-
-        neutron_client = NeutronAPIClient(
-            self._username,
-            self._api_key,
-            self._auth_url,
-            self._project_id,
-            self._region_name)
+            self._project_id)
 
         data = {}
         data['events'] = []
@@ -331,9 +322,9 @@ class OpenStackPoller(object):
             yield self._populateImageData(client, data)
             yield self._populateServerData(client, data)
 
-            yield self._populateNetworkData(neutron_client, data)
-            yield self._populateAgentData(neutron_client, data)
-            yield self._populateRouterData(neutron_client, data)
+            yield self._populateNetworkData(client, data)
+            yield self._populateAgentData(client, data)
+            yield self._populateRouterData(client, data)
 
         except Exception:
             raise

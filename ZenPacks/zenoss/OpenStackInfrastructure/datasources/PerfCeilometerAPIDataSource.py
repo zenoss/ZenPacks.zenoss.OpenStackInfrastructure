@@ -31,7 +31,7 @@ from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import (
     IPythonDataSourceInfo)
 
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import result_errmsg
-from apiclients.keystoneapiclient import KeystoneAPIClient
+from apiclients.txapiclient import APIClient
 
 
 class ProxyWebClient(object):
@@ -202,7 +202,7 @@ class PerfCeilometerAPIDataSourcePlugin(PythonDataSourcePlugin):
         # this is not very efficient- if we end up using this datasource, it should
         # be rewritten to use a real ceilometer client library with token caching/re-login
         # support.
-        client = KeystoneAPIClient(
+        client = APIClient(
             username=username,
             password=password,
             project_id=project,

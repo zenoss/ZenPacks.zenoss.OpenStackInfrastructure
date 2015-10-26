@@ -13,6 +13,9 @@ class_relationships:
 # Containing Relations
 - Endpoint(components) 1:MC OpenstackComponent
 - Instance 1:MC Vnic
+# Cinder
+- Volume 1:MC Snapshot
+- Volume 1:MC Backup
 # Non-Containing Relations
 - NeutronAgent M:M Router
 - NeutronAgent M:M Network
@@ -22,6 +25,7 @@ class_relationships:
 - Host(hostedSoftware) 1:M (hostedOn)SoftwareComponent
 - OrgComponent 1:M Host
 - OrgComponent 1:M SoftwareComponent
+- OrgComponent 1:M Pool
 # Tenant -> * (Instance,Network,Subnet,Router,Port,FloatingIp)
 - Tenant 1:M Instance
 - Tenant 1:M Network
@@ -29,6 +33,11 @@ class_relationships:
 - Tenant 1:M Router
 - Tenant 1:M Port
 - Tenant 1:M FloatingIp
+# Cinder
+- Tenant 1:M Volume
+- Tenant 1:M Snapshot
+- Tenant 1:M Backup
+- Tenant 1:1 Quota
 # Flavor
 - Flavor 1:M Instance
 - Image 1:M Instance
@@ -53,6 +62,8 @@ class_relationships:
 - Router 1:M FloatingIp
 - Router M:M Subnet
 - Hypervisor 1:1 Host
+# Cinder
+- Instance 1:M Volume
 device_classes: !ZenPackSpec
   /Server/SSH/Linux/NovaHost:
     zProperties:
@@ -691,6 +702,14 @@ classes: !ZenPackSpec
         label_width: 50
       subnets:
         label_width: 50
+      volumes:
+        grid_display: false
+      backups:
+        grid_display: false
+      snapshots:
+        grid_display: false
+      quota:
+        grid_display: false
     dynamicview_views: [service_view]
     dynamicview_relations:
       impacted_by: [instances, networks, subnets, implementation_components]
@@ -832,6 +851,10 @@ classes: !ZenPackSpec
       vnics:
         label: Vnics
         grid_display: false
+      volumes:
+        label: Volumes
+        label_width: 45
+        content_width: 45
     dynamicview_views: [service_view]
     dynamicview_relations:
       impacted_by: [hypervisor, ports, vnics]
@@ -1336,4 +1359,202 @@ classes: !ZenPackSpec
     # exported from DV to impact currently (ZEN-14579).
     # --------------------------------------------------------------------------
     impacted_by: [implementation_components]
+  Volume:
+    base: [LogicalComponent]
+    meta_type: OpenStackInfrastructureVolume
+    label: Volume
+    order: 20
+    properties:
+      bootable:
+        label: Bootable
+        label_width: 40
+        content_width: 40
+      volumeId:
+        label: Volume ID
+        grid_display: false
+      avzone:
+        label: Availability Zone
+        grid_display: false
+      created_at:
+        label: Created At
+        grid_display: false
+      sourceVolumeId:
+        label: Source Volume ID
+        grid_display: false
+      host:
+        label: Host
+        label_width: 100
+        content_width: 100
+      size:
+        label: Size (GB)
+        label_width: 40
+        content_width: 40
+      status:
+        label: Status
+        label_width: 80
+        content_width: 80
+    relationships:
+      tenant:
+        label_width: 80
+        content_width: 80
+      instance:
+        label_width: 80
+        content_width: 80
+      snapshots:
+        label_width: 50
+        content_width: 50
+      backups:
+        label_width: 50
+        content_width: 50
+  Snapshot:
+    base: [LogicalComponent]
+    meta_type: OpenStackInfrastructureSnapshot
+    label: Snapshot
+    order: 21
+    properties:
+      created_at:
+        label: Created At
+        label_width: 100
+        content_width: 100
+      description:
+        label: Description
+        label_width: 150
+        content_width: 150
+      size:
+        label: Size (GB)
+        label_width: 40
+        content_width: 40
+      progress:
+        label: Progress
+        label_width: 80
+        content_width: 80
+      status:
+        label: Status
+        label_width: 80
+        content_width: 80
+      created_at:
+        label: Created At
+        label_width: 100
+        content_width: 100
+        grid_display: false
+    relationships:
+      volume:
+        label_width: 80
+        content_width: 80
+  Backup:
+    base: [LogicalComponent]
+    meta_type: OpenStackInfrastructureBackup
+    label: Backup
+    order: 22
+    properties:
+      created_at:
+        label: Created At
+        label_width: 100
+        content_width: 100
+      description:
+        label: Description
+        label_width: 150
+        content_width: 150
+      size:
+        label: Size (GB)
+        label_width: 40
+        content_width: 40
+      progress:
+        label: Progress
+        label_width: 100
+        content_width: 100
+      status:
+        label: Status
+        label_width: 80
+        content_width: 80
+    relationships:
+      volume:
+        label_width: 80
+        content_width: 80
+  Pool:
+    base: [OrgComponent]
+    meta_type: OpenStackInfrastructurePool
+    label: Pool
+    order: 23
+    properties:
+      qos_support:
+        label: QoS Support
+        label_width: 40
+        content_width: 40
+        grid_display: false
+      allocated_capacity:
+        label: Allocated Capacity
+        label_width: 90
+        content_width: 90
+      free_capacity:
+        label: Free Capacity
+        label_width: 80
+        content_width: 80
+      total_capacity:
+        label: Total Capacity
+        label_width: 80
+        content_width: 80
+      driver_version:
+        label: Driver Version
+        label_width: 40
+        content_width: 40
+        grid_display: false
+      location:
+        label: Location
+        label_width: 100
+        content_width: 100
+        grid_display: false
+      reserved_percentage:
+        label: Reserved Percentage
+        label_width: 100
+        content_width: 100
+      storage_protocol:
+        label: Storage Protocol
+        label_width: 80
+        content_width: 80
+      vendor_name:
+        label: Vendor Name
+        label_width: 80
+        content_width: 80
+        grid_display: false
+      volume_backend:
+        label: Volume Backend
+        label_width: 80
+        content_width: 80
+        grid_display: false
+  Quota:
+    base: [LogicalComponent]
+    meta_type: OpenStackInfrastructureQuota
+    label: Quota
+    order: 24
+    properties:
+      tenant_name:
+        label: Tenant Name
+        label_width: 100
+        content_width: 100
+      backup_bytes:
+        label: Backup (GB)
+        label_width: 60
+        content_width: 60
+      backups:
+        label: Backups
+        label_width: 40
+        content_width: 40
+      bytes:
+        label: Bytes (GB)
+        label_width: 50
+        content_width: 50
+      snapshots:
+        label: Snapshots
+        label_width: 50
+        content_width: 50
+      volumes:
+        label: Volumes
+        label_width: 50
+        content_width: 50
+    relationships:
+      tenant:
+        label_width: 80
+        content_width: 80
 
+#

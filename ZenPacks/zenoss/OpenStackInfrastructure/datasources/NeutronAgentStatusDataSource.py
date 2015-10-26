@@ -27,7 +27,7 @@ from Products.ZenUtils.Utils import prepId
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import result_errmsg, add_local_lib_path
 add_local_lib_path()
 
-from apiclients.neutronapiclient import NeutronAPIClient
+from apiclients.txapiclient import APIClient
 
 
 class NeutronAgentStatusDataSource(PythonDataSource):
@@ -104,7 +104,7 @@ class NeutronAgentStatusDataSourcePlugin(PythonDataSourcePlugin):
         log.debug("Collect for OpenStack Neutron Agent Status (%s)" % config.id)
         ds0 = config.datasources[0]
 
-        client = NeutronAPIClient(
+        client = APIClient(
             ds0.zCommandUsername,
             ds0.zCommandPassword,
             ds0.zOpenStackAuthUrl,
@@ -114,7 +114,7 @@ class NeutronAgentStatusDataSourcePlugin(PythonDataSourcePlugin):
         results = {}
 
         log.debug('Requesting agent-list')
-        result = yield client.agents()
+        result = yield client.neutron_agents()
         results['agents'] = result['agents']
 
         defer.returnValue(results)
