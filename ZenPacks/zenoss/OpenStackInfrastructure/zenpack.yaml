@@ -222,6 +222,9 @@ device_classes: !ZenPackSpec
           serviceStatus:
             type: OpenStack Nova Service Status
             cycletime: 30
+          cinderServiceStatus:
+            type: OpenStack Cinder Service Status
+            cycletime: 30
         graphs:
           Agents:
             units: count
@@ -622,12 +625,18 @@ classes: !ZenPackSpec
       childOrgs:
         label: Children
         order: 1.1
+        label_width: 60
+        content_width: 60
       hosts:
         label: Host
         order: 1.0
+        label_width: 60
+        content_width: 60
       parentOrg:
         label: Parent Region
         order: 1.0
+        label_width: 60
+        content_width: 60
       softwareComponents:
         label_width: 150
     filter_display: false
@@ -1359,11 +1368,43 @@ classes: !ZenPackSpec
     # exported from DV to impact currently (ZEN-14579).
     # --------------------------------------------------------------------------
     impacted_by: [implementation_components]
+  CinderService:
+    base: [SoftwareComponent]
+    meta_type: OpenStackInfrastructureCinderService
+    label: Cinder Service
+    order: 20.1
+      # --------------------------------------------------------------------------
+      # We use a normal impact adaptor for osprocess_component, rather than
+      # dynamicview impacts adaptor, because OSProcess is not part of
+      # service_view, and so will not be exported from DV to impact  currently
+      # (ZEN-14579).
+      # --------------------------------------------------------------------------
+#      impacted_by: [osprocess_component]
+#      dynamicview_views: [service_view, openstack_view]
+#      dynamicview_relations:
+#        impacted_by: [hostedOn]
+#        impacts: [orgComponent]
+  CinderApi:
+    base: [SoftwareComponent]
+    meta_type: OpenStackInfrastructureCinderApi
+    label: Cinder API
+    order: 20.2
+    # --------------------------------------------------------------------------
+    # We use a normal impact adaptor for osprocess_component, rather than
+    # dynamicview impacts adaptor, because OSProcess is not part of
+    # service_view, and so will not be exported from DV to impact  currently
+    # (ZEN-14579).
+    # --------------------------------------------------------------------------
+#    impacted_by: [osprocess_component]
+#    dynamicview_views: [service_view, openstack_view]
+#    dynamicview_relations:
+#      impacted_by: [hostedOn]
+#      impacts: [orgComponent]
   Volume:
     base: [LogicalComponent]
     meta_type: OpenStackInfrastructureVolume
     label: Volume
-    order: 20
+    order: 21
     properties:
       bootable:
         label: Bootable
@@ -1410,7 +1451,7 @@ classes: !ZenPackSpec
     base: [LogicalComponent]
     meta_type: OpenStackInfrastructureSnapshot
     label: Snapshot
-    order: 21
+    order: 22
     properties:
       created_at:
         label: Created At
@@ -1445,7 +1486,7 @@ classes: !ZenPackSpec
     base: [LogicalComponent]
     meta_type: OpenStackInfrastructureBackup
     label: Backup
-    order: 22
+    order: 23
     properties:
       created_at:
         label: Created At
@@ -1475,12 +1516,10 @@ classes: !ZenPackSpec
     base: [OrgComponent]
     meta_type: OpenStackInfrastructurePool
     label: Pool
-    order: 23
+    order: 24
     properties:
       qos_support:
         label: QoS Support
-        label_width: 40
-        content_width: 40
         grid_display: false
       allocated_capacity:
         label: Allocated Capacity
@@ -1496,13 +1535,9 @@ classes: !ZenPackSpec
         content_width: 80
       driver_version:
         label: Driver Version
-        label_width: 40
-        content_width: 40
         grid_display: false
       location:
         label: Location
-        label_width: 100
-        content_width: 100
         grid_display: false
       reserved_percentage:
         label: Reserved Percentage
@@ -1514,19 +1549,15 @@ classes: !ZenPackSpec
         content_width: 80
       vendor_name:
         label: Vendor Name
-        label_width: 80
-        content_width: 80
         grid_display: false
       volume_backend:
         label: Volume Backend
-        label_width: 80
-        content_width: 80
         grid_display: false
   Quota:
     base: [LogicalComponent]
     meta_type: OpenStackInfrastructureQuota
     label: Quota
-    order: 24
+    order: 25
     properties:
       tenant_name:
         label: Tenant Name

@@ -8,7 +8,7 @@
 ##############################################################################
 
 import logging
-log = logging.getLogger('zen.OpenStack.NovaServiceStatus')
+log = logging.getLogger('zen.OpenStack.QueueSizeStatus')
 
 from twisted.internet import defer
 from twisted.internet.defer import inlineCallbacks

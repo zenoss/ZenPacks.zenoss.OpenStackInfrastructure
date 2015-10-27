@@ -191,7 +191,6 @@ class PerfCeilometerAPIDataSourcePlugin(PythonDataSourcePlugin):
 
         ds0 = config.datasources[0]
 
-        ceilometer_url = ds0.zPerfCeilometerAPIUrl.rstrip('/')
         username = ds0.zCommandUsername
         password = ds0.zCommandPassword
         metric = ds0.params['metric']
@@ -209,6 +208,9 @@ class PerfCeilometerAPIDataSourcePlugin(PythonDataSourcePlugin):
             auth_url=authurl,
         )
         yield client.login()
+
+        ceilometer_url = yield client.ceilometer_url()
+        ceilometer_url = ceilometer_url.rstrip('/')
 
         hdr = {}
         hdr['X-Auth-Token'] = client._token

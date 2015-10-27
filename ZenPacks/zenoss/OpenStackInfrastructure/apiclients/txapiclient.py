@@ -442,6 +442,13 @@ class APIClient(object):
         returnValue(self._nova_url)
 
 
+    @inlineCallbacks
+    def ceilometer_url(self):
+        if not self._ceilometer_url:
+            yield self.login()
+        returnValue(self._ceilometer_url)
+
+
 class API(object):
 
     """Wrapper for each element of an API path including the leaf.  """

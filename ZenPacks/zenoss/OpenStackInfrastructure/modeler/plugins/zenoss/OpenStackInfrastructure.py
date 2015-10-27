@@ -252,7 +252,7 @@ class OpenStackInfrastructure(PythonPlugin):
             results['backups'] = result['backups']
 
         result = yield client.cinder_services()
-        results['volume_services'] = result['services']
+        results['cinder_services'] = result['services']
 
         result = yield client.cinder_pools()
         #import pdb;pdb.set_trace()
@@ -488,16 +488,46 @@ class OpenStackInfrastructure(PythonPlugin):
             }
 
         # Find all hosts which have a cinder service on them
-        for service in results['volume_services']:
+        for service in results['cinder_services']:
             # well, guest what? volume services do not have 'id' key !
 
-            host_id = prepId("host-{0}".format(service.get('host', '')))
+            host_id_end = service.get('host', '').find('@')
+            if host_id_end > -1:
+                host_id = prepId("host-{0}".format(service.get('host', '')[:host_id_end]))
+            else:
+                host_id = prepId("host-{0}".format(service.get('host', '')))
+            #import pdb;pdb.set_trace()
             zone_id = prepId("zone-{0}".format(service.get('zone', '')))
+            title = '{0}@{1} ({2})'.format(service.get('binary', ''),
+                                           service.get('host', ''),
+                                           service.get('zone', ''))
+            service_id = prepId('service-{0}-{1}-{2}'.format(
+                service.get('binary', ''), service.get('host', ''), service.get('zone', '')))
 
-            hostmap[host_id] = {
-                'hostname': service.get('host', ''),
-                'org_id': zone_id
-            }
+            if host_id not in hostmap:
+                hostmap[host_id] = {
+                    'hostname': service.get('host', ''),
+                    'org_id': zone_id
+                }
+            #import pdb;pdb.set_trace()
+            services.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.CinderService',
+                data=dict(
+                    id=service_id,
+                    title=title,
+                    binary=service.get('binary', ''),
+                    enabled={
+                        'enabled': True,
+                        'disabled': False
+                    }.get(service.get('status', None), False),
+                    operStatus={
+                        'up': 'UP',
+                        'down': 'DOWN'
+                    }.get(service.get('state', None), 'UNKNOWN'),
+                    set_hostedOn=host_id,
+                    set_orgComponent=zone_id
+                )))
+
 
         # add any user-specified hosts which we haven't already found.
         if device.zOpenStackNovaApiHosts or device.zOpenStackExtraHosts:
@@ -583,10 +613,14 @@ class OpenStackInfrastructure(PythonPlugin):
         # in the nova-service list (which we ignored earlier). It should not
         # be, under icehouse, at least, but just in case this changes..)
         nova_api_hosts = set(device.zOpenStackNovaApiHosts)
+        cinder_api_hosts = []
         for service in results['services']:
             if service.get('binary', '') == 'nova-api':
                 if service.get('host', '') not in nova_api_hosts:
                     nova_api_hosts.add(service.get('host', ''))
+            if service.get('binary', '') == 'cinder-api':
+                if service.get('host', '') not in cinder_api_hosts:
+                    cinder_api_hosts.append(service.get('host', ''))
 
         # Look to see if the hostname or IP in the auth url corresponds
         # directly to a host we know about.  If so, add it to the nova
@@ -597,10 +631,12 @@ class OpenStackInfrastructure(PythonPlugin):
             for host in hosts:
                 if host.hostname == apiHostname:
                     nova_api_hosts.add(host.hostname)
+                    cinder_api_hosts.append(host.hostname)
                 else:
                     hostIp = results['resolved_hostnames'].get(host.hostname, host.hostname)
                     if hostIp == apiIp:
                         nova_api_hosts.add(host.hostname)
+                        cinder_api_hosts.append(host.hostname)
         except Exception, e:
             log.warning("Unable to perform nova-api component discovery: %s" % e)
 
@@ -618,6 +654,24 @@ class OpenStackInfrastructure(PythonPlugin):
                     id=nova_api_id,
                     title=title,
                     binary='nova-api',
+                    set_hostedOn=host_id,
+                    set_orgComponent=region_id
+                )))
+
+        if not cinder_api_hosts:
+            log.warning("No cinder-api hosts have been identified.   You must set zOpenStackNovaApiHosts to the list of hosts upon which cinder-api runs.")
+
+        for hostname in cinder_api_hosts:
+            title = '{0}@{1} ({2})'.format('cinder-api', hostname, device.zOpenStackRegionName)
+            host_id = prepId("host-{0}".format(hostname))
+            cinder_api_id = prepId('service-cinder-api-{0}-{1}'.format(service.get('host', ''), device.zOpenStackRegionName))
+
+            services.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.CinderApi',
+                data=dict(
+                    id=cinder_api_id,
+                    title=title,
+                    binary='cinder-api',
                     set_hostedOn=host_id,
                     set_orgComponent=region_id
                 )))
@@ -960,6 +1014,7 @@ class OpenStackInfrastructure(PythonPlugin):
             'routers': routers,
             'ports': ports,
             'floatingips': floatingips,
+#            'cinder_services': cinder_services,
             'volumes': volumes,
             'snapshots': snapshots,
             'backups': backups,
@@ -967,6 +1022,7 @@ class OpenStackInfrastructure(PythonPlugin):
             'quotas': quotas,
         }
 
+        import pdb;pdb.set_trace()
         # If we have references to tenants which we did not discover during
         # (keystone) modeling, create dummy records for them.
         all_tenant_ids = set()
