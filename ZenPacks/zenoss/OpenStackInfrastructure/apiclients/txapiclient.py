@@ -253,6 +253,48 @@ class APIClient(object):
         return self._apis.setdefault('cinder_services', API(self, '/os-services'))
 
 
+    @property
+    def ceilometer_resources(self):
+        self.user_agent = 'zenoss-ceilometerclient'
+        return self._apis.setdefault('ceilometer_resources', API(self, '/v2/resources'))
+
+
+    @property
+    def ceilometer_meters(self):
+        self.user_agent = 'zenoss-ceilometerclient'
+        return self._apis.setdefault('ceilometer_meters', API(self, '/v2/meters'))
+
+
+    @property
+    def ceilometer_statistics(self):
+        self.user_agent = 'zenoss-ceilometerclient'
+        return self._apis.setdefault('ceilometer_statistics', API(self, '/v2/meters/'))
+
+
+    @property
+    def ceilometer_samples(self):
+        self.user_agent = 'zenoss-ceilometerclient'
+        return self._apis.setdefault('ceilometer_samples', API(self, '/v2/samples'))
+
+
+    @property
+    def ceilometer_events(self):
+        self.user_agent = 'zenoss-ceilometerclient'
+        return self._apis.setdefault('ceilometer_events', API(self, '/v2/events'))
+
+
+    @property
+    def ceilometer_alarms(self):
+        self.user_agent = 'zenoss-ceilometerclient'
+        return self._apis.setdefault('ceilometer_alarms', API(self, '/v2/alarms'))
+
+
+    #@property
+    #def ceilometer_querysamples(self):
+    #    self.user_agent = 'zenoss-ceilometerclient'
+    #    return self._apis.setdefault('ceilometer_querysamples', API(self, '/v2/query/samples'))
+
+
     @inlineCallbacks
     def login(self):
         """Login to Keystone.
@@ -322,26 +364,22 @@ class APIClient(object):
         is encountered during the first API call attempt.
 
         """
-        #import pdb;pdb.set_trace()
         if not self._token:
             yield self.login()
         else:
             log.debug('api_call(). Existing token: %s' % self._token)
 
-        #import pdb;pdb.set_trace()
         try:
             r = yield self.direct_api_call(
                 path, data=data, params=params, **kwargs)
         except UnauthorizedError:
             # Could be caused by expired token. Try to login.
-            #import pdb;pdb.set_trace()
             yield self.login()
 
             # Then try the call again.
             r = yield self.direct_api_call(
                 path, data=data, params=params, **kwargs)
 
-        #import pdb;pdb.set_trace()
         returnValue(r)
 
     @inlineCallbacks
@@ -373,7 +411,16 @@ class APIClient(object):
                 postdata=request.postdata)
 
         except Error as e:
-            #import pdb;pdb.set_trace()
+            # e.status == '200', e.message == 'OK' but still ends up here?
+            # maybe response body is too long?
+            if e.status == '200' and e.message == 'OK':
+                try:
+                    data = json.loads(e.response)
+                    returnValue(data)
+                except ValueError as e:
+                    text = 'direct_api_call(). path: ' + path + '. ' + e.message + ' of response body.'
+                    raise APIClientError(text)
+
             status = int(e.status)
             text = 'direct_api_call(). path: ' + path + '. ' + e.response.replace('\n\n', '.').strip()
 
@@ -409,8 +456,6 @@ class APIClient(object):
             headers['X-Auth-Token'] = self._token
 
         auth_url = self.auth_url.strip()    # always user auth_url for POST
-        # if 'cinder' in self.user_agent and 'os-quota-sets' in path:
-        #     import pdb;pdb.set_trace()
         if method == 'GET':
             if 'keystone' in self.user_agent and self._keystone_url is not None:
                 auth_url = self._keystone_url
@@ -474,11 +519,35 @@ class API(object):
             if '?is_public=' in self.path:
                 self.path = self.path[:self.path.index('?is_public=')]
             self.path = self.path + '?is_public=%s' % kwargs['is_public']
-        if '/cinderquotas' in self.path:
+        elif '/cinderquotas' in self.path:
             self.path = '/os-quota-sets/%s?usage=%s' % (kwargs['tenant'], kwargs['usage'])
-        return self.client.api_call(
-            self.path, data=data, params=params, **kwargs)
 
+        # append meter name and query for ceilometer statistics
+        elif '/v2/meters/' in self.path and 'meter_name' in kwargs and 'queries' in kwargs:
+            self.path = self.path[:self.path.index('/v2/meters/') + len('/v2/meters/')]
+            self.path = self.path + kwargs['meter_name'] + '/statistics'
+
+        # append query for ceilometer samples
+        elif '/v2/samples' in self.path and 'queries' in kwargs:
+            self.path = self.path[:self.path.index('/v2/samples') + len('/v2/samples')]
+
+        # append query for ceilometer events
+        elif '/v2/events' in self.path and 'queries' in kwargs:
+            self.path = self.path[:self.path.index('/v2/events') + len('/v2/events')]
+
+        # append query for ceilometer alarms
+        elif '/v2/alarms' in self.path and 'queries' in kwargs:
+            self.path = self.path[:self.path.index('/v2/alarms') + len('/v2/alarms')]
+
+        # if there are query entries, add them to the path
+        if kwargs.has_key('queries'):
+            for query in kwargs['queries']:
+                self.path += '?q.field=%s&q.op=%s&q.type=%s&q.value=%s' % \
+                        (query.get('field',''), query.get('op',''),
+                         query.get('type',''), query.get('value',''))
+
+        return self.client.api_call(
+            self.path.encode('ascii', 'ignore'), data=data, params=params, **kwargs)
 
 class APIClientError(Exception):
     """Parent class of all exceptions raised by api clients."""
@@ -591,6 +660,33 @@ def main():
                 pprint.pprint(e.message)
             else:
                 pprint.pprint(quotas)
+
+    # Ceilometer
+    try:
+        resources = yield client.ceilometer_resources()
+        meters = yield client.ceilometer_meters()
+        for meter in meters:
+            query = dict(field='resource_id', op='eq', value=meter['resource_id'], type='string')
+            stats = yield client.ceilometer_statistics(meter_name=meter['name'], queries=[query])
+            print 'meter: %s, stats: %s\n\n' % (meter['name'], str(stats))
+
+            # use with care!
+            #Ceilometer samples could spill out an enormous amount of data!
+            # samples = yield client.ceilometer_samples(queries=[query])
+            # print 'meter: %s, samples: %s\n\n' % (meter['name'], str(samples))
+
+            events = yield client.ceilometer_events(queries=[query])
+            print 'meter: %s, events: %s\n\n' % (meter['name'], str(events))
+
+            query = dict(field='meter', op='eq', value=meter['name'], type='string')
+            alarms = yield client.ceilometer_alarms(queries=[query])
+            print 'meter: %s, alarms: %s\n\n' % (meter['name'], str(alarms))
+    except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
+        pprint.pprint(e.message)
+    else:
+        resource_ids = [res['resource_id'] for res in resources]
+        pprint.pprint(resource_ids)
+        pprint.pprint(meters)
 
     if reactor.running:
         reactor.stop()
