@@ -285,7 +285,7 @@ device_classes: !ZenPackSpec
               Total:
                 dpName: openstack_flavorTotalCount
                 format: '%7.0lf'
-          Images and Snapshots:
+          Images:
             units: count
             miny: 0
             graphpoints:
@@ -421,6 +421,60 @@ device_classes: !ZenPackSpec
                 format: '%7.0lf'
               Verify Resize:
                 dpName: openstack_serverVerifyResizeCount
+                format: '%7.0lf'
+          Volumes:
+            units: count
+            miny: 0
+            graphpoints:
+              Active:
+                dpName: openstack_volumeActiveCount
+                format: '%7.0lf'
+              Bootable:
+                dpName: openstack_volumeBootableCount
+                format: '%7.0lf'
+              Attached:
+                dpName: openstack_volumeAttachedCount
+                format: '%7.0lf'
+              Available:
+                dpName: openstack_volumeAvailableCount
+                format: '%7.0lf'
+              InUse:
+                dpName: openstack_volumeInUseCount
+                format: '%7.0lf'
+              Total:
+                dpName: openstack_volumeTotalCount
+                format: '%7.0lf'
+              Unknown:
+                dpName: openstack_volumeUnknownCount
+                format: '%7.0lf'
+          Snapshots:
+            units: count
+            miny: 0
+            graphpoints:
+              Total:
+                dpName: openstack_snapshotTotalCount
+                format: '%7.0lf'
+              Available:
+                dpName: openstack_snapshotAvailableCount
+                format: '%7.0lf'
+              In Progress:
+                dpName: openstack_snapshotInProgressCount
+                format: '%7.0lf'
+          Pools:
+            units: count
+            miny: 0
+            graphpoints:
+              Total:
+                dpName: openstack_poolTotalCount
+                format: '%7.0lf'
+              Thin Provision:
+                dpName: openstack_poolThinProvisioningSupportCount
+                format: '%7.0lf'
+              Thick Provision:
+                dpName: openstack_poolThickProvisioningSupportCount
+                format: '%7.0lf'
+              QoS:
+                dpName: openstack_poolQoSSupportCount
                 format: '%7.0lf'
       Instance:
         description: 'OpenStackInfrastructure: Instance Monitoring'
@@ -787,6 +841,7 @@ classes: !ZenPackSpec
       # link to the guest instance, if known
         label: Guest
         # workaround to link to a different device
+        order: 3.1
         renderer: Zenoss.render.openstack_uid_renderer
         api_only: true
         api_backendtype: method
@@ -811,12 +866,12 @@ classes: !ZenPackSpec
         type: lines
         label: Fixed IPs
         label_width: 90
-        order: 3.2
+        order: 3.3
       publicIps:
         type: lines
         label: Floating IPs
         label_width: 90
-        order: 3.1
+        order: 3.2
       serialNumber:
         label: BIOS Serial Number
         index_type: field

@@ -39,7 +39,7 @@ class OpenStackPoller(object):
 
     @inlineCallbacks
     def _populateFlavorData(self, client, data):
-        result = yield client.novaflavors(detailed=True, is_public=None)
+        result = yield client.nova_flavors(detailed=True, is_public=None)
         data['flavorTotalCount'] = len(result['flavors'])
 
     @inlineCallbacks
@@ -53,7 +53,7 @@ class OpenStackPoller(object):
         data['imageFailedCount'] = 0
         data['imageOtherCount'] = 0
 
-        result = yield client.novaimages(detailed=True, limit=None)
+        result = yield client.nova_images(detailed=True, limit=None)
 
         for image in result['images']:
             data['imageTotalCount'] += 1
@@ -110,7 +110,7 @@ class OpenStackPoller(object):
         data['serverUnknownCount'] = 0
         data['serverOtherCount'] = 0
 
-        result = yield client.novaservers(detailed=True, search_opts={'all_tenants': 1})
+        result = yield client.nova_servers(detailed=True, search_opts={'all_tenants': 1})
 
         for server in result['servers']:
             data['serverTotalCount'] += 1
@@ -185,7 +185,7 @@ class OpenStackPoller(object):
         data['agentMLNXCount'] = 0
         data['agentMeteringCount'] = 0
 
-        result = yield client.neutronagents()
+        result = yield client.neutron_agents()
 
         for agent in result['agents']:
             data['agentTotalCount'] += 1
@@ -249,7 +249,7 @@ class OpenStackPoller(object):
         data['networkExternalCount'] = 0
         data['networkInternalCount'] = 0
 
-        result = yield client.neutronnetworks()
+        result = yield client.neutron_networks()
 
         for net in result['networks']:
             data['networkTotalCount'] += 1
@@ -286,7 +286,7 @@ class OpenStackPoller(object):
         data['routerDownCount'] = 0
         data['routerErrorCount'] = 0
 
-        result = yield client.neutronrouters()
+        result = yield client.neutron_routers()
 
         for router in result['routers']:
             data['routerTotalCount'] += 1
@@ -304,6 +304,78 @@ class OpenStackPoller(object):
             elif router['status'] == 'ERROR':
                 data['routerErrorCount'] += 1
                 severity = 5
+
+
+    @inlineCallbacks
+    def _populatePoolData(self, client, data):
+        data['poolTotalCount'] = 0
+        data['poolThinProvisioningSupportCount'] = 0
+        data['poolThickProvisioningSupportCount'] = 0
+        data['poolQoSSupportCount'] = 0
+
+        result = yield client.cinder_pools()
+
+        for pool in result['pools']:
+            data['poolTotalCount'] += 1
+
+            if pool['capabilities']['thin_provisioning_support']:
+                data['poolThinProvisioningSupportCount'] += 1
+            elif pool['capabilities']['thick_provisioning_support']:
+                data['poolThickProvisioningSupportCount'] += 1
+            if pool['capabilities']['QoS_support']:
+                data['poolQoSSupportCount'] += 1
+
+
+    @inlineCallbacks
+    def _populateVolumeData(self, client, data):
+        data['volumeTotalCount'] = 0
+        data['volumeActiveCount'] = 0
+        data['volumeBootableCount'] = 0
+        data['volumeAttachedCount'] = 0
+        data['volumeAvailableCount'] = 0
+        data['volumeInUseCount'] = 0
+        data['volumeUnknownCount'] = 0
+
+        result = yield client.cinder_volumes()
+
+        for volume in result['volumes']:
+            data['volumeTotalCount'] += 1
+            severity = None
+
+            if volume['status'] == 'ACTIVE':
+                data['volumeActiveCount'] += 1
+                data['volumeAvailableCount'] += 1
+                severity = 0
+            if volume['status'] == 'in-use':
+                data['volumeActiveCount'] += 1
+                data['volumeInUseCount'] += 1
+                severity = 0
+            if volume['bootable'] == 'true':
+                data['volumeBootableCount'] += 1
+                severity = 0
+            if len(volume['attachments']) > 0:
+                data['volumeAttachedCount'] += 1
+                severity = 0
+            if volume['status'] == 'ERROR':
+                data['volumeErrorCount'] += 1
+                severity = 5
+
+
+    @inlineCallbacks
+    def _populateSnapshotData(self, client, data):
+        data['snapshotTotalCount'] = 0
+        data['snapshotAvailableCount'] = 0
+        data['snapshotInProgressCount'] = 0
+
+        result = yield client.cinder_volumesnapshots()
+
+        for snapshot in result['snapshots']:
+            data['snapshotTotalCount'] += 1
+
+            if snapshot['status'] == 'available':
+                data['snapshotAvailableCount'] += 1
+            if '100%' not in snapshot['os-extended-snapshot-attributes:progress']:
+                data['snapshotInProgressCount'] += 1
 
 
     @inlineCallbacks
@@ -325,6 +397,10 @@ class OpenStackPoller(object):
             yield self._populateNetworkData(client, data)
             yield self._populateAgentData(client, data)
             yield self._populateRouterData(client, data)
+
+            yield self._populatePoolData(client, data)
+            yield self._populateVolumeData(client, data)
+            yield self._populateSnapshotData(client, data)
 
         except Exception:
             raise

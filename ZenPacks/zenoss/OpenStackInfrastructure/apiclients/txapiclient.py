@@ -513,8 +513,7 @@ class API(object):
         return getattr(self, name)
 
     def __call__(self, data=None, params=None, **kwargs):
-        # if we want to get either public flavor or private flavor, this seems
-        # to be the place to do it
+        # update url based on kwargs
         if '/flavors/detail' in self.path and 'is_public' in kwargs:
             if '?is_public=' in self.path:
                 self.path = self.path[:self.path.index('?is_public=')]

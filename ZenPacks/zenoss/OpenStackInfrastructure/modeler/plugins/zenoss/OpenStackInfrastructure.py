@@ -212,6 +212,9 @@ class OpenStackInfrastructure(PythonPlugin):
         except Exception, e:
             log.warning("Unable to determine nova URL for nova-api component discovery: %s" % e)
 
+        # not being able to resolve hostname could, in some cases,
+        # result in nova-api and/or cinder-api components not being modeled
+        # make sure /etc/hosts file on the controller host is decent
         results['resolved_hostnames'] = {}
         for hostname in sorted(hostnames):
             if isip(hostname):
@@ -255,7 +258,6 @@ class OpenStackInfrastructure(PythonPlugin):
         results['cinder_services'] = result['services']
 
         result = yield client.cinder_pools()
-        #import pdb;pdb.set_trace()
         results['volume_pools'] = result['pools']
 
         results['quotas'] = {}
@@ -387,7 +389,6 @@ class OpenStackInfrastructure(PythonPlugin):
                             private_ips.add(address.get('addr'))
 
             # Flavor and Image IDs could be specified two different ways.
-            #import pdb;pdb.set_trace()
             flavor_id = server.get('flavorId', None) or \
                         server.get('flavor', {}).get('id', None)
 
@@ -488,6 +489,7 @@ class OpenStackInfrastructure(PythonPlugin):
             }
 
         # Find all hosts which have a cinder service on them
+        # where cinder services are: cinder-backup, cinder-scheduler, cinder-volume
         for service in results['cinder_services']:
             # well, guest what? volume services do not have 'id' key !
 
@@ -496,7 +498,6 @@ class OpenStackInfrastructure(PythonPlugin):
                 host_id = prepId("host-{0}".format(service.get('host', '')[:host_id_end]))
             else:
                 host_id = prepId("host-{0}".format(service.get('host', '')))
-            #import pdb;pdb.set_trace()
             zone_id = prepId("zone-{0}".format(service.get('zone', '')))
             title = '{0}@{1} ({2})'.format(service.get('binary', ''),
                                            service.get('host', ''),
@@ -509,7 +510,6 @@ class OpenStackInfrastructure(PythonPlugin):
                     'hostname': service.get('host', ''),
                     'org_id': zone_id
                 }
-            #import pdb;pdb.set_trace()
             services.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.CinderService',
                 data=dict(
@@ -659,7 +659,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 )))
 
         if not cinder_api_hosts:
-            log.warning("No cinder-api hosts have been identified.   You must set zOpenStackNovaApiHosts to the list of hosts upon which cinder-api runs.")
+            log.warning("No cinder-api hosts have been identified.   You must set zOpenStackCinderApiHosts to the list of hosts upon which cinder-api runs.")
 
         for hostname in cinder_api_hosts:
             title = '{0}@{1} ({2})'.format('cinder-api', hostname, device.zOpenStackRegionName)
@@ -874,7 +874,6 @@ class OpenStackInfrastructure(PythonPlugin):
             instanceId = ''
             if len(attachment) > 0:
                 instanceId = attachment[0].get('server_id', '')
-            #import pdb;pdb.set_trace()
             data=dict(
                 #volumeId=volume['id'],
                 id=prepId('volume-{0}'.format(volume['id'])),
@@ -1022,7 +1021,6 @@ class OpenStackInfrastructure(PythonPlugin):
             'quotas': quotas,
         }
 
-        import pdb;pdb.set_trace()
         # If we have references to tenants which we did not discover during
         # (keystone) modeling, create dummy records for them.
         all_tenant_ids = set()

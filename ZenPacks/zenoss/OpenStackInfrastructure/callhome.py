@@ -63,7 +63,6 @@ class OSIResource(object):
             )
 
         # Initialize counters if needed.
-        #import pdb;pdb.set_trace()
         for counter_key in counter_keys:
             if counter_key not in context:
                 LOG.debug("initializing %r counter", counter_key)
