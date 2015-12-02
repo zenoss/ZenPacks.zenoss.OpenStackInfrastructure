@@ -166,9 +166,14 @@ class OpenStackInfrastructure(PythonPlugin):
             _networks = set()
 
             if _agent['agent_type'].lower() == 'l3 agent':
-                router_data = yield \
-                    neutron_client.api_call('/v2.0/agents/%s/l3-routers'
-                                            % str(_agent['id']))
+                try:
+                    router_data = yield \
+                        neutron_client.api_call('/v2.0/agents/%s/l3-routers'
+                                                % str(_agent['id']))
+                except Exception, e:
+                    log.warning("Unable to determine neutron URL for " + \
+                                "l3 router agent discovery: %s" % e)
+                    continue
 
                 for r in router_data['routers']:
                     _routers.add(r.get('id'))
@@ -192,9 +197,14 @@ class OpenStackInfrastructure(PythonPlugin):
             _networks = []
 
             if _agent['agent_type'].lower() == 'dhcp agent':
-                dhcp_data = yield \
-                    neutron_client.api_call('/v2.0/agents/%s/dhcp-networks'
-                                            % str(_agent['id']))
+                try:
+                    dhcp_data = yield \
+                        neutron_client.api_call('/v2.0/agents/%s/dhcp-networks'
+                                                % str(_agent['id']))
+                except Exception, e:
+                    log.warning("Unable to determine neutron URL for " + \
+                                "dhcp agent discovery: %s" % e)
+                    continue
 
                 for network in dhcp_data['networks']:
                     _networks.append(network.get('id'))
