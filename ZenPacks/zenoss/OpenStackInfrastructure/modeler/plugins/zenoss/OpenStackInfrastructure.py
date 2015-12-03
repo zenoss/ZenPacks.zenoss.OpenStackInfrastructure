@@ -728,20 +728,24 @@ class OpenStackInfrastructure(PythonPlugin):
             if _network_id:
                 _network = 'network-{0}'.format(_network_id)
 
+            _dict = dict(
+                admin_state_up=router.get('admin_state_up', False),
+                gateways=list(_gateways),
+                id=prepId('router-{0}'.format(router['id'])),
+                routerId=router['id'],
+                routes=list(router.get('routes', [])),
+                set_tenant=prepId('tenant-{0}'.format(router.get('tenant_id',''))),
+                status=router.get('status', 'UNKNOWN'),
+                title=router.get('name', router['id']),
+            )
+            if _network:
+                _dict['set_network'] = prepId(_network)
+            if len(_subnets) > 0:
+                _dict['set_subnets'] = [prepId('subnet-{0}'.format(x)) for x in _subnets]
+
             routers.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Router',
-                data=dict(
-                    admin_state_up=router.get('admin_state_up', False),
-                    gateways=list(_gateways),
-                    id=prepId('router-{0}'.format(router['id'])),
-                    routerId=router['id'],
-                    routes=list(router.get('routes', [])),
-                    set_network=prepId(_network),
-                    set_subnets=[prepId('subnet-{0}'.format(x)) for x in _subnets],
-                    set_tenant=prepId('tenant-{0}'.format(router.get('tenant_id',''))),
-                    status=router.get('status', 'UNKNOWN'),
-                    title=router.get('name', router['id']),
-                )))
+                data=_dict))
 
         # port
         ports = []
