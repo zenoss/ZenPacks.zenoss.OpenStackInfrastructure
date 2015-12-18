@@ -16,7 +16,8 @@ from Products.ZCatalog.Catalog import CatalogError
 from Products.ZCatalog.ZCatalog import manage_addZCatalog
 from Products.ZenUtils.Search import makeKeywordIndex
 
-from ZenPacks.zenoss.OpenStackInfrastructure.interfaces import INeutronImplementationPlugin
+from ZenPacks.zenoss.OpenStackInfrastructure.interfaces import \
+    INeutronImplementationPlugin, ICinderImplementationPlugin
 
 def get_neutron_implementation_catalog(dmd):
     device_class = dmd.getObjByPath('Devices/OpenStack/Infrastructure')
@@ -87,3 +88,75 @@ def get_neutron_core_catalog(dmd):
                 catalog.catalog_object(obj, obj.getPrimaryId())
 
     return catalog
+
+
+def get_cinder_implementation_catalog(dmd):
+    device_class = dmd.getObjByPath('Devices/OpenStack/Infrastructure')
+    catalog_name = 'cinder_implementation'
+
+    try:
+        catalog = getattr(device_class, catalog_name)
+    except AttributeError:
+        if not hasattr(device_class, catalog_name):
+            log.info("Creating cinder integration catalog '%s'", catalog_name)
+            manage_addZCatalog(device_class, catalog_name, catalog_name)
+
+        zcatalog = device_class._getOb(catalog_name)
+        catalog = zcatalog._catalog
+
+        try:
+            log.info('Adding integration key index to %s', catalog_name)
+            index = makeKeywordIndex('getCinderIntegrationKeys')
+
+            # Make the index explicitly case sensitive.
+            index.PrenormalizeTerm = ''
+
+            catalog.addIndex('getCinderIntegrationKeys', index)
+
+        except CatalogError:
+            # Index already exists.
+            pass
+
+        else:
+            # index everything.
+            for plugin_name, plugin in zope.component.getUtilitiesFor(ICinderImplementationPlugin):
+                plugin.reindex_cinder_implementation_components(dmd)
+
+    return catalog
+
+
+def get_cinder_core_catalog(dmd):
+    device_class = dmd.getObjByPath('Devices/OpenStack/Infrastructure')
+    catalog_name = 'cinder_core'
+
+    try:
+        catalog = getattr(device_class, catalog_name)
+    except AttributeError:
+        if not hasattr(device_class, catalog_name):
+            log.info("Creating cinder core catalog '%s'", catalog_name)
+            manage_addZCatalog(device_class, catalog_name, catalog_name)
+
+        zcatalog = device_class._getOb(catalog_name)
+        catalog = zcatalog._catalog
+
+        try:
+            log.info('Adding integration key index to %s', catalog_name)
+            index = makeKeywordIndex('getCinderIntegrationKeys')
+
+            # Make the index explicitly case sensitive.
+            index.PrenormalizeTerm = ''
+
+            catalog.addIndex('getCinderIntegrationKeys', index)
+
+        except CatalogError:
+            # Index already exists.
+            pass
+
+        else:
+            from .CinderIntegrationComponent import all_cinder_core_components
+
+            for obj in all_cinder_core_components(dmd):
+                catalog.catalog_object(obj, obj.getPrimaryId())
+
+    return catalog
+
