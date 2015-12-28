@@ -692,13 +692,14 @@ classes: !ZenPackSpec
         label_width: 60
         content_width: 60
       softwareComponents:
-        label_width: 150
+        label_width: 80
     filter_display: false
   SoftwareComponent:
     # Component Base Type
     base: [OpenstackComponent]
-    label: Software Component
-    label_width: 120
+    label: SW Component
+    label_width: 70
+    content_width: 70
     properties:
       binary:
         label: Binary
@@ -892,7 +893,7 @@ classes: !ZenPackSpec
         grid_display: false
       serverStatus:
         label: Status
-        label_width: 65
+        label_width: 60
         order: 3.5
     relationships:
       flavor:
@@ -1073,6 +1074,33 @@ classes: !ZenPackSpec
         grid_display: false
       hypervisor_version:
         label: Version
+        grid_display: false
+      host_ip:
+        label: Host IP
+        grid_display: false
+      vcpus:
+        label: vCPU
+        grid_display: false
+      vcpus_used:
+        label: vCPU Used
+        grid_display: false
+      memory:
+        label: Memory (MB)
+        grid_display: false
+      memory_used:
+        label: Memory Used (MB)
+        grid_display: false
+      memory_free:
+        label: Memory Free (MB)
+        grid_display: false
+      disk:
+        label: Disk (GB)
+        grid_display: false
+      disk_used:
+        label: Disk Used (GB)
+        grid_display: false
+      disk_free:
+        label: Disk Free (GB)
         grid_display: false
     dynamicview_views: [service_view, openstack_view]
     dynamicview_relations:
@@ -1546,11 +1574,11 @@ classes: !ZenPackSpec
       created_at:
         label: Created At
         label_width: 100
-        content_width: 100
+        content_width: 90
       description:
         label: Description
-        label_width: 150
-        content_width: 150
+        label_width: 130
+        content_width: 130
       size:
         label: Size (GB)
         label_width: 40
@@ -1568,7 +1596,7 @@ classes: !ZenPackSpec
         label_width: 80
         content_width: 80
   Pool:
-    base: [OrgComponent]
+    base: [OpenstackComponent]
     meta_type: OpenStackInfrastructurePool
     label: Pool
     order: 24
@@ -1607,6 +1635,9 @@ classes: !ZenPackSpec
         grid_display: false
       volume_backend:
         label: Volume Backend
+        grid_display: false
+    relationships:
+      orgComponent:
         grid_display: false
   Quota:
     base: [LogicalComponent]

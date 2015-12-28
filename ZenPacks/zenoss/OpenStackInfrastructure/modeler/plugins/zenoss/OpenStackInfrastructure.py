@@ -39,7 +39,8 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import (
     get_port_instance,
     getNetSubnetsGws_from_GwInfo,
     get_port_fixedips,
-    sleep
+    sleep,
+    isValidHostname,
 )
 
 add_local_lib_path()
@@ -112,13 +113,22 @@ class OpenStackInfrastructure(PythonPlugin):
         results['images'] = result['images']
         log.debug('images: %s\n' % str(results['images']))
 
-        result = yield client.nova_hypervisors()
+        result = yield client.nova_hypervisors(hypervisor_match='%',
+                                               servers=True)
         results['hypervisors'] = result['hypervisors']
         log.debug('hypervisors: %s\n' % str(results['hypervisors']))
 
         result = yield client.nova_hypervisorsdetailed()
         results['hypervisors_detailed'] = result['hypervisors']
         log.debug('hypervisors_detailed: %s\n' % str(results['hypervisors']))
+
+        # get hypervisor details for each individual hypervisor
+        results['hypervisor_details'] = {}
+        for hypervisor in results['hypervisors']:
+            result = yield client.nova_hypervisors(
+                hypervisor_id=hypervisor['id'])
+            hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
+            results['hypervisor_details'][hypervisor_id] = result['hypervisor']
 
         result = yield client.nova_servers()
         results['servers'] = result['servers']
@@ -149,9 +159,14 @@ class OpenStackInfrastructure(PythonPlugin):
             _networks = set()
 
             if _agent['agent_type'].lower() == 'l3 agent':
-                router_data = yield \
-                    client.api_call('/v2.0/agents/%s/l3-routers'
-                                            % str(_agent['id']))
+                try:
+                    router_data = yield \
+                        client.api_call('/v2.0/agents/%s/l3-routers'
+                                        % str(_agent['id']))
+                except Exception, e:
+                    log.warning("Unable to determine neutron URL for " + \
+                                "l3 router agent discovery: %s" % e)
+                    continue
 
                 for r in router_data['routers']:
                     _routers.add(r.get('id'))
@@ -175,9 +190,14 @@ class OpenStackInfrastructure(PythonPlugin):
             _networks = []
 
             if _agent['agent_type'].lower() == 'dhcp agent':
-                dhcp_data = yield \
-                    client.api_call('/v2.0/agents/%s/dhcp-networks'
-                                            % str(_agent['id']))
+                try:
+                    dhcp_data = yield \
+                        client.api_call('/v2.0/agents/%s/dhcp-networks'
+                                                % str(_agent['id']))
+                except Exception, e:
+                    log.warning("Unable to determine neutron URL for " + \
+                                "dhcp agent discovery: %s" % e)
+                    continue
 
                 for network in dhcp_data['networks']:
                     _networks.append(network.get('id'))
@@ -246,13 +266,13 @@ class OpenStackInfrastructure(PythonPlugin):
         result = yield client.cinder_volumesnapshots()
         results['snapshots'] = result['snapshots']
 
-        try:
-            result = yield client.cinder_volumebackups()
-        except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
-            log.info('Server (not zenpack) error while calling client.cinder_volumebackups(): %s\n' % e.message)
-            results['backups'] = []
-        else:
-            results['backups'] = result['backups']
+        # try:
+        #     result = yield client.cinder_volumebackups()
+        # except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
+        #     log.info('Server (not zenpack) error while calling client.cinder_volumebackups(): %s\n' % e.message)
+        #     results['backups'] = []
+        # else:
+        #     results['backups'] = result['backups']
 
         result = yield client.cinder_services()
         results['cinder_services'] = result['services']
@@ -270,11 +290,16 @@ class OpenStackInfrastructure(PythonPlugin):
 
     def process(self, device, results, unused):
         tenants = []
+        quota_tenants = []                   # for use by quota later
         for tenant in results['tenants']:
             if tenant.get('enabled', False) is not True:
                 continue
             if not tenant.get('id', None):
                 continue
+
+            quota_tenant = dict(name=tenant.get('name', tenant['id']),
+                                id=tenant['id'])
+            quota_tenants.append(quota_tenant)
 
             tenants.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Tenant',
@@ -344,24 +369,19 @@ class OpenStackInfrastructure(PythonPlugin):
                     imageUpdated=imageUpdated,  # 2014/09/30 19:45:44.000
                 )))
 
+        # instances
         servers = []
         for server in results['servers']:
             if not server.get('id', None):
                 continue
 
             # Backup support is optional. Guard against it not existing.
-            backup_schedule_enabled = None
-            backup_schedule_daily = None
-            backup_schedule_weekly = None
-
-            try:
-                backup_schedule_enabled = server['backup_schedule']['enabled']
-                backup_schedule_daily = server['backup_schedule']['daily']
-                backup_schedule_weekly = server['backup_schedule']['weekly']
-            except (NotFoundError, AttributeError, KeyError):
-                backup_schedule_enabled = False
-                backup_schedule_daily = 'DISABLED'
-                backup_schedule_weekly = 'DISABLED'
+            backup_schedule_enabled = server.get('backup_schedule',
+                                                 {}).get('enabled', False)
+            backup_schedule_daily = server.get('backup_schedule',
+                                               {}).get('daily', 'DISABLED')
+            backup_schedule_weekly = server.get('backup_schedule',
+                                                {}).get('weekly', 'DISABLED')
 
             # Get and classify IP addresses into public and private: (fixed/floating)
             public_ips = set()
@@ -396,8 +416,8 @@ class OpenStackInfrastructure(PythonPlugin):
             if 'imageId' in server:
                 image_id = server['imageId']
             elif 'image' in server and \
-                 isinstance(server['image'], dict) and \
-                 'id' in server['image']:
+                    isinstance(server['image'], dict) and \
+                            'id' in server['image']:
                 image_id = server['image']['id']
 
             tenant_id = server.get('tenant_id', '')
@@ -419,7 +439,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_image=prepId('image-{0}'.format(image_id)),       # image-346eeba5-a122-42f1-94e7-06cb3c53f690
                     set_tenant=prepId('tenant-{0}'.format(tenant_id)),    # tenant-a3a2901f2fd14f808401863e3628a858
                     hostId=server.get('hostId', ''),                      # a84303c0021aa53c7e749cbbbfac265f
-                    hostName=server.get('name', '')                       # cloudserver01
+                    hostName=server.get('OS-EXT-SRV-ATTR:hypervisor_hostname', '')                       # cloudserver01
                 )))
 
         services = []
@@ -548,6 +568,10 @@ class OpenStackInfrastructure(PythonPlugin):
         hosts = []
         for host_id in hostmap:
             data = hostmap[host_id]
+
+            if not isValidHostname(data.get('hostname', host_id)):
+                continue
+
             hosts.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Host',
                 data=dict(
@@ -568,6 +592,21 @@ class OpenStackInfrastructure(PythonPlugin):
             hypervisor_type[hypervisor_id] = hypervisor.get('hypervisor_type', None)
             hypervisor_version[hypervisor_id] = hypervisor.get('hypervisor_version', None)
 
+        # if results['hypervisors_detailed'] did not give us hypervisor type,
+        # hypervisor version, try results['hypervisors_details']
+        for k, v in hypervisor_type.iteritems():
+            if v is None and k in results['hypervisor_details']:
+                hypervisor_type[k] = \
+                results['hypervisor_details'][k].get(
+                    'hypervisor_type', None)
+        for k, v in hypervisor_version.iteritems():
+            if v is None and k in results['hypervisor_details']:
+                h_ver = results['hypervisor_details'][k].get(
+                        'hypervisor_version', None)
+                if h_ver:
+                    h_ver_list = str(h_ver).split('00')
+                    hypervisor_version[k] = '.'.join(h_ver_list)
+
         hypervisors = []
         server_hypervisor_instance_name = {}
         for hypervisor in results['hypervisors']:
@@ -576,6 +615,7 @@ class OpenStackInfrastructure(PythonPlugin):
 
             hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
 
+            # this is how a hypervisor discovers the instances belonging to it
             hypervisor_servers = []
             if 'servers' in hypervisor:
                 for server in hypervisor['servers']:
@@ -590,6 +630,24 @@ class OpenStackInfrastructure(PythonPlugin):
                 hypervisorId=hypervisor['id'],  # 1
                 hypervisor_type=hypervisor_type.get(hypervisor_id, None),
                 hypervisor_version=hypervisor_version.get(hypervisor_id, None),
+                host_ip=results['hypervisor_details'].get(hypervisor_id,
+                                 {}).get('host_ip', None),
+                vcpus=str(results['hypervisor_details'].get(hypervisor_id,
+                                 {}).get('vcpus', None)),
+                vcpus_used=results['hypervisor_details'].get(hypervisor_id,
+                                 {}).get('vcpus_used', None),
+                memory=results['hypervisor_details'].get(hypervisor_id,
+                                 {}).get('memory_mb', None),
+                memory_used=results['hypervisor_details'].get(hypervisor_id,
+                                 {}).get('memory_mb_used', None),
+                memory_free=results['hypervisor_details'].get(hypervisor_id,
+                                 {}).get('free_ram_mb', None),
+                disk=results['hypervisor_details'].get(hypervisor_id,
+                                 {}).get('local_gb', None),
+                disk_used=results['hypervisor_details'].get(hypervisor_id,
+                                 {}).get('local_gb_used', None),
+                disk_free=results['hypervisor_details'].get(hypervisor_id,
+                                 {}).get('free_disk_gb', None),
                 set_instances=hypervisor_servers,
                 set_hostByName=hypervisor.get('hypervisor_hostname', ''),
             )
@@ -661,6 +719,7 @@ class OpenStackInfrastructure(PythonPlugin):
         if not cinder_api_hosts:
             log.warning("No cinder-api hosts have been identified.   You must set zOpenStackCinderApiHosts to the list of hosts upon which cinder-api runs.")
 
+        # hosts
         for hostname in cinder_api_hosts:
             title = '{0}@{1} ({2})'.format('cinder-api', hostname, device.zOpenStackRegionName)
             host_id = prepId("host-{0}".format(hostname))
@@ -796,20 +855,23 @@ class OpenStackInfrastructure(PythonPlugin):
             if _network_id:
                 _network = 'network-{0}'.format(_network_id)
 
+            _dict=dict(
+                admin_state_up=router.get('admin_state_up', False),
+                gateways=list(_gateways),
+                id=prepId('router-{0}'.format(router['id'])),
+                routerId=router['id'],
+                routes=list(router.get('routes', [])),
+                set_tenant=prepId('tenant-{0}'.format(router.get('tenant_id',''))),
+                status=router.get('status', 'UNKNOWN'),
+                title=router.get('name', router['id']),
+            )
+            if _network:
+                    _dict['set_network'] = prepId(_network)
+            if len(_subnets) > 0:
+                    _dict['set_subnets'] = [prepId('subnet-{0}'.format(x)) for x in _subnets]
             routers.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Router',
-                data=dict(
-                    admin_state_up=router.get('admin_state_up', False),
-                    gateways=list(_gateways),
-                    id=prepId('router-{0}'.format(router['id'])),
-                    routerId=router['id'],
-                    routes=list(router.get('routes', [])),
-                    set_network=prepId(_network),
-                    set_subnets=[prepId('subnet-{0}'.format(x)) for x in _subnets],
-                    set_tenant=prepId('tenant-{0}'.format(router.get('tenant_id',''))),
-                    status=router.get('status', 'UNKNOWN'),
-                    title=router.get('name', router['id']),
-                )))
+                data=_dict))
 
         # port
         ports = []
@@ -904,38 +966,38 @@ class OpenStackInfrastructure(PythonPlugin):
             snapshots.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Snapshot',
                 data=dict(
-                    #snapshotId=snapshot['id'],
+                    snapshotId=snapshot['id'],
                     id=prepId('snapshot-{0}'.format(snapshot['id'])),
                     created_at=snapshot.get('created_at', '').replace('T', ' '),
                     size=snapshot.get('size', 0),
                     description=snapshot.get('description', ''),
-                    #snapshot=snapshot.get('snapshot_id', ''),
+                    snapshot=snapshot.get('snapshot_id', ''),
                     status=snapshot.get('status', 'UNKNOWN').upper(),
                     set_volume=prepId('volume-{0}'.format(snapshot.get('volume_id',''))),
                     set_tenant=prepId('tenant-{0}'.format(snapshot.get('os-extended-snapshot-attributes:project_id',''))),
                     )))
 
         # Backups
-        backups = []
-        for backup in results['backups']:
-            if not backup.get('id', None):
-                continue
-
-            backups.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStackInfrastructure.Backup',
-                data=dict(
-                    snapshotId=backup['id'],
-                    id=prepId('backup-{0}'.format(backup['id'])),
-                    name=backup.get('name', ''),
-                    created_at=backup.get('created_at', ''),
-                    size=str(backup.get('size', 0)) + ' GB',
-                    description=backup.get('description', ''),
-                    snapshot=backup.get('backup_id', ''),
-                    status=backup.get('status', 'UNKNOWN').upper(),
-                    set_volume=prepId('volume-{0}'.format(backup.get('volume_id',''))),
-                    set_tenant=prepId('tenant-{0}'.format(backup.get('os-extended-snapshot-attributes:project_id',''))),
-                    )))
-
+        # backups = []
+        # for backup in results['backups']:
+        #     if not backup.get('id', None):
+        #         continue
+        #
+        #     backups.append(ObjectMap(
+        #         modname='ZenPacks.zenoss.OpenStackInfrastructure.Backup',
+        #         data=dict(
+        #             snapshotId=backup['id'],
+        #             id=prepId('backup-{0}'.format(backup['id'])),
+        #             name=backup.get('name', ''),
+        #             created_at=backup.get('created_at', ''),
+        #             size=str(backup.get('size', 0)) + ' GB',
+        #             description=backup.get('description', ''),
+        #             snapshot=backup.get('backup_id', ''),
+        #             status=backup.get('status', 'UNKNOWN').upper(),
+        #             set_volume=prepId('volume-{0}'.format(backup.get('volume_id',''))),
+        #             set_tenant=prepId('tenant-{0}'.format(backup.get('os-extended-snapshot-attributes:project_id',''))),
+        #             )))
+        #
         # Pools
         pools = []
         for pool in results['volume_pools']:
@@ -976,25 +1038,21 @@ class OpenStackInfrastructure(PythonPlugin):
 
         # Quotas
         quotas = []
-        for tenant in tenants:
-            if tenant.tenantId in results['quotas']:
-                quota = results['quotas'][tenants[0].tenantId]
-                if not quota.get('id', None):
-                    continue
-            else:
-                continue
+        for quota_key in results['quotas'].keys():
+            quota = results['quotas'][quota_key]
+            tenant = [t for t in quota_tenants if t['id'] == quota_key][0]
 
             quotas.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Quota',
                 data=dict(
-                    id=prepId('quota-{0}'.format(tenant.title)),
-                    tenant_name=tenant.title,
+                    id=prepId('quota-{0}'.format(tenant['name'])),
+                    tenant_name=tenant['name'],
                     volumes=quota.get('volumes', 0),
                     snapshots=quota.get('snapshots', 0),
                     bytes=quota.get('gigabytes', 0),
                     backups=quota.get('backups', 0),
                     backup_bytes=quota.get('backup_gigabytes', 0),
-                    set_tenant=prepId('tenant-{0}'.format(quota.get('id', ''))),
+                    set_tenant=prepId('tenant-{0}'.format(quota_key)),
                     )))
 
         objmaps = {
@@ -1016,7 +1074,7 @@ class OpenStackInfrastructure(PythonPlugin):
 #            'cinder_services': cinder_services,
             'volumes': volumes,
             'snapshots': snapshots,
-            'backups': backups,
+            # 'backups': backups,
             'pools': pools,
             'quotas': quotas,
         }
@@ -1100,7 +1158,7 @@ class OpenStackInfrastructure(PythonPlugin):
         for i in ('tenants', 'regions', 'flavors', 'images', 'servers', 'zones',
                   'hosts', 'hypervisors', 'services', 'networks',
                   'subnets', 'routers', 'ports', 'agents', 'floatingips',
-                  'volumes', 'snapshots', 'backups', 'pools', 'quotas',
+                  'volumes', 'snapshots', 'pools', 'quotas',
                   ):
             for objmap in objmaps[i]:
                 componentsMap.append(objmap)

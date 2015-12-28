@@ -11,7 +11,9 @@
 #
 ###########################################################################
 
+import sys
 import httplib
+import urllib
 import json
 import collections
 
@@ -149,6 +151,18 @@ class APIClient(object):
     def nova_hypervisorsdetailed(self):
         self.user_agent = 'zenoss-novaclient'
         return self._apis.setdefault('nova_hypervisors', API(self, '/os-hypervisors/detail'))
+
+
+    @property
+    def nova_hypervisorstats(self):
+        self.user_agent = 'zenoss-novaclient'
+        return self._apis.setdefault('nova_hypervisorstats', API(self, '/os-hypervisors/statistics'))
+
+
+    @property
+    def nova_hypervisor_detail_id(self):
+        self.user_agent = 'zenoss-novaclient'
+        return self._apis.setdefault('nova_hypervisordetail', API(self, '/os-hypervisors'))
 
 
     @property
@@ -518,6 +532,18 @@ class API(object):
             if '?is_public=' in self.path:
                 self.path = self.path[:self.path.index('?is_public=')]
             self.path = self.path + '?is_public=%s' % kwargs['is_public']
+
+        elif '/os-hypervisors' in self.path and \
+                'hypervisor_match' in kwargs and 'servers' in kwargs:
+            target = 'servers' if kwargs['servers'] else 'search'
+            self.path = '/os-hypervisors/%s/%s' % \
+                        (urllib.quote(kwargs['hypervisor_match'], safe=''),
+                         target)
+
+        elif '/os-hypervisors' in self.path and \
+                        'hypervisor_id' in kwargs:
+            self.path = '/os-hypervisors/%s' % kwargs['hypervisor_id']
+
         elif '/cinderquotas' in self.path:
             self.path = '/os-quota-sets/%s?usage=%s' % (kwargs['tenant'], kwargs['usage'])
 
@@ -598,6 +624,8 @@ def main():
         private_flavors = yield client.nova_flavors(is_public=False)
         hosts = yield client.nova_hosts()
         hypervisors = yield client.nova_hypervisors(hypervisor_match='%', servers=True)
+        hypervisorStats = yield client.nova_hypervisorstats()
+        hypervisor_1 = yield client.nova_hypervisor_detail_id(hypervisor_id='1')
         images = yield client.nova_images(detailed=True)
         novaservices = yield client.nova_services()
         servers = yield client.nova_servers(detailed=True, search_opts={'all_tenants': 1})
@@ -609,6 +637,125 @@ def main():
         pprint.pprint(private_flavors)
         pprint.pprint(hosts)
         pprint.pprint(hypervisors)
+        pprint.pprint(hypervisorStats)
+        pprint.pprint(hypervisor_1)
+        pprint.pprint(images)
+        pprint.pprint(novaservices)
+        pprint.pprint(servers)
+
+    # Neutron
+    try:
+        neutronagents = yield client.neutron_agents()
+        floatingips = yield client.neutron_floatingips()
+        networks = yield client.neutron_networks()
+        ports = yield client.neutron_ports()
+        routers = yield client.neutron_routers()
+        security_groups = yield client.neutron_security_groups()
+        subnets = yield client.neutron_subnets()
+    except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
+        pprint.pprint(e.message)
+    else:
+        pprint.pprint(neutronagents)
+        pprint.pprint(floatingips)
+        pprint.pprint(networks)
+        pprint.pprint(ports)
+        pprint.pprint(routers)
+        pprint.pprint(security_groups)
+        pprint.pprint(subnets)
+
+    # Cinder
+    try:
+        volumes = yield client.cinder_volumes()
+        volumetypes = yield client.cinder_volumetypes()
+        volumebackups = yield client.cinder_volumebackups()
+        volumesnapshots = yield client.cinder_volumesnapshots()
+        cinderservices = yield client.cinder_services(detailed=True)
+        cinderpools = yield client.cinder_pools(detailed=True)
+    except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
+        pprint.pprint(e.message)
+    else:
+        pprint.pprint(volumes)
+        pprint.pprint(volumetypes)
+        pprint.pprint(volumebackups)
+        pprint.pprint(volumesnapshots)
+        pprint.pprint(cinderservices)
+        pprint.pprint(cinderpools)
+
+    if tenants and 'tenants' in tenants:
+        for tenant in tenants['tenants']:
+            try:
+                quotas = yield client.cinder_quotas(tenant=tenant['id'].encode('ascii', 'ignore'), usage=False)
+            except (BadRequestError, UnauthorizedError, NotFoundError) as e:
+                pprint.pprint(e.message)
+            else:
+                pprint.pprint(quotas)
+    try:
+        avzones = yield client.nova_avzones()
+        public_flavors = yield client.nova_flavors(is_public=True)
+        private_flavors = yield client.nova_flavors(is_public=False)
+        hosts = yield client.nova_hosts()
+        hypervisors = yield client.nova_hypervisors(hypervisor_match='%', servers=True)
+        images = yield client.nova_images(detailed=True)
+        novaservices = yield client.nova_services()
+        servers = yield client.nova_servers(detailed=True, search_opts={'all_tenants': 1})
+    except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
+        pprint.pprint(e.message)
+    else:
+        pprint.pprint(avzones)
+        pprint.pprint(public_flavors)
+        pprint.pprint(private_flavors)
+        pprint.pprint(hosts)
+        pprint.pprint(hypervisors)
+        pprint.pprint(images)
+        pprint.pprint(novaservices)
+        pprint.pprint(servers)
+
+    # Neutron
+    try:
+        neutronagents = yield client.neutron_agents()
+        floatingips = yield client.neutron_floatingips()
+        networks = yield client.neutron_networks()
+        ports = yield client.neutron_ports()
+        routers = yield client.neutron_routers()
+        security_groups = yield client.neutron_security_groups()
+        subnets = yield client.neutron_subnets()
+    except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
+        pprint.pprint(e.message)
+    else:
+        pprint.pprint(neutronagents)
+        pprint.pprint(floatingips)
+        pprint.pprint(networks)
+        pprint.pprint(ports)
+        pprint.pprint(routers)
+        pprint.pprint(security_groups)
+        pprint.pprint(subnets)
+
+    # Cinder
+    try:
+        volumes = yield client.cinder_volumes()
+        volumetypes = yield client.cinder_volumetypes()
+        volumebackups = yield client.cinder_volumebackups()
+        volumesnapshots = yield client.cinder_volumesnapshots()
+        cinderservices = yield client.cinder_services(detailed=True)
+        cinderpools = yield client.cinder_pools(detailed=True)
+    except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
+        pprint.pprint(e.message)
+    else:
+        pprint.pprint(volumes)
+        pprint.pprint(volumetypes)
+        pprint.pprint(volumebackups)
+        pprint.pprint(volumesnapshots)
+        pprint.pprint(cinderservices)
+        pprint.pprint(cinderpools)
+
+    if tenants and 'tenants' in tenants:
+        for tenant in tenants['tenants']:
+            try:
+                quotas = yield client.cinder_quotas(tenant=tenant['id'].encode('ascii', 'ignore'), usage=False)
+            except (BadRequestError, UnauthorizedError, NotFoundError) as e:
+                pprint.pprint(e.message)
+            else:
+                pprint.pprint(quotas)
         pprint.pprint(images)
         pprint.pprint(novaservices)
         pprint.pprint(servers)
