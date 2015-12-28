@@ -481,45 +481,60 @@ device_classes: !ZenPackSpec
         targetPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Instance
         datasources:
           cpuUtilization:
-            type: OpenStack Ceilometer Perf AMQP
+#            type: OpenStack Ceilometer Perf AMQP
+            type: OpenStack Ceilometer Perf API
             severity: clear
             cycletime: 600
             datapoints:
               cpuUtilization:
                 aliases: {cpu__pct: null}
-            meter: cpu_util
+#            meter: cpu_util
+            metric: cpu_util
+            statistic: cpu_util
           diskReadBytesRate:
-            type: OpenStack Ceilometer Perf AMQP
+#            type: OpenStack Ceilometer Perf AMQP
+            type: OpenStack Ceilometer Perf API
             severity: clear
             cycletime: 600
             datapoints:
               diskReadBytesRate:
                 aliases: {disk_read__bytessec: null}
-            meter: disk.read.bytes.rate
+#            meter: disk.read.bytes.rate
+            metric: disk.read.bytes.rate
+            statistic: disk.read.bytes.rate
           diskReadRequestsRate:
-            type: OpenStack Ceilometer Perf AMQP
+#            type: OpenStack Ceilometer Perf AMQP
+            type: OpenStack Ceilometer Perf API
             severity: clear
             cycletime: 600
             datapoints:
               diskReadRequestsRate:
                 aliases: {disk_reads__persec: null}
-            meter: disk.read.requests.rate
+#            meter: disk.read.requests.rate
+            metric: disk.read.requests.rate
+            statistic: disk.read.requests.rate
           diskWriteBytesRate:
-            type: OpenStack Ceilometer Perf AMQP
+#            type: OpenStack Ceilometer Perf AMQP
+            type: OpenStack Ceilometer Perf API
             severity: clear
             cycletime: 600
             datapoints:
               diskWriteBytesRate:
                 aliases: {disk_write__bytessec: null}
-            meter: disk.write.bytes.rate
+#            meter: disk.write.bytes.rate
+            metric: disk.write.bytes.rate
+            statistic: disk.write.bytes.rate
           diskWriteRequestsRate:
-            type: OpenStack Ceilometer Perf AMQP
+#            type: OpenStack Ceilometer Perf AMQP
+            type: OpenStack Ceilometer Perf API
             severity: clear
             cycletime: 600
             datapoints:
               diskWriteRequestsRate:
                 aliases: {disk_writes__persec: null}
-            meter: disk.write.requests.rate
+#            meter: disk.write.requests.rate
+            metric: disk.write.requests.rate
+            statistic: disk.write.requests.rate
         graphs:
           CPU Utilization:
             units: percent
@@ -554,37 +569,49 @@ device_classes: !ZenPackSpec
         targetPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Vnic
         datasources:
           networkIncomingBytesRate:
-            type: OpenStack Ceilometer Perf AMQP
+#            type: OpenStack Ceilometer Perf AMQP
+            type: OpenStack Ceilometer Perf API
             severity: clear
             cycletime: 600
             datapoints:
               networkIncomingBytesRate:
                 aliases: {if_received__bytessec: null}
-            meter: network.incoming.bytes.rate
+#            meter: network.incoming.bytes.rate
+            metric: network.incoming.bytes.rate
+            statistic: network.incoming.bytes.rate
           networkIncomingPacketsRate:
-            type: OpenStack Ceilometer Perf AMQP
+#            type: OpenStack Ceilometer Perf AMQP
+            type: OpenStack Ceilometer Perf API
             severity: clear
             cycletime: 600
             datapoints:
               networkIncomingPacketsRate:
                 aliases: {if_received_packets__persec: null}
-            meter: network.incoming.packets.rate
+#            meter: network.incoming.packets.rate
+            metric: network.incoming.packets.rate
+            statistic: network.incoming.packets.rate
           networkOutgoingBytesRate:
-            type: OpenStack Ceilometer Perf AMQP
+#            type: OpenStack Ceilometer Perf AMQP
+            type: OpenStack Ceilometer Perf API
             severity: clear
             cycletime: 600
             datapoints:
               networkOutgoingBytesRate:
                 aliases: {if_sent__bytessec: null}
-            meter: network.outgoing.bytes.rate
+#            meter: network.outgoing.bytes.rate
+            metric: network.outgoing.bytes.rate
+            statistic: network.outgoing.bytes.rate
           networkOutgoingPacketsRate:
-            type: OpenStack Ceilometer Perf AMQP
+#            type: OpenStack Ceilometer Perf AMQP
+            type: OpenStack Ceilometer Perf API
             severity: clear
             cycletime: 600
             datapoints:
               networkOutgoingPacketsRate:
                 aliases: {if_sent_packets__persec: null}
-            meter: network.outgoing.packets.rate
+#            meter: network.outgoing.packets.rate
+            metric: network.outgoing.packets.rate
+            statistic: network.outgoing.packets.rate
         graphs:
           Network Packet Rate:
             units: packets/sec
@@ -1071,13 +1098,15 @@ classes: !ZenPackSpec
         grid_display: false
       hypervisor_type:
         label: Type
-        grid_display: false
+        label_width: 80
+        content_width: 80
       hypervisor_version:
         label: Version
         grid_display: false
       host_ip:
         label: Host IP
-        grid_display: false
+        label_width: 100
+        content_width: 100
       vcpus:
         label: vCPU
         grid_display: false

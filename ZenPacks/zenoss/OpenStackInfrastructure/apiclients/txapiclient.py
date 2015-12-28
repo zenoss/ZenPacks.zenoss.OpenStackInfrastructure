@@ -597,8 +597,8 @@ class NotFoundError(APIClientError):
 def main():
     import pprint
 
-    client = APIClient('admin', 'zenoss', 'http://10.87.209.30:5000/v2.0', 'admin',
-                  True)
+    client = APIClient('admin', 'zenoss', 'http://10.87.209.30:5000/v2.0', 'admin', True)
+#    client = APIClient('admin', 'password', 'http://192.168.56.122:5000/v2.0', 'admin', True)
 
     # Keystone
     tenants = {}
@@ -756,9 +756,6 @@ def main():
                 pprint.pprint(e.message)
             else:
                 pprint.pprint(quotas)
-        pprint.pprint(images)
-        pprint.pprint(novaservices)
-        pprint.pprint(servers)
 
     # Neutron
     try:

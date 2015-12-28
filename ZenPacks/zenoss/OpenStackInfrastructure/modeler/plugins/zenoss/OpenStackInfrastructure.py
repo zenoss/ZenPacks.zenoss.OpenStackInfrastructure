@@ -628,7 +628,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 title='{0}.{1}'.format(hypervisor.get('hypervisor_hostname', ''),
                                        hypervisor['id']),
                 hypervisorId=hypervisor['id'],  # 1
-                hypervisor_type=hypervisor_type.get(hypervisor_id, None),
+                hypervisor_type=hypervisor_type.get(hypervisor_id, '').upper(),
                 hypervisor_version=hypervisor_version.get(hypervisor_id, None),
                 host_ip=results['hypervisor_details'].get(hypervisor_id,
                                  {}).get('host_ip', None),
