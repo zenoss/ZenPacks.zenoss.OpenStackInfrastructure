@@ -5832,6 +5832,7 @@ if DYNAMICVIEW_INSTALLED:
             """Generate object relatables returned by adapted.methodname()."""
             method = getattr(self._adapted, methodname, None)
             if not method or not callable(method):
+                #import pdb;pdb.set_trace()
                 LOG.warning(
                     "no %r relationship or method for %r",
                     methodname,

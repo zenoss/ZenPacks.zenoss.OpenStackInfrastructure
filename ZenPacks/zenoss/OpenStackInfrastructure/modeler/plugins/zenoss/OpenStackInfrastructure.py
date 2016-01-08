@@ -339,12 +339,6 @@ class OpenStackInfrastructure(PythonPlugin):
             if not image.get('id', None):
                 continue
 
-            # If it's a snapshot, rather than a normal image, ignore it for
-            # the time being.
-            if 'server' in image:
-                log.debug("Ignoring image %s" % image.get('name', ''))
-                continue
-
             # If we can, change dates like '2014-09-30T19:45:44Z' to '2014/09/30 19:45:44.00'
             try:
                 imageCreated = LocalDateTime(isoToTimestamp(image.get('created', '').replace('Z', '')))
@@ -704,10 +698,10 @@ class OpenStackInfrastructure(PythonPlugin):
         for hostname in sorted(nova_api_hosts):
             title = '{0}@{1} ({2})'.format('nova-api', hostname, device.zOpenStackRegionName)
             host_id = prepId("host-{0}".format(hostname))
-            nova_api_id = prepId('service-nova-api-{0}-{1}'.format(service.get('host', ''), device.zOpenStackRegionName))
+            nova_api_id = prepId('service-nova-api-{0}-{1}'.format(hostname, device.zOpenStackRegionName))
 
             services.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStackInfrastructure.NovaApi',
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.NovaService',
                 data=dict(
                     id=nova_api_id,
                     title=title,
@@ -723,10 +717,10 @@ class OpenStackInfrastructure(PythonPlugin):
         for hostname in cinder_api_hosts:
             title = '{0}@{1} ({2})'.format('cinder-api', hostname, device.zOpenStackRegionName)
             host_id = prepId("host-{0}".format(hostname))
-            cinder_api_id = prepId('service-cinder-api-{0}-{1}'.format(service.get('host', ''), device.zOpenStackRegionName))
+            cinder_api_id = prepId('service-cinder-api-{0}-{1}'.format(hostname, device.zOpenStackRegionName))
 
             services.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStackInfrastructure.CinderApi',
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.CinderService',
                 data=dict(
                     id=cinder_api_id,
                     title=title,
@@ -855,23 +849,25 @@ class OpenStackInfrastructure(PythonPlugin):
             if _network_id:
                 _network = 'network-{0}'.format(_network_id)
 
-            _dict=dict(
+            router_dict=dict(
                 admin_state_up=router.get('admin_state_up', False),
                 gateways=list(_gateways),
                 id=prepId('router-{0}'.format(router['id'])),
                 routerId=router['id'],
                 routes=list(router.get('routes', [])),
-                set_tenant=prepId('tenant-{0}'.format(router.get('tenant_id',''))),
+                set_tenant=prepId('tenant-{0}'.format(router.get('tenant_id',
+                                                                 ''))),
                 status=router.get('status', 'UNKNOWN'),
                 title=router.get('name', router['id']),
             )
             if _network:
-                    _dict['set_network'] = prepId(_network)
+                router_dict['set_network'] = prepId(_network)
             if len(_subnets) > 0:
-                    _dict['set_subnets'] = [prepId('subnet-{0}'.format(x)) for x in _subnets]
+                router_dict['set_subnets'] = [prepId('subnet-{0}'.format(x)) \
+                                              for x in _subnets]
             routers.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Router',
-                data=_dict))
+                data=router_dict))
 
         # port
         ports = []
@@ -881,7 +877,8 @@ class OpenStackInfrastructure(PythonPlugin):
 
             port_tenant = None
             if port.get('tenant_id', None):
-                port_tenant = prepId('tenant-{0}'.format(port.get('tenant_id', '')))
+                port_tenant = prepId('tenant-{0}'.format(port.get('tenant_id',
+                                                                  '')))
 
             port_instance = get_port_instance(port.get('device_owner', ''),
                                               port.get('device_id', ''))
@@ -898,8 +895,10 @@ class OpenStackInfrastructure(PythonPlugin):
                     mac_address=port.get('mac_address', '').upper(),
                     portId=port['id'],
                     set_instance=port_instance,
-                    set_network=prepId('network-{0}'.format(port.get('network_id', ''))),
-                    set_subnets=[prepId(x) for x in get_subnets_from_fixedips(port.get('fixed_ips', []))],
+                    set_network=prepId('network-{0}'.format(port.get(
+                        'network_id', ''))),
+                    set_subnets=[prepId(x) for x in get_subnets_from_fixedips(
+                        port.get('fixed_ips', []))],
                     set_tenant=port_tenant,
                     status=port.get('status', 'UNKNOWN'),
                     title=port.get('name', port['id']),
@@ -937,8 +936,8 @@ class OpenStackInfrastructure(PythonPlugin):
             if len(attachment) > 0:
                 instanceId = attachment[0].get('server_id', '')
             data=dict(
-                #volumeId=volume['id'],
                 id=prepId('volume-{0}'.format(volume['id'])),
+                title=volume.get('name', ''),
                 volumeId=volume['id'],  # 847424
                 avzone=volume.get('availability_zone', ''),
                 created_at=volume.get('created_at', '').replace('T', ' '),
@@ -966,12 +965,11 @@ class OpenStackInfrastructure(PythonPlugin):
             snapshots.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Snapshot',
                 data=dict(
-                    snapshotId=snapshot['id'],
                     id=prepId('snapshot-{0}'.format(snapshot['id'])),
+                    title=snapshot.get('name', ''),
                     created_at=snapshot.get('created_at', '').replace('T', ' '),
                     size=snapshot.get('size', 0),
                     description=snapshot.get('description', ''),
-                    snapshot=snapshot.get('snapshot_id', ''),
                     status=snapshot.get('status', 'UNKNOWN').upper(),
                     set_volume=prepId('volume-{0}'.format(snapshot.get('volume_id',''))),
                     set_tenant=prepId('tenant-{0}'.format(snapshot.get('os-extended-snapshot-attributes:project_id',''))),

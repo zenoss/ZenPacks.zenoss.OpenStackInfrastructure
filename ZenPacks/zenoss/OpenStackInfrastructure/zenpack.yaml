@@ -949,7 +949,7 @@ classes: !ZenPackSpec
         content_width: 45
     dynamicview_views: [service_view]
     dynamicview_relations:
-      impacted_by: [hypervisor, ports, vnics]
+      impacted_by: [hypervisor, ports, vnics, volumes]
       impacts: [guestDevice, tenant]
   Vnic:
     base: [LogicalComponent]
@@ -1040,22 +1040,6 @@ classes: !ZenPackSpec
     meta_type: OpenStackInfrastructureNovaService
     label: Nova Service
     order: 7
-    # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for osprocess_component, rather than
-    # dynamicview impacts adaptor, because OSProcess is not part of
-    # service_view, and so will not be exported from DV to impact  currently
-    # (ZEN-14579).
-    # --------------------------------------------------------------------------
-    impacted_by: [osprocess_component]
-    dynamicview_views: [service_view, openstack_view]
-    dynamicview_relations:
-      impacted_by: [hostedOn]
-      impacts: [orgComponent]
-  NovaApi:
-    base: [SoftwareComponent]
-    meta_type: OpenStackInfrastructureNovaApi
-    label: Nova API
-    order: 7.1
     # --------------------------------------------------------------------------
     # We use a normal impact adaptor for osprocess_component, rather than
     # dynamicview impacts adaptor, because OSProcess is not part of
@@ -1485,35 +1469,18 @@ classes: !ZenPackSpec
     meta_type: OpenStackInfrastructureCinderService
     label: Cinder Service
     order: 20.1
-      # --------------------------------------------------------------------------
-      # We use a normal impact adaptor for osprocess_component, rather than
-      # dynamicview impacts adaptor, because OSProcess is not part of
-      # service_view, and so will not be exported from DV to impact  currently
-      # (ZEN-14579).
-      # --------------------------------------------------------------------------
-#      impacted_by: [osprocess_component]
-#      dynamicview_views: [service_view, openstack_view]
-#      dynamicview_relations:
-#        impacted_by: [hostedOn]
-#        impacts: [orgComponent]
-  CinderApi:
-    base: [SoftwareComponent]
-    meta_type: OpenStackInfrastructureCinderApi
-    label: Cinder API
-    order: 20.2
     # --------------------------------------------------------------------------
     # We use a normal impact adaptor for osprocess_component, rather than
     # dynamicview impacts adaptor, because OSProcess is not part of
     # service_view, and so will not be exported from DV to impact  currently
     # (ZEN-14579).
     # --------------------------------------------------------------------------
-#    impacted_by: [osprocess_component]
-#    dynamicview_views: [service_view, openstack_view]
-#    dynamicview_relations:
-#      impacted_by: [hostedOn]
-#      impacts: [orgComponent]
+    impacted_by: [osprocess_component]
+    dynamicview_views: [service_view, openstack_view]
+    dynamicview_relations:
+      impacted_by: [hostedOn]
   Volume:
-    base: [LogicalComponent]
+    base: [ZenPacks.zenoss.OpenStackInfrastructure.CinderIntegrationComponent.CinderIntegrationComponent, LogicalComponent]
     meta_type: OpenStackInfrastructureVolume
     label: Volume
     order: 21
@@ -1546,6 +1513,12 @@ classes: !ZenPackSpec
         label: Status
         label_width: 80
         content_width: 80
+      implementation_components:
+        type: entity
+        label: Cinder Implementation
+        grid_display: false
+        api_only: true
+        api_backendtype: method
     relationships:
       tenant:
         label_width: 80
@@ -1559,8 +1532,11 @@ classes: !ZenPackSpec
       backups:
         label_width: 50
         content_width: 50
+    dynamicview_relations:
+      impacts: [instance, snapshots]
+    impacted_by: [implementation_components]
   Snapshot:
-    base: [LogicalComponent]
+    base: [ZenPacks.zenoss.OpenStackInfrastructure.CinderIntegrationComponent.CinderIntegrationComponent, LogicalComponent]
     meta_type: OpenStackInfrastructureSnapshot
     label: Snapshot
     order: 22
@@ -1590,10 +1566,19 @@ classes: !ZenPackSpec
         label_width: 100
         content_width: 100
         grid_display: false
+      implementation_components:
+        type: entity
+        label: Cinder Implementation
+        grid_display: false
+        api_only: true
+        api_backendtype: method
     relationships:
       volume:
         label_width: 80
         content_width: 80
+    dynamicview_relations:
+      impacted_by: [volume]
+    impacted_by: [implementation_components]
   Backup:
     base: [LogicalComponent]
     meta_type: OpenStackInfrastructureBackup
