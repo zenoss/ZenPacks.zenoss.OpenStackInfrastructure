@@ -120,7 +120,7 @@ def get_cinder_implementation_catalog(dmd):
         else:
             # index everything.
             for plugin_name, plugin in zope.component.getUtilitiesFor(ICinderImplementationPlugin):
-                plugin.reindex_cinder_implementation_components(dmd)
+                plugin.reindex_implementation_components(dmd)
 
     return catalog
 

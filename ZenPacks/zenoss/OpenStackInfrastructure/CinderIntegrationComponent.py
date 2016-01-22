@@ -63,6 +63,7 @@ class CinderIntegrationComponent(object):
                         log.error("Key '%s' for plugin %s does not contain the proper prefix, and is being ignored.",
                                   key, plugin_name)
                     else:
+                        # key: 'cinder.ceph:volume|volume-366fc7b1-4c11-4ae6-9ec2-d096df0194e0'
                         keys.append(key)
 
             except Exception:
@@ -80,14 +81,14 @@ class CinderIntegrationComponent(object):
         catalog = get_cinder_implementation_catalog(self.dmd)
         return [brain.getObject() for brain in catalog(getCinderIntegrationKeys=keys)]
 
-    def index_cinder_object(self, idxs=None):
+    def index_object(self, idxs=None):
         from .OpenstackComponent import OpenstackComponent
         super(OpenstackComponent, self).index_object(idxs=idxs)
 
         catalog = get_cinder_core_catalog(self.dmd)
         catalog.catalog_object(self, self.getPrimaryId())
 
-    def unindex_cinder_object(self):
+    def unindex_object(self):
         from .OpenstackComponent import OpenstackComponent
         super(OpenstackComponent, self).unindex_object()
 

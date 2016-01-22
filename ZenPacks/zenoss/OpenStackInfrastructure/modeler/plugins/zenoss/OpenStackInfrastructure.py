@@ -1001,6 +1001,10 @@ class OpenStackInfrastructure(PythonPlugin):
         for pool in results['volume_pools']:
             # does pool have id?
 
+            # pool name from Ceph looks like: 'block1@ceph#ceph
+            # the right most (or the middle part?) part is volume type.
+            # the middle part is Ceph cluster name?
+
             allocated_capacity=pool.get('capabilities', {}).get('allocated_capacity_gb', False)
             if not allocated_capacity:
                 allocated_capacity = ''
@@ -1022,6 +1026,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 data=dict(
                     #poolId=pool.get('name'),
                     id=prepId('pool-{0}'.format(pool.get('name'))),
+                    title=pool.get('name', ''),
                     qos_support=pool.get('capabilities', {}).get('QoS_support', False),
                     allocated_capacity=allocated_capacity,
                     free_capacity=free_capacity,

@@ -1086,7 +1086,8 @@ classes: !ZenPackSpec
         content_width: 80
       hypervisor_version:
         label: Version
-        grid_display: false
+        label_width: 80
+        content_width: 80
       host_ip:
         label: Host IP
         label_width: 100

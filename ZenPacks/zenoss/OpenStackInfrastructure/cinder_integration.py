@@ -30,25 +30,25 @@ def split_list(s):
         return [y for y in [x.strip() for x in s.split(',')] if len(y)]
 
 
-def reindex_cinder_core_components(dmd):
+def reindex_core_components(dmd):
     log.info("Reindexing all cinder core components")
     for obj in all_cinder_core_components(dmd):
         obj.index_object()
         notify(IndexingEvent(obj))
 
 
-def reindex_cinder_implementation_components(dmd):
+def reindex_implementation_components(dmd):
     for plugin_name, plugin in zope.component.getUtilitiesFor(ICinderImplementationPlugin):
         log.info("Asking implementation plugin %s to reindex its components" % plugin_name)
         plugin.reindex_cinder_implementation_components(dmd)
 
 
-def index_cinder_implementation_object(obj):
+def index_implementation_object(obj):
     catalog = get_cinder_implementation_catalog(obj.dmd)
     catalog.catalog_object(obj, obj.getPrimaryId())
 
 
-def unindex_cinder_implementation_object(obj):
+def unindex_implementation_object(obj):
     catalog = get_cinder_implementation_catalog(obj.dmd)
     catalog.uncatalog_object(obj.getPrimaryId())
 
@@ -114,10 +114,10 @@ class BaseCinderImplementationComponent(object):
         if self.cinder_plugin_name is None:
             raise ValueError("cinder_plugin_name must be set in subclass %s" % self.__class__)
 
-        index_cinder_implementation_object(self)
+        index_implementation_object(self)
 
     def unindex_cinder_object(self):
         if self.cinder_plugin_name is None:
             raise ValueError("cinder_plugin_name must be set in subclass %s" % self.__class__)
 
-        unindex_cinder_implementation_object(self)
+        unindex_implementation_object(self)
