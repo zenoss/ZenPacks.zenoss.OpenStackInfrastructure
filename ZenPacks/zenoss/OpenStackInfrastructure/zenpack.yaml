@@ -69,7 +69,7 @@ device_classes: !ZenPackSpec
     zProperties:
       zCollectorPlugins: [zenoss.cmd.uname, zenoss.cmd.uname_a, zenoss.cmd.df, zenoss.cmd.linux.cpuinfo,
         zenoss.cmd.linux.memory, zenoss.cmd.linux.ifconfig, zenoss.cmd.linux.netstat_an,
-        zenoss.cmd.linux.netstat_rn, zenoss.cmd.linux.process, zenoss.cmd.linux.rpm,
+        zenoss.cmd.linux.netstat_rn, zenoss.cmd.linux.process, zenoss.cmd.linux.lvm, zenoss.cmd.linux.rpm,
         zenoss.cmd.linux.openstack.nova, zenoss.cmd.linux.openstack.libvirt, zenoss.cmd.linux.openstack.inifiles]
       zOpenStackNeutronConfigDir: /etc/neutron
       zSshConcurrentSessions: 5
