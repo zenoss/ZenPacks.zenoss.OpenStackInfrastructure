@@ -855,8 +855,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 id=prepId('router-{0}'.format(router['id'])),
                 routerId=router['id'],
                 routes=list(router.get('routes', [])),
-                set_tenant=prepId('tenant-{0}'.format(router.get('tenant_id',
-                                                                 ''))),
+                set_tenant=prepId('tenant-{0}'.format(router.get('tenant_id',''))),
                 status=router.get('status', 'UNKNOWN'),
                 title=router.get('name', router['id']),
             )
