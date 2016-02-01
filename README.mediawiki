@@ -400,6 +400,7 @@ Provides linkage between OpenStackInfrastrcuture components and relevant integra
 
 ;2.1.1
 * Various bug fixes
+* Add meta.zcml feature tags for Neutron Integration
 
 ;2.1.0
 * Added Neutron network components
