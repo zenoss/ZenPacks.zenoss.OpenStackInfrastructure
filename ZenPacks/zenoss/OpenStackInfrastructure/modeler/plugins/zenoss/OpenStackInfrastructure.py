@@ -45,7 +45,7 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import (
 
 add_local_lib_path()
 
-from apiclients.txapiclient import APIClient, BadRequestError, UnauthorizedError, APIClientError, NotFoundError
+from apiclients.txapiclient import APIClient, APIClientError, NotFoundError
 
 
 class OpenStackInfrastructure(PythonPlugin):
@@ -156,7 +156,7 @@ class OpenStackInfrastructure(PythonPlugin):
                         client.api_call('/v2.0/agents/%s/l3-routers'
                                         % str(_agent['id']))
                 except Exception, e:
-                    log.warning("Unable to determine neutron URL for " + \
+                    log.warning("Unable to determine neutron URL for " +
                                 "l3 router agent discovery: %s" % e)
                     continue
 
@@ -187,7 +187,7 @@ class OpenStackInfrastructure(PythonPlugin):
                         client.api_call('/v2.0/agents/%s/dhcp-networks'
                                                 % str(_agent['id']))
                 except Exception, e:
-                    log.warning("Unable to determine neutron URL for " + \
+                    log.warning("Unable to determine neutron URL for " +
                                 "dhcp agent discovery: %s" % e)
                     continue
 
@@ -269,7 +269,6 @@ class OpenStackInfrastructure(PythonPlugin):
         for tenant in results['tenants']:
             result = yield client.cinder_quotas(tenant=tenant['id'].encode('ascii', 'ignore'), usage=False)
             results['quotas'][tenant['id']] = result['quota_set']
-
 
         returnValue(results)
 
@@ -526,7 +525,6 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_hostedOn=host_id,
                     set_orgComponent=zone_id
                 )))
-
 
         # add any user-specified hosts which we haven't already found.
         if device.zOpenStackNovaApiHosts or device.zOpenStackExtraHosts:
@@ -807,7 +805,7 @@ class OpenStackInfrastructure(PythonPlugin):
             if _network_id:
                 _network = 'network-{0}'.format(_network_id)
 
-            router_dict=dict(
+            router_dict = dict(
                 admin_state_up=router.get('admin_state_up', False),
                 gateways=list(_gateways),
                 id=prepId('router-{0}'.format(router['id'])),
@@ -820,7 +818,7 @@ class OpenStackInfrastructure(PythonPlugin):
             if _network:
                 router_dict['set_network'] = prepId(_network)
             if len(_subnets) > 0:
-                router_dict['set_subnets'] = [prepId('subnet-{0}'.format(x)) \
+                router_dict['set_subnets'] = [prepId('subnet-{0}'.format(x))
                                               for x in _subnets]
             routers.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Router',
@@ -893,7 +891,7 @@ class OpenStackInfrastructure(PythonPlugin):
             if len(attachment) > 0:
                 instanceId = attachment[0].get('server_id', '')
 
-            volume_dict=dict(
+            volume_dict = dict(
                 id=prepId('volume-{0}'.format(volume['id'])),
                 title=volume.get('name', ''),
                 volumeId=volume['id'],  # 847424
@@ -918,14 +916,13 @@ class OpenStackInfrastructure(PythonPlugin):
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Volume',
                 data=volume_dict))
 
-
         # volume Snapshots
         volsnapshots = []
         for snapshot in results['volsnapshots']:
             if not snapshot.get('id', None):
                 continue
 
-            volsnap_dict=dict(
+            volsnap_dict = dict(
                 id=prepId('snapshot-{0}'.format(snapshot['id'])),
                 title=snapshot.get('name', ''),
                 created_at=snapshot.get('created_at', '').replace('T', ' '),
@@ -978,25 +975,25 @@ class OpenStackInfrastructure(PythonPlugin):
             # the right most (or the middle part?) part is volume type.
             # the middle part is Ceph cluster name?
 
-            allocated_capacity=pool.get('capabilities', {}).get('allocated_capacity_gb', False)
+            allocated_capacity = pool.get('capabilities', {}).get('allocated_capacity_gb', False)
             if not allocated_capacity:
                 allocated_capacity = ''
             else:
                 allocated_capacity = str(allocated_capacity) + ' GB',
-            free_capacity=pool.get('capabilities', {}).get('free_capacity_gb', False)
+            free_capacity = pool.get('capabilities', {}).get('free_capacity_gb', False)
             if not free_capacity:
                 free_capacity = ''
             else:
                 free_capacity = str(free_capacity) + ' GB',
-            total_capacity=pool.get('capabilities', {}).get('total_capacity_gb', False)
+            total_capacity = pool.get('capabilities', {}).get('total_capacity_gb', False)
             if not total_capacity:
                 total_capacity = ''
             else:
                 total_capacity = str(total_capacity) + ' GB',
 
             pools.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStackInfrastructure.Pool',
-                data=dict(
+                modname = 'ZenPacks.zenoss.OpenStackInfrastructure.Pool',
+                data = dict(
                     #poolId=pool.get('name'),
                     id=prepId('pool-{0}'.format(pool.get('name'))),
                     title=pool.get('name', ''),
@@ -1047,7 +1044,6 @@ class OpenStackInfrastructure(PythonPlugin):
             'routers': routers,
             'ports': ports,
             'floatingips': floatingips,
-#            'cinder_services': cinder_services,
             'volumes': volumes,
             'volsnapshots': volsnapshots,
             # 'backups': backups,
