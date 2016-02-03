@@ -54,8 +54,6 @@
 # // [note: Cisco UCS;ZenPack{bg:darkslateblue}]-[UCS Service Profile{bg:darkslateblue}]
 [UCS Service Profile{bg:darkslateblue}]1-*>[Linux;Device{bg:deepskyblue}]
 
-<<<<<<< Updated upstream
-=======
 # Cinder
 [CinderAgent{bg:orange}]*-*>[Volume{bg:orange}]
 [CinderAgent{bg:orange}]*-*>[Snapshot{bg:orange}]
@@ -69,5 +67,3 @@
 [Volume{bg:orange}]<1-*[Snapshot{bg:orange}]
 [Volume{bg:orange}]<1-*[Backup{bg:orange}]
 [Volume{bg:orange}]*-1>[Pool{bg:orange}]
-
->>>>>>> Stashed changes

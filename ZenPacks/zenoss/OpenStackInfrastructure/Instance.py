@@ -47,7 +47,7 @@ class Instance(schema.Instance):
         if len(hypervisors):
             hypervisor = sorted(hypervisors)[0]
             if len(hypervisors) > 1:
-                LOG.warn("Multiple hypervisors were found matching hostname %s - Choosing %s" %
+                LOG.error("Multiple hypervisors were found matching hostname %s - Choosing %s" %
                           (hostname, hypervisor))
             self.set_hypervisor(hypervisor)
         else:

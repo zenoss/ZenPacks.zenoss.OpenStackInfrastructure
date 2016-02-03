@@ -122,14 +122,6 @@ class OpenStackInfrastructure(PythonPlugin):
         results['hypervisors_detailed'] = result['hypervisors']
         log.debug('hypervisors_detailed: %s\n' % str(results['hypervisors']))
 
-        # get hypervisor details for each individual hypervisor
-        results['hypervisor_details'] = {}
-        for hypervisor in results['hypervisors']:
-            result = yield client.nova_hypervisors(
-                hypervisor_id=hypervisor['id'])
-            hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
-            results['hypervisor_details'][hypervisor_id] = result['hypervisor']
-
         result = yield client.nova_servers()
         results['servers'] = result['servers']
         log.debug('servers: %s\n' % str(results['servers']))
@@ -234,7 +226,8 @@ class OpenStackInfrastructure(PythonPlugin):
 
         # not being able to resolve hostname could, in some cases,
         # result in nova-api and/or cinder-api components not being modeled
-        # make sure /etc/hosts file on the controller host is decent
+        # make sure DNS can resolve controller hostname
+
         results['resolved_hostnames'] = {}
         for hostname in sorted(hostnames):
             if isip(hostname):
@@ -264,15 +257,7 @@ class OpenStackInfrastructure(PythonPlugin):
         results['volumes'] = result['volumes']
 
         result = yield client.cinder_volumesnapshots()
-        results['snapshots'] = result['snapshots']
-
-        # try:
-        #     result = yield client.cinder_volumebackups()
-        # except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
-        #     log.info('Server (not zenpack) error while calling client.cinder_volumebackups(): %s\n' % e.message)
-        #     results['backups'] = []
-        # else:
-        #     results['backups'] = result['backups']
+        results['volsnapshots'] = result['snapshots']
 
         result = yield client.cinder_services()
         results['cinder_services'] = result['services']
@@ -433,7 +418,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_image=prepId('image-{0}'.format(image_id)),       # image-346eeba5-a122-42f1-94e7-06cb3c53f690
                     set_tenant=prepId('tenant-{0}'.format(tenant_id)),    # tenant-a3a2901f2fd14f808401863e3628a858
                     hostId=server.get('hostId', ''),                      # a84303c0021aa53c7e749cbbbfac265f
-                    hostName=server.get('OS-EXT-SRV-ATTR:hypervisor_hostname', '')                       # cloudserver01
+                    hostName=server.get('name', '')                       # cloudserver01
                 )))
 
         services = []
@@ -564,6 +549,12 @@ class OpenStackInfrastructure(PythonPlugin):
             data = hostmap[host_id]
 
             if not isValidHostname(data.get('hostname', host_id)):
+                # Jake Lampe once got a host like this:
+                # u'host': u'overcloud-controller-1.localdomain:4947de00-0c13-5ee7-902e-fc270d3993b9'
+                # and the hostname in hostmap becomes:
+                # 'host-overcloud-controller-1.localdomain:4947de00-0c13-5ee7-902e-fc270d3993b9'
+                # this caused problem when setting orgComponent for agent
+                log.warn("  Invalid hostname found: %s" % data.get('hostname', host_id))
                 continue
 
             hosts.append(ObjectMap(
@@ -586,21 +577,6 @@ class OpenStackInfrastructure(PythonPlugin):
             hypervisor_type[hypervisor_id] = hypervisor.get('hypervisor_type', None)
             hypervisor_version[hypervisor_id] = hypervisor.get('hypervisor_version', None)
 
-        # if results['hypervisors_detailed'] did not give us hypervisor type,
-        # hypervisor version, try results['hypervisors_details']
-        for k, v in hypervisor_type.iteritems():
-            if v is None and k in results['hypervisor_details']:
-                hypervisor_type[k] = \
-                results['hypervisor_details'][k].get(
-                    'hypervisor_type', None)
-        for k, v in hypervisor_version.iteritems():
-            if v is None and k in results['hypervisor_details']:
-                h_ver = results['hypervisor_details'][k].get(
-                        'hypervisor_version', None)
-                if h_ver:
-                    h_ver_list = str(h_ver).split('00')
-                    hypervisor_version[k] = '.'.join(h_ver_list)
-
         hypervisors = []
         server_hypervisor_instance_name = {}
         for hypervisor in results['hypervisors']:
@@ -622,26 +598,8 @@ class OpenStackInfrastructure(PythonPlugin):
                 title='{0}.{1}'.format(hypervisor.get('hypervisor_hostname', ''),
                                        hypervisor['id']),
                 hypervisorId=hypervisor['id'],  # 1
-                hypervisor_type=hypervisor_type.get(hypervisor_id, '').upper(),
+                hypervisor_type=hypervisor_type.get(hypervisor_id, ''),
                 hypervisor_version=hypervisor_version.get(hypervisor_id, None),
-                host_ip=results['hypervisor_details'].get(hypervisor_id,
-                                 {}).get('host_ip', None),
-                vcpus=str(results['hypervisor_details'].get(hypervisor_id,
-                                 {}).get('vcpus', None)),
-                vcpus_used=results['hypervisor_details'].get(hypervisor_id,
-                                 {}).get('vcpus_used', None),
-                memory=results['hypervisor_details'].get(hypervisor_id,
-                                 {}).get('memory_mb', None),
-                memory_used=results['hypervisor_details'].get(hypervisor_id,
-                                 {}).get('memory_mb_used', None),
-                memory_free=results['hypervisor_details'].get(hypervisor_id,
-                                 {}).get('free_ram_mb', None),
-                disk=results['hypervisor_details'].get(hypervisor_id,
-                                 {}).get('local_gb', None),
-                disk_used=results['hypervisor_details'].get(hypervisor_id,
-                                 {}).get('local_gb_used', None),
-                disk_free=results['hypervisor_details'].get(hypervisor_id,
-                                 {}).get('free_disk_gb', None),
                 set_instances=hypervisor_servers,
                 set_hostByName=hypervisor.get('hypervisor_hostname', ''),
             )
@@ -701,7 +659,7 @@ class OpenStackInfrastructure(PythonPlugin):
             nova_api_id = prepId('service-nova-api-{0}-{1}'.format(hostname, device.zOpenStackRegionName))
 
             services.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStackInfrastructure.NovaService',
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.NovaApi',
                 data=dict(
                     id=nova_api_id,
                     title=title,
@@ -720,7 +678,7 @@ class OpenStackInfrastructure(PythonPlugin):
             cinder_api_id = prepId('service-cinder-api-{0}-{1}'.format(hostname, device.zOpenStackRegionName))
 
             services.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStackInfrastructure.CinderService',
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.CinderApi',
                 data=dict(
                     id=cinder_api_id,
                     title=title,
@@ -934,7 +892,8 @@ class OpenStackInfrastructure(PythonPlugin):
             instanceId = ''
             if len(attachment) > 0:
                 instanceId = attachment[0].get('server_id', '')
-            data=dict(
+
+            volume_dict=dict(
                 id=prepId('volume-{0}'.format(volume['id'])),
                 title=volume.get('name', ''),
                 volumeId=volume['id'],  # 847424
@@ -947,32 +906,46 @@ class OpenStackInfrastructure(PythonPlugin):
                 status=volume.get('status', 'UNKNOWN').upper(),
                 set_tenant=prepId('tenant-{0}'.format(volume.get('os-vol-tenant-attr:tenant_id',''))),
             )
-            # set instance only when volume['attachments'] is not empty
+            # set tenant only when volume['attachments'] is not empty
             if len(instanceId) > 0:
-                data['set_instance'] = prepId('server-{0}'.format(instanceId))
+                volume_dict['set_instance'] = prepId('server-{0}'.format(
+                    instanceId))
+            # set instance only when volume['tenant_id'] is not empty
+            if volume.get('os-vol-tenant-attr:tenant_id', None):
+                volume_dict['set_tenant'] = prepId('tenant-{0}'.format(
+                    volume.get('os-vol-tenant-attr:tenant_id','')))
             volumes.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Volume',
-                data=data))
+                data=volume_dict))
 
 
-        # Snapshots
-        snapshots = []
-        for snapshot in results['snapshots']:
+        # volume Snapshots
+        volsnapshots = []
+        for snapshot in results['volsnapshots']:
             if not snapshot.get('id', None):
                 continue
 
-            snapshots.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStackInfrastructure.Snapshot',
-                data=dict(
-                    id=prepId('snapshot-{0}'.format(snapshot['id'])),
-                    title=snapshot.get('name', ''),
-                    created_at=snapshot.get('created_at', '').replace('T', ' '),
-                    size=snapshot.get('size', 0),
-                    description=snapshot.get('description', ''),
-                    status=snapshot.get('status', 'UNKNOWN').upper(),
-                    set_volume=prepId('volume-{0}'.format(snapshot.get('volume_id',''))),
-                    set_tenant=prepId('tenant-{0}'.format(snapshot.get('os-extended-snapshot-attributes:project_id',''))),
-                    )))
+            volsnap_dict=dict(
+                id=prepId('snapshot-{0}'.format(snapshot['id'])),
+                title=snapshot.get('name', ''),
+                created_at=snapshot.get('created_at', '').replace('T', ' '),
+                size=snapshot.get('size', 0),
+                description=snapshot.get('description', ''),
+                status=snapshot.get('status', 'UNKNOWN').upper(),
+            )
+            if snapshot.get('volume_id', None):
+                volsnap_dict['set_volume'] = \
+                    prepId('volume-{0}'.format(snapshot.get('volume_id','')))
+            if snapshot.get('os-extended-snapshot-attributes:project_id', None):
+                volsnap_dict['set_tenant'] = \
+                    prepId('tenant-{0}'.format(snapshot.get(
+                        'os-extended-snapshot-attributes:project_id','')))
+            volsnapshots.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.VolSnapshot',
+                data=volsnap_dict))
+
+        # volume backup is not ready. but also don't want to waste efforts
+        # either
 
         # Backups
         # backups = []
@@ -995,6 +968,7 @@ class OpenStackInfrastructure(PythonPlugin):
         #             set_tenant=prepId('tenant-{0}'.format(backup.get('os-extended-snapshot-attributes:project_id',''))),
         #             )))
         #
+
         # Pools
         pools = []
         for pool in results['volume_pools']:
@@ -1075,7 +1049,7 @@ class OpenStackInfrastructure(PythonPlugin):
             'floatingips': floatingips,
 #            'cinder_services': cinder_services,
             'volumes': volumes,
-            'snapshots': snapshots,
+            'volsnapshots': volsnapshots,
             # 'backups': backups,
             'pools': pools,
             'quotas': quotas,
@@ -1160,7 +1134,7 @@ class OpenStackInfrastructure(PythonPlugin):
         for i in ('tenants', 'regions', 'flavors', 'images', 'servers', 'zones',
                   'hosts', 'hypervisors', 'services', 'networks',
                   'subnets', 'routers', 'ports', 'agents', 'floatingips',
-                  'volumes', 'snapshots', 'pools', 'quotas',
+                  'volumes', 'volsnapshots', 'pools', 'quotas',
                   ):
             for objmap in objmaps[i]:
                 componentsMap.append(objmap)
