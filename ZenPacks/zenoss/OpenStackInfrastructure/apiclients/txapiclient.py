@@ -11,7 +11,6 @@
 #
 ###########################################################################
 
-import sys
 import httplib
 import urllib
 import json
@@ -33,6 +32,7 @@ log = logging.getLogger('zen.OpenStack.txapiclient')
 
 Request = collections.namedtuple(
     'Request', ['url', 'method', 'agent', 'headers', 'postdata'])
+
 
 def getPageAndHeaders(url, contextFactory=None, *args, **kwargs):
     """Return deferred with a (body, headers) success result.
@@ -75,14 +75,12 @@ class APIClient(object):
         self._cinderv2_url = None
         self._glance_url = None
 
-
     @property
     def keystone_endpoints(self):
         if '/v2' in self.auth_url:
             self._admin_only()
         self.user_agent = 'zenoss-keystoneclient'
         return self._apis.setdefault('keystone_endpoints', API(self, '/endpoints'))
-
 
     @property
     def keystone_tenants(self):
@@ -91,14 +89,12 @@ class APIClient(object):
         self.user_agent = 'zenoss-keystoneclient'
         return self._apis.setdefault('keystone_tenants', API(self, '/tenants'))
 
-
     @property
     def keystone_users(self):
         if '/v2' in self.auth_url:
             self._admin_only()
         self.user_agent = 'zenoss-keystoneclient'
         return self._apis.setdefault('keystone_users', API(self, '/users'))
-
 
     @property
     def keystone_roles(self):
@@ -107,7 +103,6 @@ class APIClient(object):
         self.user_agent = 'zenoss-keystoneclient'
         return self._apis.setdefault('keystone_roles', API(self, '/OS-KSADM/roles'))
 
-
     @property
     def keystone_services(self):
         if '/v2' in self.auth_url:
@@ -115,18 +110,15 @@ class APIClient(object):
         self.user_agent = 'zenoss-keystoneclient'
         return self._apis.setdefault('keystone_services', API(self, '/OS-KSADM/services'))
 
-
     def _admin_only(self, api_method='GET'):
         # for Keystone only
         if self.is_admin is False:
             raise UnauthorizedError("'%s' is only available in the Identity admin API v2.0" % api_method)
 
-
     @property
     def nova_avzones(self):
         self.user_agent = 'zenoss-novaclient'
         return self._apis.setdefault('nova_avzones', API(self, '/os-availability-zone/detail'))
-
 
     @property
     def nova_flavors(self):
@@ -134,180 +126,150 @@ class APIClient(object):
         self.user_agent = 'zenoss-novaclient'
         return self._apis.setdefault('nova_flavors', API(self, '/flavors/detail'))
 
-
     @property
     def nova_hosts(self):
         self.user_agent = 'zenoss-novaclient'
         return self._apis.setdefault('nova_hosts', API(self, '/os-hosts'))
-
 
     @property
     def nova_hypervisors(self):
         self.user_agent = 'zenoss-novaclient'
         return self._apis.setdefault('nova_hypervisors', API(self, '/os-hypervisors'))
 
-
     @property
     def nova_hypervisorsdetailed(self):
         self.user_agent = 'zenoss-novaclient'
         return self._apis.setdefault('nova_hypervisors', API(self, '/os-hypervisors/detail'))
-
 
     @property
     def nova_hypervisorstats(self):
         self.user_agent = 'zenoss-novaclient'
         return self._apis.setdefault('nova_hypervisorstats', API(self, '/os-hypervisors/statistics'))
 
-
     @property
     def nova_hypervisor_detail_id(self):
         self.user_agent = 'zenoss-novaclient'
         return self._apis.setdefault('nova_hypervisordetail', API(self, '/os-hypervisors'))
-
 
     @property
     def nova_images(self):
         self.user_agent = 'zenoss-novaclient'
         return self._apis.setdefault('nova_images', API(self, '/images/detail'))
 
-
     @property
     def nova_servers(self):
         self.user_agent = 'zenoss-novaclient'
         return self._apis.setdefault('nova_servers', API(self, '/servers/detail?all_tenants=1'))
-
 
     @property
     def nova_services(self):
         self.user_agent = 'zenoss-novaclient'
         return self._apis.setdefault('nova_services', API(self, '/os-services'))
 
-
     @property
     def neutron_agents(self):
         self.user_agent = 'zenoss-neutronclient'
         return self._apis.setdefault('neutron_agents', API(self, '/v2.0/agents.json'))
-
 
     @property
     def neutron_floatingips(self):
         self.user_agent = 'zenoss-neutronclient'
         return self._apis.setdefault('neutron_floatingips', API(self, '/v2.0/floatingips.json'))
 
-
     @property
     def neutron_networks(self):
         self.user_agent = 'zenoss-neutronclient'
         return self._apis.setdefault('neutron_networks', API(self, '/v2.0/networks.json'))
-
 
     @property
     def neutron_ports(self):
         self.user_agent = 'zenoss-neutronclient'
         return self._apis.setdefault('neutron_ports', API(self, '/v2.0/ports.json'))
 
-
     @property
     def neutron_routers(self):
         self.user_agent = 'zenoss-neutronclient'
         return self._apis.setdefault('neutron_routers', API(self, '/v2.0/routers.json'))
-
 
     @property
     def neutron_security_groups(self):
         self.user_agent = 'zenoss-neutronclient'
         return self._apis.setdefault('neutron_security_groups', API(self, '/v2.0/security-groups.json'))
 
-
     @property
     def neutron_subnets(self):
         self.user_agent = 'zenoss-neutronclient'
         return self._apis.setdefault('neutron_subnets', API(self, '/v2.0/subnets.json'))
-
 
     @property
     def cinder_volumes(self):
         self.user_agent = 'zenoss-cinderv2client'
         return self._apis.setdefault('cinder_volumes', API(self, '/volumes/detail?all_tenants=1'))
 
-
     @property
     def cinder_volumetypes(self):
         self.user_agent = 'zenoss-cinderv2client'
         return self._apis.setdefault('cinder_volumetypes', API(self, '/types'))
-
 
     @property
     def cinder_volumebackups(self):
         self.user_agent = 'zenoss-cinderv2client'
         return self._apis.setdefault('cinder_volumebackups', API(self, '/backups/detail?all_tenants=1'))
 
-
     @property
     def cinder_volumesnapshots(self):
         self.user_agent = 'zenoss-cinderv2client'
         return self._apis.setdefault('cinderv_olumesnapshots', API(self, '/snapshots/detail?all_tenants=1'))
-
 
     @property
     def cinder_pools(self):
         self.user_agent = 'zenoss-cinderv2client'
         return self._apis.setdefault('cinder_pools', API(self, '/scheduler-stats/get_pools?detail=True'))
 
-
     @property
     def cinder_quotas(self):
         self.user_agent = 'zenoss-cinderv2client'
         return self._apis.setdefault('cinder_quotas', API(self, '/cinderquotas'))
-
 
     @property
     def cinder_services(self):
         self.user_agent = 'zenoss-cinderv2client'
         return self._apis.setdefault('cinder_services', API(self, '/os-services'))
 
-
     @property
     def ceilometer_resources(self):
         self.user_agent = 'zenoss-ceilometerclient'
         return self._apis.setdefault('ceilometer_resources', API(self, '/v2/resources'))
-
 
     @property
     def ceilometer_meters(self):
         self.user_agent = 'zenoss-ceilometerclient'
         return self._apis.setdefault('ceilometer_meters', API(self, '/v2/meters'))
 
-
     @property
     def ceilometer_statistics(self):
         self.user_agent = 'zenoss-ceilometerclient'
         return self._apis.setdefault('ceilometer_statistics', API(self, '/v2/meters/'))
-
 
     @property
     def ceilometer_samples(self):
         self.user_agent = 'zenoss-ceilometerclient'
         return self._apis.setdefault('ceilometer_samples', API(self, '/v2/samples'))
 
-
     @property
     def ceilometer_events(self):
         self.user_agent = 'zenoss-ceilometerclient'
         return self._apis.setdefault('ceilometer_events', API(self, '/v2/events'))
-
 
     @property
     def ceilometer_alarms(self):
         self.user_agent = 'zenoss-ceilometerclient'
         return self._apis.setdefault('ceilometer_alarms', API(self, '/v2/alarms'))
 
-
     #@property
     #def ceilometer_querysamples(self):
     #    self.user_agent = 'zenoss-ceilometerclient'
     #    return self._apis.setdefault('ceilometer_querysamples', API(self, '/v2/query/samples'))
-
 
     @inlineCallbacks
     def login(self):
@@ -493,13 +455,11 @@ class APIClient(object):
             headers=headers,
             postdata=postdata)
 
-
     @inlineCallbacks
     def nova_url(self):
         if not self._nova_url:
             yield self.login()
         returnValue(self._nova_url)
-
 
     @inlineCallbacks
     def ceilometer_url(self):
@@ -565,7 +525,7 @@ class API(object):
             self.path = self.path[:self.path.index('/v2/alarms') + len('/v2/alarms')]
 
         # if there are query entries, add them to the path
-        if kwargs.has_key('queries'):
+        if 'queries' in kwargs:
             for query in kwargs['queries']:
                 self.path += '?q.field=%s&q.op=%s&q.type=%s&q.value=%s' % \
                         (query.get('field',''), query.get('op',''),
@@ -574,9 +534,11 @@ class API(object):
         return self.client.api_call(
             self.path.encode('ascii', 'ignore'), data=data, params=params, **kwargs)
 
+
 class APIClientError(Exception):
     """Parent class of all exceptions raised by api clients."""
     pass
+
 
 class BadRequestError(APIClientError):
     """Wrapper for HTTP 400 Bad Request error."""

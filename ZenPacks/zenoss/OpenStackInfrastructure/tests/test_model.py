@@ -21,10 +21,7 @@ from Products.Zuul.catalog.events import IndexingEvent
 from Products.Five import zcml
 
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
-from Products.ZenModel import ZVersion
 from Products.ZenTestCase.BaseTestCase import BaseTestCase
-from Products.Zuul.interfaces.info import IInfo
-from Products.DataCollector.DeviceProxy import DeviceProxy
 
 from ZenPacks.zenoss.OpenStackInfrastructure.modeler.plugins.zenoss.OpenStackInfrastructure \
     import OpenStackInfrastructure as OpenStackInfrastructureModeler
@@ -50,7 +47,6 @@ class TestModel(BaseTestCase):
         self.d.index_object()
         notify(IndexingEvent(self.d))
 
-
         self.applyDataMap = ApplyDataMap()._applyDataMap
 
         # Required to prevent erroring out when trying to define viewlets in
@@ -62,7 +58,6 @@ class TestModel(BaseTestCase):
         zcml.load_config('configure.zcml', ZenPacks.zenoss.OpenStackInfrastructure)
 
         self._loadZenossData()
-
 
     def _loadZenossData(self):
         if hasattr(self, '_loaded'):
@@ -214,7 +209,7 @@ class TestModel(BaseTestCase):
         images = self.d.getDeviceComponents(type='OpenStackInfrastructureImage')
         self.assertEquals(len(images), 1)
 
-        self.assertEquals('image-b5ac0c5f-bf91-4ab6-bcaa-d895a8df90bb', \
+        self.assertEquals('image-b5ac0c5f-bf91-4ab6-bcaa-d895a8df90bb',
                           images[0].id)
         self.assertEquals('cirros', images[0].name())
 
@@ -223,7 +218,7 @@ class TestModel(BaseTestCase):
 
         instances = self.d.getDeviceComponents(type='OpenStackInfrastructureInstance')
         self.assertEquals(len(instances), 1)
-        self.assertEquals('server-0aa87c33-aa73-4c02-976b-321f5e2df205', \
+        self.assertEquals('server-0aa87c33-aa73-4c02-976b-321f5e2df205',
                           instances[0].id)
         self.assertEquals('tiny1', instances[0].name())
 
@@ -254,8 +249,8 @@ class TestModel(BaseTestCase):
         self.assertEquals(hypervisors[0].endpoint.id, 'endpoint')
         self.assertEquals(hypervisors[0].endpoint.name(), 'liberty.zenoss.local.1')
         self.assertEquals(hypervisors[0].getPrimaryId(),
-                          '/zport/dmd/Devices/OpenStack/Infrastructure' + \
-                          '/devices/zenoss.OpenStackInfrastructure.testDevice' + \
+                          '/zport/dmd/Devices/OpenStack/Infrastructure' +
+                          '/devices/zenoss.OpenStackInfrastructure.testDevice' +
                           '/components/hypervisor-1')
 
     def testNeutronAgent(self):
@@ -293,6 +288,7 @@ class TestModel(BaseTestCase):
 
     def testQuota(self):
         self.assertEquals(1, 1)
+
 
 def test_suite():
     from unittest import TestSuite, makeSuite

@@ -50,7 +50,7 @@ class CinderServiceStatusDataSource(PythonDataSource):
 
     # CinderServiceStatusDataSource
 
-    _properties = PythonDataSource._properties + ( )
+    _properties = PythonDataSource._properties + ()
 
 
 class ICinderServiceStatusDataSourceInfo(IPythonDataSourceInfo):

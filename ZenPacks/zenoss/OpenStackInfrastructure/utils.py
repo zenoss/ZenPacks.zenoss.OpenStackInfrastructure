@@ -313,6 +313,7 @@ def getNetSubnetsGws_from_GwInfo(external_gateway_info):
 
     return (network, subnets, gateways)
 
+
 def isValidHostname(hostname):
     # see this for valid hostname length:
     # https://blogs.msdn.microsoft.com/oldnewthing/20120412-00/?p=7873/

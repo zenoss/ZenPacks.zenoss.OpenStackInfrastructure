@@ -50,7 +50,7 @@ class OpenstackHelper(object):
         """Return the first defined ceilometer URL, given a keystone endpoint,
         credentials, and a region.  May return an empty string if none is found."""
 
-        client = KeystoneAPIClient(
+        client = APIClient(
             username=username,
             password=api_key,
             project_id=project_id,
