@@ -145,3 +145,122 @@ class INeutronImplementationComponent(Interface):
 
     An example may be found in "README.neutron_integration.txt"
     """
+
+
+class ICinderImplementationPlugin(Interface):
+    """
+    Cinder Implementation Plugin.  To be implemented by zenpacks which support
+    the backend device for block storage.  Given access to cinder
+    configuration and modeled objects, this plugin maps the cinder components
+    from the OpenStackInfrastructure zenpack to underlying "implementation"
+    components within the device-specific zenpack.
+    """
+
+    def ini_required(cls):
+        """
+        Return a list of tuples describing the values to collect from the cinder
+        configuration files, in the format:
+            [
+                (filename, section_name, option_name),
+                ...
+            ]
+
+        Filenames must be relative to the cinder configuration base directory
+        (/etc/cinder by default)
+
+        If the value can not be found (file not found, or option not found within
+        the file), an event will be raised.
+        """
+
+    def ini_optional(cls):
+        """
+        Return a list of tuples describing the values to collect from the cinder
+        configuration files, in the format:
+            [
+                (filename, section_name, option_name),
+                ...
+            ]
+
+        Filenames must be relative to the cinder configuration base directory
+        (/etc/cinder by default)
+        """
+
+    def ini_process(cls, filename, section_name, option_name, value):
+        """
+        Post-process the collected values from the ini file.  Default behavior
+        should be to return the value unmodified, but can be used to convert
+        strings into lists, for multi-valued parameters, for example.
+        """
+
+    def reindex_cinder_implementation_components(cls, dmd):
+        """
+        Implementation should iterate over all objects in the classes that
+        implement the ICinderImplementationComponent interface for this
+        plugin and cause them to index themselves in the integration catalog.
+
+        For properly implemented objects, this should simply be calling
+        index_object upon them.
+
+        This method will be used to initially populate the catalog, during
+        OpenStackInfrastructure ZenPack installation (when the zenpack
+        providing this plugin has already been installed and modeled
+        the implementation components)
+        """
+
+    """
+    The functions below must, given a core object, return one or more
+    integration keys.  An integration key is a string of any format as
+    long as the same value can be generated on both sides (cinder and
+    implementation) and is sufficient to identify corresponding components.
+
+    For guidelines and an example, see "README.cinder_integration.txt"
+
+    Note: For the functions below, if you need information which was collected
+    from the .ini files, it may be accessed by calling the ini_get
+    method on the openstack objects.
+    """
+
+    def getPoolIntegrationKeys(self, pool):
+        """
+        Returns a list of one or more integration keys for
+        the supplied openstack cinder pool.
+        """
+
+    def getVolumeIntegrationKeys(self, volume):
+        """
+        Returns a list of one or more integration keys for
+        the supplied cinder volume.
+        """
+
+    def getSnapshotIntegrationKeys(self, snapshot):
+        """
+        Returns a list of one or more integration keys for
+        the supplied cinder snapshot.
+        """
+
+    def getBackupIntegrationKeys(self, backup):
+        """
+        Returns a list of one or more integration keys for
+        the supplied cinder backup.
+        """
+
+
+class ICinderImplementationComponent(Interface):
+
+    def getCinderIntegrationKeys(self):
+        """
+        Returns a list of one or more integration keys for this component.
+
+        This key must match one of the keys defined above, if this
+        component is the implementation backing one (or more) of the cinder
+        objects.
+        """
+
+    """
+    Objects that implement this interface must also invoke
+    the "index_cinder_implementation_object" and "unindex_cinder_implementation_object"
+    functions provided in ZenPacks.zenoss.OpenStackInfrastructure.cinder_integration
+    from their index_object and unindex_object methods, respectively.
+
+    An example may be found in "README.cinder_integration.txt"
+    """

@@ -1,6 +1,7 @@
 // OpenStackInfrastructure Internal Impacts
 [note: OpenStackInfrastructure;ZenPack{bg:aquamarine}]-[NovaEndpoint{bg:aquamarine}]
 [note: OpenStackInfrastructure;ZenPack{bg:aquamarine}]-[NeutronAgent{bg:tan}]
+[note: OpenStackInfrastructure;ZenPack{bg:aquamarine}]-[CinderAgent{bg:orange}]
 [NovaEndpoint{bg:aquamarine}]1-*>[Host{bg:aquamarine}]
 
 [Host{bg:aquamarine}]*-1>[AvailabilityZone{bg:aquamarine}]
@@ -22,6 +23,8 @@
 
 # //   [Vnic{bg:tan}]1-*>[Port{bg:tan}]
 [Host{bg:tan}]1-*>[NeutronAgent{bg:tan}]
+[Host{bg:tan}]1-*>[CinderAgent{bg:orange}]
+[Host{bg:tan}]*-*>[Pool{bg:orange}]
 [NeutronAgent{bg:tan}]*-*>[Network{bg:tan}]
 [NeutronAgent{bg:tan}]*-*>[Router{bg:tan}]
 [NeutronAgent{bg:tan}]*-*>[Subnet{bg:tan}]
@@ -51,3 +54,16 @@
 # // [note: Cisco UCS;ZenPack{bg:darkslateblue}]-[UCS Service Profile{bg:darkslateblue}]
 [UCS Service Profile{bg:darkslateblue}]1-*>[Linux;Device{bg:deepskyblue}]
 
+# Cinder
+[CinderAgent{bg:orange}]*-*>[Volume{bg:orange}]
+[CinderAgent{bg:orange}]*-*>[Snapshot{bg:orange}]
+[CinderAgent{bg:orange}]*-*>[Backup{bg:orange}]
+[Volume{bg:orange}]*-1>[Tenant{bg:orange}]
+[Snapshot{bg:orange}]*-1>[Tenant{bg:orange}]
+[Backup{bg:orange}]*-1>[Tenant{bg:orange}]
+[Quota{bg:orange}]1-1>[Tenant{bg:orange}]
+[Instance{bg:orange}]<1-1[Volume{bg:orange}]
+[VolumeType{bg:orange}]<1-*[Volume{bg:orange}]
+[Volume{bg:orange}]<1-*[Snapshot{bg:orange}]
+[Volume{bg:orange}]<1-*[Backup{bg:orange}]
+[Volume{bg:orange}]*-1>[Pool{bg:orange}]

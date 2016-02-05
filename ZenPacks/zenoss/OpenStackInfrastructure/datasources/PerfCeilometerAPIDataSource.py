@@ -31,7 +31,7 @@ from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import (
     IPythonDataSourceInfo)
 
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import result_errmsg
-from apiclients.keystoneapiclient import KeystoneAPIClient
+from apiclients.txapiclient import APIClient
 
 
 class ProxyWebClient(object):
@@ -105,7 +105,7 @@ class PerfCeilometerAPIDataSource(PythonDataSource):
 
     ZENPACKID = 'ZenPacks.zenoss.OpenStackInfrastructure.'
 
-    sourcetypes = ('OpenStack Ceilometer',)
+    sourcetypes = ('OpenStack Ceilometer Perf API',)
     sourcetype = sourcetypes[0]
 
     # RRDDataSource
@@ -132,11 +132,11 @@ class IPerfCeilometerAPIDataSourceInfo(IPythonDataSourceInfo):
     '''
 
     metric = schema.TextLine(
-        group=_t('OpenStack Ceilometer'),
+        group=_t('OpenStack Ceilometer Perf API'),
         title=_t('Metric Name'))
 
     statistic = schema.TextLine(
-        group=_t('OpenStack Ceilometer'),
+        group=_t('OpenStack Ceilometer Perf API'),
         title=_t('Statistic'))
 
 
@@ -187,46 +187,29 @@ class PerfCeilometerAPIDataSourcePlugin(PythonDataSourcePlugin):
     @inlineCallbacks
     def collect(self, config):
         log.debug("Collect for OpenStack")
-        results = []
 
         ds0 = config.datasources[0]
 
-        ceilometer_url = ds0.zPerfCeilometerAPIUrl.rstrip('/')
-        username = ds0.zCommandUsername
-        password = ds0.zCommandPassword
-        metric = ds0.params['metric']
-        authurl = ds0.zOpenStackAuthUrl
-        project = ds0.zOpenStackProjectId
-        resourceId = ds0.resourceId
-
-        # this is not very efficient- if we end up using this datasource, it should
-        # be rewritten to use a real ceilometer client library with token caching/re-login
-        # support.
-        client = KeystoneAPIClient(
-            username=username,
-            password=password,
-            project_id=project,
-            auth_url=authurl,
+        client = APIClient(
+            username=ds0.zCommandUsername,
+            password=ds0.zCommandPassword,
+            auth_url=ds0.zOpenStackAuthUrl,
+            project_id=ds0.zOpenStackProjectId,
+            is_admin=True,
         )
-        yield client.login()
 
-        hdr = {}
-        hdr['X-Auth-Token'] = client._token
-        hdr['Content-Type'] = 'application/json'
-
-        def sleep(secs):
-            d = defer.Deferred()
-            reactor.callLater(secs, d.callback, None)
-            return d
-
+        results = []
         for ds in config.datasources:
-            metric = ds.params['metric']
-            resourceId = ds.resourceId
-            getURL = "%s/v2/meters/%s/statistics?q.field=resource_id&q.op=eq&q.value=%s" % \
-                (ceilometer_url, metric, resourceId)
-
-            factory = ProxyWebClient(getURL)
-            result = yield factory.get_page(hdr)
+            query = dict(
+                field='resource_id',
+                op='eq',
+                value=ds.resourceId,
+                type='string'
+            )
+            result = yield client.ceilometer_statistics(
+                meter_name=ds.params['metric'],
+                queries=[query]
+            )
             results.append((ds, result))
 
         defer.returnValue(results)
@@ -236,53 +219,50 @@ class PerfCeilometerAPIDataSourcePlugin(PythonDataSourcePlugin):
 
         for ds, result in results:
 
-            # returned json sometimes contains bare null, and python does not like it
-            stats = ast.literal_eval(result.replace('null', '\"null\"'))
-
-            if len(stats) == 0:
+            if len(result) == 0:
                 value = '0'
             elif ds.params['metric'] == 'cpu_util':
-                value = str(round(stats[0]['avg'], 2))
+                value = str(round(result[0]['avg'], 2))
             elif ds.params['metric'] == 'cpu':
                 # convert nano seconds to seconds
-                value = str(float(stats[0]['avg']) * 1.0e-9)
+                value = str(float(result[0]['avg']) * 1.0e-9)
             elif ds.params['metric'] == 'disk.read.requests':
-                value = str(stats[0]['avg'])
+                value = str(result[0]['avg'])
             elif ds.params['metric'] == 'disk.write.requests':
-                value = str(stats[0]['avg'])
+                value = str(result[0]['avg'])
             elif ds.params['metric'] == 'disk.read.requests.rate':
-                value = str(stats[0]['avg'])
+                value = str(result[0]['avg'])
             elif ds.params['metric'] == 'disk.write.requests.rate':
-                value = str(stats[0]['avg'])
+                value = str(result[0]['avg'])
             elif ds.params['metric'] == 'disk.read.bytes':
                 # convert B to KB
-                value = str(float(stats[0]['avg']) * 1.0e-3)
+                value = str(result[0]['avg'] * 1.0e-3)
             elif ds.params['metric'] == 'disk.write.bytes':
                 # convert B to KB
-                value = str(float(stats[0]['avg']) * 1.0e-3)
+                value = str(result[0]['avg'] * 1.0e-3)
             elif ds.params['metric'] == 'disk.read.bytes.rate':
                 # convert B to KB
-                value = str(float(stats[0]['avg']) * 1.0e-3)
+                value = str(result[0]['avg'] * 1.0e-3)
             elif ds.params['metric'] == 'disk.write.bytes.rate':
-                value = str(float(stats[0]['avg']) * 1.0e-3)
+                value = str(result[0]['avg'] * 1.0e-3)
             elif ds.params['metric'] == 'network.incoming.packets':
-                value = str(float(stats[0]['avg']) * 1.0e-3)
+                value = str(result[0]['avg'] * 1.0e-3)
             elif ds.params['metric'] == 'network.outpoing.packets':
-                value = str(float(stats[0]['avg']) * 1.0e-3)
+                value = str(result[0]['avg'] * 1.0e-3)
             elif ds.params['metric'] == 'network.incoming.packets.rate':
-                value = str(float(stats[0]['avg']) * 1.0e-3)
+                value = str(result[0]['avg'] * 1.0e-3)
             elif ds.params['metric'] == 'network.outpoing.packets.rate':
-                value = str(float(stats[0]['avg']) * 1.0e-3)
+                value = str(result[0]['avg'] * 1.0e-3)
             elif ds.params['metric'] == 'network.incoming.bytes':
                 # convert B to KB
-                value = str(float(stats[0]['avg']) * 1.0e-3)
+                value = str(result[0]['avg'] * 1.0e-3)
             elif ds.params['metric'] == 'network.outpoing.bytes':
                 # convert B to KB
-                value = str(float(stats[0]['avg']) * 1.0e-3)
+                value = str(result[0]['avg'] * 1.0e-3)
             elif ds.params['metric'] == 'network.incoming.bytes.rate':
-                value = str(float(stats[0]['avg']) * 1.0e-3)
+                value = str(result[0]['avg'] * 1.0e-3)
             elif ds.params['metric'] == 'network.outpoing.bytes.rate':
-                value = str(float(stats[0]['avg']) * 1.0e-3)
+                value = str(result[0]['avg'] * 1.0e-3)
             else:
                 value = '0'
             data['values'][ds.component][ds.datasource] = (value, 'N')

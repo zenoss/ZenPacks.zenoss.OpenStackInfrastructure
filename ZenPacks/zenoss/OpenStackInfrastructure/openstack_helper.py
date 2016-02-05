@@ -21,7 +21,7 @@ log = logging.getLogger('openstackHelper')
 from optparse import OptionParser
 from twisted.internet.defer import inlineCallbacks, returnValue
 
-from apiclients.keystoneapiclient import KeystoneAPIClient
+from apiclients.txapiclient import APIClient
 
 
 class OpenstackHelper(object):
@@ -30,7 +30,7 @@ class OpenstackHelper(object):
     def getRegions(self, username, api_key, project_id, auth_url):
         """Get a list of available regions, given a keystone endpoint and credentials."""
 
-        client = KeystoneAPIClient(
+        client = APIClient(
             username=username,
             password=api_key,
             project_id=project_id,
@@ -50,7 +50,7 @@ class OpenstackHelper(object):
         """Return the first defined ceilometer URL, given a keystone endpoint,
         credentials, and a region.  May return an empty string if none is found."""
 
-        client = KeystoneAPIClient(
+        client = APIClient(
             username=username,
             password=api_key,
             project_id=project_id,

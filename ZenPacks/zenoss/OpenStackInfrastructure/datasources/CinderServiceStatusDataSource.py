@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2014, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2015, all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -8,7 +8,7 @@
 ##############################################################################
 
 import logging
-log = logging.getLogger('zen.OpenStack.NovaServiceStatus')
+log = logging.getLogger('zen.OpenStack.CinderServiceStatus')
 
 from twisted.internet import defer
 from twisted.internet.defer import inlineCallbacks
@@ -30,14 +30,14 @@ add_local_lib_path()
 from apiclients.txapiclient import APIClient
 
 
-class NovaServiceStatusDataSource(PythonDataSource):
+class CinderServiceStatusDataSource(PythonDataSource):
     '''
-    Datasource used to check the status of nova services via the nova API
+    Datasource used to check the status of Cinder services via the Cinder API
     '''
 
     ZENPACKID = 'ZenPacks.zenoss.OpenStackInfrastructure.'
 
-    sourcetypes = ('OpenStack Nova Service Status',)
+    sourcetypes = ('OpenStack Cinder Service Status',)
     sourcetype = sourcetypes[0]
 
     # RRDDataSource
@@ -46,33 +46,33 @@ class NovaServiceStatusDataSource(PythonDataSource):
 
     # PythonDataSource
     plugin_classname = 'ZenPacks.zenoss.OpenStackInfrastructure.datasources.'\
-        'NovaServiceStatusDataSource.NovaServiceStatusDataSourcePlugin'
+        'CinderServiceStatusDataSource.CinderServiceStatusDataSourcePlugin'
 
-    # NovaServiceStatusDataSource
+    # CinderServiceStatusDataSource
 
-    _properties = PythonDataSource._properties + ( )
+    _properties = PythonDataSource._properties + ()
 
 
-class INovaServiceStatusDataSourceInfo(IPythonDataSourceInfo):
+class ICinderServiceStatusDataSourceInfo(IPythonDataSourceInfo):
     '''
-    API Info interface for INovaServiceStatusDataSource.
+    API Info interface for ICinderServiceStatusDataSource.
     '''
 
     pass
 
 
-class NovaServiceStatusDataSourceInfo(PythonDataSourceInfo):
+class CinderServiceStatusDataSourceInfo(PythonDataSourceInfo):
     '''
-    API Info adapter factory for NovaServiceStatusDataSource.
+    API Info adapter factory for CinderServiceStatusDataSource.
     '''
 
-    implements(INovaServiceStatusDataSourceInfo)
-    adapts(NovaServiceStatusDataSource)
+    implements(ICinderServiceStatusDataSourceInfo)
+    adapts(CinderServiceStatusDataSource)
 
     testable = False
 
 
-class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
+class CinderServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
     proxy_attributes = (
         'zOpenStackRegionName',
         'zCommandUsername',
@@ -101,7 +101,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
 
     @inlineCallbacks
     def collect(self, config):
-        log.debug("Collect for OpenStack Nova Service Status (%s)" % config.id)
+        log.debug("Collect for OpenStack Cinder Service Status (%s)" % config.id)
         ds0 = config.datasources[0]
 
         client = APIClient(
@@ -114,8 +114,10 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
         results = {}
 
         log.debug('Requesting services')
-        result = yield client.nova_services()
+        result = yield client.cinder_services()
         results['services'] = result['services']
+
+        results['nova_url'] = yield client.nova_url()
 
         defer.returnValue(results)
 
@@ -127,7 +129,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
                 service['binary'], service['host'], service['zone']))
 
             data['maps'].append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStackInfrastructure.NovaService',
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.CinderService',
                 compname='',
                 data=dict(
                     id=service_id,
@@ -149,7 +151,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
                     'summary': 'Service %s on host %s (Availabilty Zone %s) is now DISABLED' %
                                (service['binary'], service['host'], service['zone']),
                     'severity': ZenEventClasses.Clear,
-                    'eventClassKey': 'openStackNovaServiceStatus',
+                    'eventClassKey': 'openStackCinderServiceStatus',
                     })
 
             elif service['state'] == 'up':
@@ -159,7 +161,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
                     'summary': 'Service %s on host %s (Availabilty Zone %s) is now UP' %
                                (service['binary'], service['host'], service['zone']),
                     'severity': ZenEventClasses.Clear,
-                    'eventClassKey': 'openStackNovaServiceStatus',
+                    'eventClassKey': 'openStackCinderServiceStatus',
                     })
             else:
 
@@ -169,34 +171,34 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
                     'summary': 'Service %s on host %s (Availabilty Zone %s) is now DOWN' %
                                (service['binary'], service['host'], service['zone']),
                     'severity': ZenEventClasses.Error,
-                    'eventClassKey': 'openStackNovaServiceStatus',
+                    'eventClassKey': 'openStackCinderServiceStatus',
                     })
 
-        # Note: Technically, this event could be related to the nova-api component(s)
+        # Note: Technically, this event could be related to the Cinder-api component(s)
         # for this region
         data['events'].append({
             'device': config.id,
-            'summary': 'Nova Status Collector: successful collection',
+            'summary': 'Cinder Status Collector: successful collection',
             'severity': ZenEventClasses.Clear,
-            'eventKey': 'openStackNovaServiceCollectionError',
+            'eventKey': 'openStackCinderServiceCollectionError',
             'eventClassKey': 'openstackRestored',
             })
 
         return data
 
     def onError(self, result, config):
-        errmsg = 'Nova Status Collector: %s' % result_errmsg(result)
+        errmsg = 'Cinder Status Collector: %s' % result_errmsg(result)
         log.error('%s: %s', config.id, errmsg)
 
         data = self.new_data()
 
-        # Note: Technically, this event could be related to the nova-api component(s)
+        # Note: Technically, this event could be related to the Cinder-api component(s)
         # for this region
         data['events'].append({
             'device': config.id,
             'summary': errmsg,
             'severity': ZenEventClasses.Error,
-            'eventKey': 'openStackNovaServiceCollectionError',
+            'eventKey': 'openStackCinderServiceCollectionError',
             'eventClassKey': 'openStackFailure',
             })
 

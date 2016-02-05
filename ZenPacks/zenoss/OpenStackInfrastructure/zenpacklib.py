@@ -27,7 +27,7 @@ This module provides a single integration point for common ZenPacks.
 """
 
 # PEP-396 version. (https://www.python.org/dev/peps/pep-0396/)
-__version__ = "1.1.0dev"
+__version__ = "1.0.9"
 
 
 import logging
@@ -47,6 +47,9 @@ import os
 import re
 import sys
 import math
+import types
+
+from lxml import etree
 
 if __name__ == '__main__':
     import Globals
@@ -58,7 +61,6 @@ from zope.component import adapts, getGlobalSiteManager
 from zope.event import notify
 from zope.interface import classImplements, implements
 from zope.interface.interface import InterfaceClass
-import zope.proxy
 from Acquisition import aq_base
 
 from Products.AdvancedQuery import Eq, Or
@@ -233,7 +235,13 @@ class ZenPack(ZenPackBase):
             # objects, but we do not have access to that relationship
             # at this point in the process.
             for dcname, dcspec in self._v_specparams.device_classes.iteritems():
-                deviceclass = self.dmd.Devices.getOrganizer(dcname)
+                try:
+                    deviceclass = self.dmd.Devices.getOrganizer(dcname)
+                except KeyError:
+                    # DeviceClass.getOrganizer() can raise a KeyError if the
+                    # organizer doesn't exist.
+                    deviceclass = None
+
                 if deviceclass is None:
                     LOG.warning(
                         "DeviceClass %s has been removed at some point "
@@ -322,49 +330,72 @@ class ZenPack(ZenPackBase):
     def manage_exportPack(self, download="no", REQUEST=None):
         """Export ZenPack to $ZENHOME/export directory.
 
-        In order to control which objects are exported, we wrap the
-        entire zenpack object, and the zenpackable objects it contains,
-        in proxy objects, which allow us to override their behavior
-        without disrupting the original objects.
-
+        Postprocess the generated xml files to remove references to ZPL-managed
+        objects.
         """
-        import Acquisition
+        from Products.ZenModel.ZenPackLoader import findFiles
 
-        class FilteredZenPackable(zope.proxy.ProxyBase, Acquisition.Explicit):
-            @zope.proxy.non_overridable
-            def objectValues(self):
-                # proxy the remote objects on ToManyContRelationships
-                return [FilteredZenPackable(x).__of__(x.aq_parent) for x in self._objects.values()]
-
-            @zope.proxy.non_overridable
-            def exportXmlRelationships(self, ofile, ignorerels=[]):
-                for rel in self.getRelationships():
-                    if rel.id in ignorerels:
-                        continue
-                    filtered_rel = FilteredZenPackable(rel).__of__(rel.aq_parent)
-                    filtered_rel.exportXml(ofile, ignorerels)
-
-            @zope.proxy.non_overridable
-            def exportXml(self, *args, **kwargs):
-                original = zope.proxy.getProxiedObject(self).__class__.exportXml
-                path = '/'.join(self.getPrimaryPath())
-
-                if getattr(self, 'zpl_managed', False):
-                    LOG.info("Excluding %s from export (ZPL-managed object)" % path)
-                    return
-
-                original(self, *args, **kwargs)
-
-        class FilteredZenPack(zope.proxy.ProxyBase):
-            @zope.proxy.non_overridable
-            def packables(self):
-                packables = zope.proxy.getProxiedObject(self).packables()
-                return [FilteredZenPackable(x).__of__(x.aq_parent) for x in packables]
-
-        return ZenPackBase.manage_exportPack(
-            FilteredZenPack(self),
+        result = super(ZenPack, self).manage_exportPack(
             download=download,
             REQUEST=REQUEST)
+
+        for filename in findFiles(self, 'objects', lambda f: f.endswith('.xml')):
+            self.filter_xml(filename)
+
+        return result
+
+    def filter_xml(self, filename):
+        pruned = 0
+        try:
+            tree = etree.parse(filename)
+
+            path = []
+            context = etree.iterwalk(tree, events=('start', 'end'))
+            for action, elem in context:
+                if elem.tag == 'object':
+                    if action == 'start':
+                        path.append(elem.attrib.get('id'))
+
+                    elif action == 'end':
+                        obj_path = '/'.join(path)
+                        try:
+                            obj = self.dmd.getObjByPath(obj_path)
+                            if getattr(obj, 'zpl_managed', False):
+                                LOG.debug("Removing %s from %s", obj_path, filename)
+                                pruned += 1
+
+                                # if there's a comment before it with the
+                                # primary path of the object, remove that first.
+                                prev = elem.getprevious()
+                                if '<!-- ' + repr(tuple('/'.join(path).split('/'))) + ' -->' == repr(prev):
+                                    elem.getparent().remove(prev)
+
+                                # Remove the ZPL-managed object
+                                elem.getparent().remove(elem)
+
+                        except Exception:
+                            LOG.warning("Unable to postprocess %s in %s", obj_path, filename)
+
+                        path.pop()
+
+                if elem.tag == 'tomanycont':
+                    if action == 'start':
+                        path.append(elem.attrib.get('id'))
+                    elif action == 'end':
+                        path.pop()
+
+            if len(tree.getroot()) == 0:
+                LOG.info("Removing %s", filename)
+                os.remove(filename)
+            elif pruned:
+                LOG.info("Pruning %d objects from %s", pruned, filename)
+                with open(filename, 'w') as f:
+                    f.write(etree.tostring(tree))
+            else:
+                LOG.debug("Leaving %s unchanged", filename)
+
+        except Exception, e:
+            LOG.error("Unable to postprocess %s: %s", filename, e)
 
 
 class CatalogBase(object):
@@ -709,7 +740,7 @@ class ComponentBase(ModelBase):
             return
 
         # Find and add new object to relationship.
-        for result in self.device().search('ComponentBase', id=id_):
+        for result in catalog_search(self.device(), 'ComponentBase', id=id_):
             new_obj = result.getObject()
             relationship.addRelation(new_obj)
 
@@ -753,7 +784,7 @@ class ComponentBase(ModelBase):
         query = Or(*[Eq('id', x) for x in changed_ids])
 
         obj_map = {}
-        for result in self.device().search('ComponentBase', query):
+        for result in catalog_search(self.device(), 'ComponentBase', query):
             obj_map[result.id] = result.getObject()
 
         for id_ in new_ids.symmetric_difference(current_ids):
@@ -1534,6 +1565,7 @@ class ZenPackSpec(Spec):
         self.create_global_js_snippet()
         self.create_device_js_snippet()
         self.register_browser_resources()
+        self.apply_platform_patches()
 
     def create_product_names(self):
         """Add all classes to ZenPack's productNames list.
@@ -1634,6 +1666,27 @@ class ZenPackSpec(Spec):
                     name=self.name,
                     directory=resource_path,
                     directives=''.join(directives)))
+
+    def apply_platform_patches(self):
+        """Apply necessary patches to platform code."""
+        self.apply_zen21467_patch()
+
+    def apply_zen21467_patch(self):
+        """Patch cause of ZEN-21467 issue.
+
+        The problem is that zenpacklib sets string property values to unicode
+        strings instead of regular strings. There's a platform bug that
+        prevents unicode values from being serialized to be used by zenjmx.
+        This means that JMX datasources won't work without this patch.
+
+        """
+        try:
+            from Products.ZenHub.XmlRpcService import XmlRpcService
+            if types.UnicodeType not in XmlRpcService.PRIMITIVES:
+                XmlRpcService.PRIMITIVES.append(types.UnicodeType)
+        except Exception:
+            # The above may become wrong in future platform versions.
+            pass
 
     def create_js_snippet(self, name, snippet, classes=None):
         """Create, register and return JavaScript snippet for given classes."""
@@ -2096,6 +2149,7 @@ class ClassSpec(Spec):
         # Paths
         self.path_pattern_streams = []
         if extra_paths is not None:
+            self.extra_paths = extra_paths
             for pattern_tuple in extra_paths:
                 # Each item in extra_paths is expressed as a tuple of
                 # regular expression patterns that are matched
@@ -2134,6 +2188,8 @@ class ClassSpec(Spec):
                     pattern_stream.append(re.compile("/?$"))
 
                 self.path_pattern_streams.append(pattern_stream)
+        else:
+            self.extra_paths = []
 
     def create(self):
         """Implement specification."""
@@ -2221,7 +2277,7 @@ class ClassSpec(Spec):
         for base in self.bases:
             if not isinstance(base, type):
                 class_spec = self.zenpack.classes[base]
-                properties.update(class_spec.properties)
+                properties.update(class_spec.inherited_properties())
 
         properties.update(self.properties)
 
@@ -2232,7 +2288,7 @@ class ClassSpec(Spec):
         for base in self.bases:
             if not isinstance(base, type):
                 class_spec = self.zenpack.classes[base]
-                relationships.update(class_spec.relationships)
+                relationships.update(class_spec.inherited_relationships())
 
         relationships.update(self.relationships)
 
@@ -2980,7 +3036,7 @@ class ClassPropertySpec(Spec):
             :param api_backendtype: TODO (enum)
             :type api_backendtype: str
             :param enum: TODO
-            :type enum: list(str)
+            :type enum: dict
             :param datapoint: TODO (validate datapoint name)
             :type datapoint: str
             :param datapoint_default: TODO  - DEPRECATE (use default instead)
@@ -3141,6 +3197,9 @@ class ClassPropertySpec(Spec):
 
         if self.renderer:
             column_fields.append("renderer: {}".format(self.renderer))
+        else:
+            if self.type_ == 'boolean':
+                column_fields.append("renderer: Zenoss.render.checkbox")
 
         return [
             OrderAndValue(
@@ -3576,6 +3635,10 @@ class RRDTemplateSpec(Spec):
         # exported to objects.xml  (contained objects will also be excluded)
         template.zpl_managed = True
 
+        # Add this RRDTemplate to the zenpack.
+        zenpack_name = self.deviceclass_spec.zenpack_spec.name
+        template.addToZenPack(pack=zenpack_name)
+
         if not existing_template:
             self.speclog.info("adding template")
 
@@ -3778,7 +3841,12 @@ class RRDDatasourceSpec(Spec):
         if self.extra_params:
             for param, value in self.extra_params.iteritems():
                 if param in [x['id'] for x in datasource._properties]:
-                    setattr(datasource, param, value)
+                    # handle an ui test error that expects the oid value to be a string
+                    # this is to workaround a ui bug known in 4.5 and 5.0.3
+                    if type_ == 'BasicDataSource.SNMP' and param == 'oid':
+                        setattr(datasource, param, str(value))
+                    else:
+                        setattr(datasource, param, value)
                 else:
                     raise ValueError("%s is not a valid property for datasource of type %s" % (param, type_))
 
@@ -3876,6 +3944,8 @@ class RRDDatapointSpec(Spec):
         type_ = datapoint.__class__.__name__
         self.speclog.debug("adding datapoint of type %s" % type_)
 
+        if self.rrdtype is not None:
+            datapoint.rrdtype = self.rrdtype
         if self.createCmd is not None:
             datapoint.createCmd = self.createCmd
         if self.isrow is not None:
@@ -4246,8 +4316,16 @@ class RRDTemplateSpecParams(SpecParams, RRDTemplateSpec):
         SpecParams.__init__(self)
         template = aq_base(template)
 
-        self.targetPythonClass = template.targetPythonClass
-        self.description = template.description
+        # Weed out any values that are the same as they would by by default.
+        # We do this by instantiating a "blank" template and comparing
+        # to it.
+        sample_template = template.__class__(template.id)
+
+        for propname in ('targetPythonClass', 'description',):
+            if hasattr(sample_template, propname):
+                setattr(self, '_%s_defaultvalue' % propname, getattr(sample_template, propname))
+            if getattr(template, propname, None) != getattr(sample_template, propname, None):
+                setattr(self, propname, getattr(template, propname, None))
 
         self.thresholds = {x.id: RRDThresholdSpecParams.fromObject(x) for x in template.thresholds()}
         self.datasources = {x.id: RRDDatasourceSpecParams.fromObject(x) for x in template.datasources()}
@@ -5191,14 +5269,19 @@ def enableTesting():
                 import ZenPacks.zenoss.DynamicView
                 zcml.load_config('configure.zcml', ZenPacks.zenoss.DynamicView)
             except ImportError:
-                return
+                pass
 
             try:
                 import ZenPacks.zenoss.Impact
                 zcml.load_config('meta.zcml', ZenPacks.zenoss.Impact)
                 zcml.load_config('configure.zcml', ZenPacks.zenoss.Impact)
             except ImportError:
-                return
+                pass
+
+            try:
+                zcml.load_config('configure.zcml', zenpack_module)
+            except IOError:
+                pass
 
             # BaseTestCast.afterSetUp already hides transaction.commit. So we also
             # need to hide transaction.abort.
@@ -5812,12 +5895,23 @@ if DYNAMICVIEW_INSTALLED:
 
         def relations(self, type=TAG_ALL):
             target = IRelatable(self._adapted)
+            relations = getattr(self._adapted, 'dynamicview_relations', {})
 
-            for tag in (TAG_ALL, type):
-                relations = getattr(self._adapted, 'dynamicview_relations', {})
-                for methodname in relations.get(tag, []):
-                    for remote in self.get_remote_relatables(methodname):
-                        yield BaseRelation(target, remote, type)
+            # Group methods by type to allow easy tagging of multiple types
+            # per yielded relation. This allows supporting the special TAG_ALL
+            # type without duplicating work or relations.
+            types_by_methodname = collections.defaultdict(set)
+            if type == TAG_ALL:
+                for ltype, lmethodnames in relations.items():
+                    for lmethodname in lmethodnames:
+                        types_by_methodname[lmethodname].add(ltype)
+            else:
+                for lmethodname in relations.get(type, []):
+                    types_by_methodname[lmethodname].add(type)
+
+            for methodname, type_set in types_by_methodname.items():
+                for remote in self.get_remote_relatables(methodname):
+                    yield BaseRelation(target, remote, list(type_set))
 
         def get_remote_relatables(self, methodname):
             """Generate object relatables returned by adapted.methodname()."""
@@ -5951,7 +6045,7 @@ Ext.apply(Zenoss.render, {
         }
 
         if (isLink) {
-            return '<a href="javascript:Ext.getCmp(\\'component_card\\').componentgrid.jumpToEntity(\\''+obj.uid+'\\', \\''+obj.meta_type+'\\');">'+obj.title+'</a>';
+            return '<a href="'+obj.uid+'"onClick="Ext.getCmp(\\'component_card\\').componentgrid.jumpToEntity(\\''+obj.uid +'\\', \\''+obj.meta_type+'\\');return false;">'+obj.title+'</a>';
         } else {
             return obj.title;
         }
@@ -6258,11 +6352,15 @@ if __name__ == '__main__':
                 self.connect()
 
                 templates = self.zenpack_templatespecs(zenpack_name)
-                zpsp = ZenPackSpecParams(zenpack_name, device_classes={x: {} for x in templates})
-                for dc_name in templates:
-                    zpsp.device_classes[dc_name].templates = templates[dc_name]
+                if templates:
+                    zpsp = ZenPackSpecParams(
+                        zenpack_name,
+                        device_classes={x: {} for x in templates})
 
-                print yaml.dump(zpsp, Dumper=Dumper)
+                    for dc_name in templates:
+                        zpsp.device_classes[dc_name].templates = templates[dc_name]
+
+                    print yaml.dump(zpsp, Dumper=Dumper)
 
             elif len(args) == 3 and args[0] == "class_diagram":
                 diagram_type = args[1]
@@ -6369,17 +6467,50 @@ if __name__ == '__main__':
                 print USAGE.format(sys.argv[0])
 
         def zenpack_templatespecs(self, zenpack_name):
+            """Return dictionary of RRDTemplateSpecParams by device_class.
+
+            Example return value:
+
+                {
+                    '/Server/Linux': {
+                        'Device': RRDTemplateSpecParams(...),
+                    },
+                    '/Server/SSH/Linux': {
+                        'Device': RRDTemplateSpecParams(...),
+                        'IpInterface': RRDTemplateSpecParams(...),
+                    },
+                }
+
+            """
             zenpack = self.dmd.ZenPackManager.packs._getOb(zenpack_name, None)
             if zenpack is None:
                 LOG.error("ZenPack '%s' not found." % zenpack_name)
                 return
 
-            templates = collections.defaultdict(dict)
-            for deviceclass in [x for x in zenpack.packables() if x.meta_type == 'DeviceClass']:
-                for template in deviceclass.getAllRRDTemplates():
-                    dc_name = template.deviceClass().getOrganizerName()
-                    templates[dc_name][template.id] = RRDTemplateSpecParams.fromObject(template)
-            return templates
+            # Find explicitly associated templates, and templates implicitly
+            # associated through an explicitly associated device class.
+            from Products.ZenModel.DeviceClass import DeviceClass
+            from Products.ZenModel.RRDTemplate import RRDTemplate
+
+            templates = []
+            for packable in zenpack.packables():
+                if isinstance(packable, DeviceClass):
+                    templates.extend(packable.getAllRRDTemplates())
+                elif isinstance(packable, RRDTemplate):
+                    templates.append(packable)
+
+            # Only create specs for templates that have an associated device
+            # class. This prevents locally-overridden templates from being
+            # included.
+            specs = collections.defaultdict(dict)
+            for template in templates:
+                deviceClass = template.deviceClass()
+                if deviceClass:
+                    dc_name = deviceClass.getOrganizerName()
+                    spec = RRDTemplateSpecParams.fromObject(template)
+                    specs[dc_name][template.id] = spec
+
+            return specs
 
     script = ZPLCommand()
     script.run()

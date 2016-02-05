@@ -22,6 +22,7 @@ class_relationships:
 - Host(hostedSoftware) 1:M (hostedOn)SoftwareComponent
 - OrgComponent 1:M Host
 - OrgComponent 1:M SoftwareComponent
+- OrgComponent 1:M Pool
 # Tenant -> * (Instance,Network,Subnet,Router,Port,FloatingIp)
 - Tenant 1:M Instance
 - Tenant 1:M Network
@@ -29,6 +30,11 @@ class_relationships:
 - Tenant 1:M Router
 - Tenant 1:M Port
 - Tenant 1:M FloatingIp
+# Cinder
+- Tenant 1:M Volume
+- Tenant 1:M VolSnapshot
+- Tenant 1:M Backup
+- Tenant 1:1 Quota
 # Flavor
 - Flavor 1:M Instance
 - Image 1:M Instance
@@ -53,12 +59,16 @@ class_relationships:
 - Router 1:M FloatingIp
 - Router M:M Subnet
 - Hypervisor 1:1 Host
+# Cinder
+- Instance 1:M Volume
+- Volume 1:M VolSnapshot
+- Volume 1:M Backup
 device_classes: !ZenPackSpec
   /Server/SSH/Linux/NovaHost:
     zProperties:
       zCollectorPlugins: [zenoss.cmd.uname, zenoss.cmd.uname_a, zenoss.cmd.df, zenoss.cmd.linux.cpuinfo,
         zenoss.cmd.linux.memory, zenoss.cmd.linux.ifconfig, zenoss.cmd.linux.netstat_an,
-        zenoss.cmd.linux.netstat_rn, zenoss.cmd.linux.process, zenoss.cmd.linux.rpm,
+        zenoss.cmd.linux.netstat_rn, zenoss.cmd.linux.process, zenoss.cmd.linux.lvm, zenoss.cmd.linux.rpm,
         zenoss.cmd.linux.openstack.nova, zenoss.cmd.linux.openstack.libvirt, zenoss.cmd.linux.openstack.inifiles]
       zOpenStackNeutronConfigDir: /etc/neutron
       zSshConcurrentSessions: 5
@@ -211,6 +221,9 @@ device_classes: !ZenPackSpec
           serviceStatus:
             type: OpenStack Nova Service Status
             cycletime: 30
+          cinderServiceStatus:
+            type: OpenStack Cinder Service Status
+            cycletime: 30
         graphs:
           Agents:
             units: count
@@ -271,7 +284,7 @@ device_classes: !ZenPackSpec
               Total:
                 dpName: openstack_flavorTotalCount
                 format: '%7.0lf'
-          Images and Snapshots:
+          Images:
             units: count
             miny: 0
             graphpoints:
@@ -407,6 +420,60 @@ device_classes: !ZenPackSpec
                 format: '%7.0lf'
               Verify Resize:
                 dpName: openstack_serverVerifyResizeCount
+                format: '%7.0lf'
+          Volumes:
+            units: count
+            miny: 0
+            graphpoints:
+              Active:
+                dpName: openstack_volumeActiveCount
+                format: '%7.0lf'
+              Bootable:
+                dpName: openstack_volumeBootableCount
+                format: '%7.0lf'
+              Attached:
+                dpName: openstack_volumeAttachedCount
+                format: '%7.0lf'
+              Available:
+                dpName: openstack_volumeAvailableCount
+                format: '%7.0lf'
+              InUse:
+                dpName: openstack_volumeInUseCount
+                format: '%7.0lf'
+              Total:
+                dpName: openstack_volumeTotalCount
+                format: '%7.0lf'
+              Unknown:
+                dpName: openstack_volumeUnknownCount
+                format: '%7.0lf'
+          Snapshots:
+            units: count
+            miny: 0
+            graphpoints:
+              Total:
+                dpName: openstack_snapshotTotalCount
+                format: '%7.0lf'
+              Available:
+                dpName: openstack_snapshotAvailableCount
+                format: '%7.0lf'
+              In Progress:
+                dpName: openstack_snapshotInProgressCount
+                format: '%7.0lf'
+          Pools:
+            units: count
+            miny: 0
+            graphpoints:
+              Total:
+                dpName: openstack_poolTotalCount
+                format: '%7.0lf'
+              Thin Provision:
+                dpName: openstack_poolThinProvisioningSupportCount
+                format: '%7.0lf'
+              Thick Provision:
+                dpName: openstack_poolThickProvisioningSupportCount
+                format: '%7.0lf'
+              QoS:
+                dpName: openstack_poolQoSSupportCount
                 format: '%7.0lf'
       Instance:
         description: 'OpenStackInfrastructure: Instance Monitoring'
@@ -611,20 +678,27 @@ classes: !ZenPackSpec
       childOrgs:
         label: Children
         order: 1.1
+        label_width: 60
+        content_width: 60
       hosts:
         label: Host
         order: 1.0
+        label_width: 60
+        content_width: 60
       parentOrg:
         label: Parent Region
         order: 1.0
+        label_width: 60
+        content_width: 60
       softwareComponents:
-        label_width: 150
+        label_width: 80
     filter_display: false
   SoftwareComponent:
     # Component Base Type
     base: [OpenstackComponent]
-    label: Software Component
-    label_width: 120
+    label: SW Component
+    label_width: 70
+    content_width: 70
     properties:
       binary:
         label: Binary
@@ -691,6 +765,14 @@ classes: !ZenPackSpec
         label_width: 50
       subnets:
         label_width: 50
+      volumes:
+        grid_display: false
+      backups:
+        grid_display: false
+      volSnapshots:
+        grid_display: false
+      quota:
+        grid_display: false
     dynamicview_views: [service_view]
     dynamicview_relations:
       impacted_by: [instances, networks, subnets, implementation_components]
@@ -759,6 +841,7 @@ classes: !ZenPackSpec
       # link to the guest instance, if known
         label: Guest
         # workaround to link to a different device
+        order: 3.1
         renderer: Zenoss.render.openstack_uid_renderer
         api_only: true
         api_backendtype: method
@@ -783,12 +866,12 @@ classes: !ZenPackSpec
         type: lines
         label: Fixed IPs
         label_width: 90
-        order: 3.2
+        order: 3.3
       publicIps:
         type: lines
         label: Floating IPs
         label_width: 90
-        order: 3.1
+        order: 3.2
       serialNumber:
         label: BIOS Serial Number
         index_type: field
@@ -809,7 +892,7 @@ classes: !ZenPackSpec
         grid_display: false
       serverStatus:
         label: Status
-        label_width: 65
+        label_width: 60
         order: 3.5
     relationships:
       flavor:
@@ -832,9 +915,13 @@ classes: !ZenPackSpec
       vnics:
         label: Vnics
         grid_display: false
+      volumes:
+        label: Volumes
+        label_width: 45
+        content_width: 45
     dynamicview_views: [service_view]
     dynamicview_relations:
-      impacted_by: [hypervisor, ports, vnics]
+      impacted_by: [hypervisor, ports, vnics, volumes]
       impacts: [guestDevice, tenant]
   Vnic:
     base: [LogicalComponent]
@@ -983,9 +1070,39 @@ classes: !ZenPackSpec
         grid_display: false
       hypervisor_type:
         label: Type
-        grid_display: false
+        label_width: 80
+        content_width: 80
       hypervisor_version:
         label: Version
+        label_width: 80
+        content_width: 80
+      host_ip:
+        label: Host IP
+        label_width: 100
+        content_width: 100
+      vcpus:
+        label: vCPU
+        grid_display: false
+      vcpus_used:
+        label: vCPU Used
+        grid_display: false
+      memory:
+        label: Memory (MB)
+        grid_display: false
+      memory_used:
+        label: Memory Used (MB)
+        grid_display: false
+      memory_free:
+        label: Memory Free (MB)
+        grid_display: false
+      disk:
+        label: Disk (GB)
+        grid_display: false
+      disk_used:
+        label: Disk Used (GB)
+        grid_display: false
+      disk_free:
+        label: Disk Free (GB)
         grid_display: false
     dynamicview_views: [service_view, openstack_view]
     dynamicview_relations:
@@ -1336,4 +1453,244 @@ classes: !ZenPackSpec
     # exported from DV to impact currently (ZEN-14579).
     # --------------------------------------------------------------------------
     impacted_by: [implementation_components]
+  CinderService:
+    base: [SoftwareComponent]
+    meta_type: OpenStackInfrastructureCinderService
+    label: Cinder Service
+    order: 20.1
+    # --------------------------------------------------------------------------
+    # We use a normal impact adaptor for osprocess_component, rather than
+    # dynamicview impacts adaptor, because OSProcess is not part of
+    # service_view, and so will not be exported from DV to impact  currently
+    # (ZEN-14579).
+    # --------------------------------------------------------------------------
+    impacted_by: [osprocess_component]
+    dynamicview_views: [service_view, openstack_view]
+    dynamicview_relations:
+      impacted_by: [hostedOn]
+  CinderApi:
+    base: [SoftwareComponent]
+    meta_type: OpenStackInfrastructureCinderApi
+    label: Cinder API
+    order: 20.1
+    # --------------------------------------------------------------------------
+    # We use a normal impact adaptor for osprocess_component, rather than
+    # dynamicview impacts adaptor, because OSProcess is not part of
+    # service_view, and so will not be exported from DV to impact  currently
+    # (ZEN-14579).
+    # --------------------------------------------------------------------------
+    impacted_by: [osprocess_component]
+    dynamicview_views: [service_view, openstack_view]
+    dynamicview_relations:
+      impacted_by: [hostedOn]
+      impacts: [orgComponent]
+  Volume:
+    base: [ZenPacks.zenoss.OpenStackInfrastructure.CinderIntegrationComponent.CinderIntegrationComponent, LogicalComponent]
+    meta_type: OpenStackInfrastructureVolume
+    label: Volume
+    order: 21
+    properties:
+      bootable:
+        label: Bootable
+        label_width: 40
+        content_width: 40
+      volumeId:
+        label: Volume ID
+        grid_display: false
+      avzone:
+        label: Availability Zone
+        grid_display: false
+      created_at:
+        label: Created At
+        grid_display: false
+      sourceVolumeId:
+        label: Source Volume ID
+        grid_display: false
+      host:
+        label: Host
+        label_width: 100
+        content_width: 100
+      size:
+        label: Size (GB)
+        label_width: 40
+        content_width: 40
+      status:
+        label: Status
+        label_width: 80
+        content_width: 80
+      implementation_components:
+        type: entity
+        label: Cinder Implementation
+        grid_display: false
+        api_only: true
+        api_backendtype: method
+    relationships:
+      tenant:
+        label_width: 80
+        content_width: 80
+      instance:
+        label_width: 80
+        content_width: 80
+      volSnapshots:
+        label_width: 50
+        content_width: 50
+      backups:
+        label_width: 50
+        content_width: 50
+    dynamicview_relations:
+      impacts: [instance, volSnapshots]
+    impacted_by: [implementation_components]
+  VolSnapshot:
+    base: [ZenPacks.zenoss.OpenStackInfrastructure.CinderIntegrationComponent.CinderIntegrationComponent, LogicalComponent]
+    meta_type: OpenStackInfrastructureVolSnapshot
+    label: Snapshot
+    order: 22
+    properties:
+      created_at:
+        label: Created At
+        label_width: 100
+        content_width: 100
+      description:
+        label: Description
+        label_width: 150
+        content_width: 150
+      size:
+        label: Size (GB)
+        label_width: 40
+        content_width: 40
+      progress:
+        label: Progress
+        label_width: 80
+        content_width: 80
+      status:
+        label: Status
+        label_width: 80
+        content_width: 80
+      created_at:
+        label: Created At
+        label_width: 100
+        content_width: 100
+        grid_display: false
+      implementation_components:
+        type: entity
+        label: Cinder Implementation
+        grid_display: false
+        api_only: true
+        api_backendtype: method
+    relationships:
+      volume:
+        label_width: 80
+        content_width: 80
+    dynamicview_relations:
+      impacted_by: [volume]
+    impacted_by: [implementation_components]
+  Backup:
+    base: [LogicalComponent]
+    meta_type: OpenStackInfrastructureBackup
+    label: Backup
+    order: 23
+    properties:
+      created_at:
+        label: Created At
+        label_width: 100
+        content_width: 90
+      description:
+        label: Description
+        label_width: 130
+        content_width: 130
+      size:
+        label: Size (GB)
+        label_width: 40
+        content_width: 40
+      progress:
+        label: Progress
+        label_width: 100
+        content_width: 100
+      status:
+        label: Status
+        label_width: 80
+        content_width: 80
+    relationships:
+      volume:
+        label_width: 80
+        content_width: 80
+  Pool:
+    base: [OpenstackComponent]
+    meta_type: OpenStackInfrastructurePool
+    label: Pool
+    order: 24
+    properties:
+      qos_support:
+        label: QoS Support
+        grid_display: false
+      allocated_capacity:
+        label: Allocated Capacity
+        label_width: 90
+        content_width: 90
+      free_capacity:
+        label: Free Capacity
+        label_width: 80
+        content_width: 80
+      total_capacity:
+        label: Total Capacity
+        label_width: 80
+        content_width: 80
+      driver_version:
+        label: Driver Version
+        grid_display: false
+      location:
+        label: Location
+        grid_display: false
+      reserved_percentage:
+        label: Reserved Percentage
+        label_width: 100
+        content_width: 100
+      storage_protocol:
+        label: Storage Protocol
+        label_width: 80
+        content_width: 80
+      vendor_name:
+        label: Vendor Name
+        grid_display: false
+      volume_backend:
+        label: Volume Backend
+        grid_display: false
+    relationships:
+      orgComponent:
+        grid_display: false
+  Quota:
+    base: [LogicalComponent]
+    meta_type: OpenStackInfrastructureQuota
+    label: Quota
+    order: 25
+    properties:
+      tenant_name:
+        label: Tenant Name
+        label_width: 100
+        content_width: 100
+      backup_bytes:
+        label: Backup (GB)
+        label_width: 60
+        content_width: 60
+      backups:
+        label: Backups
+        label_width: 40
+        content_width: 40
+      bytes:
+        label: Bytes (GB)
+        label_width: 50
+        content_width: 50
+      snapshots:
+        label: Snapshots
+        label_width: 50
+        content_width: 50
+      volumes:
+        label: Volumes
+        label_width: 50
+        content_width: 50
+    relationships:
+      tenant:
+        label_width: 80
+        content_width: 80
 
+#

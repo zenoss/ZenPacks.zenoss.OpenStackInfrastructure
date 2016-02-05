@@ -313,4 +313,15 @@ def getNetSubnetsGws_from_GwInfo(external_gateway_info):
 
     return (network, subnets, gateways)
 
+
+def isValidHostname(hostname):
+    # see this for valid hostname length:
+    # https://blogs.msdn.microsoft.com/oldnewthing/20120412-00/?p=7873/
+    if len(hostname) > 255:
+        return False
+    if hostname.endswith('.'):
+        hostname = hostname[:-1]
+    valid = re.compile("(?!-)[a-z\d-]{1,63}(?<!-)$", re.IGNORECASE)
+    return all(valid.match(x) for x in hostname.split("."))
+
 # -----------------------------------------------------------------------------
