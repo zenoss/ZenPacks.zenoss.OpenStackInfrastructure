@@ -122,6 +122,18 @@ class OpenStackInfrastructure(PythonPlugin):
         results['hypervisors_detailed'] = result['hypervisors']
         log.debug('hypervisors_detailed: %s\n' % str(results['hypervisors']))
 
+        if len(results['hypervisors']) > 0 and \
+                not results['hypervisors'][0].has_key('hypervisor_type') and \
+                len(results['hypervisors_detailed']) > 0 and \
+                not results['hypervisors_detailed'][0].has_key('hypervisor_type'):
+            # get hypervisor details for each individual hypervisor
+            results['hypervisor_details'] = {}
+            for hypervisor in results['hypervisors']:
+                result = yield client.nova_hypervisors(
+                    hypervisor_id=hypervisor['id'])
+                hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
+                results['hypervisor_details'][hypervisor_id] = result['hypervisor']
+
         result = yield client.nova_servers()
         results['servers'] = result['servers']
         log.debug('servers: %s\n' % str(results['servers']))
@@ -575,6 +587,21 @@ class OpenStackInfrastructure(PythonPlugin):
             hypervisor_type[hypervisor_id] = hypervisor.get('hypervisor_type', None)
             hypervisor_version[hypervisor_id] = hypervisor.get('hypervisor_version', None)
 
+        # if results['hypervisors_detailed'] did not give us hypervisor type,
+        # hypervisor version, try results['hypervisors_details']
+        for k, v in hypervisor_type.iteritems():
+            if v is None and k in results['hypervisor_details']:
+                hypervisor_type[k] = \
+                    results['hypervisor_details'][k].get(
+                        'hypervisor_type', None)
+        for k, v in hypervisor_version.iteritems():
+            if v is None and k in results['hypervisor_details']:
+                h_ver = results['hypervisor_details'][k].get(
+                    'hypervisor_version', None)
+                if h_ver:
+                    h_ver_list = str(h_ver).split('00')
+                    hypervisor_version[k] = '.'.join(h_ver_list)
+
         hypervisors = []
         server_hypervisor_instance_name = {}
         for hypervisor in results['hypervisors']:
@@ -598,6 +625,29 @@ class OpenStackInfrastructure(PythonPlugin):
                 hypervisorId=hypervisor['id'],  # 1
                 hypervisor_type=hypervisor_type.get(hypervisor_id, ''),
                 hypervisor_version=hypervisor_version.get(hypervisor_id, None),
+                # hypervisor state: power state, UP/DOWN
+                hstate=hypervisor.get('state', 'unknown').upper(),
+                # hypervisor status: ENABLED/DISABLED
+                hstatus=hypervisor.get('status', 'unknown').upper(),
+                # hypervisor ip: internal ip address
+                host_ip=results['hypervisor_details'].get(hypervisor_id,
+                                                          {}).get('host_ip', None),
+                vcpus=str(results['hypervisor_details'].get(hypervisor_id,
+                                                            {}).get('vcpus', None)),
+                vcpus_used=results['hypervisor_details'].get(hypervisor_id,
+                                                             {}).get('vcpus_used', None),
+                memory=results['hypervisor_details'].get(hypervisor_id,
+                                                         {}).get('memory_mb', None),
+                memory_used=results['hypervisor_details'].get(hypervisor_id,
+                                                              {}).get('memory_mb_used', None),
+                memory_free=results['hypervisor_details'].get(hypervisor_id,
+                                                              {}).get('free_ram_mb', None),
+                disk=results['hypervisor_details'].get(hypervisor_id,
+                                                       {}).get('local_gb', None),
+                disk_used=results['hypervisor_details'].get(hypervisor_id,
+                                                            {}).get('local_gb_used', None),
+                disk_free=results['hypervisor_details'].get(hypervisor_id,
+                                                            {}).get('free_disk_gb', None),
                 set_instances=hypervisor_servers,
                 set_hostByName=hypervisor.get('hypervisor_hostname', ''),
             )
