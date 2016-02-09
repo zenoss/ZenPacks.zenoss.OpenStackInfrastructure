@@ -122,17 +122,13 @@ class OpenStackInfrastructure(PythonPlugin):
         results['hypervisors_detailed'] = result['hypervisors']
         log.debug('hypervisors_detailed: %s\n' % str(results['hypervisors']))
 
-        if len(results['hypervisors']) > 0 and \
-                not results['hypervisors'][0].has_key('hypervisor_type') and \
-                len(results['hypervisors_detailed']) > 0 and \
-                not results['hypervisors_detailed'][0].has_key('hypervisor_type'):
-            # get hypervisor details for each individual hypervisor
-            results['hypervisor_details'] = {}
-            for hypervisor in results['hypervisors']:
-                result = yield client.nova_hypervisors(
-                    hypervisor_id=hypervisor['id'])
-                hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
-                results['hypervisor_details'][hypervisor_id] = result['hypervisor']
+        # get hypervisor details for each individual hypervisor
+        results['hypervisor_details'] = {}
+        for hypervisor in results['hypervisors']:
+            result = yield client.nova_hypervisors(
+                hypervisor_id=hypervisor['id'])
+            hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
+            results['hypervisor_details'][hypervisor_id] = result['hypervisor']
 
         result = yield client.nova_servers()
         results['servers'] = result['servers']
@@ -631,23 +627,23 @@ class OpenStackInfrastructure(PythonPlugin):
                 hstatus=hypervisor.get('status', 'unknown').upper(),
                 # hypervisor ip: internal ip address
                 host_ip=results['hypervisor_details'].get(hypervisor_id,
-                                                          {}).get('host_ip', None),
-                vcpus=str(results['hypervisor_details'].get(hypervisor_id,
-                                                            {}).get('vcpus', None)),
+                                                {}).get('host_ip', None),
+                vcpus=results['hypervisor_details'].get(hypervisor_id,
+                                                {}).get('vcpus', None),
                 vcpus_used=results['hypervisor_details'].get(hypervisor_id,
-                                                             {}).get('vcpus_used', None),
+                                                {}).get('vcpus_used', None),
                 memory=results['hypervisor_details'].get(hypervisor_id,
-                                                         {}).get('memory_mb', None),
+                                                {}).get('memory_mb', None),
                 memory_used=results['hypervisor_details'].get(hypervisor_id,
-                                                              {}).get('memory_mb_used', None),
+                                                {}).get('memory_mb_used', None),
                 memory_free=results['hypervisor_details'].get(hypervisor_id,
-                                                              {}).get('free_ram_mb', None),
+                                                {}).get('free_ram_mb', None),
                 disk=results['hypervisor_details'].get(hypervisor_id,
-                                                       {}).get('local_gb', None),
+                                                {}).get('local_gb', None),
                 disk_used=results['hypervisor_details'].get(hypervisor_id,
-                                                            {}).get('local_gb_used', None),
+                                                {}).get('local_gb_used', None),
                 disk_free=results['hypervisor_details'].get(hypervisor_id,
-                                                            {}).get('free_disk_gb', None),
+                                                {}).get('free_disk_gb', None),
                 set_instances=hypervisor_servers,
                 set_hostByName=hypervisor.get('hypervisor_hostname', ''),
             )
