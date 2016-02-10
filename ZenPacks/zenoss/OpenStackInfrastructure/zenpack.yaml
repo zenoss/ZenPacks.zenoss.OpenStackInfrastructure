@@ -1068,42 +1068,63 @@ classes: !ZenPackSpec
       hypervisorId:
         label: Hypervisor ID
         grid_display: false
+      hstatus:
+        label: Hypervisor Status
+        label_width: 80
+        content_width: 80
+        order: 9.1
+      hstate:
+        label: Hypervisor State
+        label_width: 80
+        content_width: 80
+        order: 9.2
+      host_ip:
+        label: Host IP
+        label_width: 80
+        content_width: 80
+        order: 9.3
       hypervisor_type:
         label: Type
         label_width: 80
         content_width: 80
+        order: 9.4
       hypervisor_version:
         label: Version
         label_width: 80
         content_width: 80
-      host_ip:
-        label: Host IP
-        label_width: 100
-        content_width: 100
+        order: 9.5
       vcpus:
         label: vCPU
         grid_display: false
+        order: 9.6
       vcpus_used:
         label: vCPU Used
         grid_display: false
+        order: 9.7
       memory:
         label: Memory (MB)
         grid_display: false
+        order: 9.8
       memory_used:
         label: Memory Used (MB)
         grid_display: false
+        order: 9.9
       memory_free:
         label: Memory Free (MB)
         grid_display: false
+        order: 9.10
       disk:
         label: Disk (GB)
         grid_display: false
+        order: 9.11
       disk_used:
         label: Disk Used (GB)
         grid_display: false
+        order: 9.12
       disk_free:
         label: Disk Free (GB)
         grid_display: false
+        order: 9.13
     dynamicview_views: [service_view, openstack_view]
     dynamicview_relations:
       impacted_by: [host]
