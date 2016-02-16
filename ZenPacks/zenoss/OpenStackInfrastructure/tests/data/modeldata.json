@@ -163,6 +163,91 @@
                               "hypervisor_hostname": "liberty.zenoss.local"
                             }
                           ],
+  "hypervisor_details":
+    {
+      "hypervisor-1": {
+        "status": "enabled",
+        "service": {
+          "host": "liberty.yichi.local",
+          "disabled_reason": null,
+          "id": 4
+        },
+        "vcpus_used": 1,
+        "hypervisor_type": "QEMU",
+        "id": 1,
+        "local_gb_used": 1,
+        "state": "up",
+        "hypervisor_hostname": "liberty.yichi.local",
+        "host_ip": "10.0.2.34",
+        "memory_mb": 3791,
+        "memory_mb_used": 1024,
+        "current_workload": 0,
+        "vcpus": 1,
+        "free_ram_mb": 2767,
+        "running_vms": 1,
+        "free_disk_gb": 16,
+        "hypervisor_version": 1005003,
+        "disk_available_least": 14,
+        "local_gb": 17,
+        "cpu_info": {
+          "vendor": "Intel",
+          "model": "Westmere",
+          "arch": "x86_64",
+          "features": [
+            "pge",
+            "avx",
+            "clflush",
+            "sep",
+            "syscall",
+            "vme",
+            "tsc",
+            "xsave",
+            "cmov",
+            "fpu",
+            "pat",
+            "monitor",
+            "lm",
+            "msr",
+            "nx",
+            "fxsr",
+            "sse4.1",
+            "pae",
+            "sse4.2",
+            "pclmuldq",
+            "mmx",
+            "osxsave",
+            "cx8",
+            "mce",
+            "de",
+            "rdtscp",
+            "mca",
+            "pse",
+            "lahf_lm",
+            "abm",
+            "popcnt",
+            "apic",
+            "sse",
+            "invtsc",
+            "pni",
+            "aes",
+            "sse2",
+            "hypervisor",
+            "ssse3",
+            "cx16",
+            "pse36",
+            "mtrr",
+            "movbe",
+            "rdrand"
+          ],
+          "topology": {
+            "cores": 1
+          },
+          "cells": 1,
+          "threads": 1,
+          "sockets": 1
+        }
+      }
+    },
   "agents": [
               {
                 "l3_agent_networks": ["a13b2c35-d734-4021-9850-432dfa7fa7a3"], 
@@ -330,7 +415,7 @@
                           "liberty.zenoss.local": "192.168.56.122",
                           "192.168.56.122": "192.168.56.122"
                         },
-  "snapshots": [
+  "volsnapshots": [
                   {
                     "status": "available",
                     "os-extended-snapshot-attributes:progress": "100%",
