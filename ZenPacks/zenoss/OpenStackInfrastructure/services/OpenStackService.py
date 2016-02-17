@@ -31,7 +31,7 @@ class OpenStackService(HubService):
                 processes = set()
                 for process in host.proxy_device().getDeviceComponents(type='OSProcess'):
                     process_name = process.osProcessClass().id
-                    if process_name in ('ceilometer-agent-notification', 'ceilometer-collector'):
+                    if process_name in ('ceilometer-collector'):
                         processes.add(process_name)
 
                 if processes:
