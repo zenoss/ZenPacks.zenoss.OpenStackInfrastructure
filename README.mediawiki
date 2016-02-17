@@ -376,6 +376,9 @@ Provides linkage between OpenStackInfrastrcuture components and relevant integra
 
 == Changes ==
 
+;2.1.2
+* Remove deprecated ceilometer-agent-notification heartbeats
+
 ;2.1.1
 * Various bug fixes
 
