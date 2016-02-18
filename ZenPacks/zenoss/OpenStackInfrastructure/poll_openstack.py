@@ -315,20 +315,20 @@ class OpenStackPoller(object):
 
         result = yield client.cinder_pools()
 
-        def get_pool_data(pool, key1, key2):
+        def pool_has_data(pool, key1, key2):
             if pool.get(key1, {}).get(key2, None) is not None:
-                return True
-            return False
+                return 1
+            return 0
 
         for pool in result['pools']:
             data['poolTotalCount'] += 1
 
-            if get_pool_data(pool, 'capabilities','thin_provisioning_support'):
-                data['poolThinProvisioningSupportCount'] += 1
-            elif get_pool_data(pool, 'capabilities','thick_provisioning_support'):
-                data['poolThickProvisioningSupportCount'] += 1
-            if get_pool_data(pool, 'capabilities','QoS_support'):
-                data['poolQoSSupportCount'] += 1
+            data['poolThinProvisioningSupportCount'] += \
+                pool_has_data(pool, 'capabilities','thin_provisioning_support')
+            data['poolThickProvisioningSupportCount'] += \
+                pool_has_data(pool, 'capabilities','thick_provisioning_support')
+            data['poolQoSSupportCount'] += \
+                pool_has_data(pool, 'capabilities','QoS_support')
 
 
     @inlineCallbacks
