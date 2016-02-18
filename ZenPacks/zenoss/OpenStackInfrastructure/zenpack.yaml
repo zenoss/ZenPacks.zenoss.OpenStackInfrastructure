@@ -211,6 +211,34 @@ device_classes: !ZenPackSpec
                 aliases: {server_unknown__count: null}
               serverVerifyResizeCount:
                 aliases: {server_verify_resize__count: null}
+              volumeActiveCount:
+                aliases: {volume_active__count: null}
+              volumeBootableCount:
+                aliases: {volume_bootable__count: null}
+              volumeAttachedCount:
+                aliases: {volume_attached__count: null}
+              volumeAvailableCount:
+                aliases: {volume_available__count: null}
+              volumeInUseCount:
+                aliases: {volume_inuse__count: null}
+              volumeTotalCount:
+                aliases: {volume_total__count: null}
+              volumeUnknownCount:
+                aliases: {volume_unknown__count: null}
+              snapshotTotalCount:
+                aliases: {snapshot_total__count: null}
+              snapshotAvailableCount:
+                aliases: {snapshot_available__count: null}
+              snapshotProgressCount:
+                aliases: {snapshot_progress__count: null}
+              poolTotalCount:
+                aliases: {pool_total__count: null}
+              poolThinProvisioningSupportCount:
+                aliases: {pool_thin_provisioning_support__count: null}
+              poolThickProvisioningSupportCount:
+                aliases: {pool_thick_provisioning_support__count: null}
+              poolQoSSupportCount:
+                aliases: {pool_qos_support__count: null}
             parser: ZenPacks.zenoss.OpenStackInfrastructure.parsers.endpoint
           openstackQueues:
             type: OpenStack AMQP Queue Size
