@@ -229,8 +229,8 @@ device_classes: !ZenPackSpec
                 aliases: {snapshot_total__count: null}
               snapshotAvailableCount:
                 aliases: {snapshot_available__count: null}
-              snapshotProgressCount:
-                aliases: {snapshot_progress__count: null}
+              snapshotInProgressCount:
+                aliases: {snapshot_inprogress__count: null}
               poolTotalCount:
                 aliases: {pool_total__count: null}
               poolThinProvisioningSupportCount:
