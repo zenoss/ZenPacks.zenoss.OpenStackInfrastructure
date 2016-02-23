@@ -46,7 +46,7 @@ class CinderIntegrationComponent(object):
         methodname = {
             'OpenStackInfrastructurePool':         'getPoolIntegrationKeys',
             'OpenStackInfrastructureVolume':       'getVolumeIntegrationKeys',
-            'OpenStackInfrastructureSnapshot':     'getSnapshotIntegrationKeys',
+            'OpenStackInfrastructureVolSnapshot':  'getSnapshotIntegrationKeys',
             'OpenStackInfrastructureBackup':       'getBackupIntegrationKeys'
         }.get(self.meta_type, None)
 
