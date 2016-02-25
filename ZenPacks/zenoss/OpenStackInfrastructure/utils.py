@@ -310,4 +310,32 @@ def getNetSubnetsGws_from_GwInfo(external_gateway_info):
 
     return (network, subnets, gateways)
 
+
+def sanitize_host_or_ip(host):
+    '''Search for a valid IP address or hostname if that fails'''
+    host_RX = re.compile(
+                         '^'
+                         '(?P<hostname>[\w-]+[\.\-\w]*)'
+                         '[^\w\-\.]*'
+                         '.*'
+                         '$'
+                         )
+
+    ip_RX = re.compile(
+                         '^'
+                         '(?P<ipnumber>[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3})'
+                         '[^\d\.]*'
+                         '.*'
+                         '$'
+                         )
+
+    # Search IP first: the pattern is easier to parse
+    ip_search = ip_RX.search(host)
+    if ip_search:
+        return ip_search.group('ipnumber')
+
+    host_search = host_RX.search(host)
+    if host_search:
+        return host_search.group('hostname')
+
 # -----------------------------------------------------------------------------
