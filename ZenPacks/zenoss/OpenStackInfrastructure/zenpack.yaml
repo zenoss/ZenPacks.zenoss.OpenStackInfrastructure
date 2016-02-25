@@ -1517,6 +1517,7 @@ classes: !ZenPackSpec
     dynamicview_views: [service_view, openstack_view]
     dynamicview_relations:
       impacted_by: [hostedOn]
+      impacts: [orgComponent]
   CinderApi:
     base: [SoftwareComponent]
     meta_type: OpenStackInfrastructureCinderApi
@@ -1586,8 +1587,15 @@ classes: !ZenPackSpec
       backups:
         label_width: 50
         content_width: 50
+    dynamicview_views: [service_view, openstack_view]
     dynamicview_relations:
       impacts: [instance, volSnapshots]
+    # --------------------------------------------------------------------------
+    # We use a normal impact adaptor for implementation_components, rather than
+    # dynamicview impacts adaptor, because the implementation zenpack might not
+    # use dynamic view (and therefore not be in service_view) and so will not be
+    # exported from DV to impact currently (ZEN-14579).
+    # --------------------------------------------------------------------------
     impacted_by: [implementation_components]
   VolSnapshot:
     base: [ZenPacks.zenoss.OpenStackInfrastructure.CinderIntegrationComponent.CinderIntegrationComponent, LogicalComponent]
@@ -1630,8 +1638,15 @@ classes: !ZenPackSpec
       volume:
         label_width: 80
         content_width: 80
+    dynamicview_views: [service_view, openstack_view]
     dynamicview_relations:
       impacted_by: [volume]
+    # --------------------------------------------------------------------------
+    # We use a normal impact adaptor for implementation_components, rather than
+    # dynamicview impacts adaptor, because the implementation zenpack might not
+    # use dynamic view (and therefore not be in service_view) and so will not be
+    # exported from DV to impact currently (ZEN-14579).
+    # --------------------------------------------------------------------------
     impacted_by: [implementation_components]
   Backup:
     base: [LogicalComponent]
