@@ -39,7 +39,9 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import (
     get_port_instance,
     getNetSubnetsGws_from_GwInfo,
     get_port_fixedips,
-    sleep
+    sleep,
+    sanitize_host_or_ip
+
 )
 
 add_local_lib_path()
@@ -409,14 +411,17 @@ class OpenStackInfrastructure(PythonPlugin):
 
         # Find all hosts which have a nova service on them.
         for service in results['services']:
+            log.debug("Sanitizing host %s", service['host'])
+            sanitized_hostname = sanitize_host_or_ip(service['host'])
+
             title = '{0}@{1} ({2})'.format(service['binary'], service['host'], service['zone'])
             service_id = prepId('service-{0}-{1}-{2}'.format(
-                service['binary'], service['host'], service['zone']))
-            host_id = prepId("host-{0}".format(service['host']))
+                service['binary'], sanitized_hostname, service['zone']))
+            host_id = prepId("host-{0}".format(sanitized_hostname))
             zone_id = prepId("zone-{0}".format(service['zone']))
 
             hostmap[host_id] = {
-                'hostname': service['host'],
+                'hostname': sanitized_hostname,
                 'org_id': zone_id
             }
 
@@ -455,9 +460,11 @@ class OpenStackInfrastructure(PythonPlugin):
 
         # Find all hosts which have a neutron agent on them.
         for agent in results['agents']:
-            host_id = prepId("host-{0}".format(agent['host']))
+            log.debug("Sanitizing host %s", agent['host'])
+            sanitized_hostname = sanitize_host_or_ip(agent['host'])
+            host_id = prepId("host-{0}".format(sanitized_hostname))
             hostmap[host_id] = {
-                'hostname': agent['host'],
+                'hostname': sanitized_hostname,
                 'org_id': region_id
             }
 
@@ -471,9 +478,11 @@ class OpenStackInfrastructure(PythonPlugin):
                 log.info("  Adding zOpenStackExtraHosts=%s" % device.zOpenStackExtraHosts)
 
         for hostname in device.zOpenStackNovaApiHosts + device.zOpenStackExtraHosts:
-            host_id = prepId("host-{0}".format(hostname))
+            log.debug("Sanitizing host %s", hostname)
+            sanitized_hostname = sanitize_host_or_ip(hostname)
+            host_id = prepId("host-{0}".format(sanitized_hostname))
             hostmap[host_id] = {
-                'hostname': hostname,
+                'hostname': sanitized_hostname,
                 'org_id': region_id
             }
 
@@ -539,9 +548,12 @@ class OpenStackInfrastructure(PythonPlugin):
         # be, under icehouse, at least, but just in case this changes..)
         nova_api_hosts = set(device.zOpenStackNovaApiHosts)
         for service in results['services']:
+            log.debug("Sanitizing host %s", service['host'])
+            sanitized_hostname = sanitize_host_or_ip(service['host'])
+
             if service['binary'] == 'nova-api':
-                if service['host'] not in nova_api_hosts:
-                    nova_api_hosts.add(service['host'])
+                if sanitized_hostname not in nova_api_hosts:
+                    nova_api_hosts.add(sanitized_hostname)
 
         # Look to see if the hostname or IP in the auth url corresponds
         # directly to a host we know about.  If so, add it to the nova
@@ -565,7 +577,7 @@ class OpenStackInfrastructure(PythonPlugin):
         for hostname in sorted(nova_api_hosts):
             title = '{0}@{1} ({2})'.format('nova-api', hostname, device.zOpenStackRegionName)
             host_id = prepId("host-{0}".format(hostname))
-            nova_api_id = prepId('service-nova-api-{0}-{1}'.format(service['host'], device.zOpenStackRegionName))
+            nova_api_id = prepId('service-nova-api-{0}-{1}'.format(hostname, device.zOpenStackRegionName))
 
             services.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.NovaApi',
@@ -582,7 +594,9 @@ class OpenStackInfrastructure(PythonPlugin):
         for agent in results['agents']:
 
             # Get agent's host
-            agent_host = 'host-{0}'.format(agent['host'])
+            log.debug("Sanitizing host %s", agent['host'])
+            sanitized_host = sanitize_host_or_ip(agent['host'])
+            agent_host = 'host-{0}'.format(sanitized_host)
 
             # ------------------------------------------------------------------
             # AgentSubnets Section
