@@ -40,7 +40,7 @@ def reindex_core_components(dmd):
 def reindex_implementation_components(dmd):
     for plugin_name, plugin in zope.component.getUtilitiesFor(ICinderImplementationPlugin):
         log.info("Asking implementation plugin %s to reindex its components" % plugin_name)
-        plugin.reindex_cinder_implementation_components(dmd)
+        plugin.reindex_implementation_components(dmd)
 
 
 def index_implementation_object(obj):
