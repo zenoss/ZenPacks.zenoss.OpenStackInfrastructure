@@ -41,6 +41,7 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import (
     get_port_fixedips,
     sleep,
     isValidHostname,
+    sanitize_host_or_ip,
 )
 
 add_local_lib_path()
@@ -494,9 +495,16 @@ class OpenStackInfrastructure(PythonPlugin):
             if not agent.get('id', None):
                 continue
 
-            host_id = prepId("host-{0}".format(agent.get('host', '')))
+            sanitized_hostname = sanitize_host_or_ip(agent['host'])
+            if not sanitized_hostname:
+                log.debug("Skipping empty hostname %s !", agent['host'])
+                continue
+            if sanitized_hostname != agent['host']:
+                log.debug("Sanitized hostname %s", agent['host'])
+
+            host_id = prepId("host-{0}".format(sanitized_hostname))
             hostmap[host_id] = {
-                'hostname': agent.get('host', ''),
+                'hostname': sanitized_hostname,
                 'org_id': region_id
             }
 
@@ -743,8 +751,15 @@ class OpenStackInfrastructure(PythonPlugin):
             if not agent.get('id', None):
                 continue
 
+            sanitized_hostname = sanitize_host_or_ip(agent['host'])
+            if not sanitized_hostname:
+                log.debug("Skipping empty hostname %s !", agent['host'])
+                continue
+            if sanitized_hostname != agent['host']:
+                log.debug("Sanitized hostname %s", agent['host'])
+
             # Get agent's host
-            agent_host = 'host-{0}'.format(agent.get('host', ''))
+            agent_host = prepId('host-{0}'.format(sanitized_hostname))
 
             # ------------------------------------------------------------------
             # AgentSubnets Section

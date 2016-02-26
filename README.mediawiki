@@ -398,6 +398,9 @@ Provides linkage between OpenStackInfrastrcuture components and relevant integra
 
 == Changes ==
 
+;2.1.3
+* Fixed ZEN-22126: Malformed hostnames in the F5 LBAAS plugin
+
 ;2.1.2
 * Remove deprecated ceilometer-agent-notification heartbeats
 
