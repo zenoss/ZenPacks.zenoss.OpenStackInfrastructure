@@ -39,7 +39,9 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import (
     get_port_instance,
     getNetSubnetsGws_from_GwInfo,
     get_port_fixedips,
-    sleep
+    sleep,
+    sanitize_host_or_ip,
+
 )
 
 add_local_lib_path()
@@ -455,9 +457,16 @@ class OpenStackInfrastructure(PythonPlugin):
 
         # Find all hosts which have a neutron agent on them.
         for agent in results['agents']:
-            host_id = prepId("host-{0}".format(agent['host']))
+            sanitized_hostname = sanitize_host_or_ip(agent['host'])
+            if not sanitized_hostname:
+                log.debug("Skipping empty hostname %s !", agent['host'])
+                continue
+            if sanitized_hostname != agent['host']:
+                log.debug("Sanitized hostname %s", agent['host'])
+
+            host_id = prepId("host-{0}".format(sanitized_hostname))
             hostmap[host_id] = {
-                'hostname': agent['host'],
+                'hostname': sanitized_hostname,
                 'org_id': region_id
             }
 
@@ -565,7 +574,7 @@ class OpenStackInfrastructure(PythonPlugin):
         for hostname in sorted(nova_api_hosts):
             title = '{0}@{1} ({2})'.format('nova-api', hostname, device.zOpenStackRegionName)
             host_id = prepId("host-{0}".format(hostname))
-            nova_api_id = prepId('service-nova-api-{0}-{1}'.format(service['host'], device.zOpenStackRegionName))
+            nova_api_id = prepId('service-nova-api-{0}-{1}'.format(hostname, device.zOpenStackRegionName))
 
             services.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.NovaApi',
@@ -581,8 +590,15 @@ class OpenStackInfrastructure(PythonPlugin):
         agents = []
         for agent in results['agents']:
 
+            sanitized_hostname = sanitize_host_or_ip(agent['host'])
+            if not sanitized_hostname:
+                log.debug("Skipping empty hostname %s !", agent['host'])
+                continue
+            if sanitized_hostname != agent['host']:
+                log.debug("Sanitized hostname %s", agent['host'])
+
             # Get agent's host
-            agent_host = 'host-{0}'.format(agent['host'])
+            agent_host = prepId('host-{0}'.format(sanitized_hostname))
 
             # ------------------------------------------------------------------
             # AgentSubnets Section
