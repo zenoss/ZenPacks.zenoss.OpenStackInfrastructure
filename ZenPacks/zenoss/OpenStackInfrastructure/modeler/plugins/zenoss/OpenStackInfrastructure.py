@@ -598,7 +598,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 log.debug("Sanitized hostname %s", agent['host'])
 
             # Get agent's host
-            agent_host = 'host-{0}'.format(sanitized_hostname)
+            agent_host = prepId('host-{0}'.format(sanitized_hostname))
 
             # ------------------------------------------------------------------
             # AgentSubnets Section
