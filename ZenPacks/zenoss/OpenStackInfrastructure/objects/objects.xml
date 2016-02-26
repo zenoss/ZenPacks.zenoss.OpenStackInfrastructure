@@ -940,6 +940,86 @@ False
 12
 </property>
 </object>
+<object id="cinder-api" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+cinder-api
+</property>
+<property type="string" id="regex" mode="w">
+cinder-api
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="cinder-scheduler" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+cinder-scheduler
+</property>
+<property type="string" id="regex" mode="w">
+cinder-scheduler
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="cinder-volume" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+cinder-volume
+</property>
+<property type="string" id="regex" mode="w">
+cinder-volume
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="cinder-backup" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+cinder-backup
+</property>
+<property type="string" id="regex" mode="w">
+cinder-backup
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
 </tomanycont>
 </object>
 </objects>
