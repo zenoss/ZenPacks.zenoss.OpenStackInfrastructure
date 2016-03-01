@@ -963,10 +963,18 @@ classes: !ZenPackSpec
         order: 1.4
         api_only: true
         api_backendtype: method
+        content_width: 120
+      port:
+        type: entity
+        label: Port
+        order: 1.41
+        api_only: true
+        api_backendtype: method
+        content_width: 120
       macaddress:
         label: MAC Address
         index_type: field
-        content_width: 120
+        content_width: 100
         renderer: Zenoss.render.openstack_uppercase_renderer
         order: 1.0
         index_scope: global
@@ -1385,6 +1393,9 @@ classes: !ZenPackSpec
     label: Port
     order: 16
     properties:
+      title:
+        label: Title
+        grid_display: false
       admin_state_up:
         label: Admin State
         label_width: 60
@@ -1394,11 +1405,14 @@ classes: !ZenPackSpec
       device_owner:
         label: Device Owner
         grid_display: false
-        order: 1.18
       fixed_ip_list:
         label: Fixed IPs
         label_width: 70
-        order: 1.12
+        grid_display: false
+      vif_type:
+        label: Type
+        label_width: 20
+        order: 1.13
       implementation_components:
         type: entity
         label: Neutron Implementation
@@ -1407,28 +1421,28 @@ classes: !ZenPackSpec
         api_backendtype: method
       mac_address:
         label: MAC
-        content_width: 105
+        content_width: 90
         order: 1.14
       portId:
         label: Port ID
         label_width: 40
         grid_display: false
+      vnic:
+        type: entity
+        label: Vnic
+        order: 1.15
+        api_only: true
+        api_backendtype: method
+        label_width: 70
       status:
         label: Status
         label_width: 35
         order: 1.19
-      title:
-        label: Title
-        grid_display: false
-      vif_type:
-        label: Type
-        label_width: 30
-        order: 1.13
     relationships:
       floatingIps:
         grid_display: false
       instance:
-        label_width: 40
+        label_width: 50
         content_width: 40
         order: 1.1
       network:
