@@ -955,8 +955,14 @@ class OpenStackInfrastructure(PythonPlugin):
 
             attachment = volume.get('attachments', [])
             instanceId = ''
+            # each openstack volume can only attach to one instance
             if len(attachment) > 0:
                 instanceId = attachment[0].get('server_id', '')
+
+            # if not defined, volume.get('volume_type', '') returns None
+            voltype = volume.get('volume_type', '')
+            if voltype is None or voltype == '':
+                voltype = 'UNKNOWN'
 
             volume_dict = dict(
                 id=prepId('volume-{0}'.format(volume['id'])),
@@ -969,6 +975,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 size=volume.get('size', 0),
                 bootable=volume.get('bootable', 'FALSE').upper(),
                 status=volume.get('status', 'UNKNOWN').upper(),
+                volume_type=voltype.upper(),
                 set_tenant=prepId('tenant-{0}'.format(volume.get('os-vol-tenant-attr:tenant_id',''))),
             )
             # set tenant only when volume['attachments'] is not empty

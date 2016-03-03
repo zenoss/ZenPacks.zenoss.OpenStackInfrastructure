@@ -1574,14 +1574,22 @@ classes: !ZenPackSpec
         label: Host
         label_width: 100
         content_width: 100
+        order: 21.4
       size:
         label: Size (GB)
         label_width: 40
         content_width: 40
+        order: 21.1
       status:
         label: Status
         label_width: 80
         content_width: 80
+        order: 21.2
+      volume_type:
+        label: Type
+        label_width: 70
+        content_width: 70
+        order: 21.3
       implementation_components:
         type: entity
         label: Cinder Implementation
