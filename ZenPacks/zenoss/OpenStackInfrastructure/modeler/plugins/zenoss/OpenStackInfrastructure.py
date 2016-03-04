@@ -405,35 +405,42 @@ class OpenStackInfrastructure(PythonPlugin):
             flavor_id = server.get('flavorId', None) or \
                         server.get('flavor', {}).get('id', None)
 
+            tenant_id = server.get('tenant_id', '')
+
+            # Note: volume relations are added in volumes map below
+            server_dict = dict(
+                            id=prepId('server-{0}'.format(server['id'])),
+                            title=server.get('name', server['id']),
+                            resourceId=server['id'],
+                            serverId=server['id'],  # 847424
+                            serverStatus=server.get('status', ''),
+                            serverBackupEnabled=backup_schedule_enabled,
+                            serverBackupDaily=backup_schedule_daily,
+                            serverBackupWeekly=backup_schedule_weekly,
+                            publicIps=list(public_ips),
+                            privateIps=list(private_ips),
+                            set_flavor=prepId('flavor-{0}'.format(flavor_id)),
+                            set_tenant=prepId('tenant-{0}'.format(tenant_id)),
+                            hostId=server.get('hostId', ''),
+                            hostName=server.get('name', '')
+                            )
+
+            # Some Instances are created from pre-existing volumes
+            # This implies no image exists.
             image_id = None
             if 'imageId' in server:
                 image_id = server['imageId']
-            elif 'image' in server and \
-                    isinstance(server['image'], dict) and \
-                            'id' in server['image']:
+            elif 'image' in server \
+                    and isinstance(server['image'], dict) \
+                    and 'id' in server['image']:
                 image_id = server['image']['id']
 
-            tenant_id = server.get('tenant_id', '')
+            if image_id:
+                server_dict['set_image'] = prepId('image-{0}'.format(image_id))
 
             servers.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStackInfrastructure.Instance',
-                data=dict(
-                    id=prepId('server-{0}'.format(server['id'])),
-                    title=server.get('name', server['id']),   # cloudserver01
-                    resourceId=server['id'],
-                    serverId=server['id'],  # 847424
-                    serverStatus=server.get('status', ''),  # ACTIVE
-                    serverBackupEnabled=backup_schedule_enabled,  # False
-                    serverBackupDaily=backup_schedule_daily,      # DISABLED
-                    serverBackupWeekly=backup_schedule_weekly,    # DISABLED
-                    publicIps=list(public_ips),                   # 50.57.74.222
-                    privateIps=list(private_ips),                 # 10.182.13.13
-                    set_flavor=prepId('flavor-{0}'.format(flavor_id)),    # flavor-performance1-1
-                    set_image=prepId('image-{0}'.format(image_id)),       # image-346eeba5-a122-42f1-94e7-06cb3c53f690
-                    set_tenant=prepId('tenant-{0}'.format(tenant_id)),    # tenant-a3a2901f2fd14f808401863e3628a858
-                    hostId=server.get('hostId', ''),                      # a84303c0021aa53c7e749cbbbfac265f
-                    hostName=server.get('name', '')                       # cloudserver01
-                )))
+                    modname='ZenPacks.zenoss.OpenStackInfrastructure.Instance',
+                    data=server_dict))
 
         services = []
         zones = {}
