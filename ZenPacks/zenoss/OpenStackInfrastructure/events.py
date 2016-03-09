@@ -503,10 +503,11 @@ def port_update(device, dmd, evt):
                                            evt.trait_device_id)
         setattr(objmap, 'set_instance', port_instance)
 
-    # get the preformatted port_subnets from get_subnets_from_fixedips
+    # get subnets and fixed_ips
     if hasattr(evt, 'trait_fixed_ips'):
         port_fips = ast.literal_eval(evt.trait_fixed_ips)
-        port_subnets = get_subnets_from_fixedips(port_fips)
+        _subnets = get_subnets_from_fixedips(port_fips)
+        port_subnets = [prepId('subnet-{}'.format(x)) for x in _subnets]
         port_fixedips = get_port_fixedips(port_fips)
         setattr(objmap, 'set_subnets', port_subnets)
         setattr(objmap, 'fixed_ip_list', port_fixedips)

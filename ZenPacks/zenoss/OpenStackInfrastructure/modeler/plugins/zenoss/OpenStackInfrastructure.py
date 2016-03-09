@@ -22,6 +22,7 @@ import re
 import itertools
 from urlparse import urlparse
 import socket
+from collections import defaultdict
 
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.internet.error import ConnectError, TimeoutError
@@ -857,52 +858,22 @@ class OpenStackInfrastructure(PythonPlugin):
                     title=subnet.get('name', subnet['id']),
                     )))
 
-        # router
-        routers = []
-        for router in results['routers']:
-            if not router.get('id', None):
-                continue
-
-            _gateways = set()
-            _subnets = set()
-            _network_id = None
-
-            # Get the External Gateway Data
-            external_gateway_info = router.get('external_gateway_info')
-            if external_gateway_info:
-                _network_id = external_gateway_info.get('network_id', '')
-                for _ip in external_gateway_info.get('external_fixed_ips', []):
-                    _gateways.add(_ip.get('ip_address', None))
-                    _subnets.add(_ip.get('subnet_id', None))
-
-            _network = None
-            if _network_id:
-                _network = 'network-{0}'.format(_network_id)
-
-            router_dict = dict(
-                admin_state_up=router.get('admin_state_up', False),
-                gateways=list(_gateways),
-                id=prepId('router-{0}'.format(router['id'])),
-                routerId=router['id'],
-                routes=list(router.get('routes', [])),
-                set_tenant=prepId('tenant-{0}'.format(router.get('tenant_id',''))),
-                status=router.get('status', 'UNKNOWN'),
-                title=router.get('name', router['id']),
-            )
-            if _network:
-                router_dict['set_network'] = prepId(_network)
-            if len(_subnets) > 0:
-                router_dict['set_subnets'] = [prepId('subnet-{0}'.format(x))
-                                              for x in _subnets]
-            routers.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStackInfrastructure.Router',
-                data=router_dict))
-
         # port
         ports = []
+        device_subnet_list = defaultdict(set)
         for port in results['ports']:
             if not port.get('id', None):
                 continue
+
+            # Fetch the subnets for later use
+            raw_subnets = get_subnets_from_fixedips(port.get('fixed_ips', []))
+            port_subnets = [prepId('subnet-{}'.format(x)) for x in raw_subnets]
+
+            # Prepare the device_subnet_list data for later use.
+            port_router_id = port.get('device_id')
+            if port_router_id:
+                device_subnet_list[port_router_id] = \
+                        device_subnet_list[port_router_id].union(raw_subnets)
 
             port_tenant = None
             if port.get('tenant_id', None):
@@ -926,13 +897,55 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_instance=port_instance,
                     set_network=prepId('network-{0}'.format(port.get(
                         'network_id', ''))),
-                    set_subnets=[prepId(x) for x in get_subnets_from_fixedips(
-                        port.get('fixed_ips', []))],
+                    set_subnets=port_subnets,
                     set_tenant=port_tenant,
                     status=port.get('status', 'UNKNOWN'),
                     title=port.get('name', port['id']),
                     vif_type=port.get('binding:vif_type', 'UNKNOWN'),
                     )))
+
+        # router
+        routers = []
+        for router in results['routers']:
+            if not router.get('id', None):
+                continue
+
+            _gateways = set()
+            _network_id = None
+            # This should be all of the associated subnets
+            _subnets = device_subnet_list[router['id']]
+
+            # Get the External Gateway Data
+            external_gateway_info = router.get('external_gateway_info')
+            if external_gateway_info:
+                _network_id = external_gateway_info.get('network_id', '')
+                for _ip in external_gateway_info.get('external_fixed_ips', []):
+                    _gateways.add(_ip.get('ip_address', None))
+                    # This should not be required, but it doesn't hurt set()
+                    _subnets.add(_ip.get('subnet_id', None))
+
+            _network = None
+            if _network_id:
+                _network = 'network-{0}'.format(_network_id)
+
+            router_dict = dict(
+                admin_state_up=router.get('admin_state_up', False),
+                gateways=list(_gateways),
+                id=prepId('router-{0}'.format(router['id'])),
+                routerId=router['id'],
+                routes=list(router.get('routes', [])),
+                set_tenant=prepId('tenant-{0}'.format(router.get('tenant_id',''))),
+                status=router.get('status', 'UNKNOWN'),
+                title=router.get('name', router['id']),
+            )
+            if _network:
+                router_dict['set_network'] = prepId(_network)
+            if _subnets:
+                router_dict['set_subnets'] = [prepId('subnet-{0}'.format(x))
+                                              for x in _subnets]
+            routers.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.Router',
+                data=router_dict))
 
         # floatingip
         floatingips = []

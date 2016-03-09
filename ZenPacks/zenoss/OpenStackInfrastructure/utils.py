@@ -275,12 +275,12 @@ def get_port_fixedips(port_fips):
     return ', '.join(fixed_ips)
 
 def get_subnets_from_fixedips(port_fips):
-    '''get formatted list of subnets from Neutron API fixed_ip structure'''
+    '''get set subnets from Neutron API fixed_ip structure'''
     subnets = set()
     for _fip in port_fips:
         subnets.add(_fip.get('subnet_id'))
 
-    return ['subnet-{0}'.format(x) for x in subnets]
+    return subnets
 
 def get_port_instance(device_owner, device_id):
     # If device_owner is part of compute, then add device_id as set_instance
