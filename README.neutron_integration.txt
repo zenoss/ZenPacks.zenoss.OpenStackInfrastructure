@@ -113,14 +113,22 @@ class MySwitchNeutronImplementationPlugin(BaseNeutronImplementationPlugin):
             notify(IndexingEvent(obj))
 
 
+Make sure OpenStackInfrastructure's meta.zcml has an entry for Neutron integration:
+    <!-- OpenStack Integration features -->
+    <provides feature="openstack_neutron_integration" />
+
 Register your plugin in the zenpack's configure.zcml file as follows:
 
-    <configure zcml:condition="installed ZenPacks.zenoss.OpenStackInfrastructure">
-        <utility
-            name="ml2.myswitch"
-            factory=".openstack_neutron.MySwitchNeutronImplementationPlugin"
-            provides="ZenPacks.zenoss.OpenStackInfrastructure.interfaces.INeutronImplementationPlugin"
-            />
+    <!-- OpenStack Cinder integration -->
+    <configure zcml:condition="installed ZenPacks.zenoss.OpenStackInfrastructure.interfaces">
+        <!-- Guard Against Older OSI that lacks Cinder -->
+        <configure zcml:condition="have openstack_neutron_integration">
+            <utility
+                name="ml2.myswitch"
+                factory=".openstack_cinder.MySwitchNeutronImplementationPlugin"
+                provides="ZenPacks.zenoss.OpenStackInfrastructure.interfaces.INeutronImplementationPlugin"
+                />
+        </configure>
     </configure>
 
 
