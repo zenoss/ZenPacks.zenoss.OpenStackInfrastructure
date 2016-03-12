@@ -2,11 +2,11 @@
 Introduction
 ------------
 
-Since Neutron, mostly through its ML2 plugin, can configure a variety of
+Since Neutron, mostly through its ML2 plugin, can handle a variety of
 underlying network topologies, which would be modeled using different
 ZenPacks, we provide a generic mechanism for these zenpacks to provide
-a mapping between neutron components like networks and ports and the underlying
-zenpack's components, such as bridge groups and interfaces.
+a mapping between neutron components, like networks and ports, and the related
+zenpack components, such as bridge groups and interfaces.
 
 These mappings are many-to-many, to support a variety of implementation
 strategies.
@@ -113,14 +113,22 @@ class MySwitchNeutronImplementationPlugin(BaseNeutronImplementationPlugin):
             notify(IndexingEvent(obj))
 
 
+Make sure OpenStackInfrastructure's meta.zcml has an entry for Neutron integration:
+    <!-- OpenStack Integration features -->
+    <provides feature="openstack_neutron_integration" />
+
 Register your plugin in the zenpack's configure.zcml file as follows:
 
-    <configure zcml:condition="installed ZenPacks.zenoss.OpenStackInfrastructure">
-        <utility
-            name="ml2.myswitch"
-            factory=".openstack_neutron.MySwitchNeutronImplementationPlugin"
-            provides="ZenPacks.zenoss.OpenStackInfrastructure.interfaces.INeutronImplementationPlugin"
-            />
+    <!-- OpenStack Cinder integration -->
+    <configure zcml:condition="installed ZenPacks.zenoss.OpenStackInfrastructure.interfaces">
+        <!-- Guard Against Older OSI that lacks Cinder -->
+        <configure zcml:condition="have openstack_neutron_integration">
+            <utility
+                name="ml2.myswitch"
+                factory=".openstack_cinder.MySwitchNeutronImplementationPlugin"
+                provides="ZenPacks.zenoss.OpenStackInfrastructure.interfaces.INeutronImplementationPlugin"
+                />
+        </configure>
     </configure>
 
 
