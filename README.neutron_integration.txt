@@ -2,11 +2,11 @@
 Introduction
 ------------
 
-Since Neutron, mostly through its ML2 plugin, can configure a variety of
+Since Neutron, mostly through its ML2 plugin, can handle a variety of
 underlying network topologies, which would be modeled using different
 ZenPacks, we provide a generic mechanism for these zenpacks to provide
-a mapping between neutron components like networks and ports and the underlying
-zenpack's components, such as bridge groups and interfaces.
+a mapping between neutron components, like networks and ports, and the related
+zenpack components, such as bridge groups and interfaces.
 
 These mappings are many-to-many, to support a variety of implementation
 strategies.

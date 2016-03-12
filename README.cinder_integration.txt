@@ -1,11 +1,11 @@
 Introduction
 ------------
 
-Since Cinder can configure a variety of underlying block storage topologies,
+Since Cinder can handle a variety of underlying block storage topologies,
 which would be modeled using different ZenPacks, we provide a generic mechanism
-for these zenpacks to provide a mapping between cinder components like volumes
-and snapshots, and the underlying zenpack's components, such as LVM and Ceph
-RBDs.
+for these zenpacks to provide a mapping between cinder storage components, like
+volumes and snapshots, and the related zenpack components, such as LVM and
+Ceph RBDs.
 
 These mappings are many-to-many, to support a variety of implementation
 strategies.
