@@ -26,6 +26,11 @@ from Products.ZenTestCase.BaseTestCase import BaseTestCase
 from ZenPacks.zenoss.OpenStackInfrastructure.modeler.plugins.zenoss.OpenStackInfrastructure \
     import OpenStackInfrastructure as OpenStackInfrastructureModeler
 
+from ZenPacks.zenoss.OpenStackInfrastructure.lib.OsiDnsHost import (
+        OsiHostResolver,
+        OsiHostGroup,
+        )
+
 CLOUDSTACK_ICON = '/++resource++cloudstack/img/cloudstack.png'
 
 
@@ -68,6 +73,19 @@ class TestModel(BaseTestCase):
                                'data',
                                'modeldata.json')) as json_file:
             results = json.load(json_file)
+
+        # ---------------------------------------------------------------------
+        # We need to create and add the hostgroup data structure to results
+        # ---------------------------------------------------------------------
+        resolved_hostnames = results.get('resolved_hostnames')
+        hostResolver = OsiHostResolver()
+        hostResolver.resolved_hostnames = resolved_hostnames
+        hostgroup = OsiHostGroup(hostResolver=hostResolver)
+        hostnames = resolved_hostnames.keys()
+        hostgroup.add_hostnames(hostnames)
+        hostgroup.update_canonical_hostnames()
+        results['hostgroup'] = hostgroup
+        # ---------------------------------------------------------------------
 
         for data_map in modeler.process(self.d, results, log):
             self.applyDataMap(self.d, data_map)
