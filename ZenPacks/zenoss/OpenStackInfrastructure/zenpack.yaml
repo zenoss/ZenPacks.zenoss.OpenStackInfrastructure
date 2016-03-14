@@ -33,7 +33,8 @@ class_relationships:
 # Cinder
 - Tenant 1:M Volume
 - Tenant 1:M VolSnapshot
-- Tenant 1:M Backup
+# release 2.2.0 does not do backup
+#- Tenant 1:M Backup
 - Tenant 1:1 Quota
 # Flavor
 - Flavor 1:M Instance
@@ -62,7 +63,8 @@ class_relationships:
 # Cinder
 - Instance 1:M Volume
 - Volume 1:M VolSnapshot
-- Volume 1:M Backup
+# release 2.2.0 does not do backup
+#- Volume 1:M Backup
 device_classes: !ZenPackSpec
   /Server/SSH/Linux/NovaHost:
     zProperties:
@@ -795,8 +797,9 @@ classes: !ZenPackSpec
         label_width: 50
       volumes:
         grid_display: false
-      backups:
-        grid_display: false
+# release 2.2.0 does not do backup
+#      backups:
+#        grid_display: false
       volSnapshots:
         grid_display: false
       quota:
@@ -1606,9 +1609,9 @@ classes: !ZenPackSpec
       volSnapshots:
         label_width: 50
         content_width: 50
-      backups:
-        label_width: 50
-        content_width: 50
+#      backups:
+#        label_width: 50
+#        content_width: 50
     dynamicview_views: [service_view, openstack_view]
     dynamicview_relations:
       impacts: [instance, volSnapshots]
@@ -1696,10 +1699,10 @@ classes: !ZenPackSpec
         label: Status
         label_width: 80
         content_width: 80
-    relationships:
-      volume:
-        label_width: 80
-        content_width: 80
+#    relationships:
+#      volume:
+#        label_width: 80
+#        content_width: 80
   Pool:
     base: [OpenstackComponent]
     meta_type: OpenStackInfrastructurePool
