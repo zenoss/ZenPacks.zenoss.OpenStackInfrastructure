@@ -83,14 +83,14 @@ class OpenStackPoller(object):
                 data['imageOtherCount'] += 1
                 severity = 1
 
-            data['events'].append(dict(
-                severity=severity,
-                summary='image status is {0}'.format(image['status']),
-                component='image{0}'.format(image['id']),
-                eventKey='imageStatus',
-                eventClassKey='openstackImageStatus',
-                imageStatus=image['status'],
-            ))
+            # data['events'].append(dict(
+            #     severity=severity,
+            #     summary='image status is {0}'.format(image['status']),
+            #     component='image{0}'.format(image['id']),
+            #     eventKey='imageStatus',
+            #     eventClassKey='openstackImageStatus',
+            #     imageStatus=image['status'],
+            # ))
 
     @inlineCallbacks
     def _populateServerData(self, client, data):
