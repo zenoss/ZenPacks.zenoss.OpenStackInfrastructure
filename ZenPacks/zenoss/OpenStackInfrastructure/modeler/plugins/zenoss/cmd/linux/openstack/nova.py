@@ -24,7 +24,7 @@ import re
 
 class nova(CommandPlugin):
 
-    command = "nova-manage --version 2>&1"
+    command = "sudo docker exec novacompute_20160306_0550-mercury-rhel7-osp7 nova-manage --version 2>&1"
 
     def process(self, device, results, log):
         log.info("Modeler %s processing data for device %s",
