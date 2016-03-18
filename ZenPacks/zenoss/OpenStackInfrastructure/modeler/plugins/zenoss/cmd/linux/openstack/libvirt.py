@@ -59,6 +59,7 @@ class libvirt(PythonPlugin):
             'port': device.zCommandPort,
             'user': device.zCommandUsername,
             'password': device.zCommandPassword,
+            'identities': ['~/.ssh/id_rsa', '~/.ssh/id_dsa'],
             'buffersize': 32768})
         client.connect()
         timeout = device.zCommandCommandTimeout
@@ -66,7 +67,7 @@ class libvirt(PythonPlugin):
 
         try:
             for instanceId, instanceUUID in device.openstack_instanceList:
-                cmd = "virsh --readonly -c 'qemu:///system' dumpxml '%s'" % instanceUUID
+                cmd = "sudo docker exec novacompute_20160306_0550-mercury-rhel7-osp7 virsh --readonly -c 'qemu:///system' dumpxml '%s'" % instanceUUID
                 log.info("Running %s" % cmd)
                 d = yield client.run(cmd, timeout=timeout)
 
