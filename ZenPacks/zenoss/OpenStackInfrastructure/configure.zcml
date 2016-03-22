@@ -93,21 +93,26 @@
              xmlns:zcml="http://namespaces.zope.org/zcml"
              zcml:condition="installed ZenPacks.zenoss.ZenETL" />
 
+    <!-- DynamicView -->
+    <configure zcml:condition="installed ZenPacks.zenoss.DynamicView">
+
+        <subscriber
+            provides="ZenPacks.zenoss.DynamicView.interfaces.IRelationsProvider"
+            for="Products.ZenModel.Device.Device"
+            factory=".dynamicview.DeviceRelationsProvider_OSI"
+            />
+
+        <subscriber
+            provides="ZenPacks.zenoss.DynamicView.interfaces.IRelationsProvider"
+            for="Products.ZenModel.OSProcess.OSProcess"
+            factory=".dynamicview.OSProcessRelationsProvider_OSI"
+            />
+
+    </configure>
+
     <!-- Impact (special cases) -->
     <configure zcml:condition="installed ZenPacks.zenoss.Impact">
         <include package="ZenPacks.zenoss.Impact" file="meta.zcml"/>
-
-        <subscriber
-            provides="ZenPacks.zenoss.Impact.impactd.interfaces.IRelationshipDataProvider"
-            for="Products.ZenModel.Device.Device"
-            factory=".impact.HostDeviceRelationsProvider"
-            />
-
-        <subscriber
-            provides="ZenPacks.zenoss.Impact.impactd.interfaces.IRelationshipDataProvider"
-            for="Products.ZenModel.Device.Device"
-            factory=".impact.GuestDeviceRelationsProvider"
-            />
 
         <subscriber
             provides="ZenPacks.zenoss.Impact.impactd.interfaces.IRelationshipDataProvider"

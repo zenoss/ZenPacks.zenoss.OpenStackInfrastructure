@@ -14,6 +14,7 @@ Patches to be applied to the platform.
 import logging
 log = logging.getLogger("zen.OpenStack.device")
 
+from Products.ZenModel.OSProcess import OSProcess
 from Products.ZenUtils.Utils import monkeypatch
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import getIpInterfaceMacs
 from ZenPacks.zenoss.OpenStackInfrastructure.DeviceProxyComponent import DeviceProxyComponent
@@ -110,3 +111,13 @@ def setApplyDataMapToOpenStackInfrastructureHost(self, datamap):
         log.error("Unable to apply datamap to proxy component for %s (component not found)" % self)
     else:
         mapper._applyDataMap(component, datamap)
+
+
+@monkeypatch(OSProcess)
+def openstack_softwareComponent(self):
+    """Return associated OpenStack SoftwareComponent instance."""
+    host = self.device().openstack_hostComponent()
+    if host:
+        for software in host.hostedSoftware():
+            if software.binary == self.osProcessClass().id:
+                return software

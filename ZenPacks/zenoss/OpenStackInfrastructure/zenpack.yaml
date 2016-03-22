@@ -926,15 +926,16 @@ classes: !ZenPackSpec
     label: Nova Service
     order: 7
     # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for osprocess_component, rather than
-    # dynamicview impacts adaptor, because OSProcess is not part of
-    # service_view, and so will not be exported from DV to impact  currently
-    # (ZEN-14579).
+    # We must define that we're impacted_by osprocess_component both in the
+    # Impact and DynamicView style. This is because OSProcess is not registered
+    # into DynamicView's service_view, but we do want to see the impact both in
+    # Impact, and DynamicView's Dependency View.
+    # (ZEN-14579)
     # --------------------------------------------------------------------------
     impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
     dynamicview_relations:
-      impacted_by: [hostedOn]
+      impacted_by: [hostedOn, osprocess_component]
       impacts: [orgComponent]
   NovaApi:
     base: [SoftwareComponent]
@@ -942,15 +943,16 @@ classes: !ZenPackSpec
     label: Nova API
     order: 7.1
     # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for osprocess_component, rather than
-    # dynamicview impacts adaptor, because OSProcess is not part of
-    # service_view, and so will not be exported from DV to impact  currently
-    # (ZEN-14579).
+    # We must define that we're impacted_by osprocess_component both in the
+    # Impact and DynamicView style. This is because OSProcess is not registered
+    # into DynamicView's service_view, but we do want to see the impact both in
+    # Impact, and DynamicView's Dependency View.
+    # (ZEN-14579)
     # --------------------------------------------------------------------------
     impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
     dynamicview_relations:
-      impacted_by: [hostedOn]
+      impacted_by: [hostedOn, osprocess_component]
       impacts: [orgComponent]
   NovaDatabase:
     base: [SoftwareComponent]
@@ -959,15 +961,16 @@ classes: !ZenPackSpec
     order: 7.2
     filter_hide_from: [Region, Cell, AvailabilityZone, Host]
     # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for osprocess_component, rather than
-    # dynamicview impacts adaptor, because OSProcess is not part of
-    # service_view, and so will not be exported from DV to impact  currently
-    # (ZEN-14579).
+    # We must define that we're impacted_by osprocess_component both in the
+    # Impact and DynamicView style. This is because OSProcess is not registered
+    # into DynamicView's service_view, but we do want to see the impact both in
+    # Impact, and DynamicView's Dependency View.
+    # (ZEN-14579)
     # --------------------------------------------------------------------------
     impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
     dynamicview_relations:
-      impacted_by: [hostedOn]
+      impacted_by: [hostedOn, osprocess_component]
       impacts: [orgComponent]
   Hypervisor:
     base: [OpenstackComponent]
@@ -1023,15 +1026,16 @@ classes: !ZenPackSpec
         label_width: 40
         order: 1.2
     # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for osprocess_component, rather than
-    # dynamicview impacts adaptor, because OSProcess is not part of
-    # service_view, and so will not be exported from DV to impact  currently
-    # (ZEN-14579).
+    # We must define that we're impacted_by osprocess_component both in the
+    # Impact and DynamicView style. This is because OSProcess is not registered
+    # into DynamicView's service_view, but we do want to see the impact both in
+    # Impact, and DynamicView's Dependency View.
+    # (ZEN-14579)
     # --------------------------------------------------------------------------
     impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
     dynamicview_relations:
-      impacted_by: [hostedOn]
+      impacted_by: [hostedOn, osprocess_component]
       impacts: [networks, subnets, routers]
   Network:
     base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, LogicalComponent]

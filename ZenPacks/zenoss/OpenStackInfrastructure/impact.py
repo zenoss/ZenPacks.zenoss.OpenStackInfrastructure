@@ -14,7 +14,6 @@ from Products.ZenUtils.guid.interfaces import IGlobalIdentifier
 from ZenPacks.zenoss.Impact.impactd.relations import ImpactEdge
 from ZenPacks.zenoss.Impact.impactd.interfaces import IRelationshipDataProvider
 
-from Products.ZenModel.Device import Device
 from Products.ZenModel.OSProcess import OSProcess
 
 ZENPACK_NAME = 'ZenPacks.zenoss.OpenStackInfrastructure'
@@ -80,13 +79,6 @@ class BaseRelationshipDataProvider(object):
             yield IGlobalIdentifier(r).getGUID()
 
 
-class HostDeviceRelationsProvider(BaseRelationshipDataProvider):
-    adapts(Device)
-
-    # A linux device that is also an openstack host impacts that host component.
-    impacts = ['openstack_hostComponent']
-
-
 class OSProcessRelationsProvider(BaseRelationshipDataProvider):
     adapts(OSProcess)
 
@@ -94,19 +86,10 @@ class OSProcessRelationsProvider(BaseRelationshipDataProvider):
         for base_edge in BaseRelationshipDataProvider.getEdges(self):
             yield base_edge
 
-        host = self.adapted.device().openstack_hostComponent()
-        if host:
-            for software in host.hostedSoftware():
-                if software.binary == self.adapted.osProcessClass().id:
-                    # impact the corresponding software software component
-                    yield ImpactEdge(
-                        IGlobalIdentifier(self.adapted).getGUID(),
-                        IGlobalIdentifier(software).getGUID(),
-                        self.relationship_provider
-                    )
-
-
-class GuestDeviceRelationsProvider(BaseRelationshipDataProvider):
-    adapts(Device)
-
-    impacted_by = ['openstackInstance']
+        software_component = self.adapted.openstack_softwareComponent()
+        if software_component:
+            # impact the corresponding software software component
+            yield ImpactEdge(
+                IGlobalIdentifier(self.adapted).getGUID(),
+                IGlobalIdentifier(software_component).getGUID(),
+                self.relationship_provider)
