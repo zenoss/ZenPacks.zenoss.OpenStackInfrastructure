@@ -564,7 +564,8 @@ classes: !ZenPackSpec
         default: []
         grid_display: false
     dynamicview_views: [service_view, openstack_view]
-    dynamicview_group: Devices
+    dynamicview_group: OpenStack Clusters
+    dynamicview_weight: 280
     dynamicview_relations:
       impacts: [hosts]
       openstack_link: [region]
@@ -692,6 +693,8 @@ classes: !ZenPackSpec
       subnets:
         label_width: 50
     dynamicview_views: [service_view]
+    dynamicview_group: Tenants
+    dynamicview_weight: 15
     dynamicview_relations:
       impacted_by: [instances, networks, subnets, implementation_components]
   Flavor:
@@ -833,6 +836,8 @@ classes: !ZenPackSpec
         label: Vnics
         grid_display: false
     dynamicview_views: [service_view]
+    dynamicview_group: Instances
+    dynamicview_weight: 211
     dynamicview_relations:
       impacted_by: [hypervisor, ports, vnics]
       impacts: [guestDevice, tenant]
@@ -859,6 +864,8 @@ classes: !ZenPackSpec
       instance:
         grid_display: false
     dynamicview_views: [service_view]
+    dynamicview_group: vNICs
+    dynamicview_weight: 216
     dynamicview_relations:
       impacts: [instance]
   Region:
@@ -868,6 +875,8 @@ classes: !ZenPackSpec
     order: 1
     filter_hide_from: [Region, Cell, AvailabilityZone]
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Regions
+    dynamicview_weight: 221
     dynamicview_relations:
       impacted_by: [childOrgs, hosts, softwareComponents]
       impacts: [parentOrg]
@@ -879,6 +888,8 @@ classes: !ZenPackSpec
     order: 3
     filter_hide_from: [Region, Cell, AvailabilityZone]
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Cells
+    dynamicview_weight: 222
     dynamicview_relations:
       impacted_by: [childOrgs, hosts, softwareComponents]
       impacts: [parentOrg]
@@ -890,6 +901,8 @@ classes: !ZenPackSpec
     order: 2
     filter_hide_from: [AvailabilityZone]
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Zones
+    dynamicview_weight: 223
     dynamicview_relations:
       impacted_by: [childOrgs, hosts, softwareComponents]
       impacts: [parentOrg]
@@ -916,6 +929,8 @@ classes: !ZenPackSpec
         render_with_type: true
         order: 1.0
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Hosts (OpenStack)
+    dynamicview_weight: 271
     dynamicview_relations:
       impacted_by: [endpoint, proxy_device]
       impacts: [hypervisor, orgComponent, hostedSoftware]
@@ -934,6 +949,8 @@ classes: !ZenPackSpec
     # --------------------------------------------------------------------------
     impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Nova Services
+    dynamicview_weight: 263
     dynamicview_relations:
       impacted_by: [hostedOn, osprocess_component]
       impacts: [orgComponent]
@@ -951,6 +968,8 @@ classes: !ZenPackSpec
     # --------------------------------------------------------------------------
     impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Nova APIs
+    dynamicview_weight: 262
     dynamicview_relations:
       impacted_by: [hostedOn, osprocess_component]
       impacts: [orgComponent]
@@ -969,6 +988,8 @@ classes: !ZenPackSpec
     # --------------------------------------------------------------------------
     impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Nova Databases
+    dynamicview_weight: 264
     dynamicview_relations:
       impacted_by: [hostedOn, osprocess_component]
       impacts: [orgComponent]
@@ -991,6 +1012,8 @@ classes: !ZenPackSpec
         label: Version
         grid_display: false
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Hypervisors
+    dynamicview_weight: 226
     dynamicview_relations:
       impacted_by: [host]
       impacts: [instances]
@@ -1034,6 +1057,8 @@ classes: !ZenPackSpec
     # --------------------------------------------------------------------------
     impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Neutron Agents
+    dynamicview_weight: 261
     dynamicview_relations:
       impacted_by: [hostedOn, osprocess_component]
       impacts: [networks, subnets, routers]
@@ -1088,6 +1113,9 @@ classes: !ZenPackSpec
       tenant:
         label_width: 50
         order: 1.5
+    dynamicview_views: [service_view]
+    dynamicview_group: Networks
+    dynamicview_weight: 254
     dynamicview_relations:
       impacted_by: [neutronAgents]
       impacts: [subnets, tenant]
@@ -1141,6 +1169,9 @@ classes: !ZenPackSpec
       tenant:
         label_width: 50
         order: 2.3
+    dynamicview_views: [service_view]
+    dynamicview_group: Subnets
+    dynamicview_weight: 252
     dynamicview_relations:
       impacted_by: [network, routers, neutronAgents]
       impacts: [ports, tenant]
@@ -1207,6 +1238,9 @@ classes: !ZenPackSpec
         label_width: 45
         content_width: 50
         order: 2.4
+    dynamicview_views: [service_view]
+    dynamicview_group: Routers
+    dynamicview_weight: 253
     dynamicview_relations:
       impacted_by: [neutronAgents]
       impacts: [subnets, floatingIps]
@@ -1279,6 +1313,9 @@ classes: !ZenPackSpec
         label_width: 35
         content_width: 35
         order: 1.3
+    dynamicview_views: [service_view]
+    dynamicview_group: Ports
+    dynamicview_weight: 251
     dynamicview_relations:
       impacted_by: [subnets, floatingIps]
       impacts: [instance]
@@ -1330,6 +1367,9 @@ classes: !ZenPackSpec
       tenant:
         label_width: 50
         order: 1.4
+    dynamicview_views: [service_view]
+    dynamicview_group: Floating IPs
+    dynamicview_weight: 215
     dynamicview_relations:
       impacted_by: [router]
       impacts: [port]
