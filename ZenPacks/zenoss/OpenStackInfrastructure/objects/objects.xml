@@ -339,6 +339,30 @@ history
 </object>
 </tomanycont>
 </object>
+<object id="Cinder" module="Products.ZenEvents.EventClass" class="EventClass">
+<object id="Volume" module="Products.ZenEvents.EventClass" class="EventClass">
+<tomanycont id="instances">
+<object id="cinder.volume default mapping" module="Products.ZenEvents.EventClassInst" class="EventClassInst">
+<property type="text" id="transform" mode="w">
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
+<property type="string" id="eventClassKey" mode="w">
+defaultmapping
+</property>
+<property type="int" id="sequence" mode="w">
+900
+</property>
+<property type="string" id="rule" mode="w">
+(getattr(evt, 'eventClassKey', '') or '').startswith('openstack|volume')
+</property>
+<property type="text" id="explanation" mode="w">
+All volume events not otherwise mapped will be placed in the /OpenStackInfrastructure/Cinder/Volume class history.
+</property>
+</object>
+</tomanycont>
+</object>
+</object>
 </object>
 <!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackCeilometerHeartbeat') -->
 <object id='/zport/dmd/Events/Status/instances/openStackCeilometerHeartbeat' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
