@@ -181,12 +181,12 @@ class inifiles(PythonPlugin):
             required_files = []
             optional_files = []
 
-            if data['neutron.conf']:
+            if data.get('neutron.conf'):
                 ini = data['neutron.conf']
                 neutron_core_plugin = self.ini_get(device, filename, ini, 'DEFAULT', 'core_plugin', required=True)
                 plugin_names.add(neutron_core_plugin)
 
-            if 'plugins/ml2/ml2_conf.ini' in data:
+            if data.get('plugins/ml2/ml2_conf.ini'):
                 mechanism_drivers = split_list(self.ini_get(
                     device,
                     filename,
