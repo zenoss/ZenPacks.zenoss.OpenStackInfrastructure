@@ -615,6 +615,16 @@ device_classes: !ZenPackSpec
                 aliases: {if_sent_packets__persec: null}
             meter: network.outgoing.packets.rate
         graphs:
+          Network Throughput:
+            units: bits/sec
+            miny: 0
+            graphpoints:
+              Inbound:
+                dpName: networkIncomingBytesRate_networkIncomingBytesRate
+                format: '%7.2lf%s'
+              Outbound:
+                dpName: networkOutgoingBytesRate_networkOutgoingBytesRate
+                format: '%7.2lf%s'
           Network Packet Rate:
             units: packets/sec
             miny: 0
@@ -624,16 +634,6 @@ device_classes: !ZenPackSpec
                 format: '%7.2lf%s'
               Outbound:
                 dpName: networkOutgoingPacketsRate_networkOutgoingPacketsRate
-                format: '%7.2lf%s'
-          Network Throughput:
-            units: bytes/sec
-            miny: 0
-            graphpoints:
-              Inbound:
-                dpName: networkIncomingBytesRate_networkIncomingBytesRate
-                format: '%7.2lf%s'
-              Outbound:
-                dpName: networkOutgoingBytesRate_networkOutgoingBytesRate
                 format: '%7.2lf%s'
 classes: !ZenPackSpec
   #-----------------------------------------------------------------------------
