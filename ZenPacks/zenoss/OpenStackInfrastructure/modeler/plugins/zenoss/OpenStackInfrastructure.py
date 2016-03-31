@@ -884,6 +884,11 @@ class OpenStackInfrastructure(PythonPlugin):
                                               port.get('device_id', ''))
             if port_instance:
                 port_instance = prepId(port_instance)
+            else:
+                port_instance = None
+            port_network = port.get('network_id', None)
+            if port_network:
+                port_network = prepId('network-{0}'.format(port_network))
 
             ports.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Port',
@@ -895,8 +900,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     mac_address=port.get('mac_address', '').upper(),
                     portId=port['id'],
                     set_instance=port_instance,
-                    set_network=prepId('network-{0}'.format(port.get(
-                        'network_id', ''))),
+                    set_network=port_network,
                     set_subnets=port_subnets,
                     set_tenant=port_tenant,
                     status=port.get('status', 'UNKNOWN'),
