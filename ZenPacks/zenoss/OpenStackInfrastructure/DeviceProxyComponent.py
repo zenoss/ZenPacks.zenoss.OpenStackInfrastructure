@@ -163,13 +163,11 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
             device = None
         if self.dmd.Devices.findDevice(device_name):
             device_name = device_name + "_nameconflict"
-            LOG.info("Device name conflict with endpoint.  Changed name to %s"
-                     % device_name)
+            LOG.info("Device name conflict with endpoint.  Changed name to %s" % device_name)
 
         if device:
-            LOG.info("Change title and device class  for existing device %s"
+            LOG.info("Change device class  for existing device %s"
                      % device.title)
-            device.title = device_name
             device.changeDeviceClass('/Server/SSH/Linux/NovaHost')
         else:
             LOG.info('Adding device for %s %s' % (self.meta_type, self.title))
