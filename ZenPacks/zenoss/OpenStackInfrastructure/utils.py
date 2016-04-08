@@ -344,4 +344,12 @@ def sanitize_host_or_ip(host):
 
     return ''
 
+def container_cmd_wrapper(zproperty, sub_cmd):
+    # given a zProperty related to the name of a docker container,
+    # and a sub command to be run inside the container,
+    # generate a command to be run on a container host
+    # assuming the user, specified by zCommandUsername, can execute the command
+    return "docker exec $(docker ps --format '{{.Names}}' | grep '%s') %s" % \
+          (zproperty, sub_cmd)
+
 # -----------------------------------------------------------------------------

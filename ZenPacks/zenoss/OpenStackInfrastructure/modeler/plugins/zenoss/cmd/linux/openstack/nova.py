@@ -13,18 +13,66 @@
 
 """ Get OpenStack Nova API version """
 
-from Products.DataCollector.plugins.DataMaps import ObjectMap, MultiArgs
+from twisted.internet.defer import inlineCallbacks, returnValue
 
-from Products.DataCollector.plugins.CollectorPlugin import CommandPlugin
-from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path
+from Products.DataCollector.plugins.DataMaps import ObjectMap, MultiArgs
+from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
+from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path, \
+    container_cmd_wrapper
+
+from sshclient import SSHClient
+
 add_local_lib_path()
 
 import re
 
 
-class nova(CommandPlugin):
+class nova(PythonPlugin):
 
-    command = "sudo docker exec novacompute_20160306_0550-mercury-rhel7-osp7 nova-manage --version 2>&1"
+    deviceProperties = PythonPlugin.deviceProperties \
+                       + ('zCommandUsername', 'zCommandPassword',
+                          'zCommandPort', 'zCommandCommandTimeout',
+                          'zOpenStackRunNovaManageInContainer')
+
+    @inlineCallbacks
+    def collect(self, device, log):
+        manageIp = str(device.manageIp)
+
+        log.info('Connecting to ssh://%s@%s:%d' % (
+            device.zCommandUsername,
+            manageIp,
+            device.zCommandPort
+        ))
+
+        client = SSHClient({
+            'hostname': manageIp,
+            'port': device.zCommandPort,
+            'user': device.zCommandUsername,
+            'password': device.zCommandPassword,
+            'identities': ['~/.ssh/id_rsa', '~/.ssh/id_dsa'],
+            'buffersize': 32768})
+        client.connect()
+        timeout = device.zCommandCommandTimeout
+
+        cmd = container_cmd_wrapper(
+            device.zOpenStackRunNovaManageInContainer,
+            "nova-manage --version 2>&1"
+        )
+        log.info("Running %s" % cmd)
+        try:
+            d = yield client.run(cmd, timeout=timeout)
+
+            if d.exitCode != 0 or d.stderr:
+                # nova conduct isn't running on this host, and should be ignored.
+                log.info("nova conduct not running on host- not collecting nova version")
+                return
+
+        except Exception:
+            raise
+        finally:
+            client.disconnect()
+
+        returnValue(d.output)
 
     def process(self, device, results, log):
         log.info("Modeler %s processing data for device %s",

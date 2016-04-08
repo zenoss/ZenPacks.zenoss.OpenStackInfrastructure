@@ -29,7 +29,9 @@ from Products.ZenEvents import Event
 from ZenPacks.zenoss.OpenStackInfrastructure.interfaces import INeutronImplementationPlugin
 from ZenPacks.zenoss.OpenStackInfrastructure.neutron_integration import split_list
 
-from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path
+from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path, \
+    container_cmd_wrapper
+
 add_local_lib_path()
 
 import logging
@@ -49,7 +51,8 @@ class inifiles(PythonPlugin):
     deviceProperties = PythonPlugin.deviceProperties \
         + ('zCommandUsername', 'zCommandPassword',
            'zCommandPort', 'zCommandCommandTimeout',
-           'zOpenStackNeutronConfigDir')
+           'zOpenStackNeutronConfigDir',
+           'zOpenStackRunNeutronCommonInContainer')
 
     def sendEvent(self, evt):
         if not self._eventService:
@@ -115,7 +118,9 @@ class inifiles(PythonPlugin):
         filepath = os.path.join(device.zOpenStackNeutronConfigDir, filename)
         log.info("Retrieving %s", filepath)
 
-        cmd = "cat %s" % filepath
+        cmd = container_cmd_wrapper(
+            device.zOpenStackRunNeutronCommonInContainer, "cat %s" % filepath
+        )
         d = yield self.client.run(cmd, timeout=self.timeout)
 
         if d.exitCode != 0 or d.stderr:
@@ -162,7 +167,12 @@ class inifiles(PythonPlugin):
 
         try:
             # Check if neutron-server runs on this machine
-            d = yield self.client.run("pgrep neutron-server", timeout=self.timeout)
+            cmd = container_cmd_wrapper(
+                device.zOpenStackRunNeutronCommonInContainer,
+                "pgrep neutron-server"
+            )
+            d = yield self.client.run(cmd, timeout=self.timeout)
+
             if d.exitCode != 0:
                 # neutron isn't running on this host, so its config
                 # files are suspect, and should be ignored.
