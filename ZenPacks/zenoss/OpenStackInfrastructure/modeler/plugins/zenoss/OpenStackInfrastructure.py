@@ -1023,7 +1023,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 volume_dict['set_volType'] = voltypeid[0]
             if volume.get('os-vol-tenant-attr:tenant_id'):
                 volume_dict['set_tenant'] = prepId('tenant-{0}'.format(
-                    volume.get('os-vol-tenant-attr:tenant_id'))
+                    volume.get('os-vol-tenant-attr:tenant_id')))
 
             volumes.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Volume',
