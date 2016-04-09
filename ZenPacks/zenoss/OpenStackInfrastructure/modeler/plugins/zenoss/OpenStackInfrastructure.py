@@ -266,6 +266,9 @@ class OpenStackInfrastructure(PythonPlugin):
         result = yield client.cinder_volumes()
         results['volumes'] = result['volumes']
 
+        result = yield client.cinder_volumetypes()
+        results['volumetypes'] = result['volume_types']
+
         result = yield client.cinder_volumesnapshots()
         results['volsnapshots'] = result['snapshots']
 
@@ -967,10 +970,23 @@ class OpenStackInfrastructure(PythonPlugin):
                     status=floatingip.get('status', 'UNKNOWN'),
                     )))
 
+        # volume Types
+        voltypes = []
+        for voltype in results['volumetypes']:
+            if not voltype.get('id'):
+                continue
+
+            voltypes.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.VolType',
+                data=dict(
+                    id=prepId('volType-{0}'.format(voltype['id'])),
+                    title=voltype.get('name', 'UNKNOWN'),
+                )))
+
         # volumes
         volumes = []
         for volume in results['volumes']:
-            if not volume.get('id', None):
+            if not volume.get('id'):
                 continue
 
             attachment = volume.get('attachments', [])
@@ -979,10 +995,9 @@ class OpenStackInfrastructure(PythonPlugin):
             if len(attachment) > 0:
                 instanceId = attachment[0].get('server_id', '')
 
-            # if not defined, volume.get('volume_type', '') returns None
-            voltype = volume.get('volume_type', '')
-            if voltype is None or voltype == '':
-                voltype = 'UNKNOWN'
+            # if not defined, volume.get('volume_type', '') returns ''
+            voltypeid = [vtype.id for vtype in voltypes
+                         if volume.get('volume_type', '') == vtype.title]
 
             volume_dict = dict(
                 id=prepId('volume-{0}'.format(volume['id'])),
@@ -995,17 +1010,21 @@ class OpenStackInfrastructure(PythonPlugin):
                 size=volume.get('size', 0),
                 bootable=volume.get('bootable', 'FALSE').upper(),
                 status=volume.get('status', 'UNKNOWN').upper(),
-                volume_type=voltype.upper(),
-                set_tenant=prepId('tenant-{0}'.format(volume.get('os-vol-tenant-attr:tenant_id',''))),
             )
             # set tenant only when volume['attachments'] is not empty
             if len(instanceId) > 0:
                 volume_dict['set_instance'] = prepId('server-{0}'.format(
                     instanceId))
             # set instance only when volume['tenant_id'] is not empty
-            if volume.get('os-vol-tenant-attr:tenant_id', None):
+            if volume.get('os-vol-tenant-attr:tenant_id'):
                 volume_dict['set_tenant'] = prepId('tenant-{0}'.format(
                     volume.get('os-vol-tenant-attr:tenant_id','')))
+            if len(voltypeid) > 0:
+                volume_dict['set_volType'] = voltypeid[0]
+            if volume.get('os-vol-tenant-attr:tenant_id'):
+                volume_dict['set_tenant'] = prepId('tenant-{0}'.format(
+                    volume.get('os-vol-tenant-attr:tenant_id')))
+
             volumes.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Volume',
                 data=volume_dict))
@@ -1139,6 +1158,7 @@ class OpenStackInfrastructure(PythonPlugin):
             'ports': ports,
             'floatingips': floatingips,
             'volumes': volumes,
+            'voltypes': voltypes,
             'volsnapshots': volsnapshots,
             # 'backups': backups,
             'pools': pools,
@@ -1224,7 +1244,7 @@ class OpenStackInfrastructure(PythonPlugin):
         for i in ('tenants', 'regions', 'flavors', 'images', 'servers', 'zones',
                   'hosts', 'hypervisors', 'services', 'networks',
                   'subnets', 'routers', 'ports', 'agents', 'floatingips',
-                  'volumes', 'volsnapshots', 'pools', 'quotas',
+                  'voltypes', 'volumes', 'volsnapshots', 'pools', 'quotas',
                   ):
             for objmap in objmaps[i]:
                 componentsMap.append(objmap)

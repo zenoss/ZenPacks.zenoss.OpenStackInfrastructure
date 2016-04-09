@@ -14,6 +14,7 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import (get_subnets_from_fixe
                                                            get_port_instance,
                                                            getNetSubnetsGws_from_GwInfo,
                                                            get_port_fixedips,
+                                                           is_uuid,
                                                            )
 import ast
 
@@ -718,6 +719,10 @@ def volume_update(device, dmd, evt):
     elif 'detach.end' in evt.eventClassKey:
         # the volume is being detached from an instance
         setattr(objmap, 'set_instance', '')
+    # make sure objmap has volume_type and volume_type is uuid
+    if hasattr(objmap, 'volume_type') and is_uuid(objmap.volume_type):
+        # set volume type
+        _apply_trait_rel(evt, objmap, 'trait_type', 'volType')
         
     return [objmap]
 

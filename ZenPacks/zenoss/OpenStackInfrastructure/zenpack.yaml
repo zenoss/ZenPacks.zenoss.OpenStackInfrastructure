@@ -63,6 +63,7 @@ class_relationships:
 # Cinder
 - Instance 1:M Volume
 - Volume 1:M VolSnapshot
+- VolType 1:M Volume
 # release 2.2.0 does not do backup
 #- Volume 1:M Backup
 device_classes: !ZenPackSpec
@@ -1588,11 +1589,6 @@ classes: !ZenPackSpec
         label_width: 80
         content_width: 80
         order: 21.2
-      volume_type:
-        label: Type
-        label_width: 70
-        content_width: 70
-        order: 21.3
       implementation_components:
         type: entity
         label: Cinder Implementation
@@ -1622,11 +1618,16 @@ classes: !ZenPackSpec
     # exported from DV to impact currently (ZEN-14579).
     # --------------------------------------------------------------------------
     impacted_by: [implementation_components]
+  VolType:
+    base: [LogicalComponent]
+    meta_type: OpenStackInfrastructureVolType
+    label: Volume Type
+    order: 22
   VolSnapshot:
     base: [ZenPacks.zenoss.OpenStackInfrastructure.CinderIntegrationComponent.CinderIntegrationComponent, LogicalComponent]
     meta_type: OpenStackInfrastructureVolSnapshot
     label: Snapshot
-    order: 22
+    order: 23
     properties:
       created_at:
         label: Created At
@@ -1677,7 +1678,7 @@ classes: !ZenPackSpec
     base: [LogicalComponent]
     meta_type: OpenStackInfrastructureBackup
     label: Backup
-    order: 23
+    order: 24
     properties:
       created_at:
         label: Created At
@@ -1707,7 +1708,7 @@ classes: !ZenPackSpec
     base: [OpenstackComponent]
     meta_type: OpenStackInfrastructurePool
     label: Pool
-    order: 24
+    order: 25
     properties:
       qos_support:
         label: QoS Support
@@ -1751,7 +1752,7 @@ classes: !ZenPackSpec
     base: [LogicalComponent]
     meta_type: OpenStackInfrastructureQuota
     label: Quota
-    order: 25
+    order: 26
     properties:
       tenant_name:
         label: Tenant Name
