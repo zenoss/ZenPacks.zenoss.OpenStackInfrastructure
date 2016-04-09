@@ -358,4 +358,11 @@ def sanitize_host_or_ip(host):
 
     return ''
 
+def is_uuid(uuid):
+    matcher = re.compile(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
+    match = matcher.search(uuid)
+    if match:
+        return True
+    return False
+
 # -----------------------------------------------------------------------------
