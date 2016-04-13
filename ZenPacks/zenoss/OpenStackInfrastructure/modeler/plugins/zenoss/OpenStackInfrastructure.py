@@ -864,32 +864,32 @@ class OpenStackInfrastructure(PythonPlugin):
         for port in results['ports']:
             if not port.get('id', None):
                 continue
-
+            port_dict= dict()
             # Fetch the subnets for later use
             raw_subnets = get_subnets_from_fixedips(port.get('fixed_ips', []))
             port_subnets = [prepId('subnet-{}'.format(x)) for x in raw_subnets]
-
+            if port_subnets:
+                port_dict['set_subnets']= port_subnets
             # Prepare the device_subnet_list data for later use.
             port_router_id = port.get('device_id')
             if port_router_id:
                 device_subnet_list[port_router_id] = \
                         device_subnet_list[port_router_id].union(raw_subnets)
-
             port_tenant = None
             if port.get('tenant_id', None):
                 port_tenant = prepId('tenant-{0}'.format(port.get('tenant_id',
                                                                   '')))
+                port_dict['set_tenant'] = port_tenant
 
             port_instance = get_port_instance(port.get('device_owner', ''),
                                               port.get('device_id', ''))
             if port_instance:
                 port_instance = prepId(port_instance)
-            else:
-                port_instance = None
+                port_dict['set_instance'] = port_instance
             port_network = port.get('network_id', None)
             if port_network:
                 port_network = prepId('network-{0}'.format(port_network))
-
+                port_dict['set_network'] = port_network
             ports.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Port',
                 data=dict(
@@ -899,13 +899,10 @@ class OpenStackInfrastructure(PythonPlugin):
                     id=prepId('port-{0}'.format(port['id'])),
                     mac_address=port.get('mac_address', '').upper(),
                     portId=port['id'],
-                    set_instance=port_instance,
-                    set_network=port_network,
-                    set_subnets=port_subnets,
-                    set_tenant=port_tenant,
                     status=port.get('status', 'UNKNOWN'),
                     title=port.get('name', port['id']),
                     vif_type=port.get('binding:vif_type', 'UNKNOWN'),
+                    **port_dict
                     )))
 
         # router
