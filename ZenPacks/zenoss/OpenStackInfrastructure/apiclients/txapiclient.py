@@ -405,6 +405,10 @@ class APIClient(object):
             elif status == httplib.BAD_REQUEST:
                 raise BadRequestError(text + ". (check headers and/or data)")
             elif status == httplib.NOT_FOUND:
+                component = path.split('/')[-1].replace('.json', '')
+                if component in ('subnets', 'ports', 'networks'):
+                    log.info('No data for {0} '.format(component))
+                    returnValue(json.loads('{"%s": []}' % component))
                 raise NotFoundError(text + ' url used: ' + request.url)
 
             raise APIClientError(text)
