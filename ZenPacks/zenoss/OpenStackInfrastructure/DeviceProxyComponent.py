@@ -161,15 +161,16 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
                 getHostByName(device_name))
         except Exception:
             device = None
+
         if self.dmd.Devices.findDevice(device_name):
             device_name = device_name + "_nameconflict"
             LOG.info("Device name conflict with endpoint.  Changed name to %s" % device_name)
 
-        if device:
+        if device and device.getDeviceClassName() == '/Server/SSH/Linux':
             LOG.info("Change device class  for existing device %s"
                      % device.title)
             device.changeDeviceClass('/Server/SSH/Linux/NovaHost')
-        else:
+        elif not device:
             LOG.info('Adding device for %s %s' % (self.meta_type, self.title))
 
             device = self.proxy_deviceclass().createInstance(device_name)
