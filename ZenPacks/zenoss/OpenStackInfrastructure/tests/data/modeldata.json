@@ -569,7 +569,7 @@
                                                     "snapshots_iscsi": -1,
                                                     "backups": 10,
                                                     "gigabytes_iscsi": -1,
-                                                    "id": "28a2787a215a4187b22f800f51e58665"
+                                                    "id": "5b79c3f4df73447a9850887b2ea17372"
                                                   },
               "e6bae7721b8745ce8b14f3908de17b8c":
                                                   {
@@ -582,9 +582,21 @@
                                                     "snapshots_iscsi": -1,
                                                     "backups": 10,
                                                     "gigabytes_iscsi": -1,
-                                                    "id": "28a2787a215a4187b22f800f51e58665"
+                                                    "id": "e6bae7721b8745ce8b14f3908de17b8c"
                                                   }
             },
+  "volumetypes": [
+                    {
+                        "volume_backend_name": "ceph",
+                        "id": "033af14f-b609-45e3-aed2-5b2e02d44c8f",
+                        "name": "ceph"
+                    },
+                    {
+                      "volume_backend_name": "LVM_iSCSI",
+                      "id": "6e2e993c-110e-4aaf-a79b-a44acc533051",
+                      "name": "lvm"
+                    }
+                ],
   "volumes": [
                 {
                   "migration_status": null,
