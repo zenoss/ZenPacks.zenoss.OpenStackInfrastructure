@@ -335,6 +335,9 @@ class OpenStackInfrastructure(PythonPlugin):
                     flavorRAM=flavor.get('ram', 0) * 1024 * 1024,
                     flavorDisk=flavor.get('disk', 0) * 1024 * 1024 * 1024,
                     flavorVCPUs=flavor.get('vcpus', 0),
+                    # default to True, since default flavor is always public
+                    flavorType=str(flavor.get('os-flavor-access:is_public',
+                                              True)),
                 )))
 
         images = []
