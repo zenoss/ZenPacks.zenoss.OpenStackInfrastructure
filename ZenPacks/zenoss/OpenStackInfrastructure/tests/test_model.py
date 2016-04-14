@@ -281,14 +281,48 @@ class TestModel(BaseTestCase):
     def testVolume(self):
         self.assertEquals(1, 1)
 
+    def testVolumeTypes(self):
+        self.assertTrue(self._modeled)
+
+        voltypes = self.d.getDeviceComponents(type='OpenStackInfrastructureVolType')
+        self.assertEquals(len(voltypes), 2)
+        self.assertEquals(voltypes[0].id, 'volType-033af14f-b609-45e3-aed2-5b2e02d44c8f')
+        self.assertEquals(voltypes[0].title, 'ceph')
+        self.assertEquals(voltypes[1].id, 'volType-6e2e993c-110e-4aaf-a79b-a44acc533051')
+        self.assertEquals(voltypes[1].title, 'lvm')
+
     def testSnapshot(self):
         self.assertEquals(1, 1)
 
-    def testPool(self):
+    def testVolumePools(self):
         self.assertEquals(1, 1)
 
-    def testQuota(self):
-        self.assertEquals(1, 1)
+    def testCinderQuota(self):
+        self.assertTrue(self._modeled)
+
+        quotas = self.d.getDeviceComponents(type='OpenStackInfrastructureQuota')
+        self.assertEquals(len(quotas), 3)
+        self.assertEquals(quotas[0].id, 'quota-demo')
+        self.assertEquals(quotas[1].id, 'quota-services')
+        self.assertEquals(quotas[2].id, 'quota-admin')
+        self.assertEquals(quotas[0].tenant_name, 'demo')
+        self.assertEquals(quotas[1].tenant_name, 'services')
+        self.assertEquals(quotas[2].tenant_name, 'admin')
+        self.assertEquals(quotas[0].volumes, 10)
+        self.assertEquals(quotas[1].volumes, 10)
+        self.assertEquals(quotas[2].volumes, 10)
+        self.assertEquals(quotas[0].bytes, 1000)
+        self.assertEquals(quotas[1].bytes, 1000)
+        self.assertEquals(quotas[2].bytes, 1000)
+        self.assertEquals(quotas[0].backup_bytes, 1000)
+        self.assertEquals(quotas[1].backup_bytes, 1000)
+        self.assertEquals(quotas[2].backup_bytes, 1000)
+        self.assertEquals(quotas[0].snapshots, 10)
+        self.assertEquals(quotas[1].snapshots, 10)
+        self.assertEquals(quotas[2].snapshots, 10)
+        self.assertEquals(quotas[0].backups, 10)
+        self.assertEquals(quotas[1].backups, 10)
+        self.assertEquals(quotas[2].backups, 10)
 
 
 def test_suite():
