@@ -17,6 +17,9 @@ The initialization order for ZenPacks is defined by
 $ZENHOME/ZenPacks/easy-install.pth.
 
 """
+NOVA_HOST_PLUGINS = ['zenoss.cmd.linux.openstack.nova',
+                     'zenoss.cmd.linux.openstack.libvirt',
+                     'zenoss.cmd.linux.openstack.inifiles']
 
 from . import zenpacklib
 
@@ -39,9 +42,16 @@ from . import schema
 class ZenPack(schema.ZenPack):
     def install(self, app):
         self._migrate_productversions()
+        self._update_plugins()
 
         super(ZenPack, self).install(app)
         self.chmodScripts()
+
+    def _update_plugins(self):
+        log.info('Setting zProperty zCollectorPlugins on /Server/SSH/Linux/NovaHost')
+        plugins=self.dmd.Devices.getOrganizer('/Server/SSH/Linux').zCollectorPlugins
+        novahost = self.dmd.Devices.getOrganizer('/Server/SSH/Linux/NovaHost')
+        novahost.zCollectorPlugins = plugins + NOVA_HOST_PLUGINS
 
     def _migrate_productversions(self):
         # Rename products for openstack versions which did not yet have names
