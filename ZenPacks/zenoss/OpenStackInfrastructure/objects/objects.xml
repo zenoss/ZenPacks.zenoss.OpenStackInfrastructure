@@ -418,6 +418,21 @@ A neutron agent is not running properly
 Restart the offending agent.
 </property>
 </object>
+<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackCinderServiceStatus') -->
+<object id='/zport/dmd/Events/Status/instances/openStackCinderServiceStatus' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+openStackCinderServiceStatus
+</property>
+<property type="int" id="sequence" mode="w" >
+12
+</property>
+<property type="text" id="explanation" mode="w" >
+A cinder agent is not running properly
+</property>
+<property type="text" id="resolution" mode="w" >
+Restart the offending agent.
+</property>
+</object>
 <!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackNovaServiceStatus') -->
 <object id='/zport/dmd/Events/Status/instances/openStackNovaServiceStatus' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
 <property type="string" id="eventClassKey" mode="w" >
