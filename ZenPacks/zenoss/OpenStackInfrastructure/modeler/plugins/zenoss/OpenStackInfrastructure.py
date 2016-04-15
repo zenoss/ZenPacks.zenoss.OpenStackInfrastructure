@@ -887,7 +887,8 @@ class OpenStackInfrastructure(PythonPlugin):
                                                                   '')))
                 port_dict['set_tenant'] = port_tenant
 
-            port_instance = get_port_instance(port.get('device_owner', ''),
+            device_owner = port.get('device_owner', '')
+            port_instance = get_port_instance(device_owner,
                                               port.get('device_id', ''))
             if port_instance:
                 port_instance = prepId(port_instance)
@@ -896,11 +897,17 @@ class OpenStackInfrastructure(PythonPlugin):
             if port_network:
                 port_network = prepId('network-{0}'.format(port_network))
                 port_dict['set_network'] = port_network
+
+            port_router = None
+            if 'router_interface' in device_owner and port_router_id:
+                port_router = prepId('router-{0}'.format(port_router_id))
+                port_dict['set_router'] = port_router
+
             ports.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Port',
                 data=dict(
                     admin_state_up=port.get('admin_state_up', False),
-                    device_owner=port.get('device_owner', ''),
+                    device_owner=device_owner,
                     fixed_ip_list=get_port_fixedips(port.get('fixed_ips', [])),
                     id=prepId('port-{0}'.format(port['id'])),
                     mac_address=port.get('mac_address', '').upper(),

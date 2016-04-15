@@ -57,8 +57,10 @@ class_relationships:
 #    Router can connect to many subnets, a subnet can connect to several routers
 #    EG: router_AB + router_C connect to public_subnet:  subnet -> *router
 #    EG: since public network can have multiple subnets: router -> *subnet
+#    Router can have many ports with limitation one port per a subnet
 - Router 1:M FloatingIp
 - Router M:M Subnet
+- Router 1:M Port
 - Hypervisor 1:1 Host
 # Cinder
 - Instance 1:M Volume
@@ -1379,10 +1381,14 @@ classes: !ZenPackSpec
       tenant:
         label_width: 45
         content_width: 50
+        order: 2.5
+      ports:
+        label_width: 45
+        content_width: 50
         order: 2.4
     dynamicview_relations:
       impacted_by: [neutronAgents]
-      impacts: [subnets, floatingIps]
+      impacts: [subnets, floatingIps, ports]
     # --------------------------------------------------------------------------
     # We use a normal impact adaptor for implementation_components, rather than
     # dynamicview impacts adaptor, because the implementation zenpack might not
@@ -1457,9 +1463,13 @@ classes: !ZenPackSpec
       tenant:
         label_width: 35
         content_width: 35
+        order: 1.4
+      router:
+        label_width: 35
+        content_width: 35
         order: 1.3
     dynamicview_relations:
-      impacted_by: [subnets, floatingIps]
+      impacted_by: [subnets, floatingIps, router]
       impacts: [instance]
     # --------------------------------------------------------------------------
     # We use a normal impact adaptor for implementation_components, rather than
