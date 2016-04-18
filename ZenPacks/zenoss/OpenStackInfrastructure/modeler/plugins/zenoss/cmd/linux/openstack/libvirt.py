@@ -18,7 +18,8 @@ from twisted.internet.defer import inlineCallbacks, returnValue
 
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
-from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path
+from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path, \
+    container_cmd_wrapper
 add_local_lib_path()
 
 import logging
@@ -38,7 +39,8 @@ class libvirt(PythonPlugin):
 
     deviceProperties = PythonPlugin.deviceProperties \
         + ('zCommandUsername', 'zCommandPassword',
-           'zCommandPort', 'zCommandCommandTimeout', 'openstack_instanceList')
+           'zCommandPort', 'zCommandCommandTimeout', 'openstack_instanceList',
+           'zOpenStackRunVirshQemuInContainer')
 
     def condition(self, device, log):
         # Only run this if we've got openstack instances on this host.
@@ -59,6 +61,7 @@ class libvirt(PythonPlugin):
             'port': device.zCommandPort,
             'user': device.zCommandUsername,
             'password': device.zCommandPassword,
+            'identities': ['~/.ssh/id_rsa', '~/.ssh/id_dsa'],
             'buffersize': 32768})
         client.connect()
         timeout = device.zCommandCommandTimeout
@@ -66,7 +69,10 @@ class libvirt(PythonPlugin):
 
         try:
             for instanceId, instanceUUID in device.openstack_instanceList:
-                cmd = "virsh --readonly -c 'qemu:///system' dumpxml '%s'" % instanceUUID
+                cmd = container_cmd_wrapper(
+                    device.zOpenStackRunVirshQemuInContainer,
+                    "virsh --readonly -c 'qemu:///system' dumpxml '%s'" %
+                    instanceUUID)
                 log.info("Running %s" % cmd)
                 d = yield client.run(cmd, timeout=timeout)
 

@@ -657,6 +657,9 @@ class ModelBase(CatalogBase):
         """Return relative URL path for class' icon."""
         return getattr(self, 'icon_url', '/zport/dmd/img/icons/noicon.png')
 
+    def getDynamicViewGroup(self):
+        return getattr(self, 'dynamicview_group', None)
+
 
 class DeviceBase(ModelBase):
 
@@ -2019,6 +2022,7 @@ class ClassSpec(Spec):
             filter_hide_from=None,
             dynamicview_views=None,
             dynamicview_group=None,
+            dynamicview_weight=None,
             dynamicview_relations=None,
             extra_paths=None,
             _source_location=None
@@ -2078,6 +2082,8 @@ class ClassSpec(Spec):
             :type dynamicview_views: list(str)
             :param dynamicview_group: TODO
             :type dynamicview_group: str
+            :param dynamicview_weight: TODO
+            :type dynamicview_weight: float
             :param dynamicview_relations: TODO
             :type dynamicview_relations: dict
             :param extra_paths: TODO
@@ -2158,6 +2164,11 @@ class ClassSpec(Spec):
             self.dynamicview_group = self.plural_short_label
         else:
             self.dynamicview_group = dynamicview_group
+
+        if dynamicview_weight is None:
+            self.dynamicview_weight = 1000 + (self.order * 100)
+        else:
+            self.dynamicview_weight = dynamicview_weight
 
         # additional relationships to add, beyond IMPACTS and IMPACTED_BY.
         if dynamicview_relations is None:
@@ -2336,6 +2347,9 @@ class ClassSpec(Spec):
     @property
     def icon_url(self):
         """Return relative URL to icon."""
+        if self.icon and self.icon.startswith('/'):
+            return self.icon
+
         icon_filename = self.icon or '{}.png'.format(self.name)
 
         icon_path = os.path.join(
@@ -2367,7 +2381,12 @@ class ClassSpec(Spec):
             'class_plural_label': self.plural_label,
             'class_short_label': self.short_label,
             'class_plural_short_label': self.plural_short_label,
-            'class_dynamicview_group': self.dynamicview_group,
+            'dynamicview_group': {
+                'name': self.dynamicview_group,
+                'weight': self.dynamicview_weight,
+                'type': self.zenpack.name,
+                'icon': self.icon_url,
+                },
             }
 
         properties = []
@@ -2654,27 +2673,10 @@ class ClassSpec(Spec):
             required=(self.model_class,),
             provided=IRelationsProvider)
 
-        dvm = DynamicViewMappings()
-
-        groupName = self.model_class.class_dynamicview_group
-        weight = 1000 + (self.order * 100)
-        icon_url = getattr(self, 'icon_url', '/zport/dmd/img/icons/noicon.png')
-
-        # Make sure the named utility is also registered.  It seems that
-        # during unit tests, it may not be, even if the mapping is still
-        # present.
-        group = GSM.queryUtility(IGroup, groupName)
-        if not group:
-            group = BaseGroup(groupName, weight, None, icon_url)
-            GSM.registerUtility(group, IGroup, groupName)
-
-        for viewName in self.dynamicview_views:
-            if groupName not in dvm.getGroupNames(viewName):
-                dvm.addMapping(
-                    viewName=viewName,
-                    groupName=group.name,
-                    weight=group.weight,
-                    icon=group.icon)
+        GSM.registerSubscriptionAdapter(
+            DynamicViewGroupMappingProvider,
+            required=(DynamicViewRelatable,),
+            provided=IGroupMappingProvider)
 
     def register_impact_adapters(self):
         """Register Impact adapters."""
@@ -5777,7 +5779,7 @@ def create_class(module, schema_module, classname, bases, attributes):
 # Impact Stuff ##############################################################
 
 try:
-    from ZenPacks.zenoss.Impact.impactd.relations import ImpactEdge, DSVRelationshipProvider, RelationshipEdgeError
+    from ZenPacks.zenoss.Impact.impactd.relations import ImpactEdge
     from ZenPacks.zenoss.Impact.impactd.interfaces import IRelationshipDataProvider
 except ImportError:
     IMPACT_INSTALLED = False
@@ -5786,10 +5788,11 @@ else:
 
 try:
     from ZenPacks.zenoss.DynamicView import BaseRelation, BaseGroup
-    from ZenPacks.zenoss.DynamicView import TAG_IMPACTED_BY, TAG_IMPACTS, TAG_ALL
-    from ZenPacks.zenoss.DynamicView.interfaces import IRelatable, IRelationsProvider, IGroup
-    from ZenPacks.zenoss.DynamicView.dynamicview import DynamicViewMappings
-    from ZenPacks.zenoss.DynamicView.model.adapters import BaseRelatable, BaseRelationsProvider
+    from ZenPacks.zenoss.DynamicView import TAG_ALL
+    from ZenPacks.zenoss.DynamicView.interfaces import IRelatable, IRelationsProvider
+    from ZenPacks.zenoss.DynamicView.interfaces import IGroupMappingProvider
+    from ZenPacks.zenoss.DynamicView.model.adapters import BaseRelatable
+    from ZenPacks.zenoss.DynamicView.model.adapters import BaseRelationsProvider
 
 except ImportError:
     DYNAMICVIEW_INSTALLED = False
@@ -5881,7 +5884,6 @@ if DYNAMICVIEW_INSTALLED:
         """
 
         implements(IRelatable)
-        adapts(DeviceBase, ComponentBase)
 
         @property
         def id(self):
@@ -5897,7 +5899,35 @@ if DYNAMICVIEW_INSTALLED:
 
         @property
         def group(self):
-            return self._adapted.class_dynamicview_group
+            data = self._adapted.getDynamicViewGroup()
+            if data:
+                return data.get('name', 'Unknown')
+
+        @property
+        def group_data(self):
+            return self._adapted.getDynamicViewGroup()
+
+    class DynamicViewGroupMappingProvider(object):
+        """Generic DynamicView IGroupMappingProvider adapter.
+
+        All group information is gathered from the adapted model object.
+
+        """
+
+        implements(IGroupMappingProvider)
+        adapts(DynamicViewRelatable)
+
+        def __init__(self, adapted):
+            self._adapted = adapted
+
+        def getGroup(self, viewName):
+            data = self._adapted.group_data
+            if data:
+                return BaseGroup(
+                    name=data.get('name', 'Unknown'),
+                    weight=data.get('weight', 999),
+                    type=data.get('type', 'Unknown'),
+                    icon=data.get('icon', '/zport/dmd/img/icons/noicon.png'))
 
     class DynamicViewRelationsProvider(BaseRelationsProvider):
         """Generic DynamicView RelationsProvider subscription adapter (IRelationsProvider)
@@ -5911,7 +5941,6 @@ if DYNAMICVIEW_INSTALLED:
         DynamicViewRelationsProvider for a given model class.
         """
         implements(IRelationsProvider)
-        adapts(DeviceBase, ComponentBase)
 
         def relations(self, type=TAG_ALL):
             target = IRelatable(self._adapted)
