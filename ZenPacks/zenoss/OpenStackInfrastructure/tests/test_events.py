@@ -10,7 +10,7 @@
 ##############################################################################
 
 '''
-Unit test for impact
+Unit test for event
 '''
 import Globals
 
