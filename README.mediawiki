@@ -205,6 +205,36 @@ Routers
 Zenoss, and all events processed through Ceilometer are exposed via the
 Zenoss Event Console.
 
+==Host Based Installation vs Container Based Installation==
+
+This zenpack supports both host based installation and container based
+installation.
+
+===Host Based Installation===
+
+With host based installation, the OpenStack binaries are directly installed on
+the host. For instance,  the binary nova-api would be installed directly in the
+controller host's /usr/bin directory. In this case, leave the zProperties
+zOpenStackRunNovaManageInContainer, zOpenStackRunVirshQemuInContainer, and
+zOpenStackRunNeutronCommonInContainer unset in zenpack.yaml:
+<syntaxhighlight lang="bash">
+      zOpenStackRunNovaManageInContainer:
+      zOpenStackRunVirshQemuInContainer:
+      zOpenStackRunNeutronCommonInContainer:
+</syntaxhighlight>
+
+===Container Based Installation===
+
+With container based installation, each OpenStack binary runs inside its own
+container. In this case, set the zProperties zOpenStackRunNovaManageInContainer,
+zOpenStackRunVirshQemuInContainer, and zOpenStackRunNeutronCommonInContainer in
+zenpack.yaml as:
+<syntaxhighlight lang="bash">
+      zOpenStackRunNovaManageInContainer: novaconduct
+      zOpenStackRunVirshQemuInContainer: novacompute
+      zOpenStackRunNeutronCommonInContainer: neutron_server
+</syntaxhighlight>
+
 ==Ceilometer Enablement==
 
 Although you may add an OpenStack device to Zenoss, as shown above, event and

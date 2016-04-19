@@ -54,10 +54,14 @@ class nova(PythonPlugin):
         client.connect()
         timeout = device.zCommandCommandTimeout
 
-        cmd = container_cmd_wrapper(
-            device.zOpenStackRunNovaManageInContainer,
-            "nova-manage --version 2>&1"
-        )
+        # host based installation
+        cmd = "nova-manage --version 2>&1"
+        if device.zOpenStackRunNovaManageInContainer:
+            # container based installation
+            cmd = container_cmd_wrapper(
+                device.zOpenStackRunNovaManageInContainer,
+                "nova-manage --version 2>&1"
+            )
         log.info("Running %s" % cmd)
         try:
             d = yield client.run(cmd, timeout=timeout)
