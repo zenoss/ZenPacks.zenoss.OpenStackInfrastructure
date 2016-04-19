@@ -69,10 +69,15 @@ class libvirt(PythonPlugin):
 
         try:
             for instanceId, instanceUUID in device.openstack_instanceList:
-                cmd = container_cmd_wrapper(
-                    device.zOpenStackRunVirshQemuInContainer,
-                    "virsh --readonly -c 'qemu:///system' dumpxml '%s'" %
-                    instanceUUID)
+                # host based installation
+                cmd = "virsh --readonly -c 'qemu:///system' dumpxml '%s'" % \
+                      instanceUUID
+                if device.zOpenStackRunNeutronCommonInContainer:
+                    # container based installation
+                    cmd = container_cmd_wrapper(
+                        device.zOpenStackRunVirshQemuInContainer,
+                        "virsh --readonly -c 'qemu:///system' dumpxml '%s'" % \
+                        instanceUUID)
                 log.info("Running %s" % cmd)
                 d = yield client.run(cmd, timeout=timeout)
 

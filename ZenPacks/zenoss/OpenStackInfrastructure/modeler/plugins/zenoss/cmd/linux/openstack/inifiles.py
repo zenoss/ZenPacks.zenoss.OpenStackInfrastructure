@@ -118,9 +118,14 @@ class inifiles(PythonPlugin):
         filepath = os.path.join(device.zOpenStackNeutronConfigDir, filename)
         log.info("Retrieving %s", filepath)
 
-        cmd = container_cmd_wrapper(
-            device.zOpenStackRunNeutronCommonInContainer, "cat %s" % filepath
-        )
+        # host based installation
+        cmd = "cat %s" % filepath
+        if device.zOpenStackRunNeutronCommonInContainer:
+            # container based installation
+            cmd = container_cmd_wrapper(
+                device.zOpenStackRunNeutronCommonInContainer, "cat %s" % \
+                                                              filepath
+            )
         d = yield self.client.run(cmd, timeout=self.timeout)
 
         if d.exitCode != 0 or d.stderr:
@@ -167,10 +172,14 @@ class inifiles(PythonPlugin):
 
         try:
             # Check if neutron-server runs on this machine
-            cmd = container_cmd_wrapper(
-                device.zOpenStackRunNeutronCommonInContainer,
-                "pgrep neutron-server"
-            )
+            # host based installation
+            cmd = "pgrep neutron-server"
+            if device.zOpenStackRunNeutronCommonInContainer:
+                # container based installation
+                cmd = container_cmd_wrapper(
+                    device.zOpenStackRunNeutronCommonInContainer,
+                    "pgrep neutron-server"
+                )
             d = yield self.client.run(cmd, timeout=self.timeout)
 
             if d.exitCode != 0:
