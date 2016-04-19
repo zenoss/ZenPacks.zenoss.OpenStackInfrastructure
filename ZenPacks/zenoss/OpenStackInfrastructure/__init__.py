@@ -42,10 +42,18 @@ from . import schema
 class ZenPack(schema.ZenPack):
     def install(self, app):
         self._migrate_productversions()
-        self._update_plugins()
+        self._check_organizer_exists()
 
         super(ZenPack, self).install(app)
+        self._update_plugins()
         self.chmodScripts()
+
+    def _check_organizer_exists(self):
+        try:
+            self.dmd.Devices.getOrganizer('/Server/SSH/Linux/NovaHost')
+        except KeyError:
+            log.info('Creating DeviceClass %s' % '/Server/SSH/Linux/NovaHost')
+            self.dmd.Devices.createOrganizer('/Server/SSH/Linux/NovaHost')
 
     def _update_plugins(self):
         log.info('Setting zProperty zCollectorPlugins on /Server/SSH/Linux/NovaHost')
