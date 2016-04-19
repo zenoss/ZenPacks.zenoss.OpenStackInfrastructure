@@ -284,8 +284,13 @@ class OpenStackInfrastructure(PythonPlugin):
                 result = yield client.cinder_quotas(tenant=tenant['id'].encode(
                     'ascii', 'ignore'), usage=False)
             except Exception, e:
+                try:
+                    message = re.search('\"message\":\s?\"(.*)\.\"',e.message).groups()[0]
+                except AttributeError:
+                    message = e.message
+
                 log.warn("Unable to obtain quotas for %s. Error message: %s" %
-                         (tenant['name'], e.message))
+                         (tenant['name'], message))
             else:
                 results['quotas'][tenant['id']] = result['quota_set']
 
