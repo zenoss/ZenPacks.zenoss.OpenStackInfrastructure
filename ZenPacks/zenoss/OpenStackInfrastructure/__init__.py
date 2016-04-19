@@ -50,7 +50,11 @@ class ZenPack(schema.ZenPack):
     def _update_plugins(self):
         log.info('Setting zProperty zCollectorPlugins on /Server/SSH/Linux/NovaHost')
         plugins=self.dmd.Devices.getOrganizer('/Server/SSH/Linux').zCollectorPlugins
-        novahost = self.dmd.Devices.getOrganizer('/Server/SSH/Linux/NovaHost')
+        try:
+            novahost = self.dmd.Devices.getOrganizer('/Server/SSH/Linux/NovaHost')
+        except KeyError:
+            log.info('Creating DeviceClass %s' % '/Server/SSH/Linux/NovaHost')
+            novahost = self.dmd.Devices.createOrganizer('/Server/SSH/Linux/NovaHost')
         novahost.zCollectorPlugins = plugins + NOVA_HOST_PLUGINS
 
     def _migrate_productversions(self):
