@@ -17,9 +17,6 @@ The initialization order for ZenPacks is defined by
 $ZENHOME/ZenPacks/easy-install.pth.
 
 """
-NOVA_HOST_PLUGINS = ['zenoss.cmd.linux.openstack.nova',
-                     'zenoss.cmd.linux.openstack.libvirt',
-                     'zenoss.cmd.linux.openstack.inifiles']
 
 from . import zenpacklib
 
@@ -42,25 +39,18 @@ from . import schema
 class ZenPack(schema.ZenPack):
     def install(self, app):
         self._migrate_productversions()
-        self._check_organizer_exists()
-
+        self._update_plugins('/Server/SSH/Linux/NovaHost')
         super(ZenPack, self).install(app)
-        self._update_plugins()
         self.chmodScripts()
 
-    def _check_organizer_exists(self):
+    def _update_plugins(self, organizer):
+        log.debug('Update plugins list for NovaHost organizer')
         try:
-            self.dmd.Devices.getOrganizer('/Server/SSH/Linux/NovaHost')
+            plugins=self.dmd.Devices.getOrganizer('/Server/SSH/Linux').zCollectorPlugins
+            self.device_classes[organizer].zProperties['zCollectorPlugins'] += plugins
         except KeyError:
-            log.info('Creating DeviceClass %s' % '/Server/SSH/Linux/NovaHost')
-            self.dmd.Devices.createOrganizer('/Server/SSH/Linux/NovaHost')
-
-    def _update_plugins(self):
-        log.info('Setting zProperty zCollectorPlugins on /Server/SSH/Linux/NovaHost')
-        plugins=self.dmd.Devices.getOrganizer('/Server/SSH/Linux').zCollectorPlugins
-        novahost = self.dmd.Devices.getOrganizer('/Server/SSH/Linux/NovaHost')
-        novahost.zCollectorPlugins = plugins + NOVA_HOST_PLUGINS
-
+            log.debug("'Server/SSH/Linux' organizer does not exist")
+    
     def _migrate_productversions(self):
         # Rename products for openstack versions which did not yet have names
         # in previous versions of the zenpack.   This can not be done in a
