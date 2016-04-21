@@ -739,6 +739,26 @@ False
 7
 </property>
 </object>
+<object id='ceilometer-polling' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+ceilometer-polling
+</property>
+<property type="string" id="regex" mode="w" >
+ceilometer-polling
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+3
+</property>
+</object>
 <object id='neutron-dhcp-agent' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
 neutron-dhcp-agent
@@ -1045,6 +1065,166 @@ cinder-backup
 </property>
 <property type="string" id="regex" mode="w">
 cinder-backup
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="glance-api" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+glance-api
+</property>
+<property type="string" id="regex" mode="w">
+glance-api
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="glance-registry" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+glance-registry
+</property>
+<property type="string" id="regex" mode="w">
+glance-registry
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="gnocchi-metricd" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+gnocchi-metricd
+</property>
+<property type="string" id="regex" mode="w">
+gnocchi-metricd
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="gnocchi-statsd" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+gnocchi-statsd
+</property>
+<property type="string" id="regex" mode="w">
+gnocchi-statsd
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="keystone-all" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+keystone-all
+</property>
+<property type="string" id="regex" mode="w">
+keystone-all
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="keystone-admin" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+keystone-admin
+</property>
+<property type="string" id="regex" mode="w">
+keystone-admin
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="keystone-main" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+keystone-main
+</property>
+<property type="string" id="regex" mode="w">
+keystone-main
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="rabbitmq-server" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+rabbitmq-server
+</property>
+<property type="string" id="regex" mode="w">
+rabbitmq-server
 </property>
 <property type="string" id="excludeRegex" mode="w">
 \b(vim|tail|grep|tar|cat|bash)\b
