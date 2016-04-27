@@ -41,6 +41,6 @@ class OpenStackService(HubService):
                     ))
 
         except Exception:
-            log.error("Device Error %s on endpoint_id %s") % (device, endpoint_id)
+            log.error("Device Error %s on endpoint_id %s" % (device, endpoint_id))
 
         return result
