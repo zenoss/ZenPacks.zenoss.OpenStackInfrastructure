@@ -127,7 +127,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
 
             # this shouldn't happen, but if we've somehow become half-connected
             # (we know about the device, it doesn't know about us), reconnect.
-            if device.openstackProxyComponentUUID != guid:
+            if getattr(device, 'openstackProxyComponentUUID', None) != guid:
                 LOG.info("%s component '%s' linkage to device '%s' is broken.  Re-claiming it." % (self.meta_type, self.name(), device.name()))
                 self.claim_proxy_device(device)
 
