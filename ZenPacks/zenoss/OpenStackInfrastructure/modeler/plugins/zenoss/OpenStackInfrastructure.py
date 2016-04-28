@@ -108,7 +108,9 @@ class OpenStackInfrastructure(PythonPlugin):
         result = yield client.nova_flavors(is_public=True)
         results['flavors'] = result['flavors']
         result = yield client.nova_flavors(is_public=False)
-        results['flavors'].extend(result['flavors'])
+        for flavor in result['flavors']:
+            if flavor not in results['flavors']:
+                results['flavors'].append(flavor)
         log.debug('flavors: %s\n' % str(results['flavors']))
 
         result = yield client.nova_images()
