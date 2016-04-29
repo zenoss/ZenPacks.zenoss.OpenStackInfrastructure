@@ -13,7 +13,7 @@
 
 PYTHON=python
 SRC_DIR=$(PWD)/src
-TXSSHCLIENT_DIR=$(SRC_DIR)/txsshclient-0.1.0dev1
+TXSSHCLIENT_DIR=$(SRC_DIR)/txsshclient-0.2.0
 ZP_DIR=$(PWD)/ZenPacks/zenoss/OpenStackInfrastructure
 BIN_DIR=$(ZP_DIR)/bin
 LIB_DIR=$(ZP_DIR)/lib
@@ -27,11 +27,10 @@ egg:
 .PHONY: build analytics
 
 build:
-
-	# Now build all the build dependencies for this zenpack.
-	cd $(TXSSHCLIENT_DIR) && \
-		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
-			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
+# Now build all the build dependencies for this zenpack.
+	rm -rf $(TXSSHCLIENT_DIR)/build
+	cd $(TXSSHCLIENT_DIR); python setup.py build
+	cp -r $(TXSSHCLIENT_DIR)/build/lib/sshclient $(ZP_DIR)/lib/sshclient/
 
 clean:
 	rm -rf build dist *.egg-info
