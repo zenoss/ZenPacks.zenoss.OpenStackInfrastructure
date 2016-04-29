@@ -9,6 +9,10 @@ zProperties: !ZenPackSpec
     default: /Server/SSH/Linux/NovaHost
   zOpenStackNovaApiHosts:
     type: lines
+  zOpenStackNeutronConfigDir: {}
+  zOpenStackRunNovaManageInContainer: {}
+  zOpenStackRunVirshQemuInContainer: {}
+  zOpenStackRunNeutronCommonInContainer: {}
 class_relationships:
 # Containing Relations
 - Endpoint(components) 1:MC OpenstackComponent
