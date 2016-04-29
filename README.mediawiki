@@ -213,26 +213,31 @@ installation.
 ===Host Based Installation===
 
 With host based installation, the OpenStack binaries are directly installed on
-the host. For instance,  the binary nova-api would be installed directly in the
-controller host's /usr/bin directory. In this case, leave the zProperties
+the host. For instance,  the binary nova-api will be installed directly in the
+controller host's /usr/bin directory. In this case, edit the Configuration
+Properties of the /Server/SSH/Linux/NovaHost devices,
 zOpenStackRunNovaManageInContainer, zOpenStackRunVirshQemuInContainer, and
-zOpenStackRunNeutronCommonInContainer unset in zenpack.yaml:
+zOpenStackRunNeutronCommonInContainer, after modeling the OpenStackInfrastructure
+device, but before modeling the /Server/SSH/Linux/NovaHost devices, and make
+sure their values are empty:
 <syntaxhighlight lang="bash">
-      zOpenStackRunNovaManageInContainer:
-      zOpenStackRunVirshQemuInContainer:
-      zOpenStackRunNeutronCommonInContainer:
+      zOpenStackRunNovaManageInContainer
+      zOpenStackRunVirshQemuInContainer
+      zOpenStackRunNeutronCommonInContainer
 </syntaxhighlight>
 
 ===Container Based Installation===
 
 With container based installation, each OpenStack binary runs inside its own
-container. In this case, set the zProperties zOpenStackRunNovaManageInContainer,
-zOpenStackRunVirshQemuInContainer, and zOpenStackRunNeutronCommonInContainer in
-zenpack.yaml as:
+container. In this case, edit the Configuration Properties of the
+/Server/SSH/Linux/NovaHost devices, zOpenStackRunNovaManageInContainer,
+zOpenStackRunVirshQemuInContainer, and zOpenStackRunNeutronCommonInContainer,
+after modeling the OpenStackInfrastructure device, but before modeling the
+/Server/SSH/Linux/NovaHost devices, and make sure their values are set as:
 <syntaxhighlight lang="bash">
-      zOpenStackRunNovaManageInContainer: novaconduct
-      zOpenStackRunVirshQemuInContainer: novacompute
-      zOpenStackRunNeutronCommonInContainer: neutron_server
+      zOpenStackRunNovaManageInContainer novaconduct
+      zOpenStackRunVirshQemuInContainer novacompute
+      zOpenStackRunNeutronCommonInContainer neutron_server
 </syntaxhighlight>
 
 ==Ceilometer Enablement==
