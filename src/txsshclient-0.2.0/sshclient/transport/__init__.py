@@ -25,6 +25,5 @@ class SSHTransport(transport.SSHClientTransport):
         transport.SSHClientTransport.sendDisconnect(self, reason, desc)
 
         # Tell the factory we had an unauthorized login exception
-        if reason == 14:
-            log.debug('login failure, telling the factory about it')
-            self.factory.resetConnection(UnauthorizedLogin())
+        if reason == transport.DISCONNECT_NO_MORE_AUTH_METHODS_AVAILABLE:
+            self.factory.resetConnection(UnauthorizedLogin('Authentication Failure'))

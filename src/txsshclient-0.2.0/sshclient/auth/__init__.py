@@ -94,7 +94,7 @@ class PasswordAuth(userauth.SSHUserAuthClient):
         """
         Get the password. Raise an exception if it is not set.
         """
-        if not self.options['password']:
+        if 'password' not in self.options or not self.options['password']:
             message = "no password set in options"
             raise SshNoPasswordError(message)
         return self.options['password']

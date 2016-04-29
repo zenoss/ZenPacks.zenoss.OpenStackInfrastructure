@@ -23,7 +23,7 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path, \
 add_local_lib_path()
 
 import logging
-from sshclient import SSHClient
+from ZenPacks.zenoss.OpenStackInfrastructure.ssh import SSHClient
 
 ssh_logger = logging.getLogger('txsshclient')
 ssh_logger.setLevel(logging.DEBUG)

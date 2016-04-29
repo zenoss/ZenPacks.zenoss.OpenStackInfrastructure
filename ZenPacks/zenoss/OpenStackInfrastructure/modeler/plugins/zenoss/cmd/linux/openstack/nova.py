@@ -20,7 +20,7 @@ from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path, \
     container_cmd_wrapper
 
-from sshclient import SSHClient
+from ZenPacks.zenoss.OpenStackInfrastructure.ssh import SSHClient
 
 add_local_lib_path()
 
