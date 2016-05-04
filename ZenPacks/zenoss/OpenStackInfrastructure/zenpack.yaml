@@ -816,7 +816,7 @@ classes: !ZenPackSpec
     dynamicview_group: Tenants
     dynamicview_weight: 15
     dynamicview_relations:
-      impacted_by: [instances, networks, subnets, implementation_components]
+      impacted_by: [instances, volumes, networks, subnets, implementation_components]
   Flavor:
     base: [LogicalComponent]
     meta_type: OpenStackInfrastructureFlavor
@@ -1671,7 +1671,7 @@ classes: !ZenPackSpec
 #        content_width: 50
     dynamicview_views: [service_view, openstack_view]
     dynamicview_relations:
-      impacts: [instance, volSnapshots]
+      impacts: [instance, volSnapshots, tenant]
     # --------------------------------------------------------------------------
     # We use a normal impact adaptor for implementation_components, rather than
     # dynamicview impacts adaptor, because the implementation zenpack might not

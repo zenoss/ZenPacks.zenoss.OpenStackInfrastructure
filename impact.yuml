@@ -54,9 +54,6 @@
 [UCS Service Profile{bg:darkslateblue}]1-*>[Linux;Device{bg:deepskyblue}]
 
 # Cinder
-[CinderAgent{bg:orange}]*-*>[Volume{bg:orange}]
-[CinderAgent{bg:orange}]*-*>[Snapshot{bg:orange}]
 [Volume{bg:orange}]*-1>[Tenant{bg:orange}]
-[Snapshot{bg:orange}]*-1>[Tenant{bg:orange}]
-[Instance{bg:orange}]<1-1[Volume{bg:orange}]
+[Instance{bg:orange}]<1-*[Volume{bg:orange}]
 [Volume{bg:orange}]<1-*[Snapshot{bg:orange}]
