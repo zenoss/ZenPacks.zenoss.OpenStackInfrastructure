@@ -165,7 +165,9 @@ class EventsAMQPDataSourcePlugin(PythonDataSourcePlugin):
 
             traits = {}
             for trait in c_event['traits']:
-                traits[trait['name']] = trait['value']
+                # liberty: [[name, dtype, value] ...]
+                # [[u'display_name', 1, u'demo-volume1-snap'], ...]
+                traits[trait[0]] = trait[2]
 
             if 'priority' in traits:
                 if traits['priority'] == 'WARN':
