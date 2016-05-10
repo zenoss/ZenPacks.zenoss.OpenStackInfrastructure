@@ -80,7 +80,6 @@ device_classes: !ZenPackSpec
       zOpenStackRunNovaManageInContainer: novaconduct
       zOpenStackRunVirshQemuInContainer: novacompute
       zOpenStackRunNeutronCommonInContainer: neutron_server
-      zCollectorPlugins: ['zenoss.cmd.linux.openstack.nova','zenoss.cmd.linux.openstack.libvirt','zenoss.cmd.linux.openstack.inifiles']
   /OpenStack: {}
   /OpenStack/Infrastructure:
     remove: true
