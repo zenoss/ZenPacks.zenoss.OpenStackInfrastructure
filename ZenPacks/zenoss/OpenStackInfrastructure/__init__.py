@@ -49,13 +49,12 @@ class ZenPack(schema.ZenPack):
 
     def _update_plugins(self, organizer):
         log.debug('Update plugins list for NovaHost organizer')
+        self.device_classes[organizer].zProperties['zCollectorPlugins'] = NOVAHOST_PLUGINS
         try:
             plugins = self.dmd.Devices.getOrganizer('/Server/SSH/Linux').zCollectorPlugins
-            self.device_classes[organizer].zProperties['zCollectorPlugins'] = plugins
+            self.device_classes[organizer].zProperties['zCollectorPlugins'] += plugins
         except KeyError:
             log.debug("'Server/SSH/Linux' organizer does not exist")
-            self.device_classes[organizer].zProperties['zCollectorPlugins'] = []
-        self.device_classes[organizer].zProperties['zCollectorPlugins'] += NOVAHOST_PLUGINS
 
     def _migrate_productversions(self):
         # Rename products for openstack versions which did not yet have names
