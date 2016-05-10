@@ -58,4 +58,4 @@ class Hypervisor(schema.Hypervisor):
                     self.set_host(host.id)
                     self.hostfqdn = name
         else:
-            log.error("Could not setup host")
+            log.error("%s: Could not set hypervisor host by name (%s)", self.id, name)
