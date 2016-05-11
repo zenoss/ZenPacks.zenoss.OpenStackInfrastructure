@@ -74,6 +74,7 @@ class_relationships:
 #- Volume 1:M Backup
 device_classes: !ZenPackSpec
   /Server/SSH/Linux/NovaHost:
+    remove: True
     zProperties:
       zOpenStackNeutronConfigDir: /etc/neutron
       zSshConcurrentSessions: 5
