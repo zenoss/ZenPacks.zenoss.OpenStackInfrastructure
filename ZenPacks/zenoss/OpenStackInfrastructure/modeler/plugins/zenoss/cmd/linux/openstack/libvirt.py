@@ -84,6 +84,10 @@ class libvirt(PythonPlugin):
                 if d.exitCode != 0 or d.stderr:
                     if 'Domain not found' in d.stderr:
                         log.debug("Domain not found while running virsh (rc=%s, stderr='%s')" % (d.exitCode, d.stderr))
+                    elif 'docker: command not found' in d.stderr:
+                        msg = 'Check zOpenStackRunNeutronCommonInContainer value'
+                        stderr = ' '.join(list(set(d.stderr.split('\n')))).lstrip()
+                        log.error("Error running virsh (rc=%s, stderr='%s'); %s" % (d.exitCode, stderr, msg))
                     else:
                         log.error("Error running virsh (rc=%s, stderr='%s')" % (d.exitCode, d.stderr))
                     continue
