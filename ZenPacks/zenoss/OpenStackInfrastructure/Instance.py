@@ -108,7 +108,7 @@ guest is running within.
     def getExpandedLinks(self):
         instance = self._device.openstackInstance()
         if instance:
-            return ['<a href="%s">Openstack VM Instance \'%s\' on %s</a>' % (
+            return ['<a href="%s">Instance \'%s\' on OpenStack %s</a>' % (
                 instance.getPrimaryUrlPath(), instance.titleOrId(), instance.device().titleOrId())]
 
         return []
