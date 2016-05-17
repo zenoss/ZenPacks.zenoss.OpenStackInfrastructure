@@ -176,7 +176,7 @@ class NeutronAgentStatusDataSourcePlugin(PythonDataSourcePlugin):
             'summary': 'Neutron Agent Status Collector: successful collection',
             'severity': ZenEventClasses.Clear,
             'eventKey': 'openStackNeutronAgentCollectionError',
-            'eventClassKey': 'openstackRestored',
+            'eventClassKey': 'openStackFailure',
             })
 
         return data
