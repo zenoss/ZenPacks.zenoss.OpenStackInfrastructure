@@ -387,6 +387,7 @@ device_classes: !ZenPackSpec
               Performance:
                 dpName: openstackQueues_perfQueueCount
                 format: '%7.0lf'
+                color: 98df8a
           Routers:
             units: count
             miny: 0
@@ -575,6 +576,7 @@ device_classes: !ZenPackSpec
               Write:
                 dpName: diskWriteBytesRate_diskWriteBytesRate
                 format: '%7.2lf%s'
+                color: 98df8a
           Disk Requests:
             units: requests/sec
             miny: 0
@@ -585,6 +587,7 @@ device_classes: !ZenPackSpec
               Write:
                 dpName: diskWriteRequestsRate_diskWriteRequestsRate
                 format: '%7.2lf%s'
+                color: 98df8a
       Vnic:
         description: 'OpenStackInfrastructure: Vnic Monitoring'
         targetPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Vnic
@@ -632,6 +635,7 @@ device_classes: !ZenPackSpec
               Outbound:
                 dpName: networkOutgoingBytesRate_networkOutgoingBytesRate
                 format: '%7.2lf%s'
+                color: 98df8a
           Network Packet Rate:
             units: packets/sec
             miny: 0
@@ -642,6 +646,7 @@ device_classes: !ZenPackSpec
               Outbound:
                 dpName: networkOutgoingPacketsRate_networkOutgoingPacketsRate
                 format: '%7.2lf%s'
+                color: 98df8a
 classes: !ZenPackSpec
   #-----------------------------------------------------------------------------
   # Base Device Class Types
