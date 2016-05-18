@@ -181,7 +181,7 @@ class CinderServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
             'summary': 'Cinder Status Collector: successful collection',
             'severity': ZenEventClasses.Clear,
             'eventKey': 'openStackCinderServiceCollectionError',
-            'eventClassKey': 'openstackRestored',
+            'eventClassKey': 'openStackFailure',
             })
 
         return data
