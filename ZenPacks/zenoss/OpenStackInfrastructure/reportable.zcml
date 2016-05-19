@@ -43,4 +43,9 @@
            provides="Products.Zuul.interfaces.IReportable"
            />
 
+  <adapter factory=".reportable.RegionReportable"
+           for=".Region.Region"
+           provides="Products.Zuul.interfaces.IReportable"
+           />
+
 </configure>
