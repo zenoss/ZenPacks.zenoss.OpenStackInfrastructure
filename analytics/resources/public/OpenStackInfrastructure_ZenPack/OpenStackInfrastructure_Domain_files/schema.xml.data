@@ -729,7 +729,7 @@
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_name" label="Instance Name"/>
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_resource_id" label="Ceilometer Resource ID"/>
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_host_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_host_id" label="Host ID"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_host_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_host_name" label="hostName"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_host_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_host_name" label="Instance Title"/>
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_bios_uuid" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_bios_uuid" label="BIOS UUID"/>
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_serial_number" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_serial_number" label="BIOS Serial Number"/>
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_instance.openstack_infrastructure_instance_hypervisor_instance_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_instance_openstack_infrastructure_instance_hypervisor_instance_name" label="Hypervisor Instance Name"/>
@@ -764,7 +764,7 @@
       <items>
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_host.openstack_infrastructure_host_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_host_openstack_infrastructure_host_name" label="Host Name"/>
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_host.openstack_infrastructure_host_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_host_openstack_infrastructure_host_resource_id" label="Ceilometer Resource ID"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_host.openstack_infrastructure_host_hostname" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_host_openstack_infrastructure_host_hostname" label="hostname"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_host.openstack_infrastructure_host_hostname" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_host_openstack_infrastructure_host_hostname" label="Host Title"/>
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_host.openstack_infrastructure_host_hostfqdn" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_host_openstack_infrastructure_host_hostfqdn" label="hostfqdn"/>
       </items>
     </itemGroup>
