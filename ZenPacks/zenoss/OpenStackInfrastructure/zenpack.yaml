@@ -905,7 +905,7 @@ classes: !ZenPackSpec
         label: Host ID
         grid_display: false
       hostName:
-        label: Host Name
+        label: Instance Title
         index_type: field
         grid_display: false
       hypervisorInstanceName:
@@ -1059,7 +1059,7 @@ classes: !ZenPackSpec
         index_type: field
         grid_display: false
       hostname:
-        label: Host Name
+        label: Host Title
         index_type: field
         grid_display: false
     relationships:
