@@ -632,6 +632,8 @@
       </itemGroups>
       <items>
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_region.openstack_infrastructure_region_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_region_openstack_infrastructure_region_name" label="Region Name"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_region.openstack_infrastructure_region_parent_org" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_region_openstack_infrastructure_region_parent_org" label="Parent Region"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_region.openstack_infrastructure_region_child_orgs" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_region_openstack_infrastructure_region_child_orgs" label="Children"/>
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_region.openstack_infrastructure_region_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_region_openstack_infrastructure_region_resource_id" label="Ceilometer Resource ID"/>
       </items>
     </itemGroup>
@@ -2406,6 +2408,8 @@
         <field type="java.lang.Double" id="child_orgs_org_component_count"/>
         <field type="java.lang.Double" id="openstack_infrastructure_host_count"/>
         <field type="java.lang.Double" id="software_component_count"/>
+        <field type="java.lang.String" id="openstack_infrastructure_region_parent_org"/>
+        <field type="java.lang.String" id="openstack_infrastructure_region_child_orgs"/>
       </fieldList>
     </jdbcTable>
     <jdbcTable tableName="dim_openstack_infrastructure_flavor" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_flavor">
@@ -3896,6 +3900,8 @@
         <field type="java.lang.Double" id="dim_openstack_infrastructure_region.child_orgs_org_component_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_region.openstack_infrastructure_host_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_region.software_component_count"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_region.openstack_infrastructure_region_parent_org"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_region.openstack_infrastructure_region_child_orgs"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_flavor.openstack_infrastructure_flavor_key"/>
         <field type="openstack_infrastructure_flavor_deleted_at" id="dim_openstack_infrastructure_flavor.openstack_infrastructure_flavor_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_flavor.openstack_infrastructure_flavor_deleted_at,null,0,1)"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_flavor.openstack_infrastructure_flavor_name"/>

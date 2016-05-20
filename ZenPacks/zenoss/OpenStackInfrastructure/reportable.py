@@ -10,7 +10,7 @@
 import basereportable
 from ZenPacks.zenoss.OpenStackInfrastructure.SoftwareComponent import SoftwareComponent
 from Products.Zuul.interfaces import IReportable
-from ZenPacks.zenoss.ZenETL.reportable import MARKER_LENGTH
+from ZenPacks.zenoss.ZenETL.reportable import MARKER_LENGTH, DEFAULT_STRING_LENGTH
 
 
 class BaseReportable(basereportable.BaseReportable):
@@ -89,3 +89,21 @@ class InstanceReportable(BaseReportable):
                    'reference',
                    None,
                    MARKER_LENGTH)
+
+
+class RegionReportable(BaseReportable):
+
+    def reportProperties(self):
+        for prop in super(RegionReportable, self).reportProperties():
+            yield prop
+        region = self.context
+
+        yield ('openstack_infrastructure_region_parent_org',
+               'string',
+               str(len(region.parentOrg())) if region.parentOrg() else None,
+               DEFAULT_STRING_LENGTH)
+
+        yield ('openstack_infrastructure_region_child_orgs',
+               'string',
+               str(len(region.childOrgs())),
+               DEFAULT_STRING_LENGTH)
