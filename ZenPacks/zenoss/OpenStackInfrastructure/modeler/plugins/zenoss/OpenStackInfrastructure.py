@@ -597,14 +597,23 @@ class OpenStackInfrastructure(PythonPlugin):
                 # this caused problem when setting orgComponent for agent
                 log.warn("  Invalid hostname found: %s" % data.get('hostname', host_id))
                 continue
-
+            instance_names = []
+            for hypervisor in results['hypervisors']:
+                if hypervisor.get(
+                        'hypervisor_hostname', '') == data.get('hostname'):
+                    if 'servers' in hypervisor:
+                        for instance in hypervisor['servers']:
+                            instance_id = 'server-{0}'.format(
+                                instance.get('uuid', ''))
+                            instance_names.append(instance_id)
             hosts.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Host',
                 data=dict(
                     id=host_id,
                     title=data.get('hostname', host_id),
                     hostname=data.get('hostname', ''),
-                    set_orgComponent=data.get('org_id', '')
+                    set_orgComponent=data.get('org_id', ''),
+                    set_instances=instance_names
                 )))
 
         hypervisor_type = {}

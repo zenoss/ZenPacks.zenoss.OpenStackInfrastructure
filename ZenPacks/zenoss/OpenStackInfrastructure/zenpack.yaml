@@ -66,6 +66,7 @@ class_relationships:
 - Router M:M Subnet
 - Router 1:M Port
 - Hypervisor 1:1 Host
+- Host 1:M (hostedPlace)Instance
 # Cinder
 - Instance 1:M Volume
 - Volume 1:M VolSnapshot
