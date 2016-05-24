@@ -49,7 +49,7 @@ class nova(PythonPlugin):
             'port': device.zCommandPort,
             'user': device.zCommandUsername,
             'password': device.zCommandPassword,
-            'identities': ['~/.ssh/id_rsa', '~/.ssh/id_dsa'],
+            'identities': [device.zKeyPath],
             'buffersize': 32768})
         client.connect()
         timeout = device.zCommandCommandTimeout
