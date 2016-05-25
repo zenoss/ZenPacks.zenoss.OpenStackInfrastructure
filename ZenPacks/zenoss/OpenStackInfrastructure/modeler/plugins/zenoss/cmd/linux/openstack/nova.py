@@ -32,7 +32,7 @@ class nova(PythonPlugin):
     deviceProperties = PythonPlugin.deviceProperties \
                        + ('zCommandUsername', 'zCommandPassword',
                           'zCommandPort', 'zCommandCommandTimeout',
-                          'zOpenStackRunNovaManageInContainer')
+                          'zOpenStackRunNovaManageInContainer', 'zKeyPath')
 
     @inlineCallbacks
     def collect(self, device, log):

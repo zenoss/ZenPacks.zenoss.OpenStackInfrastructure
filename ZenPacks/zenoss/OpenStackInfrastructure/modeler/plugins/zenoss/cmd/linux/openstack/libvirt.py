@@ -40,7 +40,7 @@ class libvirt(PythonPlugin):
     deviceProperties = PythonPlugin.deviceProperties \
         + ('zCommandUsername', 'zCommandPassword',
            'zCommandPort', 'zCommandCommandTimeout', 'openstack_instanceList',
-           'zOpenStackRunVirshQemuInContainer')
+           'zOpenStackRunVirshQemuInContainer', 'zKeyPath')
 
     def condition(self, device, log):
         # Only run this if we've got openstack instances on this host.

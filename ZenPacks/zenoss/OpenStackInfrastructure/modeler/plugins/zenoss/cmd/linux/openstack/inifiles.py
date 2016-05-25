@@ -52,7 +52,7 @@ class inifiles(PythonPlugin):
         + ('zCommandUsername', 'zCommandPassword',
            'zCommandPort', 'zCommandCommandTimeout',
            'zOpenStackNeutronConfigDir',
-           'zOpenStackRunNeutronCommonInContainer')
+           'zOpenStackRunNeutronCommonInContainer', 'zKeyPath')
 
     def sendEvent(self, evt):
         if not self._eventService:
