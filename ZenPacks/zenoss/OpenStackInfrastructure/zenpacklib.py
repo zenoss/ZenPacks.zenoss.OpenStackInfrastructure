@@ -27,7 +27,7 @@ This module provides a single integration point for common ZenPacks.
 """
 
 # PEP-396 version. (https://www.python.org/dev/peps/pep-0396/)
-__version__ = "1.0.9"
+__version__ = "1.1.0"
 
 
 import logging
@@ -35,7 +35,8 @@ LOG = logging.getLogger('zen.zenpacklib')
 
 # Suppresses "No handlers could be found for logger" errors if logging
 # hasn't been configured.
-LOG.addHandler(logging.NullHandler())
+if len(LOG.handlers) == 0:
+    LOG.addHandler(logging.NullHandler())
 
 import collections
 import imp
@@ -207,6 +208,9 @@ class ZenPack(ZenPackBase):
 
             dcObject = self.dmd.Devices.getOrganizer(dcspec.path)
             for zprop, value in dcspec.zProperties.iteritems():
+                if dcObject.getPropertyType(zprop) is None:
+                    LOG.error("Unable to set zProperty %s on %s (undefined zProperty)", zprop, dcspec.path)
+                    continue
                 LOG.info('Setting zProperty %s on %s' % (zprop, dcspec.path))
                 dcObject.setZenProperty(zprop, value)
 
@@ -594,8 +598,11 @@ class CatalogBase(object):
         from Products.Zuul.interfaces import ICatalogTool
         catalog = zcatalog._catalog
 
-        classname = spec.get(
-            'class', 'Products.ZenModel.DeviceComponent.DeviceComponent')
+        # I think this is the original intent for setting classname, not sure why it would fail
+        try:
+            classname = '%s.%s' % (cls.__module__, cls.__class__.__name__)
+        except Exception:
+            classname = 'Products.ZenModel.DeviceComponent.DeviceComponent'
 
         for propname, propdata in spec['indexes'].items():
             index_type = propdata.get('type')
@@ -1124,6 +1131,7 @@ def ModelTypeFactory(name, bases):
 
     @ClassProperty
     @classmethod
+    @memoize
     def _relations(cls):
         """Return _relations property
 
@@ -1769,24 +1777,9 @@ class ZenPackSpec(Spec):
 
     def create_device_js_snippet(self):
         """Register device JavaScript snippet."""
-        snippets = []
-        for spec in self.ordered_classes:
-            snippets.append(spec.device_js_snippet)
-
-        # Don't register the snippet if there's nothing in it.
-        if not [x for x in snippets if x]:
+        snippet = self.device_js_snippet
+        if not snippet:
             return
-
-        link_code = JS_LINK_FROM_GRID.replace('{zenpack_id_prefix}', self.id_prefix)
-        snippet = (
-            "(function(){{\n"
-            "var ZC = Ext.ns('Zenoss.component');\n"
-            "{link_code}\n"
-            "{snippets}"
-            "}})();\n"
-            .format(
-                link_code=link_code,
-                snippets=''.join(snippets)))
 
         device_classes = [
             x.model_class
@@ -1800,6 +1793,64 @@ class ZenPackSpec(Spec):
 
         return self.create_js_snippet(
             'device', snippet, classes=device_classes)
+
+    @property
+    def device_js_snippet(self):
+        """Return device JavaScript snippet for ZenPack."""
+        snippets = []
+        for spec in self.ordered_classes:
+            snippets.append(spec.device_js_snippet)
+
+        # One DynamicView navigation snippet for all classes.
+        snippets.append(self.dynamicview_nav_js_snippet)
+
+        # Don't register the snippet if there's nothing in it.
+        if not [x for x in snippets if x]:
+            return ""
+
+        link_code = JS_LINK_FROM_GRID.replace('{zenpack_id_prefix}', self.id_prefix)
+        return (
+            "(function(){{\n"
+            "var ZC = Ext.ns('Zenoss.component');\n"
+            "{link_code}\n"
+            "{snippets}"
+            "}})();\n"
+            .format(
+                link_code=link_code,
+                snippets=''.join(snippets)))
+
+    @property
+    def dynamicview_nav_js_snippet(self):
+        if not DYNAMICVIEW_INSTALLED:
+            return ""
+
+        service_view_metatypes = set()
+        for kls in self.ordered_classes:
+            # Currently only supporting service_view.
+            if 'service_view' in (kls.dynamicview_views or []):
+                service_view_metatypes.add(kls.meta_type)
+
+        if service_view_metatypes:
+            return (
+                "Zenoss.nav.appendTo('Component', [{{\n"
+                "    id: 'subcomponent_view',\n"
+                "    text: _t('Dynamic View'),\n"
+                "    xtype: 'dynamicview',\n"
+                "    relationshipFilter: 'impacted_by',\n"
+                "    viewName: 'service_view',\n"
+                "    filterNav: function(navpanel) {{\n"
+                "        switch (navpanel.refOwner.componentType) {{\n"
+                "            {cases}\n"
+                "            default: return false;\n"
+                "        }}\n"
+                "    }}\n"
+                "}}]);\n"
+                ).format(
+                    cases=' '.join(
+                        "case '{}': return true;".format(x)
+                        for x in service_view_metatypes))
+        else:
+            return ""
 
     @property
     def zenpack_module(self):
@@ -2352,16 +2403,18 @@ class ClassSpec(Spec):
 
         icon_filename = self.icon or '{}.png'.format(self.name)
 
-        icon_path = os.path.join(
-            get_zenpack_path(self.zenpack.name),
-            'resources',
-            'icon',
-            icon_filename)
+        zenpack_path = get_zenpack_path(self.zenpack.name)
+        if zenpack_path:
+            icon_path = os.path.join(
+                get_zenpack_path(self.zenpack.name),
+                'resources',
+                'icon',
+                icon_filename)
 
-        if os.path.isfile(icon_path):
-            return '/++resource++{zenpack_name}/icon/{filename}'.format(
-                zenpack_name=self.zenpack.name,
-                filename=icon_filename)
+            if os.path.isfile(icon_path):
+                return '/++resource++{zenpack_name}/icon/{filename}'.format(
+                    zenpack_name=self.zenpack.name,
+                    filename=icon_filename)
 
         return '/zport/dmd/img/icons/noicon.png'
 
@@ -2578,8 +2631,8 @@ class ClassSpec(Spec):
 
         for spec in self.containing_components:
             attr = None
-            for rel, spec in self.relationships.items():
-                if spec.remote_classname == spec.name:
+            for rel, rspec in self.relationships.items():
+                if rspec.remote_classname == spec.name:
                     attr = rel
                     continue
 
@@ -2946,27 +2999,11 @@ class ClassSpec(Spec):
                 cases=' '.join(cases)))
 
     @property
-    def dynamicview_nav_js_snippet(self):
-        if DYNAMICVIEW_INSTALLED:
-            return (
-                "Zenoss.nav.appendTo('Component', [{\n"
-                "    id: 'subcomponent_view',\n"
-                "    text: _t('Dynamic View'),\n"
-                "    xtype: 'dynamicview',\n"
-                "    relationshipFilter: 'impacted_by',\n"
-                "    viewName: 'service_view'\n"
-                "}]);\n"
-                )
-        else:
-            return ""
-
-    @property
     def device_js_snippet(self):
         """Return device JavaScript snippet."""
         return ''.join((
             self.component_grid_panel_js_snippet,
             self.subcomponent_nav_js_snippet,
-            self.dynamicview_nav_js_snippet,
             ))
 
     def test_setup(self):
@@ -5206,6 +5243,10 @@ def load_yaml(yaml_filename=None):
         try:
             CFG = yaml.load(file(yaml_filename, 'r'), Loader=Loader)
         except Exception as e:
+            if not [x for x in LOG.handlers if not isinstance(x, logging.NullHandler)]:
+                # Logging has not ben initialized yet- LOG.error may not be
+                # seen.
+                logging.basicConfig()
             LOG.error(e)
     else:
         zenpack_name = None
@@ -6054,7 +6095,7 @@ def create_zenpack_srcdir(zenpack_name):
     with open(init_fname, 'w') as init_f:
         init_f.write(
             "from . import zenpacklib\n\n"
-            "zenpacklib.load_yaml()\n")
+            "CFG = zenpacklib.load_yaml()\n")
 
     # Create zenpack.yaml in ZenPack module directory.
     yaml_fname = os.path.join(module_directory, 'zenpack.yaml')
