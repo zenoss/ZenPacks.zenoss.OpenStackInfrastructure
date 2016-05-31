@@ -359,6 +359,9 @@ defaultmapping
 <property type="text" id="explanation" mode="w">
 All volume events not otherwise mapped will be placed in the /OpenStackInfrastructure/Cinder/Volume class history.
 </property>
+<property visible="True" type="string" id="zEventAction" >
+history
+</property>
 </object>
 </tomanycont>
 </object>
@@ -380,6 +383,9 @@ defaultmapping
 </property>
 <property type="text" id="explanation" mode="w">
 All snapshot events not otherwise mapped will be placed in the /OpenStackInfrastructure/Cinder/Snapshot class history.
+</property>
+<property visible="True" type="string" id="zEventAction" >
+history
 </property>
 </object>
 </tomanycont>
