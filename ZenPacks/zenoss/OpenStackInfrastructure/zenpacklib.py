@@ -278,8 +278,6 @@ class ZenPack(ZenPackBase):
                         lines_orig_mtspec = [x + '\n' for x in yaml.dump(orig_mtspec, Dumper=Dumper).split('\n')]
                         diff = ''.join(difflib.unified_diff(lines_orig_mtspec, lines_installed))
 
-                        # installed is not going to have cycletime in it, because it's the default.
-
                         newname = "{}-upgrade-{}".format(orig_mtname, int(time.time()))
                         LOG.error(
                             "Monitoring template %s/%s has been modified "
@@ -3816,7 +3814,6 @@ class RRDDatasourceSpec(Spec):
             eventKey=None,
             severity=None,
             commandTemplate=None,
-            cycletime=None,
             datapoints=None,
             extra_params=None,
             _source_location=None
@@ -3839,8 +3836,6 @@ class RRDDatasourceSpec(Spec):
             :type severity: Severity
             :param commandTemplate: TODO
             :type commandTemplate: str
-            :param cycletime: TODO
-            :type cycletime: int
             :param datapoints: TODO
             :type datapoints: SpecsParameter(RRDDatapointSpec)
             :param extra_params: Additional parameters that may be used by subclasses of RRDDatasource
@@ -3858,7 +3853,6 @@ class RRDDatasourceSpec(Spec):
         self.eventKey = eventKey
         self.severity = severity
         self.commandTemplate = commandTemplate
-        self.cycletime = cycletime
         if extra_params is None:
             self.extra_params = {}
         else:
@@ -3894,8 +3888,6 @@ class RRDDatasourceSpec(Spec):
             datasource.severity = self.severity
         if self.commandTemplate is not None:
             datasource.commandTemplate = self.commandTemplate
-        if self.cycletime is not None:
-            datasource.cycletime = self.cycletime
 
         if self.extra_params:
             for param, value in self.extra_params.iteritems():
@@ -4414,7 +4406,7 @@ class RRDDatasourceSpecParams(SpecParams, RRDDatasourceSpec):
 
         self.sourcetype = datasource.sourcetype
         for propname in ('enabled', 'component', 'eventClass', 'eventKey',
-                         'severity', 'commandTemplate', 'cycletime',):
+                         'severity', 'commandTemplate'):
             if hasattr(sample_ds, propname):
                 setattr(self, '_%s_defaultvalue' % propname, getattr(sample_ds, propname))
             if getattr(datasource, propname, None) != getattr(sample_ds, propname, None):
