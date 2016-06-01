@@ -81,28 +81,6 @@ Ext.apply(Zenoss.render, {
         return value.toUpperCase();
     },
 
-    openstack_uid_renderer: function(uid, name) {
-        // Just straight up links to the object.
-        var parts;
-        if (!uid) {
-            return uid;
-        }
-        if (Ext.isObject(uid)) {
-            if (uid.uid && uid.uid.indexOf('/') > -1) {
-                parts = uid.uid.split('/');
-                name = parts[parts.length-1];
-            }
-            else {
-                name = uid.name;
-            }
-            uid = uid.uid;
-        }
-        if (!name) {
-            parts = uid.split('/');
-            name = parts[parts.length-1];
-        }
-        return Zenoss.render.link(null, uid, name);
-    },
 });
 
 
