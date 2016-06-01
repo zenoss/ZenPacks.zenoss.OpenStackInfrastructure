@@ -174,7 +174,8 @@ class LoadModel(ZenScriptBase):
 
         print "Applying datamaps (1/2) (%d objects)" % len(objmaps)
         adm = ApplyDataMap()
-        adm._applyDataMaps(device, [relmap, endpoint_om])
+        adm._applyDataMap(device, relmap)
+        adm._applyDataMap(device, endpoint_om)
 
         print "Gathering network information"
         l3_agent_ids = [x.id for x in device.getDeviceComponents(type="OpenStackInfrastructureNeutronAgent") if x.type == 'L3 agent']
@@ -228,7 +229,8 @@ class LoadModel(ZenScriptBase):
 
         print "Applying datamaps (2/2) (%d objects)" % len(objmaps)
         adm = ApplyDataMap()
-        adm._applyDataMaps(device, objmaps)
+        for objmap in objmaps:
+            adm._applyDataMap(device, objmap)
 
         print "Committing model changes."
         transaction.commit()
