@@ -40,7 +40,7 @@ class libvirt(PythonPlugin):
     deviceProperties = PythonPlugin.deviceProperties \
         + ('zCommandUsername', 'zCommandPassword',
            'zCommandPort', 'zCommandCommandTimeout', 'openstack_instanceList',
-           'zOpenStackRunVirshQemuInContainer')
+           'zOpenStackRunVirshQemuInContainer', 'zKeyPath')
 
     def condition(self, device, log):
         # Only run this if we've got openstack instances on this host.
@@ -61,7 +61,7 @@ class libvirt(PythonPlugin):
             'port': device.zCommandPort,
             'user': device.zCommandUsername,
             'password': device.zCommandPassword,
-            'identities': ['~/.ssh/id_rsa', '~/.ssh/id_dsa'],
+            'identities': [device.zKeyPath],
             'buffersize': 32768})
         client.connect()
         timeout = device.zCommandCommandTimeout

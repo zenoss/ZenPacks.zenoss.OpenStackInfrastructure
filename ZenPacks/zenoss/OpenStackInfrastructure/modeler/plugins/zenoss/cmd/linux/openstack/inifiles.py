@@ -52,7 +52,7 @@ class inifiles(PythonPlugin):
         + ('zCommandUsername', 'zCommandPassword',
            'zCommandPort', 'zCommandCommandTimeout',
            'zOpenStackNeutronConfigDir',
-           'zOpenStackRunNeutronCommonInContainer')
+           'zOpenStackRunNeutronCommonInContainer', 'zKeyPath')
 
     def sendEvent(self, evt):
         if not self._eventService:
@@ -161,6 +161,7 @@ class inifiles(PythonPlugin):
             'port': device.zCommandPort,
             'user': device.zCommandUsername,
             'password': device.zCommandPassword,
+            'identities': [device.zKeyPath],
             'buffersize': 32768})
         self.client.connect()
         self.timeout = device.zCommandCommandTimeout
