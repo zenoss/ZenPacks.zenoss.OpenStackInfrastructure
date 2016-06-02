@@ -632,9 +632,11 @@ device_classes: !ZenPackSpec
             graphpoints:
               Inbound:
                 dpName: networkIncomingBytesRate_networkIncomingBytesRate
+                rpn: "8,*"
                 format: '%7.2lf%s'
               Outbound:
                 dpName: networkOutgoingBytesRate_networkOutgoingBytesRate
+                rpn: "8,*"
                 format: '%7.2lf%s'
                 color: 98df8a
           Network Packet Rate:
@@ -706,8 +708,8 @@ classes: !ZenPackSpec
     properties:
       proxy_device:
         label: Device
-        # Workaround to link to a different device
-        renderer: Zenoss.render.openstack_uid_renderer
+        type: entity        
+        content_width: 175        
         api_only: true
         api_backendtype: method
     filter_display: false
@@ -890,9 +892,9 @@ classes: !ZenPackSpec
       guestDevice:
       # link to the guest instance, if known
         label: Guest
-        # workaround to link to a different device
+        type: entity
+        content_width: 175
         order: 3.1
-        renderer: Zenoss.render.openstack_uid_renderer
         api_only: true
         api_backendtype: method
       host:
