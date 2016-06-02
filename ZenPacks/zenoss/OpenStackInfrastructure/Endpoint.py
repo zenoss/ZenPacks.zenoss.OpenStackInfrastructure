@@ -51,6 +51,14 @@ class Endpoint(schema.Endpoint):
 
         return True
 
+    def get_ensure_service_monitoring(self):
+        return False
+
+    def set_ensure_service_monitoring(self, arg):
+        for host in self.getDeviceComponents(type="OpenStackInfrastructureHost"):
+            host.ensure_service_monitoring()
+        return True
+
     def set_neutron_ini(self, values):
         if type(self.neutron_ini) == dict:
             self.neutron_ini = OOBTree()
