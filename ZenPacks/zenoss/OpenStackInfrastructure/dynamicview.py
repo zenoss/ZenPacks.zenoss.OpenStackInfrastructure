@@ -11,7 +11,7 @@ from ZenPacks.zenoss.DynamicView import TAG_ALL, TAG_IMPACTED_BY, TAG_IMPACTS
 from ZenPacks.zenoss.DynamicView.model.adapters import BaseRelationsProvider
 
 
-class DeviceRelationsProvider_OSI(BaseRelationsProvider):
+class LinuxDeviceRelationsProvider_OSI(BaseRelationsProvider):
     def relations(self, type=TAG_ALL):
         if type in (TAG_ALL, TAG_IMPACTED_BY):
             instance = self._adapted.openstackInstance()

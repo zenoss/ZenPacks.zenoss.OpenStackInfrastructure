@@ -97,9 +97,17 @@
     <configure zcml:condition="installed ZenPacks.zenoss.DynamicView">
 
         <subscriber
+            zcml:condition="installed ZenPacks.zenoss.LinuxMonitor.LinuxDevice"
+            provides="ZenPacks.zenoss.DynamicView.interfaces.IRelationsProvider"
+            for="ZenPacks.zenoss.LinuxMonitor.LinuxDevice.LinuxDevice"
+            factory=".dynamicview.LinuxDeviceRelationsProvider_OSI"
+            />
+
+        <subscriber
+            zcml:condition="not-installed ZenPacks.zenoss.LinuxMonitor.LinuxDevice"
             provides="ZenPacks.zenoss.DynamicView.interfaces.IRelationsProvider"
             for="Products.ZenModel.Device.Device"
-            factory=".dynamicview.DeviceRelationsProvider_OSI"
+            factory=".dynamicview.LinuxDeviceRelationsProvider_OSI"
             />
 
         <subscriber
