@@ -1267,6 +1267,26 @@ False
 12
 </property>
 </object>
+<object id='neutron-lbaas-agent' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+neutron-lbaas-agent
+</property>
+<property type="string" id="regex" mode="w" >
+neutron-lbaas-agent
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+0
+</property>
+</object>
 </tomanycont>
 </object>
 </objects>
