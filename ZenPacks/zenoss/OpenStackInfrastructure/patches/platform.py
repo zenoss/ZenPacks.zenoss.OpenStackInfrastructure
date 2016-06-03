@@ -23,10 +23,16 @@ from ZenPacks.zenoss.OpenStackInfrastructure.DeviceProxyComponent import DeviceP
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
 from ..zenpacklib import catalog_search
 
+# LinuxDevice only exists in LinuxMonitor >= 2.0.
+try:
+    from ZenPacks.zenoss.LinuxMonitor.LinuxDevice import LinuxDevice
+except ImportError:
+    from Products.ZenModel.Device import Device as LinuxDevice
+
 from ZenPacks.zenoss.OpenStackInfrastructure.Endpoint import Endpoint
 
 
-@monkeypatch('Products.ZenModel.Device.Device')
+@monkeypatch(LinuxDevice)
 def openstackInstance(self):
     # Search first by serial number, if known.
     serialNumber = self.os.getHWSerialNumber()
@@ -64,7 +70,7 @@ def openstackInstance(self):
     return None
 
 
-@monkeypatch('Products.ZenModel.Device.Device')
+@monkeypatch(LinuxDevice)
 def openstack_hostComponent(self):
     # If this is an openstack compute node, returns a the OpenstackHost component for it.
     host = DeviceProxyComponent.component_for_proxy_device(self)
@@ -73,7 +79,7 @@ def openstack_hostComponent(self):
     return None
 
 
-@monkeypatch('Products.ZenModel.Device.Device')
+@monkeypatch(LinuxDevice)
 def openstack_instanceList(self):
     # If this is an openstack compute node, returns a list of
     # (instance_ID, instance_UUID) tuples for instances running on this host.
@@ -85,12 +91,33 @@ def openstack_instanceList(self):
         return []
 
 
-@monkeypatch('Products.ZenModel.Device.Device')
+@monkeypatch(LinuxDevice)
+def getDynamicViewGroup(self):
+    """Return DynamicView group information.
+
+    Monkey-patched here so that the devices related to OpenStack hosts can be
+    put into a different group with a higher weight. This prevents hypervisor
+    and other cloud management devices from being shown in the same column as
+    guest devices.
+
+    """
+    if self.openstack_hostComponent():
+        return {
+            "name": "Devices (OpenStack)",
+            "weight": 550,
+            "type": "ZenPacks.zenoss.OpenStackInfrastructure",
+            "icon": self.icon_url,
+            }
+    else:
+        return original(self)  # NOQA: original injected by monkeypatch
+
+
+@monkeypatch(LinuxDevice)
 def getApplyDataMapToOpenStackInfrastructureEndpoint(self):
     return []
 
 
-@monkeypatch('Products.ZenModel.Device.Device')
+@monkeypatch(LinuxDevice)
 def setApplyDataMapToOpenStackInfrastructureEndpoint(self, datamap):
     mapper = ApplyDataMap()
 
@@ -101,12 +128,12 @@ def setApplyDataMapToOpenStackInfrastructureEndpoint(self, datamap):
         mapper._applyDataMap(component.device(), datamap)
 
 
-@monkeypatch('Products.ZenModel.Device.Device')
+@monkeypatch(LinuxDevice)
 def getApplyDataMapToOpenStackInfrastructureHost(self):
     return []
 
 
-@monkeypatch('Products.ZenModel.Device.Device')
+@monkeypatch(LinuxDevice)
 def setApplyDataMapToOpenStackInfrastructureHost(self, datamap):
     mapper = ApplyDataMap()
 

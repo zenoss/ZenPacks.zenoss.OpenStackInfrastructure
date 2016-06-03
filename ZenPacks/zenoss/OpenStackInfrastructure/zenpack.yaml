@@ -1606,6 +1606,8 @@ classes: !ZenPackSpec
     # --------------------------------------------------------------------------
     impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Cinder Services
+    dynamicview_weight: 266
     dynamicview_relations:
       impacted_by: [hostedOn]
       impacts: [orgComponent]
@@ -1622,6 +1624,8 @@ classes: !ZenPackSpec
     # --------------------------------------------------------------------------
     impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Cinder APIs
+    dynamicview_weight: 265
     dynamicview_relations:
       impacted_by: [hostedOn]
       impacts: [orgComponent]
@@ -1682,6 +1686,8 @@ classes: !ZenPackSpec
 #        label_width: 50
 #        content_width: 50
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Volumes
+    dynamicview_weight: 242
     dynamicview_relations:
       impacts: [instance, volSnapshots, tenant]
     # --------------------------------------------------------------------------
@@ -1738,6 +1744,8 @@ classes: !ZenPackSpec
         label_width: 80
         content_width: 80
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Snapshots
+    dynamicview_weight: 241
     dynamicview_relations:
       impacted_by: [volume]
     # --------------------------------------------------------------------------
