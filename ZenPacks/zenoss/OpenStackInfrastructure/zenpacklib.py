@@ -197,6 +197,8 @@ class ZenPack(ZenPackBase):
             d.buildRelations()
 
     def install(self, app):
+	self.createZProperties(app)
+
         # create device classes and set zProperties on them
         for dcname, dcspec in self.device_classes.iteritems():
             if dcspec.create:
