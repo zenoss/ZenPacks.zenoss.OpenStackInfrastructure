@@ -107,6 +107,10 @@ device_classes: !ZenPackSpec
           neutronAgentStatus:
             type: OpenStack Neutron Agent Status
             cycletime: 30
+          maintenance:
+            type: Python
+            plugin_classname: ZenPacks.zenoss.OpenStackInfrastructure.dsplugins.MaintenanceDataSourcePlugin
+            cycletime: 600
           openstack:
             type: COMMAND
             commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/poll_openstack.py
