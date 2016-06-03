@@ -980,6 +980,8 @@ classes: !ZenPackSpec
     dynamicview_relations:
       impacted_by: [hypervisor, ports, vnics, volumes]
       impacts: [guestDevice, tenant]
+    extra_paths:
+      - ['hypervisor', 'host']      
   Vnic:
     base: [LogicalComponent]
     meta_type: OpenStackInfrastructureVnic

@@ -18,6 +18,9 @@ from Products.AdvancedQuery import Eq, Or
 
 class Hypervisor(schema.Hypervisor):
 
+    def get_faceting_relnames(self):
+        return ['host']
+
     def get_hostByName(self):
         if self.host() and self.hostfqdn:
             return self.hostfqdn
