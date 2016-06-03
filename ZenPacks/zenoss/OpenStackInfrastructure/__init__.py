@@ -37,7 +37,9 @@ from . import schema
 
 NOVAHOST_PLUGINS = ['zenoss.cmd.linux.openstack.nova',
                     'zenoss.cmd.linux.openstack.libvirt',
-                    'zenoss.cmd.linux.openstack.inifiles']
+                    'zenoss.cmd.linux.openstack.inifiles',
+                    'zenoss.cmd.linux.openstack.hostfqdn',
+                    ]
 
 
 class ZenPack(schema.ZenPack):
