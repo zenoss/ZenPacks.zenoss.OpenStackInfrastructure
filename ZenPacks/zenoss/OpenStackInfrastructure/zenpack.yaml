@@ -66,7 +66,6 @@ class_relationships:
 - Router M:M Subnet
 - Router 1:M Port
 - Hypervisor 1:1 Host
-- Host 1:M (hostedPlace)Instance
 # Cinder
 - Instance 1:M Volume
 - Volume 1:M VolSnapshot
@@ -981,6 +980,8 @@ classes: !ZenPackSpec
     dynamicview_relations:
       impacted_by: [hypervisor, ports, vnics, volumes]
       impacts: [guestDevice, tenant]
+    extra_paths:
+      - ['hypervisor', 'host']      
   Vnic:
     base: [LogicalComponent]
     meta_type: OpenStackInfrastructureVnic
