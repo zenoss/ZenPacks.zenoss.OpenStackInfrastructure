@@ -82,6 +82,20 @@ class Endpoint(schema.Endpoint):
     def ini_get(self, *args):
         return self.neutron_ini.get(*args)
 
+    def getStatus(self, statusclass=None, **kwargs):
+        '''
+            Override the getStatus() method
+            get device status based on events with Event Class /Status from:
+                NovaServiceStatusDataSource,
+                NeutronServiceStatusDataSource
+                CinderServiceStatusDataSource
+        '''
+
+        if not self.monitorDevice():
+            return
+
+        return super(Endpoint, self).getStatus(statusclass="/Status", **kwargs)
+
 
 # Clean up any AMQP queues we may have created for this device.
 def onDeviceDeleted(object, event):
