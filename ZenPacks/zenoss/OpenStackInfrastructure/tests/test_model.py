@@ -217,7 +217,8 @@ class TestModel(BaseTestCase):
     def testInstance(self):
         self.assertTrue(self._modeled)
 
-        instances = self.d.getDeviceComponents(type='OpenStackInfrastructureInstance')
+        instances = self.d.getDeviceComponents(
+            type='OpenStackInfrastructureInstance')
         self.assertEquals(len(instances), 1)
         self.assertEquals('server-0aa87c33-aa73-4c02-976b-321f5e2df205',
                           instances[0].id)
@@ -243,7 +244,8 @@ class TestModel(BaseTestCase):
     def testHypervisor(self):
         self.assertTrue(self._modeled)
 
-        hypervisors = self.d.getDeviceComponents(type='OpenStackInfrastructureHypervisor')
+        hypervisors = self.d.getDeviceComponents(
+            type='OpenStackInfrastructureHypervisor')
         self.assertEquals(len(hypervisors), 1)
         self.assertEquals(hypervisors[0].hypervisorId, 1)
         self.assertEquals(hypervisors[0].id, 'hypervisor-1')
@@ -262,84 +264,62 @@ class TestModel(BaseTestCase):
     def testNeutronAgent(self):
         self.assertTrue(self._modeled)
 
-        nagents = self.d.getDeviceComponents(type='OpenStackInfrastructureNeutronAgent')
-        #import pdb;pdb.set_trace()
-        self.assertEquals(len(nagents), 5)
-        self.assertEquals(nagents[0].id,
-                          'agent-ee6407f6-9b13-4df4-8da0-cb751c410af5')
-        self.assertEquals(nagents[0].title, 'L3 agent@liberty.zenoss.local')
-        self.assertEquals(nagents[0].binary, 'neutron-l3-agent')
-        self.assertTrue(nagents[0].enabled)
-        self.assertEquals(nagents[0].operStatus, 'UP')
-        self.assertEquals(nagents[0].agentId,
-                          'ee6407f6-9b13-4df4-8da0-cb751c410af5')
-        self.assertEquals(nagents[0].type, 'L3 agent')
-
-        self.assertEquals(nagents[1].id,
-                          'agent-f3b165ca-d869-4a1f-a8da-361f2177da5b')
-        self.assertEquals(nagents[1].title, 'Metadata agent@liberty.zenoss.local')
-        self.assertEquals(nagents[1].binary, 'neutron-metadata-agent')
-        self.assertTrue(nagents[0].enabled)
-        self.assertEquals(nagents[1].operStatus, 'UP')
-        self.assertEquals(nagents[1].agentId,
-                          'f3b165ca-d869-4a1f-a8da-361f2177da5b')
-        self.assertEquals(nagents[1].type, 'Metadata agent')
-
-        self.assertEquals(nagents[2].id,
-                          'agent-f9697d9c-580e-4917-8c87-1b69ab53e5a6')
-        self.assertEquals(nagents[2].title, 'Open vSwitch agent@liberty.zenoss.local')
-        self.assertEquals(nagents[2].binary, 'neutron-openvswitch-agent')
-        self.assertTrue(nagents[0].enabled)
-        self.assertEquals(nagents[2].operStatus, 'UP')
-        self.assertEquals(nagents[2].agentId,
-                          'f9697d9c-580e-4917-8c87-1b69ab53e5a6')
-        self.assertEquals(nagents[2].type, 'Open vSwitch agent')
-
-        self.assertEquals(nagents[3].id,
-                          'agent-fade4d15-487c-4998-ac80-bff91b4532e9')
-        self.assertEquals(nagents[3].title, 'DHCP agent@liberty.zenoss.local')
-        self.assertEquals(nagents[3].binary, 'neutron-dhcp-agent')
-        self.assertTrue(nagents[0].enabled)
-        self.assertEquals(nagents[3].operStatus, 'UP')
-        self.assertEquals(nagents[3].agentId,
-                          'fade4d15-487c-4998-ac80-bff91b4532e9')
-        self.assertEquals(nagents[3].type, 'DHCP agent')
-
-        self.assertEquals(nagents[4].id,
-                          'agent-37c80256-d843-45c3-a9b6-fb0fde13ac89')
-        self.assertEquals(nagents[4].title,
+        agents = self.d.getDeviceComponents(type='OpenStackInfrastructureNeutronAgent')
+        self.assertEquals(len(agents), 5)
+        self.assertEquals(agents[0].id, "agent-ee6407f6-9b13-4df4-8da0-cb751c410af5")
+        self.assertEquals(agents[0].title, 'L3 agent@liberty.zenoss.local')
+        self.assertEquals(agents[0].agentId, "ee6407f6-9b13-4df4-8da0-cb751c410af5")
+        self.assertEquals(agents[0].binary, 'neutron-l3-agent')
+        self.assertTrue(agents[0].enabled)
+        self.assertEquals(agents[0].operStatus, 'UP')
+        self.assertEquals(agents[0].type, 'L3 agent')
+        self.assertEquals(agents[1].id, "agent-f3b165ca-d869-4a1f-a8da-361f2177da5b")
+        self.assertEquals(agents[1].title, 'Metadata agent@liberty.zenoss.local')
+        self.assertEquals(agents[1].agentId, "f3b165ca-d869-4a1f-a8da-361f2177da5b")
+        self.assertEquals(agents[1].binary, 'neutron-metadata-agent')
+        self.assertTrue(agents[1].enabled)
+        self.assertEquals(agents[1].operStatus, 'UP')
+        self.assertEquals(agents[1].type, 'Metadata agent')
+        self.assertEquals(agents[2].id, "agent-f9697d9c-580e-4917-8c87-1b69ab53e5a6")
+        self.assertEquals(agents[2].title, 'Open vSwitch agent@liberty.zenoss.local')
+        self.assertEquals(agents[2].agentId, "f9697d9c-580e-4917-8c87-1b69ab53e5a6")
+        self.assertEquals(agents[2].binary, 'neutron-openvswitch-agent')
+        self.assertTrue(agents[2].enabled)
+        self.assertEquals(agents[2].operStatus, 'UP')
+        self.assertEquals(agents[2].type, 'Open vSwitch agent')
+        self.assertEquals(agents[3].id, "agent-fade4d15-487c-4998-ac80-bff91b4532e9")
+        self.assertEquals(agents[3].title, 'DHCP agent@liberty.zenoss.local')
+        self.assertEquals(agents[3].agentId, "fade4d15-487c-4998-ac80-bff91b4532e9")
+        self.assertEquals(agents[3].binary, 'neutron-dhcp-agent')
+        self.assertTrue(agents[3].enabled)
+        self.assertEquals(agents[3].operStatus, 'UP')
+        self.assertEquals(agents[3].type, 'DHCP agent')
+        self.assertEquals(agents[4].id, "agent-37c80256-d843-45c3-a9b6-fb0fde13ac89")
+        self.assertEquals(agents[4].title,
                           'Loadbalancer agent@overcloud-controller-1.localdomain:4947de00-0c13-5ee7-902e-fc270d3993b9')
-        self.assertEquals(nagents[4].binary, 'f5-oslbaasv1-agent')
-        self.assertTrue(nagents[0].enabled)
-        self.assertEquals(nagents[4].operStatus, 'UP')
-        self.assertEquals(nagents[4].agentId,
-                          '37c80256-d843-45c3-a9b6-fb0fde13ac89')
-        self.assertEquals(nagents[4].type, 'Loadbalancer agent')
+        self.assertEquals(agents[4].agentId, "37c80256-d843-45c3-a9b6-fb0fde13ac89")
+        self.assertEquals(agents[4].binary, 'f5-oslbaasv1-agent')
+        self.assertTrue(agents[4].enabled)
+        self.assertEquals(agents[4].operStatus, 'UP')
+        self.assertEquals(agents[4].type, 'Loadbalancer agent')
 
     def testNetwork(self):
         self.assertTrue(self._modeled)
 
         networks = self.d.getDeviceComponents(type='OpenStackInfrastructureNetwork')
         self.assertEquals(len(networks), 2)
-        self.assertEquals(networks[0].id,
-                          'network-7a2d66f2-35e6-4459-92b9-260411a39039')
-        self.assertEquals(networks[0].netId,
-                          '7a2d66f2-35e6-4459-92b9-260411a39039')
         self.assertEquals(networks[0].title, 'private')
-        self.assertTrue(networks[0].admin_state_up)
+        self.assertEquals(networks[0].netId, "7a2d66f2-35e6-4459-92b9-260411a39039")
         self.assertFalse(networks[0].netExternal)
         self.assertEquals(networks[0].netStatus, 'ACTIVE')
         self.assertEquals(networks[0].netType, 'VXLAN')
-
-        self.assertEquals(networks[1].id,
-                          'network-a13b2c35-d734-4021-9850-432dfa7fa7a3')
-        self.assertEquals(networks[1].netId,
-                          'a13b2c35-d734-4021-9850-432dfa7fa7a3')
+        self.assertTrue(networks[0].admin_state_up)
         self.assertEquals(networks[1].title, 'public')
-        self.assertTrue(networks[1].admin_state_up)
+        self.assertEquals(networks[1].netId, "a13b2c35-d734-4021-9850-432dfa7fa7a3")
         self.assertTrue(networks[1].netExternal)
         self.assertEquals(networks[1].netStatus, 'ACTIVE')
         self.assertEquals(networks[1].netType, 'VXLAN')
+        self.assertTrue(networks[1].admin_state_up)
 
     def testSubnet(self):
         self.assertTrue(self._modeled)
