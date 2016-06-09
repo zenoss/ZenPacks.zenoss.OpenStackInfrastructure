@@ -124,8 +124,8 @@ def volume_id(evt):
         return make_id('volume', evt.trait_volume_id)
 
 def volsnapshot_id(evt):
-    if hasattr(evt, 'trait_volume_id'):
-        return make_id('volsnapshot', evt.trait_volume_id)
+    if hasattr(evt, 'trait_snapshot_id'):
+        return make_id('volsnapshot', evt.trait_snapshot_id)
 
 # -----------------------------------------------------------------------------
 # Traitmap Functions
