@@ -92,6 +92,7 @@ from Products.ZenUtils.Search import makeFieldIndex, makeKeywordIndex
 from Products.ZenUtils.Utils import monkeypatch, importClass
 
 from Products import Zuul
+from Products.Zuul import marshal
 from Products.Zuul.catalog.events import IndexingEvent
 from Products.Zuul.catalog.global_catalog import ComponentWrapper as BaseComponentWrapper
 from Products.Zuul.catalog.global_catalog import DeviceWrapper as BaseDeviceWrapper
@@ -197,7 +198,7 @@ class ZenPack(ZenPackBase):
             d.buildRelations()
 
     def install(self, app):
-	self.createZProperties(app)
+        self.createZProperties(app)
 
         # create device classes and set zProperties on them
         for dcname, dcspec in self.device_classes.iteritems():
@@ -1131,7 +1132,6 @@ def ModelTypeFactory(name, bases):
 
     @ClassProperty
     @classmethod
-    @memoize
     def _relations(cls):
         """Return _relations property
 
@@ -2434,6 +2434,7 @@ class ClassSpec(Spec):
             'class_plural_label': self.plural_label,
             'class_short_label': self.short_label,
             'class_plural_short_label': self.plural_short_label,
+            'dynamicview_views': self.dynamicview_views,
             'dynamicview_group': {
                 'name': self.dynamicview_group,
                 'weight': self.dynamicview_weight,
@@ -3215,8 +3216,9 @@ class ClassPropertySpec(Spec):
     def info_properties(self):
         """Return Info properties dict."""
         if self.api_backendtype == 'method':
+            isEntity = self.type_ == 'entity'
             return {
-                self.name: MethodInfoProperty(self.name),
+                self.name: MethodInfoProperty(self.name, entity=isEntity),
                 }
         else:
             if not self.enum:
@@ -3715,8 +3717,8 @@ class RRDTemplateSpec(Spec):
             datasource_spec.create(self, template)
 
         self.speclog.debug("adding {} graphs".format(len(self.graphs)))
-        for graph_id, graph_spec in self.graphs.items():
-            graph_spec.create(self, template)
+        for i, (graph_id, graph_spec) in enumerate(self.graphs.items()):
+            graph_spec.create(self, template, sequence=i)
 
 
 class RRDThresholdSpec(Spec):
@@ -4089,10 +4091,12 @@ class GraphDefinitionSpec(Spec):
 
         # TODO fix comments parsing - must always be a list.
 
-    def create(self, templatespec, template):
+    def create(self, templatespec, template, sequence=None):
         graph = template.manage_addGraphDefinition(self.name)
         self.speclog.debug("adding graph")
 
+        if sequence:
+            graph.sequence = sequence
         if self.height is not None:
             graph.height = self.height
         if self.width is not None:
@@ -4122,8 +4126,8 @@ class GraphDefinitionSpec(Spec):
                 comment.text = comment_text
 
         self.speclog.debug("adding {} graphpoints".format(len(self.graphpoints)))
-        for graphpoint_id, graphpoint_spec in self.graphpoints.items():
-            graphpoint_spec.create(self, graph)
+        for i, (graphpoint_id, graphpoint_spec) in enumerate(self.graphpoints.items()):
+            graphpoint_spec.create(self, graph, sequence=i)
 
 
 class GraphPointSpec(Spec):
@@ -4219,12 +4223,14 @@ class GraphPointSpec(Spec):
                 raise ValueError("'%s' is not a valid graphpoint lineType. Valid lineTypes: %s" % (
                                  lineType, ', '.join(valid_linetypes)))
 
-    def create(self, graph_spec, graph):
+    def create(self, graph_spec, graph, sequence=None):
         graphpoint = graph.createGraphPoint(DataPointGraphPoint, self.name)
         self.speclog.debug("adding graphpoint")
 
         graphpoint.dpName = self.dpName
 
+        if sequence:
+            graphpoint.sequence = sequence
         if self.lineType is not None:
             graphpoint.lineType = self.lineType
         if self.lineWidth is not None:
@@ -5503,7 +5509,7 @@ def relationships_from_yuml(yuml):
     return classes
 
 
-def MethodInfoProperty(method_name):
+def MethodInfoProperty(method_name, entity=False):
     """Return a property with the Infos for object(s) returned by a method.
 
     A list of Info objects is returned for methods returning a list, or a single
@@ -5511,10 +5517,18 @@ def MethodInfoProperty(method_name):
     """
     def getter(self):
         try:
-            return Zuul.info(getattr(self._object, method_name)())
+            result = Zuul.info(getattr(self._object, method_name)())
         except TypeError:
             # If not callable avoid the traceback and send the property
-            return Zuul.info(getattr(self._object, method_name))
+            result = Zuul.info(getattr(self._object, method_name))
+        if entity:
+            # rather than returning entire object(s), return just
+            # the fields needed by the UI renderer for creating links.
+            return marshal(
+                result,
+                keys=('name', 'meta_type', 'class_label', 'uid'))
+        else:
+            return result
 
     return property(getter)
 
@@ -5543,7 +5557,11 @@ def RelationshipInfoProperty(relationship_name):
 
     """
     def getter(self):
-        return Zuul.info(getattr(self._object, relationship_name)())
+        # rather than returning entire object(s), return just the fields
+        # required by the UI renderer for creating links.
+        return marshal(
+            Zuul.info(getattr(self._object, relationship_name)()),
+            keys=('name', 'meta_type', 'class_label', 'uid'))
 
     return property(getter)
 
@@ -5956,6 +5974,12 @@ if DYNAMICVIEW_INSTALLED:
             self._adapted = adapted
 
         def getGroup(self, viewName):
+            group = self._adapted
+            entity = group._adapted
+
+            if viewName not in entity.dynamicview_views:
+                return
+
             data = self._adapted.group_data
             if data:
                 return BaseGroup(
