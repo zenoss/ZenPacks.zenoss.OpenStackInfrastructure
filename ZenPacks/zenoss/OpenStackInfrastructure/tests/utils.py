@@ -283,6 +283,15 @@ def create_model_data(dmd):
             process_class = re.sub(r'\d+$', '', binary)
             process.setOSProcessClass("Processes/OpenStack/osProcessClasses/%s" % process_class)
 
+
+    # Cinder
+    from ZenPacks.zenoss.OpenStackInfrastructure.Volume import Volume
+    from ZenPacks.zenoss.OpenStackInfrastructure.VolSnapshot import VolSnapshot
+    volume1 = addContained(endpoint, "components", Volume("volume1"))
+    volsnap1 = addContained(endpoint, "components", VolSnapshot("volsnap1"))
+    addNonContained(instance1, "volumes", volume1)
+    addNonContained(volume1, "volSnapshots", volsnap1)
+
     return {
         'endpoint': endpoint,
         'phys_dc': phys_dc,

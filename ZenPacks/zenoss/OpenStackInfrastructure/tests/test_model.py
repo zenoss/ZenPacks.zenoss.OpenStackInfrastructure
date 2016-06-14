@@ -325,7 +325,6 @@ class TestModel(BaseTestCase):
         self.assertTrue(self._modeled)
 
         subnets = self.d.getDeviceComponents(type='OpenStackInfrastructureSubnet')
-        #import pdb;pdb.set_trace()
         self.assertEquals(len(subnets), 2)
         self.assertEquals(subnets[0].title, 'private_subnet')
         self.assertEquals(subnets[0].cidr, '10.0.0.0/24')
@@ -396,7 +395,6 @@ class TestModel(BaseTestCase):
         self.assertTrue(self._modeled)
 
         fips = self.d.getDeviceComponents(type='OpenStackInfrastructureFloatingIp')
-        #import pdb;pdb.set_trace()
         self.assertEquals(len(fips), 4)
         self.assertIsNone(fips[0].fixed_ip_address)
         self.assertEquals(fips[0].floating_ip_address, '10.239.180.102')
@@ -437,7 +435,6 @@ class TestModel(BaseTestCase):
         self.assertTrue(self._modeled)
 
         capis = self.d.getDeviceComponents(type='OpenStackInfrastructureCinderAPI')
-        #import pdb;pdb.set_trace()
         self.assertEquals(len(capis), 1)
         self.assertEquals(capis[0].id,
                           'service-cinder-api-liberty.zenoss.local-RegionOne')
@@ -487,7 +484,6 @@ class TestModel(BaseTestCase):
         self.assertTrue(self._modeled)
 
         volsnaps = self.d.getDeviceComponents(type='OpenStackInfrastructureVolSnapshot')
-        #import pdb;pdb.set_trace()
         self.assertEquals(len(volsnaps), 1)
         self.assertEquals(volsnaps[0].id, "snapshot-7bae1e24-47db-4d63-90e1-a5b02d112fb1"),
         self.assertEquals(volsnaps[0].title, "vol-GB1-snapshot"),
