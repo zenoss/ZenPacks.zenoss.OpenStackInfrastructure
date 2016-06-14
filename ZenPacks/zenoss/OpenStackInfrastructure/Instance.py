@@ -41,7 +41,7 @@ class Instance(schema.Instance):
         hypervisors = []
         for host in [x.getObject() for x in search(titleOrId=hostname,
                                                    meta_type='OpenStackInfrastructureHost')]:
-            if host.hypervisor():
+            if host.hypervisor() and host.titleOrId() == hostname:
                 hypervisors.append(host.hypervisor().id)
 
         if len(hypervisors):

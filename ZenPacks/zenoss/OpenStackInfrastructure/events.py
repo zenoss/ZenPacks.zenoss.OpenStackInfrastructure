@@ -236,11 +236,13 @@ def _apply_cinder_traits(evt, objmap):
                 'availability_zone':   ['avzone'],
                 'created_at':   ['created_at'],
                 'volume_id':  ['volumeId'],
-                'instance_id':  ['instanceId'],
                 'host':    ['host'],
                 'type':  ['volume_type'],
                 'size':  ['size'],
                }
+    if 'VolSnapshot' in objmap.modname:
+        # volume snapshot does not have volume_id, only volume does
+        traitmap.pop('volume_id', None)
     for trait in traitmap:
         for prop_name in traitmap[trait]:
             trait_field = 'trait_' + trait
