@@ -392,13 +392,13 @@ history
 </object>
 </object>
 </object>
-<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackCeilometerHeartbeat') -->
-<object id='/zport/dmd/Events/Status/instances/openStackCeilometerHeartbeat' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'Heartbeat', 'instances', 'openStackCeilometerHeartbeat') -->
+<object id='/zport/dmd/Events/Status/Heartbeat/instances/openStackCeilometerHeartbeat' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
 <property type="string" id="eventClassKey" mode="w" >
 openStackCeilometerHeartbeat
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+10
 </property>
 </object>
 <!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackIniFileAccess') -->
