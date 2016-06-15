@@ -59,6 +59,129 @@ osi_vnics.png|vNIC
 * Administrative credentials for your OpenStack environment
 ** Username, password, keystone URL, Region
 
+== Installed Items ==
+
+;Configuration Properties
+* zOpenStackAuthUrl: The URL of the Identity endpoint.
+* zOpenStackCeilometerUrl: The URL to the Ceilometer API.
+* zOpenStackExtraHosts: The list of extra hosts that will be added to the system once OpenStack Infrastructure device is modeled.
+* zOpenStackHostDeviceClass: Used as a default device class for defined hosts in zOpenStackExtraHosts and zOpenStackNovaApiHosts properties. Default is /Server/SSH/Linux/NovaHost.
+* zOpenStackNovaApiHosts: The list of Nova hosts that will be added to the system once OpenStack Infrastructure device is modeled.
+* zOpenStackNeutronConfigDir: The path where to search for Neutron's configs. Default is /etc/neutron.
+* zOpenStackProjectId: Corresponds to tenant name, project to work on.
+* zOpenStackRegionName: The name of OpenStack Region to use. Regions are autonomous OpenStack clouds joined together through shared Keystone identity server and managed through common interface.
+* zOpenStackRunNovaManageInContainer, zOpenStackRunVirshQemuInContainer, zOpenStackRunNeutronCommonInContainer: Used for container based OpenStack installation. Leave them empty.
+
+;Device Classes
+* /OpenStack: Root OpenStack device class. Typically devices should not be put in this device class.
+* /OpenStack/Infrastructure: Device class for OpenStack Infrastructure endpoints.
+* /Server/SSH/Linux/NovaHost: Device class for Nova host instances.
+
+;Modeler Plugins
+* zenoss.OpenStackInfrastructure: Used to get component information by OpenStack API clients.
+* zenoss.cmd.linux.openstack.hostfqdn: Used to get OpenStack host FQDN.
+* zenoss.cmd.linux.openstack.inifiles: Used to gather neutron.conf and ml2_conf.ini files.
+* zenoss.cmd.linux.openstack.libvirt: Used to get OpenStack instance virtual NIC information using libvert.
+* zenoss.cmd.linux.openstack.nova: Used to get OpenStack Nova API version.
+
+;Datasources
+* CinderServiceStatusDataSource: Used to check the status of Cinder services via the Cinder API.
+* EventsAMQPDataSource: Used to capture data and events from OpenStack Ceilometer via AMQP.
+* HeartbeatsAMQPDataSource: Used to capture heartbeats from OpenStack Ceilometer via AMQP.
+* NeutronAgentStatusDataSource: Used to check the status of Neutron agents via the Neutron API.
+* NovaServiceStatusDataSource: Used to check the status of Nova services via the Nova API.
+* PerfAMQPDataSource: Used to capture data and events from OpenStack Ceilometer via AMQP.
+* PerfCeilometerAPIDataSource: Used to capture datapoints from OpenStack Ceilometer.
+* QueueSizeDataSource: Used to check the number of messages in Ceilometer queues.
+
+;Monitoring Templates
+* /OpenStack/Infrastructure/
+** Endpoint
+** Instance
+** Vnic
+
+;Event Classes and Mappings
+* /OpenStack
+** OpenStack Events Default
+* /OpenStack/Cinder
+* /OpenStack/Cinder/Snapshot
+** Cinder Snapshot default mapping
+* /OpenStack/Cinder/Volume
+** cinder.volume default mapping
+* /OpenStack/compute
+* /OpenStack/compute/instance
+** compute.instance default mapping
+** compute.instance.create.error
+** compute.instance.exists
+** compute.instance.exists.verified.old
+* /OpenStack/dhcp_agent
+** dhcp_agent defaultmapping
+* /OpenStack/firewall
+** firewall defaultmapping
+* /OpenStack/firewall_policy
+** firewall_policy defaultmapping
+* /OpenStack/firewall_rule
+** firewall_rule defaultmapping
+* /OpenStack/floatingip
+** floatingip defaultmapping
+* /OpenStack/network
+** network defaultmapping 
+* /OpenStack/port
+** port defaultmapping
+* /OpenStack/router
+** router defaultmapping
+* /OpenStack/security_group
+** security_group defaultmapping
+* /OpenStack/security_group_rule
+** security_group_rule defaultmapping
+* /OpenStack/subnet
+** subnet defaultmapping
+* /Status/Heartbeat/
+** openStackCeilometerHeartbeat
+* /Status
+** openStackCinderServiceStatus
+** openStackIniFileAccess
+** openStackIniFileOptionParsing
+** openStackNeutronAgentStatus
+** openStackNovaServiceStatus
+
+;Processes
+* /OpenStack
+* /OpenStack/ceilometer-agent-central
+* /OpenStack/ceilometer-agent-compute
+* /OpenStack/ceilometer-agent-notification
+* /OpenStack/ceilometer-alarm-evaluator
+* /OpenStack/ceilometer-alarm-notifier
+* /OpenStack/ceilometer-api
+* /OpenStack/ceilometer-collector
+* /OpenStack/ceilometer-polling
+* /OpenStack/cinder-api
+* /OpenStack/cinder-backup
+* /OpenStack/cinder-scheduler
+* /OpenStack/cinder-volume
+* /OpenStack/glance-api
+* /OpenStack/glance-registry
+* /OpenStack/gnocchi-metricd
+* /OpenStack/gnocchi-statsd
+* /OpenStack/keystone-admin
+* /OpenStack/keystone-all
+* /OpenStack/keystone-main
+* /OpenStack/neutron-dhcp-agent
+* /OpenStack/neutron-l3-agent
+* /OpenStack/neutron-lbaas-agent
+* /OpenStack/neutron-metadata-agent
+* /OpenStack/neutron-metering-agent
+* /OpenStack/neutron-openvswitch-agent
+* /OpenStack/neutron-server
+* /OpenStack/nova-api
+* /OpenStack/nova-cert
+* /OpenStack/nova-compute
+* /OpenStack/nova-conductor
+* /OpenStack/nova-consoleauth
+* /OpenStack/nova-network
+* /OpenStack/nova-scheduler
+* /OpenStack/rabbitmq-server
+
 == Basic Usage ==
 
 ===Device Setup via UI===
