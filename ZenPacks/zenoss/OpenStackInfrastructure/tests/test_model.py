@@ -26,9 +26,9 @@ from Products.ZenTestCase.BaseTestCase import BaseTestCase
 from ZenPacks.zenoss.OpenStackInfrastructure.modeler.plugins.zenoss.OpenStackInfrastructure \
     import OpenStackInfrastructure as OpenStackInfrastructureModeler
 
-from ZenPacks.zenoss.OpenStackInfrastructure.lib.OsiDnsHost import (
-        OsiHostResolver,
-        OsiHostGroup,
+from ZenPacks.zenoss.OpenStackInfrastructure.lib.HostMap import (
+        HostResolver,
+        HostGroup,
         )
 
 CLOUDSTACK_ICON = '/++resource++cloudstack/img/cloudstack.png'
@@ -78,9 +78,9 @@ class TestModel(BaseTestCase):
         # We need to create and add the hostgroup data structure to results
         # ---------------------------------------------------------------------
         resolved_hostnames = results.get('resolved_hostnames')
-        hostResolver = OsiHostResolver()
+        hostResolver = HostResolver()
         hostResolver.resolved_hostnames = resolved_hostnames
-        hostgroup = OsiHostGroup(hostResolver=hostResolver)
+        hostgroup = HostGroup(hostResolver=hostResolver)
         hostnames = resolved_hostnames.keys()
         hostgroup.add_hostnames(hostnames)
         hostgroup.update_canonical_hostnames()

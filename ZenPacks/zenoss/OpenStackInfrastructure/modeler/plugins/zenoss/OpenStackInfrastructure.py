@@ -42,9 +42,9 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import (
 )
 add_local_lib_path()
 
-from ZenPacks.zenoss.OpenStackInfrastructure.lib.OsiDnsHost import (
-        OsiHostResolver,
-        OsiHostGroup,
+from ZenPacks.zenoss.OpenStackInfrastructure.lib.HostMap import (
+        HostResolver,
+        HostGroup,
         )
 
 from apiclients.txapiclient import APIClient, APIClientError, NotFoundError
@@ -244,11 +244,11 @@ class OpenStackInfrastructure(PythonPlugin):
         # make sure DNS can resolve controller hostnames
 
         # Create the hostResolver object for DNS resolution
-        hostResolver = OsiHostResolver()
+        hostResolver = HostResolver()
         yield hostResolver.bulk_update_names(hostnames)
 
         # Create hostGroup with hostResolver instance
-        hostgroup = OsiHostGroup(hostResolver=hostResolver)
+        hostgroup = HostGroup(hostResolver=hostResolver)
         hostgroup.add_hostnames(hostnames)
         hostgroup.update_canonical_hostnames()
         results['hostgroup'] = hostgroup
@@ -906,12 +906,12 @@ class OpenStackInfrastructure(PythonPlugin):
         for port in results['ports']:
             if not port.get('id', None):
                 continue
-            port_dict= dict()
+            port_dict = dict()
             # Fetch the subnets for later use
             raw_subnets = get_subnets_from_fixedips(port.get('fixed_ips', []))
             port_subnets = [prepId('subnet-{}'.format(x)) for x in raw_subnets]
             if port_subnets:
-                port_dict['set_subnets']= port_subnets
+                port_dict['set_subnets'] = port_subnets
             # Prepare the device_subnet_list data for later use.
             port_router_id = port.get('device_id')
             if port_router_id:

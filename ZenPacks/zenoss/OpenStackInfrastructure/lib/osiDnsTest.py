@@ -1,5 +1,5 @@
 import logging
-log = logging.getLogger('osi.OsiDnsHost')
+log = logging.getLogger('osi.HostMap')
 logging.basicConfig(level=logging.DEBUG)
 
 import socket
@@ -121,12 +121,12 @@ def resolve_names_with_retries(names, retries=2):
 
 
 # ==============================================================================
-class OsiDnsError(Exception):
+class hostMapError(Exception):
     """Parent class of all exceptions raised by api clients."""
     pass
 
 
-class OsiHostResolver(object):
+class HostResolver(object):
     """
     Create a host-ip map that can be referenced later as an object.
     """
@@ -147,7 +147,7 @@ class OsiHostResolver(object):
 
         # Force addition of map: mapping must be a dict of form {name: ip}
         if self.locked:
-            log.warn("Denied: add_hostnames() to locked OsiHostResolver")
+            log.warn("Denied: add_hostnames() to locked HostResolver")
         else:
             self.resolved_hostnames.update(mapping)
 
@@ -155,7 +155,7 @@ class OsiHostResolver(object):
     def bulk_update_names(self, hostnames):
         # Resolve and update map from a list of names.
         if self.locked:
-            log.warn("Denied: add hostnames to locked OsiHostResolver")
+            log.warn("Denied: add hostnames to locked HostResolver")
             return
 
         # Ensure that all hostnames are valid
@@ -173,7 +173,7 @@ class OsiHostResolver(object):
     def add_hostname(self, name, ip=None):
         # Add single hostname-ip pair. Ensure valid format
         if self.locked:
-            log.warn("Denied: add hostname:ip pair to locked OsiHostResolver")
+            log.warn("Denied: add hostname:ip pair to locked HostResolver")
             return
         if not isip(ip):
             log.ERROR("Denied: Can't add invalid IP: %s", ip)
@@ -202,10 +202,10 @@ class OsiHostResolver(object):
         return self.resolved_hostnames
 
 
-class OsiDnsHost(object):
+class HostMap(object):
     '''
-    OsiDnsHost represents resolvable hosts in the OSI cluster.
-    It requires a valid OsiHostResolver instance object in order to get
+    HostMap represents resolvable hosts in the OSI cluster.
+    It requires a valid HostResolver instance object in order to get
     pre-resolved IP addresses. When fully populated, objects have:
     @locked: lock host from updates
     @ip: The IP address
@@ -215,7 +215,7 @@ class OsiDnsHost(object):
 
     def __new__(cls, ip=None, hostname=None, canonical=None):
         if not (ip or hostname):
-            log.error("Missing IP and Hostname for OsiDnsHost creation!")
+            log.error("Missing IP and Hostname for HostMap creation!")
             return
         else:
             return object.__new__(cls)
@@ -223,16 +223,16 @@ class OsiDnsHost(object):
     def __init__(self, ip=None, hostname=None, canonical=None):
 
         if not (ip or hostname):
-            log.error("Missing IP or Hostname for OsiDnsHost creation!")
-            # raise Exception("Missing IP or Hostname for OsiDnsHost creation!")
+            log.error("Missing IP or Hostname for HostMap creation!")
+            # raise Exception("Missing IP or Hostname for HostMap creation!")
 
         self.locked = False
 
         if not ip:
-            log.debug("Missing IP for OsiDnsHost creation. Check DNS")
+            log.debug("Missing IP for HostMap creation. Check DNS")
             self.ip = None
         elif not isip(ip):
-            log.warn("Bad IP in OsiDnsHost creation!")
+            log.warn("Bad IP in HostMap creation!")
             self.ip = None
         else:
             self.ip = ip
@@ -246,21 +246,21 @@ class OsiDnsHost(object):
             self.canonical_hostname = canonical
 
     def __eq__(self, other):
-        # Allows set(OsiDnsHost) to determine equailty based on contents
-        if isinstance(other, OsiDnsHost):
+        # Allows set(HostMap) to determine equailty based on contents
+        if isinstance(other, HostMap):
             return self.ip == other.ip and self.hostnames == other.hostnames
         return False
 
     def __ne__(self, other):
-        # Allows set(OsiDnsHost) to determine equailty based on contents
+        # Allows set(HostMap) to determine equailty based on contents
         return (not self.__eq__(other))
 
     def __repr__(self):
-        # Allows set(OsiDnsHost) to determine equailty based on contents
+        # Allows set(HostMap) to determine equailty based on contents
         return 'H({s.ip!r}, {s.hostnames!r})'.format(s=self)
 
     def __hash__(self):
-        # Allows set(OsiDnsHost) to determine equailty based on contents
+        # Allows set(HostMap) to determine equailty based on contents
         return hash(repr(self))
 
     def lock(self):
@@ -287,7 +287,7 @@ class OsiDnsHost(object):
         # unique hostname. Take the first host in alphabetical order
         # Use cached value if available
         if not self.hostnames:
-            log.warn("get_canonical: No hostnames for OsiDnsHost %s", self.ip)
+            log.warn("get_canonical: No hostnames for HostMap %s", self.ip)
             return
 
         if self.canonical_hostname:
@@ -308,7 +308,7 @@ class OsiDnsHost(object):
         # unique hostname. Typically we will take the most fully qualified
         # domain name that is found.
         if self.locked:
-            log.warn("Won't update canonical on locked OsiDnsHost %s", self.ip)
+            log.warn("Won't update canonical on locked HostMap %s", self.ip)
             return
 
         self.canonical_hostname = None
@@ -317,7 +317,7 @@ class OsiDnsHost(object):
     def add_hostname(self, hostname, ip=None):
         # NOTE: We don't update self.canonica_hostname here. Must do manually.
         if self.locked:
-            log.warn("Won't add %s to locked OsiDnsHost %s", hostname, self.ip)
+            log.warn("Won't add %s to locked HostMap %s", hostname, self.ip)
             return
 
         # If hostname is in hostnames, pass, else check IP: add it
@@ -347,7 +347,7 @@ class OsiDnsHost(object):
         # Add hostnames in batch.
         # We blindly assume that these hostnames are valid for this host.
         if self.locked:
-            log.warn("Won't add hosts to locked OsiDnsHost %s", self.ip)
+            log.warn("Won't add hosts to locked HostMap %s", self.ip)
             return
 
         if isinstance(hostnames, (list, set)):
@@ -362,10 +362,10 @@ class OsiDnsHost(object):
         if hostname.lower() in self.hostnames:
             return True
 
-    def is_equal(self, dnsHost):
+    def is_equal(self, hostMap):
         # This is comparison of two objects.
         # NOTE: Comparison of hostnames is suspect: Why can't they differ?
-        if dnsHost.get_ip() in self.ip and dnsHost.hostnames == self.hostnames:
+        if hostMap.get_ip() in self.ip and hostMap.hostnames == self.hostnames:
             return True
 
     def valid_hostname_ip(self):
@@ -386,20 +386,20 @@ class OsiDnsHost(object):
             return True
 
 
-class OsiHostGroup(object):
+class HostGroup(object):
     '''
-    Class that contains a collection of OsiDnsHost objects.
+    Class that contains a collection of HostMap objects.
     '''
 
     def __init__(self, hostResolver=None):
-        if not isinstance(hostResolver, OsiHostResolver):
-            raise OsiDnsError("Invalid OsiHostResolver instance for OsiHostGroup")
+        if not isinstance(hostResolver, HostResolver):
+            raise hostMapError("Invalid HostResolver instance for HostGroup")
         self.hostResolver = hostResolver
         self.hosts = set()
 
     def update_Resolver(self, hostResolver):
-        if not isinstance(hostResolver, OsiHostResolver):
-            raise OsiDnsError("Invalid OsiHostResolver instance for OsiHostGroup")
+        if not isinstance(hostResolver, HostResolver):
+            raise hostMapError("Invalid HostResolver instance for HostGroup")
         else:
             self.hostResolver = hostResolver
 
@@ -441,8 +441,8 @@ class OsiHostGroup(object):
 
     def has_equivalent(self, osiHost):
         # Boolean: Test if self has equiv osiHost buy value
-        if not isinstance(osiHost, OsiDnsHost):
-            log.warn("host is non-OsiDnsHost. Unable to compare.")
+        if not isinstance(osiHost, HostMap):
+            log.warn("host is non-HostMap. Unable to compare.")
             return
 
         # Find the proper host in hosts set given host_or_ip
@@ -453,8 +453,8 @@ class OsiHostGroup(object):
 
     def is_subset_host(self, osiHost):
         # If osiHost is subset of some host in set, return True
-        if not isinstance(osiHost, OsiDnsHost):
-            log.warn("host is non-OsiDnsHost. Unable to compare.")
+        if not isinstance(osiHost, HostMap):
+            log.warn("host is non-HostMap. Unable to compare.")
             return
 
         for host in self.hosts:
@@ -465,8 +465,8 @@ class OsiHostGroup(object):
 
     def get_subset_host(self, osiHost):
         # Return host that is subset of this host
-        if not isinstance(osiHost, OsiDnsHost):
-            log.warn("host is non-OsiDnsHost. Unable to compare.")
+        if not isinstance(osiHost, HostMap):
+            log.warn("host is non-HostMap. Unable to compare.")
             return
 
         for host in self.hosts:
@@ -489,9 +489,9 @@ class OsiHostGroup(object):
         return False
 
     def add_host(self, osiHost):
-        # Add OsiDnsHost instance to set, but only if unique. Otherwise merge.
-        if not isinstance(osiHost, OsiDnsHost):
-            log.warn("Can't add an non OsiDnsHost object")
+        # Add HostMap instance to set, but only if unique. Otherwise merge.
+        if not isinstance(osiHost, HostMap):
+            log.warn("Can't add an non HostMap object")
             return
 
         if self.has_equivalent(osiHost) or self.is_subset_host(osiHost):
@@ -506,9 +506,9 @@ class OsiHostGroup(object):
             self.hosts.add(osiHost)
 
     def remove_host(self, osiHost):
-        # Delete OsiDnsHost object
-        if not isinstance(osiHost, OsiDnsHost):
-            log.debug("Can't remove an non OsiDnsHost object")
+        # Delete HostMap object
+        if not isinstance(osiHost, HostMap):
+            log.debug("Can't remove an non HostMap object")
             return
 
         self.hosts.remove(osiHost)
@@ -533,22 +533,22 @@ class OsiHostGroup(object):
 
         # If new host is an IP, add it as such
         if isip(name):
-            self.add_host(OsiDnsHost(ip=name))
+            self.add_host(HostMap(ip=name))
             return
 
         # Host is new hostname, so add it as such. IP can be None:
         ip = self.hostResolver.getIpFromName(name)
         if ip:
-            osiHost = OsiDnsHost(ip)
+            osiHost = HostMap(ip)
             osiHost.add_hostname(name)
         else:
             log.warn("Adding host %s to a baren (missing ip) host!", name)
-            osiHost = OsiDnsHost(hostname=name)
+            osiHost = HostMap(hostname=name)
 
         self.add_host(osiHost)
 
     def add_hostnames(self, hostnames):
-        # Add an OsiDnsHost for each corresponding name in hostnames
+        # Add an HostMap for each corresponding name in hostnames
         for host in hostnames:
             self.add_hostname(host)
 # ==============================================================================
@@ -585,9 +585,9 @@ def main():
     try:
 
         # This dns object is the authoritative source of DNS information
-        dns1 = OsiHostResolver()
+        dns1 = HostResolver()
 
-        dns2 = OsiHostResolver()
+        dns2 = HostResolver()
 
         yield dns1.bulk_update_names(hostnames)
         yield dns2.bulk_update_names(hostnames)
@@ -614,21 +614,21 @@ def main():
         print dns1.getIpFromName('google.com')
 
     try:
-        # host1 = OsiDnsHost(dns, ip='192.230.66.239')
-        # host1 = OsiDnsHost(dns, ip='', hostnames=hostnames)
+        # host1 = HostMap(dns, ip='192.230.66.239')
+        # host1 = HostMap(dns, ip='', hostnames=hostnames)
 
-        host0 = OsiDnsHost()
+        host0 = HostMap()
         try:
             host0.add_hostname(ip=None, hostname='ioc.com')
         except Exception:
             log.warn("********* host0 is bad ********* ")
 
-        host1 = OsiDnsHost(ip='192.230.66.239')
-        host2 = OsiDnsHost(ip='1.2.3.4')
-        host3 = OsiDnsHost(ip='1.2.3.4')
-        host4 = OsiDnsHost(ip='1.2.3.4')
+        host1 = HostMap(ip='192.230.66.239')
+        host2 = HostMap(ip='1.2.3.4')
+        host3 = HostMap(ip='1.2.3.4')
+        host4 = HostMap(ip='1.2.3.4')
 
-    except OsiDnsError as ex:
+    except hostMapError as ex:
         log.error(ex)
 
     else:
@@ -669,7 +669,7 @@ def main():
         print "Host2 hostnames = ", host2.hostnames
         print "Canonical hostname = ", host2.get_canonical_hostname()
 
-        # Host 3 to test equality and merging and set(OsiDnsHosts)
+        # Host 3 to test equality and merging and set(HostMaps)
         host3.add_hostname('agate.google.com')
         host4.add_hostname('agate.google.com')
         host4.add_hostname('acacia.google.com')
@@ -679,10 +679,10 @@ def main():
 
         # Test: Remove host from s
 
-        hostgroup = OsiHostGroup(hostResolver=dns1)
+        hostgroup = HostGroup(hostResolver=dns1)
         ipadds = dns1.get_ip_addresses()
         for ip in ipadds:
-            host = OsiDnsHost(ip=ip)
+            host = HostMap(ip=ip)
             hostgroup.add_host(host)
 
         for host in hostgroup.hostResolver.resolved_hostnames:
