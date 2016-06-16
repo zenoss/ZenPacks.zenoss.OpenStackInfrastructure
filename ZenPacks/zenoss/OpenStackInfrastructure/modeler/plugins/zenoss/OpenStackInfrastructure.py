@@ -21,13 +21,11 @@ import os
 import re
 import itertools
 from urlparse import urlparse
-import socket
 from collections import defaultdict
 
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.internet.error import ConnectError, TimeoutError
 
-from Products.ZenUtils.IpUtil import isip, asyncIpLookup
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
 from Products.ZenUtils.Utils import prepId
@@ -40,12 +38,14 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import (
     get_port_instance,
     getNetSubnetsGws_from_GwInfo,
     get_port_fixedips,
-    sleep,
     isValidHostname,
-    sanitize_host_or_ip,
 )
-
 add_local_lib_path()
+
+from ZenPacks.zenoss.OpenStackInfrastructure.lib.HostMap import (
+        HostResolver,
+        HostGroup,
+        )
 
 from apiclients.txapiclient import APIClient, APIClientError, NotFoundError
 
@@ -226,7 +226,7 @@ class OpenStackInfrastructure(PythonPlugin):
         result = yield client.neutron_floatingips()
         results['floatingips'] = result['floatingips']
 
-        # Do some DNS lookups as well.
+        # Compile all hosts into a set
         hostnames = set([x['host'] for x in results['services']])
         hostnames.update([x['host'] for x in results['agents']])
         hostnames.update(device.zOpenStackExtraHosts)
@@ -236,33 +236,23 @@ class OpenStackInfrastructure(PythonPlugin):
         except Exception, e:
             log.warning("Unable to determine nova URL for nova-api component discovery: %s" % e)
 
-        # not being able to resolve hostname could, in some cases,
+        # ---------------------------------------------------------------------
+        # DNS Resolution and Hostgroups
+        # ---------------------------------------------------------------------
+        # Not being able to resolve hostname could, in some cases,
         # result in nova-api and/or cinder-api components not being modeled
-        # make sure DNS can resolve controller hostname
+        # make sure DNS can resolve controller hostnames
 
-        results['resolved_hostnames'] = {}
-        for hostname in sorted(hostnames):
-            if isip(hostname):
-                results['resolved_hostnames'][hostname] = hostname
-                continue
+        # Create the hostResolver object for DNS resolution
+        hostResolver = HostResolver()
+        yield hostResolver.bulk_update_names(hostnames)
 
-            for i in range(1, 4):
-                try:
-                    host_ip = yield asyncIpLookup(hostname)
-                    results['resolved_hostnames'][hostname] = host_ip
-                    break
-                except socket.gaierror, e:
-                    if e.errno == -3:
-                        # temporary dns issue- try again.
-                        log.error("resolve %s: (attempt %d/3): %s" % (hostname, i, e))
-                        yield sleep(2)
-                        continue
-                    else:
-                        log.error("resolve %s: %s" % (hostname, e))
-                        break
-                except Exception, e:
-                    log.error("resolve %s: %s" % (hostname, e))
-                    break
+        # Create hostGroup with hostResolver instance
+        hostgroup = HostGroup(hostResolver=hostResolver)
+        hostgroup.add_hostnames(hostnames)
+        hostgroup.update_canonical_hostnames()
+        results['hostgroup'] = hostgroup
+        # ---------------------------------------------------------------------
 
         # Cinder
         result = yield client.cinder_volumes()
@@ -299,6 +289,7 @@ class OpenStackInfrastructure(PythonPlugin):
         returnValue(results)
 
     def process(self, device, results, unused):
+
         tenants = []
         quota_tenants = []                   # for use by quota later
         for tenant in results['tenants']:
@@ -459,22 +450,32 @@ class OpenStackInfrastructure(PythonPlugin):
         services = []
         zones = {}
         hostmap = {}
+        hostgroup = results['hostgroup']
 
         # Find all hosts which have a nova service on them.
         for service in results['services']:
             if not service.get('id', None):
                 continue
 
+            # Use only canonical hosts as discovered in collect
+            osiHost = hostgroup.get_host_by_name_or_ip(service.get('host'))
+
+            if not osiHost:
+                log.warn("No host %s for service %s!", service.get('host'), service.get('id'))
+                continue
+
             title = '{0}@{1} ({2})'.format(service.get('binary', ''),
-                                           service.get('host', ''),
+                                           osiHost.get_canonical_hostname(),
                                            service.get('zone', ''))
             service_id = prepId('service-{0}-{1}-{2}'.format(
-                service.get('binary', ''), service.get('host', ''), service.get('zone', '')))
-            host_id = prepId("host-{0}".format(service.get('host', '')))
+                service.get('binary', ''),
+                osiHost.get_canonical_hostname(),
+                service.get('zone', '')))
+            host_id = osiHost.get_id()
             zone_id = prepId("zone-{0}".format(service.get('zone', '')))
 
             hostmap[host_id] = {
-                'hostname': service.get('host', ''),
+                'hostname': osiHost.get_canonical_hostname(),
                 'org_id': zone_id
             }
 
@@ -516,16 +517,16 @@ class OpenStackInfrastructure(PythonPlugin):
             if not agent.get('id', None):
                 continue
 
-            sanitized_hostname = sanitize_host_or_ip(agent['host'])
-            if not sanitized_hostname:
-                log.debug("Skipping empty hostname %s !", agent['host'])
+            raw_hostname = agent.get('host')
+            osiHost = hostgroup.get_host_by_name_or_ip(raw_hostname)
+            if not osiHost:
+                log.warn("Host %s not found for agent %s!",
+                                            raw_hostname, agent.get('id'))
                 continue
-            if sanitized_hostname != agent['host']:
-                log.debug("Sanitized hostname %s", agent['host'])
 
-            host_id = prepId("host-{0}".format(sanitized_hostname))
+            host_id = osiHost.get_id()
             hostmap[host_id] = {
-                'hostname': sanitized_hostname,
+                'hostname': osiHost.get_canonical_hostname(),
                 'org_id': region_id
             }
 
@@ -534,21 +535,27 @@ class OpenStackInfrastructure(PythonPlugin):
         for service in results['cinder_services']:
             # well, guest what? volume services do not have 'id' key !
 
-            host_id_end = service.get('host', '').find('@')
-            if host_id_end > -1:
-                host_id = prepId("host-{0}".format(service.get('host', '')[:host_id_end]))
-            else:
-                host_id = prepId("host-{0}".format(service.get('host', '')))
+            raw_hostname = service.get('host', '')
+            osiHost = hostgroup.get_host_by_name_or_ip(raw_hostname)
+
+            if not osiHost:
+                log.warn("Host %s not found for cinder_service %s!",
+                                    raw_hostname, service.get('binary'))
+                continue
+
+            host_id = osiHost.get_id()
+            canonical_hostname = osiHost.get_canonical_hostname()
+
             zone_id = prepId("zone-{0}".format(service.get('zone', '')))
             title = '{0}@{1} ({2})'.format(service.get('binary', ''),
-                                           service.get('host', ''),
+                                           raw_hostname,
                                            service.get('zone', ''))
             service_id = prepId('service-{0}-{1}-{2}'.format(
-                service.get('binary', ''), service.get('host', ''), service.get('zone', '')))
+                service.get('binary', ''), canonical_hostname, service.get('zone', '')))
 
             if host_id not in hostmap:
                 hostmap[host_id] = {
-                    'hostname': service.get('host', ''),
+                    'hostname': canonical_hostname,
                     'org_id': zone_id
                 }
             services.append(ObjectMap(
@@ -579,12 +586,20 @@ class OpenStackInfrastructure(PythonPlugin):
                 log.info("  Adding zOpenStackExtraHosts=%s" % device.zOpenStackExtraHosts)
 
         for hostname in device.zOpenStackNovaApiHosts + device.zOpenStackExtraHosts:
-            host_id = prepId("host-{0}".format(hostname))
+            osiHost = hostgroup.get_host_by_name_or_ip(hostname)
+
+            if not osiHost:
+                log.warn("Skipping missing AdditionalHost  %s !", hostname)
+                continue
+
+            canonical_hostname = osiHost.get_canonical_hostname()
+            host_id = osiHost.get_id()
             hostmap[host_id] = {
-                'hostname': hostname,
+                'hostname': canonical_hostname,
                 'org_id': region_id
             }
 
+        # Here: hostmap should be free of duplicates and bogons
         hosts = []
         for host_id in hostmap:
             data = hostmap[host_id]
@@ -595,7 +610,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 # and the hostname in hostmap becomes:
                 # 'host-overcloud-controller-1.localdomain:4947de00-0c13-5ee7-902e-fc270d3993b9'
                 # this caused problem when setting orgComponent for agent
-                log.warn("  Invalid hostname found: %s" % data.get('hostname', host_id))
+                log.warn("Invalid hostname found: %s" % data.get('hostname', host_id))
                 continue
 
             hosts.append(ObjectMap(
@@ -701,6 +716,7 @@ class OpenStackInfrastructure(PythonPlugin):
         # Place it on the user-specified hosts, or also find it if it's
         # in the nova-service list (which we ignored earlier). It should not
         # be, under icehouse, at least, but just in case this changes..)
+
         nova_api_hosts = set(device.zOpenStackNovaApiHosts)
         cinder_api_hosts = []
         for service in results['services']:
@@ -716,9 +732,21 @@ class OpenStackInfrastructure(PythonPlugin):
         # api hosts.
         try:
             apiHostname = urlparse(results['nova_url']).hostname
-            apiIp = results['resolved_hostnames'].get(apiHostname, apiHostname)
+            osiHost = hostgroup.get_host_by_name_or_ip(apiHostname)
+
+            if not osiHost:
+                log.warn("Missing or invalid apiHostname %s !", apiHostname)
+                raise Exception
+
+            canonical_hostname = osiHost.get_canonical_hostname()
+            apiIp = osiHost.get_ip()
+
+            if not apiIp:
+                log.warn("Using hostname for Missing IP for apiHostname %s!", apiHostname)
+                apiIp = apiHostname
+
             for host in hosts:
-                if host.hostname == apiHostname:
+                if host.hostname == canonical_hostname:
                     nova_api_hosts.add(host.hostname)
                     cinder_api_hosts.append(host.hostname)
                 else:
@@ -769,18 +797,19 @@ class OpenStackInfrastructure(PythonPlugin):
         # agent
         agents = []
         for agent in results['agents']:
-            if not agent.get('id', None):
+            if not agent.get('id'):
                 continue
-
-            sanitized_hostname = sanitize_host_or_ip(agent['host'])
-            if not sanitized_hostname:
-                log.debug("Skipping empty hostname %s !", agent['host'])
-                continue
-            if sanitized_hostname != agent['host']:
-                log.debug("Sanitized hostname %s", agent['host'])
 
             # Get agent's host
-            agent_host = prepId('host-{0}'.format(sanitized_hostname))
+            raw_host = agent['host']
+            osiHost = hostgroup.get_host_by_name_or_ip(raw_hostname)
+
+            if not osiHost:
+                log.warn("Skipped missing Host %s for Agent %s!",
+                                raw_host, agent.get('id'))
+                continue
+
+            agent_host = osiHost.get_id()
 
             # ------------------------------------------------------------------
             # AgentSubnets Section
@@ -877,12 +906,12 @@ class OpenStackInfrastructure(PythonPlugin):
         for port in results['ports']:
             if not port.get('id', None):
                 continue
-            port_dict= dict()
+            port_dict = dict()
             # Fetch the subnets for later use
             raw_subnets = get_subnets_from_fixedips(port.get('fixed_ips', []))
             port_subnets = [prepId('subnet-{}'.format(x)) for x in raw_subnets]
             if port_subnets:
-                port_dict['set_subnets']= port_subnets
+                port_dict['set_subnets'] = port_subnets
             # Prepare the device_subnet_list data for later use.
             port_router_id = port.get('device_id')
             if port_router_id:
@@ -1017,6 +1046,7 @@ class OpenStackInfrastructure(PythonPlugin):
             voltypeid = [vtype.id for vtype in voltypes
                          if volume.get('volume_type', '') == vtype.title]
 
+            # >>>> canonicalize hosts here
             volume_dict = dict(
                 id=prepId('volume-{0}'.format(volume['id'])),
                 title=volume.get('name', ''),
