@@ -389,7 +389,7 @@ configuration (see below)
 
 Zenoss relies upon a Ceilometer dispatcher plugin to ship raw event and
 metering data from Ceilometer to Zenoss for storage in the Zenoss event
-and performance databases.   This integration is done by publishing messages
+and performance databases. This integration is done by publishing messages
 to Zenoss's RabbitMQ server.
 
 This dispatcher should be installed on all nodes running any ceilometer, but
@@ -403,18 +403,36 @@ on the Zenoss collector):
   sudo cp /usr/lib/*/site-packages/ceilometer_zenoss/event_definitions.yaml /etc/ceilometer/
 </syntaxhighlight>
 
-Edit /etc/ceilometer/ceilometer.conf, and add the following lines to the
-appropriate sections:
+The following configuration must be added to /etc/ceilometer/ceilometer.conf file:
 
 <syntaxhighlight lang="text">
   [DEFAULT]
+  # Dispatcher to process data.
   dispatcher=zenoss
 
   [notification]
+  # Save event details.
   store_events=True
+
+  [dispatcher_zenoss]
+  # Device that the OpenStack environment is registered as in Zenoss.
+  zenoss_device = ...
+  # The port number to which the underlying TCP connection is made.
+  # Usually, AMQP port is 5672.
+  amqp_port = ...
+  # Valid AMQP user id.
+  amqp_userid = ...
+  # Valid AMQP password for the above user id.
+  amqp_password = ...
+  # The name of the "virtual host" (or vhost) that specifies the namespace 
+  # for entities (exchanges and queues) referred to by the protocol.
+  amqp_virtual_host = ...
+  # It must be an accessible interface from your OpenStack system,
+  # and that interface must be one that accepts AMQP connections for your Zenoss installation.
+  amqp_hostname = ...
 </syntaxhighlight>
 
-Also add the [dispatcher_zenoss] section reported by openstack_amqp_config above.
+;The order of the sections is important, the [dispatcher_zenoss] section needs to be added at the end of ceilometer.conf file.
 
 {{note}} Please restart all Ceilometer services on all hosts after making these changes.
 
