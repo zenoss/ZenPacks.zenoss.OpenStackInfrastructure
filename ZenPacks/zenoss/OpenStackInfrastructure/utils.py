@@ -24,7 +24,7 @@ import importlib
 import pytz
 import time
 
-from twisted.internet import reactor
+from twisted.internet import reactor, defer
 from twisted.internet.error import ConnectionRefusedError, TimeoutError
 from twisted.internet.task import deferLater
 
@@ -313,51 +313,6 @@ def getNetSubnetsGws_from_GwInfo(external_gateway_info):
 
     return (network, subnets, gateways)
 
-
-def isValidHostname(hostname):
-    # see this for valid hostname length:
-    # https://blogs.msdn.microsoft.com/oldnewthing/20120412-00/?p=7873/
-    if len(hostname) > 255:
-        return False
-    if hostname.endswith('.'):
-        hostname = hostname[:-1]
-    valid = re.compile("(?!-)[a-z\d-]{1,63}(?<!-)$", re.IGNORECASE)
-    return all(valid.match(x) for x in hostname.split("."))
-
-
-def sanitize_host_or_ip(host):
-    '''Return valid IP, else hostname, else ''
-    '''
-    if not host:
-        return ''
-
-    host_RX = re.compile(
-                         '^'
-                         '(?P<hostname>[\w-]+[\.\-\w]*)'
-                         '[^\w\-\.]*'
-                         '.*'
-                         '$'
-                         )
-
-    ip_RX = re.compile(
-                         '^'
-                         '(?P<ipnumber>[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3})'
-                         '[^\d\.]*'
-                         '.*'
-                         '$'
-                         )
-
-    # Search IP first: the pattern is easier to parse
-    ip_search = ip_RX.search(host)
-    if ip_search:
-        return ip_search.group('ipnumber')
-
-    host_search = host_RX.search(host)
-    if host_search:
-        return host_search.group('hostname')
-
-    return ''
-
 def is_uuid(uuid):
     matcher = re.compile(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
     match = matcher.search(uuid)
@@ -373,5 +328,36 @@ def container_cmd_wrapper(zproperty, sub_cmd):
     return "docker exec $(docker ps --format '{{.Names}}' | grep '%s') %s" % \
           (zproperty, sub_cmd)
 
+@defer.inlineCallbacks
+def resolve_name(name):
+    ## If you have an IP already, return it.
+    # if isip(name):
+    #    returnValue((name, name))
+    ip = yield reactor.resolve(name)
+    defer.returnValue((name, ip))
 
-# -----------------------------------------------------------------------------
+
+@defer.inlineCallbacks
+def resolve_names(names):
+    """Resolve names to IP addresses in parallel.
+    Names must be an iterable of names.
+
+    Example return value:
+
+        {
+            'example.com': '192.168.1.2',
+            'www.google.com': '8.7.6.5',
+            'doesntexist': None,
+        }
+    """
+    from twisted.internet.defer import DeferredList
+    results = yield DeferredList(
+        [resolve_name(n) for n in names],
+        consumeErrors=True)
+
+    result_map = {n: None for n in names}
+    for success, result in results:
+        if success:
+            result_map[result[0]] = result[1]
+
+    defer.returnValue(result_map)

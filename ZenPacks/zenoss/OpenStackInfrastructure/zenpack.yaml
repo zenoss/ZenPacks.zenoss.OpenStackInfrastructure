@@ -9,6 +9,12 @@ zProperties: !ZenPackSpec
     default: /Server/SSH/Linux/NovaHost
   zOpenStackNovaApiHosts:
     type: lines
+  zOpenStackCinderApiHosts:
+    type: lines
+  zOpenStackHostMapToId:
+    type: lines
+  zOpenStackHostMapSame:
+    type: lines
   zOpenStackNeutronConfigDir: {}
   zOpenStackRunNovaManageInContainer: {}
   zOpenStackRunVirshQemuInContainer: {}

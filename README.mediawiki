@@ -66,7 +66,10 @@ osi_vnics.png|vNIC
 * zOpenStackCeilometerUrl: The URL to the Ceilometer API.
 * zOpenStackExtraHosts: The list of extra hosts that will be added to the system once OpenStack Infrastructure device is modeled.
 * zOpenStackHostDeviceClass: Used as a default device class for defined hosts in zOpenStackExtraHosts and zOpenStackNovaApiHosts properties. Default is /Server/SSH/Linux/NovaHost.
-* zOpenStackNovaApiHosts: The list of Nova hosts that will be added to the system once OpenStack Infrastructure device is modeled.
+* zOpenStackNovaApiHosts: The list of hosts upon which nova-api runs.  This is required when the IP address in the nova API url does not match any known host.
+* zOpenStackCinderApiHosts: The list of hosts upon which cinder-api runs.  This is required when the IP address in the cinder API url does not match any known host.
+* zOpenStackHostMapToId: A list of <name>=<id>, used to force a host referred to by openstack with the given name to be represented in Zenoss as a host component with the given ID.   (this is not commonly used)
+* zOpenStackHostMapSame: A list of <name1>=<name2>, used to inform the modeler that the same host may be referred to with a different name by some part of openstack.  (this is not commonly used)
 * zOpenStackNeutronConfigDir: The path where to search for Neutron's configs. Default is /etc/neutron.
 * zOpenStackProjectId: Corresponds to tenant name, project to work on.
 * zOpenStackRegionName: The name of OpenStack Region to use. Regions are autonomous OpenStack clouds joined together through shared Keystone identity server and managed through common interface.

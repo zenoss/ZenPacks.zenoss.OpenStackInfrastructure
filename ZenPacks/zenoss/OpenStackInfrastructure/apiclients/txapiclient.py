@@ -466,6 +466,12 @@ class APIClient(object):
         returnValue(self._nova_url)
 
     @inlineCallbacks
+    def cinder_url(self):
+        if not self._cinder_url:
+            yield self.login()
+        returnValue(self._cinder_url)
+
+    @inlineCallbacks
     def ceilometer_url(self):
         if not self._ceilometer_url:
             yield self.login()
