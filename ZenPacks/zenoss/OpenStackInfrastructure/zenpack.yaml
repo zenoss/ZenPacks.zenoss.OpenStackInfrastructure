@@ -78,9 +78,9 @@ device_classes: !ZenPackSpec
     zProperties:
       zOpenStackNeutronConfigDir: /etc/neutron
       zSshConcurrentSessions: 5
-      zOpenStackRunNovaManageInContainer:
-      zOpenStackRunVirshQemuInContainer:
-      zOpenStackRunNeutronCommonInContainer:
+      zOpenStackRunNovaManageInContainer: ''
+      zOpenStackRunVirshQemuInContainer: ''
+      zOpenStackRunNeutronCommonInContainer: ''
   /OpenStack: {}
   /OpenStack/Infrastructure:
     remove: true
