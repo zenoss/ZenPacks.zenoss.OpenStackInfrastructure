@@ -196,8 +196,8 @@ class OpenStackInfrastructure(PythonPlugin):
             if _agent['agent_type'].lower() == 'dhcp agent':
                 try:
                     dhcp_data = yield \
-                        client.api_call('/v2.0/agents/%s/dhcp-networks'
-                                                % str(_agent['id']))
+                        client.api_call('/v2.0/agents/%s/dhcp-networks' %
+                                        str(_agent['id']))
                 except Exception, e:
                     log.warning("Unable to determine neutron URL for " +
                                 "dhcp agent discovery: %s" % e)
@@ -417,27 +417,27 @@ class OpenStackInfrastructure(PythonPlugin):
 
             # Flavor and Image IDs could be specified two different ways.
             flavor_id = server.get('flavorId', None) or \
-                        server.get('flavor', {}).get('id', None)
+                server.get('flavor', {}).get('id', None)
 
             tenant_id = server.get('tenant_id', '')
 
             # Note: volume relations are added in volumes map below
             server_dict = dict(
-                            id=prepId('server-{0}'.format(server['id'])),
-                            title=server.get('name', server['id']),
-                            resourceId=server['id'],
-                            serverId=server['id'],  # 847424
-                            serverStatus=server.get('status', ''),
-                            serverBackupEnabled=backup_schedule_enabled,
-                            serverBackupDaily=backup_schedule_daily,
-                            serverBackupWeekly=backup_schedule_weekly,
-                            publicIps=list(public_ips),
-                            privateIps=list(private_ips),
-                            set_flavor=prepId('flavor-{0}'.format(flavor_id)),
-                            set_tenant=prepId('tenant-{0}'.format(tenant_id)),
-                            hostId=server.get('hostId', ''),
-                            hostName=server.get('name', '')
-                            )
+                id=prepId('server-{0}'.format(server['id'])),
+                title=server.get('name', server['id']),
+                resourceId=server['id'],
+                serverId=server['id'],  # 847424
+                serverStatus=server.get('status', ''),
+                serverBackupEnabled=backup_schedule_enabled,
+                serverBackupDaily=backup_schedule_daily,
+                serverBackupWeekly=backup_schedule_weekly,
+                publicIps=list(public_ips),
+                privateIps=list(private_ips),
+                set_flavor=prepId('flavor-{0}'.format(flavor_id)),
+                set_tenant=prepId('tenant-{0}'.format(tenant_id)),
+                hostId=server.get('hostId', ''),
+                hostName=server.get('name', '')
+                )
 
             # Some Instances are created from pre-existing volumes
             # This implies no image exists.
@@ -453,8 +453,8 @@ class OpenStackInfrastructure(PythonPlugin):
                 server_dict['set_image'] = prepId('image-{0}'.format(image_id))
 
             servers.append(ObjectMap(
-                    modname='ZenPacks.zenoss.OpenStackInfrastructure.Instance',
-                    data=server_dict))
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.Instance',
+                data=server_dict))
 
         services = []
         zones = {}
@@ -661,24 +661,24 @@ class OpenStackInfrastructure(PythonPlugin):
                 # hypervisor status: ENABLED/DISABLED
                 hstatus=hypervisor.get('status', 'unknown').upper(),
                 # hypervisor ip: internal ip address
-                host_ip=results['hypervisor_details'].get(hypervisor_id,
-                                                {}).get('host_ip', None),
-                vcpus=results['hypervisor_details'].get(hypervisor_id,
-                                                {}).get('vcpus', None),
-                vcpus_used=results['hypervisor_details'].get(hypervisor_id,
-                                                {}).get('vcpus_used', None),
-                memory=results['hypervisor_details'].get(hypervisor_id,
-                                                {}).get('memory_mb', None),
-                memory_used=results['hypervisor_details'].get(hypervisor_id,
-                                                {}).get('memory_mb_used', None),
-                memory_free=results['hypervisor_details'].get(hypervisor_id,
-                                                {}).get('free_ram_mb', None),
-                disk=results['hypervisor_details'].get(hypervisor_id,
-                                                {}).get('local_gb', None),
-                disk_used=results['hypervisor_details'].get(hypervisor_id,
-                                                {}).get('local_gb_used', None),
-                disk_free=results['hypervisor_details'].get(hypervisor_id,
-                                                {}).get('free_disk_gb', None),
+                host_ip=results['hypervisor_details'].get(
+                    hypervisor_id, {}).get('host_ip', None),
+                vcpus=results['hypervisor_details'].get(
+                    hypervisor_id, {}).get('vcpus', None),
+                vcpus_used=results['hypervisor_details'].get(
+                    hypervisor_id, {}).get('vcpus_used', None),
+                memory=results['hypervisor_details'].get(
+                    hypervisor_id, {}).get('memory_mb', None),
+                memory_used=results['hypervisor_details'].get(
+                    hypervisor_id, {}).get('memory_mb_used', None),
+                memory_free=results['hypervisor_details'].get(
+                    hypervisor_id, {}).get('free_ram_mb', None),
+                disk=results['hypervisor_details'].get(
+                    hypervisor_id, {}).get('local_gb', None),
+                disk_used=results['hypervisor_details'].get(
+                    hypervisor_id, {}).get('local_gb_used', None),
+                disk_free=results['hypervisor_details'].get(
+                    hypervisor_id, {}).get('free_disk_gb', None),
                 set_instances=hypervisor_servers,
                 set_hostByName=hypervisor.get('hypervisor_hostname', ''),
             )
@@ -861,12 +861,12 @@ class OpenStackInfrastructure(PythonPlugin):
             subnets.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Subnet',
                 data=dict(
-                    cidr=subnet.get('cidr',''),
+                    cidr=subnet.get('cidr', ''),
                     dns_nameservers=subnet.get('dns_nameservers', []),
-                    gateway_ip=subnet.get('gateway_ip',''),
+                    gateway_ip=subnet.get('gateway_ip', ''),
                     id=prepId('subnet-{0}'.format(subnet['id'])),
-                    set_network=prepId('network-{0}'.format(subnet.get('network_id',''))),
-                    set_tenant=prepId('tenant-{0}'.format(subnet.get('tenant_id',''))),
+                    set_network=prepId('network-{0}'.format(subnet.get('network_id', ''))),
+                    set_tenant=prepId('tenant-{0}'.format(subnet.get('tenant_id', ''))),
                     subnetId=subnet['id'],
                     title=subnet.get('name', subnet['id']),
                     )))
@@ -877,17 +877,17 @@ class OpenStackInfrastructure(PythonPlugin):
         for port in results['ports']:
             if not port.get('id', None):
                 continue
-            port_dict= dict()
+            port_dict = dict()
             # Fetch the subnets for later use
             raw_subnets = get_subnets_from_fixedips(port.get('fixed_ips', []))
             port_subnets = [prepId('subnet-{}'.format(x)) for x in raw_subnets]
             if port_subnets:
-                port_dict['set_subnets']= port_subnets
+                port_dict['set_subnets'] = port_subnets
             # Prepare the device_subnet_list data for later use.
             port_router_id = port.get('device_id')
             if port_router_id:
                 device_subnet_list[port_router_id] = \
-                        device_subnet_list[port_router_id].union(raw_subnets)
+                    device_subnet_list[port_router_id].union(raw_subnets)
             port_tenant = None
             if port.get('tenant_id', None):
                 port_tenant = prepId('tenant-{0}'.format(port.get('tenant_id',
@@ -955,7 +955,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 id=prepId('router-{0}'.format(router['id'])),
                 routerId=router['id'],
                 routes=list(router.get('routes', [])),
-                set_tenant=prepId('tenant-{0}'.format(router.get('tenant_id',''))),
+                set_tenant=prepId('tenant-{0}'.format(router.get('tenant_id', ''))),
                 status=router.get('status', 'UNKNOWN'),
                 title=router.get('name', router['id']),
             )
@@ -984,7 +984,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_router=prepId('router-{0}'.format(floatingip.get('router_id', ''))),
                     set_network=prepId('network-{0}'.format(floatingip.get('floating_network_id', ''))),
                     set_port=prepId('port-{0}'.format(floatingip.get('port_id', ''))),
-                    set_tenant=prepId('tenant-{0}'.format(floatingip.get('tenant_id',''))),
+                    set_tenant=prepId('tenant-{0}'.format(floatingip.get('tenant_id', ''))),
                     status=floatingip.get('status', 'UNKNOWN'),
                     )))
 
@@ -1036,7 +1036,7 @@ class OpenStackInfrastructure(PythonPlugin):
             # set instance only when volume['tenant_id'] is not empty
             if volume.get('os-vol-tenant-attr:tenant_id'):
                 volume_dict['set_tenant'] = prepId('tenant-{0}'.format(
-                    volume.get('os-vol-tenant-attr:tenant_id','')))
+                    volume.get('os-vol-tenant-attr:tenant_id', '')))
             if len(voltypeid) > 0:
                 volume_dict['set_volType'] = voltypeid[0]
             if volume.get('os-vol-tenant-attr:tenant_id'):
@@ -1063,11 +1063,11 @@ class OpenStackInfrastructure(PythonPlugin):
             )
             if snapshot.get('volume_id', None):
                 volsnap_dict['set_volume'] = \
-                    prepId('volume-{0}'.format(snapshot.get('volume_id','')))
+                    prepId('volume-{0}'.format(snapshot.get('volume_id', '')))
             if snapshot.get('os-extended-snapshot-attributes:project_id', None):
                 volsnap_dict['set_tenant'] = \
                     prepId('tenant-{0}'.format(snapshot.get(
-                        'os-extended-snapshot-attributes:project_id','')))
+                        'os-extended-snapshot-attributes:project_id', '')))
             volsnapshots.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.VolSnapshot',
                 data=volsnap_dict))
@@ -1123,9 +1123,8 @@ class OpenStackInfrastructure(PythonPlugin):
                 total_capacity = str(total_capacity) + ' GB',
 
             pools.append(ObjectMap(
-                modname = 'ZenPacks.zenoss.OpenStackInfrastructure.Pool',
-                data = dict(
-                    #poolId=pool.get('name'),
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.Pool',
+                data=dict(
                     id=prepId('pool-{0}'.format(pool.get('name'))),
                     title=pool.get('name', ''),
                     qos_support=pool.get('capabilities', {}).get('QoS_support', False),
