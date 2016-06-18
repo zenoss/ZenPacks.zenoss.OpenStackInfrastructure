@@ -10,6 +10,7 @@
 
 from . import schema
 
+import json
 import logging
 LOG = logging.getLogger('zen.OpenStackInfrastructureEndpoint')
 
@@ -25,6 +26,7 @@ from BTrees.OOBTree import OOBTree
 class Endpoint(schema.Endpoint):
 
     neutron_ini = {}
+    host_mappings = {}
 
     def hosts(self):
         return self.getDeviceComponents(type="OpenStackInfrastructureHost")
@@ -58,6 +60,17 @@ class Endpoint(schema.Endpoint):
         for host in self.getDeviceComponents(type="OpenStackInfrastructureHost"):
             host.ensure_service_monitoring()
         return True
+
+    def set_host_mappings(self, values):
+        if type(self.host_mappings) == dict:
+            self.host_mappings = OOBTree()
+        for k, v in values.iteritems():
+            if k not in self.host_mappings or self.host_mappings[k] != v:
+                LOG.debug("Updating host mapping: %s -> %s", k, v)
+                self.host_mappings[k] = v
+
+    def get_host_mappings(self):
+        return dict(self.host_mappings)
 
     def set_neutron_ini(self, values):
         if type(self.neutron_ini) == dict:
@@ -95,6 +108,20 @@ class Endpoint(schema.Endpoint):
             return
 
         return super(Endpoint, self).getStatus(statusclass="/Status", **kwargs)
+
+    def health(self):
+        """Dump out a health report for this endpoint"""
+
+        return "Host Mappings:\n\n" + \
+               "Settings:\n" + \
+               "    zOpenStackNovaApiHosts=%s\n" % self.zOpenStackNovaApiHosts + \
+               "    zOpenStackCinderApiHosts=%s\n" % self.zOpenStackCinderApiHosts + \
+               "    zOpenStackExtraHosts=%s\n" % self.zOpenStackExtraHosts + \
+               "    zOpenStackHostMapToId=%s\n" % self.zOpenStackHostMapToId + \
+               "    zOpenStackHostMapSame=%s\n" % self.zOpenStackHostMapSame + \
+               "\n" + \
+               "Mappings=" + \
+               json.dumps(self.get_host_mappings(), indent=4)
 
 
 # Clean up any AMQP queues we may have created for this device.
