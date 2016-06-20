@@ -58,6 +58,7 @@ class TestModel(BaseTestCase):
     disableLogging = False
 
     def tearDown(self):
+        super(TestModel, self).tearDown()
         DeviceProxyComponent.getHostByName = self._real_getHostByName
         Device.getHostByName = self._real_getHostByName
         hostmap.resolve_names = self._real_resolve_names
