@@ -19,6 +19,8 @@ import logging
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('zen.OpenStackInfrastructure')
 
+from twisted.internet import defer
+
 import Globals
 from zope.event import notify
 from Products.Zuul.catalog.events import IndexingEvent
@@ -32,14 +34,53 @@ from ZenPacks.zenoss.OpenStackInfrastructure.tests.utils import setup_crochet
 from ZenPacks.zenoss.OpenStackInfrastructure.modeler.plugins.zenoss.OpenStackInfrastructure \
     import OpenStackInfrastructure as OpenStackInfrastructureModeler
 
+from Products.ZenModel import Device
+from ZenPacks.zenoss.OpenStackInfrastructure import DeviceProxyComponent
+from ZenPacks.zenoss.OpenStackInfrastructure import hostmap
+
 unused(Globals)
 
 crochet = setup_crochet()
 
+MOCK_DNS = {
+    "liberty.yichi.local": "10.0.2.34",
+    "liberty.zenoss.local": "192.168.56.122",
+    "host-10-0-0-1.openstacklocal.": "10.0.0.1",
+    "host-10-0-0-2.openstacklocal.": "10.0.0.2",
+    "host-10-0-0-3.openstacklocal.": "10.0.0.3",
+    "host-172-24-4-226.openstacklocal.": "172.24.4.226",
+    "overcloud-controller-1.localdomain": "10.88.0.100"
+}
+
 
 class TestModel(BaseTestCase):
+
+    disableLogging = False
+
+    def tearDown(self):
+        DeviceProxyComponent.getHostByName = self._real_getHostByName
+        Device.getHostByName = self._real_getHostByName
+        hostmap.resolve_names = self._real_resolve_names
+
     def afterSetUp(self):
         super(TestModel, self).afterSetUp()
+
+        # Patch to remove DNS dependencies
+        def getHostByName(name):
+            return MOCK_DNS.get(name)
+
+        def resolve_names(names):
+            result = {}
+            for name in names:
+                result[name] = MOCK_DNS.get(name)
+            return defer.maybeDeferred(lambda: result)
+
+        self._real_resolve_names = hostmap.resolve_names
+        hostmap.resolve_names = resolve_names
+
+        self._real_getHostByName = DeviceProxyComponent.getHostByName
+        DeviceProxyComponent.getHostByName = getHostByName
+        Device.getHostByName = getHostByName
 
         dc = self.dmd.Devices.createOrganizer('/Devices/OpenStack/Infrastructure')
 

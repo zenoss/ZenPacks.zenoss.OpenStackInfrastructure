@@ -40,6 +40,8 @@ class TestHostMap(BaseTestCase):
     disableLogging = False
 
     def setUp(self):
+        super(TestHostMap, self).setUp()
+
         def resolve_names(names):
             return defer.maybeDeferred(lambda: {
                 'test1': '1.2.3.4',
@@ -51,6 +53,8 @@ class TestHostMap(BaseTestCase):
         hostmap.resolve_names = resolve_names
 
     def tearDown(self):
+        super(TestHostMap, self).tearDown()
+
         hostmap.resolve_names = self._real_resolve_names
 
     @crochet.wait_for(timeout=30)

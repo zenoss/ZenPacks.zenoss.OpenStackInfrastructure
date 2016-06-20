@@ -139,7 +139,12 @@ class HostMap(object):
         """
 
         log.debug("Resolving all referenced hostnames")
-        resolved = yield resolve_names(self.mapping.keys())
+
+        # (ignore the obviously bogus ones, just to save time)
+        hostnames = [x for x in self.mapping.keys()
+                     if (":" not in x and "@" not in x)]
+
+        resolved = yield resolve_names(hostnames)
         resolved_by_ip = defaultdict(set)
         for name, ip in resolved.iteritems():
             if ip is not None:
