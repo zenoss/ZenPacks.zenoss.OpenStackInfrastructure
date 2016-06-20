@@ -835,9 +835,10 @@ class OpenStackInfrastructure(PythonPlugin):
             # format l3_agent_routers
             l3_agent_routers = ['router-{0}'.format(x)
                                 for x in agent['l3_agent_routers']]
-
+            hostname = self.hostmap.get_hostname_for_hostid(agent['host'])
             title = '{0}@{1}'.format(agent.get('agent_type', ''),
-                                     agent['host'])
+                                     hostname)
+
             agents.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.NeutronAgent',
                 data=dict(

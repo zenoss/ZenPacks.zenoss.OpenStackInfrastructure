@@ -114,7 +114,7 @@ class TestModel(BaseTestCase):
         return modeler.preprocess_hosts(self.d, results)
 
     def _loadZenossData(self):
-        if hasattr(self, '_loaded'):
+        if hasattr(self, '_modeled'):
             return
 
         modeler = OpenStackInfrastructureModeler()
@@ -352,7 +352,7 @@ class TestModel(BaseTestCase):
         self.assertEquals(agents[3].type, 'DHCP agent')
         self.assertEquals(agents[4].id, "agent-37c80256-d843-45c3-a9b6-fb0fde13ac89")
         self.assertEquals(agents[4].title,
-                          'Loadbalancer agent@overcloud-controller-1.localdomain:4947de00-0c13-5ee7-902e-fc270d3993b9')
+                          'Loadbalancer agent@overcloud-controller-1.localdomain')
         self.assertEquals(agents[4].agentId, "37c80256-d843-45c3-a9b6-fb0fde13ac89")
         self.assertEquals(agents[4].binary, 'f5-oslbaasv1-agent')
         self.assertTrue(agents[4].enabled)
@@ -482,7 +482,7 @@ class TestModel(BaseTestCase):
         self.assertEquals(cservices[1].binary, "cinder-scheduler")
         self.assertTrue(cservices[1].enabled)
         self.assertEquals(cservices[1].operStatus, 'UP')
-        self.assertEquals(cservices[2].title, "cinder-volume@liberty.zenoss.local@lvm (nova)")
+        self.assertEquals(cservices[2].title, "cinder-volume@liberty.zenoss.local (nova)")
         self.assertEquals(cservices[2].binary, "cinder-volume")
         self.assertTrue(cservices[2].enabled)
         self.assertEquals(cservices[2].operStatus, 'UP')
