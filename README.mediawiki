@@ -101,7 +101,7 @@ osi_vnics.png|vNIC
 * /OpenStack/Infrastructure/
 ** Endpoint
 ** Instance
-** Vnic
+** vNIC
 
 ;Event Classes and Mappings
 * /OpenStack
@@ -187,6 +187,14 @@ osi_vnics.png|vNIC
 
 == Basic Usage ==
 
+{{note|'''Full Modeling'''}}
+
+The OpenStackInfrastructrue ZenPack models vNICs associated with OpenStack
+Instances. In order to correctly model these vNICs, you must first fully model
+the OpenStack environment and then configure and model the
+/Server/SSH/Linux/NovaHost devices. See the section below for details on
+configuration specifics.
+
 ===Device Setup via UI===
 
 {{warning|Host Setup:}}
@@ -247,10 +255,14 @@ You can setup the device using *zenbatchload* as follows:
 where ''<filename>'' should have the form:
 
 <syntaxhighlight lang="text">
-/Devices/OpenStack/Infrastructure loader='openstackinfrastructure', loader_arg_keys=['deviceName', 'username', 'api_key', 'project_id', 'auth_url', 'ceilometer_url', 'region_name', 'collector']
-   <devicename> username='<username>', api_key='<password>', project_id='<tenant ID>', auth_url='http://<ip address>:5000/v2.0/', region_name='RegionOne'</syntaxhighlight>
+/Devices/OpenStack/Infrastructure loader='openstackinfrastructure', \
+    loader_arg_keys=['deviceName', 'username', 'api_key', 'project_id', 'auth_url', 'ceilometer_url', 'region_name', 'collector']
+<devicename> username='<username>', api_key='<password>', project_id='<tenant ID>', \
+    auth_url='http://<ip address>:5000/v2.0/', region_name='RegionOne'</syntaxhighlight>
 
-* As before zCommandUsername/zCommandPassword properties must be set manually for /Devices/Server/SSH/Linux/NovaHost device class.
+/Devices/Server/SSH/Linux/NovaHost zCommandUsername='username', zCommandPassword='password'
+
+* As mentioned before, zCommandUsername/zCommandPassword properties must be set for /Devices/Server/SSH/Linux/NovaHost devices (and vNICs) to be correctly modeled.
 
 ===Organizational Elements===
 ;The following organizational elements are discovered:
@@ -578,7 +590,7 @@ Provides linkage between OpenStackInfrastrcuture components and relevant integra
 == Changes ==
 
 ;2.2.0
-* Fix ZEN-17017: Add Port-Vnic links in UI
+* Fix ZEN-17017: Add Port-vNIC links in UI
 
 ;2.1.3
 * Fixed ZEN-22126: Malformed hostnames in the F5 LBAAS plugin
