@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 ###########################################################################
 #
 # This program is part of Zenoss Core, an open source monitoring platform.
@@ -14,19 +16,25 @@
 import os
 import json
 import logging
+logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('zen.OpenStackInfrastructure')
 
+import Globals
 from zope.event import notify
 from Products.Zuul.catalog.events import IndexingEvent
 from Products.Five import zcml
 
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
 from Products.ZenTestCase.BaseTestCase import BaseTestCase
+from Products.ZenUtils.Utils import unused
 
+from ZenPacks.zenoss.OpenStackInfrastructure.tests.utils import setup_crochet
 from ZenPacks.zenoss.OpenStackInfrastructure.modeler.plugins.zenoss.OpenStackInfrastructure \
     import OpenStackInfrastructure as OpenStackInfrastructureModeler
 
-CLOUDSTACK_ICON = '/++resource++cloudstack/img/cloudstack.png'
+unused(Globals)
+
+crochet = setup_crochet()
 
 
 class TestModel(BaseTestCase):
@@ -40,7 +48,8 @@ class TestModel(BaseTestCase):
         dc.setZenProperty('zOpenStackRegionName', 'RegionOne')
         dc.setZenProperty('zOpenStackNovaApiHosts', [])
         dc.setZenProperty('zOpenStackExtraHosts', [])
-        # dc.setZenProperty('zPythonClass', 'ZenPacks.zenoss.OpenStackInfrastructureModeler.Cloud')
+        dc.setZenProperty('zOpenStackHostMapToId', [])
+        dc.setZenProperty('zOpenStackHostMapSame', [])
 
         self.d = dc.createInstance('zenoss.OpenStackInfrastructure.testDevice')
         self.d.setPerformanceMonitor('localhost')
@@ -59,6 +68,10 @@ class TestModel(BaseTestCase):
 
         self._loadZenossData()
 
+    @crochet.wait_for(timeout=30)
+    def _preprocessHosts(self, modeler, results):
+        return modeler.preprocess_hosts(self.d, results)
+
     def _loadZenossData(self):
         if hasattr(self, '_loaded'):
             return
@@ -68,6 +81,8 @@ class TestModel(BaseTestCase):
                                'data',
                                'modeldata.json')) as json_file:
             results = json.load(json_file)
+
+        self._preprocessHosts(modeler, results)
 
         for data_map in modeler.process(self.d, results, log):
             self.applyDataMap(self.d, data_map)
@@ -525,3 +540,9 @@ def test_suite():
     suite = TestSuite()
     suite.addTest(makeSuite(TestModel))
     return suite
+
+
+if __name__ == "__main__":
+    from zope.testrunner.runner import Runner
+    runner = Runner(found_suites=[test_suite()])
+    runner.run()

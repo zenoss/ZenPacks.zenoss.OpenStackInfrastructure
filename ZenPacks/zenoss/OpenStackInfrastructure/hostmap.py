@@ -11,6 +11,7 @@ import logging
 log = logging.getLogger('zen.OpenStack.hostmap')
 
 from collections import defaultdict
+import itertools
 import re
 from twisted.internet import defer
 
@@ -102,7 +103,7 @@ class HostMap(object):
     def assert_host_id(self, hostref, hostid):
         self.asserted_host_id[hostref] = hostid
 
-    def assert_same_host(self, hostref1, hostref2, source="Unknown"):
+    def assert_same_host(self, hostref1, hostref2, source="Unknown", oneway=False):
         """
         Firmly assert that two hostrefs  (names, IPs, etc) refer to the
         same host.
@@ -112,15 +113,17 @@ class HostMap(object):
             return
 
         if hostref1 not in self.mapping:
-            log.error("asserte_same_host: %s is not a valid host reference -- ignoring", hostref1)
+            log.error("assert_same_host(source=%s): %s is not a valid host reference -- ignoring", source, hostref1)
             return
 
         if hostref2 not in self.mapping:
-            log.error("asserte_same_host: %s is not a valid host reference -- ignoring", hostref2)
+            log.error("assert_same_host(source=%s): %s is not a valid host reference -- ignoring", source, hostref2)
             return
 
         self.asserted_same[hostref1][hostref2] = source
-        self.asserted_same[hostref2][hostref1] = source
+
+        if not oneway:
+            self.asserted_same[hostref2][hostref1] = source
 
     @defer.inlineCallbacks
     def perform_mapping(self):
@@ -137,11 +140,26 @@ class HostMap(object):
 
         log.debug("Resolving all referenced hostnames")
         resolved = yield resolve_names(self.mapping.keys())
+        resolved_by_ip = defaultdict(set)
         for name, ip in resolved.iteritems():
             if ip is not None:
+                resolved_by_ip[ip].add(name)
+
+            # If the name and IP are known references, but might not
+            # be known to be identical, add that assertion.
+            if name in self.mapping and ip in self.mapping:
                 self.assert_same_host(name, ip, source="DNS Resolution")
 
+        for ip, hostnames in resolved_by_ip.iteritems():
+            # all possible combinations of hostnames that share an IP
+            # are interchangeable.  Add those assertions where
+            # we have seen both versions of the name.
+            for hostref1, hostref2 in itertools.combinations(hostnames, 2):
+                if hostref1 in self.mapping and hostref2 in self.mapping:
+                    self.assert_same_host(hostref1, hostref2, source="Resolve to same IP")
+
         new_mapping = {}
+        original_name = {}
         for hostref in self.mapping:
             # Strip anything after an '@' or ':" and convert to lowercase.
             clean_hostref = re.sub(r'[@:].*$', '', hostref).lower()
@@ -149,10 +167,19 @@ class HostMap(object):
             # Remove any whitespace.
             clean_hostref = re.sub(r'\s', '', clean_hostref)
 
+            # Remember what the original one was.
+            original_name[clean_hostref] = hostref
+
             naive_hostid = prepId("host-{0}".format(clean_hostref))
 
             log.debug("Potential host mapping: %s -> %s", hostref, naive_hostid)
             new_mapping[hostref] = naive_hostid
+
+        # when we've seen both the cleaned name and the original name in
+        # different places, it's important to remember that they're the same.
+        for clean, orig in original_name.iteritems():
+            if clean in new_mapping and orig in new_mapping:
+                self.assert_same_host(orig, clean, source="Cleaned name vs original name", oneway=True)
 
         for hostref in new_mapping:
             if hostref in self.asserted_host_id:
@@ -165,18 +192,22 @@ class HostMap(object):
                 same_as_keys = set([new_mapping[x] for x in self.asserted_same[hostref]])
 
                 if len(same_as_keys) > 1:
-                    log.error("The host referred to as '%s' is asserted to be identical to multiple hosts with conflicting IDs", hostref)
+                    log.warning("The host referred to as '%s' is asserted to be identical to multiple hosts with conflicting IDs", hostref)
                     for same_as in sorted(self.asserted_same[hostref]):
                         log.error(" %s = %s = %s", hostref, same_as, new_mapping[same_as])
                     same_as = sorted(self.asserted_same[hostref].keys())[0]
                     if new_mapping[hostref] != new_mapping[same_as]:
-                        log.error(" Selected %s (%s)", same_as, new_mapping[same_as])
+                        log.warning(" Selected %s (%s)", same_as, new_mapping[same_as])
                         new_mapping[hostref] = new_mapping[same_as]
                 elif len(same_as_keys) == 1:
                     same_as = self.asserted_same[hostref].keys()[0]
                     if new_mapping[hostref] != new_mapping[same_as]:
-                        log.debug("Since host %s is asserted to be identical to host %s, using ID %s for both", hostref, same_as, new_mapping[same_as])
-                        new_mapping[hostref] = new_mapping[same_as]
+                        # choose the longest of the keys and use that for both.
+                        new_key = max([new_mapping[hostref], new_mapping[same_as]], key=len)
+
+                        log.debug("Since host %s is asserted to be identical to host %s, using ID %s for both", hostref, same_as, new_key)
+                        new_mapping[hostref] = new_key
+                        new_mapping[same_as] = new_key
             elif hostref in self.frozen_mapping and new_mapping[hostref] != self.frozen_mapping[hostref]:
                 # if this hostref was previously mapped to a specific ID,
                 # maintain that mapping.

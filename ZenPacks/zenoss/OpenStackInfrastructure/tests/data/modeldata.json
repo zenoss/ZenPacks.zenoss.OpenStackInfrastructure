@@ -786,6 +786,12 @@
                     }
                  ],
   "nova_url": "http://192.168.56.122:8774/v2/e6bae7721b8745ce8b14f3908de17b8c",
+  "nova_url_host": "192.168.56.122",
+  "cinder_url": "http://192.168.56.122:8776/v1/e6bae7721b8745ce8b14f3908de17b8c",
+  "cinder_url_host": "192.168.56.122",
+  "zOpenStackNovaApiHosts": [],
+  "zOpenStackCinderApiHosts": [],
+  "zOpenStackExtraHosts": [],
   "quotas":
             {
               "28a2787a215a4187b22f800f51e58665":

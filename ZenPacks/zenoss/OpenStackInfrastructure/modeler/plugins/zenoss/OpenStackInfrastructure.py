@@ -304,7 +304,12 @@ class OpenStackInfrastructure(PythonPlugin):
                 log.error("Invalid value in zOpenStackHostMapSame: %s", mapping)
 
         # load in previous mappings..
-        hostmap.thaw_mappings(device.get_host_mappings)
+        if callable(device.get_host_mappings):
+            # needed when we are passed a real device, rather than a
+            # deviceproxy, during testing
+            hostmap.thaw_mappings(device.get_host_mappings())
+        else:
+            hostmap.thaw_mappings(device.get_host_mappings)
 
         for service in results['services']:
             if 'host' in service:
