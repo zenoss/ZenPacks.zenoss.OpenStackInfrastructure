@@ -176,7 +176,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
             device = self.proxy_deviceclass().createInstance(device_name)
             device.setProdState(self.productionState)
             device.setPerformanceMonitor(self.getPerformanceServer().id)
-            device.setManageIp(self.name())
+            device.setManageIp()
 
         device.index_object()
         notify(IndexingEvent(device))
