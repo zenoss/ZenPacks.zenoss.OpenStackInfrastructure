@@ -263,36 +263,11 @@ class HostMap(object):
         if not hostid.startswith("host-"):
             raise Exception("get_hostname_for_hostid must be supplied with a valid hostid")
 
-        # find list of references that referred to this host ID
-        hostrefs = []
-        for hostref in self.mapping:
-            this_hostid = self.mapping[hostref]
-
-            if hostid == this_hostid:
-                hostrefs.append(hostref)
-
-        if len(hostrefs) == 0:
-            # this shouldn't even be possible.
-            log.warning("No hostname was found for hostid %s" % hostid)
-            return hostid
-
-        # find the "best" reference to use as a title for this host.
-        # note that this does not have to be deterministic.  We want a given
-        # reference to "always" (best-effort) give the same ID.  The
-        # canonical title for that host ID might not always be the same.. If
-        # we find a "better" one than we did last time, for some reason, that
-        # might be used.   For example, if a host was identified by IP,
-        # but then later added to DNS, we ideally want the host ID to continue
-        # to be based on the IP, but the title can now show a hostname.
-
-        # for the moment, we define "best" as longest one that a substring
-        # of the hostid, if possible, and otherwise, just the longest one.
-        substr_hostrefs = [x for x in hostrefs if x in hostid]
-
-        if substr_hostrefs:
-            return max(substr_hostrefs, key=len)
-        else:
-            return max(hostrefs, key=len)
+        # despite what I said above, at the moment, the algorithm for selecting
+        # a hostid is probably the best bet for selecting a hostname, as well.
+        # So just strip off the host- prefix and go with that.  This may
+        # not always be the way this works in the future, though!
+        return hostid[5:]
 
     def freeze_mappings(self):
         """
