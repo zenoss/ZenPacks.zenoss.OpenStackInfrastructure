@@ -763,7 +763,9 @@ class OpenStackInfrastructure(PythonPlugin):
             cinder_api_hosts.add(cinder_url_host)
 
         if not nova_api_hosts:
-            log.warning("No nova-api hosts have been identified.   You must set zOpenStackNovaApiHosts to the list of hosts upon which nova-api runs.")
+            log.info("No nova-api hosts have been identified. You must set "
+                     "zOpenStackNovaApiHosts to the list of hosts upon which "
+                     "nova-api runs.")
 
         for host_id in sorted(nova_api_hosts):
             hostname = self.hostmap.get_hostname_for_hostid(host_id)
@@ -782,7 +784,9 @@ class OpenStackInfrastructure(PythonPlugin):
                 )))
 
         if not cinder_api_hosts:
-            log.warning("No cinder-api hosts have been identified.   You must set zOpenStackCinderApiHosts to the list of hosts upon which cinder-api runs.")
+            log.info("No cinder-api hosts have been identified. You must set "
+                     "zOpenStackCinderApiHosts to the list of hosts upon which"
+                     "cinder-api runs.")
 
         # hosts
         for host_id in cinder_api_hosts:
