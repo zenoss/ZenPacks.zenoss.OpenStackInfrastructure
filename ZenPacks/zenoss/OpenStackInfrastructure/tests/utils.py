@@ -57,6 +57,18 @@ def require_zenpack(zenpack_name, default=None):
     return wrap
 
 
+def setup_crochet():
+    """Setup and return crochet for testing Twisted code."""
+    try:
+        import crochet
+    except ImportError as e:
+        print "\n\nERROR: Unable to import crochet: {}".format(e)
+        print "  You must install it: pip install --no-deps crochet\n"
+        raise
+
+    crochet.setup()
+    return crochet
+
 # When a manually-created python object is first added to its container, we
 # need to reload it, as its in-memory representation is changed.
 def addContained(object, relname, target):
