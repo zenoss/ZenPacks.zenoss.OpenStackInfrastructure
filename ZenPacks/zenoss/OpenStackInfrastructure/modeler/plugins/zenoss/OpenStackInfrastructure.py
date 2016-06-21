@@ -1002,19 +1002,25 @@ class OpenStackInfrastructure(PythonPlugin):
             if not floatingip.get('id', None):
                 continue
 
-            floatingips.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStackInfrastructure.FloatingIp',
-                data=dict(
+            floatingip_dict = dict(
                     floatingipId=floatingip['id'],
                     fixed_ip_address=floatingip.get('fixed_ip_address', ''),
                     floating_ip_address=floatingip.get('floating_ip_address', ''),
                     id=prepId('floatingip-{0}'.format(floatingip['id'])),
-                    set_router=prepId('router-{0}'.format(floatingip.get('router_id', ''))),
                     set_network=prepId('network-{0}'.format(floatingip.get('floating_network_id', ''))),
-                    set_port=prepId('port-{0}'.format(floatingip.get('port_id', ''))),
                     set_tenant=prepId('tenant-{0}'.format(floatingip.get('tenant_id', ''))),
                     status=floatingip.get('status', 'UNKNOWN'),
-                    )))
+                    )
+
+            if floatingip.get('router_id'):
+                floatingip_dict['set_router'] = prepId('router-{0}'.format(floatingip.get('router_id', '')))
+
+            if floatingip.get('port_id'):
+                floatingip_dict['set_port'] = prepId('port-{0}'.format(floatingip.get('port_id', '')))
+
+            floatingips.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.FloatingIp',
+                data=floatingip_dict))
 
         # volume Types
         voltypes = []
