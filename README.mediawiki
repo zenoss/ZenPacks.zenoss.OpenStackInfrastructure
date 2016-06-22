@@ -575,6 +575,22 @@ Provides linkage between OpenStackInfrastrcuture components and relevant integra
 * APIC Integration via Cisco APIC ZenPack
 * NSX Integration via NSX ZenPack
 
+
+== Daemons ==
+
+
+{| class="wikitable"
+!width="50%"|Collector Type
+!width="50%"|Daemon
+|-
+|Modeler
+|<span class="keyword cmdname">zenmodeler</span>
+|-
+|Performance Collectors
+|<span class="keyword cmdname">zencommand, zenpython</span>
+|-
+|}
+
 == Known Issues ==
 
 # [https://jira.zenoss.com/browse/ZEN-14585 ZEN-14585]: The same endpoint can not be monitored both as user and an infrastructure endpoints.
