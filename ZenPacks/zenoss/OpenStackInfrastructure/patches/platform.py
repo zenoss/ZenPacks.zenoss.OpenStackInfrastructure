@@ -32,7 +32,7 @@ except ImportError:
 from ZenPacks.zenoss.OpenStackInfrastructure.Endpoint import Endpoint
 
 
-@monkeypatch(LinuxDevice)
+@monkeypatch('Products.ZenModel.Device.Device')
 def openstackInstance(self):
     # Search first by serial number, if known.
     serialNumber = self.os.getHWSerialNumber()
@@ -70,7 +70,7 @@ def openstackInstance(self):
     return None
 
 
-@monkeypatch(LinuxDevice)
+@monkeypatch('Products.ZenModel.Device.Device')
 def openstack_hostComponent(self):
     # If this is an openstack compute node, returns a the OpenstackHost component for it.
     host = DeviceProxyComponent.component_for_proxy_device(self)
@@ -79,7 +79,7 @@ def openstack_hostComponent(self):
     return None
 
 
-@monkeypatch(LinuxDevice)
+@monkeypatch('Products.ZenModel.Device.Device')
 def openstack_instanceList(self):
     # If this is an openstack compute node, returns a list of
     # (instance_ID, instance_UUID) tuples for instances running on this host.
@@ -112,12 +112,12 @@ def getDynamicViewGroup(self):
         return original(self)  # NOQA: original injected by monkeypatch
 
 
-@monkeypatch(LinuxDevice)
+@monkeypatch('Products.ZenModel.Device.Device')
 def getApplyDataMapToOpenStackInfrastructureEndpoint(self):
     return []
 
 
-@monkeypatch(LinuxDevice)
+@monkeypatch('Products.ZenModel.Device.Device')
 def setApplyDataMapToOpenStackInfrastructureEndpoint(self, datamap):
     mapper = ApplyDataMap()
 
@@ -128,12 +128,12 @@ def setApplyDataMapToOpenStackInfrastructureEndpoint(self, datamap):
         mapper._applyDataMap(component.device(), datamap)
 
 
-@monkeypatch(LinuxDevice)
+@monkeypatch('Products.ZenModel.Device.Device')
 def getApplyDataMapToOpenStackInfrastructureHost(self):
     return []
 
 
-@monkeypatch(LinuxDevice)
+@monkeypatch('Products.ZenModel.Device.Device')
 def setApplyDataMapToOpenStackInfrastructureHost(self, datamap):
     mapper = ApplyDataMap()
 
