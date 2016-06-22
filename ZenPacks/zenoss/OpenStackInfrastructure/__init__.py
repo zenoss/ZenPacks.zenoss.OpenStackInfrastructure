@@ -46,8 +46,18 @@ class ZenPack(schema.ZenPack):
     def install(self, app):
         self._migrate_productversions()
         self._update_plugins('/Server/SSH/Linux/NovaHost')
+        self._update_properties()
         super(ZenPack, self).install(app)
         self.chmodScripts()
+
+    def _update_properties(self):
+        # ZEN-23536: Update zOpenStackNeutronConfigDir property type
+        # for existing /Server/SSH/Linux/NovaHost device class.
+        try:
+            self.dmd.Devices.Server.SSH.Linux.NovaHost._updateProperty(
+                'zOpenStackNeutronConfigDir', '/etc/neutron')
+        except AttributeError:
+            pass
 
     def _update_plugins(self, organizer):
         log.debug('Update plugins list for NovaHost organizer')
