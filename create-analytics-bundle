@@ -111,6 +111,9 @@ class AnalyticsBundleCreator(ZenScriptBase):
         public_path = os.path.join('.', 'analytics', 'resources', 'public')
         zenpack_path = os.path.join(public_path, self.folder_name)
 
+        if not os.path.exists(zenpack_path):
+            os.mkdir(zenpack_path)
+
         resources = {
             x.replace('.xml', '')
             for x in os.listdir(zenpack_path)

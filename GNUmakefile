@@ -14,7 +14,9 @@
 PYTHON=python
 SRC_DIR=$(PWD)/src
 TXSSHCLIENT_DIR=$(SRC_DIR)/txsshclient-0.2.0
-ZP_DIR=$(PWD)/ZenPacks/zenoss/OpenStackInfrastructure
+ZP_NAME=OpenStackInfrastructure
+ZP_DIR=$(PWD)/ZenPacks/zenoss/$(ZP_NAME)
+DIR=$(SRC_DIR)/txsshclient-0.2.0
 BIN_DIR=$(ZP_DIR)/bin
 LIB_DIR=$(ZP_DIR)/lib
 
@@ -39,13 +41,13 @@ clean:
 	cd $(LIB_DIR) ; rm -Rf *.egg site.py easy-install.pth ; cd $(SRC_DIR)
 	find . -name '*.pyc' | xargs rm -f
 
+# Make sure you have set an environment var for OSI $device.
 analytics:
-	rm -f ZenPacks/zenoss/OpenStackInfrastructure/analytics/analytics-bundle.zip
-	mkdir -p analytics/resources/public/OpenStackInfrastructure_ZenPack
+	rm -f ZenPacks/zenoss/$(ZP_NAME)/analytics/analytics-bundle.zip
 	./create-analytics-bundle \
-		--folder="OpenStackInfrastructure ZenPack" \
-		--domain="OpenStackInfrastructure Domain" \
-		--device=ostack
-	cd analytics; zip -r ../ZenPacks/zenoss/OpenStackInfrastructure/analytics/analytics-bundle.zip *
+		--folder="$(ZP_NAME) ZenPack" \
+		--domain="$(ZP_NAME) Domain" \
+		--device="$(device)"
+	cd analytics; zip -r ../ZenPacks/zenoss/$(ZP_NAME)/analytics/analytics-bundle.zip *
 
 

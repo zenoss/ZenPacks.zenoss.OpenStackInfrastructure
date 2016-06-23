@@ -3,6 +3,6 @@
   <parent>/public</parent>
   <name>OpenStackInfrastructure_ZenPack</name>
   <label>OpenStackInfrastructure ZenPack</label>
-  <resource>OpenStackInfrastructure_Domain</resource>
   <resource>OpenStack_Instance_List</resource>
+  <resource>OpenStackInfrastructure_Domain</resource>
 </folder>
