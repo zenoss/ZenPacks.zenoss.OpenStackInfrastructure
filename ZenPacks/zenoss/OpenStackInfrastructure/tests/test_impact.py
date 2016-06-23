@@ -442,6 +442,7 @@ class TestImpact(zenpacklib.TestCase):
                 self.assertTrue(instance.id in impacted_by,
                                 msg="Tenant %s impacted by instance %s" % (tenant.id, instance.id))
 
+    @unittest.skip("guest device test not ready")
     @require_zenpack('ZenPacks.zenoss.Impact')
     # Have not yet implemented openstackInstance()
     def test_GuestDevice(self):
@@ -455,6 +456,7 @@ class TestImpact(zenpacklib.TestCase):
             self.assertTrue(instance.id in impacted_by,
                             msg="Guest %s is impacted by instance %s" % (guest.id, instance.id))
 
+    @unittest.skip("host device test not ready")
     @require_zenpack('ZenPacks.zenoss.Impact')
     def test_HostDevice(self):
         hostdevices = self.linuxhosts()
