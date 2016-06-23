@@ -690,13 +690,117 @@
         </itemGroup>
       </itemGroups>
       <items>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_parent_cluster" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_endpoint_openstack_infrastructure_endpoint_parent_cluster" label="Parent Cluster"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_ldomhostdevices" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_endpoint_openstack_infrastructure_endpoint_ldomhostdevices" label="LDOM Host Devices"/>
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_neutron_core_plugin" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_endpoint_openstack_infrastructure_endpoint_neutron_core_plugin" label="Neutron Core Plugin"/>
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_neutron_mechanism_drivers" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_endpoint_openstack_infrastructure_endpoint_neutron_mechanism_drivers" label="Neutron ML2 Mechanism Drivers"/>
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_neutron_type_drivers" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_endpoint_openstack_infrastructure_endpoint_neutron_type_drivers" label="Neutron ML2 Type Drivers"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_z_command_username" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_endpoint_openstack_infrastructure_endpoint_z_command_username" label="Username"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_z_ip_service_map_max_port" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_endpoint_openstack_infrastructure_endpoint_z_ip_service_map_max_port" label="IP Service Map Max Port"/>
+      </items>
+    </itemGroup>
+    <itemGroup resourceId="JoinTree_1" label="Vnics" id="set_openstack_infrastructure_vnic" description="">
+      <itemGroups>
+        <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_vnic_measures" description="">
+          <itemGroups/>
+          <items>
+            <item resourceId="JoinTree_1.daily_if_received__bytessec.fct_ts" dimensionOrMeasure="Dimension" id="daily_if_received__bytessec_fct_ts" label="if_received__bytessec / daily / TS"/>
+            <item resourceId="JoinTree_1.daily_if_received__bytessec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="daily_if_received__bytessec_fct_ts_gmt" label="if_received__bytessec / daily / TS GMT"/>
+            <item resourceId="JoinTree_1.daily_if_received__bytessec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_received__bytessec_fct_avg" label="if_received__bytessec / daily / Average"/>
+            <item resourceId="JoinTree_1.daily_if_received__bytessec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_received__bytessec_fct_max" label="if_received__bytessec / daily / Highest"/>
+            <item resourceId="JoinTree_1.daily_if_received__bytessec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_received__bytessec_fct_min" label="if_received__bytessec / daily / Lowest"/>
+            <item resourceId="JoinTree_1.hourly_if_received__bytessec.fct_ts" dimensionOrMeasure="Dimension" id="hourly_if_received__bytessec_fct_ts" label="if_received__bytessec / hourly / TS"/>
+            <item resourceId="JoinTree_1.hourly_if_received__bytessec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="hourly_if_received__bytessec_fct_ts_gmt" label="if_received__bytessec / hourly / TS GMT"/>
+            <item resourceId="JoinTree_1.hourly_if_received__bytessec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_received__bytessec_fct_avg" label="if_received__bytessec / hourly / Average"/>
+            <item resourceId="JoinTree_1.hourly_if_received__bytessec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_received__bytessec_fct_max" label="if_received__bytessec / hourly / Highest"/>
+            <item resourceId="JoinTree_1.hourly_if_received__bytessec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_received__bytessec_fct_min" label="if_received__bytessec / hourly / Lowest"/>
+            <item resourceId="JoinTree_1.daily_if_received_packets__persec.fct_ts" dimensionOrMeasure="Dimension" id="daily_if_received_packets__persec_fct_ts" label="if_received_packets__persec / daily / TS"/>
+            <item resourceId="JoinTree_1.daily_if_received_packets__persec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="daily_if_received_packets__persec_fct_ts_gmt" label="if_received_packets__persec / daily / TS GMT"/>
+            <item resourceId="JoinTree_1.daily_if_received_packets__persec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_received_packets__persec_fct_avg" label="if_received_packets__persec / daily / Average"/>
+            <item resourceId="JoinTree_1.daily_if_received_packets__persec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_received_packets__persec_fct_max" label="if_received_packets__persec / daily / Highest"/>
+            <item resourceId="JoinTree_1.daily_if_received_packets__persec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_received_packets__persec_fct_min" label="if_received_packets__persec / daily / Lowest"/>
+            <item resourceId="JoinTree_1.hourly_if_received_packets__persec.fct_ts" dimensionOrMeasure="Dimension" id="hourly_if_received_packets__persec_fct_ts" label="if_received_packets__persec / hourly / TS"/>
+            <item resourceId="JoinTree_1.hourly_if_received_packets__persec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="hourly_if_received_packets__persec_fct_ts_gmt" label="if_received_packets__persec / hourly / TS GMT"/>
+            <item resourceId="JoinTree_1.hourly_if_received_packets__persec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_received_packets__persec_fct_avg" label="if_received_packets__persec / hourly / Average"/>
+            <item resourceId="JoinTree_1.hourly_if_received_packets__persec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_received_packets__persec_fct_max" label="if_received_packets__persec / hourly / Highest"/>
+            <item resourceId="JoinTree_1.hourly_if_received_packets__persec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_received_packets__persec_fct_min" label="if_received_packets__persec / hourly / Lowest"/>
+            <item resourceId="JoinTree_1.daily_if_sent__bytessec.fct_ts" dimensionOrMeasure="Dimension" id="daily_if_sent__bytessec_fct_ts" label="if_sent__bytessec / daily / TS"/>
+            <item resourceId="JoinTree_1.daily_if_sent__bytessec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="daily_if_sent__bytessec_fct_ts_gmt" label="if_sent__bytessec / daily / TS GMT"/>
+            <item resourceId="JoinTree_1.daily_if_sent__bytessec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_sent__bytessec_fct_avg" label="if_sent__bytessec / daily / Average"/>
+            <item resourceId="JoinTree_1.daily_if_sent__bytessec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_sent__bytessec_fct_max" label="if_sent__bytessec / daily / Highest"/>
+            <item resourceId="JoinTree_1.daily_if_sent__bytessec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_sent__bytessec_fct_min" label="if_sent__bytessec / daily / Lowest"/>
+            <item resourceId="JoinTree_1.hourly_if_sent__bytessec.fct_ts" dimensionOrMeasure="Dimension" id="hourly_if_sent__bytessec_fct_ts" label="if_sent__bytessec / hourly / TS"/>
+            <item resourceId="JoinTree_1.hourly_if_sent__bytessec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="hourly_if_sent__bytessec_fct_ts_gmt" label="if_sent__bytessec / hourly / TS GMT"/>
+            <item resourceId="JoinTree_1.hourly_if_sent__bytessec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_sent__bytessec_fct_avg" label="if_sent__bytessec / hourly / Average"/>
+            <item resourceId="JoinTree_1.hourly_if_sent__bytessec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_sent__bytessec_fct_max" label="if_sent__bytessec / hourly / Highest"/>
+            <item resourceId="JoinTree_1.hourly_if_sent__bytessec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_sent__bytessec_fct_min" label="if_sent__bytessec / hourly / Lowest"/>
+            <item resourceId="JoinTree_1.daily_if_sent_packets__persec.fct_ts" dimensionOrMeasure="Dimension" id="daily_if_sent_packets__persec_fct_ts" label="if_sent_packets__persec / daily / TS"/>
+            <item resourceId="JoinTree_1.daily_if_sent_packets__persec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="daily_if_sent_packets__persec_fct_ts_gmt" label="if_sent_packets__persec / daily / TS GMT"/>
+            <item resourceId="JoinTree_1.daily_if_sent_packets__persec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_sent_packets__persec_fct_avg" label="if_sent_packets__persec / daily / Average"/>
+            <item resourceId="JoinTree_1.daily_if_sent_packets__persec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_sent_packets__persec_fct_max" label="if_sent_packets__persec / daily / Highest"/>
+            <item resourceId="JoinTree_1.daily_if_sent_packets__persec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="daily_if_sent_packets__persec_fct_min" label="if_sent_packets__persec / daily / Lowest"/>
+            <item resourceId="JoinTree_1.hourly_if_sent_packets__persec.fct_ts" dimensionOrMeasure="Dimension" id="hourly_if_sent_packets__persec_fct_ts" label="if_sent_packets__persec / hourly / TS"/>
+            <item resourceId="JoinTree_1.hourly_if_sent_packets__persec.fct_ts_gmt" dimensionOrMeasure="Dimension" id="hourly_if_sent_packets__persec_fct_ts_gmt" label="if_sent_packets__persec / hourly / TS GMT"/>
+            <item resourceId="JoinTree_1.hourly_if_sent_packets__persec.fct_avg" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_sent_packets__persec_fct_avg" label="if_sent_packets__persec / hourly / Average"/>
+            <item resourceId="JoinTree_1.hourly_if_sent_packets__persec.fct_max" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_sent_packets__persec_fct_max" label="if_sent_packets__persec / hourly / Highest"/>
+            <item resourceId="JoinTree_1.hourly_if_sent_packets__persec.fct_min" dimensionOrMeasure="Measure" defaultAgg="Average" id="hourly_if_sent_packets__persec_fct_min" label="if_sent_packets__persec / hourly / Lowest"/>
+          </items>
+        </itemGroup>
+      </itemGroups>
+      <items>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_vnic_openstack_infrastructure_vnic_name" label="Vnic Name"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_vnic_openstack_infrastructure_vnic_resource_id" label="Ceilometer Resource ID"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_macaddress" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_vnic_openstack_infrastructure_vnic_macaddress" label="MAC Address"/>
+      </items>
+    </itemGroup>
+    <itemGroup resourceId="JoinTree_1" label="Networks" id="set_openstack_infrastructure_network" description="">
+      <itemGroups>
+        <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_network_measures" description="">
+          <itemGroups/>
+          <items/>
+        </itemGroup>
+      </itemGroups>
+      <items>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_network.openstack_infrastructure_network_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_network_openstack_infrastructure_network_name" label="Network Name"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_network.openstack_infrastructure_network_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_network_openstack_infrastructure_network_resource_id" label="Ceilometer Resource ID"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_network.openstack_infrastructure_network_admin_state_up" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_network_openstack_infrastructure_network_admin_state_up" label="Admin State"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_network.openstack_infrastructure_network_net_external" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_network_openstack_infrastructure_network_net_external" label="Net External"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_network.openstack_infrastructure_network_net_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_network_openstack_infrastructure_network_net_id" label="Net ID"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_network.openstack_infrastructure_network_net_status" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_network_openstack_infrastructure_network_net_status" label="Status"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_network.openstack_infrastructure_network_net_type" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_network_openstack_infrastructure_network_net_type" label="Type"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_network.openstack_infrastructure_network_title" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_network_openstack_infrastructure_network_title" label="Title"/>
+      </items>
+    </itemGroup>
+    <itemGroup resourceId="JoinTree_1" label="Subnets" id="set_openstack_infrastructure_subnet" description="">
+      <itemGroups>
+        <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_subnet_measures" description="">
+          <itemGroups/>
+          <items/>
+        </itemGroup>
+      </itemGroups>
+      <items>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_subnet_openstack_infrastructure_subnet_name" label="Subnet Name"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_subnet_openstack_infrastructure_subnet_resource_id" label="Ceilometer Resource ID"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_cidr" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_subnet_openstack_infrastructure_subnet_cidr" label="CIDR"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_dns_nameservers" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_subnet_openstack_infrastructure_subnet_dns_nameservers" label="DNS Nameservers"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_gateway_ip" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_subnet_openstack_infrastructure_subnet_gateway_ip" label="Gateway"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_subnet_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_subnet_openstack_infrastructure_subnet_subnet_id" label="Subnet ID"/>
+      </items>
+    </itemGroup>
+    <itemGroup resourceId="JoinTree_1" label="Ports" id="set_openstack_infrastructure_port" description="">
+      <itemGroups>
+        <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_port_measures" description="">
+          <itemGroups/>
+          <items/>
+        </itemGroup>
+      </itemGroups>
+      <items>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_name" label="Port Name"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_resource_id" label="Ceilometer Resource ID"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_title" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_title" label="Title"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_admin_state_up" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_admin_state_up" label="Admin State"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_device_owner" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_device_owner" label="Device Owner"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_fixed_ip_list" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_fixed_ip_list" label="Fixed IPs"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_vif_type" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_vif_type" label="Type"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_mac_address" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_mac_address" label="MAC"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_port_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_port_id" label="Port ID"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_status" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_status" label="Status"/>
       </items>
     </itemGroup>
     <itemGroup resourceId="JoinTree_1" label="Tenants" id="set_openstack_infrastructure_tenant" description="">
@@ -946,40 +1050,6 @@
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_cinder_api.openstack_infrastructure_cinder_api_oper_status" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_cinder_api_openstack_infrastructure_cinder_api_oper_status" label="State"/>
       </items>
     </itemGroup>
-    <itemGroup resourceId="JoinTree_1" label="Networks" id="set_openstack_infrastructure_network" description="">
-      <itemGroups>
-        <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_network_measures" description="">
-          <itemGroups/>
-          <items/>
-        </itemGroup>
-      </itemGroups>
-      <items>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_network.openstack_infrastructure_network_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_network_openstack_infrastructure_network_name" label="Network Name"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_network.openstack_infrastructure_network_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_network_openstack_infrastructure_network_resource_id" label="Ceilometer Resource ID"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_network.openstack_infrastructure_network_admin_state_up" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_network_openstack_infrastructure_network_admin_state_up" label="Admin State"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_network.openstack_infrastructure_network_net_external" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_network_openstack_infrastructure_network_net_external" label="Net External"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_network.openstack_infrastructure_network_net_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_network_openstack_infrastructure_network_net_id" label="Net ID"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_network.openstack_infrastructure_network_net_status" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_network_openstack_infrastructure_network_net_status" label="Status"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_network.openstack_infrastructure_network_net_type" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_network_openstack_infrastructure_network_net_type" label="Type"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_network.openstack_infrastructure_network_title" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_network_openstack_infrastructure_network_title" label="Title"/>
-      </items>
-    </itemGroup>
-    <itemGroup resourceId="JoinTree_1" label="Subnets" id="set_openstack_infrastructure_subnet" description="">
-      <itemGroups>
-        <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_subnet_measures" description="">
-          <itemGroups/>
-          <items/>
-        </itemGroup>
-      </itemGroups>
-      <items>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_subnet_openstack_infrastructure_subnet_name" label="Subnet Name"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_subnet_openstack_infrastructure_subnet_resource_id" label="Ceilometer Resource ID"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_cidr" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_subnet_openstack_infrastructure_subnet_cidr" label="CIDR"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_dns_nameservers" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_subnet_openstack_infrastructure_subnet_dns_nameservers" label="DNS Nameservers"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_gateway_ip" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_subnet_openstack_infrastructure_subnet_gateway_ip" label="Gateway"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_subnet_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_subnet_openstack_infrastructure_subnet_subnet_id" label="Subnet ID"/>
-      </items>
-    </itemGroup>
     <itemGroup resourceId="JoinTree_1" label="Routers" id="set_openstack_infrastructure_router" description="">
       <itemGroups>
         <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_router_measures" description="">
@@ -998,26 +1068,6 @@
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_router.openstack_infrastructure_router_title" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_router_openstack_infrastructure_router_title" label="Router"/>
       </items>
     </itemGroup>
-    <itemGroup resourceId="JoinTree_1" label="Ports" id="set_openstack_infrastructure_port" description="">
-      <itemGroups>
-        <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_port_measures" description="">
-          <itemGroups/>
-          <items/>
-        </itemGroup>
-      </itemGroups>
-      <items>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_name" label="Port Name"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_resource_id" label="Ceilometer Resource ID"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_title" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_title" label="Title"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_admin_state_up" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_admin_state_up" label="Admin State"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_device_owner" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_device_owner" label="Device Owner"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_fixed_ip_list" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_fixed_ip_list" label="Fixed IPs"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_vif_type" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_vif_type" label="Type"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_mac_address" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_mac_address" label="MAC"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_port_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_port_id" label="Port ID"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_port.openstack_infrastructure_port_status" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_port_openstack_infrastructure_port_status" label="Status"/>
-      </items>
-    </itemGroup>
     <itemGroup resourceId="JoinTree_1" label="Neutron Agents" id="set_openstack_infrastructure_neutron_agent" description="">
       <itemGroups>
         <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_neutron_agent_measures" description="">
@@ -1033,22 +1083,6 @@
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_neutron_agent.openstack_infrastructure_neutron_agent_enabled" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_neutron_agent_openstack_infrastructure_neutron_agent_enabled" label="Enabled"/>
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_neutron_agent.openstack_infrastructure_neutron_agent_oper_status" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_neutron_agent_openstack_infrastructure_neutron_agent_oper_status" label="Status"/>
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_neutron_agent.openstack_infrastructure_neutron_agent_agent_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_neutron_agent_openstack_infrastructure_neutron_agent_agent_id" label="Agent ID"/>
-      </items>
-    </itemGroup>
-    <itemGroup resourceId="JoinTree_1" label="Floating IPs" id="set_openstack_infrastructure_floating_ip" description="">
-      <itemGroups>
-        <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_floating_ip_measures" description="">
-          <itemGroups/>
-          <items/>
-        </itemGroup>
-      </itemGroups>
-      <items>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_floating_ip_openstack_infrastructure_floating_ip_name" label="Floating IP Name"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_floating_ip_openstack_infrastructure_floating_ip_resource_id" label="Ceilometer Resource ID"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_fixed_ip_address" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_floating_ip_openstack_infrastructure_floating_ip_fixed_ip_address" label="Attached IP"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_floating_ip_address" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_floating_ip_openstack_infrastructure_floating_ip_floating_ip_address" label="Floating IP"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_floatingip_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_floating_ip_openstack_infrastructure_floating_ip_floatingip_id" label="Floating ID"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_status" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_floating_ip_openstack_infrastructure_floating_ip_status" label="Status"/>
       </items>
     </itemGroup>
     <itemGroup resourceId="JoinTree_1" label="Volume Types" id="set_openstack_infrastructure_vol_type" description="">
@@ -1083,26 +1117,55 @@
         <item resourceId="JoinTree_1.dim_openstack_infrastructure_volume.openstack_infrastructure_volume_status" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_volume_openstack_infrastructure_volume_status" label="Status"/>
       </items>
     </itemGroup>
-    <itemGroup resourceId="JoinTree_1" label="Pools" id="set_openstack_infrastructure_pool" description="">
+    <itemGroup resourceId="JoinTree_1" label="Snapshots" id="set_openstack_infrastructure_vol_snapshot" description="">
       <itemGroups>
-        <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_pool_measures" description="">
+        <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_vol_snapshot_measures" description="">
           <itemGroups/>
           <items/>
         </itemGroup>
       </itemGroups>
       <items>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_pool.openstack_infrastructure_pool_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_pool_openstack_infrastructure_pool_name" label="Pool Name"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_pool.openstack_infrastructure_pool_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_pool_openstack_infrastructure_pool_resource_id" label="Ceilometer Resource ID"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_pool.openstack_infrastructure_pool_qos_support" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_pool_openstack_infrastructure_pool_qos_support" label="QoS Support"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_pool.openstack_infrastructure_pool_allocated_capacity" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_pool_openstack_infrastructure_pool_allocated_capacity" label="Allocated Capacity"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_pool.openstack_infrastructure_pool_free_capacity" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_pool_openstack_infrastructure_pool_free_capacity" label="Free Capacity"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_pool.openstack_infrastructure_pool_total_capacity" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_pool_openstack_infrastructure_pool_total_capacity" label="Total Capacity"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_pool.openstack_infrastructure_pool_driver_version" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_pool_openstack_infrastructure_pool_driver_version" label="Driver Version"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_pool.openstack_infrastructure_pool_location" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_pool_openstack_infrastructure_pool_location" label="Location"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_pool.openstack_infrastructure_pool_reserved_percentage" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_pool_openstack_infrastructure_pool_reserved_percentage" label="Reserved Percentage"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_pool.openstack_infrastructure_pool_storage_protocol" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_pool_openstack_infrastructure_pool_storage_protocol" label="Storage Protocol"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_pool.openstack_infrastructure_pool_vendor_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_pool_openstack_infrastructure_pool_vendor_name" label="Vendor Name"/>
-        <item resourceId="JoinTree_1.dim_openstack_infrastructure_pool.openstack_infrastructure_pool_volume_backend" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_pool_openstack_infrastructure_pool_volume_backend" label="Volume Backend"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_vol_snapshot_openstack_infrastructure_vol_snapshot_name" label="Snapshot Name"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_vol_snapshot_openstack_infrastructure_vol_snapshot_resource_id" label="Ceilometer Resource ID"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_created_at" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_vol_snapshot_openstack_infrastructure_vol_snapshot_created_at" label="Created At"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_description" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_vol_snapshot_openstack_infrastructure_vol_snapshot_description" label="Description"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_size" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_vol_snapshot_openstack_infrastructure_vol_snapshot_size" label="Size (GB)"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_progress" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_vol_snapshot_openstack_infrastructure_vol_snapshot_progress" label="Progress"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_status" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_vol_snapshot_openstack_infrastructure_vol_snapshot_status" label="Status"/>
+      </items>
+    </itemGroup>
+    <itemGroup resourceId="JoinTree_1" label="Quotas" id="set_openstack_infrastructure_quota" description="">
+      <itemGroups>
+        <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_quota_measures" description="">
+          <itemGroups/>
+          <items/>
+        </itemGroup>
+      </itemGroups>
+      <items>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_quota.openstack_infrastructure_quota_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_quota_openstack_infrastructure_quota_name" label="Quota Name"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_quota.openstack_infrastructure_quota_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_quota_openstack_infrastructure_quota_resource_id" label="Ceilometer Resource ID"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_quota.openstack_infrastructure_quota_tenant_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_quota_openstack_infrastructure_quota_tenant_name" label="Tenant Name"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_quota.openstack_infrastructure_quota_backup_bytes" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_quota_openstack_infrastructure_quota_backup_bytes" label="Backup (GB)"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_quota.openstack_infrastructure_quota_backups" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_quota_openstack_infrastructure_quota_backups" label="Backups"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_quota.openstack_infrastructure_quota_bytes" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_quota_openstack_infrastructure_quota_bytes" label="Bytes (GB)"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_quota.openstack_infrastructure_quota_snapshots" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_quota_openstack_infrastructure_quota_snapshots" label="Snapshots"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_quota.openstack_infrastructure_quota_volumes" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_quota_openstack_infrastructure_quota_volumes" label="Volumes"/>
+      </items>
+    </itemGroup>
+    <itemGroup resourceId="JoinTree_1" label="Floating IPs" id="set_openstack_infrastructure_floating_ip" description="">
+      <itemGroups>
+        <itemGroup resourceId="JoinTree_1" label="Measures" id="set_openstack_infrastructure_floating_ip_measures" description="">
+          <itemGroups/>
+          <items/>
+        </itemGroup>
+      </itemGroups>
+      <items>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_name" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_floating_ip_openstack_infrastructure_floating_ip_name" label="Floating IP Name"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_resource_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_floating_ip_openstack_infrastructure_floating_ip_resource_id" label="Ceilometer Resource ID"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_fixed_ip_address" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_floating_ip_openstack_infrastructure_floating_ip_fixed_ip_address" label="Attached IP"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_floating_ip_address" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_floating_ip_openstack_infrastructure_floating_ip_floating_ip_address" label="Floating IP"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_floatingip_id" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_floating_ip_openstack_infrastructure_floating_ip_floatingip_id" label="Floating ID"/>
+        <item resourceId="JoinTree_1.dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_status" dimensionOrMeasure="Dimension" id="dim_openstack_infrastructure_floating_ip_openstack_infrastructure_floating_ip_status" label="Status"/>
       </items>
     </itemGroup>
   </itemGroups>
@@ -1136,20 +1199,15 @@
         <field type="java.lang.String" id="openstack_infrastructure_endpoint_comments"/>
         <field type="java.lang.String" id="openstack_infrastructure_endpoint_sysedge_license_mode"/>
         <field type="java.lang.Double" id="openstack_infrastructure_endpoint_priority"/>
-        <field type="java.lang.String" id="openstack_infrastructure_endpoint_parent_cluster"/>
-        <field type="java.lang.String" id="openstack_infrastructure_endpoint_ldomhostdevices"/>
         <field type="java.lang.String" id="openstack_infrastructure_endpoint_neutron_core_plugin"/>
         <field type="java.lang.String" id="openstack_infrastructure_endpoint_neutron_mechanism_drivers"/>
         <field type="java.lang.String" id="openstack_infrastructure_endpoint_neutron_type_drivers"/>
         <field type="java.lang.String" id="openstack_infrastructure_endpoint_z_open_stack_project_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_endpoint_z_open_stack_ceilometer_url"/>
-        <field type="java.lang.String" id="openstack_infrastructure_endpoint_z_open_stack_auth_url"/>
         <field type="java.lang.String" id="openstack_infrastructure_endpoint_z_command_username"/>
+        <field type="java.lang.String" id="openstack_infrastructure_endpoint_z_open_stack_auth_url"/>
         <field type="java.lang.String" id="openstack_infrastructure_endpoint_z_open_stack_region_name"/>
-        <field type="java.lang.Double" id="openstack_infrastructure_endpoint_z_ip_service_map_max_port"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
         <field type="java.lang.Integer" id="device_class_key"/>
         <field type="java.lang.Integer" id="performance_conf_key"/>
@@ -1159,17 +1217,6 @@
         <field type="java.lang.Double" id="administrative_role_count"/>
         <field type="java.lang.Double" id="user_command_count"/>
         <field type="java.lang.Double" id="status_monitor_conf_count"/>
-        <field type="java.lang.Double" id="element_pool_count"/>
-        <field type="java.lang.Double" id="my_sql_server_count"/>
-        <field type="java.lang.Double" id="ldom_count"/>
-        <field type="java.lang.Double" id="zone_container_count"/>
-        <field type="java.lang.Double" id="processor_pool_count"/>
-        <field type="java.lang.Double" id="cluster_node_count"/>
-        <field type="java.lang.Double" id="cluster_transport_path_count"/>
-        <field type="java.lang.Double" id="cluster_ipmp_group_count"/>
-        <field type="java.lang.Double" id="cluster_switch_count"/>
-        <field type="java.lang.Double" id="cluster_device_group_count"/>
-        <field type="java.lang.Double" id="cluster_nas_device_count"/>
         <field type="java.lang.Double" id="openstack_component_count"/>
       </fieldList>
     </jdbcTable>
@@ -2811,6 +2858,219 @@
         <field type="java.lang.Double" id="fct_min"/>
       </fieldList>
     </jdbcTable>
+    <jdbcTable tableName="dim_openstack_infrastructure_vnic" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_vnic">
+      <fieldList>
+        <field type="java.lang.Integer" id="openstack_infrastructure_vnic_key"/>
+        <field type="java.sql.Timestamp" id="openstack_infrastructure_vnic_deleted_at" dataSetExpression="if(openstack_infrastructure_vnic_deleted_at,null,0,1)"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vnic_name"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vnic_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vnic_type"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vnic_uid"/>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vnic_snmpindex"/>
+        <field type="java.lang.Boolean" id="openstack_infrastructure_vnic_monitor"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vnic_production_state"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vnic_pre_mw_production_state"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vnic_resource_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vnic_macaddress"/>
+        <field type="java.lang.Double" id="dependencies_count"/>
+        <field type="java.lang.Double" id="dependents_count"/>
+        <field type="java.lang.Double" id="maintenance_window_count"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_instance_key"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="daily_if_received__bytessec" datasourceId="zenoss_reporting" id="daily_if_received__bytessec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="hourly_if_received__bytessec" datasourceId="zenoss_reporting" id="hourly_if_received__bytessec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="daily_if_received_packets__persec" datasourceId="zenoss_reporting" id="daily_if_received_packets__persec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="hourly_if_received_packets__persec" datasourceId="zenoss_reporting" id="hourly_if_received_packets__persec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="daily_if_sent__bytessec" datasourceId="zenoss_reporting" id="daily_if_sent__bytessec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="hourly_if_sent__bytessec" datasourceId="zenoss_reporting" id="hourly_if_sent__bytessec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="daily_if_sent_packets__persec" datasourceId="zenoss_reporting" id="daily_if_sent_packets__persec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="hourly_if_sent_packets__persec" datasourceId="zenoss_reporting" id="hourly_if_sent_packets__persec">
+      <fieldList>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.Integer" id="component_key"/>
+        <field type="java.util.Date" id="date_key"/>
+        <field type="java.sql.Timestamp" id="fct_ts"/>
+        <field type="java.sql.Timestamp" id="fct_ts_gmt"/>
+        <field type="java.lang.Double" id="fct_avg"/>
+        <field type="java.lang.Double" id="fct_max"/>
+        <field type="java.lang.Double" id="fct_min"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="dim_openstack_infrastructure_network" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_network">
+      <fieldList>
+        <field type="java.lang.Integer" id="openstack_infrastructure_network_key"/>
+        <field type="java.sql.Timestamp" id="openstack_infrastructure_network_deleted_at" dataSetExpression="if(openstack_infrastructure_network_deleted_at,null,0,1)"/>
+        <field type="java.lang.String" id="openstack_infrastructure_network_name"/>
+        <field type="java.lang.String" id="openstack_infrastructure_network_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_network_type"/>
+        <field type="java.lang.String" id="openstack_infrastructure_network_uid"/>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.String" id="openstack_infrastructure_network_snmpindex"/>
+        <field type="java.lang.Boolean" id="openstack_infrastructure_network_monitor"/>
+        <field type="java.lang.String" id="openstack_infrastructure_network_production_state"/>
+        <field type="java.lang.String" id="openstack_infrastructure_network_pre_mw_production_state"/>
+        <field type="java.lang.String" id="openstack_infrastructure_network_resource_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_network_admin_state_up"/>
+        <field type="java.lang.String" id="openstack_infrastructure_network_net_external"/>
+        <field type="java.lang.String" id="openstack_infrastructure_network_net_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_network_net_status"/>
+        <field type="java.lang.String" id="openstack_infrastructure_network_net_type"/>
+        <field type="java.lang.String" id="openstack_infrastructure_network_title"/>
+        <field type="java.lang.Double" id="dependencies_count"/>
+        <field type="java.lang.Double" id="dependents_count"/>
+        <field type="java.lang.Double" id="maintenance_window_count"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
+        <field type="java.lang.Double" id="openstack_infrastructure_floating_ip_count"/>
+        <field type="java.lang.Double" id="openstack_infrastructure_neutron_agent_count"/>
+        <field type="java.lang.Double" id="openstack_infrastructure_port_count"/>
+        <field type="java.lang.Double" id="openstack_infrastructure_router_count"/>
+        <field type="java.lang.Double" id="openstack_infrastructure_subnet_count"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_tenant_key"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="dim_openstack_infrastructure_subnet" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_subnet">
+      <fieldList>
+        <field type="java.lang.Integer" id="openstack_infrastructure_subnet_key"/>
+        <field type="java.sql.Timestamp" id="openstack_infrastructure_subnet_deleted_at" dataSetExpression="if(openstack_infrastructure_subnet_deleted_at,null,0,1)"/>
+        <field type="java.lang.String" id="openstack_infrastructure_subnet_name"/>
+        <field type="java.lang.String" id="openstack_infrastructure_subnet_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_subnet_type"/>
+        <field type="java.lang.String" id="openstack_infrastructure_subnet_uid"/>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.String" id="openstack_infrastructure_subnet_snmpindex"/>
+        <field type="java.lang.Boolean" id="openstack_infrastructure_subnet_monitor"/>
+        <field type="java.lang.String" id="openstack_infrastructure_subnet_production_state"/>
+        <field type="java.lang.String" id="openstack_infrastructure_subnet_pre_mw_production_state"/>
+        <field type="java.lang.String" id="openstack_infrastructure_subnet_resource_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_subnet_cidr"/>
+        <field type="java.lang.String" id="openstack_infrastructure_subnet_dns_nameservers"/>
+        <field type="java.lang.String" id="openstack_infrastructure_subnet_gateway_ip"/>
+        <field type="java.lang.String" id="openstack_infrastructure_subnet_subnet_id"/>
+        <field type="java.lang.Double" id="dependencies_count"/>
+        <field type="java.lang.Double" id="dependents_count"/>
+        <field type="java.lang.Double" id="maintenance_window_count"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_network_key"/>
+        <field type="java.lang.Double" id="openstack_infrastructure_neutron_agent_count"/>
+        <field type="java.lang.Double" id="openstack_infrastructure_port_count"/>
+        <field type="java.lang.Double" id="openstack_infrastructure_router_count"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_tenant_key"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="dim_openstack_infrastructure_port" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_port">
+      <fieldList>
+        <field type="java.lang.Integer" id="openstack_infrastructure_port_key"/>
+        <field type="java.sql.Timestamp" id="openstack_infrastructure_port_deleted_at" dataSetExpression="if(openstack_infrastructure_port_deleted_at,null,0,1)"/>
+        <field type="java.lang.String" id="openstack_infrastructure_port_name"/>
+        <field type="java.lang.String" id="openstack_infrastructure_port_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_port_type"/>
+        <field type="java.lang.String" id="openstack_infrastructure_port_uid"/>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.String" id="openstack_infrastructure_port_snmpindex"/>
+        <field type="java.lang.Boolean" id="openstack_infrastructure_port_monitor"/>
+        <field type="java.lang.String" id="openstack_infrastructure_port_production_state"/>
+        <field type="java.lang.String" id="openstack_infrastructure_port_pre_mw_production_state"/>
+        <field type="java.lang.String" id="openstack_infrastructure_port_resource_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_port_title"/>
+        <field type="java.lang.String" id="openstack_infrastructure_port_admin_state_up"/>
+        <field type="java.lang.String" id="openstack_infrastructure_port_device_owner"/>
+        <field type="java.lang.String" id="openstack_infrastructure_port_fixed_ip_list"/>
+        <field type="java.lang.String" id="openstack_infrastructure_port_vif_type"/>
+        <field type="java.lang.String" id="openstack_infrastructure_port_mac_address"/>
+        <field type="java.lang.String" id="openstack_infrastructure_port_port_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_port_status"/>
+        <field type="java.lang.Double" id="dependencies_count"/>
+        <field type="java.lang.Double" id="dependents_count"/>
+        <field type="java.lang.Double" id="maintenance_window_count"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
+        <field type="java.lang.Double" id="openstack_infrastructure_floating_ip_count"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_instance_key"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_network_key"/>
+        <field type="java.lang.Double" id="openstack_infrastructure_subnet_count"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_tenant_key"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_router_key"/>
+      </fieldList>
+    </jdbcTable>
     <jdbcTable tableName="dim_openstack_infrastructure_tenant" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_tenant">
       <fieldList>
         <field type="java.lang.Integer" id="openstack_infrastructure_tenant_key"/>
@@ -2829,7 +3089,6 @@
         <field type="java.lang.String" id="openstack_infrastructure_tenant_tenant_id"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="openstack_infrastructure_floating_ip_count"/>
@@ -2859,7 +3118,6 @@
         <field type="java.lang.String" id="openstack_infrastructure_region_resource_id"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="org_component_count"/>
@@ -2892,7 +3150,6 @@
         <field type="java.lang.String" id="openstack_infrastructure_flavor_flavor_type"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="openstack_infrastructure_instance_count"/>
@@ -2918,7 +3175,6 @@
         <field type="java.lang.String" id="openstack_infrastructure_image_image_updated"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="openstack_infrastructure_instance_count"/>
@@ -2952,7 +3208,6 @@
         <field type="java.lang.String" id="openstack_infrastructure_instance_server_status"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_flavor_key"/>
@@ -3101,7 +3356,6 @@
         <field type="java.lang.String" id="openstack_infrastructure_availability_zone_resource_id"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="org_component_count"/>
@@ -3130,7 +3384,6 @@
         <field type="java.lang.String" id="openstack_infrastructure_host_hostname"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Integer" id="org_component_key"/>
@@ -3170,7 +3423,6 @@
         <field type="java.lang.String" id="openstack_infrastructure_hypervisor_disk_free"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="openstack_infrastructure_instance_count"/>
@@ -3197,7 +3449,6 @@
         <field type="java.lang.String" id="openstack_infrastructure_nova_service_oper_status"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_host_key"/>
@@ -3224,7 +3475,6 @@
         <field type="java.lang.String" id="openstack_infrastructure_cinder_service_oper_status"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_host_key"/>
@@ -3251,7 +3501,6 @@
         <field type="java.lang.String" id="openstack_infrastructure_nova_api_oper_status"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_host_key"/>
@@ -3278,74 +3527,10 @@
         <field type="java.lang.String" id="openstack_infrastructure_cinder_api_oper_status"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_host_key"/>
         <field type="java.lang.Integer" id="org_component_key"/>
-      </fieldList>
-    </jdbcTable>
-    <jdbcTable tableName="dim_openstack_infrastructure_network" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_network">
-      <fieldList>
-        <field type="java.lang.Integer" id="openstack_infrastructure_network_key"/>
-        <field type="java.sql.Timestamp" id="openstack_infrastructure_network_deleted_at" dataSetExpression="if(openstack_infrastructure_network_deleted_at,null,0,1)"/>
-        <field type="java.lang.String" id="openstack_infrastructure_network_name"/>
-        <field type="java.lang.String" id="openstack_infrastructure_network_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_network_type"/>
-        <field type="java.lang.String" id="openstack_infrastructure_network_uid"/>
-        <field type="java.lang.Integer" id="device_key"/>
-        <field type="java.lang.String" id="openstack_infrastructure_network_snmpindex"/>
-        <field type="java.lang.Boolean" id="openstack_infrastructure_network_monitor"/>
-        <field type="java.lang.String" id="openstack_infrastructure_network_production_state"/>
-        <field type="java.lang.String" id="openstack_infrastructure_network_pre_mw_production_state"/>
-        <field type="java.lang.String" id="openstack_infrastructure_network_resource_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_network_admin_state_up"/>
-        <field type="java.lang.String" id="openstack_infrastructure_network_net_external"/>
-        <field type="java.lang.String" id="openstack_infrastructure_network_net_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_network_net_status"/>
-        <field type="java.lang.String" id="openstack_infrastructure_network_net_type"/>
-        <field type="java.lang.String" id="openstack_infrastructure_network_title"/>
-        <field type="java.lang.Double" id="dependencies_count"/>
-        <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
-        <field type="java.lang.Double" id="maintenance_window_count"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
-        <field type="java.lang.Double" id="openstack_infrastructure_floating_ip_count"/>
-        <field type="java.lang.Double" id="openstack_infrastructure_neutron_agent_count"/>
-        <field type="java.lang.Double" id="openstack_infrastructure_port_count"/>
-        <field type="java.lang.Double" id="openstack_infrastructure_router_count"/>
-        <field type="java.lang.Double" id="openstack_infrastructure_subnet_count"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_tenant_key"/>
-      </fieldList>
-    </jdbcTable>
-    <jdbcTable tableName="dim_openstack_infrastructure_subnet" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_subnet">
-      <fieldList>
-        <field type="java.lang.Integer" id="openstack_infrastructure_subnet_key"/>
-        <field type="java.sql.Timestamp" id="openstack_infrastructure_subnet_deleted_at" dataSetExpression="if(openstack_infrastructure_subnet_deleted_at,null,0,1)"/>
-        <field type="java.lang.String" id="openstack_infrastructure_subnet_name"/>
-        <field type="java.lang.String" id="openstack_infrastructure_subnet_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_subnet_type"/>
-        <field type="java.lang.String" id="openstack_infrastructure_subnet_uid"/>
-        <field type="java.lang.Integer" id="device_key"/>
-        <field type="java.lang.String" id="openstack_infrastructure_subnet_snmpindex"/>
-        <field type="java.lang.Boolean" id="openstack_infrastructure_subnet_monitor"/>
-        <field type="java.lang.String" id="openstack_infrastructure_subnet_production_state"/>
-        <field type="java.lang.String" id="openstack_infrastructure_subnet_pre_mw_production_state"/>
-        <field type="java.lang.String" id="openstack_infrastructure_subnet_resource_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_subnet_cidr"/>
-        <field type="java.lang.String" id="openstack_infrastructure_subnet_dns_nameservers"/>
-        <field type="java.lang.String" id="openstack_infrastructure_subnet_gateway_ip"/>
-        <field type="java.lang.String" id="openstack_infrastructure_subnet_subnet_id"/>
-        <field type="java.lang.Double" id="dependencies_count"/>
-        <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
-        <field type="java.lang.Double" id="maintenance_window_count"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_network_key"/>
-        <field type="java.lang.Double" id="openstack_infrastructure_neutron_agent_count"/>
-        <field type="java.lang.Double" id="openstack_infrastructure_port_count"/>
-        <field type="java.lang.Double" id="openstack_infrastructure_router_count"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_tenant_key"/>
       </fieldList>
     </jdbcTable>
     <jdbcTable tableName="dim_openstack_infrastructure_router" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_router">
@@ -3370,7 +3555,6 @@
         <field type="java.lang.String" id="openstack_infrastructure_router_title"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="openstack_infrastructure_floating_ip_count"/>
@@ -3379,41 +3563,6 @@
         <field type="java.lang.Double" id="openstack_infrastructure_subnet_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_tenant_key"/>
         <field type="java.lang.Double" id="openstack_infrastructure_port_count"/>
-      </fieldList>
-    </jdbcTable>
-    <jdbcTable tableName="dim_openstack_infrastructure_port" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_port">
-      <fieldList>
-        <field type="java.lang.Integer" id="openstack_infrastructure_port_key"/>
-        <field type="java.sql.Timestamp" id="openstack_infrastructure_port_deleted_at" dataSetExpression="if(openstack_infrastructure_port_deleted_at,null,0,1)"/>
-        <field type="java.lang.String" id="openstack_infrastructure_port_name"/>
-        <field type="java.lang.String" id="openstack_infrastructure_port_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_port_type"/>
-        <field type="java.lang.String" id="openstack_infrastructure_port_uid"/>
-        <field type="java.lang.Integer" id="device_key"/>
-        <field type="java.lang.String" id="openstack_infrastructure_port_snmpindex"/>
-        <field type="java.lang.Boolean" id="openstack_infrastructure_port_monitor"/>
-        <field type="java.lang.String" id="openstack_infrastructure_port_production_state"/>
-        <field type="java.lang.String" id="openstack_infrastructure_port_pre_mw_production_state"/>
-        <field type="java.lang.String" id="openstack_infrastructure_port_resource_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_port_title"/>
-        <field type="java.lang.String" id="openstack_infrastructure_port_admin_state_up"/>
-        <field type="java.lang.String" id="openstack_infrastructure_port_device_owner"/>
-        <field type="java.lang.String" id="openstack_infrastructure_port_fixed_ip_list"/>
-        <field type="java.lang.String" id="openstack_infrastructure_port_vif_type"/>
-        <field type="java.lang.String" id="openstack_infrastructure_port_mac_address"/>
-        <field type="java.lang.String" id="openstack_infrastructure_port_port_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_port_status"/>
-        <field type="java.lang.Double" id="dependencies_count"/>
-        <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
-        <field type="java.lang.Double" id="maintenance_window_count"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
-        <field type="java.lang.Double" id="openstack_infrastructure_floating_ip_count"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_instance_key"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_network_key"/>
-        <field type="java.lang.Double" id="openstack_infrastructure_subnet_count"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_tenant_key"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_router_key"/>
       </fieldList>
     </jdbcTable>
     <jdbcTable tableName="dim_openstack_infrastructure_neutron_agent" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_neutron_agent">
@@ -3437,7 +3586,6 @@
         <field type="java.lang.String" id="openstack_infrastructure_neutron_agent_agent_id"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_host_key"/>
@@ -3445,35 +3593,6 @@
         <field type="java.lang.Double" id="openstack_infrastructure_network_count"/>
         <field type="java.lang.Double" id="openstack_infrastructure_router_count"/>
         <field type="java.lang.Double" id="openstack_infrastructure_subnet_count"/>
-      </fieldList>
-    </jdbcTable>
-    <jdbcTable tableName="dim_openstack_infrastructure_floating_ip" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_floating_ip">
-      <fieldList>
-        <field type="java.lang.Integer" id="openstack_infrastructure_floating_ip_key"/>
-        <field type="java.sql.Timestamp" id="openstack_infrastructure_floating_ip_deleted_at" dataSetExpression="if(openstack_infrastructure_floating_ip_deleted_at,null,0,1)"/>
-        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_name"/>
-        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_type"/>
-        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_uid"/>
-        <field type="java.lang.Integer" id="device_key"/>
-        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_snmpindex"/>
-        <field type="java.lang.Boolean" id="openstack_infrastructure_floating_ip_monitor"/>
-        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_production_state"/>
-        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_pre_mw_production_state"/>
-        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_resource_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_fixed_ip_address"/>
-        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_floating_ip_address"/>
-        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_floatingip_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_status"/>
-        <field type="java.lang.Double" id="dependencies_count"/>
-        <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
-        <field type="java.lang.Double" id="maintenance_window_count"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_network_key"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_port_key"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_router_key"/>
-        <field type="java.lang.Integer" id="openstack_infrastructure_tenant_key"/>
       </fieldList>
     </jdbcTable>
     <jdbcTable tableName="dim_openstack_infrastructure_vol_type" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_vol_type">
@@ -3492,7 +3611,6 @@
         <field type="java.lang.String" id="openstack_infrastructure_vol_type_resource_id"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="openstack_infrastructure_volume_count"/>
@@ -3522,7 +3640,6 @@
         <field type="java.lang.String" id="openstack_infrastructure_volume_status"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_tenant_key"/>
@@ -3531,36 +3648,86 @@
         <field type="java.lang.Integer" id="openstack_infrastructure_vol_type_key"/>
       </fieldList>
     </jdbcTable>
-    <jdbcTable tableName="dim_openstack_infrastructure_pool" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_pool">
+    <jdbcTable tableName="dim_openstack_infrastructure_vol_snapshot" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_vol_snapshot">
       <fieldList>
-        <field type="java.lang.Integer" id="openstack_infrastructure_pool_key"/>
-        <field type="java.sql.Timestamp" id="openstack_infrastructure_pool_deleted_at" dataSetExpression="if(openstack_infrastructure_pool_deleted_at,null,0,1)"/>
-        <field type="java.lang.String" id="openstack_infrastructure_pool_name"/>
-        <field type="java.lang.String" id="openstack_infrastructure_pool_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_pool_type"/>
-        <field type="java.lang.String" id="openstack_infrastructure_pool_uid"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_vol_snapshot_key"/>
+        <field type="java.sql.Timestamp" id="openstack_infrastructure_vol_snapshot_deleted_at" dataSetExpression="if(openstack_infrastructure_vol_snapshot_deleted_at,null,0,1)"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vol_snapshot_name"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vol_snapshot_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vol_snapshot_type"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vol_snapshot_uid"/>
         <field type="java.lang.Integer" id="device_key"/>
-        <field type="java.lang.String" id="openstack_infrastructure_pool_snmpindex"/>
-        <field type="java.lang.Boolean" id="openstack_infrastructure_pool_monitor"/>
-        <field type="java.lang.String" id="openstack_infrastructure_pool_production_state"/>
-        <field type="java.lang.String" id="openstack_infrastructure_pool_pre_mw_production_state"/>
-        <field type="java.lang.String" id="openstack_infrastructure_pool_resource_id"/>
-        <field type="java.lang.String" id="openstack_infrastructure_pool_qos_support"/>
-        <field type="java.lang.String" id="openstack_infrastructure_pool_allocated_capacity"/>
-        <field type="java.lang.String" id="openstack_infrastructure_pool_free_capacity"/>
-        <field type="java.lang.String" id="openstack_infrastructure_pool_total_capacity"/>
-        <field type="java.lang.String" id="openstack_infrastructure_pool_driver_version"/>
-        <field type="java.lang.String" id="openstack_infrastructure_pool_location"/>
-        <field type="java.lang.String" id="openstack_infrastructure_pool_reserved_percentage"/>
-        <field type="java.lang.String" id="openstack_infrastructure_pool_storage_protocol"/>
-        <field type="java.lang.String" id="openstack_infrastructure_pool_vendor_name"/>
-        <field type="java.lang.String" id="openstack_infrastructure_pool_volume_backend"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vol_snapshot_snmpindex"/>
+        <field type="java.lang.Boolean" id="openstack_infrastructure_vol_snapshot_monitor"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vol_snapshot_production_state"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vol_snapshot_pre_mw_production_state"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vol_snapshot_resource_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vol_snapshot_created_at"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vol_snapshot_description"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vol_snapshot_size"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vol_snapshot_progress"/>
+        <field type="java.lang.String" id="openstack_infrastructure_vol_snapshot_status"/>
         <field type="java.lang.Double" id="dependencies_count"/>
         <field type="java.lang.Double" id="dependents_count"/>
-        <field type="java.lang.Double" id="component_group_count"/>
         <field type="java.lang.Double" id="maintenance_window_count"/>
         <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
-        <field type="java.lang.Integer" id="org_component_key"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_volume_key"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_tenant_key"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="dim_openstack_infrastructure_quota" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_quota">
+      <fieldList>
+        <field type="java.lang.Integer" id="openstack_infrastructure_quota_key"/>
+        <field type="java.sql.Timestamp" id="openstack_infrastructure_quota_deleted_at" dataSetExpression="if(openstack_infrastructure_quota_deleted_at,null,0,1)"/>
+        <field type="java.lang.String" id="openstack_infrastructure_quota_name"/>
+        <field type="java.lang.String" id="openstack_infrastructure_quota_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_quota_type"/>
+        <field type="java.lang.String" id="openstack_infrastructure_quota_uid"/>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.String" id="openstack_infrastructure_quota_snmpindex"/>
+        <field type="java.lang.Boolean" id="openstack_infrastructure_quota_monitor"/>
+        <field type="java.lang.String" id="openstack_infrastructure_quota_production_state"/>
+        <field type="java.lang.String" id="openstack_infrastructure_quota_pre_mw_production_state"/>
+        <field type="java.lang.String" id="openstack_infrastructure_quota_resource_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_quota_tenant_name"/>
+        <field type="java.lang.String" id="openstack_infrastructure_quota_backup_bytes"/>
+        <field type="java.lang.String" id="openstack_infrastructure_quota_backups"/>
+        <field type="java.lang.String" id="openstack_infrastructure_quota_bytes"/>
+        <field type="java.lang.String" id="openstack_infrastructure_quota_snapshots"/>
+        <field type="java.lang.String" id="openstack_infrastructure_quota_volumes"/>
+        <field type="java.lang.Double" id="dependencies_count"/>
+        <field type="java.lang.Double" id="dependents_count"/>
+        <field type="java.lang.Double" id="maintenance_window_count"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_tenant_key"/>
+      </fieldList>
+    </jdbcTable>
+    <jdbcTable tableName="dim_openstack_infrastructure_floating_ip" datasourceId="zenoss_reporting" id="dim_openstack_infrastructure_floating_ip">
+      <fieldList>
+        <field type="java.lang.Integer" id="openstack_infrastructure_floating_ip_key"/>
+        <field type="java.sql.Timestamp" id="openstack_infrastructure_floating_ip_deleted_at" dataSetExpression="if(openstack_infrastructure_floating_ip_deleted_at,null,0,1)"/>
+        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_name"/>
+        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_type"/>
+        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_uid"/>
+        <field type="java.lang.Integer" id="device_key"/>
+        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_snmpindex"/>
+        <field type="java.lang.Boolean" id="openstack_infrastructure_floating_ip_monitor"/>
+        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_production_state"/>
+        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_pre_mw_production_state"/>
+        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_resource_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_fixed_ip_address"/>
+        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_floating_ip_address"/>
+        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_floatingip_id"/>
+        <field type="java.lang.String" id="openstack_infrastructure_floating_ip_status"/>
+        <field type="java.lang.Double" id="dependencies_count"/>
+        <field type="java.lang.Double" id="dependents_count"/>
+        <field type="java.lang.Double" id="maintenance_window_count"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_endpoint_key"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_network_key"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_port_key"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_router_key"/>
+        <field type="java.lang.Integer" id="openstack_infrastructure_tenant_key"/>
       </fieldList>
     </jdbcTable>
     <jdbcTable tableName="dim_openstack_infrastructure_endpoint" datasourceId="zenoss_reporting" id="JoinTree_1">
@@ -3591,20 +3758,15 @@
         <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_comments"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_sysedge_license_mode"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_priority"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_parent_cluster"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_ldomhostdevices"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_neutron_core_plugin"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_neutron_mechanism_drivers"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_neutron_type_drivers"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_z_open_stack_project_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_z_open_stack_ceilometer_url"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_z_open_stack_auth_url"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_z_command_username"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_z_open_stack_auth_url"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_z_open_stack_region_name"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_z_ip_service_map_max_port"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.dependencies_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.component_group_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_endpoint.device_class_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_endpoint.performance_conf_key"/>
@@ -3614,17 +3776,6 @@
         <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.administrative_role_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.user_command_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.status_monitor_conf_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.element_pool_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.my_sql_server_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.ldom_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.zone_container_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.processor_pool_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.cluster_node_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.cluster_transport_path_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.cluster_ipmp_group_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.cluster_switch_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.cluster_device_group_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.cluster_nas_device_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_endpoint.openstack_component_count"/>
         <field type="java.lang.Integer" id="daily_agent_alive__count.device_key"/>
         <field type="java.lang.Integer" id="daily_agent_alive__count.component_key"/>
@@ -4714,6 +4865,171 @@
         <field type="java.lang.Double" id="hourly_volume_unknown__count.fct_avg"/>
         <field type="java.lang.Double" id="hourly_volume_unknown__count.fct_max"/>
         <field type="java.lang.Double" id="hourly_volume_unknown__count.fct_min"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_key"/>
+        <field type="openstack_infrastructure_vnic_deleted_at" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_deleted_at,null,0,1)"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_name"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_type"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_uid"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_vnic.device_key"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_snmpindex"/>
+        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_monitor"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_production_state"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_pre_mw_production_state"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_resource_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_macaddress"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_vnic.dependencies_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_vnic.dependents_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_vnic.maintenance_window_count"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_endpoint_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_vnic.openstack_infrastructure_instance_key"/>
+        <field type="java.lang.Integer" id="daily_if_received__bytessec.device_key"/>
+        <field type="java.lang.Integer" id="daily_if_received__bytessec.component_key"/>
+        <field type="java.util.Date" id="daily_if_received__bytessec.date_key"/>
+        <field type="java.sql.Timestamp" id="daily_if_received__bytessec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="daily_if_received__bytessec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="daily_if_received__bytessec.fct_avg"/>
+        <field type="java.lang.Double" id="daily_if_received__bytessec.fct_max"/>
+        <field type="java.lang.Double" id="daily_if_received__bytessec.fct_min"/>
+        <field type="java.lang.Integer" id="hourly_if_received__bytessec.device_key"/>
+        <field type="java.lang.Integer" id="hourly_if_received__bytessec.component_key"/>
+        <field type="java.util.Date" id="hourly_if_received__bytessec.date_key"/>
+        <field type="java.sql.Timestamp" id="hourly_if_received__bytessec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="hourly_if_received__bytessec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="hourly_if_received__bytessec.fct_avg"/>
+        <field type="java.lang.Double" id="hourly_if_received__bytessec.fct_max"/>
+        <field type="java.lang.Double" id="hourly_if_received__bytessec.fct_min"/>
+        <field type="java.lang.Integer" id="daily_if_received_packets__persec.device_key"/>
+        <field type="java.lang.Integer" id="daily_if_received_packets__persec.component_key"/>
+        <field type="java.util.Date" id="daily_if_received_packets__persec.date_key"/>
+        <field type="java.sql.Timestamp" id="daily_if_received_packets__persec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="daily_if_received_packets__persec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="daily_if_received_packets__persec.fct_avg"/>
+        <field type="java.lang.Double" id="daily_if_received_packets__persec.fct_max"/>
+        <field type="java.lang.Double" id="daily_if_received_packets__persec.fct_min"/>
+        <field type="java.lang.Integer" id="hourly_if_received_packets__persec.device_key"/>
+        <field type="java.lang.Integer" id="hourly_if_received_packets__persec.component_key"/>
+        <field type="java.util.Date" id="hourly_if_received_packets__persec.date_key"/>
+        <field type="java.sql.Timestamp" id="hourly_if_received_packets__persec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="hourly_if_received_packets__persec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="hourly_if_received_packets__persec.fct_avg"/>
+        <field type="java.lang.Double" id="hourly_if_received_packets__persec.fct_max"/>
+        <field type="java.lang.Double" id="hourly_if_received_packets__persec.fct_min"/>
+        <field type="java.lang.Integer" id="daily_if_sent__bytessec.device_key"/>
+        <field type="java.lang.Integer" id="daily_if_sent__bytessec.component_key"/>
+        <field type="java.util.Date" id="daily_if_sent__bytessec.date_key"/>
+        <field type="java.sql.Timestamp" id="daily_if_sent__bytessec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="daily_if_sent__bytessec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="daily_if_sent__bytessec.fct_avg"/>
+        <field type="java.lang.Double" id="daily_if_sent__bytessec.fct_max"/>
+        <field type="java.lang.Double" id="daily_if_sent__bytessec.fct_min"/>
+        <field type="java.lang.Integer" id="hourly_if_sent__bytessec.device_key"/>
+        <field type="java.lang.Integer" id="hourly_if_sent__bytessec.component_key"/>
+        <field type="java.util.Date" id="hourly_if_sent__bytessec.date_key"/>
+        <field type="java.sql.Timestamp" id="hourly_if_sent__bytessec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="hourly_if_sent__bytessec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="hourly_if_sent__bytessec.fct_avg"/>
+        <field type="java.lang.Double" id="hourly_if_sent__bytessec.fct_max"/>
+        <field type="java.lang.Double" id="hourly_if_sent__bytessec.fct_min"/>
+        <field type="java.lang.Integer" id="daily_if_sent_packets__persec.device_key"/>
+        <field type="java.lang.Integer" id="daily_if_sent_packets__persec.component_key"/>
+        <field type="java.util.Date" id="daily_if_sent_packets__persec.date_key"/>
+        <field type="java.sql.Timestamp" id="daily_if_sent_packets__persec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="daily_if_sent_packets__persec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="daily_if_sent_packets__persec.fct_avg"/>
+        <field type="java.lang.Double" id="daily_if_sent_packets__persec.fct_max"/>
+        <field type="java.lang.Double" id="daily_if_sent_packets__persec.fct_min"/>
+        <field type="java.lang.Integer" id="hourly_if_sent_packets__persec.device_key"/>
+        <field type="java.lang.Integer" id="hourly_if_sent_packets__persec.component_key"/>
+        <field type="java.util.Date" id="hourly_if_sent_packets__persec.date_key"/>
+        <field type="java.sql.Timestamp" id="hourly_if_sent_packets__persec.fct_ts"/>
+        <field type="java.sql.Timestamp" id="hourly_if_sent_packets__persec.fct_ts_gmt"/>
+        <field type="java.lang.Double" id="hourly_if_sent_packets__persec.fct_avg"/>
+        <field type="java.lang.Double" id="hourly_if_sent_packets__persec.fct_max"/>
+        <field type="java.lang.Double" id="hourly_if_sent_packets__persec.fct_min"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_key"/>
+        <field type="openstack_infrastructure_network_deleted_at" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_network.openstack_infrastructure_network_deleted_at,null,0,1)"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_name"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_type"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_uid"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_network.device_key"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_snmpindex"/>
+        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_monitor"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_production_state"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_pre_mw_production_state"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_resource_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_admin_state_up"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_net_external"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_net_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_net_status"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_net_type"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_title"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_network.dependencies_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_network.dependents_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_network.maintenance_window_count"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_network.openstack_infrastructure_endpoint_key"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_network.openstack_infrastructure_floating_ip_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_network.openstack_infrastructure_neutron_agent_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_network.openstack_infrastructure_port_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_network.openstack_infrastructure_router_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_network.openstack_infrastructure_subnet_count"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_network.openstack_infrastructure_tenant_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_key"/>
+        <field type="openstack_infrastructure_subnet_deleted_at" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_deleted_at,null,0,1)"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_name"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_type"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_uid"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_subnet.device_key"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_snmpindex"/>
+        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_monitor"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_production_state"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_pre_mw_production_state"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_resource_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_cidr"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_dns_nameservers"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_gateway_ip"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_subnet_id"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_subnet.dependencies_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_subnet.dependents_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_subnet.maintenance_window_count"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_endpoint_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_network_key"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_neutron_agent_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_port_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_router_count"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_tenant_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_key"/>
+        <field type="openstack_infrastructure_port_deleted_at" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_port.openstack_infrastructure_port_deleted_at,null,0,1)"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_name"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_type"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_uid"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_port.device_key"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_snmpindex"/>
+        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_monitor"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_production_state"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_pre_mw_production_state"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_resource_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_title"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_admin_state_up"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_device_owner"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_fixed_ip_list"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_vif_type"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_mac_address"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_port_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_status"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_port.dependencies_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_port.dependents_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_port.maintenance_window_count"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_port.openstack_infrastructure_endpoint_key"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_port.openstack_infrastructure_floating_ip_count"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_port.openstack_infrastructure_instance_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_port.openstack_infrastructure_network_key"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_port.openstack_infrastructure_subnet_count"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_port.openstack_infrastructure_tenant_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_port.openstack_infrastructure_router_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key"/>
         <field type="openstack_infrastructure_tenant_deleted_at" id="dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_deleted_at,null,0,1)"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_name"/>
@@ -4730,7 +5046,6 @@
         <field type="java.lang.String" id="dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_tenant_id"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_tenant.dependencies_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_tenant.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_tenant.component_group_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_tenant.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_tenant.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_tenant.openstack_infrastructure_floating_ip_count"/>
@@ -4756,7 +5071,6 @@
         <field type="java.lang.String" id="dim_openstack_infrastructure_region.openstack_infrastructure_region_resource_id"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_region.dependencies_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_region.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_region.component_group_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_region.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_region.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_region.org_component_count"/>
@@ -4785,7 +5099,6 @@
         <field type="java.lang.String" id="dim_openstack_infrastructure_flavor.openstack_infrastructure_flavor_flavor_type"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_flavor.dependencies_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_flavor.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_flavor.component_group_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_flavor.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_flavor.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_flavor.openstack_infrastructure_instance_count"/>
@@ -4807,7 +5120,6 @@
         <field type="java.lang.String" id="dim_openstack_infrastructure_image.openstack_infrastructure_image_image_updated"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_image.dependencies_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_image.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_image.component_group_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_image.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_image.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_image.openstack_infrastructure_instance_count"/>
@@ -4837,7 +5149,6 @@
         <field type="java.lang.String" id="dim_openstack_infrastructure_instance.openstack_infrastructure_instance_server_status"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_instance.dependencies_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_instance.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_instance.component_group_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_instance.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_instance.openstack_infrastructure_flavor_key"/>
@@ -4942,7 +5253,6 @@
         <field type="java.lang.String" id="dim_openstack_infrastructure_availability_zone.openstack_infrastructure_availability_zone_resource_id"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_availability_zone.dependencies_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_availability_zone.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_availability_zone.component_group_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_availability_zone.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_availability_zone.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_availability_zone.org_component_count"/>
@@ -4967,7 +5277,6 @@
         <field type="java.lang.String" id="dim_openstack_infrastructure_host.openstack_infrastructure_host_hostname"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_host.dependencies_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_host.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_host.component_group_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_host.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_host.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_host.org_component_key"/>
@@ -5003,7 +5312,6 @@
         <field type="java.lang.String" id="dim_openstack_infrastructure_hypervisor.openstack_infrastructure_hypervisor_disk_free"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_hypervisor.dependencies_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_hypervisor.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_hypervisor.component_group_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_hypervisor.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_hypervisor.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_hypervisor.openstack_infrastructure_instance_count"/>
@@ -5026,7 +5334,6 @@
         <field type="java.lang.String" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_nova_service_oper_status"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_nova_service.dependencies_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_nova_service.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_nova_service.component_group_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_nova_service.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_nova_service.openstack_infrastructure_host_key"/>
@@ -5049,7 +5356,6 @@
         <field type="java.lang.String" id="dim_openstack_infrastructure_cinder_service.openstack_infrastructure_cinder_service_oper_status"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_cinder_service.dependencies_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_cinder_service.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_cinder_service.component_group_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_cinder_service.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_cinder_service.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_cinder_service.openstack_infrastructure_host_key"/>
@@ -5072,7 +5378,6 @@
         <field type="java.lang.String" id="dim_openstack_infrastructure_nova_api.openstack_infrastructure_nova_api_oper_status"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_nova_api.dependencies_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_nova_api.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_nova_api.component_group_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_nova_api.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_nova_api.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_nova_api.openstack_infrastructure_host_key"/>
@@ -5095,66 +5400,10 @@
         <field type="java.lang.String" id="dim_openstack_infrastructure_cinder_api.openstack_infrastructure_cinder_api_oper_status"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_cinder_api.dependencies_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_cinder_api.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_cinder_api.component_group_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_cinder_api.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_cinder_api.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_cinder_api.openstack_infrastructure_host_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_cinder_api.org_component_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_key"/>
-        <field type="openstack_infrastructure_network_deleted_at" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_network.openstack_infrastructure_network_deleted_at,null,0,1)"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_name"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_type"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_uid"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_network.device_key"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_snmpindex"/>
-        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_monitor"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_production_state"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_pre_mw_production_state"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_resource_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_admin_state_up"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_net_external"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_net_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_net_status"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_net_type"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_network.openstack_infrastructure_network_title"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_network.dependencies_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_network.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_network.component_group_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_network.maintenance_window_count"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_network.openstack_infrastructure_endpoint_key"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_network.openstack_infrastructure_floating_ip_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_network.openstack_infrastructure_neutron_agent_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_network.openstack_infrastructure_port_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_network.openstack_infrastructure_router_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_network.openstack_infrastructure_subnet_count"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_network.openstack_infrastructure_tenant_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_key"/>
-        <field type="openstack_infrastructure_subnet_deleted_at" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_deleted_at,null,0,1)"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_name"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_type"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_uid"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_subnet.device_key"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_snmpindex"/>
-        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_monitor"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_production_state"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_pre_mw_production_state"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_resource_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_cidr"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_dns_nameservers"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_gateway_ip"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_subnet_subnet_id"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_subnet.dependencies_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_subnet.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_subnet.component_group_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_subnet.maintenance_window_count"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_endpoint_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_network_key"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_neutron_agent_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_port_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_router_count"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_subnet.openstack_infrastructure_tenant_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_router.openstack_infrastructure_router_key"/>
         <field type="openstack_infrastructure_router_deleted_at" id="dim_openstack_infrastructure_router.openstack_infrastructure_router_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_router.openstack_infrastructure_router_deleted_at,null,0,1)"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_router.openstack_infrastructure_router_name"/>
@@ -5175,7 +5424,6 @@
         <field type="java.lang.String" id="dim_openstack_infrastructure_router.openstack_infrastructure_router_title"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_router.dependencies_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_router.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_router.component_group_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_router.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_router.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_router.openstack_infrastructure_floating_ip_count"/>
@@ -5184,37 +5432,6 @@
         <field type="java.lang.Double" id="dim_openstack_infrastructure_router.openstack_infrastructure_subnet_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_router.openstack_infrastructure_tenant_key"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_router.openstack_infrastructure_port_count"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_key"/>
-        <field type="openstack_infrastructure_port_deleted_at" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_port.openstack_infrastructure_port_deleted_at,null,0,1)"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_name"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_type"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_uid"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_port.device_key"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_snmpindex"/>
-        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_monitor"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_production_state"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_pre_mw_production_state"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_resource_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_title"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_admin_state_up"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_device_owner"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_fixed_ip_list"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_vif_type"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_mac_address"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_port_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_port.openstack_infrastructure_port_status"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_port.dependencies_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_port.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_port.component_group_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_port.maintenance_window_count"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_port.openstack_infrastructure_endpoint_key"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_port.openstack_infrastructure_floating_ip_count"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_port.openstack_infrastructure_instance_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_port.openstack_infrastructure_network_key"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_port.openstack_infrastructure_subnet_count"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_port.openstack_infrastructure_tenant_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_port.openstack_infrastructure_router_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_neutron_agent.openstack_infrastructure_neutron_agent_key"/>
         <field type="openstack_infrastructure_neutron_agent_deleted_at" id="dim_openstack_infrastructure_neutron_agent.openstack_infrastructure_neutron_agent_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_neutron_agent.openstack_infrastructure_neutron_agent_deleted_at,null,0,1)"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_neutron_agent.openstack_infrastructure_neutron_agent_name"/>
@@ -5234,7 +5451,6 @@
         <field type="java.lang.String" id="dim_openstack_infrastructure_neutron_agent.openstack_infrastructure_neutron_agent_agent_id"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_neutron_agent.dependencies_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_neutron_agent.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_neutron_agent.component_group_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_neutron_agent.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_neutron_agent.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_neutron_agent.openstack_infrastructure_host_key"/>
@@ -5242,31 +5458,6 @@
         <field type="java.lang.Double" id="dim_openstack_infrastructure_neutron_agent.openstack_infrastructure_network_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_neutron_agent.openstack_infrastructure_router_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_neutron_agent.openstack_infrastructure_subnet_count"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_key"/>
-        <field type="openstack_infrastructure_floating_ip_deleted_at" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_deleted_at,null,0,1)"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_name"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_type"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_uid"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_floating_ip.device_key"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_snmpindex"/>
-        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_monitor"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_production_state"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_pre_mw_production_state"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_resource_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_fixed_ip_address"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_floating_ip_address"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_floatingip_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_status"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_floating_ip.dependencies_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_floating_ip.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_floating_ip.component_group_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_floating_ip.maintenance_window_count"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_endpoint_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_network_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_port_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_router_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_tenant_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_vol_type.openstack_infrastructure_vol_type_key"/>
         <field type="openstack_infrastructure_vol_type_deleted_at" id="dim_openstack_infrastructure_vol_type.openstack_infrastructure_vol_type_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_vol_type.openstack_infrastructure_vol_type_deleted_at,null,0,1)"/>
         <field type="java.lang.String" id="dim_openstack_infrastructure_vol_type.openstack_infrastructure_vol_type_name"/>
@@ -5281,7 +5472,6 @@
         <field type="java.lang.String" id="dim_openstack_infrastructure_vol_type.openstack_infrastructure_vol_type_resource_id"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_vol_type.dependencies_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_vol_type.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_vol_type.component_group_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_vol_type.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_vol_type.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_vol_type.openstack_infrastructure_volume_count"/>
@@ -5307,41 +5497,82 @@
         <field type="java.lang.String" id="dim_openstack_infrastructure_volume.openstack_infrastructure_volume_status"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_volume.dependencies_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_volume.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_volume.component_group_count"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_volume.maintenance_window_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_volume.openstack_infrastructure_endpoint_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_volume.openstack_infrastructure_tenant_key"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_volume.openstack_infrastructure_instance_key"/>
         <field type="java.lang.Double" id="dim_openstack_infrastructure_volume.openstack_infrastructure_vol_snapshot_count"/>
         <field type="java.lang.Integer" id="dim_openstack_infrastructure_volume.openstack_infrastructure_vol_type_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_key"/>
-        <field type="openstack_infrastructure_pool_deleted_at" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_pool.openstack_infrastructure_pool_deleted_at,null,0,1)"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_name"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_type"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_uid"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_pool.device_key"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_snmpindex"/>
-        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_monitor"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_production_state"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_pre_mw_production_state"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_resource_id"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_qos_support"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_allocated_capacity"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_free_capacity"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_total_capacity"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_driver_version"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_location"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_reserved_percentage"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_storage_protocol"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_vendor_name"/>
-        <field type="java.lang.String" id="dim_openstack_infrastructure_pool.openstack_infrastructure_pool_volume_backend"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_pool.dependencies_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_pool.dependents_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_pool.component_group_count"/>
-        <field type="java.lang.Double" id="dim_openstack_infrastructure_pool.maintenance_window_count"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_pool.openstack_infrastructure_endpoint_key"/>
-        <field type="java.lang.Integer" id="dim_openstack_infrastructure_pool.org_component_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_key"/>
+        <field type="openstack_infrastructure_vol_snapshot_deleted_at" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_deleted_at,null,0,1)"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_name"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_type"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_uid"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_vol_snapshot.device_key"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_snmpindex"/>
+        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_monitor"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_production_state"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_pre_mw_production_state"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_resource_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_created_at"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_description"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_size"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_progress"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_vol_snapshot_status"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_vol_snapshot.dependencies_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_vol_snapshot.dependents_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_vol_snapshot.maintenance_window_count"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_endpoint_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_volume_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_tenant_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_quota.openstack_infrastructure_quota_key"/>
+        <field type="openstack_infrastructure_quota_deleted_at" id="dim_openstack_infrastructure_quota.openstack_infrastructure_quota_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_quota.openstack_infrastructure_quota_deleted_at,null,0,1)"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_quota.openstack_infrastructure_quota_name"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_quota.openstack_infrastructure_quota_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_quota.openstack_infrastructure_quota_type"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_quota.openstack_infrastructure_quota_uid"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_quota.device_key"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_quota.openstack_infrastructure_quota_snmpindex"/>
+        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_quota.openstack_infrastructure_quota_monitor"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_quota.openstack_infrastructure_quota_production_state"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_quota.openstack_infrastructure_quota_pre_mw_production_state"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_quota.openstack_infrastructure_quota_resource_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_quota.openstack_infrastructure_quota_tenant_name"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_quota.openstack_infrastructure_quota_backup_bytes"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_quota.openstack_infrastructure_quota_backups"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_quota.openstack_infrastructure_quota_bytes"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_quota.openstack_infrastructure_quota_snapshots"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_quota.openstack_infrastructure_quota_volumes"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_quota.dependencies_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_quota.dependents_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_quota.maintenance_window_count"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_quota.openstack_infrastructure_endpoint_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_quota.openstack_infrastructure_tenant_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_key"/>
+        <field type="openstack_infrastructure_floating_ip_deleted_at" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_deleted_at" dataSetExpression="if(dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_deleted_at,null,0,1)"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_name"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_type"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_uid"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_floating_ip.device_key"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_snmpindex"/>
+        <field type="java.lang.Boolean" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_monitor"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_production_state"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_pre_mw_production_state"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_resource_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_fixed_ip_address"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_floating_ip_address"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_floatingip_id"/>
+        <field type="java.lang.String" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_floating_ip_status"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_floating_ip.dependencies_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_floating_ip.dependents_count"/>
+        <field type="java.lang.Double" id="dim_openstack_infrastructure_floating_ip.maintenance_window_count"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_endpoint_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_network_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_port_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_router_key"/>
+        <field type="java.lang.Integer" id="dim_openstack_infrastructure_floating_ip.openstack_infrastructure_tenant_key"/>
       </fieldList>
       <joinInfo alias="dim_openstack_infrastructure_endpoint" referenceId="dim_openstack_infrastructure_endpoint"/>
       <joinedDataSetList>
@@ -5754,7 +5985,43 @@
           <joinString>left outer join hourly_volume_unknown__count hourly_volume_unknown__count on (dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key == hourly_volume_unknown__count.device_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_tenant dim_openstack_infrastructure_tenant on (dim_openstack_infrastructure_tenant.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_vnic dim_openstack_infrastructure_vnic on (dim_openstack_infrastructure_vnic.openstack_infrastructure_instance_key == dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join daily_if_received__bytessec daily_if_received__bytessec on (dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_key == daily_if_received__bytessec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join hourly_if_received__bytessec hourly_if_received__bytessec on (dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_key == hourly_if_received__bytessec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join daily_if_received_packets__persec daily_if_received_packets__persec on (dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_key == daily_if_received_packets__persec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join hourly_if_received_packets__persec hourly_if_received_packets__persec on (dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_key == hourly_if_received_packets__persec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join daily_if_sent__bytessec daily_if_sent__bytessec on (dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_key == daily_if_sent__bytessec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join hourly_if_sent__bytessec hourly_if_sent__bytessec on (dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_key == hourly_if_sent__bytessec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join daily_if_sent_packets__persec daily_if_sent_packets__persec on (dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_key == daily_if_sent_packets__persec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join hourly_if_sent_packets__persec hourly_if_sent_packets__persec on (dim_openstack_infrastructure_vnic.openstack_infrastructure_vnic_key == hourly_if_sent_packets__persec.component_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join dim_openstack_infrastructure_network dim_openstack_infrastructure_network on (dim_openstack_infrastructure_network.openstack_infrastructure_tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key and dim_openstack_infrastructure_network.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join dim_openstack_infrastructure_subnet dim_openstack_infrastructure_subnet on (dim_openstack_infrastructure_subnet.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_subnet.openstack_infrastructure_network_key == dim_openstack_infrastructure_network.openstack_infrastructure_network_key and dim_openstack_infrastructure_subnet.openstack_infrastructure_tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join dim_openstack_infrastructure_port dim_openstack_infrastructure_port on (dim_openstack_infrastructure_port.openstack_infrastructure_network_key == dim_openstack_infrastructure_network.openstack_infrastructure_network_key and dim_openstack_infrastructure_port.openstack_infrastructure_instance_key == dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key and dim_openstack_infrastructure_port.openstack_infrastructure_tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key and dim_openstack_infrastructure_port.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_port.openstack_infrastructure_router_key == dim_openstack_infrastructure_router.openstack_infrastructure_router_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join dim_openstack_infrastructure_tenant dim_openstack_infrastructure_tenant on (dim_openstack_infrastructure_tenant.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_tenant.openstack_infrastructure_quota_key == dim_openstack_infrastructure_quota.openstack_infrastructure_quota_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
           <joinString>left outer join dim_openstack_infrastructure_region dim_openstack_infrastructure_region on (dim_openstack_infrastructure_region.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
@@ -5766,7 +6033,7 @@
           <joinString>left outer join dim_openstack_infrastructure_image dim_openstack_infrastructure_image on (dim_openstack_infrastructure_image.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_instance dim_openstack_infrastructure_instance on (dim_openstack_infrastructure_instance.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_instance.openstack_infrastructure_tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key and dim_openstack_infrastructure_instance.openstack_infrastructure_hypervisor_key == dim_openstack_infrastructure_hypervisor.openstack_infrastructure_hypervisor_key and dim_openstack_infrastructure_instance.openstack_infrastructure_flavor_key == dim_openstack_infrastructure_flavor.openstack_infrastructure_flavor_key and dim_openstack_infrastructure_instance.openstack_infrastructure_image_key == dim_openstack_infrastructure_image.openstack_infrastructure_image_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_instance dim_openstack_infrastructure_instance on (dim_openstack_infrastructure_instance.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_instance.openstack_infrastructure_image_key == dim_openstack_infrastructure_image.openstack_infrastructure_image_key and dim_openstack_infrastructure_instance.openstack_infrastructure_hypervisor_key == dim_openstack_infrastructure_hypervisor.openstack_infrastructure_hypervisor_key and dim_openstack_infrastructure_instance.openstack_infrastructure_flavor_key == dim_openstack_infrastructure_flavor.openstack_infrastructure_flavor_key and dim_openstack_infrastructure_instance.openstack_infrastructure_tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
           <joinString>left outer join daily_cpu__pct daily_cpu__pct on (dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key == daily_cpu__pct.component_key)</joinString>
@@ -5802,7 +6069,7 @@
           <joinString>left outer join dim_openstack_infrastructure_availability_zone dim_openstack_infrastructure_availability_zone on (dim_openstack_infrastructure_availability_zone.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_availability_zone.openstack_infrastructure_region_key == dim_openstack_infrastructure_region.openstack_infrastructure_region_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_host dim_openstack_infrastructure_host on (dim_openstack_infrastructure_host.openstack_infrastructure_hypervisor_key == dim_openstack_infrastructure_hypervisor.openstack_infrastructure_hypervisor_key and dim_openstack_infrastructure_host.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_host.org_component_key == dim_openstack_infrastructure_region.openstack_infrastructure_region_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_host dim_openstack_infrastructure_host on (dim_openstack_infrastructure_host.openstack_infrastructure_hypervisor_key == dim_openstack_infrastructure_hypervisor.openstack_infrastructure_hypervisor_key and dim_openstack_infrastructure_host.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_host.org_component_key == dim_openstack_infrastructure_region.openstack_infrastructure_region_key and dim_openstack_infrastructure_host.org_component_key == dim_openstack_infrastructure_availability_zone.openstack_infrastructure_availability_zone_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
           <joinString>left outer join dim_openstack_infrastructure_hypervisor dim_openstack_infrastructure_hypervisor on (dim_openstack_infrastructure_hypervisor.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_hypervisor.openstack_infrastructure_host_key == dim_openstack_infrastructure_host.openstack_infrastructure_host_key)</joinString>
@@ -5820,34 +6087,28 @@
           <joinString>left outer join dim_openstack_infrastructure_cinder_api dim_openstack_infrastructure_cinder_api on (dim_openstack_infrastructure_cinder_api.org_component_key == dim_openstack_infrastructure_region.openstack_infrastructure_region_key and dim_openstack_infrastructure_cinder_api.openstack_infrastructure_host_key == dim_openstack_infrastructure_host.openstack_infrastructure_host_key and dim_openstack_infrastructure_cinder_api.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_network dim_openstack_infrastructure_network on (dim_openstack_infrastructure_network.openstack_infrastructure_tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key and dim_openstack_infrastructure_network.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_router dim_openstack_infrastructure_router on (dim_openstack_infrastructure_router.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_router.openstack_infrastructure_tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_subnet dim_openstack_infrastructure_subnet on (dim_openstack_infrastructure_subnet.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_subnet.openstack_infrastructure_network_key == dim_openstack_infrastructure_network.openstack_infrastructure_network_key and dim_openstack_infrastructure_subnet.openstack_infrastructure_tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key)</joinString>
-        </joinedDataSetRef>
-        <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_router dim_openstack_infrastructure_router on (dim_openstack_infrastructure_router.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_router.openstack_infrastructure_network_key == dim_openstack_infrastructure_network.openstack_infrastructure_network_key and dim_openstack_infrastructure_router.openstack_infrastructure_tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key)</joinString>
-        </joinedDataSetRef>
-        <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_port dim_openstack_infrastructure_port on (dim_openstack_infrastructure_port.openstack_infrastructure_network_key == dim_openstack_infrastructure_network.openstack_infrastructure_network_key and dim_openstack_infrastructure_port.openstack_infrastructure_instance_key == dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key and dim_openstack_infrastructure_port.openstack_infrastructure_tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key and dim_openstack_infrastructure_port.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_port.openstack_infrastructure_router_key == dim_openstack_infrastructure_router.openstack_infrastructure_router_key)</joinString>
-        </joinedDataSetRef>
-        <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_neutron_agent dim_openstack_infrastructure_neutron_agent on (dim_openstack_infrastructure_neutron_agent.openstack_infrastructure_host_key == dim_openstack_infrastructure_host.openstack_infrastructure_host_key and dim_openstack_infrastructure_neutron_agent.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_neutron_agent.org_component_key == dim_openstack_infrastructure_region.openstack_infrastructure_region_key)</joinString>
-        </joinedDataSetRef>
-        <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_floating_ip dim_openstack_infrastructure_floating_ip on (dim_openstack_infrastructure_floating_ip.openstack_infrastructure_router_key == dim_openstack_infrastructure_router.openstack_infrastructure_router_key and dim_openstack_infrastructure_floating_ip.openstack_infrastructure_port_key == dim_openstack_infrastructure_port.openstack_infrastructure_port_key and dim_openstack_infrastructure_floating_ip.openstack_infrastructure_network_key == dim_openstack_infrastructure_network.openstack_infrastructure_network_key and dim_openstack_infrastructure_floating_ip.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_floating_ip.openstack_infrastructure_tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_neutron_agent dim_openstack_infrastructure_neutron_agent on (dim_openstack_infrastructure_neutron_agent.openstack_infrastructure_host_key == dim_openstack_infrastructure_host.openstack_infrastructure_host_key and dim_openstack_infrastructure_neutron_agent.org_component_key == dim_openstack_infrastructure_availability_zone.openstack_infrastructure_availability_zone_key and dim_openstack_infrastructure_neutron_agent.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_neutron_agent.org_component_key == dim_openstack_infrastructure_region.openstack_infrastructure_region_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
           <joinString>left outer join dim_openstack_infrastructure_vol_type dim_openstack_infrastructure_vol_type on (dim_openstack_infrastructure_vol_type.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_volume dim_openstack_infrastructure_volume on (dim_openstack_infrastructure_volume.openstack_infrastructure_tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key and dim_openstack_infrastructure_volume.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_volume dim_openstack_infrastructure_volume on (dim_openstack_infrastructure_volume.openstack_infrastructure_tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key and dim_openstack_infrastructure_volume.openstack_infrastructure_vol_type_key == dim_openstack_infrastructure_vol_type.openstack_infrastructure_vol_type_key and dim_openstack_infrastructure_volume.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_volume.openstack_infrastructure_instance_key == dim_openstack_infrastructure_instance.openstack_infrastructure_instance_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_openstack_infrastructure_pool dim_openstack_infrastructure_pool on (dim_openstack_infrastructure_pool.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_vol_snapshot dim_openstack_infrastructure_vol_snapshot on (dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key and dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_volume_key == dim_openstack_infrastructure_volume.openstack_infrastructure_volume_key and dim_openstack_infrastructure_vol_snapshot.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
         </joinedDataSetRef>
         <joinedDataSetRef>
-          <joinString>left outer join dim_date dim_date on (hourly_server_verify_resize__count.date_key == dim_date.date_key and daily_snapshot_total__count.date_key == dim_date.date_key and hourly_server_rescue__count.date_key == dim_date.date_key and daily_server_resize__count.date_key == dim_date.date_key and daily_pool_thin_provisioning_support__count.date_key == dim_date.date_key and daily_server_queue_resize__count.date_key == dim_date.date_key and hourly_volume_active__count.date_key == dim_date.date_key and daily_server_rescue__count.date_key == dim_date.date_key and hourly_pool_thick_provisioning_support__count.date_key == dim_date.date_key and hourly_snapshot_available__count.date_key == dim_date.date_key and daily_router_error__count.date_key == dim_date.date_key and daily_agent_mlnx__count.date_key == dim_date.date_key and hourly_snapshot_inprogress__count.date_key == dim_date.date_key and hourly_network_external__count.date_key == dim_date.date_key and daily_disk_write__bytessec.date_key == dim_date.date_key and daily_server_build__count.date_key == dim_date.date_key and hourly_server_resize__count.date_key == dim_date.date_key and hourly_router_total__count.date_key == dim_date.date_key and hourly_router_build__count.date_key == dim_date.date_key and daily_network_shared__count.date_key == dim_date.date_key and hourly_image_preparing__count.date_key == dim_date.date_key and hourly_agent_hyperv__count.date_key == dim_date.date_key and daily_server_reboot__count.date_key == dim_date.date_key and daily_server_rebuild__count.date_key == dim_date.date_key and daily_volume_total__count.date_key == dim_date.date_key and hourly_image_queued__count.date_key == dim_date.date_key and hourly_image_saving__count.date_key == dim_date.date_key and hourly_image_active__count.date_key == dim_date.date_key and hourly_snapshot_total__count.date_key == dim_date.date_key and hourly_volume_bootable__count.date_key == dim_date.date_key and hourly_pool_qos_support__count.date_key == dim_date.date_key and hourly_server_hard_reboot__count.date_key == dim_date.date_key and hourly_agent_metering__count.date_key == dim_date.date_key and hourly_network_down__count.date_key == dim_date.date_key and daily_server_total__count.date_key == dim_date.date_key and hourly_volume_total__count.date_key == dim_date.date_key and daily_image_failed__count.date_key == dim_date.date_key and hourly_agent_total__count.date_key == dim_date.date_key and hourly_agent_alive__count.date_key == dim_date.date_key and daily_agent_linux_bridge__count.date_key == dim_date.date_key and daily_flavor_total__count.date_key == dim_date.date_key and daily_image_saving__count.date_key == dim_date.date_key and daily_server_active__count.date_key == dim_date.date_key and hourly_pool_total__count.date_key == dim_date.date_key and daily_server_password__count.date_key == dim_date.date_key and hourly_disk_read__bytessec.date_key == dim_date.date_key and daily_agent_dhcp__count.date_key == dim_date.date_key and daily_agent_ofa__count.date_key == dim_date.date_key and daily_volume_attached__count.date_key == dim_date.date_key and daily_image_active__count.date_key == dim_date.date_key and hourly_server_delete__count.date_key == dim_date.date_key and daily_server_other__count.date_key == dim_date.date_key and hourly_volume_inuse__count.date_key == dim_date.date_key and daily_disk_writes__persec.date_key == dim_date.date_key and daily_agent_hyperv__count.date_key == dim_date.date_key and hourly_server_unknown__count.date_key == dim_date.date_key and daily_volume_bootable__count.date_key == dim_date.date_key and hourly_agent_ovs__count.date_key == dim_date.date_key and hourly_router_active__count.date_key == dim_date.date_key and daily_agent_sdnve__count.date_key == dim_date.date_key and hourly_server_rebuild__count.date_key == dim_date.date_key and daily_server_hard_reboot__count.date_key == dim_date.date_key and daily_agent_metering__count.date_key == dim_date.date_key and hourly_image_unknown__count.date_key == dim_date.date_key and hourly_agent_mlnx__count.date_key == dim_date.date_key and hourly_server_total__count.date_key == dim_date.date_key and hourly_image_total__count.date_key == dim_date.date_key and daily_image_preparing__count.date_key == dim_date.date_key and daily_server_suspended__count.date_key == dim_date.date_key and hourly_flavor_total__count.date_key == dim_date.date_key and daily_image_queued__count.date_key == dim_date.date_key and hourly_server_prep_resize__count.date_key == dim_date.date_key and daily_network_error__count.date_key == dim_date.date_key and hourly_server_active__count.date_key == dim_date.date_key and hourly_server_reboot__count.date_key == dim_date.date_key and hourly_image_other__count.date_key == dim_date.date_key and hourly_network_build__count.date_key == dim_date.date_key and daily_pool_qos_support__count.date_key == dim_date.date_key and daily_agent_nics__count.date_key == dim_date.date_key and hourly_server_password__count.date_key == dim_date.date_key and hourly_image_failed__count.date_key == dim_date.date_key and hourly_server_build__count.date_key == dim_date.date_key and hourly_disk_writes__persec.date_key == dim_date.date_key and daily_agent_dead__count.date_key == dim_date.date_key and hourly_agent_metadata__count.date_key == dim_date.date_key and daily_disk_reads__persec.date_key == dim_date.date_key and daily_router_total__count.date_key == dim_date.date_key and hourly_router_error__count.date_key == dim_date.date_key and daily_cpu__pct.date_key == dim_date.date_key and daily_snapshot_inprogress__count.date_key == dim_date.date_key and hourly_agent_lb__count.date_key == dim_date.date_key and hourly_network_avtive__count.date_key == dim_date.date_key and hourly_server_queue_resize__count.date_key == dim_date.date_key and hourly_network_error__count.date_key == dim_date.date_key and hourly_pool_thin_provisioning_support__count.date_key == dim_date.date_key and daily_agent_metadata__count.date_key == dim_date.date_key and daily_pool_thick_provisioning_support__count.date_key == dim_date.date_key and daily_network_build__count.date_key == dim_date.date_key and daily_network_total__count.date_key == dim_date.date_key and hourly_disk_reads__persec.date_key == dim_date.date_key and hourly_agent_nics__count.date_key == dim_date.date_key and daily_image_unknown__count.date_key == dim_date.date_key and daily_volume_inuse__count.date_key == dim_date.date_key and daily_agent_ovs__count.date_key == dim_date.date_key and daily_agent_lb__count.date_key == dim_date.date_key and daily_image_other__count.date_key == dim_date.date_key and daily_volume_unknown__count.date_key == dim_date.date_key and hourly_agent_sdnve__count.date_key == dim_date.date_key and daily_network_internal__count.date_key == dim_date.date_key and hourly_agent_dhcp__count.date_key == dim_date.date_key and daily_agent_alive__count.date_key == dim_date.date_key and daily_pool_total__count.date_key == dim_date.date_key and hourly_volume_unknown__count.date_key == dim_date.date_key and daily_agent_l3__count.date_key == dim_date.date_key and daily_server_prep_resize__count.date_key == dim_date.date_key and hourly_server_other__count.date_key == dim_date.date_key and daily_volume_available__count.date_key == dim_date.date_key and daily_network_avtive__count.date_key == dim_date.date_key and hourly_network_shared__count.date_key == dim_date.date_key and hourly_volume_available__count.date_key == dim_date.date_key and hourly_cpu__pct.date_key == dim_date.date_key and hourly_network_internal__count.date_key == dim_date.date_key and daily_volume_active__count.date_key == dim_date.date_key and daily_snapshot_available__count.date_key == dim_date.date_key and hourly_agent_dead__count.date_key == dim_date.date_key and hourly_agent_nec__count.date_key == dim_date.date_key and daily_server_unknown__count.date_key == dim_date.date_key and hourly_disk_write__bytessec.date_key == dim_date.date_key and daily_router_build__count.date_key == dim_date.date_key and daily_agent_total__count.date_key == dim_date.date_key and hourly_volume_attached__count.date_key == dim_date.date_key and hourly_agent_l3__count.date_key == dim_date.date_key and daily_router_active__count.date_key == dim_date.date_key and hourly_agent_ofa__count.date_key == dim_date.date_key and daily_agent_nec__count.date_key == dim_date.date_key and hourly_router_down__count.date_key == dim_date.date_key and daily_image_total__count.date_key == dim_date.date_key and daily_router_down__count.date_key == dim_date.date_key and daily_server_verify_resize__count.date_key == dim_date.date_key and daily_network_external__count.date_key == dim_date.date_key and daily_network_down__count.date_key == dim_date.date_key and daily_server_delete__count.date_key == dim_date.date_key and daily_disk_read__bytessec.date_key == dim_date.date_key and hourly_server_suspended__count.date_key == dim_date.date_key and hourly_agent_linux_bridge__count.date_key == dim_date.date_key and hourly_network_total__count.date_key == dim_date.date_key)</joinString>
+          <joinString>left outer join dim_openstack_infrastructure_quota dim_openstack_infrastructure_quota on (dim_openstack_infrastructure_quota.openstack_infrastructure_tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key and dim_openstack_infrastructure_quota.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join dim_openstack_infrastructure_floating_ip dim_openstack_infrastructure_floating_ip on (dim_openstack_infrastructure_floating_ip.openstack_infrastructure_network_key == dim_openstack_infrastructure_network.openstack_infrastructure_network_key and dim_openstack_infrastructure_floating_ip.openstack_infrastructure_endpoint_key == dim_openstack_infrastructure_endpoint.openstack_infrastructure_endpoint_key and dim_openstack_infrastructure_floating_ip.openstack_infrastructure_tenant_key == dim_openstack_infrastructure_tenant.openstack_infrastructure_tenant_key)</joinString>
+        </joinedDataSetRef>
+        <joinedDataSetRef>
+          <joinString>left outer join dim_date dim_date on (hourly_server_verify_resize__count.date_key == dim_date.date_key and daily_snapshot_total__count.date_key == dim_date.date_key and hourly_server_rescue__count.date_key == dim_date.date_key and daily_if_sent__bytessec.date_key == dim_date.date_key and daily_server_resize__count.date_key == dim_date.date_key and daily_pool_thin_provisioning_support__count.date_key == dim_date.date_key and daily_server_queue_resize__count.date_key == dim_date.date_key and hourly_volume_active__count.date_key == dim_date.date_key and daily_server_rescue__count.date_key == dim_date.date_key and hourly_pool_thick_provisioning_support__count.date_key == dim_date.date_key and hourly_snapshot_available__count.date_key == dim_date.date_key and daily_router_error__count.date_key == dim_date.date_key and daily_agent_mlnx__count.date_key == dim_date.date_key and hourly_snapshot_inprogress__count.date_key == dim_date.date_key and hourly_network_external__count.date_key == dim_date.date_key and daily_disk_write__bytessec.date_key == dim_date.date_key and daily_server_build__count.date_key == dim_date.date_key and hourly_server_resize__count.date_key == dim_date.date_key and hourly_router_total__count.date_key == dim_date.date_key and hourly_router_build__count.date_key == dim_date.date_key and daily_network_shared__count.date_key == dim_date.date_key and hourly_image_preparing__count.date_key == dim_date.date_key and hourly_agent_hyperv__count.date_key == dim_date.date_key and daily_server_reboot__count.date_key == dim_date.date_key and daily_server_rebuild__count.date_key == dim_date.date_key and daily_volume_total__count.date_key == dim_date.date_key and hourly_image_queued__count.date_key == dim_date.date_key and hourly_image_saving__count.date_key == dim_date.date_key and hourly_image_active__count.date_key == dim_date.date_key and hourly_snapshot_total__count.date_key == dim_date.date_key and hourly_volume_bootable__count.date_key == dim_date.date_key and hourly_pool_qos_support__count.date_key == dim_date.date_key and hourly_server_hard_reboot__count.date_key == dim_date.date_key and hourly_agent_metering__count.date_key == dim_date.date_key and hourly_network_down__count.date_key == dim_date.date_key and daily_server_total__count.date_key == dim_date.date_key and hourly_volume_total__count.date_key == dim_date.date_key and daily_image_failed__count.date_key == dim_date.date_key and hourly_agent_total__count.date_key == dim_date.date_key and hourly_agent_alive__count.date_key == dim_date.date_key and daily_agent_linux_bridge__count.date_key == dim_date.date_key and daily_flavor_total__count.date_key == dim_date.date_key and daily_image_saving__count.date_key == dim_date.date_key and daily_server_active__count.date_key == dim_date.date_key and hourly_pool_total__count.date_key == dim_date.date_key and daily_server_password__count.date_key == dim_date.date_key and hourly_if_sent__bytessec.date_key == dim_date.date_key and hourly_disk_read__bytessec.date_key == dim_date.date_key and daily_agent_dhcp__count.date_key == dim_date.date_key and daily_agent_ofa__count.date_key == dim_date.date_key and daily_volume_attached__count.date_key == dim_date.date_key and daily_image_active__count.date_key == dim_date.date_key and hourly_server_delete__count.date_key == dim_date.date_key and daily_server_other__count.date_key == dim_date.date_key and hourly_volume_inuse__count.date_key == dim_date.date_key and daily_disk_writes__persec.date_key == dim_date.date_key and hourly_if_sent_packets__persec.date_key == dim_date.date_key and daily_agent_hyperv__count.date_key == dim_date.date_key and hourly_server_unknown__count.date_key == dim_date.date_key and daily_volume_bootable__count.date_key == dim_date.date_key and hourly_agent_ovs__count.date_key == dim_date.date_key and hourly_router_active__count.date_key == dim_date.date_key and daily_agent_sdnve__count.date_key == dim_date.date_key and hourly_server_rebuild__count.date_key == dim_date.date_key and daily_server_hard_reboot__count.date_key == dim_date.date_key and daily_agent_metering__count.date_key == dim_date.date_key and hourly_image_unknown__count.date_key == dim_date.date_key and hourly_agent_mlnx__count.date_key == dim_date.date_key and hourly_server_total__count.date_key == dim_date.date_key and hourly_image_total__count.date_key == dim_date.date_key and daily_image_preparing__count.date_key == dim_date.date_key and daily_if_received__bytessec.date_key == dim_date.date_key and daily_server_suspended__count.date_key == dim_date.date_key and hourly_flavor_total__count.date_key == dim_date.date_key and daily_image_queued__count.date_key == dim_date.date_key and hourly_server_prep_resize__count.date_key == dim_date.date_key and daily_network_error__count.date_key == dim_date.date_key and hourly_server_active__count.date_key == dim_date.date_key and hourly_server_reboot__count.date_key == dim_date.date_key and hourly_image_other__count.date_key == dim_date.date_key and hourly_network_build__count.date_key == dim_date.date_key and daily_pool_qos_support__count.date_key == dim_date.date_key and daily_agent_nics__count.date_key == dim_date.date_key and hourly_server_password__count.date_key == dim_date.date_key and hourly_image_failed__count.date_key == dim_date.date_key and hourly_server_build__count.date_key == dim_date.date_key and hourly_disk_writes__persec.date_key == dim_date.date_key and daily_agent_dead__count.date_key == dim_date.date_key and hourly_agent_metadata__count.date_key == dim_date.date_key and daily_disk_reads__persec.date_key == dim_date.date_key and daily_if_sent_packets__persec.date_key == dim_date.date_key and daily_router_total__count.date_key == dim_date.date_key and hourly_router_error__count.date_key == dim_date.date_key and daily_cpu__pct.date_key == dim_date.date_key and daily_snapshot_inprogress__count.date_key == dim_date.date_key and hourly_agent_lb__count.date_key == dim_date.date_key and hourly_network_avtive__count.date_key == dim_date.date_key and hourly_server_queue_resize__count.date_key == dim_date.date_key and hourly_network_error__count.date_key == dim_date.date_key and hourly_pool_thin_provisioning_support__count.date_key == dim_date.date_key and daily_agent_metadata__count.date_key == dim_date.date_key and daily_pool_thick_provisioning_support__count.date_key == dim_date.date_key and daily_network_build__count.date_key == dim_date.date_key and daily_network_total__count.date_key == dim_date.date_key and hourly_if_received_packets__persec.date_key == dim_date.date_key and hourly_disk_reads__persec.date_key == dim_date.date_key and hourly_agent_nics__count.date_key == dim_date.date_key and daily_image_unknown__count.date_key == dim_date.date_key and daily_volume_inuse__count.date_key == dim_date.date_key and daily_if_received_packets__persec.date_key == dim_date.date_key and hourly_if_received__bytessec.date_key == dim_date.date_key and daily_agent_ovs__count.date_key == dim_date.date_key and daily_agent_lb__count.date_key == dim_date.date_key and daily_image_other__count.date_key == dim_date.date_key and daily_volume_unknown__count.date_key == dim_date.date_key and hourly_agent_sdnve__count.date_key == dim_date.date_key and daily_network_internal__count.date_key == dim_date.date_key and hourly_agent_dhcp__count.date_key == dim_date.date_key and daily_agent_alive__count.date_key == dim_date.date_key and daily_pool_total__count.date_key == dim_date.date_key and hourly_volume_unknown__count.date_key == dim_date.date_key and daily_agent_l3__count.date_key == dim_date.date_key and daily_server_prep_resize__count.date_key == dim_date.date_key and hourly_server_other__count.date_key == dim_date.date_key and daily_volume_available__count.date_key == dim_date.date_key and daily_network_avtive__count.date_key == dim_date.date_key and hourly_network_shared__count.date_key == dim_date.date_key and hourly_volume_available__count.date_key == dim_date.date_key and hourly_cpu__pct.date_key == dim_date.date_key and hourly_network_internal__count.date_key == dim_date.date_key and daily_volume_active__count.date_key == dim_date.date_key and daily_snapshot_available__count.date_key == dim_date.date_key and hourly_agent_dead__count.date_key == dim_date.date_key and hourly_agent_nec__count.date_key == dim_date.date_key and daily_server_unknown__count.date_key == dim_date.date_key and hourly_disk_write__bytessec.date_key == dim_date.date_key and daily_router_build__count.date_key == dim_date.date_key and daily_agent_total__count.date_key == dim_date.date_key and hourly_volume_attached__count.date_key == dim_date.date_key and hourly_agent_l3__count.date_key == dim_date.date_key and daily_router_active__count.date_key == dim_date.date_key and hourly_agent_ofa__count.date_key == dim_date.date_key and daily_agent_nec__count.date_key == dim_date.date_key and hourly_router_down__count.date_key == dim_date.date_key and daily_image_total__count.date_key == dim_date.date_key and daily_router_down__count.date_key == dim_date.date_key and daily_server_verify_resize__count.date_key == dim_date.date_key and daily_network_external__count.date_key == dim_date.date_key and daily_network_down__count.date_key == dim_date.date_key and daily_server_delete__count.date_key == dim_date.date_key and daily_disk_read__bytessec.date_key == dim_date.date_key and hourly_server_suspended__count.date_key == dim_date.date_key and hourly_agent_linux_bridge__count.date_key == dim_date.date_key and hourly_network_total__count.date_key == dim_date.date_key)</joinString>
         </joinedDataSetRef>
       </joinedDataSetList>
     </jdbcTable>
