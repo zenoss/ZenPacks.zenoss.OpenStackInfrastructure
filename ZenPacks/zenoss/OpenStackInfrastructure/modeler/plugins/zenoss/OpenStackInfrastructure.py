@@ -46,6 +46,17 @@ add_local_lib_path()
 from apiclients.txapiclient import APIClient, APIClientError, NotFoundError
 
 
+# https://github.com/openstack/nova/blob/master/nova/compute/power_state.py
+POWER_STATE_MAP = {
+    0: 'pending',
+    1: 'running',
+    3: 'paused',
+    4: 'shutdown',
+    6: 'crashed',
+    7: 'suspended',
+}
+
+
 class OpenStackInfrastructure(PythonPlugin):
     deviceProperties = PythonPlugin.deviceProperties + (
         'zCommandUsername',
@@ -490,13 +501,19 @@ class OpenStackInfrastructure(PythonPlugin):
 
             tenant_id = server.get('tenant_id', '')
 
+            power_state = server.get('OS-EXT-STS:power_state', 0)
+            task_state = server.get('OS-EXT-STS:task_state')
+            if not task_state:
+                task_state = 'no task in progress'
+            vm_state = server.get('OS-EXT-STS:vm_state')
+
             # Note: volume relations are added in volumes map below
             server_dict = dict(
                 id=prepId('server-{0}'.format(server['id'])),
                 title=server.get('name', server['id']),
                 resourceId=server['id'],
                 serverId=server['id'],  # 847424
-                serverStatus=server.get('status', ''),
+                serverStatus=server.get('status', '').lower(),
                 serverBackupEnabled=backup_schedule_enabled,
                 serverBackupDaily=backup_schedule_daily,
                 serverBackupWeekly=backup_schedule_weekly,
@@ -505,7 +522,10 @@ class OpenStackInfrastructure(PythonPlugin):
                 set_flavor=prepId('flavor-{0}'.format(flavor_id)),
                 set_tenant=prepId('tenant-{0}'.format(tenant_id)),
                 hostId=server.get('hostId', ''),
-                hostName=server.get('name', '')
+                hostName=server.get('name', ''),
+                powerState=POWER_STATE_MAP.get(power_state),
+                taskState=task_state,
+                vmState=vm_state,
                 )
 
             # Some Instances are created from pre-existing volumes
