@@ -72,7 +72,7 @@ class libvirt(PythonPlugin):
                 # host based installation
                 cmd = "virsh --readonly -c 'qemu:///system' dumpxml '%s'" % \
                       instanceUUID
-                if device.zOpenStackRunNeutronCommonInContainer:
+                if device.zOpenStackRunVirshQemuInContainer:
                     # container based installation
                     cmd = container_cmd_wrapper(
                         device.zOpenStackRunVirshQemuInContainer,
