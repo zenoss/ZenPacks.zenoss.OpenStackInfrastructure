@@ -125,17 +125,8 @@ class CinderServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
         data = self.new_data()
 
         for service in result['services']:
-            # on some OpenStack hosts, the host for
-            # cinder-volume has pool name, lvm, attached to it, like:
-            # u'host': u'liberty-allinone.zenoss.loc@lvm', which isn't correct
-            # whereas for cinder-backup and cinder-scheduler host looks like:
-            # u'host': u'liberty-allinone.zenoss.loc', which is correct
-            # remove '@lvm' from host name only if hostname has it
-            host = service['host']
-            if host.endswith('@lvm'):
-                host = host[:host.index('@lvm')]
             service_id = prepId('service-{0}-{1}-{2}'.format(
-                service['binary'], host, service['zone']))
+                service['binary'], service['host'], service['zone']))
 
             data['maps'].append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.CinderService',
