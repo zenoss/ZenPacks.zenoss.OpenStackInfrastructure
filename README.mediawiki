@@ -8,10 +8,11 @@ underlying OpenStack servers and software are monitored.
 === Features ===
 
 * Monitors Overall OpenStack state
-* Monitors Nova and Neutron health
+* Monitors Nova, Neutron and Cinder health
 * Monitors multiple Tenant Infrastructure
-* Monitors Nova Services and components
-* Models and monitors Neutron Services and components
+* Models and monitors Nova Services and components
+* Models and monitors Neutron Agents and components
+* Models and monitors Cinder Services and components
 * Impact and Root-Cause (Requires Zenoss Service Dynamics)
 
 === Gallery ===
@@ -39,14 +40,18 @@ osi_routers.png|Router
 osi_subnets.png|Subnet
 osi_tenants.png|Tenant
 osi_vnics.png|vNIC
+osi_cinderservices.png|Cinder Service
+osi_volumes.png|Volume
+osi_volsnapshots.png|Volume Snapshot
 </gallery>
 
 == Prerequisites ==
 
 * OpenStack (Icehouse or newer)
 * Ceilometer-OpenStack compatible with your version of OpenStack
-* ceilometer_zenoss 1.0.0+ (https://github.com/zenoss/ceilometer_zenoss)
-** This Zenoss-specific plugin must be installed on your Ceilometer nodes (see below)
+* ceilometer_zenoss 1.0.1 for Kilo and Prior (https://github.com/zenoss/ceilometer_zenoss)
+* ceilometer_zenoss 1.0.2 for Liberty
+** This Zenoss-specific plugin must be installed on all your Ceilometer nodes (see below)
 ** If not installed and configured properly, Instances and vNICs graphs will be blank, and Zenoss will not detect changes (such as new instances or instance state changes) until a full model is performed.
 * PyYAML needs to be installed in order to use the YAML configuration
 ** All 5.X versions of Zenoss have PyYAML already installed
@@ -290,6 +295,15 @@ where ''<filename>'' should have the form:
 * Floating-Ips
 * vNICs (from NovaHost compute device model)
 
+;The following block storage elements are discovered:
+* Cinder Services (processes supporting block storage)
+* Cinder API Endpoints
+* Volumes
+* Volume Snapshots
+* Volume Types
+* Storage Pools
+* Cinder Quotas
+
 ===Metrics===
 
 ;The following component level metrics are collected:
@@ -367,13 +381,12 @@ sure their values are empty:
 ===Container Based Installation===
 
 With container based installation, each OpenStack binary runs inside its own
-container. In this case, edit the Configuration Properties of the
+container. In this case, the Configuration Properties of the
 /Server/SSH/Linux/NovaHost devices, zOpenStackRunNovaManageInContainer,
 zOpenStackRunVirshQemuInContainer, and zOpenStackRunNeutronCommonInContainer,
-after modeling the OpenStackInfrastructure device, but before modeling the
-/Server/SSH/Linux/NovaHost devices, and make sure their values are set as:
+should be set to the container names, before modeling Nova hosts, as:
 <syntaxhighlight lang="bash">
-      zOpenStackRunNovaManageInContainer novaconduct
+      zOpenStackRunNovaManageInContainer novacompute
       zOpenStackRunVirshQemuInContainer novacompute
       zOpenStackRunNeutronCommonInContainer neutron_server
 </syntaxhighlight>
@@ -410,12 +423,37 @@ to Zenoss's RabbitMQ server.
 This dispatcher should be installed on all nodes running any ceilometer, but
 particularly those running ceilometer-collector or ceilometer-agent-notification.
 
-To install it, perform the following steps on each of these OpenStack nodes (NOT
+To install ceilometer_zenoss 1.0.1, perform the following steps on each of these OpenStack nodes (NOT
 on the Zenoss collector):
 
 <syntaxhighlight lang="bash">
   sudo pip -q install --force-reinstall https://github.com/zenoss/ceilometer_zenoss/archive/master.zip
   sudo cp /usr/lib/*/site-packages/ceilometer_zenoss/event_definitions.yaml /etc/ceilometer/
+</syntaxhighlight>
+
+For ceilometer_zenoss 1.0.2, first git clone the ceilometer_zenoss repository from
+https://github.com/zenoss/ceilometer_zenoss to a Linux server, either Ubuntu 14.04+,
+or CentOS 6.5+. Install docker or docker-engine on the Linux server.
+Next navigate to the top directory of ceilometer_zenoss,
+<syntaxhighlight lang="bash">
+  $ make -C jenkins images
+  $ make -f jenkins/Makefile rpms
+</syntaxhighlight>
+ 
+This generates RPM files for RHEL6, RHEL7, CentOS 6 and CentOS 7.
+Before installing RPMs on OpenStack ceilometer hosts, make sure older versions of 
+cepilometer_zenoss has been erased. One can check this using:
+<syntaxhighlight lang="bash">
+  $ pip list | grep ceilometer_zenoss
+</syntaxhighlight>
+or:
+<syntaxhighlight lang="bash">
+  $ rpm -qa | grep ceilometer_zenoss
+</syntaxhighlight>
+
+To install ceilometer_zenoss rpm on an OpenStack ceilometer host,
+<syntaxhighlight lang="bash">
+  $ rpm -Uvh <ceilometer_zenoss rpm>
 </syntaxhighlight>
 
 The following configuration must be added to /etc/ceilometer/ceilometer.conf file:
@@ -547,8 +585,8 @@ Component failures will affect Impact as follows:
 
 ;Internal Impact Relationships
 * OpenStack API endpoint impacts all Hosts
-* Availabilty zone impacts associated Region
-* Host impacts associated Hypervisors, Nova Services, Cells, Nova Apis, and Neutron Agents
+* Availability zone impacts associated Region
+* Host impacts associated Hypervisors, Nova Services, Cells, Nova Apis, Neutron Agents, and Cinder Services
 * Hypervisor impacts the resident Instances (VMs)
 * Nova Service affects the Availability Zone or Region that it supports
 * Instance impacts the associated Tenant
@@ -559,13 +597,14 @@ Component failures will affect Impact as follows:
 * Network impacts associated Subnets and Tenants
 * Router impacts associated Subnets and Floating-ips
 * Neutron Agent impacts associated Networks, Subnets and Routers
+* volume impacts Instances (VMs), Volume Snapshots
 
 ;External Impact Relationships
 * Instance impacts guest operating system device.
 * Cisco UCS vNIC impacts related host's underlying Linux device NIC.
 * Cisco UCS service profile impacts host's underlying Linux device.
 * Host impacted by associated Linux device.
-* OS Processes on an underlying Linux device impact corresponding Nova APIs and  Nova Services on Host.
+* OS Processes on an underlying Linux device impact corresponding Nova APIs,  Nova Services, Neutron Agents and Cinder Services on Host.
 
 == ML2 Integration ==
 
@@ -575,21 +614,18 @@ Provides linkage between OpenStackInfrastrcuture components and relevant integra
 * APIC Integration via Cisco APIC ZenPack
 * NSX Integration via NSX ZenPack
 
+== Cinder Integration ==
 
-== Daemons ==
+Provides linkage between OpenStackInfrastrcuture components and relevant integrated device components; imports performance graphs from relevant integrated device components; provides impact graph relations between OpenStackInfrastrcuture components and relevant integrated device components
 
+* LVM logical volumes Integration via LinuxMonitor 2.0.0 ZenPack
+* Ceph RBD volumes Integration via Ceph 2.0.0 ZenPack
 
-{| class="wikitable"
-!width="50%"|Collector Type
-!width="50%"|Daemon
-|-
-|Modeler
-|<span class="keyword cmdname">zenmodeler</span>
-|-
-|Performance Collectors
-|<span class="keyword cmdname">zencommand, zenpython</span>
-|-
-|}
+== Tested OpenStack Releases ==
+
+OpenStack Provider View Version 2.0.0 was tested against Icehouse and Juno.
+OpenStack Provider View Version 2.1.3 was tested against Juno and Kilo.
+OpenStack Provider View Version 2.2.0 was tested against Juno, Kilo, Liberty.
 
 == Known Issues ==
 
@@ -606,7 +642,9 @@ Provides linkage between OpenStackInfrastrcuture components and relevant integra
 == Changes ==
 
 ;2.2.0
-* Fix ZEN-17017: Add Port-vNIC links in UI
+* Added Cinder block storage components.
+* Added LVM, Ceph block storage integration via LinuxMonitor and Ceph ZenPacks.
+* Various bug fixes
 
 ;2.1.3
 * Fixed ZEN-22126: Malformed hostnames in the F5 LBAAS plugin
