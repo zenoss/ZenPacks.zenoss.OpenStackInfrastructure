@@ -282,4 +282,8 @@ class HostMap(object):
         for hostref, hostid in self.mapping.iteritems():
             frozen[hostref] = hostid
 
+        for hostref, hostid in self.frozen_mapping.iteritems():
+            if hostref not in frozen:
+                frozen[hostref] = hostid
+
         return frozen
