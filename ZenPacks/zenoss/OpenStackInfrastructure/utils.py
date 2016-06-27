@@ -361,3 +361,27 @@ def resolve_names(names):
             result_map[result[0]] = result[1]
 
     defer.returnValue(result_map)
+
+
+def validate_fqdn(dn):
+    if dn.endswith('.'):
+        dn = dn[:-1]
+    if len(dn) < 1 or len(dn) > 253:
+        return False
+    ldh_re = re.compile('^[a-z\d]([a-z\d-]{0,61}[a-z\d])?$', re.IGNORECASE)
+    return all(ldh_re.match(x) for x in dn.split('.'))
+
+
+def filter_FQDNs(dnlist):
+    """Remove invalid hosts: return tuple (correct_hosts, valid)"""
+
+    goodlist = []
+    host_errors = False
+    for dn in dnlist:
+        if not validate_fqdn(dn):
+            LOG.warn('Invalid hostname at "%s"', dn)
+            host_errors = True
+        else:
+            goodlist.append(dn)
+
+    return goodlist, host_errors

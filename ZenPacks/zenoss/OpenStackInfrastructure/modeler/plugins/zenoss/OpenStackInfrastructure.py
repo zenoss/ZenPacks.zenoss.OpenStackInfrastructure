@@ -39,6 +39,7 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import (
     get_port_instance,
     getNetSubnetsGws_from_GwInfo,
     get_port_fixedips,
+    filter_FQDNs,
 )
 
 add_local_lib_path()
@@ -261,10 +262,18 @@ class OpenStackInfrastructure(PythonPlugin):
             else:
                 results['quotas'][tenant['id']] = result.get('quota_set', [])
 
-        results['zOpenStackNovaApiHosts'] = device.zOpenStackNovaApiHosts
-        results['zOpenStackCinderApiHosts'] = device.zOpenStackCinderApiHosts
+        results['zOpenStackNovaApiHosts'], host_errors = filter_FQDNs(device.zOpenStackNovaApiHosts)
+        if host_errors:
+            log.warn('Invalid host in zOpenStackNovaApiHosts')
 
-        results['zOpenStackExtraHosts'] = device.zOpenStackExtraHosts
+        results['zOpenStackCinderApiHosts'], host_errors = filter_FQDNs(device.zOpenStackCinderApiHosts)
+        if host_errors:
+            log.warn('Invalid host in zOpenStackCinderApiHosts')
+
+        results['zOpenStackExtraHosts'], host_errors = filter_FQDNs(device.zOpenStackExtraHosts)
+        if host_errors:
+            log.warn('Invalid host in zOpenStackExtraHosts')
+
         try:
             results['nova_url_host'] = urlparse(results['nova_url']).hostname
         except:
