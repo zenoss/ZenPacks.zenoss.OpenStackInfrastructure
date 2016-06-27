@@ -10,6 +10,8 @@
 import logging
 log = logging.getLogger('zen.OpenStack.CinderServiceStatus')
 
+import re
+
 from twisted.internet import defer
 from twisted.internet.defer import inlineCallbacks
 
@@ -24,6 +26,7 @@ from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import (
     IPythonDataSourceInfo)
 
 from Products.ZenUtils.Utils import prepId
+from ZenPacks.zenoss.OpenStackInfrastructure.hostmap import HostMap
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import result_errmsg, add_local_lib_path
 add_local_lib_path()
 
@@ -79,6 +82,8 @@ class CinderServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
         'zCommandPassword',
         'zOpenStackProjectId',
         'zOpenStackAuthUrl',
+        'zOpenStackHostMapToId',
+        'zOpenStackHostMapSame',
     )
 
     @classmethod
@@ -97,7 +102,9 @@ class CinderServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
 
     @classmethod
     def params(cls, datasource, context):
-        return {}
+        return {
+            'host_mappings': dict(context.host_mappings)
+        }
 
     @inlineCallbacks
     def collect(self, config):
@@ -119,20 +126,78 @@ class CinderServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
 
         results['nova_url'] = yield client.nova_url()
 
+        yield self.preprocess_hosts(config, results)
+
         defer.returnValue(results)
+
+    @inlineCallbacks
+    def preprocess_hosts(self, config, results):
+        # spin through the collected data, pre-processing all the fields
+        # that reference hosts to have consistent host IDs, so that the
+        # process() method does not have to worry about hostname -> ID
+        # mapping at all.
+
+        hostmap = HostMap()
+        results['hostmap'] = hostmap
+
+        ds0 = config.datasources[0]
+
+        for mapping in ds0.zOpenStackHostMapToId:
+            try:
+                hostref, hostid = mapping.split("=")
+                hostmap.assert_host_id(hostref, hostid)
+            except Exception:
+                log.error("Invalid value in zOpenStackHostMapToId: %s", mapping)
+
+        for mapping in ds0.zOpenStackHostMapSame:
+            try:
+                hostref1, hostref2 = mapping.split("=")
+                hostmap.assert_same_as(hostref1, hostref2)
+            except Exception:
+                log.error("Invalid value in zOpenStackHostMapSame: %s", mapping)
+
+        # load in previously modeled mappings..
+        hostmap.thaw_mappings(ds0.params['host_mappings'])
+
+        for service in results['services']:
+            if 'host' in service:
+                hostmap.add_hostref(service['host'], source="nova services")
+
+        # generate host IDs
+        yield hostmap.perform_mapping()
+
+        # replace all references to hosts with their host IDs, so
+        # process() doesn't have to think about this stuff.
+        for service in results['services']:
+            if 'host' in service:
+                service['host'] = hostmap.get_hostid(service['host'])
+
+        # Note: Normally, whenever using hostmap, we store the output of
+        # freeze_mappings, so that any new mappings are persisted.  This
+        # is not necessary in this case, because any new components found
+        # by this task will not be stored in the database (because _add=False),
+        # so their IDs don't especially matter.  The new full model run
+        # will establish and store their proper IDs.
 
     def onSuccess(self, result, config):
         data = self.new_data()
 
         for service in result['services']:
+            host_id = service['host']
+            hostname = result['hostmap'].get_hostname_for_hostid(host_id)
+            host_base_id = re.sub(r'^host-', '', host_id)
+
             service_id = prepId('service-{0}-{1}-{2}'.format(
-                service['binary'], service['host'], service['zone']))
+                service['binary'],
+                host_base_id,
+                service['zone']))
 
             data['maps'].append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.CinderService',
                 compname='',
                 data=dict(
                     id=service_id,
+                    _add=False,
                     relname='components',
                     enabled={
                         'enabled': True,
@@ -149,7 +214,7 @@ class CinderServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
                     'device': config.id,
                     'component': service_id,
                     'summary': 'Service %s on host %s (Availabilty Zone %s) is now DISABLED' %
-                               (service['binary'], service['host'], service['zone']),
+                               (service['binary'], hostname, service['zone']),
                     'severity': ZenEventClasses.Clear,
                     'eventClassKey': 'openStackCinderServiceStatus',
                     })
@@ -159,7 +224,7 @@ class CinderServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
                     'device': config.id,
                     'component': service_id,
                     'summary': 'Service %s on host %s (Availabilty Zone %s) is now UP' %
-                               (service['binary'], service['host'], service['zone']),
+                               (service['binary'], hostname, service['zone']),
                     'severity': ZenEventClasses.Clear,
                     'eventClassKey': 'openStackCinderServiceStatus',
                     })
@@ -169,7 +234,7 @@ class CinderServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
                     'device': config.id,
                     'component': service_id,
                     'summary': 'Service %s on host %s (Availabilty Zone %s) is now DOWN' %
-                               (service['binary'], service['host'], service['zone']),
+                               (service['binary'], hostname, service['zone']),
                     'severity': ZenEventClasses.Error,
                     'eventClassKey': 'openStackCinderServiceStatus',
                     })
