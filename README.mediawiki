@@ -522,6 +522,20 @@ since by default, Ceilometer will only produce one datapoint every 10 minutes.
 This can be adjusted by modifying the "interval: 600" line in your
 pipeline.yaml file (typically /etc/ceilometer/pipeline.yaml).
 
+== Device Status ==
+
+The OpenStackInfrastructure Device Status is now handled by ZenPackLib 1.1.0.
+The device Status is determined by OpenStackInfrastructure data source events.
+The device is down if a critical event is received from one of
+OpenStackInfrastructure's data sources. Otherwise the device status is up.
+Please note that being able to model OpenStackInfrastructure device is not
+equivalent to device status being up.
+
+Since the older versions of OpenStackInfrastructure ZenPack processed device
+status differently, before upgrading from older versions of the ZenPacks,
+please make sure that the ceilometer enablement is configured properly, and
+Zenoss server receives heartbeat events from the OpenStack host.
+
 == Zenoss Analytics ==
 
 This ZenPack provides additional support for Zenoss Analytics. Perform the
