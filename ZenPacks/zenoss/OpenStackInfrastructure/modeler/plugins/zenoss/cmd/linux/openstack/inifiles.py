@@ -29,11 +29,13 @@ from Products.ZenEvents import Event
 from ZenPacks.zenoss.OpenStackInfrastructure.interfaces import INeutronImplementationPlugin
 from ZenPacks.zenoss.OpenStackInfrastructure.neutron_integration import split_list
 
-from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path
+from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path, \
+    container_cmd_wrapper
+
 add_local_lib_path()
 
 import logging
-from sshclient import SSHClient
+from ZenPacks.zenoss.OpenStackInfrastructure.ssh import SSHClient
 
 ssh_logger = logging.getLogger('txsshclient')
 ssh_logger.setLevel(logging.DEBUG)
@@ -49,7 +51,8 @@ class inifiles(PythonPlugin):
     deviceProperties = PythonPlugin.deviceProperties \
         + ('zCommandUsername', 'zCommandPassword',
            'zCommandPort', 'zCommandCommandTimeout',
-           'zOpenStackNeutronConfigDir')
+           'zOpenStackNeutronConfigDir',
+           'zOpenStackRunNeutronCommonInContainer', 'zKeyPath')
 
     def sendEvent(self, evt):
         if not self._eventService:
@@ -115,7 +118,14 @@ class inifiles(PythonPlugin):
         filepath = os.path.join(device.zOpenStackNeutronConfigDir, filename)
         log.info("Retrieving %s", filepath)
 
+        # host based installation
         cmd = "cat %s" % filepath
+        if device.zOpenStackRunNeutronCommonInContainer:
+            # container based installation
+            cmd = container_cmd_wrapper(
+                device.zOpenStackRunNeutronCommonInContainer, "cat %s" % \
+                                                              filepath
+            )
         d = yield self.client.run(cmd, timeout=self.timeout)
 
         if d.exitCode != 0 or d.stderr:
@@ -151,6 +161,7 @@ class inifiles(PythonPlugin):
             'port': device.zCommandPort,
             'user': device.zCommandUsername,
             'password': device.zCommandPassword,
+            'identities': [device.zKeyPath],
             'buffersize': 32768})
         self.client.connect()
         self.timeout = device.zCommandCommandTimeout
@@ -162,7 +173,16 @@ class inifiles(PythonPlugin):
 
         try:
             # Check if neutron-server runs on this machine
-            d = yield self.client.run("pgrep neutron-server", timeout=self.timeout)
+            # host based installation
+            cmd = "pgrep neutron-server"
+            if device.zOpenStackRunNeutronCommonInContainer:
+                # container based installation
+                cmd = container_cmd_wrapper(
+                    device.zOpenStackRunNeutronCommonInContainer,
+                    "pgrep neutron-server"
+                )
+            d = yield self.client.run(cmd, timeout=self.timeout)
+
             if d.exitCode != 0:
                 # neutron isn't running on this host, so its config
                 # files are suspect, and should be ignored.
@@ -181,12 +201,12 @@ class inifiles(PythonPlugin):
             required_files = []
             optional_files = []
 
-            if data['neutron.conf']:
+            if data.get('neutron.conf'):
                 ini = data['neutron.conf']
                 neutron_core_plugin = self.ini_get(device, filename, ini, 'DEFAULT', 'core_plugin', required=True)
                 plugin_names.add(neutron_core_plugin)
 
-            if 'plugins/ml2/ml2_conf.ini' in data:
+            if data.get('plugins/ml2/ml2_conf.ini'):
                 mechanism_drivers = split_list(self.ini_get(
                     device,
                     filename,

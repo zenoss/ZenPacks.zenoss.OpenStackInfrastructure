@@ -1,10 +1,23 @@
 
 import os
+import re
 from setuptools import setup, find_packages
+
 
 # Utility function to read the README file.
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
+
+def get_version(filename):
+    pattern = re.compile(r"^__version__ = ['\"]([^'\"]*)['\"]")
+
+    for line in open(filename).readlines():
+        match = pattern.search(line)
+        if match:
+            return match.group(1)
+    raise Exception('Unable to find version string in %s.' % filename)
+
 
 requires = [
     'twisted',
@@ -16,7 +29,7 @@ setup(
     name='txsshclient',
     packages=find_packages(),
 
-    version='0.1.0dev1',
+    version=get_version("sshclient/__init__.py"),
     description="Twisted python asynchronous library for issueing commands and receiving or sending files over ssh.",
     long_description=read('README'),
 

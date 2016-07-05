@@ -24,7 +24,7 @@ import importlib
 import pytz
 import time
 
-from twisted.internet import reactor
+from twisted.internet import reactor, defer
 from twisted.internet.error import ConnectionRefusedError, TimeoutError
 from twisted.internet.task import deferLater
 
@@ -194,10 +194,12 @@ def sleep(sec):
 
 
 class ExpiringFIFOEntry(object):
-    def __init__(self, value, timestamp, expires):
+    def __init__(self, value, timestamp, expire_in_seconds):
+        now = time.time()
+
         self.value = value
         self.timestamp = timestamp
-        self.expires = expires
+        self.expires = now + expire_in_seconds
 
 
 class ExpiringFIFO(object):
@@ -227,7 +229,8 @@ class ExpiringFIFO(object):
 
     def add(self, value, timestamp):
         self._expire()
-        self.entries.append(ExpiringFIFOEntry(value, timestamp, timestamp + self.expireTime))
+
+        self.entries.append(ExpiringFIFOEntry(value, timestamp, self.expireTime))
 
     def get(self):
         while True:
@@ -272,12 +275,12 @@ def get_port_fixedips(port_fips):
     return ', '.join(fixed_ips)
 
 def get_subnets_from_fixedips(port_fips):
-    '''get formatted list of subnets from Neutron API fixed_ip structure'''
+    '''get set subnets from Neutron API fixed_ip structure'''
     subnets = set()
     for _fip in port_fips:
         subnets.add(_fip.get('subnet_id'))
 
-    return ['subnet-{0}'.format(x) for x in subnets]
+    return subnets
 
 def get_port_instance(device_owner, device_id):
     # If device_owner is part of compute, then add device_id as set_instance
@@ -310,38 +313,75 @@ def getNetSubnetsGws_from_GwInfo(external_gateway_info):
 
     return (network, subnets, gateways)
 
+def is_uuid(uuid):
+    matcher = re.compile(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
+    match = matcher.search(uuid)
+    if match:
+        return True
+    return False
 
-def sanitize_host_or_ip(host):
-    '''Return valid IP, else hostname, else ''
-    '''
-    if not host:
-        return ''
+def container_cmd_wrapper(zproperty, sub_cmd):
+    # given a zProperty related to the name of a docker container,
+    # and a sub command to be run inside the container,
+    # generate a command to be run on a container host
+    # assuming the user, specified by zCommandUsername, can execute the command
+    return "docker exec $(docker ps --format '{{.Names}}' | grep '%s') %s" % \
+          (zproperty, sub_cmd)
 
-    host_RX = re.compile(
-                         '^'
-                         '(?P<hostname>[\w-]+[\.\-\w]*)'
-                         '[^\w\-\.]*'
-                         '.*'
-                         '$'
-                         )
+@defer.inlineCallbacks
+def resolve_name(name):
+    ## If you have an IP already, return it.
+    # if isip(name):
+    #    returnValue((name, name))
+    ip = yield reactor.resolve(name)
+    defer.returnValue((name, ip))
 
-    ip_RX = re.compile(
-                         '^'
-                         '(?P<ipnumber>[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3})'
-                         '[^\d\.]*'
-                         '.*'
-                         '$'
-                         )
 
-    # Search IP first: the pattern is easier to parse
-    ip_search = ip_RX.search(host)
-    if ip_search:
-        return ip_search.group('ipnumber')
+@defer.inlineCallbacks
+def resolve_names(names):
+    """Resolve names to IP addresses in parallel.
+    Names must be an iterable of names.
 
-    host_search = host_RX.search(host)
-    if host_search:
-        return host_search.group('hostname')
+    Example return value:
 
-    return ''
+        {
+            'example.com': '192.168.1.2',
+            'www.google.com': '8.7.6.5',
+            'doesntexist': None,
+        }
+    """
+    from twisted.internet.defer import DeferredList
+    results = yield DeferredList(
+        [resolve_name(n) for n in names],
+        consumeErrors=True)
 
-# -----------------------------------------------------------------------------
+    result_map = {n: None for n in names}
+    for success, result in results:
+        if success:
+            result_map[result[0]] = result[1]
+
+    defer.returnValue(result_map)
+
+
+def validate_fqdn(dn):
+    if dn.endswith('.'):
+        dn = dn[:-1]
+    if len(dn) < 1 or len(dn) > 253:
+        return False
+    ldh_re = re.compile('^[a-z\d]([a-z\d-]{0,61}[a-z\d])?$', re.IGNORECASE)
+    return all(ldh_re.match(x) for x in dn.split('.'))
+
+
+def filter_FQDNs(dnlist):
+    """Remove invalid hosts: return tuple (correct_hosts, valid)"""
+
+    goodlist = []
+    host_errors = False
+    for dn in dnlist:
+        if not validate_fqdn(dn):
+            LOG.warn('Invalid hostname at "%s"', dn)
+            host_errors = True
+        else:
+            goodlist.append(dn)
+
+    return goodlist, host_errors

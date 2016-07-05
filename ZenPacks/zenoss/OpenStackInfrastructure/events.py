@@ -14,6 +14,7 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import (get_subnets_from_fixe
                                                            get_port_instance,
                                                            getNetSubnetsGws_from_GwInfo,
                                                            get_port_fixedips,
+                                                           is_uuid,
                                                            )
 import ast
 
@@ -118,6 +119,14 @@ def tenant_id(evt):
     if hasattr(evt, 'trait_tenant_id'):
         return make_id('tenant', evt.trait_tenant_id)
 
+def volume_id(evt):
+    if hasattr(evt, 'trait_volume_id'):
+        return make_id('volume', evt.trait_volume_id)
+
+def volsnapshot_id(evt):
+    if hasattr(evt, 'trait_snapshot_id'):
+        return make_id('volsnapshot', evt.trait_snapshot_id)
+
 # -----------------------------------------------------------------------------
 # Traitmap Functions
 # -----------------------------------------------------------------------------
@@ -145,8 +154,14 @@ def _apply_trait_rel(evt, objmap, trait_name, class_rel):
     '''
     if hasattr(evt, trait_name):
         attrib_id = make_id(class_rel, getattr(evt, trait_name))
-        set_name = 'set_' + class_rel
-        setattr(objmap, set_name, attrib_id)
+        # for volume attaching to an instance, we do:
+        # volume['set_instance'] = 'server-<instance id>'
+        if 'instance' in trait_name and 'server' in class_rel:
+            # volume attaching to an instance
+            setattr(objmap, 'set_instance', attrib_id)
+        else:
+            set_name = 'set_' + class_rel
+            setattr(objmap, set_name, attrib_id)
 
 def _apply_router_gateway_info(evt, objmap):
     ''' Get the router gateways, network, and subnets'''
@@ -213,6 +228,32 @@ def _apply_instance_traits(evt, objmap):
         except Exception, e:
             LOG.debug("Unable to parse trait_fixed_ips=%s (%s)" % (evt.trait_fixed_ips, e))
 
+
+def _apply_cinder_traits(evt, objmap):
+    traitmap = {
+                'status':        ['status'],
+                'display_name': ['title'],
+                'availability_zone':   ['avzone'],
+                'created_at':   ['created_at'],
+                'volume_id':  ['volumeId'],
+                'host':    ['host'],
+                'type':  ['volume_type'],
+                'size':  ['size'],
+               }
+    if 'VolSnapshot' in objmap.modname:
+        # volume snapshot does not have volume_id, only volume does
+        traitmap.pop('volume_id', None)
+    for trait in traitmap:
+        for prop_name in traitmap[trait]:
+            trait_field = 'trait_' + trait
+            if hasattr(evt, trait_field):
+                value = getattr(evt, trait_field)
+                # awkward!
+                if prop_name == 'status':
+                    value = value.upper()
+                setattr(objmap, prop_name, value)
+
+
 def instance_objmap(evt):
     return ObjectMap(
         modname='ZenPacks.zenoss.OpenStackInfrastructure.Instance',
@@ -228,6 +269,21 @@ def neutron_objmap(evt, Name):
         WARNING: All Neutron events have a 'trait_id' attribute.
                  Make sure that Name.lower() corresponds to a well defined
                  id_function. Especially SecurityGroups!
+    """
+    module = 'ZenPacks.zenoss.OpenStackInfrastructure.' + Name
+    id_func = eval(Name.lower() + '_id')
+    _id = id_func(evt)
+
+    return ObjectMap(
+        modname=module,
+        compname='',
+        data={'id': _id,
+              'relname': 'components'
+              },
+    )
+
+def cinder_objmap(evt, Name):
+    """ Create an object map of type Name. Name must be proper module name.
     """
     module = 'ZenPacks.zenoss.OpenStackInfrastructure.' + Name
     id_func = eval(Name.lower() + '_id')
@@ -414,6 +470,21 @@ def instance_unrescue(device, dmd, evt):
     _apply_instance_traits(evt, objmap)
     return [objmap]
 
+def instance_volume_attach(device, dmd, evt):
+    evt.summary = "Instance %s being attached to a volume %s" % \
+        (evt.trait_display_name, evt.trait_volume_id)
+
+    # volume_update() for volume.attach.end will take care of it.
+    return []
+    
+def instance_volume_detach(device, dmd, evt):
+    evt.summary = "Instance %s being detached from a volume %s" % \
+        (evt.trait_display_name, evt.trait_volume_id)
+
+    # volume_update() for volume.detach.end will take care of it.
+    return []
+    
+
 # -----------------------------------------------------------------------------
 # FloatingIp
 # -----------------------------------------------------------------------------
@@ -503,10 +574,11 @@ def port_update(device, dmd, evt):
                                            evt.trait_device_id)
         setattr(objmap, 'set_instance', port_instance)
 
-    # get the preformatted port_subnets from get_subnets_from_fixedips
+    # get subnets and fixed_ips
     if hasattr(evt, 'trait_fixed_ips'):
         port_fips = ast.literal_eval(evt.trait_fixed_ips)
-        port_subnets = get_subnets_from_fixedips(port_fips)
+        _subnets = get_subnets_from_fixedips(port_fips)
+        port_subnets = [prepId('subnet-{}'.format(x)) for x in _subnets]
         port_fixedips = get_port_fixedips(port_fips)
         setattr(objmap, 'set_subnets', port_subnets)
         setattr(objmap, 'fixed_ip_list', port_fixedips)
@@ -615,6 +687,102 @@ def subnet_delete_end(device, dmd, evt):
     return [objmap]
 
 
+# -----------------------------------------------------------------------------
+# Volume Event Functions
+# -----------------------------------------------------------------------------
+def volume_create_start(device, dmd, evt):
+    evt.summary = "Creating Volume %s" % (evt.trait_volume_id)
+    return []
+
+def volume_update_start(device, dmd, evt):
+    evt.summary = "Updating Volume %s" % (evt.trait_volume_id)
+    return []
+
+def volume_update(device, dmd, evt):
+    if 'create.end' in evt.eventClassKey:
+        # the volume is being created
+        evt.summary = "Created Volume %s" % (evt.trait_volume_id)
+    elif 'attach.end' in evt.eventClassKey:
+        # the volume is being attached to an instance
+        evt.summary = "Attach Volume %s to instance %s " % \
+            (evt.trait_volume_id, evt.trait_instance_id)
+    elif 'detach.end' in evt.eventClassKey:
+        # the volume is being detached from an instance
+        evt.summary = "Detach Volume %s from instance" % \
+            (evt.trait_volume_id)
+
+    objmap = cinder_objmap(evt, "Volume")
+    _apply_dns_info(evt, objmap)
+    _apply_cinder_traits(evt, objmap)
+    _apply_trait_rel(evt, objmap, 'trait_tenant_id', 'tenant')
+    if hasattr(objmap, 'instanceId') and len(objmap.instanceId) > 0:
+        # the volume is being attached to an instance
+        _apply_trait_rel(evt, objmap, 'trait_instance_id', 'server')
+    elif 'detach.end' in evt.eventClassKey:
+        # the volume is being detached from an instance
+        setattr(objmap, 'set_instance', '')
+    # make sure objmap has volume_type and volume_type is uuid
+    if hasattr(objmap, 'volume_type') and is_uuid(objmap.volume_type):
+        # set volume type
+        _apply_trait_rel(evt, objmap, 'trait_type', 'volType')
+        
+    return [objmap]
+
+def volume_delete_start(device, dmd, evt):
+    evt.summary = "Deleting Volume %s " % (evt.trait_volume_id)
+    return []
+
+def volume_delete_end(device, dmd, evt):
+    evt.summary = "Volume %s deleted" % (evt.trait_volume_id)
+
+    objmap = cinder_objmap(evt, 'Volume')
+    objmap.remove = True
+    return [objmap]
+
+def volume_attach_start(device, dmd, evt):
+    evt.summary = "Attaching Volume %s to instance" %  (evt.trait_display_name)
+    return []
+
+def volume_detach_start(device, dmd, evt):
+    evt.summary = "Detaching Volume %s from instance %s" % \
+        (evt.trait_display_name, evt.trait_instance_id)
+    return []
+
+
+
+# -----------------------------------------------------------------------------
+# Snapshot Event Functions
+# -----------------------------------------------------------------------------
+def volsnapshot_create_start(device, dmd, evt):
+    evt.summary = "Creating Volume Snapshot %s for volume %s" % \
+        (evt.trait_snapshot_id, evt.trait_volume_id)
+    return []
+
+def volsnapshot_update(device, dmd, evt):
+    evt.summary = "Created Volume Snapshot %s for volume %s" % \
+        (evt.trait_snapshot_id, evt.trait_volume_id)
+
+    objmap = cinder_objmap(evt, "VolSnapshot")
+    _apply_dns_info(evt, objmap)
+    _apply_cinder_traits(evt, objmap)
+    _apply_trait_rel(evt, objmap, 'trait_tenant_id', 'tenant')
+    _apply_trait_rel(evt, objmap, 'trait_volume_id', 'volume')
+    return [objmap]
+
+def volsnapshot_delete_start(device, dmd, evt):
+    evt.summary = "Deleting Snapshot %s for volume %s" % \
+        (evt.trait_snapshot_id, evt.trait_volume_id)
+    return []
+
+def volsnapshot_delete_end(device, dmd, evt):
+    evt.summary = "Volume Snapshot %s deleted for volume %s" % \
+        (evt.trait_snapshot_id, evt.trait_volume_id)
+
+    objmap = cinder_objmap(evt, 'VolSnapshot')
+    objmap.remove = True
+    return [objmap]
+
+
 # For each eventClassKey, associate it with the appropriate mapper function.
 # A mapper function is expected to take an event and return one or more objmaps.
 # it may also modify the event, for instance by add missing information
@@ -679,8 +847,8 @@ MAPPERS = {
     'openstack|compute.instance.suspend':         (instance_id, instance_suspended),
     'openstack|compute.instance.resume':          (instance_id, instance_resumed),
 
-    'openstack|compute.instance.volume.attach':   (instance_id, None),
-    'openstack|compute.instance.volume.detach':   (instance_id, None),
+    'openstack|compute.instance.volume.attach':   (instance_id, instance_volume_attach),
+    'openstack|compute.instance.volume.detach':   (instance_id, instance_volume_detach),
 
     # -------------------------------------------------------------------------
     # DHCP Agent
@@ -795,6 +963,37 @@ MAPPERS = {
     'openstack|subnet.update.end':           (subnet_id, subnet_update),
     'openstack|subnet.delete.start':         (subnet_id, subnet_delete_start),
     'openstack|subnet.delete.end':           (subnet_id, subnet_delete_end),
+
+    # -------------------------------------------------------------------------
+    #  Volume
+    #
+    # volume attaching to instance job flow:
+    # 1. volume.attach.start
+    # 2. volume.attach.end
+    # 3. compute.instance.volume.attach
+    # volume detaching from instance job flow:
+    # 1. compute.instance.volume.detach
+    # 2. volume.detach.start
+    # 3. volume.detach.end
+    # -------------------------------------------------------------------------
+    'openstack|volume.create.start':         (volume_id, volume_create_start),
+    'openstack|volume.create.end':           (volume_id, volume_update),
+    'openstack|volume.update.start':         (volume_id, volume_update_start),
+    'openstack|volume.update.end':           (volume_id, volume_update),
+    'openstack|volume.delete.start':         (volume_id, volume_delete_start),
+    'openstack|volume.delete.end':           (volume_id, volume_delete_end),
+    'openstack|volume.attach.start':         (volume_id, volume_attach_start),
+    'openstack|volume.attach.end':           (volume_id, volume_update),
+    'openstack|volume.detach.start':         (volume_id, volume_detach_start),
+    'openstack|volume.detach.end':           (volume_id, volume_update),
+
+    # -------------------------------------------------------------------------
+    #  Snapshot
+    # -------------------------------------------------------------------------
+    'openstack|snapshot.create.start':         (volsnapshot_id, volsnapshot_create_start),
+    'openstack|snapshot.create.end':           (volsnapshot_id, volsnapshot_update),
+    'openstack|snapshot.delete.start':         (volsnapshot_id, volsnapshot_delete_start),
+    'openstack|snapshot.delete.end':           (volsnapshot_id, volsnapshot_delete_end),
 
 }
 

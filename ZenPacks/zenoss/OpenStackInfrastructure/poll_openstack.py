@@ -26,8 +26,7 @@ from twisted.internet.defer import inlineCallbacks, returnValue
 from utils import add_local_lib_path
 add_local_lib_path()
 
-from apiclients.novaapiclient import NovaAPIClient
-from apiclients.neutronapiclient import NeutronAPIClient
+from apiclients.txapiclient import APIClient
 
 class OpenStackPoller(object):
     def __init__(self, username, api_key, project_id, auth_url, region_name):
@@ -40,7 +39,7 @@ class OpenStackPoller(object):
 
     @inlineCallbacks
     def _populateFlavorData(self, client, data):
-        result = yield client.flavors(detailed=True, is_public=None)
+        result = yield client.nova_flavors(detailed=True, is_public=None)
         data['flavorTotalCount'] = len(result['flavors'])
 
     @inlineCallbacks
@@ -54,7 +53,7 @@ class OpenStackPoller(object):
         data['imageFailedCount'] = 0
         data['imageOtherCount'] = 0
 
-        result = yield client.images(detailed=True, limit=None)
+        result = yield client.nova_images(detailed=True, limit=None)
 
         for image in result['images']:
             data['imageTotalCount'] += 1
@@ -83,14 +82,14 @@ class OpenStackPoller(object):
                 data['imageOtherCount'] += 1
                 severity = 1
 
-            data['events'].append(dict(
-                severity=severity,
-                summary='image status is {0}'.format(image['status']),
-                component='image{0}'.format(image['id']),
-                eventKey='imageStatus',
-                eventClassKey='openstackImageStatus',
-                imageStatus=image['status'],
-            ))
+            # data['events'].append(dict(
+            #     severity=severity,
+            #     summary='image status is {0}'.format(image['status']),
+            #     component='image{0}'.format(image['id']),
+            #     eventKey='imageStatus',
+            #     eventClassKey='openstackImageStatus',
+            #     imageStatus=image['status'],
+            # ))
 
     @inlineCallbacks
     def _populateServerData(self, client, data):
@@ -111,7 +110,7 @@ class OpenStackPoller(object):
         data['serverUnknownCount'] = 0
         data['serverOtherCount'] = 0
 
-        result = yield client.servers(detailed=True, search_opts={'all_tenants': 1})
+        result = yield client.nova_servers(detailed=True, search_opts={'all_tenants': 1})
 
         for server in result['servers']:
             data['serverTotalCount'] += 1
@@ -166,7 +165,7 @@ class OpenStackPoller(object):
 
 
     @inlineCallbacks
-    def _populateAgentData(self, neutron_client, data):
+    def _populateAgentData(self, client, data):
         data['agentTotalCount'] = 0
         data['agentDHCPCount'] = 0
         data['agentOVSCount'] = 0
@@ -186,7 +185,7 @@ class OpenStackPoller(object):
         data['agentMLNXCount'] = 0
         data['agentMeteringCount'] = 0
 
-        result = yield neutron_client.agents()
+        result = yield client.neutron_agents()
 
         for agent in result['agents']:
             data['agentTotalCount'] += 1
@@ -240,7 +239,7 @@ class OpenStackPoller(object):
 
 
     @inlineCallbacks
-    def _populateNetworkData(self, neutron_client, data):
+    def _populateNetworkData(self, client, data):
         data['networkTotalCount'] = 0
         data['networkActiveCount'] = 0
         data['networkBuildCount'] = 0
@@ -250,7 +249,7 @@ class OpenStackPoller(object):
         data['networkExternalCount'] = 0
         data['networkInternalCount'] = 0
 
-        result = yield neutron_client.networks()
+        result = yield client.neutron_networks()
 
         for net in result['networks']:
             data['networkTotalCount'] += 1
@@ -280,14 +279,14 @@ class OpenStackPoller(object):
 
 
     @inlineCallbacks
-    def _populateRouterData(self, neutron_client, data):
+    def _populateRouterData(self, client, data):
         data['routerTotalCount'] = 0
         data['routerActiveCount'] = 0
         data['routerBuildCount'] = 0
         data['routerDownCount'] = 0
         data['routerErrorCount'] = 0
 
-        result = yield neutron_client.routers()
+        result = yield client.neutron_routers()
 
         for router in result['routers']:
             data['routerTotalCount'] += 1
@@ -308,20 +307,89 @@ class OpenStackPoller(object):
 
 
     @inlineCallbacks
-    def getData(self):
-        client = NovaAPIClient(
-            self._username,
-            self._api_key,
-            self._auth_url,
-            self._project_id,
-            self._region_name)
+    def _populatePoolData(self, client, data):
+        data['poolTotalCount'] = 0
+        data['poolThinProvisioningSupportCount'] = 0
+        data['poolThickProvisioningSupportCount'] = 0
+        data['poolQoSSupportCount'] = 0
 
-        neutron_client = NeutronAPIClient(
+        result = yield client.cinder_pools()
+
+        def pool_has_data(pool, key1, key2):
+            if pool.get(key1, {}).get(key2, None) is not None:
+                return 1
+            return 0
+
+        for pool in result['pools']:
+            data['poolTotalCount'] += 1
+
+            data['poolThinProvisioningSupportCount'] += \
+                pool_has_data(pool, 'capabilities','thin_provisioning_support')
+            data['poolThickProvisioningSupportCount'] += \
+                pool_has_data(pool, 'capabilities','thick_provisioning_support')
+            data['poolQoSSupportCount'] += \
+                pool_has_data(pool, 'capabilities','QoS_support')
+
+
+    @inlineCallbacks
+    def _populateVolumeData(self, client, data):
+        data['volumeTotalCount'] = 0
+        data['volumeActiveCount'] = 0
+        data['volumeBootableCount'] = 0
+        data['volumeAttachedCount'] = 0
+        data['volumeAvailableCount'] = 0
+        data['volumeInUseCount'] = 0
+        data['volumeUnknownCount'] = 0
+
+        result = yield client.cinder_volumes()
+
+        for volume in result['volumes']:
+            data['volumeTotalCount'] += 1
+            severity = None
+
+            if volume['status'] == 'ACTIVE':
+                data['volumeActiveCount'] += 1
+                data['volumeAvailableCount'] += 1
+                severity = 0
+            if volume['status'] == 'in-use':
+                data['volumeActiveCount'] += 1
+                data['volumeInUseCount'] += 1
+                severity = 0
+            if volume['bootable'] == 'true':
+                data['volumeBootableCount'] += 1
+                severity = 0
+            if len(volume['attachments']) > 0:
+                data['volumeAttachedCount'] += 1
+                severity = 0
+            if volume['status'] == 'ERROR':
+                data['volumeErrorCount'] += 1
+                severity = 5
+
+
+    @inlineCallbacks
+    def _populateSnapshotData(self, client, data):
+        data['snapshotTotalCount'] = 0
+        data['snapshotAvailableCount'] = 0
+        data['snapshotInProgressCount'] = 0
+
+        result = yield client.cinder_volumesnapshots()
+
+        for snapshot in result['snapshots']:
+            data['snapshotTotalCount'] += 1
+
+            if snapshot['status'] == 'available':
+                data['snapshotAvailableCount'] += 1
+            if '100%' not in snapshot['os-extended-snapshot-attributes:progress']:
+                data['snapshotInProgressCount'] += 1
+
+
+    @inlineCallbacks
+    def getData(self):
+        client = APIClient(
             self._username,
             self._api_key,
             self._auth_url,
-            self._project_id,
-            self._region_name)
+            self._project_id)
 
         data = {}
         data['events'] = []
@@ -331,9 +399,13 @@ class OpenStackPoller(object):
             yield self._populateImageData(client, data)
             yield self._populateServerData(client, data)
 
-            yield self._populateNetworkData(neutron_client, data)
-            yield self._populateAgentData(neutron_client, data)
-            yield self._populateRouterData(neutron_client, data)
+            yield self._populateNetworkData(client, data)
+            yield self._populateAgentData(client, data)
+            yield self._populateRouterData(client, data)
+
+            yield self._populatePoolData(client, data)
+            yield self._populateVolumeData(client, data)
+            yield self._populateSnapshotData(client, data)
 
         except Exception:
             raise

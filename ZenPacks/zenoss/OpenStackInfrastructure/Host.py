@@ -14,6 +14,7 @@ import logging
 LOG = logging.getLogger('zen.OpenStackInfrastructureHost')
 
 from Products.ZenEvents.ZenEventClasses import Clear, Warning
+from DateTime import DateTime
 
 
 class Host(schema.Host):
@@ -49,7 +50,7 @@ class Host(schema.Host):
             LOG.info("Raising zIpServiceMapMaxPort on %s to 32767" % device.name())
             device.setZenProperty('zIpServiceMapMaxPort', 32767)
 
-        if device.getSnmpLastCollection() is None:
+        if device.getSnmpLastCollection() == DateTime(0):
             LOG.info("Unable to ensure service monitoring until host device is modeled.")
             return
 

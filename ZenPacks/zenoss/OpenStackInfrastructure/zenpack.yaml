@@ -9,6 +9,16 @@ zProperties: !ZenPackSpec
     default: /Server/SSH/Linux/NovaHost
   zOpenStackNovaApiHosts:
     type: lines
+  zOpenStackCinderApiHosts:
+    type: lines
+  zOpenStackHostMapToId:
+    type: lines
+  zOpenStackHostMapSame:
+    type: lines
+  zOpenStackNeutronConfigDir: {}
+  zOpenStackRunNovaManageInContainer: {}
+  zOpenStackRunVirshQemuInContainer: {}
+  zOpenStackRunNeutronCommonInContainer: {}
 class_relationships:
 # Containing Relations
 - Endpoint(components) 1:MC OpenstackComponent
@@ -22,6 +32,7 @@ class_relationships:
 - Host(hostedSoftware) 1:M (hostedOn)SoftwareComponent
 - OrgComponent 1:M Host
 - OrgComponent 1:M SoftwareComponent
+- OrgComponent 1:M Pool
 # Tenant -> * (Instance,Network,Subnet,Router,Port,FloatingIp)
 - Tenant 1:M Instance
 - Tenant 1:M Network
@@ -29,6 +40,12 @@ class_relationships:
 - Tenant 1:M Router
 - Tenant 1:M Port
 - Tenant 1:M FloatingIp
+# Cinder
+- Tenant 1:M Volume
+- Tenant 1:M VolSnapshot
+# release 2.2.0 does not do backup
+#- Tenant 1:M Backup
+- Tenant 1:1 Quota
 # Flavor
 - Flavor 1:M Instance
 - Image 1:M Instance
@@ -50,18 +67,26 @@ class_relationships:
 #    Router can connect to many subnets, a subnet can connect to several routers
 #    EG: router_AB + router_C connect to public_subnet:  subnet -> *router
 #    EG: since public network can have multiple subnets: router -> *subnet
+#    Router can have many ports with limitation one port per a subnet
 - Router 1:M FloatingIp
 - Router M:M Subnet
+- Router 1:M Port
 - Hypervisor 1:1 Host
+# Cinder
+- Instance 1:M Volume
+- Volume 1:M VolSnapshot
+- VolType 1:M Volume
+# release 2.2.0 does not do backup
+#- Volume 1:M Backup
 device_classes: !ZenPackSpec
   /Server/SSH/Linux/NovaHost:
+    remove: True
     zProperties:
-      zCollectorPlugins: [zenoss.cmd.uname, zenoss.cmd.uname_a, zenoss.cmd.df, zenoss.cmd.linux.cpuinfo,
-        zenoss.cmd.linux.memory, zenoss.cmd.linux.ifconfig, zenoss.cmd.linux.netstat_an,
-        zenoss.cmd.linux.netstat_rn, zenoss.cmd.linux.process, zenoss.cmd.linux.rpm,
-        zenoss.cmd.linux.openstack.nova, zenoss.cmd.linux.openstack.libvirt, zenoss.cmd.linux.openstack.inifiles]
       zOpenStackNeutronConfigDir: /etc/neutron
       zSshConcurrentSessions: 5
+      zOpenStackRunNovaManageInContainer: ''
+      zOpenStackRunVirshQemuInContainer: ''
+      zOpenStackRunNeutronCommonInContainer: ''
   /OpenStack: {}
   /OpenStack/Infrastructure:
     remove: true
@@ -87,6 +112,10 @@ device_classes: !ZenPackSpec
           neutronAgentStatus:
             type: OpenStack Neutron Agent Status
             cycletime: 30
+          maintenance:
+            type: Python
+            plugin_classname: ZenPacks.zenoss.OpenStackInfrastructure.dsplugins.MaintenanceDataSourcePlugin
+            cycletime: 600
           openstack:
             type: COMMAND
             commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/poll_openstack.py
@@ -201,6 +230,34 @@ device_classes: !ZenPackSpec
                 aliases: {server_unknown__count: null}
               serverVerifyResizeCount:
                 aliases: {server_verify_resize__count: null}
+              volumeActiveCount:
+                aliases: {volume_active__count: null}
+              volumeBootableCount:
+                aliases: {volume_bootable__count: null}
+              volumeAttachedCount:
+                aliases: {volume_attached__count: null}
+              volumeAvailableCount:
+                aliases: {volume_available__count: null}
+              volumeInUseCount:
+                aliases: {volume_inuse__count: null}
+              volumeTotalCount:
+                aliases: {volume_total__count: null}
+              volumeUnknownCount:
+                aliases: {volume_unknown__count: null}
+              snapshotTotalCount:
+                aliases: {snapshot_total__count: null}
+              snapshotAvailableCount:
+                aliases: {snapshot_available__count: null}
+              snapshotInProgressCount:
+                aliases: {snapshot_inprogress__count: null}
+              poolTotalCount:
+                aliases: {pool_total__count: null}
+              poolThinProvisioningSupportCount:
+                aliases: {pool_thin_provisioning_support__count: null}
+              poolThickProvisioningSupportCount:
+                aliases: {pool_thick_provisioning_support__count: null}
+              poolQoSSupportCount:
+                aliases: {pool_qos_support__count: null}
             parser: ZenPacks.zenoss.OpenStackInfrastructure.parsers.endpoint
           openstackQueues:
             type: OpenStack AMQP Queue Size
@@ -210,6 +267,9 @@ device_classes: !ZenPackSpec
               perfQueueCount: {}
           serviceStatus:
             type: OpenStack Nova Service Status
+            cycletime: 30
+          cinderServiceStatus:
+            type: OpenStack Cinder Service Status
             cycletime: 30
         graphs:
           Agents:
@@ -271,7 +331,7 @@ device_classes: !ZenPackSpec
               Total:
                 dpName: openstack_flavorTotalCount
                 format: '%7.0lf'
-          Images and Snapshots:
+          Images:
             units: count
             miny: 0
             graphpoints:
@@ -337,6 +397,7 @@ device_classes: !ZenPackSpec
               Performance:
                 dpName: openstackQueues_perfQueueCount
                 format: '%7.0lf'
+                color: 98df8a
           Routers:
             units: count
             miny: 0
@@ -408,6 +469,60 @@ device_classes: !ZenPackSpec
               Verify Resize:
                 dpName: openstack_serverVerifyResizeCount
                 format: '%7.0lf'
+          Volumes:
+            units: count
+            miny: 0
+            graphpoints:
+              Active:
+                dpName: openstack_volumeActiveCount
+                format: '%7.0lf'
+              Bootable:
+                dpName: openstack_volumeBootableCount
+                format: '%7.0lf'
+              Attached:
+                dpName: openstack_volumeAttachedCount
+                format: '%7.0lf'
+              Available:
+                dpName: openstack_volumeAvailableCount
+                format: '%7.0lf'
+              InUse:
+                dpName: openstack_volumeInUseCount
+                format: '%7.0lf'
+              Total:
+                dpName: openstack_volumeTotalCount
+                format: '%7.0lf'
+              Unknown:
+                dpName: openstack_volumeUnknownCount
+                format: '%7.0lf'
+          Snapshots:
+            units: count
+            miny: 0
+            graphpoints:
+              Total:
+                dpName: openstack_snapshotTotalCount
+                format: '%7.0lf'
+              Available:
+                dpName: openstack_snapshotAvailableCount
+                format: '%7.0lf'
+              In Progress:
+                dpName: openstack_snapshotInProgressCount
+                format: '%7.0lf'
+          Pools:
+            units: count
+            miny: 0
+            graphpoints:
+              Total:
+                dpName: openstack_poolTotalCount
+                format: '%7.0lf'
+              Thin Provision:
+                dpName: openstack_poolThinProvisioningSupportCount
+                format: '%7.0lf'
+              Thick Provision:
+                dpName: openstack_poolThickProvisioningSupportCount
+                format: '%7.0lf'
+              QoS:
+                dpName: openstack_poolQoSSupportCount
+                format: '%7.0lf'
       Instance:
         description: 'OpenStackInfrastructure: Instance Monitoring'
         targetPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Instance
@@ -471,6 +586,7 @@ device_classes: !ZenPackSpec
               Write:
                 dpName: diskWriteBytesRate_diskWriteBytesRate
                 format: '%7.2lf%s'
+                color: 98df8a
           Disk Requests:
             units: requests/sec
             miny: 0
@@ -481,6 +597,7 @@ device_classes: !ZenPackSpec
               Write:
                 dpName: diskWriteRequestsRate_diskWriteRequestsRate
                 format: '%7.2lf%s'
+                color: 98df8a
       Vnic:
         description: 'OpenStackInfrastructure: Vnic Monitoring'
         targetPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Vnic
@@ -518,6 +635,19 @@ device_classes: !ZenPackSpec
                 aliases: {if_sent_packets__persec: null}
             meter: network.outgoing.packets.rate
         graphs:
+          Network Throughput:
+            units: bits/sec
+            miny: 0
+            graphpoints:
+              Inbound:
+                dpName: networkIncomingBytesRate_networkIncomingBytesRate
+                rpn: "8,*"
+                format: '%7.2lf%s'
+              Outbound:
+                dpName: networkOutgoingBytesRate_networkOutgoingBytesRate
+                rpn: "8,*"
+                format: '%7.2lf%s'
+                color: 98df8a
           Network Packet Rate:
             units: packets/sec
             miny: 0
@@ -528,16 +658,7 @@ device_classes: !ZenPackSpec
               Outbound:
                 dpName: networkOutgoingPacketsRate_networkOutgoingPacketsRate
                 format: '%7.2lf%s'
-          Network Throughput:
-            units: bytes/sec
-            miny: 0
-            graphpoints:
-              Inbound:
-                dpName: networkIncomingBytesRate_networkIncomingBytesRate
-                format: '%7.2lf%s'
-              Outbound:
-                dpName: networkOutgoingBytesRate_networkOutgoingBytesRate
-                format: '%7.2lf%s'
+                color: 98df8a
 classes: !ZenPackSpec
   #-----------------------------------------------------------------------------
   # Base Device Class Types
@@ -564,7 +685,8 @@ classes: !ZenPackSpec
         default: []
         grid_display: false
     dynamicview_views: [service_view, openstack_view]
-    dynamicview_group: Devices
+    dynamicview_group: OpenStack Clusters
+    dynamicview_weight: 280
     dynamicview_relations:
       impacts: [hosts]
       openstack_link: [region]
@@ -595,8 +717,8 @@ classes: !ZenPackSpec
     properties:
       proxy_device:
         label: Device
-        # Workaround to link to a different device
-        renderer: Zenoss.render.openstack_uid_renderer
+        type: entity        
+        content_width: 175        
         api_only: true
         api_backendtype: method
     filter_display: false
@@ -611,20 +733,27 @@ classes: !ZenPackSpec
       childOrgs:
         label: Children
         order: 1.1
+        label_width: 60
+        content_width: 60
       hosts:
         label: Host
         order: 1.0
+        label_width: 60
+        content_width: 60
       parentOrg:
         label: Parent Region
         order: 1.0
+        label_width: 60
+        content_width: 60
       softwareComponents:
-        label_width: 150
+        label_width: 80
     filter_display: false
   SoftwareComponent:
     # Component Base Type
     base: [OpenstackComponent]
-    label: Software Component
-    label_width: 120
+    label: SW Component
+    label_width: 70
+    content_width: 70
     properties:
       binary:
         label: Binary
@@ -691,9 +820,20 @@ classes: !ZenPackSpec
         label_width: 50
       subnets:
         label_width: 50
+      volumes:
+        grid_display: false
+# release 2.2.0 does not do backup
+#      backups:
+#        grid_display: false
+      volSnapshots:
+        grid_display: false
+      quota:
+        grid_display: false
     dynamicview_views: [service_view]
+    dynamicview_group: Tenants
+    dynamicview_weight: 15
     dynamicview_relations:
-      impacted_by: [instances, networks, subnets, implementation_components]
+      impacted_by: [instances, volumes, networks, subnets, implementation_components]
   Flavor:
     base: [LogicalComponent]
     meta_type: OpenStackInfrastructureFlavor
@@ -714,6 +854,9 @@ classes: !ZenPackSpec
       flavorVCPUs:
         type: int
         label: VCPUs
+      flavorType:
+        label: Public
+        grid_display: false
   Image:
     base: [LogicalComponent]
     meta_type: OpenStackInfrastructureImage
@@ -758,14 +901,15 @@ classes: !ZenPackSpec
       guestDevice:
       # link to the guest instance, if known
         label: Guest
-        # workaround to link to a different device
-        renderer: Zenoss.render.openstack_uid_renderer
+        type: entity
+        content_width: 155
+        order: 3.1
         api_only: true
         api_backendtype: method
       host:
         type: entity
         label: Host
-        label_width: 90
+        label_width: 70
         order: 3.0
         api_only: true
         api_backendtype: method
@@ -773,7 +917,7 @@ classes: !ZenPackSpec
         label: Host ID
         grid_display: false
       hostName:
-        label: Host Name
+        label: Instance Title
         index_type: field
         grid_display: false
       hypervisorInstanceName:
@@ -782,13 +926,13 @@ classes: !ZenPackSpec
       privateIps:
         type: lines
         label: Fixed IPs
-        label_width: 90
-        order: 3.2
+        label_width: 70
+        order: 3.3
       publicIps:
         type: lines
         label: Floating IPs
-        label_width: 90
-        order: 3.1
+        label_width: 70
+        order: 3.2
       serialNumber:
         label: BIOS Serial Number
         index_type: field
@@ -809,7 +953,7 @@ classes: !ZenPackSpec
         grid_display: false
       serverStatus:
         label: Status
-        label_width: 65
+        label_width: 50
         order: 3.5
     relationships:
       flavor:
@@ -832,10 +976,18 @@ classes: !ZenPackSpec
       vnics:
         label: Vnics
         grid_display: false
+      volumes:
+        label: Volumes
+        label_width: 45
+        content_width: 45
     dynamicview_views: [service_view]
+    dynamicview_group: Instances
+    dynamicview_weight: 211
     dynamicview_relations:
-      impacted_by: [hypervisor, ports, vnics]
+      impacted_by: [hypervisor, ports, vnics, volumes]
       impacts: [guestDevice, tenant]
+    extra_paths:
+      - ['hypervisor', 'host']      
   Vnic:
     base: [LogicalComponent]
     meta_type: OpenStackInfrastructureVnic
@@ -848,10 +1000,18 @@ classes: !ZenPackSpec
         order: 1.4
         api_only: true
         api_backendtype: method
+        content_width: 120
+      port:
+        type: entity
+        label: Port
+        order: 1.41
+        api_only: true
+        api_backendtype: method
+        content_width: 120
       macaddress:
         label: MAC Address
         index_type: field
-        content_width: 120
+        content_width: 100
         renderer: Zenoss.render.openstack_uppercase_renderer
         order: 1.0
         index_scope: global
@@ -859,6 +1019,8 @@ classes: !ZenPackSpec
       instance:
         grid_display: false
     dynamicview_views: [service_view]
+    dynamicview_group: vNICs
+    dynamicview_weight: 216
     dynamicview_relations:
       impacts: [instance]
   Region:
@@ -868,6 +1030,8 @@ classes: !ZenPackSpec
     order: 1
     filter_hide_from: [Region, Cell, AvailabilityZone]
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Regions
+    dynamicview_weight: 221
     dynamicview_relations:
       impacted_by: [childOrgs, hosts, softwareComponents]
       impacts: [parentOrg]
@@ -879,6 +1043,8 @@ classes: !ZenPackSpec
     order: 3
     filter_hide_from: [Region, Cell, AvailabilityZone]
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Cells
+    dynamicview_weight: 222
     dynamicview_relations:
       impacted_by: [childOrgs, hosts, softwareComponents]
       impacts: [parentOrg]
@@ -890,6 +1056,8 @@ classes: !ZenPackSpec
     order: 2
     filter_hide_from: [AvailabilityZone]
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Zones
+    dynamicview_weight: 223
     dynamicview_relations:
       impacted_by: [childOrgs, hosts, softwareComponents]
       impacts: [parentOrg]
@@ -905,7 +1073,7 @@ classes: !ZenPackSpec
         index_type: field
         grid_display: false
       hostname:
-        label: Host Name
+        label: Host Title
         index_type: field
         grid_display: false
     relationships:
@@ -916,6 +1084,8 @@ classes: !ZenPackSpec
         render_with_type: true
         order: 1.0
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Hosts (OpenStack)
+    dynamicview_weight: 271
     dynamicview_relations:
       impacted_by: [endpoint, proxy_device]
       impacts: [hypervisor, orgComponent, hostedSoftware]
@@ -926,15 +1096,18 @@ classes: !ZenPackSpec
     label: Nova Service
     order: 7
     # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for osprocess_component, rather than
-    # dynamicview impacts adaptor, because OSProcess is not part of
-    # service_view, and so will not be exported from DV to impact  currently
-    # (ZEN-14579).
+    # We must define that we're impacted_by osprocess_component both in the
+    # Impact and DynamicView style. This is because OSProcess is not registered
+    # into DynamicView's service_view, but we do want to see the impact both in
+    # Impact, and DynamicView's Dependency View.
+    # (ZEN-14579)
     # --------------------------------------------------------------------------
     impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Nova Services
+    dynamicview_weight: 263
     dynamicview_relations:
-      impacted_by: [hostedOn]
+      impacted_by: [hostedOn, osprocess_component]
       impacts: [orgComponent]
   NovaApi:
     base: [SoftwareComponent]
@@ -942,15 +1115,18 @@ classes: !ZenPackSpec
     label: Nova API
     order: 7.1
     # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for osprocess_component, rather than
-    # dynamicview impacts adaptor, because OSProcess is not part of
-    # service_view, and so will not be exported from DV to impact  currently
-    # (ZEN-14579).
+    # We must define that we're impacted_by osprocess_component both in the
+    # Impact and DynamicView style. This is because OSProcess is not registered
+    # into DynamicView's service_view, but we do want to see the impact both in
+    # Impact, and DynamicView's Dependency View.
+    # (ZEN-14579)
     # --------------------------------------------------------------------------
     impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Nova APIs
+    dynamicview_weight: 262
     dynamicview_relations:
-      impacted_by: [hostedOn]
+      impacted_by: [hostedOn, osprocess_component]
       impacts: [orgComponent]
   NovaDatabase:
     base: [SoftwareComponent]
@@ -959,15 +1135,18 @@ classes: !ZenPackSpec
     order: 7.2
     filter_hide_from: [Region, Cell, AvailabilityZone, Host]
     # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for osprocess_component, rather than
-    # dynamicview impacts adaptor, because OSProcess is not part of
-    # service_view, and so will not be exported from DV to impact  currently
-    # (ZEN-14579).
+    # We must define that we're impacted_by osprocess_component both in the
+    # Impact and DynamicView style. This is because OSProcess is not registered
+    # into DynamicView's service_view, but we do want to see the impact both in
+    # Impact, and DynamicView's Dependency View.
+    # (ZEN-14579)
     # --------------------------------------------------------------------------
     impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Nova Databases
+    dynamicview_weight: 264
     dynamicview_relations:
-      impacted_by: [hostedOn]
+      impacted_by: [hostedOn, osprocess_component]
       impacts: [orgComponent]
   Hypervisor:
     base: [OpenstackComponent]
@@ -981,13 +1160,66 @@ classes: !ZenPackSpec
       hypervisorId:
         label: Hypervisor ID
         grid_display: false
+      hstatus:
+        label: Hypervisor Status
+        label_width: 80
+        content_width: 80
+        order: 9.1
+      hstate:
+        label: Hypervisor State
+        label_width: 80
+        content_width: 80
+        order: 9.2
+      host_ip:
+        label: Host IP
+        label_width: 80
+        content_width: 80
+        order: 9.3
       hypervisor_type:
         label: Type
-        grid_display: false
+        label_width: 80
+        content_width: 80
+        order: 9.4
       hypervisor_version:
         label: Version
+        label_width: 80
+        content_width: 80
+        order: 9.5
+      vcpus:
+        label: vCPU
         grid_display: false
+        order: 9.6
+      vcpus_used:
+        label: vCPU Used
+        grid_display: false
+        order: 9.7
+      memory:
+        label: Memory (MB)
+        grid_display: false
+        order: 9.8
+      memory_used:
+        label: Memory Used (MB)
+        grid_display: false
+        order: 9.9
+      memory_free:
+        label: Memory Free (MB)
+        grid_display: false
+        order: 9.10
+      disk:
+        label: Disk (GB)
+        grid_display: false
+        order: 9.11
+      disk_used:
+        label: Disk Used (GB)
+        grid_display: false
+        order: 9.12
+      disk_free:
+        label: Disk Free (GB)
+        grid_display: false
+        order: 9.13
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Hypervisors
+    dynamicview_weight: 226
     dynamicview_relations:
       impacted_by: [host]
       impacts: [instances]
@@ -1023,15 +1255,18 @@ classes: !ZenPackSpec
         label_width: 40
         order: 1.2
     # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for osprocess_component, rather than
-    # dynamicview impacts adaptor, because OSProcess is not part of
-    # service_view, and so will not be exported from DV to impact  currently
-    # (ZEN-14579).
+    # We must define that we're impacted_by osprocess_component both in the
+    # Impact and DynamicView style. This is because OSProcess is not registered
+    # into DynamicView's service_view, but we do want to see the impact both in
+    # Impact, and DynamicView's Dependency View.
+    # (ZEN-14579)
     # --------------------------------------------------------------------------
     impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Neutron Agents
+    dynamicview_weight: 261
     dynamicview_relations:
-      impacted_by: [hostedOn]
+      impacted_by: [hostedOn, osprocess_component]
       impacts: [networks, subnets, routers]
   Network:
     base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, LogicalComponent]
@@ -1084,6 +1319,9 @@ classes: !ZenPackSpec
       tenant:
         label_width: 50
         order: 1.5
+    dynamicview_views: [service_view]
+    dynamicview_group: Networks
+    dynamicview_weight: 254
     dynamicview_relations:
       impacted_by: [neutronAgents]
       impacts: [subnets, tenant]
@@ -1137,6 +1375,9 @@ classes: !ZenPackSpec
       tenant:
         label_width: 50
         order: 2.3
+    dynamicview_views: [service_view]
+    dynamicview_group: Subnets
+    dynamicview_weight: 252
     dynamicview_relations:
       impacted_by: [network, routers, neutronAgents]
       impacts: [ports, tenant]
@@ -1202,10 +1443,17 @@ classes: !ZenPackSpec
       tenant:
         label_width: 45
         content_width: 50
+        order: 2.5
+      ports:
+        label_width: 45
+        content_width: 50
         order: 2.4
+    dynamicview_views: [service_view]
+    dynamicview_group: Routers
+    dynamicview_weight: 253
     dynamicview_relations:
       impacted_by: [neutronAgents]
-      impacts: [subnets, floatingIps]
+      impacts: [subnets, floatingIps, ports]
     # --------------------------------------------------------------------------
     # We use a normal impact adaptor for implementation_components, rather than
     # dynamicview impacts adaptor, because the implementation zenpack might not
@@ -1219,6 +1467,9 @@ classes: !ZenPackSpec
     label: Port
     order: 16
     properties:
+      title:
+        label: Title
+        grid_display: false
       admin_state_up:
         label: Admin State
         label_width: 60
@@ -1228,11 +1479,14 @@ classes: !ZenPackSpec
       device_owner:
         label: Device Owner
         grid_display: false
-        order: 1.18
       fixed_ip_list:
         label: Fixed IPs
         label_width: 70
-        order: 1.12
+        grid_display: false
+      vif_type:
+        label: Type
+        label_width: 20
+        order: 1.13
       implementation_components:
         type: entity
         label: Neutron Implementation
@@ -1241,28 +1495,28 @@ classes: !ZenPackSpec
         api_backendtype: method
       mac_address:
         label: MAC
-        content_width: 105
+        content_width: 90
         order: 1.14
       portId:
         label: Port ID
         label_width: 40
         grid_display: false
+      vnic:
+        type: entity
+        label: Vnic
+        order: 1.15
+        api_only: true
+        api_backendtype: method
+        label_width: 70
       status:
         label: Status
         label_width: 35
         order: 1.19
-      title:
-        label: Title
-        grid_display: false
-      vif_type:
-        label: Type
-        label_width: 30
-        order: 1.13
     relationships:
       floatingIps:
         grid_display: false
       instance:
-        label_width: 40
+        label_width: 50
         content_width: 40
         order: 1.1
       network:
@@ -1274,9 +1528,16 @@ classes: !ZenPackSpec
       tenant:
         label_width: 35
         content_width: 35
+        order: 1.4
+      router:
+        label_width: 35
+        content_width: 35
         order: 1.3
+    dynamicview_views: [service_view]
+    dynamicview_group: Ports
+    dynamicview_weight: 251
     dynamicview_relations:
-      impacted_by: [subnets, floatingIps]
+      impacted_by: [subnets, floatingIps, router]
       impacts: [instance]
     # --------------------------------------------------------------------------
     # We use a normal impact adaptor for implementation_components, rather than
@@ -1326,6 +1587,9 @@ classes: !ZenPackSpec
       tenant:
         label_width: 50
         order: 1.4
+    dynamicview_views: [service_view]
+    dynamicview_group: Floating IPs
+    dynamicview_weight: 215
     dynamicview_relations:
       impacted_by: [router]
       impacts: [port]
@@ -1336,4 +1600,275 @@ classes: !ZenPackSpec
     # exported from DV to impact currently (ZEN-14579).
     # --------------------------------------------------------------------------
     impacted_by: [implementation_components]
+  CinderService:
+    base: [SoftwareComponent]
+    meta_type: OpenStackInfrastructureCinderService
+    label: Cinder Service
+    order: 20.1
+    # --------------------------------------------------------------------------
+    # We use a normal impact adaptor for osprocess_component, rather than
+    # dynamicview impacts adaptor, because OSProcess is not part of
+    # service_view, and so will not be exported from DV to impact  currently
+    # (ZEN-14579).
+    # --------------------------------------------------------------------------
+    impacted_by: [osprocess_component]
+    dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Cinder Services
+    dynamicview_weight: 266
+    dynamicview_relations:
+      impacted_by: [hostedOn]
+      impacts: [orgComponent]
+  CinderApi:
+    base: [SoftwareComponent]
+    meta_type: OpenStackInfrastructureCinderApi
+    label: Cinder API
+    order: 20.1
+    # --------------------------------------------------------------------------
+    # We use a normal impact adaptor for osprocess_component, rather than
+    # dynamicview impacts adaptor, because OSProcess is not part of
+    # service_view, and so will not be exported from DV to impact  currently
+    # (ZEN-14579).
+    # --------------------------------------------------------------------------
+    impacted_by: [osprocess_component]
+    dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Cinder APIs
+    dynamicview_weight: 265
+    dynamicview_relations:
+      impacted_by: [hostedOn]
+      impacts: [orgComponent]
+  Volume:
+    base: [ZenPacks.zenoss.OpenStackInfrastructure.CinderIntegrationComponent.CinderIntegrationComponent, LogicalComponent]
+    meta_type: OpenStackInfrastructureVolume
+    label: Volume
+    order: 21
+    properties:
+      bootable:
+        label: Bootable
+        label_width: 40
+        content_width: 40
+      volumeId:
+        label: Volume ID
+        grid_display: false
+      avzone:
+        label: Availability Zone
+        grid_display: false
+      created_at:
+        label: Created At
+        grid_display: false
+      sourceVolumeId:
+        label: Source Volume ID
+        grid_display: false
+      host:
+        label: Host
+        label_width: 100
+        content_width: 100
+        order: 21.4
+      size:
+        label: Size (GB)
+        label_width: 40
+        content_width: 40
+        order: 21.1
+      status:
+        label: Status
+        label_width: 80
+        content_width: 80
+        order: 21.2
+      implementation_components:
+        type: entity
+        label: Cinder Implementation
+        grid_display: false
+        api_only: true
+        api_backendtype: method
+    relationships:
+      tenant:
+        label_width: 80
+        content_width: 80
+      instance:
+        label_width: 80
+        content_width: 80
+      volSnapshots:
+        label_width: 50
+        content_width: 50
+#      backups:
+#        label_width: 50
+#        content_width: 50
+    dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Volumes
+    dynamicview_weight: 242
+    dynamicview_relations:
+      impacts: [instance, volSnapshots, tenant]
+    # --------------------------------------------------------------------------
+    # We use a normal impact adaptor for implementation_components, rather than
+    # dynamicview impacts adaptor, because the implementation zenpack might not
+    # use dynamic view (and therefore not be in service_view) and so will not be
+    # exported from DV to impact currently (ZEN-14579).
+    # --------------------------------------------------------------------------
+    impacted_by: [implementation_components]
+  VolType:
+    base: [LogicalComponent]
+    meta_type: OpenStackInfrastructureVolType
+    label: Volume Type
+    order: 22
+  VolSnapshot:
+    base: [ZenPacks.zenoss.OpenStackInfrastructure.CinderIntegrationComponent.CinderIntegrationComponent, LogicalComponent]
+    meta_type: OpenStackInfrastructureVolSnapshot
+    label: Snapshot
+    order: 23
+    properties:
+      created_at:
+        label: Created At
+        label_width: 100
+        content_width: 100
+      description:
+        label: Description
+        label_width: 150
+        content_width: 150
+      size:
+        label: Size (GB)
+        label_width: 40
+        content_width: 40
+      progress:
+        label: Progress
+        label_width: 80
+        content_width: 80
+      status:
+        label: Status
+        label_width: 80
+        content_width: 80
+      created_at:
+        label: Created At
+        label_width: 100
+        content_width: 100
+        grid_display: false
+      implementation_components:
+        type: entity
+        label: Cinder Implementation
+        grid_display: false
+        api_only: true
+        api_backendtype: method
+    relationships:
+      volume:
+        label_width: 80
+        content_width: 80
+    dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: Snapshots
+    dynamicview_weight: 241
+    dynamicview_relations:
+      impacted_by: [volume]
+    # --------------------------------------------------------------------------
+    # We use a normal impact adaptor for implementation_components, rather than
+    # dynamicview impacts adaptor, because the implementation zenpack might not
+    # use dynamic view (and therefore not be in service_view) and so will not be
+    # exported from DV to impact currently (ZEN-14579).
+    # --------------------------------------------------------------------------
+    impacted_by: [implementation_components]
+  Backup:
+    base: [LogicalComponent]
+    meta_type: OpenStackInfrastructureBackup
+    label: Backup
+    order: 24
+    properties:
+      created_at:
+        label: Created At
+        label_width: 100
+        content_width: 90
+      description:
+        label: Description
+        label_width: 130
+        content_width: 130
+      size:
+        label: Size (GB)
+        label_width: 40
+        content_width: 40
+      progress:
+        label: Progress
+        label_width: 100
+        content_width: 100
+      status:
+        label: Status
+        label_width: 80
+        content_width: 80
+#    relationships:
+#      volume:
+#        label_width: 80
+#        content_width: 80
+  Pool:
+    base: [OpenstackComponent]
+    meta_type: OpenStackInfrastructurePool
+    label: Pool
+    order: 25
+    properties:
+      qos_support:
+        label: QoS Support
+        grid_display: false
+      allocated_capacity:
+        label: Allocated Capacity
+        label_width: 90
+        content_width: 90
+      free_capacity:
+        label: Free Capacity
+        label_width: 80
+        content_width: 80
+      total_capacity:
+        label: Total Capacity
+        label_width: 80
+        content_width: 80
+      driver_version:
+        label: Driver Version
+        grid_display: false
+      location:
+        label: Location
+        grid_display: false
+      reserved_percentage:
+        label: Reserved Percentage
+        label_width: 100
+        content_width: 100
+      storage_protocol:
+        label: Storage Protocol
+        label_width: 80
+        content_width: 80
+      vendor_name:
+        label: Vendor Name
+        grid_display: false
+      volume_backend:
+        label: Volume Backend
+        grid_display: false
+    relationships:
+      orgComponent:
+        grid_display: false
+  Quota:
+    base: [LogicalComponent]
+    meta_type: OpenStackInfrastructureQuota
+    label: Quota
+    order: 26
+    properties:
+      tenant_name:
+        label: Tenant Name
+        label_width: 100
+        content_width: 100
+      backup_bytes:
+        label: Backup (GB)
+        label_width: 60
+        content_width: 60
+      backups:
+        label: Backups
+        label_width: 40
+        content_width: 40
+      bytes:
+        label: Bytes (GB)
+        label_width: 50
+        content_width: 50
+      snapshots:
+        label: Snapshots
+        label_width: 50
+        content_width: 50
+      volumes:
+        label: Volumes
+        label_width: 50
+        content_width: 50
+    relationships:
+      tenant:
+        label_width: 80
+        content_width: 80
 
+#

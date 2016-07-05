@@ -18,6 +18,9 @@ from Products.AdvancedQuery import Eq, Or
 
 class Hypervisor(schema.Hypervisor):
 
+    def get_faceting_relnames(self):
+        return ['host']
+
     def get_hostByName(self):
         if self.host() and self.hostfqdn:
             return self.hostfqdn
@@ -58,4 +61,4 @@ class Hypervisor(schema.Hypervisor):
                     self.set_host(host.id)
                     self.hostfqdn = name
         else:
-            log.error("Could not setup host")
+            log.error("%s: Could not set hypervisor host by name (%s)", self.id, name)

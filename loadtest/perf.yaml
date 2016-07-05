@@ -1,0 +1,421 @@
+
+Instance:
+  interval: 600
+
+  resource_metadata:
+    status: "active"
+    cpu_number: 1
+    ramdisk_id: null
+    display_name: "cirros1"
+    name: "instance-00000015"
+    disk_gb: 1
+    kernel_id: null
+    image: 
+      id: "fed702a2-77fd-42a3-b36c-89a79866d73d"
+      links: 
+        - 
+          href: "http://controller:8774/d9f73348378040a481911b32dcb5d79d/images/fed702a2-77fd-42a3-b36c-89a79866d73d"
+          rel: "bookmark"
+      name: "CirrosRaw"
+    ephemeral_gb: 0
+    host: "51462d7f90e4a86bed3eea7485884f266b1eacc2e24a35c0845c3cfb"
+    memory_mb: 512
+    instance_type: "1"
+    vcpus: 1
+    root_gb: 1
+    image_ref: "fed702a2-77fd-42a3-b36c-89a79866d73d"
+    flavor: 
+      name: "m1.tiny"
+      links: 
+        - 
+          href: "http://controller:8774/d9f73348378040a481911b32dcb5d79d/flavors/1"
+          rel: "bookmark"
+      ram: 512
+      ephemeral: 0
+      vcpus: 1
+      disk: 1
+      id: "1"
+    OS-EXT-AZ:availability_zone: "nova"
+    image_ref_url: "http://controller:8774/d9f73348378040a481911b32dcb5d79d/images/fed702a2-77fd-42a3-b36c-89a79866d73d"
+
+  meters:
+    cpu:
+      meter: cpu.${resource_id}
+      counter_name: cpu 
+      counter_unit: ns 
+      counter_type: cumulative
+      counter_volume: 32165980000000
+      resource_id: ${resource_id}
+
+    cpu_util:    
+      meter: cpu_util.${resource_id}
+      counter_name: cpu_util
+      counter_unit: "%"
+      counter_type: gauge
+      counter_volume: 3.28
+      resource_id: ${resource_id}
+
+    disk.device.read.bytes-vda:
+      meter: disk.device.read.bytes.${resource_id}-vda
+      counter_name: disk.device.read.bytes 
+      counter_unit: B 
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vda
+
+    disk.device.read.bytes-vdb:
+      meter: disk.device.read.bytes.${resource_id}-vdb
+      counter_name: disk.device.read.bytes 
+      counter_unit: B 
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vdb
+
+    disk.device.read.bytes-vdd:
+      meter: disk.device.read.bytes.${resource_id}-vdd
+      counter_name: disk.device.read.bytes 
+      counter_unit: B 
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vdd
+
+    disk.device.read.bytes-vde:
+      meter: disk.device.read.bytes.${resource_id}-vde
+      counter_name: disk.device.read.bytes 
+      counter_unit: B 
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vde
+
+    disk.device.read.bytes-vdf:
+      meter: disk.device.read.bytes.${resource_id}-vdf
+      counter_name: disk.device.read.bytes 
+      counter_unit: B 
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vdf
+
+    disk.device.read.requests-vda:
+      meter: disk.device.read.requests.${resource_id}-vda
+      counter_name: disk.device.read.requests
+      counter_unit: request
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vda
+
+    disk.device.read.requests-vdb:
+      meter: disk.device.read.requests.${resource_id}-vdb
+      counter_name: disk.device.read.requests
+      counter_unit: request
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vdb
+
+    disk.device.read.requests-vdd:
+      meter: disk.device.read.requests.${resource_id}-vdd
+      counter_name: disk.device.read.requests
+      counter_unit: request
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vdd
+
+    disk.device.read.requests-vde:
+      meter: disk.device.read.requests.${resource_id}-vde
+      counter_name: disk.device.read.requests
+      counter_unit: request
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vde
+
+    disk.device.read.requests-vdf:
+      meter: disk.device.read.requests.${resource_id}-vdf
+      counter_name: disk.device.read.requests
+      counter_unit: request
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vdf      
+
+    disk.device.write.bytes-vda:
+      meter: disk.device.write.bytes.${resource_id}-vda
+      counter_name: disk.device.write.bytes 
+      counter_unit: B 
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vda
+
+    disk.device.write.bytes-vdb:
+      meter: disk.device.write.bytes.${resource_id}-vdb
+      counter_name: disk.device.write.bytes 
+      counter_unit: B 
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vdb
+
+    disk.device.write.bytes-vdd:
+      meter: disk.device.write.bytes.${resource_id}-vdd
+      counter_name: disk.device.write.bytes 
+      counter_unit: B 
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vdd
+
+    disk.device.write.bytes-vde:
+      meter: disk.device.write.bytes.${resource_id}-vde
+      counter_name: disk.device.write.bytes 
+      counter_unit: B 
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vde
+
+    disk.device.write.bytes-vdf:
+      meter: disk.device.write.bytes.${resource_id}-vdf
+      counter_name: disk.device.write.bytes 
+      counter_unit: B 
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vdf
+
+    disk.device.write.requests-vda:
+      meter: disk.device.write.requests.${resource_id}-vda
+      counter_name: disk.device.write.requests
+      counter_unit: request
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vda
+
+    disk.device.write.requests-vdb:
+      meter: disk.device.write.requests.${resource_id}-vdb
+      counter_name: disk.device.write.requests
+      counter_unit: request
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vdb
+
+    disk.device.write.requests-vdd:
+      meter: disk.device.write.requests.${resource_id}-vdd
+      counter_name: disk.device.write.requests
+      counter_unit: request
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vdd      
+
+    disk.device.write.requests-vde:
+      meter: disk.device.write.requests.${resource_id}-vde
+      counter_name: disk.device.write.requests
+      counter_unit: request
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vde      
+
+    disk.device.write.requests-vdf:
+      meter: disk.device.write.requests.${resource_id}-vdf
+      counter_name: disk.device.write.requests
+      counter_unit: request
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}-vdf      
+
+    disk.read.bytes:
+      meter: disk.read.bytes.${resource_id}
+      counter_name: disk.read.bytes 
+      counter_unit: B 
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}
+
+    disk.read.bytes.rate:
+      meter: disk.read.bytes.rate.${resource_id}
+      counter_name: disk.read.bytes.rate 
+      counter_unit: B/s 
+      counter_type: gauge
+      counter_volume: 64.0
+      resource_id: ${resource_id}
+
+    disk.read.requests:
+      meter: disk.read.requests.${resource_id}
+      counter_name: disk.read.requests 
+      counter_unit: request
+      counter_type: cumulative
+      counter_volume: 12341234
+      resource_id: ${resource_id}
+
+    disk.read.requests.rate:
+      meter: disk.read.requests.rate.${resource_id}
+      counter_name: disk.read.requests.rate
+      counter_unit: request/s
+      counter_type: gauge
+      counter_volume: 68.0
+      resource_id: ${resource_id}
+
+    disk.write.bytes:
+      meter: disk.write.bytes.${resource_id}
+      counter_name: disk.write.bytes 
+      counter_unit: B 
+      counter_type: cumulative
+      counter_volume: 22341234
+      resource_id: ${resource_id}
+
+    disk.write.bytes.rate:
+      meter: disk.write.bytes.rate.${resource_id}
+      counter_name: disk.write.bytes.rate 
+      counter_unit: B/s 
+      counter_type: gauge
+      counter_volume: 74.0
+      resource_id: ${resource_id}
+
+    disk.write.requests:
+      meter: disk.write.requests.${resource_id}
+      counter_name: disk.write.requests 
+      counter_unit: request
+      counter_type: cumulative
+      counter_volume: 22341234
+      resource_id: ${resource_id}
+
+    disk.write.requests.rate:
+      meter: disk.write.requests.rate.${resource_id}
+      counter_name: disk.write.requests.rate
+      counter_unit: request/s
+      counter_type: gauge
+      counter_volume: 78.0
+      resource_id: ${resource_id}
+
+    instance:
+      meter: instance.${resource_id}
+      counter_name: instance,
+      counter_unit: instance,
+      counter_volume: 1,
+      counter_type: gauge
+      resource_id: ${resource_id}
+
+    instance:m1.tiny:
+      meter: instance:m1.tiny.${resource_id}
+      counter_name: instance:m1.tiny,
+      counter_unit: instance,
+      counter_volume: 1,
+      counter_type: gauge
+      resource_id: ${resource_id}
+
+Vnic:
+  interval: 600
+
+  resource_metadata:
+    name: tapef3f4fb2-25
+    parameters: {}
+    fref: null
+    instance_id: 57e258bf-b955-4ff7-bae1-22c1e7b053a8
+    instance_type: 1
+    mac: fa:16:3e:60:a2:0e
+
+  meters:  
+    network.incoming.bytes.rate:
+      meter: network.incoming.bytes.rate.${resource_id}
+      resource_id: ${resource_id}
+      counter_name: network.incoming.bytes.rate
+      counter_unit: B/s
+      counter_volume: 123.0
+      counter_type: gauge
+      resource_id: ${resource_id}
+
+    network.incoming.bytes:
+      meter: network.incoming.bytes.${resource_id}
+      resource_id: ${resource_id}
+      counter_name: network.incoming.bytes
+      counter_unit: B
+      counter_volume: 21277
+      counter_type: cumulative
+      resource_id: ${resource_id}
+
+    network.incoming.packets:
+      meter: network.incoming.packets.${resource_id}
+      resource_id: ${resource_id}
+      counter_name: network.incoming.packets
+      counter_unit: packet
+      counter_volume: 18412
+      counter_type: cumulative
+      resource_id: ${resource_id}
+
+    network.incoming.packets.rate:
+      meter: network.incoming.packets.rate.${resource_id}
+      resource_id: ${resource_id}
+      counter_name: network.incoming.packets.rate
+      counter_unit: packet/s
+      counter_volume: 111.0
+      counter_type: gauge
+      resource_id: ${resource_id}
+
+    network.outgoing.bytes:
+      meter: network.outgoing.bytes.${resource_id}
+      resource_id: ${resource_id}
+      counter_name: network.outgoing.bytes
+      counter_unit: B
+      counter_volume: 21277
+      counter_type: cumulative
+      resource_id: ${resource_id}
+
+    network.outgoing.bytes.rate:
+      meter: network.outgoing.bytes.rate.${resource_id}
+      resource_id: ${resource_id}
+      counter_name: network.outgoing.bytes.rate
+      counter_unit: B/s
+      counter_volume: 234.0
+      counter_type: gauge
+      resource_id: ${resource_id}
+
+    network.outgoing.packets:
+      meter: network.outgoing.packets.${resource_id}
+      resource_id: ${resource_id}
+      counter_name: network.outgoing.packets
+      counter_unit: packet
+      counter_volume: 22243
+      counter_type: cumulative
+      resource_id: ${resource_id}
+
+    network.outgoing.packets.rate:
+      meter: network.outgoing.packets.rate.${resource_id}
+      resource_id: ${resource_id}
+      counter_name: network.outgoing.packets.rate
+      counter_unit: packet/s
+      counter_volume: 211.0
+      counter_type: gauge
+      resource_id: ${resource_id}
+
+
+Image:  
+  interval: 600
+
+  resource_metadata:
+    status: active
+    name: CirrosRaw
+    deleted: false
+    container_format: bare
+    created_at: '2016-04-04T21:15:38'
+    disk_format: raw
+    updated_at: '2016-04-04T21:15:38'
+    properties: {}
+    protected: false
+    checksum: 0590d15336f919496ccc91b2c0f667bc
+    min_disk: 0
+    is_public: true
+    deleted_at: null
+    min_ram: 0
+    size: 4112640
+
+  meters:
+    image:
+      meter: image.${resource_id}
+      counter_name: image
+      counter_unit: image
+      counter_volume: 1
+      counter_type: gauge
+      resource_id: ${resource_id}      
+
+    image.size:
+      meter: image.size.${resource_id}
+      counter_name: image.size
+      counter_unit: B
+      counter_volume: 41126400
+      counter_type: gauge
+      resource_id: ${resource_id}      
+
+
+

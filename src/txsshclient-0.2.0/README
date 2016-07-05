@@ -39,8 +39,13 @@ c = SSHClient(options)
 d=c.ls('/tmp')
 display(data):
     print data
+    c.disconnect()
 d.addBoth(display)
 
+# ***** WARNING ******
+# This library uses the twisted reconnecting client factory.  It will not disconnect unless you tell it to.
+# It is also very aggressive in reconnecting.  If you do not disconnect you will have connections increment
+# and may flood your remote system.
 
 for more help see the builtin sshclient help.
 from sshclient import SSHClient

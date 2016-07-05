@@ -57,6 +57,18 @@ def require_zenpack(zenpack_name, default=None):
     return wrap
 
 
+def setup_crochet():
+    """Setup and return crochet for testing Twisted code."""
+    try:
+        import crochet
+    except ImportError as e:
+        print "\n\nERROR: Unable to import crochet: {}".format(e)
+        print "  You must install it: pip install --no-deps crochet\n"
+        raise
+
+    crochet.setup()
+    return crochet
+
 # When a manually-created python object is first added to its container, we
 # need to reload it, as its in-memory representation is changed.
 def addContained(object, relname, target):
@@ -282,6 +294,15 @@ def create_model_data(dmd):
 
             process_class = re.sub(r'\d+$', '', binary)
             process.setOSProcessClass("Processes/OpenStack/osProcessClasses/%s" % process_class)
+
+
+    # Cinder
+    from ZenPacks.zenoss.OpenStackInfrastructure.Volume import Volume
+    from ZenPacks.zenoss.OpenStackInfrastructure.VolSnapshot import VolSnapshot
+    volume1 = addContained(endpoint, "components", Volume("volume1"))
+    volsnap1 = addContained(endpoint, "components", VolSnapshot("volsnap1"))
+    addNonContained(instance1, "volumes", volume1)
+    addNonContained(volume1, "volSnapshots", volsnap1)
 
     return {
         'endpoint': endpoint,

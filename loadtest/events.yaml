@@ -1,0 +1,352 @@
+
+
+instance_creation:
+    - 
+        device: 'endpoint'
+        event_type: 'scheduler.run_instance.end'
+        message_id: ${message_id}
+        severity: 2
+        summary: ''
+        traits:
+            request_id: ${request_id}
+            service: 'python: "scheduler." + instance.host().id'
+            tenant_id: ${instance/tenant/id}
+    -
+        device: 'endpoint'
+        event_type: 'compute.instance.create.start'
+        message_id: ${message_id}
+        severity: 2
+        summary: ''
+        traits:
+            disk_gb: 1
+            display_name: ${instance/title}
+            ephemeral_gb: 0
+            flavor_name: ${instance/flavor/title}
+            host_name: "python: instance.host().id"
+            image_name: ${instance/image/id}
+            instance_id: ${instance/id}
+            memory_mb: 512
+            request_id: ${request_id}
+            root_gb: 1
+            service: 'compute'
+            state: 'building'
+            tenant_id: ${instance/tenant/id}
+            user_id: 'user1'
+            vcpus: 1
+    -
+        device: 'endpoint'
+        event_type: 'compute.instance.create.end'
+        message_id: ${message_id}
+        severity: 2
+        summary: ''
+        traits:
+            disk_gb: 1
+            display_name: ${instance/title}
+            ephemeral_gb: 0
+            fixed_ips: "[{'floating_ips': [], 'label': 'public', 'version': 4, 'meta': {}, 'address': '172.24.4.229', 'type': 'fixed'}]"
+            flavor_name: ${instance/flavor/title}
+            host_name: "python: instance.host().id"
+            image_name: ${instance/image/id}
+            instance_id: ${instance/id}
+            launched_at: '2014-09-02T20:20:24.933700'
+            memory_mb: 512
+            request_id: ${request_id}
+            root_gb: 1
+            service: 'compute'
+            state: 'active'
+            tenant_id: ${instance/tenant/id}
+            user_id: 'user1'
+            vcpus: 1
+        
+
+instance_power_off:
+    - 
+        device: 'endpoint'
+        event_type: 'compute.instance.power_off.start'
+        message_id: ${message_id}
+        severity: 2
+        summary: ''
+        traits:
+            disk_gb: 1
+            display_name: ${instance/title}
+            ephemeral_gb: 0
+            flavor_name: ${instance/flavor/title}
+            host_name: "python: instance.host().id"
+            instance_id: ${instance/id}
+            launched_at: '2014-08-05T01:01:02.000000'
+            memory_mb: 512
+            request_id: ${request_id}
+            root_gb: 1
+            service: 'compute'
+            state: 'active'
+            state_description: 'powering-off'
+            tenant_id: ${instance/tenant/id}
+            user_id: 'user1'
+            vcpus: 1
+    -
+        device: 'endpoint'
+        event_type: 'compute.instance.power_off.end'
+        message_id: ${message_id}
+        severity: 2
+        summary: ''
+        traits:
+            disk_gb: 1
+            display_name: ${instance/title}
+            ephemeral_gb: 0
+            flavor_name: ${instance/flavor/title}
+            host_name: "python: instance.host().id"
+            instance_id: ${instance/id}
+            launched_at: '2014-08-05T01:01:02.000000'
+            memory_mb: 512
+            request_id: ${request_id}
+            root_gb: 1
+            service: 'compute'
+            state: 'stopped'
+            state_description: ''
+            tenant_id: ${instance/tenant/id}
+            user_id: 'user1'
+            vcpus: 1
+        
+
+instance_power_on:
+    - 
+        device: 'endpoint'
+        event_type: 'compute.instance.power_on.start'
+        message_id: ${message_id}
+        severity: 2
+        summary: ''
+        traits:
+            disk_gb: 1
+            display_name: ${instance/title}
+            ephemeral_gb: 0
+            flavor_name: ${instance/flavor/title}
+            host_name: "python: instance.host().id"
+            instance_id: ${instance/id}
+            launched_at: '2014-09-05T01:48:54.000000'
+            memory_mb: 512
+            request_id: ${request_id}
+            root_gb: 1
+            service: 'compute'
+            state: 'stopped'
+            tenant_id: ${instance/tenant/id}
+            user_id: 'user1'
+            vcpus: 1
+    -
+        device: 'endpoint'
+        event_type: 'compute.instance.power_on.end'
+        message_id: ${message_id}
+        severity: 2
+        summary: ''
+        traits:
+            disk_gb: 1
+            display_name: ${instance/title}
+            ephemeral_gb: 0
+            flavor_name: ${instance/flavor/title}
+            host_name: "python: instance.host().id"
+            instance_id: ${instance/id}
+            launched_at: '2014-09-05T01:48:54.000000'
+            memory_mb: 512
+            request_id: ${request_id}
+            root_gb: 1
+            service: 'compute'
+            state: 'active'
+            tenant_id: ${instance/tenant/id}
+            user_id: 'user1'
+            vcpus: 1
+
+instance_reboot:
+    - 
+        device: 'endpoint'
+        event_type: 'compute.instance.reboot.start'
+        message_id: ${message_id}
+        severity: 2
+        summary: ''
+        traits:
+            disk_gb: 1
+            display_name: ${instance/title}
+            ephemeral_gb: 0
+            flavor_name: ${instance/flavor/title}
+            host_name: "python: instance.host().id"
+            instance_id: ${instance/id}
+            launched_at: '2014-09-05T01:48:54.000000'
+            memory_mb: 512
+            request_id: ${request_id}
+            root_gb: 1
+            service: 'compute'
+            state: 'active'
+            state_description: 'reboot_pending'
+            tenant_id: ${instance/tenant/id}
+            user_id: 'user1'
+            vcpus: 1
+    -
+        device: 'endpoint'
+        event_type: 'compute.instance.reboot.end'
+        message_id: ${message_id}
+        severity: 2
+        summary: ''
+        traits:
+            disk_gb: 1
+            display_name: ${instance/title}
+            ephemeral_gb: 0
+            flavor_name: ${instance/flavor/title}
+            host_name: "python: instance.host().id"
+            instance_id: ${instance/id}
+            launched_at: '2014-09-05T01:48:54.000000'
+            memory_mb: 512
+            request_id: ${request_id}
+            root_gb: 1
+            service: 'compute'
+            state: 'active'
+            state_description: ''
+            tenant_id: ${instance/tenant/id}
+            user_id: 'user1'
+            vcpus: 1
+
+instance_suspend_resume:
+    - 
+
+        device: 'endpoint'
+        event_type: 'compute.instance.suspend'
+        message_id: ${message_id}
+        severity: 2
+        summary: ''
+        traits:
+            disk_gb: 1
+            display_name: ${instance/title}
+            ephemeral_gb: 0
+            flavor_name: ${instance/flavor/title}
+            host_name: "python: instance.host().id"
+            instance_id: ${instance/id}
+            launched_at: '2014-09-05T19:50:11.000000'
+            memory_mb: 512
+            request_id: ${request_id}
+            root_gb: 1
+            service: 'compute'
+            state: 'suspended'
+            state_description: ''
+            tenant_id: ${instance/tenant/id}
+            user_id: 'user1'
+            vcpus: 1
+    -
+        device: 'endpoint'
+        event_type: 'compute.instance.resume'
+        message_id: ${message_id}
+        severity: 2
+        summary: ''
+        traits:
+            disk_gb: 1
+            display_name: ${instance/title}
+            ephemeral_gb: 0
+            flavor_name: ${instance/flavor/title}
+            host_name: "python: instance.host().id"
+            instance_id: ${instance/id}
+            launched_at: '2014-09-05T19:50:11.000000'
+            memory_mb: 512
+            request_id: ${request_id}
+            root_gb: 1
+            service: 'compute'
+            state: 'active'
+            state_description: ''
+            tenant_id: ${instance/tenant/id}
+            user_id: 'user1'
+            vcpus: 1
+
+instance_delete:
+    - 
+        device: 'endpoint'
+        event_type: 'compute.instance.delete.start'
+        message_id: ${message_id}
+        severity: 2
+        summary: ''
+        traits:
+            disk_gb: 1
+            display_name: ${instance/title}
+            ephemeral_gb: 0
+            flavor_name: ${instance/flavor/title}
+            host_name: "python: instance.host().id"
+            instance_id: ${instance/id}
+            launched_at: '2014-09-05T19:50:11.000000'
+            memory_mb: 512
+            priority: 'INFO'
+            request_id: ${request_id}
+            root_gb: 1
+            service: 'compute'
+            state: 'active'
+            state_description: 'deleting'
+            tenant_id: ${instance/tenant/id}
+            user_id: 'user1'
+            vcpus: 1
+    -
+        device: 'endpoint'
+        event_type: 'compute.instance.shutdown.start'
+        message_id: ${message_id}
+        severity: 2
+        summary: ''
+        traits:
+            disk_gb: 1
+            display_name: ${instance/title}
+            ephemeral_gb: 0
+            flavor_name: ${instance/flavor/title}
+            host_name: "python: instance.host().id"
+            instance_id: ${instance/id}
+            launched_at: '2014-09-05T19:50:11.000000'
+            memory_mb: 512
+            priority: 'INFO'
+            request_id: ${request_id}
+            root_gb: 1
+            service: 'compute'
+            state: 'active'
+            state_description: 'deleting'
+            tenant_id: ${instance/tenant/id}
+            user_id: 'user1'
+            vcpus: 1
+    -
+        device: 'endpoint'
+        event_type: 'compute.instance.shutdown.end'
+        message_id: ${message_id}
+        severity: 2
+        summary: ''
+        traits:
+            disk_gb: 1
+            display_name: ${instance/title}
+            ephemeral_gb: 0
+            flavor_name: ${instance/flavor/title}
+            host_name: "python: instance.host().id"
+            instance_id: ${instance/id}
+            launched_at: '2014-09-05T19:50:11.000000'
+            memory_mb: 512
+            priority: 'INFO'
+            request_id: ${request_id}
+            root_gb: 1
+            service: 'compute'
+            state: 'active'
+            state_description: 'deleting'
+            tenant_id: ${instance/tenant/id}
+            user_id: 'user1'
+            vcpus: 1
+    -
+        device: 'endpoint'
+        event_type: 'compute.instance.delete.end'
+        message_id: ${message_id}
+        severity: 2
+        summary: ''
+        traits:
+            deleted_at: '2014-09-05T21:32:34.249362'
+            disk_gb: 1
+            display_name: ${instance/title}
+            ephemeral_gb: 0
+            flavor_name: ${instance/flavor/title}
+            host_name: "python: instance.host().id"
+            instance_id: ${instance/id}
+            launched_at: '2014-09-05T19:50:11.000000'
+            memory_mb: 512
+            priority: 'INFO'
+            request_id: ${request_id}
+            root_gb: 1
+            service: 'compute'
+            state: 'deleted'
+            state_description: ''
+            tenant_id: ${instance/tenant/id}
+            user_id: 'user1'
+            vcpus: 1
+

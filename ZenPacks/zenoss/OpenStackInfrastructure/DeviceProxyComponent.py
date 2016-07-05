@@ -26,6 +26,7 @@ from Products.ZenUtils.Utils import monkeypatch
 from Products.Zuul.interfaces import ICatalogTool
 from Products.AdvancedQuery import Eq
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
+from Products.ZenUtils.IpUtil import getHostByName
 
 
 def onDeviceDeleted(object, event):
@@ -126,7 +127,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
 
             # this shouldn't happen, but if we've somehow become half-connected
             # (we know about the device, it doesn't know about us), reconnect.
-            if device.openstackProxyComponentUUID != guid:
+            if getattr(device, 'openstackProxyComponentUUID', None) != guid:
                 LOG.info("%s component '%s' linkage to device '%s' is broken.  Re-claiming it." % (self.meta_type, self.name(), device.name()))
                 self.claim_proxy_device(device)
 
@@ -155,16 +156,27 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
 
         # add the missing proxy device.
         device_name = self.name()
+        try:
+            device = self.dmd.Devices.findDeviceByIdOrIp(
+                getHostByName(device_name))
+        except Exception:
+            device = None
+
         if self.dmd.Devices.findDevice(device_name):
             device_name = device_name + "_nameconflict"
             LOG.info("Device name conflict with endpoint.  Changed name to %s" % device_name)
 
-        LOG.info('Adding device for %s %s' % (self.meta_type, self.title))
+        if device and device.getDeviceClassName() == '/Server/SSH/Linux':
+            LOG.info("Change device class  for existing device %s"
+                     % device.title)
+            device.changeDeviceClass('/Server/SSH/Linux/NovaHost')
+        elif not device:
+            LOG.info('Adding device for %s %s' % (self.meta_type, self.title))
 
-        device = self.proxy_deviceclass().createInstance(device_name)
-        device.setProdState(self.productionState)
-        device.setPerformanceMonitor(self.getPerformanceServer().id)
-        device.setManageIp(self.name())
+            device = self.proxy_deviceclass().createInstance(device_name)
+            device.setProdState(self.productionState)
+            device.setPerformanceMonitor(self.getPerformanceServer().id)
+            device.setManageIp()
 
         device.index_object()
         notify(IndexingEvent(device))

@@ -20,6 +20,8 @@ from auth import PasswordAuth
 from channel import CommandChannel
 from channel import SFTPChannel
 
+# PEP-396 version. (https://www.python.org/dev/peps/pep-0396/)
+__version__ = "0.2.0"
 
 class SSHClient(ReconnectingClientFactory):
 

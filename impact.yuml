@@ -1,6 +1,7 @@
 // OpenStackInfrastructure Internal Impacts
 [note: OpenStackInfrastructure;ZenPack{bg:aquamarine}]-[NovaEndpoint{bg:aquamarine}]
 [note: OpenStackInfrastructure;ZenPack{bg:aquamarine}]-[NeutronAgent{bg:tan}]
+[note: OpenStackInfrastructure;ZenPack{bg:aquamarine}]-[CinderService{bg:orange}]
 [NovaEndpoint{bg:aquamarine}]1-*>[Host{bg:aquamarine}]
 
 [Host{bg:aquamarine}]*-1>[AvailabilityZone{bg:aquamarine}]
@@ -22,6 +23,7 @@
 
 # //   [Vnic{bg:tan}]1-*>[Port{bg:tan}]
 [Host{bg:tan}]1-*>[NeutronAgent{bg:tan}]
+[Host{bg:tan}]1-*>[CinderService{bg:orange}]
 [NeutronAgent{bg:tan}]*-*>[Network{bg:tan}]
 [NeutronAgent{bg:tan}]*-*>[Router{bg:tan}]
 [NeutronAgent{bg:tan}]*-*>[Subnet{bg:tan}]
@@ -45,9 +47,14 @@
 [Linux;Device{bg:deepskyblue}]1-*>[OSProcess{bg:deepskyblue}]
 [OSProcess{bg:deepskyblue}]*-1>[NovaService{bg:aquamarine}]
 [OSProcess{bg:deepskyblue}]*-1>[NovaApi{bg:aquamarine}]
+[OSProcess{bg:deepskyblue}]*-1>[CinderService{bg:orange}]
 
 //
 // CiscoUCS Impacts
 # // [note: Cisco UCS;ZenPack{bg:darkslateblue}]-[UCS Service Profile{bg:darkslateblue}]
 [UCS Service Profile{bg:darkslateblue}]1-*>[Linux;Device{bg:deepskyblue}]
 
+# Cinder
+[Volume{bg:orange}]*-1>[Tenant{bg:orange}]
+[Instance{bg:orange}]<1-*[Volume{bg:orange}]
+[Volume{bg:orange}]<1-*[Snapshot{bg:orange}]

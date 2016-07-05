@@ -339,14 +339,66 @@ history
 </object>
 </tomanycont>
 </object>
+<object id="Cinder" module="Products.ZenEvents.EventClass" class="EventClass">
+<object id="Volume" module="Products.ZenEvents.EventClass" class="EventClass">
+<tomanycont id="instances">
+<object id="cinder.volume default mapping" module="Products.ZenEvents.EventClassInst" class="EventClassInst">
+<property type="text" id="transform" mode="w">
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
+<property type="string" id="eventClassKey" mode="w">
+defaultmapping
+</property>
+<property type="int" id="sequence" mode="w">
+900
+</property>
+<property type="string" id="rule" mode="w">
+(getattr(evt, 'eventClassKey', '') or '').startswith('openstack|volume')
+</property>
+<property type="text" id="explanation" mode="w">
+All volume events not otherwise mapped will be placed in the /OpenStackInfrastructure/Cinder/Volume class history.
+</property>
+<property visible="True" type="string" id="zEventAction" >
+history
+</property>
 </object>
-<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackCeilometerHeartbeat') -->
-<object id='/zport/dmd/Events/Status/instances/openStackCeilometerHeartbeat' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+</tomanycont>
+</object>
+<object id="Snapshot" module="Products.ZenEvents.EventClass" class="EventClass">
+<tomanycont id="instances">
+<object id="Cinder Snapshot default mapping" module="Products.ZenEvents.EventClassInst" class="EventClassInst">
+<property type="text" id="transform" mode="w">
+from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+process(evt, device, dmd, txnCommit)
+</property>
+<property type="string" id="eventClassKey" mode="w">
+defaultmapping
+</property>
+<property type="int" id="sequence" mode="w">
+900
+</property>
+<property type="string" id="rule" mode="w">
+(getattr(evt, 'eventClassKey', '') or '').startswith('openstack|snapshot')
+</property>
+<property type="text" id="explanation" mode="w">
+All snapshot events not otherwise mapped will be placed in the /OpenStackInfrastructure/Cinder/Snapshot class history.
+</property>
+<property visible="True" type="string" id="zEventAction" >
+history
+</property>
+</object>
+</tomanycont>
+</object>
+</object>
+</object>
+<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'Heartbeat', 'instances', 'openStackCeilometerHeartbeat') -->
+<object id='/zport/dmd/Events/Status/Heartbeat/instances/openStackCeilometerHeartbeat' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
 <property type="string" id="eventClassKey" mode="w" >
 openStackCeilometerHeartbeat
 </property>
 <property type="int" id="sequence" mode="w" >
-12
+10
 </property>
 </object>
 <!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackIniFileAccess') -->
@@ -389,6 +441,21 @@ openStackNeutronAgentStatus
 </property>
 <property type="text" id="explanation" mode="w" >
 A neutron agent is not running properly
+</property>
+<property type="text" id="resolution" mode="w" >
+Restart the offending agent.
+</property>
+</object>
+<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackCinderServiceStatus') -->
+<object id='/zport/dmd/Events/Status/instances/openStackCinderServiceStatus' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+openStackCinderServiceStatus
+</property>
+<property type="int" id="sequence" mode="w" >
+12
+</property>
+<property type="text" id="explanation" mode="w" >
+A cinder agent is not running properly
 </property>
 <property type="text" id="resolution" mode="w" >
 Restart the offending agent.
@@ -514,6 +581,39 @@ Liberty (2015.2)
 </property>
 <property type="lines" id="productKeys" mode="w" >
 ['2015.2.1', '2015.2.2', '2015.2.3', '2015.2.4', '2015.2.5', '2015.2.6', '2015.2.7', '2015.2.8', '2015.2.9', '2015.2.10']
+</property>
+<property type="boolean" id="isOS" mode="w" >
+True
+</property>
+</object>
+<object id='Mitaka (2016.1)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<property type="string" id="name" mode="w" >
+Mitaka (2016.1)
+</property>
+<property type="lines" id="productKeys" mode="w" >
+['2016.1.1', '2016.1.2', '2016.1.3', '2016.1.4', '2016.1.5', '2016.1.6', '2016.1.7', '2016.1.8', '2016.1.9', '2016.1.10']
+</property>
+<property type="boolean" id="isOS" mode="w" >
+True
+</property>
+</object>
+<object id='Newton (2016.2)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<property type="string" id="name" mode="w" >
+Newton (2016.2)
+</property>
+<property type="lines" id="productKeys" mode="w" >
+['2016.2.1', '2016.2.2', '2016.2.3', '2016.2.4', '2016.2.5', '2016.2.6', '2016.2.7', '2016.2.8', '2016.2.9', '2016.2.10']
+</property>
+<property type="boolean" id="isOS" mode="w" >
+True
+</property>
+</object>
+<object id='Ocata (2017.1)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
+<property type="string" id="name" mode="w" >
+Newton (2017.1)
+</property>
+<property type="lines" id="productKeys" mode="w" >
+['2017.1.1', '2017.1.2', '2017.1.3', '2017.1.4', '2017.1.5', '2017.1.6', '2017.1.7', '2017.1.8', '2017.1.9', '2017.1.10']
 </property>
 <property type="boolean" id="isOS" mode="w" >
 True
@@ -667,6 +767,26 @@ False
 7
 </property>
 </object>
+<object id='ceilometer-polling' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+ceilometer-polling
+</property>
+<property type="string" id="regex" mode="w" >
+ceilometer-polling
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+3
+</property>
+</object>
 <object id='neutron-dhcp-agent' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
 neutron-dhcp-agent
@@ -755,7 +875,7 @@ neutron-server
 neutron-server
 </property>
 <property type="string" id="excludeRegex" mode="w" >
-\b(vim|tail|grep|tar|cat|bash)\b
+\b(vim|tail|grep|pgrep|tar|cat|bash)\b
 </property>
 <property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
 False
@@ -905,6 +1025,286 @@ False
 </property>
 <property type="int" id="sequence" mode="w" >
 12
+</property>
+</object>
+<object id="cinder-api" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+cinder-api
+</property>
+<property type="string" id="regex" mode="w">
+cinder-api
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="cinder-scheduler" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+cinder-scheduler
+</property>
+<property type="string" id="regex" mode="w">
+cinder-scheduler
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="cinder-volume" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+cinder-volume
+</property>
+<property type="string" id="regex" mode="w">
+cinder-volume
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="cinder-backup" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+cinder-backup
+</property>
+<property type="string" id="regex" mode="w">
+cinder-backup
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="glance-api" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+glance-api
+</property>
+<property type="string" id="regex" mode="w">
+glance-api
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="glance-registry" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+glance-registry
+</property>
+<property type="string" id="regex" mode="w">
+glance-registry
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="gnocchi-metricd" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+gnocchi-metricd
+</property>
+<property type="string" id="regex" mode="w">
+gnocchi-metricd
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="gnocchi-statsd" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+gnocchi-statsd
+</property>
+<property type="string" id="regex" mode="w">
+gnocchi-statsd
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="keystone-all" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+keystone-all
+</property>
+<property type="string" id="regex" mode="w">
+keystone-all
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="keystone-admin" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+keystone-admin
+</property>
+<property type="string" id="regex" mode="w">
+keystone-admin
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="keystone-main" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+keystone-main
+</property>
+<property type="string" id="regex" mode="w">
+keystone-main
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id="rabbitmq-server" module="Products.ZenModel.OSProcessClass" class="OSProcessClass">
+<property type="string" id="name" mode="w">
+rabbitmq-server
+</property>
+<property type="string" id="regex" mode="w">
+rabbitmq-server
+</property>
+<property type="string" id="excludeRegex" mode="w">
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w">
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w">
+False
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+</object>
+<object id='neutron-lbaas-agent' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+neutron-lbaas-agent
+</property>
+<property type="string" id="regex" mode="w" >
+neutron-lbaas-agent
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+0
+</property>
+</object>
+<object id='neutron-metering-agent' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
+<property type="string" id="name" mode="w" >
+neutron-metering-agent
+</property>
+<property type="string" id="regex" mode="w" >
+neutron-metering-agent
+</property>
+<property type="string" id="excludeRegex" mode="w" >
+\b(vim|tail|grep|tar|cat|bash)\b
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
+<property type="boolean" id="ignoreParameters" mode="w" >
+False
+</property>
+<property type="int" id="sequence" mode="w" >
+0
 </property>
 </object>
 </tomanycont>

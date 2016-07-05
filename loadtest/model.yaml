@@ -1,0 +1,387 @@
+Global:
+    - ZenPacks.zenoss.OpenStackInfrastructure.Region:
+        region-RegionOne:
+            title: RegionOne
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.Tenant:
+        tenant-1:
+            description: admin tenant
+            tenantId: 1
+            title: admin
+        tenant-2:
+            description: Tenant for the openstack services
+            tenantId: 2
+            title: services
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.AvailabilityZone:            
+        zone-internal:
+            set_parentOrg: region-RegionOne
+            title: internal
+        zone-nova:
+            set_parentOrg: region-RegionOne
+            title: nova
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.Flavor:
+        flavor-1:
+            flavorDisk: 1073741824
+            flavorId: 1
+            flavorRAM: 536870912
+            flavorVCPUs: 1
+            title: m1.tiny
+        flavor-2:
+            flavorDisk: 21474836480
+            flavorId: 2
+            flavorRAM: 2147483648
+            flavorVCPUs: 1
+            title: m1.small
+        flavor-3:
+            flavorDisk: 42949672960
+            flavorId: 3
+            flavorRAM: 4294967296
+            flavorVCPUs: 2
+            title: m1.medium
+        flavor-4:
+            flavorDisk: 85899345920
+            flavorId: 4
+            flavorRAM: 8589934592
+            flavorVCPUs: 4
+            title: m1.large
+        flavor-5:
+            flavorDisk: 171798691840
+            flavorId: 5
+            flavorRAM: 17179869184
+            flavorVCPUs: 8
+            title: m1.xlarge
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.Image:
+        image-1:
+            imageCreated: 2014/11/17 16:24:01.000
+            imageId: 1
+            imageStatus: ACTIVE
+            imageUpdated: 2014/11/17 16:24:09.000
+            modname: 
+            title: cirros
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.Quota:
+        quota-admin:
+            backup_bytes: 1000
+            backups: 10
+            bytes: 1000
+            modname: 
+            set_tenant: tenant-1
+            snapshots: 10
+            tenant_name: admin
+            volumes: 10
+        quota-services:
+            backup_bytes: 1000
+            backups: 10
+            bytes: 1000
+            set_tenant: tenant-2
+            snapshots: 10
+            tenant_name: services
+            volumes: 10
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.Network:    
+        network-1:
+            admin_state_up: true
+            netExternal: true
+            netId: 1
+            netStatus: ACTIVE
+            netType: LOCAL
+            set_tenant: tenant-1
+            title: public            
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.Subnet:
+        subnet-1:
+            cidr: 172.24.4.224/28
+            dns_nameservers: []
+            gateway_ip: 172.24.4.225
+            set_network: network-1
+            set_tenant: tenant-1
+            subnetId: 1
+            title: public_subnet
+
+Controller:
+    - ZenPacks.zenoss.OpenStackInfrastructure.Host:    
+        host-controller${num}:
+            hostname: ${device_name}_controller${num}
+            set_orgComponent: region-RegionOne
+            title: ${device_name}_controller${num}
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.NeutronAgent:
+        agent-controller${num}-1:
+            agentId: ${next_int_id}
+            binary: neutron-l3-agent
+            enabled: true
+            operStatus: DOWN
+            set_hostedOn: host-controller${num}
+            set_orgComponent: region-RegionOne
+            title: L3 agent
+            type: L3 agent    
+        agent-controller${num}-2:
+            agentId: ${next_int_id}
+            binary: neutron-dhcp-agent
+            enabled: true
+            operStatus: DOWN
+            set_hostedOn: host-controller${num}
+            set_orgComponent: region-RegionOne
+            title: DHCP agent
+            type: DHCP agent
+        agent-controller${num}-3:
+            agentId: ${next_int_id}
+            binary: neutron-metadata-agent
+            enabled: true
+            operStatus: DOWN
+            set_hostedOn: host-controller${num}
+            set_networks: []
+            set_orgComponent: region-RegionOne
+            set_routers: []
+            set_subnets: []
+            title: Metadata agent
+            type: Metadata agent
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.CinderApi:
+        service-cinder-api-controller${num}-RegionOne:
+            binary: cinder-api
+            modname: 
+            set_hostedOn: host-controller${num}
+            set_orgComponent: region-RegionOne
+            title: cinder-api (RegionOne)
+    
+    - ZenPacks.zenoss.OpenStackInfrastructure.CinderService:
+        service-cinder-backup-controller${num}-nova:
+            binary: cinder-backup
+            enabled: true
+            operStatus: UP
+            set_hostedOn: host-controller${num}
+            set_orgComponent: zone-nova
+            title: cinder-backup (nova)
+        service-cinder-scheduler-controller${num}-nova:
+            binary: cinder-scheduler
+            enabled: true
+            operStatus: DOWN
+            set_hostedOn: host-controller${num}
+            set_orgComponent: zone-nova
+            title: cinder-scheduler (nova)
+        service-cinder-volume-controller${num}-nova:
+            binary: cinder-volume
+            enabled: true
+            operStatus: DOWN
+            set_hostedOn: host-controller${num}
+            set_orgComponent: zone-nova
+            title: cinder-volume@lvm (nova)
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.NovaApi:            
+        service-nova-api-controller${num}-RegionOne:
+            binary: nova-api
+            set_hostedOn: host-controller${num}
+            set_orgComponent: region-RegionOne
+            title: nova-api (RegionOne)
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.NovaService:
+        service-nova-cert-controller${num}-internal:
+            binary: nova-cert
+            enabled: true
+            operStatus: UP
+            set_hostedOn: host-controller${num}
+            set_orgComponent: zone-internal
+            title: nova-cert (internal)
+        service-nova-conductor-controller${num}-internal:
+            binary: nova-conductor
+            enabled: true
+            operStatus: UP
+            set_hostedOn: host-controller${num}
+            set_orgComponent: zone-internal
+            title: nova-conductor (internal)
+        service-nova-consoleauth-controller${num}-internal:
+            binary: nova-consoleauth
+            enabled: true
+            operStatus: UP
+            set_hostedOn: host-controller${num}
+            set_orgComponent: zone-internal
+            title: nova-consoleauth (internal)
+        service-nova-scheduler-controller${num}-internal:
+            binary: nova-scheduler
+            enabled: true
+            operStatus: UP
+            set_hostedOn: host-controller${num}
+            set_orgComponent: zone-internal
+            title: nova-scheduler (internal)
+
+Compute:
+    - ZenPacks.zenoss.OpenStackInfrastructure.Host:    
+        host-compute${num}:
+            hostname: ${device_name}_compute${num}
+            set_orgComponent: region-RegionOne
+            title: ${device_name}_compute${num}
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.Hypervisor:
+        hypervisor-compute${num}.1:
+            disk: 6
+            disk_free: 5
+            disk_used: 1
+            host_ip: 10.0.2.15
+            hstate: DOWN
+            hstatus: ENABLED
+            hypervisorId: 1
+            hypervisor_type: QEMU
+            hypervisor_version: 1.5.3
+            memory: 3792
+            memory_free: 2768
+            memory_used: 1024
+            set_hostByName: ${device_name}_compute${num}
+            title: compute${num}.1
+            vcpus: 1
+            vcpus_used: 1
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.NeutronAgent:
+        agent-compute${num}-4:
+            agentId: 4
+            binary: neutron-openvswitch-agent
+            enabled: true
+            operStatus: DOWN
+            set_hostedOn: host-compute${num}
+            set_networks: []
+            set_orgComponent: region-RegionOne
+            set_routers: []
+            set_subnets: []
+            title: Open vSwitch agent
+            type: Open vSwitch agent
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.NovaService:
+        service-nova-compute-compute${num}-nova:
+            binary: nova-compute
+            enabled: true
+            operStatus: DOWN
+            set_hostedOn: host-compute${num}
+            set_orgComponent: zone-nova
+            title: nova-compute (nova)
+
+Tenant: 
+    - ZenPacks.zenoss.OpenStackInfrastructure.Tenant:
+        tenant-${num}:
+            description: tenant ${num}
+            tenantId: ${num}
+            title: tenant ${num}
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.Network:    
+        network-${num}-2:
+            admin_state_up: true
+            netExternal: false
+            netId: ${next_int_id}
+            netStatus: ACTIVE
+            netType: LOCAL
+            set_tenant: tenant-${num}
+            title: private
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.Subnet:
+        subnet-${num}-2:
+            cidr: 10.0.0.0/24
+            dns_nameservers: []
+            gateway_ip: 10.0.0.1
+            set_network: network-${num}-2
+            set_tenant: tenant-${num}
+            subnetId: ${next_int_id}
+            title: private_subnet
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.Router:
+        router-${num}-1:
+            admin_state_up: true
+            gateways:
+            - 172.24.4.226
+            modname: 
+            routerId: ${next_int_id}
+            routes: []
+            set_network: network-1
+            set_subnets:
+            - subnet-${num}-2 
+            - subnet-1 
+            set_tenant: tenant-${num}
+            status: ACTIVE
+            title: router ${num} 1
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.Port:
+        port-${num}-1:
+            admin_state_up: true
+            device_owner: network:dhcp
+            fixed_ip_list: 10.0.0.2
+            mac_address: FA:16:3E:A1:80:33
+            portId: ${next_int_id}
+            set_network: network-${num}-2
+            set_subnets:
+            - subnet-${num}-2 
+            set_tenant: tenant-${num}
+            status: ACTIVE
+            title: 
+            vif_type: ovs
+        port-${num}-2:
+            admin_state_up: true
+            device_owner: network:router_interface
+            fixed_ip_list: 10.0.0.1
+            mac_address: FA:16:3E:10:B3:CA
+            portId: ${next_int_id}
+            set_network: network-${num}-2
+            set_subnets:
+            - subnet-${num}-2
+            set_tenant: tenant-${num}
+            status: ACTIVE
+            title: 
+            vif_type: ovs
+        port-${num}-4:
+            admin_state_up: true
+            device_owner: network:router_gateway
+            fixed_ip_list: 172.24.4.226
+            mac_address: FA:16:3E:C1:F7:42
+            portId: ${next_int_id}
+            set_network: network-1
+            set_subnets:
+            - subnet-1
+            status: DOWN
+            title: 
+            vif_type: ovs
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.Quota:
+        quota-tenant-${num}:
+            backup_bytes: 1000
+            backups: 10
+            bytes: 1000
+            set_tenant: tenant-${num}
+            snapshots: 10
+            tenant_name: tenant ${num}
+            volumes: 10
+
+Instance:
+    - ZenPacks.zenoss.OpenStackInfrastructure.Instance:    
+        server-${num}:
+            hostId: host-${compute_num}
+            hostName: server-${num}
+            hypervisorInstanceName: instance-${num}
+            privateIps:
+            - 172.24.4.227
+            publicIps: []
+            resourceId: resource-instance-$num
+            serverBackupDaily: DISABLED
+            serverBackupEnabled: false
+            serverBackupWeekly: DISABLED
+            serverId: {$next_int_id}
+            serverStatus: SHUTOFF
+            set_flavor: flavor-1
+            set_image: image-1
+            set_tenant: tenant-${tenant_num} 
+            title: instance-${num}
+
+    - ZenPacks.zenoss.OpenStackInfrastructure.Port:
+        port-${num}-3:
+            admin_state_up: true
+            device_owner: compute:nova
+            fixed_ip_list: 172.24.4.227
+            mac_address: FA:16:3E:D1:79:F9
+            portId: ${next_int_id}
+            set_instance: server-${num}
+            set_network: network-${tenant_num}-2
+            set_subnets:
+            - subnet-${tenant_num}-2
+            set_tenant: tenant-${tenant_num}
+            status: ACTIVE
+            title: 
+            vif_type: ovs

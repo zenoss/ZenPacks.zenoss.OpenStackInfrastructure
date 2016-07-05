@@ -18,11 +18,12 @@ from twisted.internet.defer import inlineCallbacks, returnValue
 
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
-from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path
+from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path, \
+    container_cmd_wrapper
 add_local_lib_path()
 
 import logging
-from sshclient import SSHClient
+from ZenPacks.zenoss.OpenStackInfrastructure.ssh import SSHClient
 
 ssh_logger = logging.getLogger('txsshclient')
 ssh_logger.setLevel(logging.DEBUG)
@@ -38,7 +39,8 @@ class libvirt(PythonPlugin):
 
     deviceProperties = PythonPlugin.deviceProperties \
         + ('zCommandUsername', 'zCommandPassword',
-           'zCommandPort', 'zCommandCommandTimeout', 'openstack_instanceList')
+           'zCommandPort', 'zCommandCommandTimeout', 'openstack_instanceList',
+           'zOpenStackRunVirshQemuInContainer', 'zKeyPath')
 
     def condition(self, device, log):
         # Only run this if we've got openstack instances on this host.
@@ -59,6 +61,7 @@ class libvirt(PythonPlugin):
             'port': device.zCommandPort,
             'user': device.zCommandUsername,
             'password': device.zCommandPassword,
+            'identities': [device.zKeyPath],
             'buffersize': 32768})
         client.connect()
         timeout = device.zCommandCommandTimeout
@@ -66,13 +69,25 @@ class libvirt(PythonPlugin):
 
         try:
             for instanceId, instanceUUID in device.openstack_instanceList:
-                cmd = "virsh --readonly -c 'qemu:///system' dumpxml '%s'" % instanceUUID
+                # host based installation
+                cmd = "virsh --readonly -c 'qemu:///system' dumpxml '%s'" % \
+                      instanceUUID
+                if device.zOpenStackRunVirshQemuInContainer:
+                    # container based installation
+                    cmd = container_cmd_wrapper(
+                        device.zOpenStackRunVirshQemuInContainer,
+                        "virsh --readonly -c 'qemu:///system' dumpxml '%s'" % \
+                        instanceUUID)
                 log.info("Running %s" % cmd)
                 d = yield client.run(cmd, timeout=timeout)
 
                 if d.exitCode != 0 or d.stderr:
                     if 'Domain not found' in d.stderr:
                         log.debug("Domain not found while running virsh (rc=%s, stderr='%s')" % (d.exitCode, d.stderr))
+                    elif 'docker: command not found' in d.stderr:
+                        msg = 'Check zOpenStackRunNeutronCommonInContainer value'
+                        stderr = ' '.join(list(set(d.stderr.split('\n')))).lstrip()
+                        log.error("Error running virsh (rc=%s, stderr='%s'); %s" % (d.exitCode, stderr, msg))
                     else:
                         log.error("Error running virsh (rc=%s, stderr='%s')" % (d.exitCode, d.stderr))
                     continue

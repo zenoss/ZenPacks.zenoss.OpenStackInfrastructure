@@ -1,0 +1,1420 @@
+{
+  "flavors": [
+                {
+                  "name": "m1.tiny",
+                  "links": [
+                              {
+                                "href": "http://192.168.56.122:8774/v2/e6bae7721b8745ce8b14f3908de17b8c/flavors/1",
+                                "rel": "self"
+                              },
+                              {
+                                "href": "http://192.168.56.122:8774/e6bae7721b8745ce8b14f3908de17b8c/flavors/1",
+                                "rel": "bookmark"
+                              }
+                            ],
+                  "ram": 512,
+                  "OS-FLV-DISABLED:disabled": false,
+                  "vcpus": 1,
+                  "swap": "",
+                  "os-flavor-access:is_public": true,
+                  "rxtx_factor": 1.0,
+                  "OS-FLV-EXT-DATA:ephemeral": 0,
+                  "disk": 1,
+                  "id": "1"
+                },
+                {
+                  "name": "m1.small",
+                  "links": [
+                              {
+                                "href": "http://192.168.56.122:8774/v2/e6bae7721b8745ce8b14f3908de17b8c/flavors/2",
+                                "rel": "self"
+                              },
+                              {
+                                "href": "http://192.168.56.122:8774/e6bae7721b8745ce8b14f3908de17b8c/flavors/2",
+                                "rel": "bookmark"
+                              }
+                            ],
+                  "ram": 2048,
+                  "OS-FLV-DISABLED:disabled": false,
+                  "vcpus": 1,
+                  "swap": "",
+                  "os-flavor-access:is_public": true,
+                  "rxtx_factor": 1.0,
+                  "OS-FLV-EXT-DATA:ephemeral": 0,
+                  "disk": 20,
+                  "id": "2"
+                },
+                {
+                  "name": "m1.medium",
+                  "links": [
+                              {
+                                "href": "http://192.168.56.122:8774/v2/e6bae7721b8745ce8b14f3908de17b8c/flavors/3",
+                                "rel": "self"
+                              },
+                              {
+                                "href": "http://192.168.56.122:8774/e6bae7721b8745ce8b14f3908de17b8c/flavors/3",
+                                "rel": "bookmark"
+                              }
+                            ],
+                  "ram": 4096,
+                  "OS-FLV-DISABLED:disabled": false,
+                  "vcpus": 2,
+                  "swap": "",
+                  "os-flavor-access:is_public": true,
+                  "rxtx_factor": 1.0,
+                  "OS-FLV-EXT-DATA:ephemeral": 0,
+                  "disk": 40,
+                  "id": "3"
+                },
+                {
+                  "name": "m1.large",
+                  "links": [
+                              {
+                                "href": "http://192.168.56.122:8774/v2/e6bae7721b8745ce8b14f3908de17b8c/flavors/4",
+                                "rel": "self"
+                              },
+                              {
+                                "href": "http://192.168.56.122:8774/e6bae7721b8745ce8b14f3908de17b8c/flavors/4",
+                                "rel": "bookmark"
+                              }
+                            ],
+                  "ram": 8192,
+                  "OS-FLV-DISABLED:disabled": false,
+                  "vcpus": 4,
+                  "swap": "",
+                  "os-flavor-access:is_public": true,
+                  "rxtx_factor": 1.0,
+                  "OS-FLV-EXT-DATA:ephemeral": 0,
+                  "disk": 80,
+                  "id": "4"
+                },
+                {
+                  "name": "m1.xlarge",
+                  "links": [
+                              {
+                                "href": "http://192.168.56.122:8774/v2/e6bae7721b8745ce8b14f3908de17b8c/flavors/5",
+                                "rel": "self"
+                              },
+                              {
+                                "href": "http://192.168.56.122:8774/e6bae7721b8745ce8b14f3908de17b8c/flavors/5",
+                                "rel": "bookmark"
+                              }
+                            ],
+                  "ram": 16384,
+                  "OS-FLV-DISABLED:disabled": false,
+                  "vcpus": 8,
+                  "swap": "",
+                  "os-flavor-access:is_public": false,
+                  "rxtx_factor": 1.0,
+                  "OS-FLV-EXT-DATA:ephemeral": 0,
+                  "disk": 160,
+                  "id": "5"
+                },
+                {
+                  "name": "m1.xxlarge",
+                  "links": [
+                    {
+                      "href": "http://192.168.56.122:8774/v2/e6bae7721b8745ce8b14f3908de17b8c/flavors/6",
+                      "rel": "self"
+                    },
+                    {
+                      "href": "http://192.168.56.122:8774/e6bae7721b8745ce8b14f3908de17b8c/flavors/6",
+                      "rel": "bookmark"
+                    }
+                  ],
+                  "ram": 16384,
+                  "OS-FLV-DISABLED:disabled": false,
+                  "vcpus": 8,
+                  "swap": "",
+                  "os-flavor-access:is_public": true,
+                  "rxtx_factor": 1.0,
+                  "OS-FLV-EXT-DATA:ephemeral": 0,
+                  "disk": 160,
+                  "__comment": "node with no id, modeler should ignore the node"
+                }
+             ],
+  "subnets": [
+                {
+                  "name": "private_subnet",
+                  "enable_dhcp": true,
+                  "network_id": "7a2d66f2-35e6-4459-92b9-260411a39039",
+                  "tenant_id": "28a2787a215a4187b22f800f51e58665",
+                  "dns_nameservers": [],
+                  "ipv6_ra_mode": null,
+                  "allocation_pools": [
+                                          {
+                                            "start": "10.0.0.2", 
+                                            "end": "10.0.0.254"
+                                          }
+                                       ], 
+                  "gateway_ip": "10.0.0.1", 
+                  "ipv6_address_mode": null, 
+                  "ip_version": 4, 
+                  "host_routes": [], 
+                  "cidr": "10.0.0.0/24", 
+                  "id": "85085b15-4f2f-4457-ae31-0cfe1d5d301c", 
+                  "subnetpool_id": null
+                }, 
+                {
+                  "name": "public_subnet", 
+                  "enable_dhcp": false, 
+                  "network_id": "a13b2c35-d734-4021-9850-432dfa7fa7a3", 
+                  "tenant_id": "e6bae7721b8745ce8b14f3908de17b8c", 
+                  "dns_nameservers": [], 
+                  "ipv6_ra_mode": null, 
+                  "allocation_pools": [
+                                          {
+                                            "start": "172.24.4.226", 
+                                            "end": "172.24.4.238"
+                                          }
+                                       ], 
+                  "gateway_ip": "172.24.4.225", 
+                  "ipv6_address_mode": null, 
+                  "ip_version": 4, 
+                  "host_routes": [], 
+                  "cidr": "172.24.4.224/28", 
+                  "id": "efe34b3a-a35c-4a0e-9769-e1fd79d7ca2d", 
+                  "subnetpool_id": null
+                },
+                {
+                  "name": "public_subnet",
+                  "enable_dhcp": false,
+                  "network_id": "a13b2c35-d734-4021-9850-432dfa7fa7a3",
+                  "tenant_id": "e6bae7721b8745ce8b14f3908de17b8c",
+                  "dns_nameservers": [],
+                  "ipv6_ra_mode": null,
+                  "allocation_pools": [
+                    {
+                      "start": "172.24.4.226",
+                      "end": "172.24.4.238"
+                    }
+                  ],
+                  "gateway_ip": "172.24.4.225",
+                  "ipv6_address_mode": null,
+                  "ip_version": 4,
+                  "host_routes": [],
+                  "cidr": "172.24.4.224/28",
+                  "__comment": "node with no id, modeler should ignore the node",
+                  "subnetpool_id": null
+                }
+              ],
+  "hypervisors_detailed": [
+                            {
+                              "status": "enabled",
+                              "state": "up",
+                              "id": 1,
+                              "hypervisor_hostname": "liberty.zenoss.local"
+                            },
+                            {
+                              "status": "enabled",
+                              "state": "up",
+                              "__comment": "node with no id, modeler should ignore the node",
+                              "hypervisor_hostname": "liberty.zenoss.local"
+                            }
+                          ],
+  "hypervisor_details":
+                            {
+                              "hypervisor-1": {
+                                "status": "enabled",
+                                "service": {
+                                  "host": "liberty.yichi.local",
+                                  "disabled_reason": null,
+                                  "id": 4
+                                },
+                                "vcpus_used": 1,
+                                "hypervisor_type": "QEMU",
+                                "id": 1,
+                                "local_gb_used": 1,
+                                "state": "up",
+                                "hypervisor_hostname": "liberty.yichi.local",
+                                "host_ip": "10.0.2.34",
+                                "memory_mb": 3791,
+                                "memory_mb_used": 1024,
+                                "current_workload": 0,
+                                "vcpus": 1,
+                                "free_ram_mb": 2767,
+                                "running_vms": 1,
+                                "free_disk_gb": 16,
+                                "hypervisor_version": 1005003,
+                                "disk_available_least": 14,
+                                "local_gb": 17,
+                                "cpu_info": {
+                                  "vendor": "Intel",
+                                  "model": "Westmere",
+                                  "arch": "x86_64",
+                                  "features": [
+                                    "pge",
+                                    "avx",
+                                    "clflush",
+                                    "sep",
+                                    "syscall",
+                                    "vme",
+                                    "tsc",
+                                    "xsave",
+                                    "cmov",
+                                    "fpu",
+                                    "pat",
+                                    "monitor",
+                                    "lm",
+                                    "msr",
+                                    "nx",
+                                    "fxsr",
+                                    "sse4.1",
+                                    "pae",
+                                    "sse4.2",
+                                    "pclmuldq",
+                                    "mmx",
+                                    "osxsave",
+                                    "cx8",
+                                    "mce",
+                                    "de",
+                                    "rdtscp",
+                                    "mca",
+                                    "pse",
+                                    "lahf_lm",
+                                    "abm",
+                                    "popcnt",
+                                    "apic",
+                                    "sse",
+                                    "invtsc",
+                                    "pni",
+                                    "aes",
+                                    "sse2",
+                                    "hypervisor",
+                                    "ssse3",
+                                    "cx16",
+                                    "pse36",
+                                    "mtrr",
+                                    "movbe",
+                                    "rdrand"
+                                  ],
+                                  "topology": {
+                                    "cores": 1
+                                  },
+                                  "cells": 1,
+                                  "threads": 1,
+                                  "sockets": 1
+                                }
+                              }
+                            },
+  "agents": [
+              {
+                "l3_agent_networks": ["a13b2c35-d734-4021-9850-432dfa7fa7a3"], 
+                "binary": "neutron-l3-agent", 
+                "l3_agent_gateways": ["172.24.4.226"], 
+                "description": null, 
+                "admin_state_up": true, 
+                "heartbeat_timestamp": "2015-12-16 21:11:01", 
+                "dhcp_agent_subnets": [], 
+                "l3_agent_subnets": ["efe34b3a-a35c-4a0e-9769-e1fd79d7ca2d"], 
+                "alive": true, 
+                "id": "ee6407f6-9b13-4df4-8da0-cb751c410af5", 
+                "topic": "l3_agent",
+                "host": "liberty.zenoss.local",
+                "agent_type": "L3 agent", 
+                "l3_agent_routers": ["88b70ee0-4204-4a88-b9c5-dd49588d5c1a"], 
+                "started_at": "2015-12-16 16:42:40", 
+                "created_at": "2015-10-30 15:56:41", 
+                "configurations": 
+                                    {
+                                      "router_id": "", 
+                                      "agent_mode": "legacy", 
+                                      "gateway_external_network_id": "", 
+                                      "handle_internal_only_routers": true, 
+                                      "use_namespaces": true, 
+                                      "routers": 1, 
+                                      "interfaces": 1, 
+                                      "floating_ips": 0, 
+                                      "interface_driver": "neutron.agent.linux.interface.OVSInterfaceDriver", 
+                                      "log_agent_heartbeats": false, 
+                                      "external_network_bridge": "br-ex", 
+                                      "ex_gw_ports": 1
+                                    }
+              }, 
+              {
+                "binary": "neutron-metadata-agent", 
+                "description": null, 
+                "admin_state_up": true, 
+                "heartbeat_timestamp": "2015-12-16 21:11:01", 
+                "dhcp_agent_subnets": [], 
+                "alive": true, 
+                "id": "f3b165ca-d869-4a1f-a8da-361f2177da5b", 
+                "topic": "N/A", 
+                "host": "liberty.zenoss.local",
+                "agent_type": "Metadata agent", 
+                "l3_agent_routers": [], 
+                "started_at": "2015-12-16 16:42:38", 
+                "created_at": "2015-10-30 15:56:42", 
+                "configurations": 
+                                    {
+                                      "log_agent_heartbeats": false, 
+                                      "nova_metadata_ip": "192.168.56.122", 
+                                      "nova_metadata_port": 8775, 
+                                      "metadata_proxy_socket": "/var/lib/neutron/metadata_proxy"
+                                    }
+              }, 
+              {
+                "binary": "neutron-openvswitch-agent", 
+                "description": null, 
+                "admin_state_up": true, 
+                "heartbeat_timestamp": "2015-12-16 21:11:01", 
+                "dhcp_agent_subnets": [], 
+                "alive": true, 
+                "id": "f9697d9c-580e-4917-8c87-1b69ab53e5a6", 
+                "topic": "N/A",
+                "host": "liberty.zenoss.local",
+                "agent_type": "Open vSwitch agent", 
+                "l3_agent_routers": [], 
+                "started_at": "2015-12-16 16:42:42", 
+                "created_at": "2015-10-30 15:57:38", 
+                "configurations": 
+                                    {
+                                      "in_distributed_mode": false, 
+                                      "arp_responder_enabled": false, 
+                                      "tunneling_ip": "192.168.56.122", 
+                                      "devices": 3, 
+                                      "log_agent_heartbeats": false, 
+                                      "l2_population": false,
+                                      "tunnel_types": ["vxlan"],
+                                      "enable_distributed_routing": false,
+                                      "bridge_mappings": {}
+                                    }
+              },
+              {
+                "binary": "neutron-dhcp-agent",
+                "description": null,
+                "admin_state_up": true,
+                "heartbeat_timestamp": "2015-12-16 21:11:01",
+                "dhcp_agent_subnets": ["85085b15-4f2f-4457-ae31-0cfe1d5d301c", "efe34b3a-a35c-4a0e-9769-e1fd79d7ca2d"],
+                "alive": true,
+                "id": "fade4d15-487c-4998-ac80-bff91b4532e9",
+                "topic": "dhcp_agent",
+                "dhcp_agent_networks": ["7a2d66f2-35e6-4459-92b9-260411a39039", "a13b2c35-d734-4021-9850-432dfa7fa7a3"],
+                "host": "liberty.zenoss.local",
+                "agent_type": "DHCP agent",
+                "l3_agent_routers": [],
+                "started_at": "2015-12-16 16:42:40",
+                "created_at": "2015-10-30 15:56:40",
+                "configurations":
+                                    {
+                                      "subnets": 1,
+                                      "use_namespaces": true,
+                                      "dhcp_lease_duration": 86400,
+                                      "dhcp_driver": "neutron.agent.linux.dhcp.Dnsmasq",
+                                      "ports": 3,
+                                      "log_agent_heartbeats": false,
+                                      "networks": 1
+                                    }
+              },
+              {
+                "binary": "f5-oslbaasv1-agent",
+                "description": null,
+                "admin_state_up": true,
+                "heartbeat_timestamp": "2015-12-07 17:45:18",
+                "dhcp_agent_subnets": [],
+                "alive": true,
+                "id": "37c80256-d843-45c3-a9b6-fb0fde13ac89",
+                "topic": "f5-lbaas-process-on-agent",
+                "host": "overcloud-controller-1.localdomain:4947de00-0c13-5ee7-902e-fc270d3993b9",
+                "agent_type": "Loadbalancer agent",
+                "l3_agent_routers": [],
+                "started_at": "2015-12-04 18:15:17",
+                "created_at": "2015-12-04 17:34:08",
+                "configurations": {
+                  "icontrol_endpoints": {
+                    "10.88.0.100": {
+                      "device_name": "Omg-OSP-NonProd-LAN-F5.aib.pri",
+                      "platform": "Virtual Edition",
+                      "version": "BIG-IP_v12.0.0",
+                      "serial_number": "42018036-36c2-248c-5beb2f3da301"
+                    }
+                  },
+                  "request_queue_depth": 0,
+                  "environment_prefix": "",
+                  "tunneling_ips": [],
+                  "common_networks": {},
+                  "services": 2,
+                  "environment_capacity_score": 0,
+                  "tunnel_types": [
+                    "gre",
+                    "vxlan"
+                  ],
+                  "environment_group_number": 1,
+                  "bridge_mappings": {
+                    "default": "1.1"
+                  },
+                  "global_routed_mode": false
+                }
+              },
+              {
+                "binary": "f5-oslbaasv1-agent",
+                "description": null,
+                "admin_state_up": true,
+                "heartbeat_timestamp": "2015-12-07 17:45:18",
+                "dhcp_agent_subnets": [],
+                "alive": true,
+                "__comment": "node with no id, modeler should ignore the node",
+                "topic": "f5-lbaas-process-on-agent",
+                "host": "overcloud-controller-1.localdomain:4947de00-0c13-5ee7-902e-fc270d3993b9",
+                "agent_type": "Loadbalancer agent",
+                "l3_agent_routers": [],
+                "started_at": "2015-12-04 18:15:17",
+                "created_at": "2015-12-04 17:34:08",
+                "configurations": {
+                  "icontrol_endpoints": {
+                    "10.88.0.100": {
+                      "device_name": "Omg-OSP-NonProd-LAN-F5.aib.pri",
+                      "platform": "Virtual Edition",
+                      "version": "BIG-IP_v12.0.0",
+                      "serial_number": "42018036-36c2-248c-5beb2f3da301"
+                    }
+                  },
+                  "request_queue_depth": 0,
+                  "environment_prefix": "",
+                  "tunneling_ips": [],
+                  "common_networks": {},
+                  "services": 2,
+                  "environment_capacity_score": 0,
+                  "tunnel_types": [
+                    "gre",
+                    "vxlan"
+                  ],
+                  "environment_group_number": 1,
+                  "bridge_mappings": {
+                    "default": "1.1"
+                  },
+                  "global_routed_mode": false
+                }
+              }
+            ],
+  "cinder_services": [
+                        {
+                          "status": "disabled",
+                          "binary": "cinder-backup",
+                          "zone": "nova",
+                          "host": "liberty.zenoss.local",
+                          "updated_at": "2015-12-16T21:11:22.000000",
+                          "state": "down",
+                          "disabled_reason": null
+                        },
+                        {
+                          "status": "enabled",
+                          "binary": "cinder-scheduler",
+                          "zone": "nova",
+                          "host": "liberty.zenoss.local",
+                          "updated_at": "2015-12-16T21:11:22.000000",
+                          "state": "up",
+                          "disabled_reason": null
+                        },
+                        {
+                          "status": "enabled",
+                          "binary": "cinder-volume",
+                          "zone": "nova",
+                          "host": "liberty.zenoss.local@lvm",
+                          "updated_at": "2015-12-16T21:11:22.000000",
+                          "state": "up",
+                          "disabled_reason": null
+                        }
+                     ],
+  "routers": [
+                {
+                  "status": "ACTIVE",
+                  "external_gateway_info":
+                                            {
+                                              "network_id": "a13b2c35-d734-4021-9850-432dfa7fa7a3",
+                                              "enable_snat": true,
+                                              "external_fixed_ips": [
+                                                                      {
+                                                                        "subnet_id": "efe34b3a-a35c-4a0e-9769-e1fd79d7ca2d",
+                                                                        "ip_address": "172.24.4.226"
+                                                                      }
+                                                                    ]
+                                            },
+                  "name": "router1",
+                  "admin_state_up": true,
+                  "tenant_id": "28a2787a215a4187b22f800f51e58665",
+                  "distributed": false,
+                  "routes": [],
+                  "ha": false,
+                  "id": "88b70ee0-4204-4a88-b9c5-dd49588d5c1a"
+                },
+                {
+                  "status": "ACTIVE",
+                  "external_gateway_info":
+                  {
+                    "network_id": "a13b2c35-d734-4021-9850-432dfa7fa7a3",
+                    "enable_snat": true,
+                    "external_fixed_ips": [
+                      {
+                        "subnet_id": "efe34b3a-a35c-4a0e-9769-e1fd79d7ca2d",
+                        "ip_address": "172.24.4.226"
+                      }
+                    ]
+                  },
+                  "name": "router1",
+                  "admin_state_up": true,
+                  "tenant_id": "28a2787a215a4187b22f800f51e58665",
+                  "distributed": false,
+                  "routes": [],
+                  "ha": false,
+                  "__comment": "node with no id, modeler should ignore the node"
+                }
+             ],
+  "resolved_hostnames":
+                        {
+                          "liberty.zenoss.local": "192.168.56.122",
+                          "192.168.56.122": "192.168.56.122"
+                        },
+  "volsnapshots": [
+                  {
+                    "status": "available",
+                    "os-extended-snapshot-attributes:progress": "100%",
+                    "name": "vol-GB1-snapshot",
+                    "os-extended-snapshot-attributes:project_id": "28a2787a215a4187b22f800f51e58665",
+                    "description": "Linux volume 1 GB snapshot",
+                    "id": "7bae1e24-47db-4d63-90e1-a5b02d112fb1",
+                    "volume_id": "281a7105-935a-4bcf-a4b5-cf5e652d2daa",
+                    "size": 1,
+                    "created_at": "2015-12-16T19:45:59.000000",
+                    "metadata": {}
+                  },
+                  {
+                    "status": "available",
+                    "os-extended-snapshot-attributes:progress": "100%",
+                    "name": "vol-GB1-snapshot",
+                    "os-extended-snapshot-attributes:project_id": "28a2787a215a4187b22f800f51e58665",
+                    "description": "Linux volume 1 GB snapshot",
+                    "__comment": "node with no id, modeler should ignore the node",
+                    "volume_id": "281a7105-935a-4bcf-a4b5-cf5e652d2daa",
+                    "size": 1,
+                    "created_at": "2015-12-16T19:45:59.000000",
+                    "metadata": {}
+                  }
+               ],
+  "servers": [
+                {
+                  "OS-EXT-STS:task_state": null,
+                  "addresses":
+                                {
+                                  "private": [
+                                                {"OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:04:6d:e6",
+                                                  "version": 4,
+                                                  "addr": "10.0.0.3",
+                                                  "OS-EXT-IPS:type": "fixed"
+                                                }
+                                             ]
+                                },
+                  "links": [
+                              {
+                                "href": "http://192.168.56.122:8774/v2/e6bae7721b8745ce8b14f3908de17b8c/servers/0aa87c33-aa73-4c02-976b-321f5e2df205",
+                                "rel": "self"
+                              },
+                              {
+                                "href": "http://192.168.56.122:8774/e6bae7721b8745ce8b14f3908de17b8c/servers/0aa87c33-aa73-4c02-976b-321f5e2df205",
+                                "rel": "bookmark"
+                              }
+                           ],
+                  "image":
+                            {
+                              "id": "b5ac0c5f-bf91-4ab6-bcaa-d895a8df90bb",
+                              "links": [
+                                          {
+                                            "href": "http://192.168.56.122:8774/e6bae7721b8745ce8b14f3908de17b8c/images/b5ac0c5f-bf91-4ab6-bcaa-d895a8df90bb",
+                                            "rel": "bookmark"
+                                          }
+                                       ]
+                            },
+                  "OS-EXT-STS:vm_state": "stopped",
+                  "OS-EXT-SRV-ATTR:instance_name": "instance-00000001",
+                  "OS-SRV-USG:launched_at": "2015-10-30T18:13:55.000000",
+                  "flavor":
+                            {
+                              "id": "1",
+                              "links": [
+                                          {
+                                            "href": "http://192.168.56.122:8774/e6bae7721b8745ce8b14f3908de17b8c/flavors/1",
+                                            "rel": "bookmark"
+                                          }
+                                       ]
+                            },
+                  "id": "0aa87c33-aa73-4c02-976b-321f5e2df205",
+                  "security_groups": [
+                                        {
+                                          "name": "default"
+                                        }
+                                     ],
+                  "user_id": "04080227fac94d45994776c6a1d0cbc6",
+                  "OS-DCF:diskConfig": "AUTO",
+                  "accessIPv4": "",
+                  "accessIPv6": "",
+                  "OS-EXT-STS:power_state": 4,
+                  "OS-EXT-AZ:availability_zone": "nova",
+                  "config_drive": "",
+                  "status": "SHUTOFF",
+                  "updated": "2015-12-16T16:42:17Z",
+                  "hostId": "859a4c2e77ea1fc6c2afde71dd6a5d98c0696f1065e3cc6855e91b03",
+                  "OS-EXT-SRV-ATTR:host": "liberty.zenoss.local",
+                  "OS-SRV-USG:terminated_at": null,
+                  "key_name": null,
+                  "OS-EXT-SRV-ATTR:hypervisor_hostname": "liberty.zenoss.local",
+                  "name": "tiny1",
+                  "created": "2015-10-30T18:13:49Z",
+                  "tenant_id": "28a2787a215a4187b22f800f51e58665",
+                  "os-extended-volumes:volumes_attached": [
+                                                            {
+                                                              "id": "281a7105-935a-4bcf-a4b5-cf5e652d2daa"
+                                                            }
+                                                          ],
+                  "metadata": {}
+                },
+                {
+                  "OS-EXT-STS:task_state": null,
+                  "addresses":
+                  {
+                    "private": [
+                      {"OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:04:6d:e6",
+                        "version": 4,
+                        "addr": "10.0.0.3",
+                        "OS-EXT-IPS:type": "fixed"
+                      }
+                    ]
+                  },
+                  "links": [
+                    {
+                      "href": "http://192.168.56.122:8774/v2/e6bae7721b8745ce8b14f3908de17b8c/servers/0aa87c33-aa73-4c02-976b-321f5e2df205",
+                      "rel": "self"
+                    },
+                    {
+                      "href": "http://192.168.56.122:8774/e6bae7721b8745ce8b14f3908de17b8c/servers/0aa87c33-aa73-4c02-976b-321f5e2df205",
+                      "rel": "bookmark"
+                    }
+                  ],
+                  "image":
+                  {
+                    "id": "b5ac0c5f-bf91-4ab6-bcaa-d895a8df90bb",
+                    "links": [
+                      {
+                        "href": "http://192.168.56.122:8774/e6bae7721b8745ce8b14f3908de17b8c/images/b5ac0c5f-bf91-4ab6-bcaa-d895a8df90bb",
+                        "rel": "bookmark"
+                      }
+                    ]
+                  },
+                  "OS-EXT-STS:vm_state": "stopped",
+                  "OS-EXT-SRV-ATTR:instance_name": "instance-00000001",
+                  "OS-SRV-USG:launched_at": "2015-10-30T18:13:55.000000",
+                  "flavor":
+                  {
+                    "id": "1",
+                    "links": [
+                      {
+                        "href": "http://192.168.56.122:8774/e6bae7721b8745ce8b14f3908de17b8c/flavors/1",
+                        "rel": "bookmark"
+                      }
+                    ]
+                  },
+                  "__comment": "node with no id, modeler should ignore the node",
+                  "security_groups": [
+                    {
+                      "name": "default"
+                    }
+                  ],
+                  "user_id": "04080227fac94d45994776c6a1d0cbc6",
+                  "OS-DCF:diskConfig": "AUTO",
+                  "accessIPv4": "",
+                  "accessIPv6": "",
+                  "OS-EXT-STS:power_state": 4,
+                  "OS-EXT-AZ:availability_zone": "nova",
+                  "config_drive": "",
+                  "status": "SHUTOFF",
+                  "updated": "2015-12-16T16:42:17Z",
+                  "hostId": "859a4c2e77ea1fc6c2afde71dd6a5d98c0696f1065e3cc6855e91b03",
+                  "OS-EXT-SRV-ATTR:host": "liberty.zenoss.local",
+                  "OS-SRV-USG:terminated_at": null,
+                  "key_name": null,
+                  "OS-EXT-SRV-ATTR:hypervisor_hostname": "liberty.zenoss.local",
+                  "name": "tiny1",
+                  "created": "2015-10-30T18:13:49Z",
+                  "tenant_id": "28a2787a215a4187b22f800f51e58665",
+                  "os-extended-volumes:volumes_attached": [
+                    {
+                      "id": "281a7105-935a-4bcf-a4b5-cf5e652d2daa"
+                    }
+                  ],
+                  "metadata": {}
+                }
+             ],
+  "hypervisors": [
+                    {
+                      "status": "enabled",
+                      "state": "up",
+                      "id": 1,
+                      "hypervisor_hostname": "liberty.zenoss.local"
+                    },
+                    {
+                      "status": "enabled",
+                      "state": "up",
+                      "__comment": "node with no id, modeler should ignore the node",
+                      "hypervisor_hostname": "liberty.zenoss.local"
+                    }
+                 ],
+  "volume_pools": [
+                    {
+                      "name": "liberty.zenoss.local@lvm#lvm",
+                      "capabilities":
+                                      {
+                                        "pool_name": "lvm",
+                                        "filter_function": null,
+                                        "allocated_capacity_gb": 2,
+                                        "goodness_function": null,
+                                        "location_info": "LVMVolumeDriver:liberty.zenoss.local:cinder-volumes:default:0",
+                                        "multiattach": true,
+                                        "provisioned_capacity_gb": 3.0,
+                                        "timestamp": "2015-12-16T21:11:01.817638",
+                                        "total_volumes": 3,
+                                        "volume_backend_name": "lvm",
+                                        "thin_provisioning_support": false,
+                                        "free_capacity_gb": 17.6,
+                                        "driver_version": "3.0.0",
+                                        "total_capacity_gb": 20.6,
+                                        "thick_provisioning_support": true,
+                                        "reserved_percentage": 0,
+                                        "QoS_support": false,
+                                        "max_over_subscription_ratio": 20.0,
+                                        "vendor_name": "Open Source",
+                                        "storage_protocol": "iSCSI"
+                                      }
+                    }
+                 ],
+  "nova_url": "http://192.168.56.122:8774/v2/e6bae7721b8745ce8b14f3908de17b8c",
+  "nova_url_host": "192.168.56.122",
+  "cinder_url": "http://192.168.56.122:8776/v1/e6bae7721b8745ce8b14f3908de17b8c",
+  "cinder_url_host": "192.168.56.122",
+  "zOpenStackNovaApiHosts": [],
+  "zOpenStackCinderApiHosts": [],
+  "zOpenStackExtraHosts": [],
+  "quotas":
+            {
+              "28a2787a215a4187b22f800f51e58665":
+                                                  {
+                                                    "per_volume_gigabytes": -1,
+                                                    "volumes": 10,
+                                                    "gigabytes": 1000,
+                                                    "backup_gigabytes": 1000,
+                                                    "snapshots": 10,
+                                                    "volumes_iscsi": -1,
+                                                    "snapshots_iscsi": -1,
+                                                    "backups": 10,
+                                                    "gigabytes_iscsi": -1,
+                                                    "id": "28a2787a215a4187b22f800f51e58665"
+                                                  },
+              "5b79c3f4df73447a9850887b2ea17372":
+                                                  {
+                                                    "per_volume_gigabytes": -1,
+                                                    "volumes": 10,
+                                                    "gigabytes": 1000,
+                                                    "backup_gigabytes": 1000,
+                                                    "snapshots": 10,
+                                                    "volumes_iscsi": -1,
+                                                    "snapshots_iscsi": -1,
+                                                    "backups": 10,
+                                                    "gigabytes_iscsi": -1,
+                                                    "id": "5b79c3f4df73447a9850887b2ea17372"
+                                                  },
+              "e6bae7721b8745ce8b14f3908de17b8c":
+                                                  {
+                                                    "per_volume_gigabytes": -1,
+                                                    "volumes": 10,
+                                                    "gigabytes": 1000,
+                                                    "backup_gigabytes": 1000,
+                                                    "snapshots": 10,
+                                                    "volumes_iscsi": -1,
+                                                    "snapshots_iscsi": -1,
+                                                    "backups": 10,
+                                                    "gigabytes_iscsi": -1,
+                                                    "id": "e6bae7721b8745ce8b14f3908de17b8c"
+                                                  }
+            },
+  "volumetypes": [
+                    {
+                        "volume_backend_name": "ceph",
+                        "id": "033af14f-b609-45e3-aed2-5b2e02d44c8f",
+                        "name": "ceph"
+                    },
+                    {
+                      "volume_backend_name": "LVM_iSCSI",
+                      "id": "6e2e993c-110e-4aaf-a79b-a44acc533051",
+                      "name": "lvm"
+                    },
+                    {
+                      "volume_backend_name": "LVM_iSCSI",
+                      "__comment": "node with no id, modeler should ignore the node",
+                      "name": "lvm"
+                    }
+                ],
+  "volumes": [
+                {
+                  "migration_status": null,
+                  "attachments": [],
+                  "links": [
+                              {
+                                "href": "http://192.168.56.122:8776/v2/e6bae7721b8745ce8b14f3908de17b8c/volumes/c3aabf8c-9f44-41c7-b962-e50e1f5936ff",
+                                "rel": "self"
+                              },
+                              {
+                                "href": "http://192.168.56.122:8776/e6bae7721b8745ce8b14f3908de17b8c/volumes/c3aabf8c-9f44-41c7-b962-e50e1f5936ff",
+                                "rel": "bookmark"
+                              }
+                           ],
+                  "availability_zone": "nova",
+                  "os-vol-host-attr:host": "liberty.zenoss.local@lvm#lvm",
+                  "encrypted": false,
+                  "os-volume-replication:extended_status": null,
+                  "replication_status": "disabled",
+                  "snapshot_id": null,
+                  "id": "c3aabf8c-9f44-41c7-b962-e50e1f5936ff",
+                  "size": 1,
+                  "user_id": "04080227fac94d45994776c6a1d0cbc6",
+                  "os-vol-tenant-attr:tenant_id": "28a2787a215a4187b22f800f51e58665",
+                  "os-vol-mig-status-attr:migstat": null,
+                  "metadata": {},
+                  "status": "available",
+                  "description": "Linux volume 1 GB",
+                  "multiattach": false,
+                  "source_volid": null,
+                  "consistencygroup_id": null,
+                  "os-vol-mig-status-attr:name_id": null,
+                  "name": "vol-GB1-2",
+                  "bootable": "false",
+                  "created_at": "2015-12-16T19:44:25.000000",
+                  "os-volume-replication:driver_data": null,
+                  "volume_type": "iscsi"
+                },
+                {
+                  "migration_status": null,
+                  "attachments": [
+                                    {
+                                      "server_id": "0aa87c33-aa73-4c02-976b-321f5e2df205",
+                                      "attachment_id": "741c52a9-8219-4625-a655-5f25bf3bf42f",
+                                      "host_name": null,
+                                      "volume_id": "281a7105-935a-4bcf-a4b5-cf5e652d2daa",
+                                      "device": "/dev/vdb",
+                                      "id": "281a7105-935a-4bcf-a4b5-cf5e652d2daa"
+                                    }
+                                 ],
+                  "links": [
+                              {
+                                "href": "http://192.168.56.122:8776/v2/e6bae7721b8745ce8b14f3908de17b8c/volumes/281a7105-935a-4bcf-a4b5-cf5e652d2daa",
+                                "rel": "self"
+                              },
+                              {
+                                "href": "http://192.168.56.122:8776/e6bae7721b8745ce8b14f3908de17b8c/volumes/281a7105-935a-4bcf-a4b5-cf5e652d2daa",
+                                "rel": "bookmark"
+                              }
+                           ],
+                  "availability_zone": "nova",
+                  "os-vol-host-attr:host": "liberty.zenoss.local@lvm#lvm",
+                  "encrypted": false,
+                  "os-volume-replication:extended_status": null,
+                  "replication_status": "disabled",
+                  "snapshot_id": null,
+                  "id": "281a7105-935a-4bcf-a4b5-cf5e652d2daa",
+                  "size": 1,
+                  "user_id": "04080227fac94d45994776c6a1d0cbc6",
+                  "os-vol-tenant-attr:tenant_id": "28a2787a215a4187b22f800f51e58665",
+                  "os-vol-mig-status-attr:migstat": null,
+                  "metadata":
+                              {
+                                "readonly": "false",
+                                "attached_mode": "rw"
+                              },
+                  "status": "in-use",
+                  "description": "Linux volume 1 GB",
+                  "multiattach": false,
+                  "source_volid": null,
+                  "consistencygroup_id": null,
+                  "os-vol-mig-status-attr:name_id": null,
+                  "name": "vol-GB1",
+                  "bootable": "false",
+                  "created_at": "2015-10-30T18:15:46.000000",
+                  "os-volume-replication:driver_data": null,
+                  "volume_type": "iscsi"
+                },
+                {
+                  "migration_status": null,
+                  "attachments": [
+                    {
+                      "server_id": "0aa87c33-aa73-4c02-976b-321f5e2df205",
+                      "attachment_id": "741c52a9-8219-4625-a655-5f25bf3bf42f",
+                      "host_name": null,
+                      "volume_id": "281a7105-935a-4bcf-a4b5-cf5e652d2daa",
+                      "device": "/dev/vdb",
+                      "id": "281a7105-935a-4bcf-a4b5-cf5e652d2daa"
+                    }
+                  ],
+                  "links": [
+                    {
+                      "href": "http://192.168.56.122:8776/v2/e6bae7721b8745ce8b14f3908de17b8c/volumes/281a7105-935a-4bcf-a4b5-cf5e652d2daa",
+                      "rel": "self"
+                    },
+                    {
+                      "href": "http://192.168.56.122:8776/e6bae7721b8745ce8b14f3908de17b8c/volumes/281a7105-935a-4bcf-a4b5-cf5e652d2daa",
+                      "rel": "bookmark"
+                    }
+                  ],
+                  "availability_zone": "nova",
+                  "os-vol-host-attr:host": "liberty.zenoss.local@lvm#lvm",
+                  "encrypted": false,
+                  "os-volume-replication:extended_status": null,
+                  "replication_status": "disabled",
+                  "snapshot_id": null,
+                  "__comment": "node with no id, modeler should ignore the node",
+                  "size": 1,
+                  "user_id": "04080227fac94d45994776c6a1d0cbc6",
+                  "os-vol-tenant-attr:tenant_id": "28a2787a215a4187b22f800f51e58665",
+                  "os-vol-mig-status-attr:migstat": null,
+                  "metadata":
+                  {
+                    "readonly": "false",
+                    "attached_mode": "rw"
+                  },
+                  "status": "in-use",
+                  "description": "Linux volume 1 GB",
+                  "multiattach": false,
+                  "source_volid": null,
+                  "consistencygroup_id": null,
+                  "os-vol-mig-status-attr:name_id": null,
+                  "name": "vol-GB1",
+                  "bootable": "false",
+                  "created_at": "2015-10-30T18:15:46.000000",
+                  "os-volume-replication:driver_data": null,
+                  "volume_type": "iscsi"
+                }
+             ],
+  "images": [
+              {
+                "status": "ACTIVE",
+                "updated": "2015-10-30T16:00:15Z",
+                "name": "cirros",
+                "links": [
+                            {
+                              "href": "http://192.168.56.122:8774/v2/e6bae7721b8745ce8b14f3908de17b8c/images/b5ac0c5f-bf91-4ab6-bcaa-d895a8df90bb",
+                              "rel": "self"
+                            },
+                            {
+                              "href": "http://192.168.56.122:8774/e6bae7721b8745ce8b14f3908de17b8c/images/b5ac0c5f-bf91-4ab6-bcaa-d895a8df90bb",
+                              "rel": "bookmark"
+                            },
+                            {
+                              "href": "http://10.0.2.34:9292/images/b5ac0c5f-bf91-4ab6-bcaa-d895a8df90bb",
+                              "type": "application/vnd.openstack.image",
+                              "rel": "alternate"
+                            }
+                          ],
+                "created": "2015-10-30T16:00:13Z",
+                "minDisk": 0,
+                "progress": 100,
+                "minRam": 0,
+                "metadata": {},
+                "id": "b5ac0c5f-bf91-4ab6-bcaa-d895a8df90bb",
+                "OS-EXT-IMG-SIZE:size": 13200896
+              },
+              {
+                "status": "ACTIVE",
+                "updated": "2015-10-30T16:00:15Z",
+                "name": "cirros",
+                "links": [
+                  {
+                    "href": "http://192.168.56.122:8774/v2/e6bae7721b8745ce8b14f3908de17b8c/images/b5ac0c5f-bf91-4ab6-bcaa-d895a8df90bb",
+                    "rel": "self"
+                  },
+                  {
+                    "href": "http://192.168.56.122:8774/e6bae7721b8745ce8b14f3908de17b8c/images/b5ac0c5f-bf91-4ab6-bcaa-d895a8df90bb",
+                    "rel": "bookmark"
+                  },
+                  {
+                    "href": "http://10.0.2.34:9292/images/b5ac0c5f-bf91-4ab6-bcaa-d895a8df90bb",
+                    "type": "application/vnd.openstack.image",
+                    "rel": "alternate"
+                  }
+                ],
+                "created": "2015-10-30T16:00:13Z",
+                "minDisk": 0,
+                "progress": 100,
+                "minRam": 0,
+                "metadata": {},
+                "__comment": "node with no id, modeler should ignore the node",
+                "OS-EXT-IMG-SIZE:size": 13200896
+              }
+            ],
+  "services": [
+                {
+                  "status": "enabled",
+                  "binary": "nova-consoleauth",
+                  "zone": "internal",
+                  "state": "up",
+                  "updated_at": "2015-12-16T21:11:22.000000",
+                  "host": "liberty.zenoss.local",
+                  "disabled_reason": null,
+                  "id": 1
+                },
+                {
+                  "status": "enabled",
+                  "binary": "nova-scheduler",
+                  "zone": "internal",
+                  "state": "up",
+                  "updated_at": "2015-12-16T21:11:22.000000",
+                  "host": "liberty.zenoss.local",
+                  "disabled_reason": null,
+                  "id": 2
+                },
+                {
+                  "status": "enabled",
+                  "binary": "nova-conductor",
+                  "zone": "internal",
+                  "state": "up",
+                  "updated_at": "2015-12-16T21:11:21.000000",
+                  "host": "liberty.zenoss.local",
+                  "disabled_reason": null,
+                  "id": 3
+                },
+                {
+                  "status": "enabled",
+                  "binary": "nova-compute",
+                  "zone": "nova",
+                  "state": "up",
+                  "updated_at": "2015-12-16T21:11:21.000000",
+                  "host": "liberty.zenoss.local",
+                  "disabled_reason": null,
+                  "id": 4
+                },
+                {
+                  "status": "enabled",
+                  "binary": "nova-cert",
+                  "zone": "internal",
+                  "state": "up",
+                  "updated_at": "2015-12-16T21:11:22.000000",
+                  "host": "liberty.zenoss.local",
+                  "disabled_reason": null,
+                  "id": 5
+                },
+                {
+                  "status": "enabled",
+                  "binary": "nova-cert",
+                  "zone": "internal",
+                  "state": "up",
+                  "updated_at": "2015-12-16T21:11:22.000000",
+                  "host": "liberty.zenoss.local",
+                  "disabled_reason": null,
+                  "__comment": "node with no id, modeler should ignore the node"
+                }
+        ],
+  "floatingips": [
+                  {
+                    "router_id": "88b70ee0-4204-4a88-b9c5-dd49588d5c1a",
+                    "status": "DOWN",
+                    "tenant_id": "e6bae7721b8745ce8b14f3908de17b8c",
+                    "floating_network_id": "a13b2c35-d734-4021-9850-432dfa7fa7a3",
+                    "fixed_ip_address": null,
+                    "floating_ip_address": "10.239.180.102",
+                    "port_id": "2ce7575f-5368-4a33-b67d-17b4718cf77c",
+                    "id": "7fc91b6e-6135-4ca3-932b-7f437c77ff45"
+                  },
+                  {
+                    "router_id": "88b70ee0-4204-4a88-b9c5-dd49588d5c1a",
+                    "status": "DOWN",
+                    "tenant_id": "e6bae7721b8745ce8b14f3908de17b8c",
+                    "floating_network_id": "a13b2c35-d734-4021-9850-432dfa7fa7a3",
+                    "fixed_ip_address": null,
+                    "floating_ip_address": "10.239.180.103",
+                    "port_id": "2ce7575f-5368-4a33-b67d-17b4718cf77c",
+                    "id": "8a5b5177-4100-445e-b085-836276a3e0c6"
+                  },
+                  {
+                    "router_id": "88b70ee0-4204-4a88-b9c5-dd49588d5c1a",
+                    "status": "ACTIVE",
+                    "tenant_id": "e6bae7721b8745ce8b14f3908de17b8c",
+                    "floating_network_id": "a13b2c35-d734-4021-9850-432dfa7fa7a3",
+                    "fixed_ip_address": null,
+                    "floating_ip_address": "10.239.180.101",
+                    "port_id": "2ce7575f-5368-4a33-b67d-17b4718cf77c",
+                    "id": "c3d558d1-5ed7-4488-9529-1ed8d47412c1"
+                  },
+                  {
+                    "router_id": "88b70ee0-4204-4a88-b9c5-dd49588d5c1a",
+                    "status": "DOWN",
+                    "tenant_id": "28a2787a215a4187b22f800f51e58665",
+                    "floating_network_id": "a13b2c35-d734-4021-9850-432dfa7fa7a3",
+                    "fixed_ip_address": null,
+                    "floating_ip_address": "10.239.180.100",
+                    "port_id": "2ce7575f-5368-4a33-b67d-17b4718cf77c",
+                    "id": "d61d4dff-b941-4359-bd95-db6110364796"
+                  },
+                  {
+                    "router_id": null,
+                    "status": "DOWN",
+                    "tenant_id": "28a2787a215a4187b22f800f51e58665",
+                    "floating_network_id": "a13b2c35-d734-4021-9850-432dfa7fa7a3",
+                    "fixed_ip_address": null,
+                    "floating_ip_address": "10.239.180.100",
+                    "port_id": null,
+                    "__comment": "node with no id, modeler should ignore the node"
+                  }
+                ],
+  "tenants": [
+                {
+                  "enabled": true,
+                  "description": "default tenant",
+                  "name": "demo",
+                  "id": "28a2787a215a4187b22f800f51e58665"
+                },
+                {
+                  "enabled": true,
+                  "description": "Tenant for the openstack services",
+                  "name": "services",
+                  "id": "5b79c3f4df73447a9850887b2ea17372"
+                },
+                {
+                  "enabled": true,
+                  "description": "admin tenant",
+                  "name": "admin",
+                  "id": "e6bae7721b8745ce8b14f3908de17b8c"
+                },
+                {
+                  "enabled": true,
+                  "description": "admin tenant",
+                  "name": "admin",
+                  "__comment": "node with no id, modeler should ignore the node"
+                }
+            ],
+  "networks": [
+                {
+                  "status": "ACTIVE",
+                  "subnets": ["85085b15-4f2f-4457-ae31-0cfe1d5d301c"],
+                  "name": "private",
+                  "provider:physical_network": null,
+                  "admin_state_up": true,
+                  "tenant_id": "28a2787a215a4187b22f800f51e58665",
+                  "mtu": 0,
+                  "router:external": false,
+                  "shared": false,
+                  "provider:network_type": "vxlan",
+                  "id": "7a2d66f2-35e6-4459-92b9-260411a39039",
+                  "provider:segmentation_id": 95
+                },
+                {
+                  "status": "ACTIVE",
+                  "subnets": ["efe34b3a-a35c-4a0e-9769-e1fd79d7ca2d"],
+                  "name": "public",
+                  "provider:physical_network": null,
+                  "admin_state_up": true,
+                  "tenant_id": "e6bae7721b8745ce8b14f3908de17b8c",
+                  "mtu": 0,
+                  "router:external": true,
+                  "shared": false,
+                  "provider:network_type": "vxlan",
+                  "id": "a13b2c35-d734-4021-9850-432dfa7fa7a3",
+                  "provider:segmentation_id": 21
+                },
+                {
+                  "status": "ACTIVE",
+                  "subnets": ["efe34b3a-a35c-4a0e-9769-e1fd79d7ca2d"],
+                  "name": "public",
+                  "provider:physical_network": null,
+                  "admin_state_up": true,
+                  "tenant_id": "e6bae7721b8745ce8b14f3908de17b8c",
+                  "mtu": 0,
+                  "router:external": true,
+                  "shared": false,
+                  "provider:network_type": "vxlan",
+                  "__comment": "node with no id, modeler should ignore the node",
+                  "provider:segmentation_id": 21
+                }
+              ],
+  "ports": [
+              {
+                "status": "DOWN",
+                "binding:host_id": "liberty.zenoss.local",
+                "name": "",
+                "allowed_address_pairs": [],
+                "admin_state_up": true,
+                "network_id": "a13b2c35-d734-4021-9850-432dfa7fa7a3",
+                "dns_name": "",
+                "extra_dhcp_opts": [],
+                "mac_address": "fa:16:3e:1f:6a:cc",
+                "dns_assignment": [
+                                    {
+                                      "hostname": "host-172-24-4-226",
+                                      "ip_address": "172.24.4.226",
+                                      "fqdn": "host-172-24-4-226.openstacklocal."
+                                    }
+                                  ],
+                "binding:vif_details":
+                                        {
+                                          "port_filter": true,
+                                          "ovs_hybrid_plug": true
+                                        },
+                "binding:vif_type": "ovs",
+                "device_owner": "network:router_gateway",
+                "tenant_id": "",
+                "binding:profile": {},
+                "binding:vnic_type": "normal",
+                "fixed_ips": [
+                                {
+                                  "subnet_id": "efe34b3a-a35c-4a0e-9769-e1fd79d7ca2d",
+                                  "ip_address": "172.24.4.226"
+                                }
+                              ],
+                "id": "027d0591-d2d7-412c-977e-5a42fd2d0277",
+                "security_groups": [],
+                "device_id": "88b70ee0-4204-4a88-b9c5-dd49588d5c1a"
+              },
+              {
+                "status": "ACTIVE",
+                "binding:host_id": "liberty.zenoss.local",
+                "name": "",
+                "allowed_address_pairs": [],
+                "admin_state_up": true,
+                "network_id": "7a2d66f2-35e6-4459-92b9-260411a39039",
+                "dns_name": "",
+                "extra_dhcp_opts": [],
+                "mac_address": "fa:16:3e:04:6d:e6",
+                "dns_assignment": [
+                                    {
+                                      "hostname": "host-10-0-0-3",
+                                      "ip_address": "10.0.0.3",
+                                      "fqdn": "host-10-0-0-3.openstacklocal."
+                                    }
+                                  ],
+                "binding:vif_details":
+                                        {
+                                          "port_filter": true,
+                                          "ovs_hybrid_plug": true
+                                        },
+                "binding:vif_type": "ovs",
+                "device_owner": "compute:nova",
+                "tenant_id": "28a2787a215a4187b22f800f51e58665",
+                "binding:profile": {},
+                "binding:vnic_type": "normal",
+                "fixed_ips": [
+                                {
+                                  "subnet_id": "85085b15-4f2f-4457-ae31-0cfe1d5d301c",
+                                  "ip_address": "10.0.0.3"
+                                }
+                              ],
+                "id": "2ce7575f-5368-4a33-b67d-17b4718cf77c",
+                "security_groups": ["3c7ba14b-8ab3-471c-8c2a-57e276ad74b8"],
+                "device_id": "0aa87c33-aa73-4c02-976b-321f5e2df205"
+              },
+              {
+                "status": "ACTIVE",
+                "binding:host_id": "liberty.zenoss.local",
+                "name": "",
+                "allowed_address_pairs": [],
+                "admin_state_up": true,
+                "network_id": "7a2d66f2-35e6-4459-92b9-260411a39039",
+                "dns_name": "",
+                "extra_dhcp_opts": [],
+                "mac_address": "fa:16:3e:bf:be:af",
+                "dns_assignment": [
+                                    {
+                                      "hostname": "host-10-0-0-1",
+                                      "ip_address": "10.0.0.1",
+                                      "fqdn": "host-10-0-0-1.openstacklocal."
+                                    }
+                                  ],
+                "binding:vif_details":
+                                        {
+                                          "port_filter": true,
+                                          "ovs_hybrid_plug": true
+                                        },
+                "binding:vif_type": "ovs",
+                "device_owner": "network:router_interface",
+                "tenant_id": "28a2787a215a4187b22f800f51e58665",
+                "binding:profile": {},
+                "binding:vnic_type": "normal",
+                "fixed_ips": [
+                                {
+                                  "subnet_id": "85085b15-4f2f-4457-ae31-0cfe1d5d301c",
+                                  "ip_address": "10.0.0.1"
+                                }
+                              ],
+                "id": "65fae58a-3d6b-4e8d-acc1-f9a43c0b7d31",
+                "security_groups": [],
+                "device_id": "88b70ee0-4204-4a88-b9c5-dd49588d5c1a"
+              },
+              {
+                "status": "ACTIVE",
+                "binding:host_id": "liberty.zenoss.local",
+                "name": "",
+                "allowed_address_pairs": [],
+                "admin_state_up": true,
+                "network_id": "7a2d66f2-35e6-4459-92b9-260411a39039",
+                "dns_name": "",
+                "extra_dhcp_opts": [],
+                "mac_address": "fa:16:3e:ff:e5:8e",
+                "dns_assignment": [
+                                    {
+                                      "hostname": "host-10-0-0-2",
+                                      "ip_address": "10.0.0.2",
+                                      "fqdn": "host-10-0-0-2.openstacklocal."
+                                    }
+                                  ],
+                "binding:vif_details":
+                                        {
+                                          "port_filter": true,
+                                          "ovs_hybrid_plug": true
+                                        },
+                "binding:vif_type": "ovs",
+                "device_owner": "network:dhcp",
+                "tenant_id": "28a2787a215a4187b22f800f51e58665",
+                "binding:profile": {},
+                "binding:vnic_type": "normal",
+                "fixed_ips": [
+                                {
+                                  "subnet_id": "85085b15-4f2f-4457-ae31-0cfe1d5d301c",
+                                  "ip_address": "10.0.0.2"
+                                }
+                              ],
+                "id": "d95c191c-f9fc-4933-9d13-af8f7524046a",
+                "security_groups": [],
+                "device_id": "dhcpa01befa0-d7d2-5f17-8b2b-284d077d8452-7a2d66f2-35e6-4459-92b9-260411a39039"
+              },
+              {
+                "status": "ACTIVE",
+                "binding:host_id": "liberty.zenoss.local",
+                "name": "",
+                "allowed_address_pairs": [],
+                "admin_state_up": true,
+                "network_id": "7a2d66f2-35e6-4459-92b9-260411a39039",
+                "dns_name": "",
+                "extra_dhcp_opts": [],
+                "mac_address": "fa:16:3e:ff:e5:8e",
+                "dns_assignment": [
+                  {
+                    "hostname": "host-10-0-0-2",
+                    "ip_address": "10.0.0.2",
+                    "fqdn": "host-10-0-0-2.openstacklocal."
+                  }
+                ],
+                "binding:vif_details":
+                {
+                  "port_filter": true,
+                  "ovs_hybrid_plug": true
+                },
+                "binding:vif_type": "ovs",
+                "device_owner": "network:dhcp",
+                "tenant_id": "28a2787a215a4187b22f800f51e58665",
+                "binding:profile": {},
+                "binding:vnic_type": "normal",
+                "fixed_ips": [
+                  {
+                    "subnet_id": "85085b15-4f2f-4457-ae31-0cfe1d5d301c",
+                    "ip_address": "10.0.0.2"
+                  }
+                ],
+                "__comment": "node with no id, modeler should ignore the node",
+                "security_groups": [],
+                "device_id": "dhcpa01befa0-d7d2-5f17-8b2b-284d077d8452-7a2d66f2-35e6-4459-92b9-260411a39039"
+              }
+        ]
+}

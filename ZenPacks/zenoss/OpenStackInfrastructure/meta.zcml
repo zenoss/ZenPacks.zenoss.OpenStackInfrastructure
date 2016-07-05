@@ -1,0 +1,7 @@
+<configure xmlns="http://namespaces.zope.org/meta">
+
+    <!-- OpenStack Integration features -->
+    <provides feature="openstack_neutron_integration" />
+    <provides feature="openstack_cinder_integration" />
+
+</configure>

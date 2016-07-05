@@ -442,6 +442,7 @@ class TestImpact(zenpacklib.TestCase):
                 self.assertTrue(instance.id in impacted_by,
                                 msg="Tenant %s impacted by instance %s" % (tenant.id, instance.id))
 
+    @unittest.skip("guest device test not ready")
     @require_zenpack('ZenPacks.zenoss.Impact')
     # Have not yet implemented openstackInstance()
     def test_GuestDevice(self):
@@ -455,6 +456,7 @@ class TestImpact(zenpacklib.TestCase):
             self.assertTrue(instance.id in impacted_by,
                             msg="Guest %s is impacted by instance %s" % (guest.id, instance.id))
 
+    @unittest.skip("host device test not ready")
     @require_zenpack('ZenPacks.zenoss.Impact')
     def test_HostDevice(self):
         hostdevices = self.linuxhosts()
@@ -481,6 +483,33 @@ class TestImpact(zenpacklib.TestCase):
                     passes += 1
 
         self.assertTrue(passes > 0, msg="OSProcesses found with which to test")
+
+    @require_zenpack('ZenPacks.zenoss.Impact')
+    def test_Volume(self):
+        # add volume1 to instance1, add volsnap1 to volume1
+        instances = self.endpoint().getDeviceComponents(type='OpenStackInfrastructureInstance')
+        self.assertEquals(len(instances), 4)
+
+        volumes = self.endpoint().getDeviceComponents(type='OpenStackInfrastructureVolume')
+        self.assertEquals(len(volumes), 1)
+
+        volsnaps = self.endpoint().getDeviceComponents(type='OpenStackInfrastructureVolSnapshot')
+        self.assertEquals(len(volsnaps), 1)
+
+        for volume in volumes:
+            # impact relations for instance1, which is impacted by volume1
+            impacts, impacted_by = impacts_for(instances[0])
+            self.assertTrue(volume.id in impacted_by,
+                            msg="instance %s impacted by volume %s" %
+                                (instances[0].id, volume.id))
+
+            for volsnap in volsnaps:
+                # impact relations for volsnap1, which is impacted by volume1
+                impacts, impacted_by = impacts_for(volsnap)
+                self.assertTrue(volume.id in impacted_by,
+                                msg="volume snapshot %s impacted by volume %s" %
+                                    (volsnap.id, volume.id))
+
 
 def test_suite():
     from unittest import TestSuite, makeSuite

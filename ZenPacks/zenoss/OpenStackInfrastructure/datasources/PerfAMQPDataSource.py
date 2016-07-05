@@ -40,7 +40,7 @@ from zenoss.protocols.twisted.amqp import AMQPFactory
 # How long to cache data in memory before discarding it (data that
 # is coming from ceilometer, but not consumed by any monitoring templates).
 # Should be at least the cycle interval.
-CACHE_EXPIRE_TIME = 15*60
+CACHE_EXPIRE_TIME = 25*60
 
 
 class PerfAMQPDataSource(PythonDataSource):
@@ -176,7 +176,7 @@ class PerfAMQPDataSourcePlugin(PythonDataSourcePlugin):
 
             amqp = AMQPFactory(self._amqpConnectionInfo, self._queueSchema)
             queue = self._queueSchema.getQueue('$OpenStackInboundPerf', replacements={'device': config.id})
-            log.info("Listening on queue: %s with binding to routing key %s" % (queue.name, queue.bindings['$OpenStackInbound'].routing_key))
+            log.debug("Listening on queue: %s with binding to routing key %s" % (queue.name, queue.bindings['$OpenStackInbound'].routing_key))
             yield amqp.listen(queue, callback=partial(self.processMessage, amqp, config.id))
             amqp_client[config.id] = amqp
 
@@ -226,10 +226,10 @@ class PerfAMQPDataSourcePlugin(PythonDataSourcePlugin):
 
                 now = time.time()
                 if timestamp > now:
-                    log.info("[%s/%s] Timestamp (%s) appears to be in the future.  Using now instead." % (resourceId, meter, value['data']['timestamp']))
+                    log.debug("[%s/%s] Timestamp (%s) appears to be in the future.  Using now instead." % (resourceId, meter, value['data']['timestamp']))
 
                 if timestamp < now - CACHE_EXPIRE_TIME:
-                    log.info("[%s/%s] Timestamp (%s) is already %d seconds old- discarding message." % (resourceId, meter, value['data']['timestamp'], now-timestamp))
+                    log.debug("[%s/%s] Timestamp (%s) is already %d seconds old- discarding message." % (resourceId, meter, value['data']['timestamp'], now-timestamp))
                 else:
                     cache[device_id].add_perf(resourceId, meter, meter_value, timestamp)
 

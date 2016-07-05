@@ -8,10 +8,11 @@ underlying OpenStack servers and software are monitored.
 === Features ===
 
 * Monitors Overall OpenStack state
-* Monitors Nova and Neutron health
+* Monitors Nova, Neutron and Cinder health
 * Monitors multiple Tenant Infrastructure
-* Monitors Nova Services and components
-* Models and monitors Neutron Services and components
+* Models and monitors Nova Services and components
+* Models and monitors Neutron Agents and components
+* Models and monitors Cinder Services and components
 * Impact and Root-Cause (Requires Zenoss Service Dynamics)
 
 === Gallery ===
@@ -39,14 +40,18 @@ osi_routers.png|Router
 osi_subnets.png|Subnet
 osi_tenants.png|Tenant
 osi_vnics.png|vNIC
+osi_cinderservices.png|Cinder Service
+osi_volumes.png|Volume
+osi_volsnapshots.png|Volume Snapshot
 </gallery>
 
 == Prerequisites ==
 
 * OpenStack (Icehouse or newer)
 * Ceilometer-OpenStack compatible with your version of OpenStack
-* ceilometer_zenoss 1.0.0+ (https://github.com/zenoss/ceilometer_zenoss)
-** This Zenoss-specific plugin must be installed on your Ceilometer nodes (see below)
+* ceilometer_zenoss 1.0.1 for Kilo and Prior (https://github.com/zenoss/ceilometer_zenoss)
+* ceilometer_zenoss 1.0.2 for Liberty
+** This Zenoss-specific plugin must be installed on all your Ceilometer nodes (see below)
 ** If not installed and configured properly, Instances and vNICs graphs will be blank, and Zenoss will not detect changes (such as new instances or instance state changes) until a full model is performed.
 * PyYAML needs to be installed in order to use the YAML configuration
 ** All 5.X versions of Zenoss have PyYAML already installed
@@ -59,9 +64,165 @@ osi_vnics.png|vNIC
 * Administrative credentials for your OpenStack environment
 ** Username, password, keystone URL, Region
 
+== Installed Items ==
+
+;Configuration Properties
+* zOpenStackAuthUrl: The URL of the Identity endpoint.
+* zOpenStackCeilometerUrl: The URL to the Ceilometer API.
+* zOpenStackExtraHosts: The list of extra hosts that will be added to the system once OpenStack Infrastructure device is modeled.
+* zOpenStackHostDeviceClass: Used as a default device class for defined hosts in zOpenStackExtraHosts and zOpenStackNovaApiHosts properties. Default is /Server/SSH/Linux/NovaHost.
+* zOpenStackNovaApiHosts: The list of hosts upon which nova-api runs.  This is required when the IP address in the nova API url does not match any known host.
+* zOpenStackCinderApiHosts: The list of hosts upon which cinder-api runs.  This is required when the IP address in the cinder API url does not match any known host.
+* zOpenStackHostMapToId: A list of <name>=<id>, used to force a host referred to by openstack with the given name to be represented in Zenoss as a host component with the given ID.   (this is not commonly used)
+* zOpenStackHostMapSame: A list of <name1>=<name2>, used to inform the modeler that the same host may be referred to with a different name by some part of openstack.  (this is not commonly used)
+* zOpenStackNeutronConfigDir: The path where to search for Neutron's configs. Default is /etc/neutron.
+* zOpenStackProjectId: Corresponds to tenant name, project to work on.
+* zOpenStackRegionName: The name of OpenStack Region to use. Regions are autonomous OpenStack clouds joined together through shared Keystone identity server and managed through common interface.
+* zOpenStackRunNovaManageInContainer, zOpenStackRunVirshQemuInContainer, zOpenStackRunNeutronCommonInContainer: Used for container based OpenStack installation. Leave them empty.
+
+;Device Classes
+* /OpenStack: Root OpenStack device class. Typically devices should not be put in this device class.
+* /OpenStack/Infrastructure: Device class for OpenStack Infrastructure endpoints.
+* /Server/SSH/Linux/NovaHost: Device class for Nova host instances.
+
+;Modeler Plugins
+* zenoss.OpenStackInfrastructure: Used to get component information by OpenStack API clients.
+* zenoss.cmd.linux.openstack.hostfqdn: Used to get OpenStack host FQDN.
+* zenoss.cmd.linux.openstack.inifiles: Used to gather neutron.conf and ml2_conf.ini files.
+* zenoss.cmd.linux.openstack.libvirt: Used to get OpenStack instance virtual NIC information using libvert.
+* zenoss.cmd.linux.openstack.nova: Used to get OpenStack Nova API version.
+
+;Datasources
+* CinderServiceStatusDataSource: Used to check the status of Cinder services via the Cinder API.
+* EventsAMQPDataSource: Used to capture data and events from OpenStack Ceilometer via AMQP.
+* HeartbeatsAMQPDataSource: Used to capture heartbeats from OpenStack Ceilometer via AMQP.
+* NeutronAgentStatusDataSource: Used to check the status of Neutron agents via the Neutron API.
+* NovaServiceStatusDataSource: Used to check the status of Nova services via the Nova API.
+* PerfAMQPDataSource: Used to capture data and events from OpenStack Ceilometer via AMQP.
+* PerfCeilometerAPIDataSource: Used to capture datapoints from OpenStack Ceilometer.
+* QueueSizeDataSource: Used to check the number of messages in Ceilometer queues.
+
+;Monitoring Templates
+* /OpenStack/Infrastructure/
+** Endpoint
+** Instance
+** vNIC
+
+;Event Classes and Mappings
+* /OpenStack
+** OpenStack Events Default
+* /OpenStack/Cinder
+* /OpenStack/Cinder/Snapshot
+** Cinder Snapshot default mapping
+* /OpenStack/Cinder/Volume
+** cinder.volume default mapping
+* /OpenStack/compute
+* /OpenStack/compute/instance
+** compute.instance default mapping
+** compute.instance.create.error
+** compute.instance.exists
+** compute.instance.exists.verified.old
+* /OpenStack/dhcp_agent
+** dhcp_agent defaultmapping
+* /OpenStack/firewall
+** firewall defaultmapping
+* /OpenStack/firewall_policy
+** firewall_policy defaultmapping
+* /OpenStack/firewall_rule
+** firewall_rule defaultmapping
+* /OpenStack/floatingip
+** floatingip defaultmapping
+* /OpenStack/network
+** network defaultmapping 
+* /OpenStack/port
+** port defaultmapping
+* /OpenStack/router
+** router defaultmapping
+* /OpenStack/security_group
+** security_group defaultmapping
+* /OpenStack/security_group_rule
+** security_group_rule defaultmapping
+* /OpenStack/subnet
+** subnet defaultmapping
+* /Status/Heartbeat/
+** openStackCeilometerHeartbeat
+* /Status
+** openStackCinderServiceStatus
+** openStackIniFileAccess
+** openStackIniFileOptionParsing
+** openStackNeutronAgentStatus
+** openStackNovaServiceStatus
+
+;Processes
+* /OpenStack
+* /OpenStack/ceilometer-agent-central
+* /OpenStack/ceilometer-agent-compute
+* /OpenStack/ceilometer-agent-notification
+* /OpenStack/ceilometer-alarm-evaluator
+* /OpenStack/ceilometer-alarm-notifier
+* /OpenStack/ceilometer-api
+* /OpenStack/ceilometer-collector
+* /OpenStack/ceilometer-polling
+* /OpenStack/cinder-api
+* /OpenStack/cinder-backup
+* /OpenStack/cinder-scheduler
+* /OpenStack/cinder-volume
+* /OpenStack/glance-api
+* /OpenStack/glance-registry
+* /OpenStack/gnocchi-metricd
+* /OpenStack/gnocchi-statsd
+* /OpenStack/keystone-admin
+* /OpenStack/keystone-all
+* /OpenStack/keystone-main
+* /OpenStack/neutron-dhcp-agent
+* /OpenStack/neutron-l3-agent
+* /OpenStack/neutron-lbaas-agent
+* /OpenStack/neutron-metadata-agent
+* /OpenStack/neutron-metering-agent
+* /OpenStack/neutron-openvswitch-agent
+* /OpenStack/neutron-server
+* /OpenStack/nova-api
+* /OpenStack/nova-cert
+* /OpenStack/nova-compute
+* /OpenStack/nova-conductor
+* /OpenStack/nova-consoleauth
+* /OpenStack/nova-network
+* /OpenStack/nova-scheduler
+* /OpenStack/rabbitmq-server
+
 == Basic Usage ==
 
+{{note|'''Full Modeling'''}}
+
+The OpenStackInfrastructrue ZenPack models vNICs associated with OpenStack
+Instances. In order to correctly model these vNICs, you must first fully model
+the OpenStack environment and then configure and model the
+/Server/SSH/Linux/NovaHost devices. See the section below for details on
+configuration specifics.
+
 ===Device Setup via UI===
+
+{{warning|Host Setup:}}
+<blockquote style="
+ background: #eca;
+ border: solid thick gray;
+ padding-top: 5px;
+ padding-right: 10px;
+ padding-bottom: 5px;
+ padding-left: 10px;">
+'''<u>We recommend against manually configuring Linux host devices!</u>'''
+
+Linux Host device names must use the same FQDN hostname that Openstack ZenPack
+is expecting. Choosing different device names will break this process.
+'''Therefore it is STRONGLY recommended that you do not manually pre-configure'''
+'''those Linux devices, but rather allow the OpenStack ZenPack to automatically'''
+'''discover and configure those devices at model time.'''
+
+If this is not possible, you will have to re-name and re-configure those hosts
+and place them into the /Server/SSH/Linux/NovaHost device class manually, which
+is very labor intensive.
+</blockquote>
+
 Once the OpenStack ZenPack is installed and you can begin monitoring by going
 to the infrastructure screen and clicking the normal button for adding devices.
 You'll find a new option labeled, "Add OpenStack Endpoint (Infrastructure)."
@@ -99,10 +260,14 @@ You can setup the device using *zenbatchload* as follows:
 where ''<filename>'' should have the form:
 
 <syntaxhighlight lang="text">
-/Devices/OpenStack/Infrastructure loader='openstackinfrastructure', loader_arg_keys=['deviceName', 'username', 'api_key', 'project_id', 'auth_url', 'ceilometer_url', 'region_name', 'collector']
-   <devicename> username='<username>', api_key='<password>', project_id='<tenant ID>', auth_url='http://<ip address>:5000/v2.0/', region_name='RegionOne'</syntaxhighlight>
+/Devices/OpenStack/Infrastructure loader='openstackinfrastructure', \
+    loader_arg_keys=['deviceName', 'username', 'api_key', 'project_id', 'auth_url', 'ceilometer_url', 'region_name', 'collector']
+<devicename> username='<username>', api_key='<password>', project_id='<tenant ID>', \
+    auth_url='http://<ip address>:5000/v2.0/', region_name='RegionOne'</syntaxhighlight>
 
-* As before zCommandUsername/zCommandPassword properties must be set manually for /Devices/Server/SSH/Linux/NovaHost device class.
+/Devices/Server/SSH/Linux/NovaHost zCommandUsername='username', zCommandPassword='password'
+
+* As mentioned before, zCommandUsername/zCommandPassword properties must be set for /Devices/Server/SSH/Linux/NovaHost devices (and vNICs) to be correctly modeled.
 
 ===Organizational Elements===
 ;The following organizational elements are discovered:
@@ -129,6 +294,15 @@ where ''<filename>'' should have the form:
 * Ports
 * Floating-Ips
 * vNICs (from NovaHost compute device model)
+
+;The following block storage elements are discovered:
+* Cinder Services (processes supporting block storage)
+* Cinder API Endpoints
+* Volumes
+* Volume Snapshots
+* Volume Types
+* Storage Pools
+* Cinder Quotas
 
 ===Metrics===
 
@@ -183,6 +357,40 @@ Routers
 Zenoss, and all events processed through Ceilometer are exposed via the
 Zenoss Event Console.
 
+==Host Based Installation vs Container Based Installation==
+
+This zenpack supports both host based installation and container based
+installation.
+
+===Host Based Installation===
+
+With host based installation, the OpenStack binaries are directly installed on
+the host. For instance,  the binary nova-api will be installed directly in the
+controller host's /usr/bin directory. In this case, edit the Configuration
+Properties of the /Server/SSH/Linux/NovaHost devices,
+zOpenStackRunNovaManageInContainer, zOpenStackRunVirshQemuInContainer, and
+zOpenStackRunNeutronCommonInContainer, after modeling the OpenStackInfrastructure
+device, but before modeling the /Server/SSH/Linux/NovaHost devices, and make
+sure their values are empty:
+<syntaxhighlight lang="bash">
+      zOpenStackRunNovaManageInContainer
+      zOpenStackRunVirshQemuInContainer
+      zOpenStackRunNeutronCommonInContainer
+</syntaxhighlight>
+
+===Container Based Installation===
+
+With container based installation, each OpenStack binary runs inside its own
+container. In this case, the Configuration Properties of the
+/Server/SSH/Linux/NovaHost devices, zOpenStackRunNovaManageInContainer,
+zOpenStackRunVirshQemuInContainer, and zOpenStackRunNeutronCommonInContainer,
+should be set to the container names, before modeling Nova hosts, as:
+<syntaxhighlight lang="bash">
+      zOpenStackRunNovaManageInContainer novacompute
+      zOpenStackRunVirshQemuInContainer novacompute
+      zOpenStackRunNeutronCommonInContainer neutron_server
+</syntaxhighlight>
+
 ==Ceilometer Enablement==
 
 Although you may add an OpenStack device to Zenoss, as shown above, event and
@@ -209,13 +417,13 @@ configuration (see below)
 
 Zenoss relies upon a Ceilometer dispatcher plugin to ship raw event and
 metering data from Ceilometer to Zenoss for storage in the Zenoss event
-and performance databases.   This integration is done by publishing messages
+and performance databases. This integration is done by publishing messages
 to Zenoss's RabbitMQ server.
 
 This dispatcher should be installed on all nodes running any ceilometer, but
 particularly those running ceilometer-collector or ceilometer-agent-notification.
 
-To install it, perform the following steps on each of these OpenStack nodes (NOT
+To install ceilometer_zenoss 1.0.1, perform the following steps on each of these OpenStack nodes (NOT
 on the Zenoss collector):
 
 <syntaxhighlight lang="bash">
@@ -223,18 +431,61 @@ on the Zenoss collector):
   sudo cp /usr/lib/*/site-packages/ceilometer_zenoss/event_definitions.yaml /etc/ceilometer/
 </syntaxhighlight>
 
-Edit /etc/ceilometer/ceilometer.conf, and add the following lines to the
-appropriate sections:
+For ceilometer_zenoss 1.0.2, first git clone the ceilometer_zenoss repository from
+https://github.com/zenoss/ceilometer_zenoss to a Linux server, either Ubuntu 14.04+,
+or CentOS 6.5+. Install docker or docker-engine on the Linux server.
+Next navigate to the top directory of ceilometer_zenoss,
+<syntaxhighlight lang="bash">
+  $ make -C jenkins images
+  $ make -f jenkins/Makefile rpms
+</syntaxhighlight>
+ 
+This generates RPM files for RHEL6, RHEL7, CentOS 6 and CentOS 7.
+Before installing RPMs on OpenStack ceilometer hosts, make sure older versions of 
+cepilometer_zenoss has been erased. One can check this using:
+<syntaxhighlight lang="bash">
+  $ pip list | grep ceilometer_zenoss
+</syntaxhighlight>
+or:
+<syntaxhighlight lang="bash">
+  $ rpm -qa | grep ceilometer_zenoss
+</syntaxhighlight>
+
+To install ceilometer_zenoss rpm on an OpenStack ceilometer host,
+<syntaxhighlight lang="bash">
+  $ rpm -Uvh <ceilometer_zenoss rpm>
+</syntaxhighlight>
+
+The following configuration must be added to /etc/ceilometer/ceilometer.conf file:
 
 <syntaxhighlight lang="text">
   [DEFAULT]
+  # Dispatcher to process data.
   dispatcher=zenoss
 
   [notification]
+  # Save event details.
   store_events=True
+
+  [dispatcher_zenoss]
+  # Device that the OpenStack environment is registered as in Zenoss.
+  zenoss_device = ...
+  # The port number to which the underlying TCP connection is made.
+  # Usually, AMQP port is 5672.
+  amqp_port = ...
+  # Valid AMQP user id.
+  amqp_userid = ...
+  # Valid AMQP password for the above user id.
+  amqp_password = ...
+  # The name of the "virtual host" (or vhost) that specifies the namespace 
+  # for entities (exchanges and queues) referred to by the protocol.
+  amqp_virtual_host = ...
+  # It must be an accessible interface from your OpenStack system,
+  # and that interface must be one that accepts AMQP connections for your Zenoss installation.
+  amqp_hostname = ...
 </syntaxhighlight>
 
-Also add the [dispatcher_zenoss] section reported by openstack_amqp_config above.
+;The order of the sections is important, the [dispatcher_zenoss] section needs to be added at the end of ceilometer.conf file.
 
 {{note}} Please restart all Ceilometer services on all hosts after making these changes.
 
@@ -270,6 +521,20 @@ Zenoss will process performance datapoints from Ceilometer every 10 minutes,
 since by default, Ceilometer will only produce one datapoint every 10 minutes.
 This can be adjusted by modifying the "interval: 600" line in your
 pipeline.yaml file (typically /etc/ceilometer/pipeline.yaml).
+
+== Device Status ==
+
+The OpenStackInfrastructure Device Status is now handled by ZenPackLib 1.1.0.
+The device Status is determined by OpenStackInfrastructure data source events.
+The device is down if a critical event is received from one of
+OpenStackInfrastructure's data sources. Otherwise the device status is up.
+Please note that being able to model OpenStackInfrastructure device is not
+equivalent to device status being up.
+
+Since the older versions of OpenStackInfrastructure ZenPack processed device
+status differently, before upgrading from older versions of the ZenPacks,
+please make sure that the ceilometer enablement is configured properly, and
+Zenoss server receives heartbeat events from the OpenStack host.
 
 == Zenoss Analytics ==
 
@@ -334,8 +599,8 @@ Component failures will affect Impact as follows:
 
 ;Internal Impact Relationships
 * OpenStack API endpoint impacts all Hosts
-* Availabilty zone impacts associated Region
-* Host impacts associated Hypervisors, Nova Services, Cells, Nova Apis, and Neutron Agents
+* Availability zone impacts associated Region
+* Host impacts associated Hypervisors, Nova Services, Cells, Nova Apis, Neutron Agents, and Cinder Services
 * Hypervisor impacts the resident Instances (VMs)
 * Nova Service affects the Availability Zone or Region that it supports
 * Instance impacts the associated Tenant
@@ -346,13 +611,14 @@ Component failures will affect Impact as follows:
 * Network impacts associated Subnets and Tenants
 * Router impacts associated Subnets and Floating-ips
 * Neutron Agent impacts associated Networks, Subnets and Routers
+* volume impacts Instances (VMs), Volume Snapshots
 
 ;External Impact Relationships
 * Instance impacts guest operating system device.
 * Cisco UCS vNIC impacts related host's underlying Linux device NIC.
 * Cisco UCS service profile impacts host's underlying Linux device.
 * Host impacted by associated Linux device.
-* OS Processes on an underlying Linux device impact corresponding Nova APIs and  Nova Services on Host.
+* OS Processes on an underlying Linux device impact corresponding Nova APIs,  Nova Services, Neutron Agents and Cinder Services on Host.
 
 == ML2 Integration ==
 
@@ -361,6 +627,19 @@ Provides linkage between OpenStackInfrastrcuture components and relevant integra
 * OpenvSwitch Integration via OpenvSwitch ZenPack
 * APIC Integration via Cisco APIC ZenPack
 * NSX Integration via NSX ZenPack
+
+== Cinder Integration ==
+
+Provides linkage between OpenStackInfrastrcuture components and relevant integrated device components; imports performance graphs from relevant integrated device components; provides impact graph relations between OpenStackInfrastrcuture components and relevant integrated device components
+
+* LVM logical volumes Integration via LinuxMonitor 2.0.0 ZenPack
+* Ceph RBD volumes Integration via Ceph 2.0.0 ZenPack
+
+== Tested OpenStack Releases ==
+
+OpenStack Provider View Version 2.0.0 was tested against Icehouse and Juno.
+OpenStack Provider View Version 2.1.3 was tested against Juno and Kilo.
+OpenStack Provider View Version 2.2.0 was tested against Juno, Kilo, Liberty.
 
 == Known Issues ==
 
@@ -376,6 +655,11 @@ Provides linkage between OpenStackInfrastrcuture components and relevant integra
 
 == Changes ==
 
+;2.2.0
+* Added Cinder block storage components.
+* Added LVM, Ceph block storage integration via LinuxMonitor and Ceph ZenPacks.
+* Various bug fixes
+
 ;2.1.3
 * Fixed ZEN-22126: Malformed hostnames in the F5 LBAAS plugin
 
@@ -384,6 +668,7 @@ Provides linkage between OpenStackInfrastrcuture components and relevant integra
 
 ;2.1.1
 * Various bug fixes
+* Add meta.zcml feature tags for Neutron Integration
 
 ;2.1.0
 * Added Neutron network components

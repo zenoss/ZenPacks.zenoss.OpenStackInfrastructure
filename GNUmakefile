@@ -13,8 +13,10 @@
 
 PYTHON=python
 SRC_DIR=$(PWD)/src
-TXSSHCLIENT_DIR=$(SRC_DIR)/txsshclient-0.1.0dev1
-ZP_DIR=$(PWD)/ZenPacks/zenoss/OpenStackInfrastructure
+TXSSHCLIENT_DIR=$(SRC_DIR)/txsshclient-0.2.0
+ZP_NAME=OpenStackInfrastructure
+ZP_DIR=$(PWD)/ZenPacks/zenoss/$(ZP_NAME)
+DIR=$(SRC_DIR)/txsshclient-0.2.0
 BIN_DIR=$(ZP_DIR)/bin
 LIB_DIR=$(ZP_DIR)/lib
 
@@ -27,11 +29,11 @@ egg:
 .PHONY: build analytics
 
 build:
-
-	# Now build all the build dependencies for this zenpack.
-	cd $(TXSSHCLIENT_DIR) && \
-		PYTHONPATH="$(PYTHONPATH):$(LIB_DIR)" $(PYTHON) setup.py install \
-			--install-lib="$(LIB_DIR)" --install-scripts="$(BIN_DIR)"
+# Now build all the build dependencies for this zenpack.
+	rm -rf $(TXSSHCLIENT_DIR)/build
+	cd $(TXSSHCLIENT_DIR); python setup.py build
+	mkdir -p $(ZP_DIR)/lib/sshclient
+	cp -r $(TXSSHCLIENT_DIR)/build/lib/sshclient/* $(ZP_DIR)/lib/sshclient/
 
 clean:
 	rm -rf build dist *.egg-info
@@ -39,13 +41,13 @@ clean:
 	cd $(LIB_DIR) ; rm -Rf *.egg site.py easy-install.pth ; cd $(SRC_DIR)
 	find . -name '*.pyc' | xargs rm -f
 
+# Make sure you have set an environment var for OSI $device.
 analytics:
-	rm -f ZenPacks/zenoss/OpenStackInfrastructure/analytics/analytics-bundle.zip
-	mkdir -p analytics/resources/public/OpenStackInfrastructure_ZenPack
+	rm -f ZenPacks/zenoss/$(ZP_NAME)/analytics/analytics-bundle.zip
 	./create-analytics-bundle \
-		--folder="OpenStackInfrastructure ZenPack" \
-		--domain="OpenStackInfrastructure Domain" \
-		--device=ostack
-	cd analytics; zip -r ../ZenPacks/zenoss/OpenStackInfrastructure/analytics/analytics-bundle.zip *
+		--folder="$(ZP_NAME) ZenPack" \
+		--domain="$(ZP_NAME) Domain" \
+		--device="$(device)"
+	cd analytics; zip -r ../ZenPacks/zenoss/$(ZP_NAME)/analytics/analytics-bundle.zip *
 
 
