@@ -49,8 +49,8 @@ osi_volsnapshots.png|Volume Snapshot
 
 * OpenStack (Icehouse or newer)
 * Ceilometer-OpenStack compatible with your version of OpenStack
-* ceilometer_zenoss 1.0.1 for Kilo and Prior (https://github.com/zenoss/ceilometer_zenoss)
-* ceilometer_zenoss 1.0.2 for Liberty
+** ceilometer_zenoss 1.0.1 for Kilo and prior (https://github.com/zenoss/ceilometer_zenoss)
+** ceilometer_zenoss 1.0.2 for Liberty
 ** This Zenoss-specific plugin must be installed on all your Ceilometer nodes (see below)
 ** If not installed and configured properly, Instances and vNICs graphs will be blank, and Zenoss will not detect changes (such as new instances or instance state changes) until a full model is performed.
 * PyYAML needs to be installed in order to use the YAML configuration
@@ -329,6 +329,26 @@ Neutron Agents
 * CPU Utilization (percent)
 * Memory Utilization (bytes)
 * Process Count (processes)
+Cinder Services
+* CPU Utilization (percent)
+* Memory Utilization (bytes)
+* Process Count (processes)
+Volumes
+* Storage Utilization (percent)
+* Operation Throughput (operations/sec)
+* Merge Rate (merged/sec)
+* Sector Throughput (sectors/sec)
+* IO Operations (operations)
+* IO Utilization (percent)
+* Weighted IO Utilization (weighted percent)
+Volume Snapshots
+* Storage Utilization (percent)
+* Operation Throughput (operations/sec)
+* Merge Rate (merged/sec)
+* Sector Throughput (sectors/sec)
+* IO Operations (operations)
+* IO Utilization (percent)
+* Weighted IO Utilization (weighted percent)
 
 ;The following device level metrics are collected:
 
@@ -352,6 +372,15 @@ Networks
 Routers
 * Total (count)
 * Total count per router state
+Volumes
+* Total (count)
+* Total count per volume state
+Volume Snapshots
+* Total (count)
+* Total count per volume snapshot state
+Volume Pool
+* Total (count)
+* Total count per volume pool state
 
 {{note}} All metrics collected by OpenStack Ceilometer may be collected and graphed in
 Zenoss, and all events processed through Ceilometer are exposed via the
@@ -637,21 +666,23 @@ Provides linkage between OpenStackInfrastrcuture components and relevant integra
 
 == Tested OpenStack Releases ==
 
-OpenStack Provider View Version 2.0.0 was tested against Icehouse and Juno.
-OpenStack Provider View Version 2.1.3 was tested against Juno and Kilo.
-OpenStack Provider View Version 2.2.0 was tested against Juno, Kilo, Liberty.
+Version 2.0.0 was tested against Icehouse and Juno; 2.1.3 against Juno and Kilo; 2.2.0 against Juno, Kilo, Liberty.
+
+== Trouble Shooting ==
+=== Nova Hosts ===
+==== Model Device ====
+;ERROR zen.PythonClient: Error in zenoss.cmd.linux.openstack.nova: Connection
+was refused by other side: 111: Connection refused.
+In the upper left corner immediately under device name and device class, there
+should be an IP address. Modeling would fail if there is no IP address listed.
+The absence of IP address is likely a DNS issue.
 
 == Known Issues ==
 
 # [https://jira.zenoss.com/browse/ZEN-14585 ZEN-14585]: The same endpoint can not be monitored both as user and an infrastructure endpoints.
 ## Workaround: If you have been previously monitoring the endpoint as a User endpoint, delete the device before you re-add it as an Infrastructure endpoint.
-# [https://jira.zenoss.com/browse/ZEN-14491 ZEN-14491]: A stack-trace may occur during the initial modeling of the device
-## The trace will contain the error "ValueError: expected txn status 'Active' or 'Doomed', but it's 'Committed'"
-## Workaround: Disregard the error.  You may also manually model the device to confirm that no further errors are reported.
 # [https://jira.zenoss.com/browse/ZEN-17905 ZEN-17905]: Nova APIs component: Grey icons for Enabled and State after model/monitor.
 ## OpenStack nova service API does not provide information about Nova-API, so its status is, in fact, unknown.
-# [https://jira.zenoss.com/browse/ZEN-19286]: If an OpenStackInfrastructure host device is created on or moved to the /Server/SSH/Linux/NovaHost class and the device name is different from the host FQDN, then the linkage between OpenStackInfrastructure device and the OpenStackInfrastructure host may not be constructed correctly.
-## Workaround: Do not create the /Server/SSH/Linux/NovaHost device separately. Just create OpenStackInfrastructure device, and it will automatically create the OpenStackInfrastructure host devices under the /Server/SSH/Linux/NovaHost class.
 
 == Changes ==
 
