@@ -955,6 +955,18 @@ classes: !ZenPackSpec
         label: Status
         label_width: 50
         order: 3.5
+      powerState:
+        label: Power State
+        label_width: 50
+        order: 3.6
+      taskState:
+        label: Task State
+        label_width: 50
+        order: 3.7
+      vmState:
+        label: VM State
+        label_width: 50
+        order: 3.8
     relationships:
       flavor:
         label_width: 35
