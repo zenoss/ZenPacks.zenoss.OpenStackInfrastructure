@@ -6,6 +6,8 @@ echo "RabbitMQ Configuration"
 echo "--------------------"
 echo "If using Europa, you *MUST* use this command in a rabbitmq container"
 
+source /home/zenoss/zenoss_env
+
 AMQP_USERID="openstack"
 AMQP_PASSWORD="[previously configured password]"
 AMQP_HOSTNAME=`zenglobalconf -p amqphost`
