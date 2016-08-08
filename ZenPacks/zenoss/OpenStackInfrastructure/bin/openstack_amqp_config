@@ -77,3 +77,12 @@ echo "     It must be an accessible interface from your OpenStack system,"
 echo "     and that interface must be one that accepts AMQP connections for "
 echo "     your Zenoss installation."
 
+# Export all the credentials to a separate file at /home/zenoss
+touch /home/zenoss/openstack_amqp
+echo "export ZENOSS_DEVICE=OpenStack" >> /home/zenoss/openstack_amqp
+echo "export AMQP_USERID=$AMQP_USERID" >> /home/zenoss/openstack_amqp
+echo "export AMQP_PASSWORD=$AMQP_PASSWORD" >> /home/zenoss/openstack_amqp
+echo "export AMQP_PORT=$AMQP_PORT" >> /home/zenoss/openstack_amqp
+echo "export AMQP_VIRTUAL_HOST=$AMQP_VIRTUAL_HOST" >> /home/zenoss/openstack_amqp
+echo "export AMQP_HOSTNAME=$DEFAULT_IP" >> /home/zenoss/openstack_amqp
+
