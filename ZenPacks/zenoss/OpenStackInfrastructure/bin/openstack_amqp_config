@@ -1,10 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 
 echo $0
 
 echo "RabbitMQ Configuration"
 echo "--------------------"
 echo "If using Europa, you *MUST* use this command in a rabbitmq container"
+
+source /home/zenoss/zenoss_env
 
 AMQP_USERID="openstack"
 AMQP_PASSWORD="[previously configured password]"
@@ -43,7 +45,7 @@ CURRENTDIR="$(dirname "$(which "$0")")"
 PARENTDIR=$(dirname $CURRENTDIR)
 
 # Create any required exchanges
-$PARENTDIR/openstack_amqp_init.py
+#$PARENTDIR/openstack_amqp_init.py
 
 echo ""
 echo "OpenStack Configuration"
@@ -76,4 +78,13 @@ echo "     appropriate entry for your amqp_hostname in ceilometer.conf."
 echo "     It must be an accessible interface from your OpenStack system,"
 echo "     and that interface must be one that accepts AMQP connections for "
 echo "     your Zenoss installation."
+
+# Export all the credentials to a separate file at /home/zenoss
+touch /home/zenoss/openstack_amqp
+echo "export ZENOSS_DEVICE=OpenStack" >> /home/zenoss/openstack_amqp
+echo "export AMQP_USERID=$AMQP_USERID" >> /home/zenoss/openstack_amqp
+echo "export AMQP_PASSWORD=$AMQP_PASSWORD" >> /home/zenoss/openstack_amqp
+echo "export AMQP_PORT=$AMQP_PORT" >> /home/zenoss/openstack_amqp
+echo "export AMQP_VIRTUAL_HOST=$AMQP_VIRTUAL_HOST" >> /home/zenoss/openstack_amqp
+echo "export AMQP_HOSTNAME=$DEFAULT_IP" >> /home/zenoss/openstack_amqp
 
