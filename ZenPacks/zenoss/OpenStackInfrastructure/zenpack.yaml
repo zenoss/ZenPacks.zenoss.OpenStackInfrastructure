@@ -902,8 +902,7 @@ classes: !ZenPackSpec
       # link to the guest instance, if known
         label: Guest
         type: entity
-        content_width: 155
-        order: 3.1
+        grid_display: false
         api_only: true
         api_backendtype: method
       host:
@@ -961,8 +960,7 @@ classes: !ZenPackSpec
         order: 3.6
       taskState:
         label: Task State
-        label_width: 50
-        order: 3.7
+        grid_display: false
       vmState:
         label: VM State
         label_width: 50
