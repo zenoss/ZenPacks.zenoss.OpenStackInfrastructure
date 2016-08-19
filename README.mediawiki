@@ -48,9 +48,9 @@ osi_volsnapshots.png|Volume Snapshot
 == Prerequisites ==
 
 * OpenStack (Icehouse or newer)
-* Ceilometer-OpenStack compatible with your version of OpenStack
-** ceilometer_zenoss 1.0.1 for Kilo and prior (https://github.com/zenoss/ceilometer_zenoss)
-** ceilometer_zenoss 1.0.2 for Liberty
+* ceilometer_zenoss compatible with your version of OpenStack
+** ceilometer_zenoss 1.0.1 for Kilo and prior versions (https://github.com/zenoss/ceilometer_zenoss)
+** ceilometer_zenoss 1.1.0 for Liberty and newer versions
 ** This Zenoss-specific plugin must be installed on all your Ceilometer nodes (see below)
 ** If not installed and configured properly, Instances and vNICs graphs will be blank, and Zenoss will not detect changes (such as new instances or instance state changes) until a full model is performed.
 * PyYAML needs to be installed in order to use the YAML configuration
@@ -59,7 +59,7 @@ osi_volsnapshots.png|Volume Snapshot
 ** You will have to add this Python package to your Zenoss installation otherwise
 ** Update to the latest RPS or "easy_install pyyaml" manually if required.
 * SSH credentials to the Linux devices in your OpenStack environment
-** Configure the zCommandUsername/zCommandPassword properties on the /Devices/Server/SSH/Linux/NovaHost device class.
+** Configure the zCommandUsername/zCommandPassword/zKeyPath properties on the /Devices/Server/SSH/Linux/NovaHost device class.
 ** If your Linux devices are already managed under Zenoss, move them into /Devices/Server/SSH/Linux/NovaHost
 * Administrative credentials for your OpenStack environment
 ** Username, password, keystone URL, Region
@@ -452,7 +452,8 @@ to Zenoss's RabbitMQ server.
 This dispatcher should be installed on all nodes running any ceilometer, but
 particularly those running ceilometer-collector or ceilometer-agent-notification.
 
-To install ceilometer_zenoss 1.0.1, perform the following steps on each of these OpenStack nodes (NOT
+To install ceilometer_zenoss 1.0.1 for Kilo and prior versions of OpenStack,
+perform the following steps on each of these OpenStack nodes (NOT
 on the Zenoss collector):
 
 <syntaxhighlight lang="bash">
@@ -460,18 +461,10 @@ on the Zenoss collector):
   sudo cp /usr/lib/*/site-packages/ceilometer_zenoss/event_definitions.yaml /etc/ceilometer/
 </syntaxhighlight>
 
-For ceilometer_zenoss 1.0.2, first git clone the ceilometer_zenoss repository from
-https://github.com/zenoss/ceilometer_zenoss to a Linux server, either Ubuntu 14.04+,
-or CentOS 6.5+. Install docker or docker-engine on the Linux server.
-Next navigate to the top directory of ceilometer_zenoss,
-<syntaxhighlight lang="bash">
-  $ make -C jenkins images
-  $ make -f jenkins/Makefile rpms
-</syntaxhighlight>
- 
-This generates RPM files for RHEL6, RHEL7, CentOS 6 and CentOS 7.
-Before installing RPMs on OpenStack ceilometer hosts, make sure older versions of 
-cepilometer_zenoss has been erased. One can check this using:
+To install the stable versions of 1.1.0 for Liberty and newer versions of OpenStack,
+from Zenoss RPM repository download an appropriate rpm file to the OpenStack node that fits the host's OS version.
+Before installing RPMs, make sure the older version of cepilometer_zenoss has been erased.
+One can check this using:
 <syntaxhighlight lang="bash">
   $ pip list | grep ceilometer_zenoss
 </syntaxhighlight>
@@ -480,7 +473,12 @@ or:
   $ rpm -qa | grep ceilometer_zenoss
 </syntaxhighlight>
 
-To install ceilometer_zenoss rpm on an OpenStack ceilometer host,
+To erase the old version of installed RPM:
+<syntaxhighlight lang="bash">
+  $ rpm -e <installed RPM>
+</syntaxhighlight>
+
+Next install the stable versions of 1.1.0 RPM:
 <syntaxhighlight lang="bash">
   $ rpm -Uvh <ceilometer_zenoss rpm>
 </syntaxhighlight>
@@ -488,10 +486,6 @@ To install ceilometer_zenoss rpm on an OpenStack ceilometer host,
 The following configuration must be added to /etc/ceilometer/ceilometer.conf file:
 
 <syntaxhighlight lang="text">
-  [DEFAULT]
-  # Dispatcher to process data.
-  dispatcher=zenoss
-
   [notification]
   # Save event details.
   store_events=True
@@ -512,6 +506,17 @@ The following configuration must be added to /etc/ceilometer/ceilometer.conf fil
   # It must be an accessible interface from your OpenStack system,
   # and that interface must be one that accepts AMQP connections for your Zenoss installation.
   amqp_hostname = ...
+</syntaxhighlight>
+
+For Liberty and prior versions, in the [DEFAULT] section, add the line:
+<syntaxhighlight lang="text">
+  dispatcher = zenoss
+</syntaxhighlight>
+
+For Mitaka and newer versions, in the [DEFAULT] section, add the lines:
+<syntaxhighlight lang="text">
+  meter_dispatchers = zenoss
+  event_dispatchers = zenoss
 </syntaxhighlight>
 
 ;The order of the sections is important, the [dispatcher_zenoss] section needs to be added at the end of ceilometer.conf file.
@@ -666,7 +671,7 @@ Provides linkage between OpenStackInfrastrcuture components and relevant integra
 
 == Tested OpenStack Releases ==
 
-Version 2.0.0 was tested against Icehouse and Juno; 2.1.3 against Juno and Kilo; 2.2.0 against Juno, Kilo, Liberty.
+Version 2.0.0 was tested against Icehouse and Juno; 2.1.3 against Juno and Kilo; 2.2.0 against Juno, Kilo, Liberty, Mitaka.
 
 == Trouble Shooting ==
 === Nova Hosts ===
