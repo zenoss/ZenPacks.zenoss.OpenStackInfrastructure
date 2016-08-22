@@ -4,7 +4,7 @@ echo $0
 
 echo "RabbitMQ Configuration"
 echo "--------------------"
-echo "If using Europa, you *MUST* use this command in a rabbitmq container"
+echo "If using Zenoss 5.x.x, you *MUST* use this command in the rabbitmq container as the zenoss user"
 
 AMQP_USERID="openstack"
 AMQP_PASSWORD="[previously configured password]"
@@ -13,7 +13,7 @@ AMQP_PORT=`zenglobalconf -p amqpport`
 AMQP_VIRTUAL_HOST=`zenglobalconf -p amqpvhost`
 DEFAULT_IP=$(ip route get 8.8.8.8 | head -1 | cut -d' ' -f8)
 
-# If in Europa, get first IP from CONTROLPLANE_HOST_IPS, otherwise default
+# If in 5.x.x, get first IP from CONTROLPLANE_HOST_IPS, otherwise default
 if [ -z "$CONTROLPLANE_HOST_IPS" ]; then
    AMQP_HOSTNAME=$(zenglobalconf -p amqphost)
 else
@@ -49,10 +49,18 @@ echo ""
 echo "OpenStack Configuration"
 echo "-----------------------"
 echo "Add the following configuration to ceilometer.conf on all openstack nodes:"
+echo "For Liberty and prior versions, "
 echo ""
 echo "    [DEFAULT]"
 echo "    dispatcher=zenoss"
 echo "" 
+echo "For Mitaka and newer versions, "
+echo ""
+echo "    [DEFAULT]"
+echo "    meter_dispatchers = zenoss"
+echo "    event_dispatchers = zenoss"
+echo ""
+echo "For all versions, "
 echo "    [notification]"
 echo "    store_events=True"
 echo ""
@@ -71,7 +79,7 @@ echo " Note: Setting a Correct amqp_hostname in OpenStack Ceilometer"
 echo " ----------------------------------------------------------------"
 echo " * Your current Zenoss amqp_hostname is set to '$AMQP_HOSTNAME'."
 echo ""
-echo "  => If this differs from your default interface, $DEFAULT_IP, must find the"
+echo "  => If this differs from your default interface, $DEFAULT_IP, you must find the"
 echo "     appropriate entry for your amqp_hostname in ceilometer.conf."
 echo "     It must be an accessible interface from your OpenStack system,"
 echo "     and that interface must be one that accepts AMQP connections for "
