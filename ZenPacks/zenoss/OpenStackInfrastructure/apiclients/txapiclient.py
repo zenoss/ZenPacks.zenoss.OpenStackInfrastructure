@@ -77,7 +77,7 @@ class APIClient(object):
 
     @property
     def keystone_endpoints(self):
-        if '/v2' in self.auth_url and self.is_admin is not None:
+        if '/v2' in self.auth_url and self.is_admin:
             self._admin_only()
         self.user_agent = 'zenoss-keystoneclient'
         return self._apis.setdefault('keystone_endpoints', API(self, '/endpoints'))
@@ -89,21 +89,21 @@ class APIClient(object):
 
     @property
     def keystone_users(self):
-        if '/v2' in self.auth_url and self.is_admin is not None:
+        if '/v2' in self.auth_url and self.is_admin:
             self._admin_only()
         self.user_agent = 'zenoss-keystoneclient'
         return self._apis.setdefault('keystone_users', API(self, '/users'))
 
     @property
     def keystone_roles(self):
-        if '/v2' in self.auth_url and self.is_admin is not None:
+        if '/v2' in self.auth_url and self.is_admin:
             self._admin_only()
         self.user_agent = 'zenoss-keystoneclient'
         return self._apis.setdefault('keystone_roles', API(self, '/OS-KSADM/roles'))
 
     @property
     def keystone_services(self):
-        if '/v2' in self.auth_url and self.is_admin is not None:
+        if '/v2' in self.auth_url and self.is_admin:
             self._admin_only()
         self.user_agent = 'zenoss-keystoneclient'
         return self._apis.setdefault('keystone_services', API(self, '/OS-KSADM/services'))
