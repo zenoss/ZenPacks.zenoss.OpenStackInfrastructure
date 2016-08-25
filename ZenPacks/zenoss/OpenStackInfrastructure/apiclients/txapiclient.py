@@ -62,7 +62,7 @@ class APIClient(object):
         self.auth_url = auth_url
         self.project_id = project_id
 
-        self.is_admin = None
+        self.is_admin = False
         self.user_agent = None
         self._token = None
         self._apis = {}
