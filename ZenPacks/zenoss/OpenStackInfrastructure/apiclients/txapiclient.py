@@ -77,7 +77,7 @@ class APIClient(object):
 
     @property
     def keystone_endpoints(self):
-        if '/v2' in self.auth_url and self.is_admin:
+        if '/v2' in self.auth_url:
             self._admin_only()
         self.user_agent = 'zenoss-keystoneclient'
         return self._apis.setdefault('keystone_endpoints', API(self, '/endpoints'))
@@ -89,21 +89,21 @@ class APIClient(object):
 
     @property
     def keystone_users(self):
-        if '/v2' in self.auth_url and self.is_admin:
+        if '/v2' in self.auth_url:
             self._admin_only()
         self.user_agent = 'zenoss-keystoneclient'
         return self._apis.setdefault('keystone_users', API(self, '/users'))
 
     @property
     def keystone_roles(self):
-        if '/v2' in self.auth_url and self.is_admin:
+        if '/v2' in self.auth_url:
             self._admin_only()
         self.user_agent = 'zenoss-keystoneclient'
         return self._apis.setdefault('keystone_roles', API(self, '/OS-KSADM/roles'))
 
     @property
     def keystone_services(self):
-        if '/v2' in self.auth_url and self.is_admin:
+        if '/v2' in self.auth_url:
             self._admin_only()
         self.user_agent = 'zenoss-keystoneclient'
         return self._apis.setdefault('keystone_services', API(self, '/OS-KSADM/services'))
@@ -116,7 +116,7 @@ class APIClient(object):
 
     def _admin_only(self, api_method='GET'):
         # for Keystone only
-        if self.is_admin is False:
+        if not self.is_admin:
             raise UnauthorizedError("'%s' is only available in the Identity admin API v2.0" % api_method)
 
     @property
@@ -581,8 +581,8 @@ class NotFoundError(APIClientError):
 def main():
     import pprint
 
-    #client = APIClient('demo', 'password', 'http://10.87.209.216:5000/v2.0', 'demo')
-    client = APIClient('admin', 'password', 'http://10.87.209.216:35357/v2.0', 'admin')
+    client = APIClient('demo', 'password', 'http://10.87.209.216:35357/v2.0', 'demo')
+    #client = APIClient('admin', 'password', 'http://10.87.209.216:35357/v2.0', 'admin')
 
     # Keystone
     tenants = {}
