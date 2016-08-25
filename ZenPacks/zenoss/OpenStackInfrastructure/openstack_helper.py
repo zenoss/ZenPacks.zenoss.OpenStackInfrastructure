@@ -35,9 +35,7 @@ class OpenstackHelper(object):
             password=api_key,
             project_id=project_id,
             auth_url=auth_url,
-            is_admin=True
         )
-        yield client.keystone_tenants()
         serviceCatalog = yield client.serviceCatalog()
 
         ep = []

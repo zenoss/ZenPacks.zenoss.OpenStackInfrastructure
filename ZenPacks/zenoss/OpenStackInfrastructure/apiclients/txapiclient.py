@@ -55,14 +55,14 @@ class APIClient(object):
 
     """Twisted asynchronous API client."""
 
-    def __init__(self, username, password, auth_url, project_id, is_admin=False):
+    def __init__(self, username, password, auth_url, project_id):
         """Create Keystone API client."""
         self.username = username
         self.password = password
         self.auth_url = auth_url
         self.project_id = project_id
-        self.is_admin = is_admin
 
+        self.is_admin = None
         self.user_agent = None
         self._token = None
         self._apis = {}
@@ -77,38 +77,42 @@ class APIClient(object):
 
     @property
     def keystone_endpoints(self):
-        if '/v2' in self.auth_url:
+        if '/v2' in self.auth_url and self.is_admin is not None:
             self._admin_only()
         self.user_agent = 'zenoss-keystoneclient'
         return self._apis.setdefault('keystone_endpoints', API(self, '/endpoints'))
 
     @property
     def keystone_tenants(self):
-        if '/v2' in self.auth_url:
-            self._admin_only()
         self.user_agent = 'zenoss-keystoneclient'
         return self._apis.setdefault('keystone_tenants', API(self, '/tenants'))
 
     @property
     def keystone_users(self):
-        if '/v2' in self.auth_url:
+        if '/v2' in self.auth_url and self.is_admin is not None:
             self._admin_only()
         self.user_agent = 'zenoss-keystoneclient'
         return self._apis.setdefault('keystone_users', API(self, '/users'))
 
     @property
     def keystone_roles(self):
-        if '/v2' in self.auth_url:
+        if '/v2' in self.auth_url and self.is_admin is not None:
             self._admin_only()
         self.user_agent = 'zenoss-keystoneclient'
         return self._apis.setdefault('keystone_roles', API(self, '/OS-KSADM/roles'))
 
     @property
     def keystone_services(self):
-        if '/v2' in self.auth_url:
+        if '/v2' in self.auth_url and self.is_admin is not None:
             self._admin_only()
         self.user_agent = 'zenoss-keystoneclient'
         return self._apis.setdefault('keystone_services', API(self, '/OS-KSADM/services'))
+
+    @property
+    def keystone_version(self):
+        # a very cheap keystone API call
+        self.user_agent = 'zenoss-keystoneclient'
+        return self._apis.setdefault('keystone_services', API(self, '/'))
 
     def _admin_only(self, api_method='GET'):
         # for Keystone only
@@ -303,6 +307,14 @@ class APIClient(object):
             if sc['type'] == 'identity' and sc['name'] == 'keystone':
                 self._keystone_url = sc['endpoints'][0]['adminURL'].encode(
                     'ascii', 'ignore')
+                # test adminURL. Use publicURL if it does not work
+                try:
+                    _ = yield self.keystone_version()
+                    self.is_admin = True
+                except Exception as ex:
+                    self._keystone_url = sc['endpoints'][0]['publicURL'
+                        ].encode('ascii', 'ignore')
+                    self.is_admin = False
             elif sc['type'] == 'compute' and sc['name'] == 'nova':
                 self._nova_url = sc['endpoints'][0]['publicURL'].encode(
                     'ascii', 'ignore')
@@ -569,25 +581,53 @@ class NotFoundError(APIClientError):
 def main():
     import pprint
 
-    client = APIClient('admin', 'zenoss', 'http://10.87.209.30:5000/v2.0', 'admin', True)
-#    client = APIClient('admin', 'password', 'http://192.168.56.122:5000/v2.0', 'admin', True)
+    #client = APIClient('demo', 'password', 'http://10.87.209.216:5000/v2.0', 'demo')
+    client = APIClient('admin', 'password', 'http://10.87.209.216:35357/v2.0', 'admin')
 
     # Keystone
     tenants = {}
     try:
+        version = yield client.keystone_version()
+    except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
+        pprint.pprint(e.message)
+    else:
+        pprint.pprint(version)
+    try:
         endpoints = yield client.keystone_endpoints()
-        tenants = yield client.keystone_tenants()
-        users = yield client.keystone_users()
-        roles = yield client.keystone_roles()
-        services = yield client.keystone_services()
     except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
         pprint.pprint(e.message)
     else:
         pprint.pprint(endpoints)
+    try:
+        tenants = yield client.keystone_tenants()
+    except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
+        pprint.pprint(e.message)
+    else:
         pprint.pprint(tenants)
+    try:
+        users = yield client.keystone_users()
+    except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
+        pprint.pprint(e.message)
+    else:
         pprint.pprint(users)
+    try:
+        roles = yield client.keystone_roles()
+    except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
+        pprint.pprint(e.message)
+    else:
         pprint.pprint(roles)
+    try:
+        services = yield client.keystone_services()
+    except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
+        pprint.pprint(e.message)
+    else:
         pprint.pprint(services)
+    try:
+        serviceCatalog = yield client.serviceCatalog()
+    except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
+        pprint.pprint(e.message)
+    else:
+        pprint.pprint(serviceCatalog)
 
     # Nova
     try:
@@ -682,100 +722,6 @@ def main():
         pprint.pprint(novaservices)
         pprint.pprint(servers)
 
-    # Neutron
-    try:
-        neutronagents = yield client.neutron_agents()
-        floatingips = yield client.neutron_floatingips()
-        networks = yield client.neutron_networks()
-        ports = yield client.neutron_ports()
-        routers = yield client.neutron_routers()
-        security_groups = yield client.neutron_security_groups()
-        subnets = yield client.neutron_subnets()
-    except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
-        pprint.pprint(e.message)
-    else:
-        pprint.pprint(neutronagents)
-        pprint.pprint(floatingips)
-        pprint.pprint(networks)
-        pprint.pprint(ports)
-        pprint.pprint(routers)
-        pprint.pprint(security_groups)
-        pprint.pprint(subnets)
-
-    # Cinder
-    try:
-        volumes = yield client.cinder_volumes()
-        volumetypes = yield client.cinder_volumetypes()
-        volumebackups = yield client.cinder_volumebackups()
-        volumesnapshots = yield client.cinder_volumesnapshots()
-        cinderservices = yield client.cinder_services(detailed=True)
-        cinderpools = yield client.cinder_pools(detailed=True)
-    except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
-        pprint.pprint(e.message)
-    else:
-        pprint.pprint(volumes)
-        pprint.pprint(volumetypes)
-        pprint.pprint(volumebackups)
-        pprint.pprint(volumesnapshots)
-        pprint.pprint(cinderservices)
-        pprint.pprint(cinderpools)
-
-    if tenants and 'tenants' in tenants:
-        for tenant in tenants['tenants']:
-            try:
-                quotas = yield client.cinder_quotas(tenant=tenant['id'].encode('ascii', 'ignore'), usage=False)
-            except (BadRequestError, UnauthorizedError, NotFoundError) as e:
-                pprint.pprint(e.message)
-            else:
-                pprint.pprint(quotas)
-
-    # Neutron
-    try:
-        neutronagents = yield client.neutron_agents()
-        floatingips = yield client.neutron_floatingips()
-        networks = yield client.neutron_networks()
-        ports = yield client.neutron_ports()
-        routers = yield client.neutron_routers()
-        security_groups = yield client.neutron_security_groups()
-        subnets = yield client.neutron_subnets()
-    except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
-        pprint.pprint(e.message)
-    else:
-        pprint.pprint(neutronagents)
-        pprint.pprint(floatingips)
-        pprint.pprint(networks)
-        pprint.pprint(ports)
-        pprint.pprint(routers)
-        pprint.pprint(security_groups)
-        pprint.pprint(subnets)
-
-    # Cinder
-    try:
-        volumes = yield client.cinder_volumes()
-        volumetypes = yield client.cinder_volumetypes()
-        volumebackups = yield client.cinder_volumebackups()
-        volumesnapshots = yield client.cinder_volumesnapshots()
-        cinderservices = yield client.cinder_services(detailed=True)
-        cinderpools = yield client.cinder_pools(detailed=True)
-    except (BadRequestError, UnauthorizedError, NotFoundError, APIClientError) as e:
-        pprint.pprint(e.message)
-    else:
-        pprint.pprint(volumes)
-        pprint.pprint(volumetypes)
-        pprint.pprint(volumebackups)
-        pprint.pprint(volumesnapshots)
-        pprint.pprint(cinderservices)
-        pprint.pprint(cinderpools)
-
-    if tenants and 'tenants' in tenants:
-        for tenant in tenants['tenants']:
-            try:
-                quotas = yield client.cinder_quotas(tenant=tenant['id'].encode('ascii', 'ignore'), usage=False)
-            except (BadRequestError, UnauthorizedError, NotFoundError) as e:
-                pprint.pprint(e.message)
-            else:
-                pprint.pprint(quotas)
-
     # Ceilometer
     try:
         resources = yield client.ceilometer_resources()
@@ -786,7 +732,8 @@ def main():
             print 'meter: %s, stats: %s\n\n' % (meter['name'], str(stats))
 
             # use with care!
-            #Ceilometer samples could spill out an enormous amount of data!
+            # Ceilometer samples could spill out an enormous amount of data!
+            # time consuming as well!
             # samples = yield client.ceilometer_samples(queries=[query])
             # print 'meter: %s, samples: %s\n\n' % (meter['name'], str(samples))
 

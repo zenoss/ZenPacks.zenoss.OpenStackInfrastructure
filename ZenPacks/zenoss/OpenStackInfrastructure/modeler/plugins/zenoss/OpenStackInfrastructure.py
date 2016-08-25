@@ -91,7 +91,7 @@ class OpenStackInfrastructure(PythonPlugin):
             device.zCommandPassword,
             device.zOpenStackAuthUrl,
             device.zOpenStackProjectId,
-            is_admin=True)
+        )
 
         results = {}
 

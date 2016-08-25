@@ -195,7 +195,6 @@ class PerfCeilometerAPIDataSourcePlugin(PythonDataSourcePlugin):
             password=ds0.zCommandPassword,
             auth_url=ds0.zOpenStackAuthUrl,
             project_id=ds0.zOpenStackProjectId,
-            is_admin=True,
         )
 
         results = []
