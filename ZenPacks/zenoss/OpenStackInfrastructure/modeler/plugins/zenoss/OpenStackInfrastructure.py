@@ -91,7 +91,7 @@ class OpenStackInfrastructure(PythonPlugin):
             device.zCommandPassword,
             device.zOpenStackAuthUrl,
             device.zOpenStackProjectId,
-            is_admin=True)
+        )
 
         results = {}
 
@@ -115,43 +115,79 @@ class OpenStackInfrastructure(PythonPlugin):
         except Exception, e:
             log.error(self._keystonev2errmsg, e)
 
-        results['nova_url'] = yield client.nova_url()
+        try:
+            results['nova_url'] = yield client.nova_url()
+        except APIClientError, e:
+            results['nova_url'] = []
+            log.error(e.message)
 
-        result = yield client.nova_flavors(is_public=True)
-        results['flavors'] = result.get('flavors', [])
-        result = yield client.nova_flavors(is_public=False)
-        for flavor in result.get('flavors', []):
-            if flavor not in results['flavors']:
-                results['flavors'].append(flavor)
+        try:
+            result = yield client.nova_flavors(is_public=True)
+            results['flavors'] = result.get('flavors', [])
+        except APIClientError, e:
+            results['flavors'] = []
+            log.error(e.message)
+        try:
+            result = yield client.nova_flavors(is_public=False)
+            for flavor in result.get('flavors', []):
+                if flavor not in results['flavors']:
+                    results['flavors'].append(flavor)
+        except APIClientError, e:
+            log.error(e.message)
         log.debug('flavors: %s\n' % str(results['flavors']))
 
-        result = yield client.nova_images()
-        results['images'] = result.get('images', [])
+        try:
+            result = yield client.nova_images()
+            results['images'] = result.get('images', [])
+        except APIClientError, e:
+            results['images'] = []
+            log.error(e.message)
         log.debug('images: %s\n' % str(results['images']))
 
-        result = yield client.nova_hypervisors(hypervisor_match='%',
-                                               servers=True)
-        results['hypervisors'] = result.get('hypervisors', [])
+        try:
+            result = yield client.nova_hypervisors(hypervisor_match='%',
+                                                   servers=True)
+            results['hypervisors'] = result.get('hypervisors', [])
+        except APIClientError, e:
+            results['hypervisors'] = []
+            log.error(e.message)
         log.debug('hypervisors: %s\n' % str(results['hypervisors']))
 
-        result = yield client.nova_hypervisorsdetailed()
-        results['hypervisors_detailed'] = result.get('hypervisors', [])
+        try:
+            result = yield client.nova_hypervisorsdetailed()
+            results['hypervisors_detailed'] = result.get('hypervisors', [])
+        except APIClientError, e:
+            results['hypervisors_detailed'] = []
+            log.error(e.message)
         log.debug('hypervisors_detailed: %s\n' % str(results['hypervisors']))
 
         # get hypervisor details for each individual hypervisor
         results['hypervisor_details'] = {}
         for hypervisor in results['hypervisors']:
-            result = yield client.nova_hypervisors(
-                hypervisor_id=hypervisor['id'])
             hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
-            results['hypervisor_details'][hypervisor_id] = result.get('hypervisor', [])
+            try:
+                result = yield client.nova_hypervisors(
+                    hypervisor_id=hypervisor['id'])
+                results['hypervisor_details'][hypervisor_id] = \
+                    result.get('hypervisor', [])
+            except APIClientError, e:
+                results['hypervisor_details'][hypervisor_id] = []
+                log.error(e.message)
 
-        result = yield client.nova_servers()
-        results['servers'] = result.get('servers', [])
+        try:
+            result = yield client.nova_servers()
+            results['servers'] = result.get('servers', [])
+        except APIClientError, e:
+            results['servers'] = []
+            log.error(e.message)
         log.debug('servers: %s\n' % str(results['servers']))
 
-        result = yield client.nova_services()
-        results['services'] = result.get('services', [])
+        try:
+            result = yield client.nova_services()
+            results['services'] = result.get('services', [])
+        except APIClientError, e:
+            results['services'] = []
+            log.error(e.message)
         log.debug('services: %s\n' % str(results['services']))
 
         # Neutron
@@ -223,35 +259,75 @@ class OpenStackInfrastructure(PythonPlugin):
                 _agent['dhcp_agent_subnets'] = _subnets
                 _agent['dhcp_agent_networks'] = _networks
 
-        result = yield client.neutron_networks()
-        results['networks'] = result.get('networks', [])
+        try:
+            result = yield client.neutron_networks()
+            results['networks'] = result.get('networks', [])
+        except APIClientError, e:
+            results['networks'] = []
+            log.error(e.message)
 
-        result = yield client.neutron_subnets()
-        results['subnets'] = result.get('subnets', [])
+        try:
+            result = yield client.neutron_subnets()
+            results['subnets'] = result.get('subnets', [])
+        except APIClientError, e:
+            results['subnets'] = []
+            log.error(e.message)
 
-        result = yield client.neutron_routers()
-        results['routers'] = result.get('routers', [])
+        try:
+            result = yield client.neutron_routers()
+            results['routers'] = result.get('routers', [])
+        except APIClientError, e:
+            results['routers'] = []
+            log.error(e.message)
 
-        result = yield client.neutron_ports()
-        results['ports'] = result.get('ports', [])
+        try:
+            result = yield client.neutron_ports()
+            results['ports'] = result.get('ports', [])
+        except APIClientError, e:
+            results['ports'] = []
+            log.error(e.message)
 
-        result = yield client.neutron_floatingips()
-        results['floatingips'] = result.get('floatingips', [])
+        try:
+            result = yield client.neutron_floatingips()
+            results['floatingips'] = result.get('floatingips', [])
+        except APIClientError, e:
+            results['floatingips'] = []
+            log.error(e.message)
 
         # Cinder
-        results['cinder_url'] = yield client.cinder_url()
+        try:
+            results['cinder_url'] = yield client.cinder_url()
+        except APIClientError, e:
+            results['cinder_url'] = []
+            log.error(e.message)
 
-        result = yield client.cinder_volumes()
-        results['volumes'] = result.get('volumes', [])
+        try:
+            result = yield client.cinder_volumes()
+            results['volumes'] = result.get('volumes', [])
+        except APIClientError, e:
+            results['volumes'] = []
+            log.error(e.message)
 
-        result = yield client.cinder_volumetypes()
-        results['volumetypes'] = result.get('volume_types', [])
+        try:
+            result = yield client.cinder_volumetypes()
+            results['volumetypes'] = result.get('volume_types', [])
+        except APIClientError, e:
+            results['volumetypes'] = []
+            log.error(e.message)
 
-        result = yield client.cinder_volumesnapshots()
-        results['volsnapshots'] = result.get('snapshots', [])
+        try:
+            result = yield client.cinder_volumesnapshots()
+            results['volsnapshots'] = result.get('snapshots', [])
+        except APIClientError, e:
+            results['volsnapshots'] = []
+            log.error(e.message)
 
-        result = yield client.cinder_services()
-        results['cinder_services'] = result.get('services', [])
+        try:
+            result = yield client.cinder_services()
+            results['cinder_services'] = result.get('services', [])
+        except APIClientError, e:
+            results['cinder_services'] = []
+            log.error(e.message)
 
         # result = yield client.cinder_pools()
         # results['volume_pools'] = result.get('pools', [])
