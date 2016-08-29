@@ -308,6 +308,7 @@ class APIClient(object):
                 self._keystone_url = sc['endpoints'][0]['adminURL'].encode(
                     'ascii', 'ignore')
                 # test adminURL. Use publicURL if it does not work
+                user_agent = self.user_agent
                 try:
                     _ = yield self.keystone_version()
                     self.is_admin = True
@@ -315,6 +316,9 @@ class APIClient(object):
                     self._keystone_url = sc['endpoints'][0]['publicURL'
                         ].encode('ascii', 'ignore')
                     self.is_admin = False
+                finally:
+                    self.user_agent = user_agent
+
             elif sc['type'] == 'compute' and sc['name'] == 'nova':
                 self._nova_url = sc['endpoints'][0]['publicURL'].encode(
                     'ascii', 'ignore')
