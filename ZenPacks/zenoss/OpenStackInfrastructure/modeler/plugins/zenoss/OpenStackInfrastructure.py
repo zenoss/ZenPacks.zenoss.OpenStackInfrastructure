@@ -298,20 +298,6 @@ class OpenStackInfrastructure(PythonPlugin):
         hostmap = HostMap()
         self.hostmap = hostmap
 
-        for mapping in device.zOpenStackHostMapToId:
-            try:
-                hostref, hostid = mapping.split("=")
-                hostmap.assert_host_id(hostref, hostid)
-            except Exception:
-                log.error("Invalid value in zOpenStackHostMapToId: %s", mapping)
-
-        for mapping in device.zOpenStackHostMapSame:
-            try:
-                hostref1, hostref2 = mapping.split("=")
-                hostmap.assert_same_as(hostref1, hostref2)
-            except Exception:
-                log.error("Invalid value in zOpenStackHostMapSame: %s", mapping)
-
         # load in previous mappings..
         if callable(device.get_host_mappings):
             # needed when we are passed a real device, rather than a
@@ -343,6 +329,20 @@ class OpenStackInfrastructure(PythonPlugin):
 
         if results['cinder_url_host']:
             hostmap.add_hostref(results['cinder_url_host'], "Cinder API URL")
+
+        for mapping in device.zOpenStackHostMapToId:
+            try:
+                hostref, hostid = mapping.split("=")
+                hostmap.assert_host_id(hostref, hostid)
+            except Exception:
+                log.error("Invalid value in zOpenStackHostMapToId: %s", mapping)
+
+        for mapping in device.zOpenStackHostMapSame:
+            try:
+                hostref1, hostref2 = mapping.split("=")
+                hostmap.assert_same_host(hostref1, hostref2)
+            except Exception:
+                log.error("Invalid value in zOpenStackHostMapSame: %s", mapping)
 
         # generate host IDs
         yield hostmap.perform_mapping()
