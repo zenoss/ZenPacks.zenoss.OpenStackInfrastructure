@@ -316,7 +316,7 @@ class OpenStackPoller(object):
         result = yield client.cinder_pools()
 
         def pool_has_data(pool, key1, key2):
-            if pool.get(key1, {}).get(key2, None) is not None:
+            if pool.get(key1, {}).get(key2, False):
                 return 1
             return 0
 

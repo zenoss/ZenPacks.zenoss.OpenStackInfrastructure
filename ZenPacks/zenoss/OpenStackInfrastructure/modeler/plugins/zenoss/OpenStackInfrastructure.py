@@ -253,9 +253,8 @@ class OpenStackInfrastructure(PythonPlugin):
         result = yield client.cinder_services()
         results['cinder_services'] = result.get('services', [])
 
-        # result = yield client.cinder_pools()
-        # results['volume_pools'] = result.get('pools', [])
-        results['volume_pools'] = []
+        result = yield client.cinder_pools()
+        results['volume_pools'] = result.get('pools', [])
 
         results['quotas'] = {}
         for tenant in results['tenants']:
