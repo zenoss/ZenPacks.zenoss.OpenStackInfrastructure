@@ -707,19 +707,18 @@ The absence of IP address is likely a DNS issue.
 
 ;Hosts are duplicated by Name and IP:
 The '''''zOpenStackHostMapSame''''' exist for mapping equivalent hosts. If you have
-an FQDN and IP that are listed seperately you can make a mapping entry that
-takes the form FQDN=IP:
+an FQDN and IP that are listed separately make a device-level mapping
+entry that takes the form FQDN=IP. For example:
 
   my.example.com=10.100.200.222
 
 Note that you must have DNS functioning for '''my.example.com''' to acquire
-its IP address set correctly.
+its IP address and set its manageIp correctly.
 
 ;Hosts are not identified to a pre-existing Linux ID:
-In this case you already
-have a Linux host identified by an ID name. You should use the
-'''''zOpenStackHostMapToId''''' property to set any equivalent hosts to this ID
-value. For example:
+In this case there is already a Linux host identified by an ID name. Use 
+'''''zOpenStackHostMapToId''''' to make a device-level equivalent hosts mapping
+to this ID value. For example:
 
   my.example.com=myID
   10.100.200.222=myID
