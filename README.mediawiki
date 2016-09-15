@@ -698,11 +698,31 @@ Version 2.0.0 was tested against Icehouse and Juno; 2.1.3 against Juno and Kilo;
 == Trouble Shooting ==
 === Nova Hosts ===
 ==== Model Device ====
-;ERROR zen.PythonClient: Error in zenoss.cmd.linux.openstack.nova: Connection
+;ERROR zen.PythonClient:
+Error in zenoss.cmd.linux.openstack.nova: Connection
 was refused by other side: 111: Connection refused.
 In the upper left corner immediately under device name and device class, there
 should be an IP address. Modeling would fail if there is no IP address listed.
 The absence of IP address is likely a DNS issue.
+
+;Hosts are duplicated by Name and IP:
+The '''''zOpenStackHostMapSame''''' exist for mapping equivalent hosts. If you have
+an FQDN and IP that are listed seperately you can make a mapping entry that
+takes the form FQDN=IP:
+
+  my.example.com=10.100.200.222
+
+Note that you must have DNS functioning for '''my.example.com''' to acquire
+its IP address set correctly.
+
+;Hosts are not identified to a pre-existing Linux ID:
+In this case you already
+have a Linux host identified by an ID name. You should use the
+'''''zOpenStackHostMapToId''''' property to set any equivalent hosts to this ID
+value. For example:
+
+  my.example.com=myID
+  10.100.200.222=myID
 
 == Known Issues ==
 
