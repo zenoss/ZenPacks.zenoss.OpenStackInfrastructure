@@ -341,18 +341,21 @@ class OpenStackInfrastructure(PythonPlugin):
             hostmap.add_hostref(results['cinder_url_host'], "Cinder API URL")
 
         for mapping in device.zOpenStackHostMapToId:
+            if not mapping: continue
             try:
                 hostref, hostid = mapping.split("=")
                 hostmap.assert_host_id(hostref, hostid)
-            except Exception:
-                log.error("Invalid value in zOpenStackHostMapToId: %s", mapping)
+            except Exception as ex:
+                log.error("Invalid value in zOpenStackHostMapToId: '%s'", mapping)
 
         for mapping in device.zOpenStackHostMapSame:
+            if not mapping: continue
             try:
                 hostref1, hostref2 = mapping.split("=")
                 hostmap.assert_same_host(hostref1, hostref2)
-            except Exception:
-                log.error("Invalid value in zOpenStackHostMapSame: %s", mapping)
+            except Exception as ex:
+                log.error("assert_same_host error: %s", ex)
+                log.error("Invalid value in zOpenStackHostMapSame: '%s'", mapping)
 
         # generate host IDs
         yield hostmap.perform_mapping()
@@ -659,7 +662,12 @@ class OpenStackInfrastructure(PythonPlugin):
 
         hosts = []
         for host_id in self.hostmap.all_hostids():
-            hostname = self.hostmap.get_hostname_for_hostid(host_id)
+            try:
+                hostname = self.hostmap.get_hostname_for_hostid(host_id)
+            except Exception:
+                log.error("Invalid hostname for host_id: '%s'", host_id)
+                log.error("Ensure that zOpenStackHost* properties are correct!")
+                continue
 
             hosts.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Host',
