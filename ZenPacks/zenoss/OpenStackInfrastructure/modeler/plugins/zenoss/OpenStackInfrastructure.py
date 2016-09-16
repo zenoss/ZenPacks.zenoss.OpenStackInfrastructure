@@ -31,7 +31,7 @@ from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
 from Products.ZenUtils.Utils import prepId
 from Products.ZenUtils.Time import isoToTimestamp, LocalDateTime
 
-from ZenPacks.zenoss.OpenStackInfrastructure.hostmap import HostMap
+from ZenPacks.zenoss.OpenStackInfrastructure.hostmap import HostMap, InvalidHostIdException
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import (
     add_local_lib_path,
     zenpack_path,
@@ -566,7 +566,16 @@ class OpenStackInfrastructure(PythonPlugin):
                 continue
 
             host_id = service['host']
-            hostname = self.hostmap.get_hostname_for_hostid(host_id)
+            try:
+                hostname = self.hostmap.get_hostname_for_hostid(host_id)
+            except InvalidHostIdException:
+                log.error("An invalid Host ID: '%s' was provided.\n"
+                          "\tPlease examine zOpenStackHostMapToId and zOpenStackHostMapSame." , host_id)
+                continue
+            except Exception:
+                log.warning("An unknown error for Host ID: '%s' occurred", host_id)
+                continue
+
             host_base_id = re.sub(r'^host-', '', host_id)
 
             title = '{0}@{1} ({2})'.format(service.get('binary', ''),
@@ -619,7 +628,15 @@ class OpenStackInfrastructure(PythonPlugin):
             # well, guest what? volume services do not have 'id' key !
 
             host_id = service['host']
-            hostname = self.hostmap.get_hostname_for_hostid(host_id)
+            try:
+                hostname = self.hostmap.get_hostname_for_hostid(host_id)
+            except InvalidHostIdException:
+                log.error("An invalid Host ID: '%s' was provided.\n"
+                          "\tPlease examine zOpenStackHostMapToId and zOpenStackHostMapSame." , host_id)
+                continue
+            except Exception:
+                log.warning("An unknown error for Host ID: '%s' occurred", host_id)
+
             host_base_id = re.sub(r'^host-', '', host_id)
             zone_id = prepId("zone-{0}".format(service.get('zone', '')))
             title = '{0}@{1} ({2})'.format(service.get('binary', ''),
@@ -871,7 +888,15 @@ class OpenStackInfrastructure(PythonPlugin):
             # format l3_agent_routers
             l3_agent_routers = ['router-{0}'.format(x)
                                 for x in agent['l3_agent_routers']]
-            hostname = self.hostmap.get_hostname_for_hostid(agent['host'])
+            try:
+                hostname = self.hostmap.get_hostname_for_hostid(agent['host'])
+            except InvalidHostIdException:
+                log.error("An invalid Host ID: '%s' was provided.\n"
+                          "\tPlease examine zOpenStackHostMapToId and zOpenStackHostMapSame." , host_id)
+                continue
+            except Exception:
+                log.warning("An unknown error for Host ID: '%s' occurred", host_id)
+
             title = '{0}@{1}'.format(agent.get('agent_type', ''),
                                      hostname)
 
