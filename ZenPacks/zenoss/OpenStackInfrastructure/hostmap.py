@@ -19,6 +19,10 @@ from Products.ZenUtils.Utils import prepId
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import resolve_names
 
 
+class InvalidHostIdException(Exception):
+        pass
+
+
 class HostMap(object):
     """
     The concept of the HostMap is to accept all of the "host references"
@@ -261,7 +265,8 @@ class HostMap(object):
             raise Exception("perform_mapping must be called before get_hostname_for_hostid")
 
         if not hostid.startswith("host-"):
-            raise Exception("get_hostname_for_hostid must be supplied with a valid hostid")
+            log.debug("Invalid hostid: '%s' found in hostmap!", hostid)
+            raise InvalidHostIdException("get_hostname_for_hostid must be supplied with a valid hostid")
 
         # despite what I said above, at the moment, the algorithm for selecting
         # a hostid is probably the best bet for selecting a hostname, as well.
