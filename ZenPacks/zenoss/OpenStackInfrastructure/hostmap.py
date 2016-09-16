@@ -113,11 +113,11 @@ class HostMap(object):
             return
 
         if hostref1 not in self.mapping:
-            log.error("assert_same_host(source=%s): %s is not a valid host reference -- ignoring", source, hostref1)
+            log.warning("assert_same_host(source=%s): %s is not a valid host reference -- ignoring", source, hostref1)
             return
 
         if hostref2 not in self.mapping:
-            log.error("assert_same_host(source=%s): %s is not a valid host reference -- ignoring", source, hostref2)
+            log.warning("assert_same_host(source=%s): %s is not a valid host reference -- ignoring", source, hostref2)
             return
 
         self.asserted_same[hostref1][hostref2] = source
