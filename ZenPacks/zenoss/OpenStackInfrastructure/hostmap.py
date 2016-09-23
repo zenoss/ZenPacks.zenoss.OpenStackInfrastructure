@@ -116,11 +116,11 @@ class HostMap(object):
         if hostref1 == hostref2:
             return
 
-        if hostref1 not in self.mapping:
+        if not any(hostref1 in x for x in [self.mapping, self.frozen_mapping]):
             log.warning("assert_same_host(source=%s): %s is not a valid host reference -- ignoring", source, hostref1)
             return
 
-        if hostref2 not in self.mapping:
+        if not any(hostref2 in x for x in [self.mapping, self.frozen_mapping]):
             log.warning("assert_same_host(source=%s): %s is not a valid host reference -- ignoring", source, hostref2)
             return
 
