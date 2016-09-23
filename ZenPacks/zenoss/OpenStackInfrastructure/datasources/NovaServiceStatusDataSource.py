@@ -156,7 +156,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
         for mapping in ds0.zOpenStackHostMapSame:
             try:
                 hostref1, hostref2 = mapping.split("=")
-                hostmap.assert_same_host(hostref1, hostref2)
+                hostmap.assert_same_host(hostref1, hostref2, source='zOpenStackHostMapSame')
             except Exception:
                 log.error("Invalid value in zOpenStackHostMapSame: %s", mapping)
 

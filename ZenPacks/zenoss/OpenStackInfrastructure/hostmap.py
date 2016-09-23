@@ -87,6 +87,12 @@ class HostMap(object):
         for hostref, hostid in from_db.iteritems():
             self.frozen_mapping[hostref] = hostid
 
+    def has_hostref(self, hostref):
+        """
+        Check if there exists a hostref in self.mapping
+        """
+        return hostref in self.mapping
+
     def add_hostref(self, hostref, source="Unknown"):
         """
         Notify the host mapper about a host reference.
@@ -94,7 +100,7 @@ class HostMap(object):
 
         self.mapping_complete = False
 
-        if hostref in self.mapping:
+        if self.has_hostref(hostref):
             return
 
         if hostref in self.frozen_mapping:
@@ -113,15 +119,15 @@ class HostMap(object):
         same host.
         """
 
+        if not self.has_hostref(hostref1):
+            log.warning("assert_same_host: (Source=%s): %s is not a valid host reference -- ignoring", source, hostref1)
+            return
+
+        if not self.has_hostref(hostref2):
+            log.warning("assert_same_host: (Source=%s): %s is not a valid host reference -- ignoring", source, hostref2)
+            return
+
         if hostref1 == hostref2:
-            return
-
-        if not any(hostref1 in x for x in [self.mapping, self.frozen_mapping]):
-            log.warning("assert_same_host(source=%s): %s is not a valid host reference -- ignoring", source, hostref1)
-            return
-
-        if not any(hostref2 in x for x in [self.mapping, self.frozen_mapping]):
-            log.warning("assert_same_host(source=%s): %s is not a valid host reference -- ignoring", source, hostref2)
             return
 
         self.asserted_same[hostref1][hostref2] = source
@@ -156,7 +162,7 @@ class HostMap(object):
 
             # If the name and IP are known references, but might not
             # be known to be identical, add that assertion.
-            if name in self.mapping and ip in self.mapping:
+            if self.has_hostref(name) and self.has_hostref(ip):
                 self.assert_same_host(name, ip, source="DNS Resolution")
 
         for ip, hostnames in resolved_by_ip.iteritems():
@@ -164,7 +170,7 @@ class HostMap(object):
             # are interchangeable.  Add those assertions where
             # we have seen both versions of the name.
             for hostref1, hostref2 in itertools.combinations(hostnames, 2):
-                if hostref1 in self.mapping and hostref2 in self.mapping:
+                if self.has_hostref(hostref1) and self.has_hostref(hostref2):
                     self.assert_same_host(hostref1, hostref2, source="Resolve to same IP")
 
         new_mapping = {}
@@ -243,7 +249,7 @@ class HostMap(object):
         if not self.mapping_complete:
             raise Exception("perform_mapping must be called before get_hostid")
 
-        if hostref not in self.mapping:
+        if not self.has_hostref(hostref):
             raise Exception("Host reference %s unrecognized. Ensure that add_hostref(%s) is done before attempting to get_hostid(%s)" % (hostref, hostref, hostref))
 
         return self.mapping[hostref]
