@@ -344,6 +344,7 @@ class OpenStackInfrastructure(PythonPlugin):
             if not mapping: continue
             try:
                 hostref, hostid = mapping.split("=")
+                hostmap.add_hostref(hostref, source="zOpenStackHostMapToId")
                 hostmap.assert_host_id(hostref, hostid)
             except Exception as ex:
                 log.error("Invalid value in zOpenStackHostMapToId: '%s'", mapping)
@@ -352,6 +353,8 @@ class OpenStackInfrastructure(PythonPlugin):
             if not mapping: continue
             try:
                 hostref1, hostref2 = mapping.split("=")
+                hostmap.add_hostref(hostref1, source="zOpenStackHostMapSame")
+                hostmap.add_hostref(hostref2, source="zOpenStackHostMapSame")
                 hostmap.assert_same_host(hostref1, hostref2)
             except Exception as ex:
                 log.error("assert_same_host error: %s", ex)
