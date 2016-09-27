@@ -734,6 +734,7 @@ to this ID value. For example:
 
 ;2.3.0
 * Added support for Mitaka.
+* ZEN-24803: Prevent Queue removal upon device deletion and recreation
 
 ;2.2.0
 * Added Cinder block storage components.
