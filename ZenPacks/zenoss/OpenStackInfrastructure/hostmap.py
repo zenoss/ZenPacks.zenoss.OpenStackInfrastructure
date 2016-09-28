@@ -93,6 +93,11 @@ class HostMap(object):
         """
         return hostref in self.mapping
 
+    def check_hostref(self, hostref, source):
+        if not self.has_hostref(hostref):
+            log.error("Hostref: '%s' from source: '%s' is not in known mapping! "
+                      "Please check that this is a valid host...", hostref, source)
+
     def add_hostref(self, hostref, source="Unknown"):
         """
         Notify the host mapper about a host reference.
