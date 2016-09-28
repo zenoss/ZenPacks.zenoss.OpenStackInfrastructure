@@ -31,7 +31,7 @@ from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
 from Products.ZenUtils.Utils import prepId
 from Products.ZenUtils.Time import isoToTimestamp, LocalDateTime
 
-from ZenPacks.zenoss.OpenStackInfrastructure.hostmap import HostMap
+from ZenPacks.zenoss.OpenStackInfrastructure.hostmap import HostMap, InvalidHostIdException
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import (
     add_local_lib_path,
     zenpack_path,
@@ -45,6 +45,17 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import (
 add_local_lib_path()
 
 from apiclients.txapiclient import APIClient, APIClientError, NotFoundError
+
+
+# https://github.com/openstack/nova/blob/master/nova/compute/power_state.py
+POWER_STATE_MAP = {
+    0: 'pending',
+    1: 'running',
+    3: 'paused',
+    4: 'shutdown',
+    6: 'crashed',
+    7: 'suspended',
+}
 
 
 class OpenStackInfrastructure(PythonPlugin):
@@ -80,7 +91,7 @@ class OpenStackInfrastructure(PythonPlugin):
             device.zCommandPassword,
             device.zOpenStackAuthUrl,
             device.zOpenStackProjectId,
-            is_admin=True)
+        )
 
         results = {}
 
@@ -242,9 +253,8 @@ class OpenStackInfrastructure(PythonPlugin):
         result = yield client.cinder_services()
         results['cinder_services'] = result.get('services', [])
 
-        # result = yield client.cinder_pools()
-        # results['volume_pools'] = result.get('pools', [])
-        results['volume_pools'] = []
+        result = yield client.cinder_pools()
+        results['volume_pools'] = result.get('pools', [])
 
         results['quotas'] = {}
         for tenant in results['tenants']:
@@ -298,20 +308,6 @@ class OpenStackInfrastructure(PythonPlugin):
         hostmap = HostMap()
         self.hostmap = hostmap
 
-        for mapping in device.zOpenStackHostMapToId:
-            try:
-                hostref, hostid = mapping.split("=")
-                hostmap.assert_host_id(hostref, hostid)
-            except Exception:
-                log.error("Invalid value in zOpenStackHostMapToId: %s", mapping)
-
-        for mapping in device.zOpenStackHostMapSame:
-            try:
-                hostref1, hostref2 = mapping.split("=")
-                hostmap.assert_same_as(hostref1, hostref2)
-            except Exception:
-                log.error("Invalid value in zOpenStackHostMapSame: %s", mapping)
-
         # load in previous mappings..
         if callable(device.get_host_mappings):
             # needed when we are passed a real device, rather than a
@@ -343,6 +339,26 @@ class OpenStackInfrastructure(PythonPlugin):
 
         if results['cinder_url_host']:
             hostmap.add_hostref(results['cinder_url_host'], "Cinder API URL")
+
+        for mapping in device.zOpenStackHostMapToId:
+            if not mapping: continue
+            try:
+                hostref, hostid = mapping.split("=")
+                hostmap.add_hostref(hostref, source="zOpenStackHostMapToId")
+                hostmap.assert_host_id(hostref, hostid)
+            except Exception as ex:
+                log.error("Invalid value in zOpenStackHostMapToId: '%s'", mapping)
+
+        for mapping in device.zOpenStackHostMapSame:
+            if not mapping: continue
+            try:
+                hostref1, hostref2 = mapping.split("=")
+                hostmap.add_hostref(hostref1, source="zOpenStackHostMapSame")
+                hostmap.add_hostref(hostref2, source="zOpenStackHostMapSame")
+                hostmap.assert_same_host(hostref1, hostref2)
+            except Exception as ex:
+                log.error("assert_same_host error: %s", ex)
+                log.error("Invalid value in zOpenStackHostMapSame: '%s'", mapping)
 
         # generate host IDs
         yield hostmap.perform_mapping()
@@ -499,13 +515,19 @@ class OpenStackInfrastructure(PythonPlugin):
 
             tenant_id = server.get('tenant_id', '')
 
+            power_state = server.get('OS-EXT-STS:power_state', 0)
+            task_state = server.get('OS-EXT-STS:task_state')
+            if not task_state:
+                task_state = 'no task in progress'
+            vm_state = server.get('OS-EXT-STS:vm_state')
+
             # Note: volume relations are added in volumes map below
             server_dict = dict(
                 id=prepId('server-{0}'.format(server['id'])),
                 title=server.get('name', server['id']),
                 resourceId=server['id'],
                 serverId=server['id'],  # 847424
-                serverStatus=server.get('status', ''),
+                serverStatus=server.get('status', '').lower(),
                 serverBackupEnabled=backup_schedule_enabled,
                 serverBackupDaily=backup_schedule_daily,
                 serverBackupWeekly=backup_schedule_weekly,
@@ -514,7 +536,10 @@ class OpenStackInfrastructure(PythonPlugin):
                 set_flavor=prepId('flavor-{0}'.format(flavor_id)),
                 set_tenant=prepId('tenant-{0}'.format(tenant_id)),
                 hostId=server.get('hostId', ''),
-                hostName=server.get('name', '')
+                hostName=server.get('name', ''),
+                powerState=POWER_STATE_MAP.get(power_state),
+                taskState=task_state,
+                vmState=vm_state,
                 )
 
             # Some Instances are created from pre-existing volumes
@@ -544,7 +569,16 @@ class OpenStackInfrastructure(PythonPlugin):
                 continue
 
             host_id = service['host']
-            hostname = self.hostmap.get_hostname_for_hostid(host_id)
+            try:
+                hostname = self.hostmap.get_hostname_for_hostid(host_id)
+            except InvalidHostIdException:
+                log.error("An invalid Host ID: '%s' was provided.\n"
+                          "\tPlease examine zOpenStackHostMapToId and zOpenStackHostMapSame." , host_id)
+                continue
+            except Exception:
+                log.warning("An unknown error for Host ID: '%s' occurred", host_id)
+                continue
+
             host_base_id = re.sub(r'^host-', '', host_id)
 
             title = '{0}@{1} ({2})'.format(service.get('binary', ''),
@@ -597,7 +631,15 @@ class OpenStackInfrastructure(PythonPlugin):
             # well, guest what? volume services do not have 'id' key !
 
             host_id = service['host']
-            hostname = self.hostmap.get_hostname_for_hostid(host_id)
+            try:
+                hostname = self.hostmap.get_hostname_for_hostid(host_id)
+            except InvalidHostIdException:
+                log.error("An invalid Host ID: '%s' was provided.\n"
+                          "\tPlease examine zOpenStackHostMapToId and zOpenStackHostMapSame." , host_id)
+                continue
+            except Exception:
+                log.warning("An unknown error for Host ID: '%s' occurred", host_id)
+
             host_base_id = re.sub(r'^host-', '', host_id)
             zone_id = prepId("zone-{0}".format(service.get('zone', '')))
             title = '{0}@{1} ({2})'.format(service.get('binary', ''),
@@ -640,7 +682,12 @@ class OpenStackInfrastructure(PythonPlugin):
 
         hosts = []
         for host_id in self.hostmap.all_hostids():
-            hostname = self.hostmap.get_hostname_for_hostid(host_id)
+            try:
+                hostname = self.hostmap.get_hostname_for_hostid(host_id)
+            except Exception:
+                log.error("Invalid hostname for host_id: '%s'", host_id)
+                log.error("Ensure that zOpenStackHost* properties are correct!")
+                continue
 
             hosts.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Host',
@@ -844,7 +891,15 @@ class OpenStackInfrastructure(PythonPlugin):
             # format l3_agent_routers
             l3_agent_routers = ['router-{0}'.format(x)
                                 for x in agent['l3_agent_routers']]
-            hostname = self.hostmap.get_hostname_for_hostid(agent['host'])
+            try:
+                hostname = self.hostmap.get_hostname_for_hostid(agent['host'])
+            except InvalidHostIdException:
+                log.error("An invalid Host ID: '%s' was provided.\n"
+                          "\tPlease examine zOpenStackHostMapToId and zOpenStackHostMapSame." , host_id)
+                continue
+            except Exception:
+                log.warning("An unknown error for Host ID: '%s' occurred", host_id)
+
             title = '{0}@{1}'.format(agent.get('agent_type', ''),
                                      hostname)
 

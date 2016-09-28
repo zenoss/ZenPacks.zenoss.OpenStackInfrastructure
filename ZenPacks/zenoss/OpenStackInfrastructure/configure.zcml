@@ -63,13 +63,13 @@
     </configure>
 
     <!-- Endpoint cleanup -->
+    <!-- Commented out: Fixes ZEN-24803. Prevent queues from being deleted.
     <subscriber
         for="ZenPacks.zenoss.OpenStackInfrastructure.Endpoint.Endpoint
              OFS.interfaces.IObjectWillBeMovedEvent"
         handler=".Endpoint.onDeviceDeleted"
         />
-
-
+    -->
 
     <!-- DeviceProxyComponent cleanup -->
     <subscriber

@@ -166,6 +166,8 @@ def result_errmsg(result):
             return 'connection refused'
         elif result.type == TimeoutError:
             return 'connection timeout'
+        elif result.type == KeyError:
+            return 'Key Error: {}'.format(result.getErrorMessage())
         else:
             return result.getErrorMessage()
     except AttributeError:

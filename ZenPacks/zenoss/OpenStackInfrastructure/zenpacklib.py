@@ -724,18 +724,6 @@ class ComponentBase(ModelBase):
                 # expects device() to return None, not to throw an exception.
                 return None
 
-    def getStatus(self, statClass='/Status'):
-        """Return the status number for this component.
-
-        Overridden to default statClass to /Status instead of
-        /Status/<self.meta_type>. Current practices do not include using
-        a separate event class for each component meta_type. The event
-        class plus component field already convey this level of
-        information.
-
-        """
-        return BaseDeviceComponent.getStatus(self, statClass=statClass)
-
     def getIdForRelationship(self, relationship):
         """Return id in ToOne relationship or None."""
         obj = relationship()

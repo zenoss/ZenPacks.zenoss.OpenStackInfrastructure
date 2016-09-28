@@ -39,6 +39,8 @@ class Instance(schema.Instance):
     def set_host_name(self, hostname):
         search = self.device().componentSearch
         hypervisors = []
+
+        # Code below may have some bearing on ZEN-24803
         for host in [x.getObject() for x in search(titleOrId=hostname,
                                                    meta_type='OpenStackInfrastructureHost')]:
             if host.hypervisor() and host.titleOrId() == hostname:

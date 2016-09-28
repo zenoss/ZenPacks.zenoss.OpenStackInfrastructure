@@ -115,8 +115,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
             ds0.zCommandUsername,
             ds0.zCommandPassword,
             ds0.zOpenStackAuthUrl,
-            ds0.zOpenStackProjectId,
-            ds0.zOpenStackRegionName)
+            ds0.zOpenStackProjectId)
 
         results = {}
 
@@ -140,6 +139,13 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
 
         ds0 = config.datasources[0]
 
+        # load in previously modeled mappings..
+        hostmap.thaw_mappings(ds0.params['host_mappings'])
+
+        for service in results['services']:
+            if 'host' in service:
+                hostmap.add_hostref(service['host'], source="nova services")
+
         for mapping in ds0.zOpenStackHostMapToId:
             try:
                 hostref, hostid = mapping.split("=")
@@ -150,16 +156,9 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
         for mapping in ds0.zOpenStackHostMapSame:
             try:
                 hostref1, hostref2 = mapping.split("=")
-                hostmap.assert_same_as(hostref1, hostref2)
+                hostmap.assert_same_host(hostref1, hostref2, source='zOpenStackHostMapSame')
             except Exception:
                 log.error("Invalid value in zOpenStackHostMapSame: %s", mapping)
-
-        # load in previously modeled mappings..
-        hostmap.thaw_mappings(ds0.params['host_mappings'])
-
-        for service in results['services']:
-            if 'host' in service:
-                hostmap.add_hostref(service['host'], source="nova services")
 
         # generate host IDs
         yield hostmap.perform_mapping()

@@ -11,7 +11,6 @@ import logging
 log = logging.getLogger('zen.PerfCeilometerAPI')
 
 import os
-import ast
 
 from twisted.web import client as txwebclient
 
@@ -191,11 +190,10 @@ class PerfCeilometerAPIDataSourcePlugin(PythonDataSourcePlugin):
         ds0 = config.datasources[0]
 
         client = APIClient(
-            username=ds0.zCommandUsername,
-            password=ds0.zCommandPassword,
-            auth_url=ds0.zOpenStackAuthUrl,
-            project_id=ds0.zOpenStackProjectId,
-            is_admin=True,
+            ds0.zCommandUsername,
+            ds0.zCommandPassword,
+            ds0.zOpenStackAuthUrl,
+            ds0.zOpenStackProjectId,
         )
 
         results = []

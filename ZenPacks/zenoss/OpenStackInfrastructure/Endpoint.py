@@ -14,10 +14,15 @@ import json
 import logging
 LOG = logging.getLogger('zen.OpenStackInfrastructureEndpoint')
 
+from Products.Zuul import getFacade
 from zope.component import getUtility
 from zenoss.protocols.queueschema import substitute_replacements
 from zenoss.protocols.interfaces import IAMQPConnectionInfo, IQueueSchema
 from zenoss.protocols.amqp import Publisher as BlockingPublisher
+from zenoss.protocols.protobufs.zep_pb2 import (
+        STATUS_NEW, STATUS_ACKNOWLEDGED,
+        SEVERITY_CRITICAL,
+        )
 from amqplib.client_0_8.exceptions import AMQPChannelException
 from OFS.interfaces import IObjectWillBeAddedEvent
 from BTrees.OOBTree import OOBTree
@@ -109,8 +114,50 @@ class Endpoint(schema.Endpoint):
                "Mappings=" + \
                json.dumps(self.get_host_mappings(), indent=4)
 
+    def getStatus(self, statusclass="/Status", **kwargs):
+        """Return status number for this device.
 
-# Clean up any AMQP queues we may have created for this device.
+        The status number is the number of critical events associated
+        with this device. This includes only events tagger with the
+        device's UUID, and not events affecting components of the
+        device.
+
+        None is returned when the device's status is unknown because it
+        isn't being monitored, or because there was an error retrieving
+        its events.
+
+        This method is overridden here to provide a simpler default
+        meaning for "down". By default any critical severity event that
+        is in either the new or acknowledged state in the /Status event
+        class and is tagged with the device's UUID indicates that the
+        device is down. An alternate event class (statusclass) can be
+        provided, which is what would be done by the device's
+        getPingStatus and getSnmpStatus methods.
+
+        A key different between this methods behavior vs. that of the
+        Device.getStatus method it overrides is that warning and error
+        events are not considered as affecting the device's status.
+
+        """
+        if not self.monitorDevice():
+            return None
+
+        zep = getFacade("zep", self.dmd)
+        try:
+            event_filter = zep.createEventFilter(
+                tags=[self.getUUID()],
+                element_sub_identifier=[""],
+                severity=[SEVERITY_CRITICAL],
+                status=[STATUS_NEW, STATUS_ACKNOWLEDGED],
+                event_class=filter(None, [statusclass]))
+
+            result = zep.getEventSummaries(0, filter=event_filter, limit=0)
+        except Exception:
+            return None
+
+        return int(result['total'])# Clean up any AMQP queues we may have created for this device.
+
+
 def onDeviceDeleted(object, event):
     if not IObjectWillBeAddedEvent.providedBy(event):
         connectionInfo = getUtility(IAMQPConnectionInfo)
