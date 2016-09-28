@@ -734,6 +734,10 @@ to this ID value. For example:
 
 ;2.3.0
 * Added support for Mitaka.
+* Provide various host-checking fixes: (ZEN-24803, ZEN-25262)
+* Prevent queues from being delete when device is removed/re-added (ZEN-24803)
+* Use publicURL if adminURL not working: (ZEN-24546)
+* Upgrade ZenPackLib to 1.1.0 to fix Liberty/Mitaka status: (ZEN-24464)
 
 ;2.2.0
 * Added Cinder block storage components.
@@ -741,7 +745,7 @@ to this ID value. For example:
 * Various bug fixes
 
 ;2.1.3
-* Fixed ZEN-22126: Malformed hostnames in the F5 LBAAS plugin
+* Fix malformed hostnames in the F5 LBAAS plugin (ZEN-22126)
 
 ;2.1.2
 * Remove deprecated ceilometer-agent-notification heartbeats
