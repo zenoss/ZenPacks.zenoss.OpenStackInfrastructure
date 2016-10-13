@@ -162,7 +162,6 @@ class OpenStackInfrastructure(PythonPlugin):
         except NotFoundError:
             # Some networks, like Nuage network, do not have network agents
             log.info("Neutron agents not found.")
-            pass
         except Exception, e:
             log.error('Error modeling neutron agents: %s' % e)
 
