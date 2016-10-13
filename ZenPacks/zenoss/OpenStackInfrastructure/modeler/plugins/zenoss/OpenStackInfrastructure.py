@@ -160,7 +160,9 @@ class OpenStackInfrastructure(PythonPlugin):
             result = yield client.neutron_agents()
             results['agents'] = result.get('agents', [])
         except NotFoundError:
-            log.error("Unable to model neutron agents because the enabled neutron plugin does not support the 'agent' API extension.")
+            # Some networks, like Nuage network, do not have network agents
+            log.info("Neutron agents not found.")
+            pass
         except Exception, e:
             log.error('Error modeling neutron agents: %s' % e)
 
@@ -325,7 +327,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 hostmap.add_hostref(agent['host'], source="neutron agents")
 
         for service in results['cinder_services']:
-            if 'host' in agent:
+            if 'host' in service:
                 hostmap.add_hostref(service['host'], source="cinder services")
 
         for hostname in results['zOpenStackNovaApiHosts']:
