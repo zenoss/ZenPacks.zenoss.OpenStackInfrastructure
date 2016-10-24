@@ -345,6 +345,7 @@ class OpenStackInfrastructure(PythonPlugin):
             if not mapping: continue
             try:
                 hostref, hostid = mapping.split("=")
+                hostmap.check_hostref(hostref, 'zOpenStackHostMapToId')
                 hostmap.add_hostref(hostref, source="zOpenStackHostMapToId")
                 hostmap.assert_host_id(hostref, hostid)
             except Exception as ex:
@@ -354,6 +355,8 @@ class OpenStackInfrastructure(PythonPlugin):
             if not mapping: continue
             try:
                 hostref1, hostref2 = mapping.split("=")
+                hostmap.check_hostref(hostref1, 'zOpenStackHostMapSame')
+                hostmap.check_hostref(hostref2, 'zOpenStackHostMapSame')
                 hostmap.add_hostref(hostref1, source="zOpenStackHostMapSame")
                 hostmap.add_hostref(hostref2, source="zOpenStackHostMapSame")
                 hostmap.assert_same_host(hostref1, hostref2)
@@ -574,7 +577,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 hostname = self.hostmap.get_hostname_for_hostid(host_id)
             except InvalidHostIdException:
                 log.error("An invalid Host ID: '%s' was provided.\n"
-                          "\tPlease examine zOpenStackHostMapToId and zOpenStackHostMapSame." , host_id)
+                          "\tPlease examine zOpenStackHostMapToId and zOpenStackHostMapSame.", host_id)
                 continue
             except Exception:
                 log.warning("An unknown error for Host ID: '%s' occurred", host_id)
@@ -636,7 +639,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 hostname = self.hostmap.get_hostname_for_hostid(host_id)
             except InvalidHostIdException:
                 log.error("An invalid Host ID: '%s' was provided.\n"
-                          "\tPlease examine zOpenStackHostMapToId and zOpenStackHostMapSame." , host_id)
+                          "\tPlease examine zOpenStackHostMapToId and zOpenStackHostMapSame.", host_id)
                 continue
             except Exception:
                 log.warning("An unknown error for Host ID: '%s' occurred", host_id)
@@ -896,7 +899,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 hostname = self.hostmap.get_hostname_for_hostid(agent['host'])
             except InvalidHostIdException:
                 log.error("An invalid Host ID: '%s' was provided.\n"
-                          "\tPlease examine zOpenStackHostMapToId and zOpenStackHostMapSame." , host_id)
+                          "\tPlease examine zOpenStackHostMapToId and zOpenStackHostMapSame.", host_id)
                 continue
             except Exception:
                 log.warning("An unknown error for Host ID: '%s' occurred", host_id)
