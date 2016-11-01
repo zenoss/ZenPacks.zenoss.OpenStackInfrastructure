@@ -1,0 +1,143 @@
+{
+    "servicePath": "/hub/collector",
+    "serviceDefinition": {
+        "CPUCommitment": 1,
+        "Command": "/usr/sbin/rabbitmq-server",
+        "ConfigFiles": {
+            "/etc/rabbitmq/rabbitmq-env.conf": {
+                "FileName": "/etc/rabbitmq/rabbitmq-env.conf",
+                "Owner": "root:root",
+                "Permissions": "0664"
+            },
+            "/etc/rabbitmq/rabbitmq.config": {
+                "FileName": "/etc/rabbitmq/rabbitmq.config",
+                "Owner": "root:root",
+                "Permissions": "0664"
+            }
+        },
+        "Description": "RabbitMQ server for OpenStackInfrastructure Ceilometer",
+        "Endpoints": [
+            {
+                "Application": "rabbitmq_{{(parent .).Name}}_admin",
+                "Name": "rabbitmq_ceil admin",
+                "PortNumber": 45672,
+                "Protocol": "tcp",
+                "Purpose": "export",
+                "Vhosts": [
+                    "rabbitmq-{{(parent .).Name}}"
+                ]
+            },
+            {
+                "AddressConfig": {
+                    "Port": 55672,
+                    "Protocol": "tcp"
+                },
+                "Application": "rabbitmq_{{(parent .).Name}}",
+                "Name": "rabbitmq_ceil",
+                "PortNumber": 55672,
+                "Protocol": "tcp",
+                "Purpose": "export"
+            },
+            {
+                "Application": "rabbitmq_{{(parent .).Name}}_epmd",
+                "Name": "rabbitmq_ceil_epmd",
+                "PortNumber": 54369,
+                "Protocol": "tcp",
+                "Purpose": "export"
+            },
+            {
+                "Application": "rabbitmq_{{(parent .).Name}}_inet_dist",
+                "Name": "rabbitmq_ceil_inet_dist",
+                "PortNumber": 54001,
+                "Protocol": "tcp",
+                "Purpose": "export"
+            },
+            {
+                "Application": "rabbitmq_{{(parent .).Name}}_epmd",
+                "Name": "rabbitmq_ceil_epmds",
+                "PortNumber": 54369,
+                "PortTemplate": "{{plus .InstanceID 24369}}",
+                "Protocol": "tcp",
+                "Purpose": "import_all",
+                "VirtualAddress": "rbt-ceil{{.InstanceID}}:54369"
+            },
+            {
+                "Application": "rabbitmq_{{(parent .).Name}}_inet_dist",
+                "Name": "rabbitmq_ceil_inet_dists",
+                "PortNumber": 54001,
+                "PortTemplate": "{{plus .InstanceID 49001}}",
+                "Protocol": "tcp",
+                "Purpose": "import_all",
+                "VirtualAddress": "rbt-ceil{{.InstanceID}}:54001"
+            },
+            {
+                "Application": "rabbitmq_{{(parent .).Name}}",
+                "Name": "rabbitmqs_ceil",
+                "PortNumber": 55672,
+                "PortTemplate": "{{plus .InstanceID 35672}}",
+                "Protocol": "tcp",
+                "Purpose": "import_all",
+                "VirtualAddress": "rbt-ceil{{.InstanceID}}:55672"
+            }
+        ],
+        "Environment": [
+            "ERL_EPMD_PORT=54369"
+        ],
+        "HealthChecks": {
+            "admin": {
+                "Interval": 10.0,
+                "Script": "curl -s -u {{(getContext . \"global.conf.amqpuser\")}}:{{(getContext . \"global.conf.amqppassword\")}} http://localhost:45672/api/vhosts | grep -q /zenoss"
+            },
+            "publishing": {
+                "Interval": 10.0,
+                "Script": "curl -s -u {{(getContext . \"global.conf.amqpuser\")}}:{{(getContext . \"global.conf.amqppassword\")}} http://localhost:45672/api/aliveness-test/%%2Fzenoss | grep -q '{\"status\":\"ok\"}'"
+            },
+            "user": {
+                "Interval": 15.0,
+                "Script": "/opt/zenoss/bin/healthchecks/RabbitMQ/user {{(getContext . \"global.conf.amqpuser\")}} {{(getContext . \"global.conf.amqppassword\")}}"
+            }
+        },
+        "Hostname": "rbt-ceil{{.InstanceID}}",
+        "ImageID": "",
+        "Instances": {
+            "min": 1
+        },
+        "Launch": "auto",
+        "LogConfigs": [
+            {
+                "path": "/var/log/rabbitmq/rabbit@localhost.log",
+                "type": "rabbitmq"
+            },
+            {
+                "path": "/var/log/rabbitmq/rabbit@localhost-sasl.log",
+                "type": "rabbitmq_sasl"
+            }
+        ],
+        "Name": "RabbitMQ-Ceilometer",
+        "Prereqs": [
+            {
+                "Name": "Cluster Leader Start",
+                "Script": "[ $(hostname) == 'rbt-ceil0' ] || rabbitmqctl -n rabbit@rbt-ceil0 status | grep nodedown || sleep 5"
+            }
+        ],
+        "Privileged": true,
+        "RAMCommitment": "256M",
+        "Services": [],
+        "Snapshot": {
+            "Pause": "PAUSE_CHECK_TIMEOUT=60 ${ZENHOME:-/opt/zenoss}/bin/quiesce-rabbitmq.sh pause",
+            "Resume": "${ZENHOME:-/opt/zenoss}/bin/quiesce-rabbitmq.sh resume"
+        },
+        "Tags": [
+            "daemon"
+        ],
+        "Volumes": [
+            {
+                "#####": "drwxr-x--- 4 rabbitmq rabbitmq 4096 Feb 25 21:25 /var/lib/rabbitmq",
+                "ContainerPath": "/var/lib/rabbitmq",
+                "Owner": "rabbitmq:rabbitmq",
+                "Permission": "0750",
+                "ResourcePath": "rabbitmq/ceil-{{(parent .).Name}}{{.InstanceID}}"
+            }
+        ]
+    }
+}
