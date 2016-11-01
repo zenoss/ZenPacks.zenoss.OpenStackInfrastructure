@@ -20,10 +20,18 @@ zProperties: !ZenPackSpec
     type: lines
   zOpenStackHostMapSame:
     type: lines
-  zOpenStackNeutronConfigDir: {}
-  zOpenStackRunNovaManageInContainer: {}
-  zOpenStackRunVirshQemuInContainer: {}
-  zOpenStackRunNeutronCommonInContainer: {}
+  zOpenStackNeutronConfigDir:
+    default: /etc/neutron
+  zOpenStackRunNovaManageInContainer:
+    default: ''
+  zOpenStackRunVirshQemuInContainer:
+    default: ''
+  zOpenStackRunNeutronCommonInContainer:
+    default: ''
+  zOpenStackAMQPUsername: {}    
+  zOpenStackAMQPPassword:
+    type: password
+
 class_relationships:
 # Containing Relations
 - Endpoint(components) 1:MC OpenstackComponent
@@ -87,11 +95,7 @@ device_classes: !ZenPackSpec
   /Server/SSH/Linux/NovaHost:
     remove: True
     zProperties:
-      zOpenStackNeutronConfigDir: /etc/neutron
       zSshConcurrentSessions: 5
-      zOpenStackRunNovaManageInContainer: ''
-      zOpenStackRunVirshQemuInContainer: ''
-      zOpenStackRunNeutronCommonInContainer: ''
   /OpenStack: {}
   /OpenStack/Infrastructure:
     remove: true
@@ -121,6 +125,10 @@ device_classes: !ZenPackSpec
             type: Python
             plugin_classname: ZenPacks.zenoss.OpenStackInfrastructure.dsplugins.MaintenanceDataSourcePlugin
             cycletime: 600
+          rabbitmq-credentials:
+            type: Python
+            plugin_classname: ZenPacks.zenoss.OpenStackInfrastructure.dsplugins.RabbitMQCeilometerCredentialsDataSourcePlugin
+            cycletime: 300
           openstack:
             type: COMMAND
             commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/poll_openstack.py
