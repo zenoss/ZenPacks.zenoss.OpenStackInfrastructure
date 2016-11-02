@@ -31,14 +31,13 @@ class PasswordAuth(userauth.SSHUserAuthClient):
         userauth.SSHUserAuthClient.__init__(self, options['user'], conn)
         self.options = options
         self.user = options['user']
+        self.key = None
         self._sent_password = False
         self._sent_pk = False
         self._sent_kbint = False
         self._auth_failures = []
         self._auth_succeeded = False  # track auth success.
         self.factory = factory
-
-        self._usedIdentities = []
 
         user = str(self.user)
         if user == '':
@@ -170,49 +169,23 @@ class PasswordAuth(userauth.SSHUserAuthClient):
                                                                **kwargs)
 
     def getPublicKey(self):
-        if 'identities' in self.options:
-            identities = [x for x in self.options['identities']
-                          if x not in self._usedIdentities]
-        else:
-            identities = []
+        identities = self.options.get('identities')
         if not identities:
-            return None
-        identity = identities[0]
-        self._usedIdentities.append(identity)
-        identity = os.path.expanduser(identity) + '.pub'
+            return
+
+        identity = os.path.expanduser(identities[0])
         if not os.path.exists(identity):
             return
-        try:
-            log.debug('Reading pubkey %s' % identity)
-            data = ''.join(open(identity).readlines()).strip()
-            key = Key.fromString(data)
 
-            return key.blob()
-        except IOError as e:
-            log.debug('Unable to read pubkey because %s' % str(e))
-            self.getPublicKey()
-        except:
-            return self.getPublicKey()
+        password = self.options.get('password', '')
+
+        log.debug('Reading pubkey %s' % identity)
+        try:
+            data = ''.join(open(identity).readlines()).strip()
+            self.key = Key.fromString(data, passphrase=password)
+            return self.key
+        except Exception:
+            return
 
     def getPrivateKey(self):
-        privkey = os.path.expanduser(self._usedIdentities[-1])
-        if 'password' in self.options:
-            password = self.options['password']
-        else:
-            password = ''
-
-        if os.path.exists(privkey):
-            try:
-                data = ''.join(open(privkey).readlines()).strip()
-                key = Key.fromString(data, passphrase=password)
-                log.debug('Loaded privkey %s' % privkey)
-                return defer.succeed(key.keyObject)
-            except keys.BadKeyError:
-                log.debug('Failed to load and/or decrypt %s' % privkey)
-
-    #def serviceStopped(self, *args, **kwargs):
-    #    userauth.SSHUserAuthClient.serviceStopped(self, *args, **kwargs)
-    #    if not self._auth_succeeded:
-    #        import pdb;pdb.set_trace()
-            #raise UnauthorizedLogin
-
+        return defer.succeed(self.key)
