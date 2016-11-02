@@ -13,10 +13,9 @@
 
 PYTHON=python
 SRC_DIR=$(PWD)/src
-TXSSHCLIENT_DIR=$(SRC_DIR)/txsshclient-0.2.0
+TXSSHCLIENT_DIR=$(SRC_DIR)/txsshclient-1.0.0
 ZP_NAME=OpenStackInfrastructure
 ZP_DIR=$(PWD)/ZenPacks/zenoss/$(ZP_NAME)
-DIR=$(SRC_DIR)/txsshclient-0.2.0
 BIN_DIR=$(ZP_DIR)/bin
 LIB_DIR=$(ZP_DIR)/lib
 
