@@ -18,14 +18,15 @@
         "Description": "RabbitMQ server for OpenStackInfrastructure Ceilometer",
         "Endpoints": [
             {
+                "AddressConfig": {
+                    "Port": 45672,
+                    "Protocol": "tcp"
+                },
                 "Application": "rabbitmq_{{(parent .).Name}}_admin",
                 "Name": "rabbitmq_ceil admin",
                 "PortNumber": 45672,
                 "Protocol": "tcp",
-                "Purpose": "export",
-                "Vhosts": [
-                    "rabbitmq-{{(parent .).Name}}"
-                ]
+                "Purpose": "export"
             },
             {
                 "AddressConfig": {
@@ -128,7 +129,8 @@
             "Resume": "${ZENHOME:-/opt/zenoss}/bin/quiesce-rabbitmq.sh resume"
         },
         "Tags": [
-            "daemon"
+            "daemon",
+            "collector"
         ],
         "Volumes": [
             {
