@@ -9,7 +9,7 @@ options = {'hostname': '127.0.0.1',
            'port': 22,
            'user': 'user',
            'password': 'password',
-           'identities': ['~/.ssh/id_rsa', '~/.ssh/id_dsa']
+           'identities': ['~/.ssh/id_rsa', '~/.ssh/id_dsa'],
            'buffersize': 32768}
 
 from sshclient import SSHClient
@@ -24,7 +24,7 @@ optional.
         #           'port': 22,
         #           'user': 'user',
         #           'password': 'password',
-        #           'identities': ['~/.ssh/id_rsa', '~/.ssh/id_dsa']
+        #           'identities': ['~/.ssh/id_rsa', '~/.ssh/id_dsa'],
         #           'buffersize': 32768}
 
         self.connectionTimeout = 100  # Connection timeout in seconds
