@@ -34,6 +34,7 @@ from Products.ZenUtils.Utils import unused
 from OFS.CopySupport import CopyError
 
 from . import schema
+from service_migration import install_migrate_zenpython, remove_migrate_zenpython
 
 NOVAHOST_PLUGINS = ['zenoss.cmd.linux.openstack.nova',
                     'zenoss.cmd.linux.openstack.libvirt',
@@ -48,6 +49,7 @@ class ZenPack(schema.ZenPack):
         self._update_plugins('/Server/SSH/Linux/NovaHost')
         self._update_properties()
         super(ZenPack, self).install(app)
+        install_migrate_zenpython()
         self.chmodScripts()
 
     def _update_properties(self):
@@ -92,6 +94,7 @@ class ZenPack(schema.ZenPack):
 
     def remove(self, app, leaveObjects=False):
         super(ZenPack, self).remove(app, leaveObjects=leaveObjects)
+        remove_migrate_zenpython()
 
     def chmodScripts(self):
         for script in ('poll_openstack.py',

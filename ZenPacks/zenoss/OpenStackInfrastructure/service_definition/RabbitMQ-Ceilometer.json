@@ -60,7 +60,7 @@
                 "PortTemplate": "{{plus .InstanceID 24369}}",
                 "Protocol": "tcp",
                 "Purpose": "import_all",
-                "VirtualAddress": "rbt-ceil{{.InstanceID}}:54369"
+                "VirtualAddress": "rbtc{{.InstanceID}}:54369"
             },
             {
                 "Application": "rabbitmq_{{(parent .).Name}}_inet_dist",
@@ -69,7 +69,7 @@
                 "PortTemplate": "{{plus .InstanceID 49001}}",
                 "Protocol": "tcp",
                 "Purpose": "import_all",
-                "VirtualAddress": "rbt-ceil{{.InstanceID}}:54001"
+                "VirtualAddress": "rbtc{{.InstanceID}}:54001"
             },
             {
                 "Application": "rabbitmq_{{(parent .).Name}}",
@@ -78,7 +78,7 @@
                 "PortTemplate": "{{plus .InstanceID 35672}}",
                 "Protocol": "tcp",
                 "Purpose": "import_all",
-                "VirtualAddress": "rbt-ceil{{.InstanceID}}:55672"
+                "VirtualAddress": "rbtc{{.InstanceID}}:55672"
             }
         ],
         "Environment": [
@@ -96,6 +96,10 @@
             "user": {
                 "Interval": 15.0,
                 "Script": "/opt/zenoss/bin/healthchecks/RabbitMQ/user {{(getContext . \"global.conf.amqpuser\")}} {{(getContext . \"global.conf.amqppassword\")}}"
+            },
+            "ceilometer-setup": {
+                "Interval": 15.0,
+                "Script": "%(daemondir)s/../libexec/init_rabbitmq-ceil.sh {{(getContext . \"global.conf.amqpuser\")}} {{(getContext . \"global.conf.amqppassword\")}}"
             }
         },
         "Hostname": "rbt-ceil{{.InstanceID}}",
