@@ -32,6 +32,7 @@ log = logging.getLogger('zen.OpenStack')
 
 from Products.ZenUtils.Utils import unused
 from OFS.CopySupport import CopyError
+from Products.ZenModel.ZenPack import DirectoryConfigContents
 
 from . import schema
 from service_migration import install_migrate_zenpython, remove_migrate_zenpython
@@ -42,6 +43,16 @@ NOVAHOST_PLUGINS = ['zenoss.cmd.linux.openstack.nova',
                     'zenoss.cmd.linux.openstack.hostfqdn',
                     ]
 
+try:
+    import servicemigration as sm
+    sm.require("1.0.0")
+    VERSION5 = True
+except ImportError:
+    VERSION5 = False
+
+
+
+
 
 class ZenPack(schema.ZenPack):
     def install(self, app):
@@ -50,6 +61,20 @@ class ZenPack(schema.ZenPack):
         self._update_properties()
         super(ZenPack, self).install(app)
         install_migrate_zenpython()
+        if VERSION5:
+            try:
+                ctx = sm.ServiceContext()
+            except sm.ServiceMigrationError:
+                log.info("Couldn't generate service context, skipping.")
+                return
+            rabbitmq_ceil = filter(lambda s: s.name == "RabbitMQ-Ceilometer", ctx.services)
+            if not rabbitmq_ceil:
+                # from line 1278 of ZenPack.py
+                log.info("Loading RabbitMQ-Ceilometer service definition during upgrade")
+                sdFiles = self.getServiceDefinitionFiles()
+                toConfigPath = lambda x: os.path.join(os.path.dirname(x),'-CONFIGS-')
+                configFileMaps = [DirectoryConfigContents(toConfigPath(i)) for i in sdFiles]
+                self.installServicesFromFiles(sdFiles, configFileMaps, self.getServiceTag())
         self.chmodScripts()
 
     def _update_properties(self):
