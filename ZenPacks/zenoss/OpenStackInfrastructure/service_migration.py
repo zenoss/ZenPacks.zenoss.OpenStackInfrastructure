@@ -10,13 +10,20 @@
 import logging
 log = logging.getLogger("zen.migrate")
 
-import servicemigration as sm
-sm.require("1.0.0")
+try:
+    import servicemigration as sm
+    sm.require("1.0.0")
+    VERSION5 = True
+except ImportError:
+    VERSION5 = False
 
 import copy
 
 
 def install_migrate_zenpython():
+    if not VERSION5:
+        return
+
     try:
         ctx = sm.ServiceContext()
     except sm.ServiceMigrationError:
@@ -32,7 +39,11 @@ def install_migrate_zenpython():
             "Protocol": "tcp",
             "Purpose": "import_all"
         }
-    mgmt_endpoint_lc = {key.lower(): value for (key, value) in mgmt_endpoint.iteritems() if key != "PortTemplate"}
+    mgmt_endpoint_lc = {key.lower(): value for (key, value) in mgmt_endpoint.iteritems()}
+    try:
+        rabbit_mgmt = sm.Endpoint(**mgmt_endpoint_lc)
+    except TypeError:
+        mgmt_endpoint_lc = {key.lower(): value for (key, value) in mgmt_endpoint.iteritems() if key != "PortTemplate"}
     amqp_endpoint = {
             "ApplicationTemplate": "rabbitmq_{{(parent .).Name}}",
             "Name": "rabbitmqs_ceil",
@@ -41,7 +52,11 @@ def install_migrate_zenpython():
             "Protocol": "tcp",
             "Purpose": "import_all"
         }
-    amqp_endpoint_lc = {key.lower(): value for (key, value) in amqp_endpoint.iteritems() if key != "PortTemplate"}
+    amqp_endpoint_lc = {key.lower(): value for (key, value) in amqp_endpoint.iteritems()}
+    try:
+        rabbit_amqp = sm.Endpoint(**amqp_endpoint_lc)
+    except TypeError:
+        amqp_endpoint_lc = {key.lower(): value for (key, value) in amqp_endpoint.iteritems() if key != "PortTemplate"}
 
     commit = False
     zpythons = filter(lambda s: s.name == "zenpython", ctx.services)
@@ -72,6 +87,9 @@ def install_migrate_zenpython():
         ctx.commit()
 
 def remove_migrate_zenpython():
+    if not VERSION5:
+        return
+
     try:
         ctx = sm.ServiceContext()
     except sm.ServiceMigrationError:
