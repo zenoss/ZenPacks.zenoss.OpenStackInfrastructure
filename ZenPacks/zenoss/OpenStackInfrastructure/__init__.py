@@ -32,7 +32,6 @@ log = logging.getLogger('zen.OpenStack')
 
 from Products.ZenUtils.Utils import unused
 from OFS.CopySupport import CopyError
-from Products.ZenModel.ZenPack import DirectoryConfigContents
 
 from . import schema
 from service_migration import install_migrate_zenpython, remove_migrate_zenpython
@@ -45,6 +44,7 @@ NOVAHOST_PLUGINS = ['zenoss.cmd.linux.openstack.nova',
 
 try:
     import servicemigration as sm
+    from Products.ZenModel.ZenPack import DirectoryConfigContents
     sm.require("1.0.0")
     VERSION5 = True
 except ImportError:
