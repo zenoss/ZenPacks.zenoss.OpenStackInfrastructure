@@ -10,9 +10,7 @@
 import logging
 log = logging.getLogger('zen.OpenStack.HeartbeatsAMQP')
 
-import json
 from time import time
-from functools import partial
 from pprint import pformat
 
 from twisted.internet import defer
@@ -23,20 +21,16 @@ from zope.component import adapts, getUtility
 from zope.interface import implements
 
 from Products.ZenCollector.interfaces import ICollector
-from Products.Five import zcml
 from Products.ZenEvents import ZenEventClasses
-import Products.ZenMessaging.queuemessaging
 
-from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import (
-    PythonDataSource, PythonDataSourcePlugin, PythonDataSourceInfo,
-    IPythonDataSourceInfo)
+from ZenPacks.zenoss.OpenStackInfrastructure.datasources.AMQPDataSource import (
+    AMQPDataSource, AMQPDataSourcePlugin, AMQPDataSourceInfo,
+    IAMQPDataSourceInfo)
 
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import result_errmsg, sleep
-from zenoss.protocols.interfaces import IAMQPConnectionInfo, IQueueSchema
-from zenoss.protocols.twisted.amqp import AMQPFactory
 
 
-class HeartbeatsAMQPDataSource(PythonDataSource):
+class HeartbeatsAMQPDataSource(AMQPDataSource):
     '''
     Datasource used to capture heartbeats shipped to us from OpenStack
     Ceilometer via AMQP.
@@ -57,10 +51,10 @@ class HeartbeatsAMQPDataSource(PythonDataSource):
 
     # HeartbeatsAMQPDataSource
 
-    _properties = PythonDataSource._properties + ()
+    _properties = AMQPDataSource._properties + ()
 
 
-class IHeartbeatsAMQPDataSourceInfo(IPythonDataSourceInfo):
+class IHeartbeatsAMQPDataSourceInfo(IAMQPDataSourceInfo):
     '''
     API Info interface for IHeartbeatsAMQPDataSource.
     '''
@@ -68,7 +62,7 @@ class IHeartbeatsAMQPDataSourceInfo(IPythonDataSourceInfo):
     pass
 
 
-class HeartbeatsAMQPDataSourceInfo(PythonDataSourceInfo):
+class HeartbeatsAMQPDataSourceInfo(AMQPDataSourceInfo):
     '''
     API Info adapter factory for HeartbeatsAMQPDataSource.
     '''
@@ -85,8 +79,15 @@ last_heard_heartbeats = {}
 MAX_TIME_LAPSE = 300
 
 
-class HeartbeatsAMQPDataSourcePlugin(PythonDataSourcePlugin):
+class HeartbeatsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
     proxy_attributes = ('expected_ceilometer_heartbeats',)
+    queue_name = "$OpenStackInboundHeartbeats"
+    failure_eventClassKey = 'openStackCeilometerHeartbeat'
+
+    def __init__(self, *args, **kwargs):
+        super(HeartbeatsAMQPDataSourcePlugin, self).__init__(*args, **kwargs)
+        self.amqp_client = amqp_client
+
 
     @classmethod
     def config_key(cls, datasource, context):
@@ -101,10 +102,6 @@ class HeartbeatsAMQPDataSourcePlugin(PythonDataSourcePlugin):
             datasource.getCycleTime(context),
             datasource.plugin_classname
         )
-
-    @classmethod
-    def params(cls, datasource, context):
-        return {}
 
     @inlineCallbacks
     def getService(self, service_name):
@@ -122,33 +119,7 @@ class HeartbeatsAMQPDataSourcePlugin(PythonDataSourcePlugin):
         if not expected_heartbeats:
             return
 
-        # During the first collect run, we spin up the AMQP listener.  After
-        # that, no active collecting is done in the collect() method.
-        #
-        # Instead, as each message arrives over the AMQP listener, it goes through
-        # processMessage(), and is placed into a list, per host, per process,
-        # where it can be processed by the onSuccess method.
-        if config.id not in amqp_client:
-            # Spin up the AMQP queue listener
-
-            zcml.load_config('configure.zcml', zope.component)
-            zcml.load_config('configure.zcml', Products.ZenMessaging.queuemessaging)
-
-            self._amqpConnectionInfo = getUtility(IAMQPConnectionInfo)
-            self._queueSchema = getUtility(IQueueSchema)
-
-            amqp = AMQPFactory(self._amqpConnectionInfo, self._queueSchema)
-            queue = self._queueSchema.getQueue('$OpenStackInboundHeartbeat',
-                                               replacements={'device': config.id})
-            log.info("Listening on queue: %s with binding to routing key %s" % (queue.name, queue.bindings['$OpenStackInboundHeartbeats'].routing_key))
-            yield amqp.listen(queue, callback=partial(self.processMessage, amqp))
-            amqp_client[config.id] = amqp
-
-            # Give time for some of the existing messages to be processed during
-            # this initial collection cycle
-            yield sleep(10)
-
-        data = self.new_data()
+        data = super(HeartbeatsAMQPDataSourcePlugin, self).collect(config)
         device_id = config.id
 
         for host in expected_heartbeats:
@@ -220,51 +191,19 @@ class HeartbeatsAMQPDataSourcePlugin(PythonDataSourcePlugin):
 
         defer.returnValue(data)
 
-    def processMessage(self, amqp, message):
+    def processMessage(self, contentbody):
         # add neartbeats to last_heard_heartbeats on per host, per process base
         msg = {}
-        try:
-            contentbody = json.loads(message.content.body)
-            hostname = contentbody['hostname']
-            processname = contentbody['processname']
+        hostname = contentbody['hostname']
+        processname = contentbody['processname']
 
-            if hostname not in last_heard_heartbeats:
-                last_heard_heartbeats[hostname] = {}
+        if hostname not in last_heard_heartbeats:
+            last_heard_heartbeats[hostname] = {}
 
-            msg['exchange'] = message.fields[3]
-            msg['routing_key'] = message.fields[4]
-            msg['lastheard'] = contentbody['timestamp']
+        msg['exchange'] = message.fields[3]
+        msg['routing_key'] = message.fields[4]
+        msg['lastheard'] = contentbody['timestamp']
 
-            last_heard_heartbeats[hostname][processname] = msg
-            log.debug("Received heartbeat from %s / %s" % (hostname, processname))
+        last_heard_heartbeats[hostname][processname] = msg
+        log.debug("Received heartbeat from %s / %s" % (hostname, processname))
 
-            amqp.acknowledge(message)
-
-        except Exception, e:
-            log.error("Exception while processing ceilometer heartbeat: %r", e)
-
-    def onError(self, result, config):
-        errmsg = 'OpenStack AMQP: %s' % result_errmsg(result)
-        log.error('%s: %s', config.id, errmsg)
-
-        data = self.new_data()
-        data['events'].append({
-            'device': config.id,
-            'summary': errmsg,
-            'severity': ZenEventClasses.Error,
-            'eventKey': 'AMQPDataSourceCollection',
-            'eventClassKey': 'openStackCeilometerHeartbeat',
-            })
-
-        return data
-
-    def cleanup(self, config):
-        log.debug("cleanup for OpenStack AMQP (%s)" % config.id)
-
-        if config.id in amqp_client and amqp_client[config.id]:
-            result = yield self.collect(config)
-            self.onSuccess(result, config)
-            amqp = amqp_client[config.id]
-            amqp.disconnect()
-            amqp.shutdown()
-            del amqp_client[config.id]
