@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2014, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2014-2016, all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -10,10 +10,8 @@
 import logging
 log = logging.getLogger('zen.OpenStack.AMQP')
 
-from collections import defaultdict
 import json
 from functools import partial
-import time
 
 from twisted.internet import defer
 from twisted.internet.defer import inlineCallbacks
@@ -25,15 +23,13 @@ from zope.interface import implements
 from Products.Five import zcml
 from Products.ZenEvents import ZenEventClasses
 import Products.ZenMessaging.queuemessaging
-from Products.Zuul.form import schema
-from Products.Zuul.infos import ProxyProperty
-from Products.Zuul.utils import ZuulMessageFactory as _t
 
 from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import (
     PythonDataSource, PythonDataSourcePlugin, PythonDataSourceInfo,
     IPythonDataSourceInfo)
 
-from ZenPacks.zenoss.OpenStackInfrastructure.utils import result_errmsg, ExpiringFIFO, sleep, amqp_timestamp_to_int
+from ZenPacks.zenoss.OpenStackInfrastructure.utils import result_errmsg, sleep
+from zenoss.protocols.amqpconfig import AMQPConfig
 from zenoss.protocols.interfaces import IAMQPConnectionInfo, IQueueSchema
 from zenoss.protocols.twisted.amqp import AMQPFactory
 
@@ -86,7 +82,7 @@ class AMQPDataSourcePlugin(PythonDataSourcePlugin):
 
     def __init__(self, *args, **kwargs):
         super(AMQPDataSourcePlugin, self).__init__(*args, **kwargs)
-        self.amqp_client = None   # must be provided by a subclass
+        self.amqp_client = {}
 
     @classmethod
     def config_key(cls, datasource, context):
@@ -119,7 +115,15 @@ class AMQPDataSourcePlugin(PythonDataSourcePlugin):
             zcml.load_config('configure.zcml', Products.ZenMessaging.queuemessaging)
 
             self._amqpConnectionInfo = getUtility(IAMQPConnectionInfo)
-            self._amqpConnectionInfo_collector = getUtility(IAMQPConnectionInfo).update({'amqphost': 'localhost', 'amqpport': 55672})
+            self._amqpConnectionInfo_collector = AMQPConfig(
+                amqphost='localhost',
+                amqpport=55672,
+                amqpvhost=self._amqpConnectionInfo.amqpvhost,
+                amqpuser=self._amqpConnectionInfo.amqpuser,
+                amqppassword=self._amqpConnectionInfo.amqppassword,
+                amqpusessl=self._amqpConnectionInfo.amqpusessl,
+                amqpconnectionheartbeat=self._amqpConnectionInfo.amqpconnectionheartbeat)
+
             self._queueSchema = getUtility(IQueueSchema)
 
             amqp = AMQPFactory(self._amqpConnectionInfo, self._queueSchema)
@@ -178,4 +182,3 @@ class AMQPDataSourcePlugin(PythonDataSourcePlugin):
                 amqp_collector.disconnect()
                 amqp_collector.shutdown()
                 del self.amqp_client[config.id + "_collector"]
-
