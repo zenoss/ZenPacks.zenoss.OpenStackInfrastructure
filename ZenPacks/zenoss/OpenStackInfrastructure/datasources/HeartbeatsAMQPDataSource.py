@@ -114,7 +114,7 @@ class HeartbeatsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
         if not expected_heartbeats:
             return
 
-        data = super(HeartbeatsAMQPDataSourcePlugin, self).collect(config)
+        data = yield super(HeartbeatsAMQPDataSourcePlugin, self).collect(config)
         device_id = config.id
 
         for host in expected_heartbeats:

@@ -101,7 +101,7 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
     def collect(self, config):
         log.debug("Collect for OpenStack AMQP Events (%s)" % config.id)
 
-        data = super(EventsAMQPDataSourcePlugin, self).collect(config)
+        data = yield super(EventsAMQPDataSourcePlugin, self).collect(config)
         device_id = config.configId
 
         for entry in cache[device_id].get():

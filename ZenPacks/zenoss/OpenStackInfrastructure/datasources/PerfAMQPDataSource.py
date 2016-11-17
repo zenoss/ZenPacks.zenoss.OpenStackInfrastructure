@@ -137,7 +137,7 @@ class PerfAMQPDataSourcePlugin(AMQPDataSourcePlugin):
     def collect(self, config):
         log.debug("Collect for OpenStack AMQP (%s)" % config.id)
 
-        data = super(PerfAMQPDataSourcePlugin, self).collect(config)
+        data = yield super(PerfAMQPDataSourcePlugin, self).collect(config)
         device_id = config.configId
 
         for ds in config.datasources:
