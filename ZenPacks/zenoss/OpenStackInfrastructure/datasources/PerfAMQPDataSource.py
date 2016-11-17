@@ -118,7 +118,6 @@ class CeilometerPerfCache(object):
 
 
 # Persistent state
-amqp_client = {}                     # amqp_client[device.id] = AMQClient object
 cache = defaultdict(CeilometerPerfCache)
 
 
@@ -126,10 +125,6 @@ class PerfAMQPDataSourcePlugin(AMQPDataSourcePlugin):
     proxy_attributes = ('resourceId')
     queue_name = "$OpenStackInboundPerf"
     failure_eventClassKey = 'PerfFailure'
-
-    def __init__(self, *args, **kwargs):
-        super(PerfAMQPDataSourcePlugin, self).__init__(*args, **kwargs)
-        self.amqp_client = amqp_client
 
     @classmethod
     def params(cls, datasource, context):

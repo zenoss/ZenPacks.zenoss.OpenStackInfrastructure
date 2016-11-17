@@ -89,7 +89,6 @@ class CeilometerEventCache(ExpiringFIFO):
 
 
 # Persistent state
-amqp_client = {}                     # amqp_client[device.id] = AMQClient object
 cache = defaultdict(CeilometerEventCache)
 
 
@@ -97,10 +96,6 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
     proxy_attributes = ()
     queue_name = "$OpenStackInboundEvents"
     failure_eventClassKey = 'EventsFailure'
-
-    def __init__(self, *args, **kwargs):
-        super(EventsAMQPDataSourcePlugin, self).__init__(*args, **kwargs)
-        self.amqp_client = amqp_client
 
     @inlineCallbacks
     def collect(self, config):

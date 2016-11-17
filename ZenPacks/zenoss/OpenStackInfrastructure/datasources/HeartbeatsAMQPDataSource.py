@@ -74,7 +74,6 @@ class HeartbeatsAMQPDataSourceInfo(AMQPDataSourceInfo):
 
 
 # Persistent state
-amqp_client = {}                    # amqp_client[device.id] = AMQClient object
 last_heard_heartbeats = {}
 MAX_TIME_LAPSE = 300
 
@@ -83,11 +82,6 @@ class HeartbeatsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
     proxy_attributes = ('expected_ceilometer_heartbeats',)
     queue_name = "$OpenStackInboundHeartbeats"
     failure_eventClassKey = 'openStackCeilometerHeartbeat'
-
-    def __init__(self, *args, **kwargs):
-        super(HeartbeatsAMQPDataSourcePlugin, self).__init__(*args, **kwargs)
-        self.amqp_client = amqp_client
-
 
     @classmethod
     def config_key(cls, datasource, context):
