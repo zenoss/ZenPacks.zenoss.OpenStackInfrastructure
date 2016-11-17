@@ -80,7 +80,8 @@ MAX_TIME_LAPSE = 300
 
 class HeartbeatsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
     proxy_attributes = ('expected_ceilometer_heartbeats',)
-    queue_name = "$OpenStackInboundHeartbeats"
+    exchange_name='$OpenStackInboundHeartbeats'
+    queue_name = "$OpenStackInboundHeartbeat"
     failure_eventClassKey = 'openStackCeilometerHeartbeat'
 
     @classmethod

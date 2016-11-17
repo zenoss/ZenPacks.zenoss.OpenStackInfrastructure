@@ -80,7 +80,8 @@ class AMQPDataSourceInfo(PythonDataSourceInfo):
 
 
 class AMQPDataSourcePlugin(PythonDataSourcePlugin):
-    queue_name = "$OpenStackInbound"  # override in subclass
+    exchange_name = '$OpenStackInbound'
+    queue_name = None  # override in subclass
     failure_eventClassKey = 'AMQPFailure'
 
     @classmethod
@@ -128,7 +129,7 @@ class AMQPDataSourcePlugin(PythonDataSourcePlugin):
             amqp = AMQPFactory(self._amqpConnectionInfo, self._queueSchema)
             amqp_collector = AMQPFactory(self._amqpConnectionInfo_collector, self._queueSchema)
             queue = self._queueSchema.getQueue(self.queue_name, replacements={'device': config.id})
-            log.debug("Listening on queue: %s with binding to routing key %s" % (queue.name, queue.bindings['$OpenStackInbound'].routing_key))
+            log.debug("Listening on queue: %s with binding to routing key %s" % (queue.name, queue.bindings[self.exchange_name].routing_key))
             yield amqp.listen(queue, callback=partial(self._processMessage, amqp, config.id))
             yield amqp_collector.listen(queue, callback=partial(self._processMessage, amqp_collector, config.id))
             amqp_client[config.id] = amqp

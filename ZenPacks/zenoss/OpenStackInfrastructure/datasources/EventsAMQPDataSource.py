@@ -94,7 +94,7 @@ cache = defaultdict(CeilometerEventCache)
 
 class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
     proxy_attributes = ()
-    queue_name = "$OpenStackInboundEvents"
+    queue_name = "$OpenStackInboundEvent"
     failure_eventClassKey = 'EventsFailure'
 
     @inlineCallbacks
