@@ -17,7 +17,7 @@ from twisted.internet import defer
 from twisted.internet.defer import inlineCallbacks, returnValue
 
 import zope.component
-from zope.component import adapts, getUtility
+from zope.component import adapts
 from zope.interface import implements
 
 from Products.ZenCollector.interfaces import ICollector
@@ -26,8 +26,6 @@ from Products.ZenEvents import ZenEventClasses
 from ZenPacks.zenoss.OpenStackInfrastructure.datasources.AMQPDataSource import (
     AMQPDataSource, AMQPDataSourcePlugin, AMQPDataSourceInfo,
     IAMQPDataSourceInfo)
-
-from ZenPacks.zenoss.OpenStackInfrastructure.utils import result_errmsg, sleep
 
 
 class HeartbeatsAMQPDataSource(AMQPDataSource):

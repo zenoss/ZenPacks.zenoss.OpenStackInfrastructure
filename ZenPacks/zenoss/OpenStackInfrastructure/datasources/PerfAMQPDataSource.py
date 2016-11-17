@@ -16,8 +16,7 @@ import time
 from twisted.internet import defer
 from twisted.internet.defer import inlineCallbacks
 
-import zope.component
-from zope.component import adapts, getUtility
+from zope.component import adapts
 from zope.interface import implements
 
 from Products.ZenEvents import ZenEventClasses
@@ -29,7 +28,7 @@ from ZenPacks.zenoss.OpenStackInfrastructure.datasources.AMQPDataSource import (
     AMQPDataSource, AMQPDataSourcePlugin, AMQPDataSourceInfo,
     IAMQPDataSourceInfo)
 
-from ZenPacks.zenoss.OpenStackInfrastructure.utils import result_errmsg, ExpiringFIFO, sleep, amqp_timestamp_to_int
+from ZenPacks.zenoss.OpenStackInfrastructure.utils import ExpiringFIFO, amqp_timestamp_to_int
 
 # How long to cache data in memory before discarding it (data that
 # is coming from ceilometer, but not consumed by any monitoring templates).
@@ -184,5 +183,4 @@ class PerfAMQPDataSourcePlugin(AMQPDataSourcePlugin):
 
         else:
             log.error("Discarding unrecognized message type: %s" % value['type'])
-
 
