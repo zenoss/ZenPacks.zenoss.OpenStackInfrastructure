@@ -118,10 +118,10 @@ class AMQPDataSourcePlugin(PythonDataSourcePlugin):
             self._amqpConnectionInfo_collector = AMQPConfig(
                 amqphost='localhost',
                 amqpport=55672,
-                amqpvhost=self._amqpConnectionInfo.amqpvhost,
-                amqpuser=self._amqpConnectionInfo.amqpuser,
-                amqppassword=self._amqpConnectionInfo.amqppassword,
-                amqpusessl=self._amqpConnectionInfo.amqpusessl,
+                amqpvhost=self._amqpConnectionInfo.vhost,
+                amqpuser=self._amqpConnectionInfo.user,
+                amqppassword=self._amqpConnectionInfo.password,
+                amqpusessl=self._amqpConnectionInfo.usessl,
                 amqpconnectionheartbeat=self._amqpConnectionInfo.amqpconnectionheartbeat)
 
             self._queueSchema = getUtility(IQueueSchema)

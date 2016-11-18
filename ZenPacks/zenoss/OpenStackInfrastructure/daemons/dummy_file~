@@ -1,0 +1,7 @@
+The 'daemons' directory is required because the service definition determines the 
+path to the healthcheck script relative to this directory.  (%(daemondir) is the
+only reference to the zenpack path that is available in service definitions).
+ 
+This file must exist to allow git to store what would be an empty directory.
+The file must end with the ~ character so that the ZenPackLoader 
+for the daemons directory will ignore it.
