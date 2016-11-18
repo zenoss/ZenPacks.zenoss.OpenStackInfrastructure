@@ -21,6 +21,7 @@ except ImportError:
 
 import copy
 
+
 def fix_service_healthcheck_path():
     # When the zenpack is installed or upgraded, the path to the healthcheck
     # script will need to be updated to reflect the current zenpack path.
@@ -43,7 +44,7 @@ def fix_service_healthcheck_path():
                 log.info("Enabling %s healthcheck for %s", check.name, ctx.getServicePath(svc))
                 script_path = zenpack_path('libexec/init_rabbitmq-ceil.sh')
                 check.script = script_path + ' {{(getContext . "global.conf.amqpuser")}} {{(getContext . "global.conf.amqppassword")}}'
-        ctx.commit()
+    ctx.commit()
 
 
 def install_migrate_zenpython():
