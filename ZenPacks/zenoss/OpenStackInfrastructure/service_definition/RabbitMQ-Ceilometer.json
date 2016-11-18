@@ -99,7 +99,7 @@
             },
             "ceilometer-setup": {
                 "Interval": 15.0,
-                "Script": "%(daemondir)s/../libexec/init_rabbitmq-ceil.sh {{(getContext . \"global.conf.amqpuser\")}} {{(getContext . \"global.conf.amqppassword\")}}"
+                "Script": "init_rabbitmq-ceil.sh {{(getContext . \"global.conf.amqpuser\")}} {{(getContext . \"global.conf.amqppassword\")}}"
             }
         },
         "Hostname": "rbt-ceil{{.InstanceID}}",

@@ -34,7 +34,7 @@ from Products.ZenUtils.Utils import unused
 from OFS.CopySupport import CopyError
 
 from . import schema
-from service_migration import install_migrate_zenpython, remove_migrate_zenpython
+from service_migration import install_migrate_zenpython, remove_migrate_zenpython, fix_service_healthcheck_path
 
 NOVAHOST_PLUGINS = ['zenoss.cmd.linux.openstack.nova',
                     'zenoss.cmd.linux.openstack.libvirt',
@@ -49,9 +49,6 @@ try:
     VERSION5 = True
 except ImportError:
     VERSION5 = False
-
-
-
 
 
 class ZenPack(schema.ZenPack):
@@ -72,9 +69,13 @@ class ZenPack(schema.ZenPack):
                 # from line 1278 of ZenPack.py
                 log.info("Loading RabbitMQ-Ceilometer service definition during upgrade")
                 sdFiles = self.getServiceDefinitionFiles()
-                toConfigPath = lambda x: os.path.join(os.path.dirname(x),'-CONFIGS-')
+                toConfigPath = lambda x: os.path.join(os.path.dirname(x), '-CONFIGS-')
                 configFileMaps = [DirectoryConfigContents(toConfigPath(i)) for i in sdFiles]
                 self.installServicesFromFiles(sdFiles, configFileMaps, self.getServiceTag())
+
+            # Fix zenpack-provided healthcheck file paths (since the zenpack's)
+            # directory may change during install/upgrade
+            fix_service_healthcheck_path()
         self.chmodScripts()
 
     def _update_properties(self):

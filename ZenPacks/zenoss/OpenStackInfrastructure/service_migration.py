@@ -10,6 +10,8 @@
 import logging
 log = logging.getLogger("zen.migrate")
 
+from ZenPacks.zenoss.OpenStackInfrastructure.utils import zenpack_path
+
 try:
     import servicemigration as sm
     sm.require("1.0.0")
@@ -18,6 +20,30 @@ except ImportError:
     VERSION5 = False
 
 import copy
+
+def fix_service_healthcheck_path():
+    # When the zenpack is installed or upgraded, the path to the healthcheck
+    # script will need to be updated to reflect the current zenpack path.
+
+    if not VERSION5:
+        return
+
+    try:
+        ctx = sm.ServiceContext()
+    except sm.ServiceMigrationError:
+        log.info("Couldn't generate service context, skipping.")
+        return
+
+    for svc in ctx.services:
+        if svc.name != 'RabbitMQ-Ceilometer':
+            continue
+
+        for check in svc.healthChecks:
+            if check.name == 'ceilometer-setup':
+                log.info("Enabling %s healthcheck for %s", check.name, ctx.getServicePath(svc))
+                script_path = zenpack_path('libexec/init_rabbitmq-ceil.sh')
+                check.script = script_path + ' {{(getContext . "global.conf.amqpuser")}} {{(getContext . "global.conf.amqppassword")}}'
+        ctx.commit()
 
 
 def install_migrate_zenpython():
