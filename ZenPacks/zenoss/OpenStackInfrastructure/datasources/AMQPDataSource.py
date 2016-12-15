@@ -108,7 +108,7 @@ class AMQPDataSourcePlugin(PythonDataSourcePlugin):
         # Instead, as each message arives over the AMQP listener, it goes through
         # processMessage(), and is placed into a cache where it can be processed
         # by the onSuccess method.
-        if config.id not in amqp_client:
+        if self.queue_name not in amqp_client:
             # Spin up the AMQP queue listener
 
             zcml.load_config('configure.zcml', zope.component)
@@ -132,8 +132,8 @@ class AMQPDataSourcePlugin(PythonDataSourcePlugin):
             log.debug("Listening on queue: %s with binding to routing key %s" % (queue.name, queue.bindings[self.exchange_name].routing_key))
             yield amqp.listen(queue, callback=partial(self._processMessage, amqp, config.id))
             yield amqp_collector.listen(queue, callback=partial(self._processMessage, amqp_collector, config.id))
-            amqp_client[config.id] = amqp
-            amqp_client[config.id + "_collector"] = amqp_collector
+            amqp_client[self.queue_name] = amqp
+            amqp_client[self.queue_name + "_collector"] = amqp_collector
 
             # Give time for some of the existing messages to be processed during
             # this initial collection cycle
@@ -146,7 +146,7 @@ class AMQPDataSourcePlugin(PythonDataSourcePlugin):
         try:
             value = json.loads(message.content.body)
             log.debug("Procesing AMQP message: %r", value)
-            self.processMessage(device_id, value)
+            self.processMessage(device_id, message, value)
             amqp.acknowledge(message)
 
         except Exception, e:
@@ -170,15 +170,15 @@ class AMQPDataSourcePlugin(PythonDataSourcePlugin):
     def cleanup(self, config):
         log.debug("cleanup for OpenStack AMQP (%s)" % config.id)
 
-        if config.id in amqp_client and amqp_client[config.id]:
+        if amqp_client.get(self.queue_name, False):
             result = yield self.collect(config)
             self.onSuccess(result, config)
             amqp = amqp_client[config.id]
             amqp.disconnect()
             amqp.shutdown()
             del self.amqp_client[config.id]
-            amqp_collector = amqp_client.get(config.id + "_collector")
+            amqp_collector = amqp_client.get(self.queue_name + "_collector")
             if amqp_collector:
                 amqp_collector.disconnect()
                 amqp_collector.shutdown()
-                del amqp_client[config.id + "_collector"]
+                del amqp_client[self.queue_name + "_collector"]

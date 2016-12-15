@@ -184,7 +184,7 @@ class HeartbeatsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
 
         defer.returnValue(data)
 
-    def processMessage(self, contentbody):
+    def processMessage(self, device_id, message, contentbody):
         # add neartbeats to last_heard_heartbeats on per host, per process base
         msg = {}
         hostname = contentbody['hostname']

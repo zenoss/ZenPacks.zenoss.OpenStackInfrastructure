@@ -156,7 +156,7 @@ class PerfAMQPDataSourcePlugin(AMQPDataSourcePlugin):
 
         defer.returnValue(data)
 
-    def processMessage(self, device_id, value):
+    def processMessage(self, device_id, message, value):
         if value['device'] != device_id:
             log.error("While expecting a message for %s, received a message regarding %s instead!" % (device_id, value['device']))
             return
