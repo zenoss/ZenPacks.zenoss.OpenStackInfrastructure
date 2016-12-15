@@ -5,6 +5,8 @@ SENTINEL=/tmp/rabbit_ceil_ok
 if [ ! -e $SENTINEL ] ; then
     USER=$1
     PASSWORD=$2
+    #Tag with administrator in order to add ability to create and delete users, create and delete permissions through http api
+    rabbitmqctl set_user_tags $USER administrator
     rabbitmqctl add_vhost /zenoss || true
     rabbitmqctl clear_permissions -p /zenoss $USER
     rabbitmqctl set_permissions -p /zenoss $USER '.*' '.*' '.*'
