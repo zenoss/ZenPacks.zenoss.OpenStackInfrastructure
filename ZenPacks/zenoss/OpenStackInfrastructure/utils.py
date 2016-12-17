@@ -256,9 +256,14 @@ def findIpInterfacesByMAC(dmd, macaddresses, interfaceType=None):
     layer2_catalog = dmd.ZenLinkManager._getCatalog(layer=2)
     if layer2_catalog is not None:
         for result in layer2_catalog(macaddress=macaddresses):
-            iface = result.getObject()
-            if not interfaceType or isinstance(iface, interfaceType):
-                yield iface
+            try:
+                iface = result.getObject()
+            except Exception:
+                # ignore a stale entry
+                pass
+            else:
+                if not interfaceType or isinstance(iface, interfaceType):
+                    yield iface
 
 def getIpInterfaceMacs(device):
     '''

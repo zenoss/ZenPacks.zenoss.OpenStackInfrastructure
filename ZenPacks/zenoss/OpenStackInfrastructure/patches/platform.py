@@ -37,10 +37,19 @@ def openstackInstance(self):
     # Search first by serial number, if known.
     serialNumber = self.os.getHWSerialNumber()
     if serialNumber:
-        instances = [x.getObject() for x in catalog_search(
-            self.dmd.Devices,
-            'ZenPacks_zenoss_OpenStackInfrastructure_Instance',
-            serialNumber=serialNumber)]
+        instances = []
+        for i in catalog_search(
+                self.dmd.Devices,
+                'ZenPacks_zenoss_OpenStackInfrastructure_Instance',
+                serialNumber=serialNumber):
+            try:
+                instance = i.getObject()
+            except Exception:
+                # ignore a stale entry
+                pass
+            else:
+                instances.appens(instance)
+
         if len(instances) > 1:
             log.warning("More than one openstack instance found with a serial number of %s - returning the first one (%s)" %
                         (serialNumber, instances[0].id))
@@ -49,10 +58,18 @@ def openstackInstance(self):
     # Nope?  OK, go to MAC addresses.
     instances = set()
     macs = getIpInterfaceMacs(self)
-    vnics = [x.getObject() for x in catalog_search(
-        self.dmd.Devices,
-        'ZenPacks_zenoss_OpenStackInfrastructure_Vnic',
-        macaddress=macs)]
+    vnics = []
+    for v in catalog_search(
+            self.dmd.Devices,
+            'ZenPacks_zenoss_OpenStackInfrastructure_Vnic',
+            macaddress=macs):
+        try:
+            vnic = v.getObject()
+        except Exception:
+            # ignore a stale entry
+            pass
+        else:
+            vnics.appens(vnic)
 
     for vnic in vnics:
         instances.add(vnic.instance())

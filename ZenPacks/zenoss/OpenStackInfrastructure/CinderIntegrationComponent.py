@@ -83,7 +83,16 @@ class CinderIntegrationComponent(object):
             return []
 
         catalog = get_cinder_implementation_catalog(self.dmd)
-        return [brain.getObject() for brain in catalog(getCinderIntegrationKeys=keys)]
+        implementation_components = []
+        for brain in catalog(getCinderIntegrationKeys=keys):
+            try:
+                obj = brain.getObject()
+            except Exception:
+                # ignore a stale entry
+                pass
+            else:
+                implementation_components.append(obj)
+        return implementation_components
 
     def index_object(self, idxs=None):
         from .OpenstackComponent import OpenstackComponent
