@@ -63,7 +63,16 @@ def get_neutron_components(obj):
         return []
 
     catalog = get_neutron_core_catalog(obj.dmd)
-    return [brain.getObject() for brain in catalog(getNeutronIntegrationKeys=keys)]
+    neutron_components = []
+    for brain in catalog(getNeutronIntegrationKeys=keys):
+        try:
+            obj = brain.getObject()
+        except Exception:
+            # ignore a stale entry
+            pass
+        else:
+            neutron_components.append(obj)
+    return neutron_components
 
 
 # Base class for neutron integration plugins which implement INeutronImplementationPlugin

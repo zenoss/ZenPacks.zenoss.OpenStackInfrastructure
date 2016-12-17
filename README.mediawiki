@@ -732,6 +732,9 @@ to this ID value. For example:
 
 == Changes ==
 
+;2.3.2
+* Wrap brain.getObject() into try/except block (ZPS-442)
+
 ;2.3.1
 * Upgrade txsshclient to fix critical change in twisted.conch (ZEN-25870)
 

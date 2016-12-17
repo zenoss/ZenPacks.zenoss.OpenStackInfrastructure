@@ -302,16 +302,21 @@ class PostEventPlugin(object):
 
             # Get OSProcess component, if the event has one
             for brain in ICatalogTool(dmd).search('Products.ZenModel.OSProcess.OSProcess', query=Eq('id', eventProxy.component)):
-                osprocess = brain.getObject()
-
-                # Figure out if we have a corresponding software component:
                 try:
-                    for software in component.hostedSoftware():
-                        if software.binary == osprocess.osProcessClass().id:
-                            # Matches!
-                            tags.append(IGlobalIdentifier(software).getGUID())
+                    osprocess = brain.getObject()
                 except Exception:
-                    LOG.debug("Unable to append event for OSProcess %s",
-                              osprocess.osProcessClass().id)
+                    # ignore a stale entry
+                    pass
+                else:
+                    # Figure out if we have a corresponding software component:
+                    try:
+                        for software in component.hostedSoftware():
+                            if software.binary == osprocess.osProcessClass().id:
+                                # Matches!
+                                tags.append(IGlobalIdentifier(software).getGUID())
+                    except Exception:
+                        LOG.debug("Unable to append event for OSProcess %s",
+                                  osprocess.osProcessClass().id)
+
 
             eventProxy.tags.addAll('ZenPacks.zenoss.OpenStackInfrastructure.DeviceProxyComponent', tags)
