@@ -48,7 +48,7 @@ def openstackInstance(self):
                 # ignore a stale entry
                 pass
             else:
-                instances.appens(instance)
+                instances.append(instance)
 
         if len(instances) > 1:
             log.warning("More than one openstack instance found with a serial number of %s - returning the first one (%s)" %
@@ -69,7 +69,7 @@ def openstackInstance(self):
             # ignore a stale entry
             pass
         else:
-            vnics.appens(vnic)
+            vnics.append(vnic)
 
     for vnic in vnics:
         instances.add(vnic.instance())

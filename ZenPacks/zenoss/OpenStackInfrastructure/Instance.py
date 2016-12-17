@@ -49,7 +49,7 @@ class Instance(schema.Instance):
                 # ignore a stale entry
                 pass
             else:
-                hosts.appens(host)
+                hosts.append(host)
 
         hypervisors = []
         for host in hosts:
@@ -89,7 +89,7 @@ class Instance(schema.Instance):
                 # ignore a stale entry
                 pass
             else:
-                flavors.appens(flavor)
+                flavors.append(flavor)
         if len(flavors):
             flavor = sorted(flavors)[0]
             if len(flavors) > 1:
@@ -114,7 +114,7 @@ class Instance(schema.Instance):
                 # ignore a stale entry
                 pass
             else:
-                images.appens(image)
+                images.append(image)
         if len(images):
             image = sorted(images)[0]
             if len(images) > 1:

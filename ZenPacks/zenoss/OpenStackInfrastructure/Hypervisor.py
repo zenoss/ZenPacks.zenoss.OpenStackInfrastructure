@@ -46,10 +46,9 @@ class Hypervisor(schema.Hypervisor):
                 # ignore a stale entry
                 pass
             else:
-                if host:
-                    log.info("Set host by fqdn: %s" % name)
-                    self.set_host(host.id)
-                    self.hostfqdn = name
+                log.info("Set host by fqdn: %s" % name)
+                self.set_host(host.id)
+                self.hostfqdn = name
         elif name.find('.') > -1:
             name = name[:name.index('.')]
             query = Or(Eq('hostname', name), Eq('hostfqdn', name))
@@ -66,9 +65,8 @@ class Hypervisor(schema.Hypervisor):
                     # ignore a stale entry
                     pass
                 else:
-                    if host:
-                        log.info("Set host by hostname: %s" % name)
-                        self.set_host(host.id)
-                        self.hostfqdn = name
+                    log.info("Set host by hostname: %s" % name)
+                    self.set_host(host.id)
+                    self.hostfqdn = name
         else:
             log.error("%s: Could not set hypervisor host by name (%s)", self.id, name)
