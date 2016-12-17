@@ -40,11 +40,16 @@ class Hypervisor(schema.Hypervisor):
                     "Got more than one host for hypervisor: " +
                     "%s with id: %s" % (self.title, self.id))
 
-            host = hosts[0].getObject()
-            if host:
-                log.info("Set host by fqdn: %s" % name)
-                self.set_host(host.id)
-                self.hostfqdn = name
+            try:
+                host = hosts[0].getObject()
+            except Exception:
+                # ignore a stale entry
+                pass
+            else:
+                if host:
+                    log.info("Set host by fqdn: %s" % name)
+                    self.set_host(host.id)
+                    self.hostfqdn = name
         elif name.find('.') > -1:
             name = name[:name.index('.')]
             query = Or(Eq('hostname', name), Eq('hostfqdn', name))
@@ -55,10 +60,15 @@ class Hypervisor(schema.Hypervisor):
                         "Got more than one host for hypervisor: " +
                         "%s with id: %s" (self.title, self.id))
 
-                host = hosts[0].getObject()
-                if host:
-                    log.info("Set host by hostname: %s" % name)
-                    self.set_host(host.id)
-                    self.hostfqdn = name
+                try:
+                    host = hosts[0].getObject()
+                except Exception:
+                    # ignore a stale entry
+                    pass
+                else:
+                    if host:
+                        log.info("Set host by hostname: %s" % name)
+                        self.set_host(host.id)
+                        self.hostfqdn = name
         else:
             log.error("%s: Could not set hypervisor host by name (%s)", self.id, name)

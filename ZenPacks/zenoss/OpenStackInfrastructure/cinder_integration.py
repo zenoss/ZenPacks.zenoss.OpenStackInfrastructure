@@ -63,7 +63,16 @@ def get_cinder_components(obj):
         return []
 
     catalog = get_cinder_core_catalog(obj.dmd)
-    return [brain.getObject() for brain in catalog(getCinderIntegrationKeys=keys)]
+    cinder_components = []
+    for brain in catalog(getCinderIntegrationKeys=keys):
+        try:
+            obj = brain.getObject()
+        except Exception:
+            # ignore a stale entry
+            pass
+        else:
+            cinder_components.append(obj)
+    return cinder_components
 
 
 # Base class for cinder integration plugins which implement ICinderImplementationPlugin

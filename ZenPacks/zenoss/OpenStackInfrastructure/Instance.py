@@ -38,11 +38,21 @@ class Instance(schema.Instance):
 
     def set_host_name(self, hostname):
         search = self.device().componentSearch
-        hypervisors = []
 
         # Code below may have some bearing on ZEN-24803
-        for host in [x.getObject() for x in search(titleOrId=hostname,
-                                                   meta_type='OpenStackInfrastructureHost')]:
+        hosts = []
+        for h in search(titleOrId=hostname,
+                        meta_type='OpenStackInfrastructureHost'):
+            try:
+                host = h.getObject()
+            except Exception:
+                # ignore a stale entry
+                pass
+            else:
+                hosts.appens(host)
+
+        hypervisors = []
+        for host in hosts:
             if host.hypervisor() and host.titleOrId() == hostname:
                 hypervisors.append(host.hypervisor().id)
 
@@ -70,8 +80,16 @@ class Instance(schema.Instance):
 
     def set_flavor_name(self, flavorname):
         search = self.device().componentSearch
-        flavors = [x.getObject().id for x in search(titleOrId=flavorname,
-                                                    meta_type='OpenStackInfrastructureFlavor')]
+        flavors = []
+        for f in search(titleOrId=flavorname,
+                        meta_type='OpenStackInfrastructureFlavor'):
+            try:
+                flavor = f.getObject()
+            except Exception:
+                # ignore a stale entry
+                pass
+            else:
+                flavors.appens(flavor)
         if len(flavors):
             flavor = sorted(flavors)[0]
             if len(flavors) > 1:
@@ -87,8 +105,16 @@ class Instance(schema.Instance):
 
     def set_image_name(self, imagename):
         search = self.device().componentSearch
-        images = [x.getObject().id for x in search(titleOrId=imagename,
-                                                   meta_type='OpenStackInfrastructureImage')]
+        images = []
+        for i in search(titleOrId=imagename,
+                        meta_type='OpenStackInfrastructureImage'):
+            try:
+                image = i.getObject()
+            except Exception:
+                # ignore a stale entry
+                pass
+            else:
+                images.appens(image)
         if len(images):
             image = sorted(images)[0]
             if len(images) > 1:
