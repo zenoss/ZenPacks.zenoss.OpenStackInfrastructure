@@ -83,7 +83,11 @@ def keyword_search(obj, keyword, types=(), meta_type=None):
         query = keyword_query
 
     for brain in ICatalogTool(obj.dmd).search(types, query=query):
-        yield brain.getObject()
+        try:
+            yield brain.getObject()
+        except Exception:
+            # ignore a stale entry
+            pass
 
 
 def device_ip_search(obj, ip_address):

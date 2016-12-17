@@ -35,7 +35,11 @@ def all_cinder_core_components(dmd):
          )
     )
     for brain in results:
-        yield brain.getObject()
+        try:
+            yield brain.getObject()
+        except Exception:
+            # ignore a stale entry
+            pass
 
 
 class CinderIntegrationComponent(object):
