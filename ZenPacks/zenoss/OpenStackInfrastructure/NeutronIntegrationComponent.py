@@ -37,7 +37,11 @@ def all_core_components(dmd):
          )
     )
     for brain in results:
-        yield brain.getObject()
+        try:
+            yield brain.getObject()
+        except Exception:
+            # ignore a stale entry
+            pass
 
 
 class NeutronIntegrationComponent(object):
@@ -82,7 +86,17 @@ class NeutronIntegrationComponent(object):
             return []
 
         catalog = get_neutron_implementation_catalog(self.dmd)
-        return [brain.getObject() for brain in catalog(getNeutronIntegrationKeys=keys)]
+        implementationcomponents = []
+        for brain in catalog(getNeutronIntegrationKeys=keys):
+            try:
+                obj = brain.getObject()
+            except Exception:
+                # ignore a stale entry
+                pass
+            else:
+                implementationcomponents.append(obj)
+
+        return implementationcomponents
 
     def index_object(self, idxs=None):
         from .OpenstackComponent import OpenstackComponent

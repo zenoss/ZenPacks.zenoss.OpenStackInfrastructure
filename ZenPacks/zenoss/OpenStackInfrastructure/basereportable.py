@@ -512,36 +512,41 @@ class DumpReportables(ZenScriptBase):
             raise ValueError("Device not found")
 
         for brain in ICatalogTool(device).search():
-            component = brain.getObject()
-            factory = IReportableFactory(component)
+            try:
+                component = brain.getObject()
+            except Exception:
+                # ignore a stale entry
+                pass
+            else:
+                factory = IReportableFactory(component)
 
-            for reportable in factory.exports():
-                if reportable.id in ('os', 'hw'):
-                    # not my problem.
-                    continue
-
-                print "      adapter=%s.%s -> %s.%s" % (
-                    factory.__class__.__module__,
-                    factory.__class__.__name__,
-                    reportable.__class__.__module__,
-                    reportable.__class__.__name__,
-                )
-                print "      reportable.entity_class_name=%s" % reportable.entity_class_name
-                print "      reportable.id=%s, sid=%s" % (reportable.id, reportable.sid)
-
-                props = reportable.reportProperties()
-
-                for name, type_, value, length in props:
-                    if name in ('snmpindex', 'monitor', 'productionState', 'preMWProductionState'):
-                        # boring, so let's omit them.
+                for reportable in factory.exports():
+                    if reportable.id in ('os', 'hw'):
+                        # not my problem.
                         continue
 
-                    if length == -1:
-                        print "         %s [%s] = %s" % (name, type_, value)
-                    else:
-                        print "         %s [%s.%s] = %s" % (name, type_, length, value)
+                    print "      adapter=%s.%s -> %s.%s" % (
+                        factory.__class__.__module__,
+                        factory.__class__.__name__,
+                        reportable.__class__.__module__,
+                        reportable.__class__.__name__,
+                    )
+                    print "      reportable.entity_class_name=%s" % reportable.entity_class_name
+                    print "      reportable.id=%s, sid=%s" % (reportable.id, reportable.sid)
 
-                print ""
+                    props = reportable.reportProperties()
+
+                    for name, type_, value, length in props:
+                        if name in ('snmpindex', 'monitor', 'productionState', 'preMWProductionState'):
+                            # boring, so let's omit them.
+                            continue
+
+                        if length == -1:
+                            print "         %s [%s] = %s" % (name, type_, value)
+                        else:
+                            print "         %s [%s.%s] = %s" % (name, type_, length, value)
+
+                    print ""
 
 
 def main():

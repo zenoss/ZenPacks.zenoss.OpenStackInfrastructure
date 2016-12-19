@@ -40,8 +40,12 @@ class Hypervisor(schema.Hypervisor):
                     "Got more than one host for hypervisor: " +
                     "%s with id: %s" % (self.title, self.id))
 
-            host = hosts[0].getObject()
-            if host:
+            try:
+                host = hosts[0].getObject()
+            except Exception:
+                # ignore a stale entry
+                pass
+            else:
                 log.info("Set host by fqdn: %s" % name)
                 self.set_host(host.id)
                 self.hostfqdn = name
@@ -55,8 +59,12 @@ class Hypervisor(schema.Hypervisor):
                         "Got more than one host for hypervisor: " +
                         "%s with id: %s" (self.title, self.id))
 
-                host = hosts[0].getObject()
-                if host:
+                try:
+                    host = hosts[0].getObject()
+                except Exception:
+                    # ignore a stale entry
+                    pass
+                else:
                     log.info("Set host by hostname: %s" % name)
                     self.set_host(host.id)
                     self.hostfqdn = name
