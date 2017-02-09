@@ -14,6 +14,7 @@ from collections import defaultdict
 import json
 from functools import partial
 import time
+import re
 
 from twisted.internet import defer
 from twisted.internet.defer import inlineCallbacks
@@ -23,6 +24,7 @@ from zope.component import adapts, getUtility
 from zope.interface import implements
 
 from Products.Five import zcml
+from Products.DataCollector.plugins.DataMaps import ObjectMap
 from Products.ZenEvents import ZenEventClasses
 import Products.ZenMessaging.queuemessaging
 from Products.Zuul.form import schema
@@ -101,7 +103,14 @@ class CeilometerPerfCache(object):
     '''
     expireTime = CACHE_EXPIRE_TIME
 
-    perf_entries = {}
+    perf_entries = None
+    new_keys = None
+    all_keys = None
+
+    def __init__(self):
+        self.perf_entries = {}
+        self.new_keys = set()
+        self.all_keys = set()
 
     def add_perf(self, resourceId, meter, value, timestamp):
         log.debug("add_perf(%s/%s) = %s @ %s" % (resourceId, meter, value, timestamp))
@@ -113,6 +122,9 @@ class CeilometerPerfCache(object):
             self.perf_entries[key] = ExpiringFIFO(self.expireTime, context)
 
         self.perf_entries[key].add(value, timestamp)
+        if key not in self.all_keys:
+            self.all_keys.add(key)
+            self.new_keys.add(key)
 
     def get_perf(self, resourceId, meter, ):
         key = (resourceId, meter,)
@@ -122,6 +134,13 @@ class CeilometerPerfCache(object):
         for entry in self.perf_entries[key].get():
             yield entry
 
+    def clear_new_key(self, key):
+        self.new_keys.remove(key)
+
+    def get_new_keys(self):
+        # return a list of new keys (tuples of (resourceId, meter)) that have
+        # been seen but not acknowledged with clear_new_key()
+        return list(self.new_keys)
 
 # Persistent state
 amqp_client = {}                     # amqp_client[device.id] = AMQClient object
@@ -152,7 +171,8 @@ class PerfAMQPDataSourcePlugin(PythonDataSourcePlugin):
     def params(cls, datasource, context):
         return {
             'meter':    datasource.talesEval(datasource.meter, context),
-            'resourceId': context.resourceId
+            'resourceId': context.resourceId,
+            'component_meta_type': context.meta_type
         }
 
     @inlineCallbacks
@@ -191,6 +211,73 @@ class PerfAMQPDataSourcePlugin(PythonDataSourcePlugin):
             for entry in cache[device_id].get_perf(ds.params['resourceId'], ds.params['meter']):
                 log.debug("perf %s/%s=%s @ %s" % (ds.params['resourceId'], ds.params['meter'], entry.value, entry.timestamp))
                 data['values'][ds.component][ds.datasource] = (entry.value, entry.timestamp)
+
+        # Look for new vNICs that we are getting data for from ceilometer, but
+        # are not modeled in zenoss yet.  (vnic modeling only happens
+        # periodically via zenmodeler)
+        known_instances = dict()
+        known_vnics = dict()
+        for ds in config.datasources:
+            if ds.params['component_meta_type'] == 'OpenStackInfrastructureInstance':
+                known_instances[ds.params['resourceId']] = ds.component
+            elif ds.params['component_meta_type'] == 'OpenStackInfrastructureVnic':
+                known_vnics[ds.params['resourceId']] = ds.component
+
+        potential_vnic_resourceIds = set()
+        for key in cache[device_id].get_new_keys():
+            resourceId, meter = key
+
+            if meter.startswith("network") and resourceId not in known_vnics:
+                potential_vnic_resourceIds.add(resourceId)
+            else:
+                # not of interest to us.
+                cache[device_id].clear_new_key(key)
+
+        for resourceId in potential_vnic_resourceIds:
+            log.info("Checking possible new vnic reference: %s" % resourceId)
+            # ok, let's assume the rest of it is probably a metric.  If it
+            # corresponds to a known instance, we can create a vNIC for it.
+            for instanceUUID in known_instances:
+                # The first time we see a network-related metric, we do a
+                # loop through all modeled instances to see if this seems
+                # to be a vNIC on that instance.  This will be tried once per
+                # polling cycle per resource until it is matched to an instance.
+                # The assumption is that most of the time, this will only
+                # need to be done once or twice per vnic, before we find a known
+                # instance id in there and model this new vnic.
+
+                # Vnic resourceIds are of the form:
+                #  [instanceName]-[instanceUUID]-[vnicName]
+                #  instance-00000001-95223d22-d3af-4b06-a91c-81114d557bd1-tap908bc571-0d
+
+                match = re.search("-%s-(.*)$" % instanceUUID, resourceId)
+                if match:
+                    vnicName = match.group(1)
+                    instance_id = known_instances[instanceUUID]
+                    vnic_id = str('vnic-%s-%s' % (instanceUUID, vnicName))
+
+                    log.info("Discovered new vNIC (%s)", vnic_id)
+                    known_vnics[resourceId] = vnic_id
+
+                    data['maps'].append(ObjectMap({
+                        'modname': 'ZenPacks.zenoss.OpenStackInfrastructure.Vnic',
+                        'id': vnic_id,
+                        'compname': 'components/%s' % instance_id,
+                        'relname': 'vnics',
+                        'title': vnicName,
+                        'resourceId': resourceId
+                    }))
+
+                    # Note- we model the new vnic, but we don't store any
+                    # perf data for it yet, because we don't have the right
+                    # datasource names, etc, until we get a config from zenhub.
+                    # That should happen by the next cycle (10 minutes)
+
+                    cache[device_id].clear_new_key(key)
+                    break
+
+            if not match:
+                log.info("Instance could not be identified at this time.")
 
         if len(data['values']):
             data['events'].append({
