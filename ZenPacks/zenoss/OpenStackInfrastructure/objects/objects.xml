@@ -461,6 +461,21 @@ A cinder agent is not running properly
 Restart the offending agent.
 </property>
 </object>
+<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackApiEndpointStatus') -->
+<object id='/zport/dmd/Events/Status/instances/openStackApiEndpointStatus' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w">
+openStackApiEndpointStatus
+</property>
+<property type="int" id="sequence" mode="w">
+12
+</property>
+<property type="text" id="explanation" mode="w">
+An openstack API endpoint is not responding to http queries.
+</property>
+<property type="text" id="resolution" mode="w">
+Troubleshoot or restart the responsible process.
+</property>
+</object>
 <!-- ('', 'zport', 'dmd', 'Events', 'Status', 'instances', 'openStackNovaServiceStatus') -->
 <object id='/zport/dmd/Events/Status/instances/openStackNovaServiceStatus' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
 <property type="string" id="eventClassKey" mode="w" >

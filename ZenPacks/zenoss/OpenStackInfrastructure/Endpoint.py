@@ -157,6 +157,13 @@ class Endpoint(schema.Endpoint):
 
         return int(result['total'])# Clean up any AMQP queues we may have created for this device.
 
+    def public_keystone_apiendpoint(self):
+        # Return the public keystone API endpoint (from zOpenStackAuthUrl)
+        try:
+            return self.components._getOb('apiendpoint-zOpenStackAuthUrl')
+        except AttributeError:
+            return None
+
 
 def onDeviceDeleted(object, event):
     if not IObjectWillBeAddedEvent.providedBy(event):
