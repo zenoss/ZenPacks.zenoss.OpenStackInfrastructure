@@ -11,6 +11,11 @@ zProperties: !ZenPackSpec
     type: lines
   zOpenStackCinderApiHosts:
     type: lines
+  zOpenStackExtraApiEndpoints:
+    # Format of each line is [service type]:[url]
+    # changes to this property will not affect monitoring until the device
+    # is re-modeled.
+    type: lines
   zOpenStackHostMapToId:
     type: lines
   zOpenStackHostMapSame:
@@ -523,6 +528,87 @@ device_classes: !ZenPackSpec
               QoS:
                 dpName: openstack_poolQoSSupportCount
                 format: '%7.0lf'
+      ApiEndpoint:
+        description: 'OpenStackInfrastructure: API Endpoint Monitoring'
+        targetPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.ApiEndpoint
+        datasources:
+          identity:
+            # keystone
+            type: OpenStack API Endpoint Status
+            cycletime: 30
+            sample_url: http://192.168.2.15:5000/v2.0 or http://192.168.2.15:5000
+            auth_required: false
+            ok_result: version
+          compute:
+            # nova
+            type: OpenStack API Endpoint Status
+            cycletime: 30
+            sample_url: http://192.168.2.15:8774/v2.1
+            auth_required: true
+            ok_result: version            
+          image:
+            # glance
+            type: OpenStack API Endpoint Status
+            cycletime: 30            
+            sample_url: http://192.168.2.15:9292
+            auth_required: false
+            ok_result: version
+          network:
+            # neutron
+            type: OpenStack API Endpoint Status
+            cycletime: 30            
+            sample_url: http://192.168.2.15:9696
+            auth_required: false
+            ok_result: version
+          volume:
+            # cinder v1
+            type: OpenStack API Endpoint Status
+            cycletime: 30
+            sample_url: http://192.168.2.15:8776/v1
+            auth_required: true
+            ok_result: version
+          volumev2:
+            # cinder v2
+            type: OpenStack API Endpoint Status
+            cycletime: 30
+            sample_url: http://192.168.2.15:8776/v2          
+            auth_required: true
+            ok_result: version
+          volumev3:
+            # cinder v3
+            type: OpenStack API Endpoint Status
+            cycletime: 30
+            sample_url: http://192.168.2.15:8776/v3
+            auth_required: true
+            ok_result: version            
+          metric:
+            # gnocchi
+            type: OpenStack API Endpoint Status
+            cycletime: 30
+            sample_url: http://192.168.2.15:969
+            auth_required: false
+            ok_result: version            
+          alarming:
+            # aodh
+            type: OpenStack API Endpoint Status
+            cycletime: 30
+            sample_url: http://192.168.2.15:8042
+            auth_required: true
+            ok_result: version            
+          metering:
+            # ceilometer
+            type: OpenStack API Endpoint Status
+            cycletime: 30
+            sample_url: http://192.168.2.15:8777
+            auth_required: true
+            ok_result: version            
+          object-store:
+            # swift
+            type: OpenStack API Endpoint Status
+            cycletime: 30
+            sample_url: http://192.168.2.15:8080/v1
+            auth_required: true
+            ok_result: version            
       Instance:
         description: 'OpenStackInfrastructure: Instance Monitoring'
         targetPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Instance
@@ -690,16 +776,6 @@ classes: !ZenPackSpec
     dynamicview_relations:
       impacts: [hosts]
       openstack_link: [region]
-  KeystoneEndpoint:
-    base: [Endpoint]
-    meta_type: OpenStackInfrastructureKeystoneEndpoint
-    label: Keystone Endpoint
-    order: 2
-  NovaEndpoint:
-    base: [Endpoint]
-    meta_type: OpenStackInfrastructureNovaEndpoint
-    label: Nova Endpoint
-    order: 3
   #-----------------------------------------------------------------------------
   # Component Base Class Types
   #-----------------------------------------------------------------------------
@@ -1045,7 +1121,7 @@ classes: !ZenPackSpec
     dynamicview_group: Regions
     dynamicview_weight: 221
     dynamicview_relations:
-      impacted_by: [childOrgs, hosts, softwareComponents]
+      impacted_by: [childOrgs, hosts, softwareComponents, public_keystone_apiendpoint]
       impacts: [parentOrg]
       openstack_link: [childOrgs, softwareComponents]
   Cell:
@@ -1165,6 +1241,36 @@ classes: !ZenPackSpec
     dynamicview_relations:
       impacted_by: [hostedOn, osprocess_component]
       impacts: [orgComponent]
+  ApiEndpoint:
+    # If the string $(tenant_id) or %(tenant_id) is in the URL, it will be 
+    # replaced with the tenant ID corresponding to zOpenStackProjectId for
+    # the device.
+    #
+    # Future versions of this zenpack may add relationships to the 
+    # ApiEndpoint model, such as the region it supports and the software 
+    # component that is servicing requests for it.  (For instance, a 
+    # Nova ApiEndpoint would correspond to a NovaApi process.  In load
+    # balancing situations, it could correspond to multiple processes)
+    base: [OpenstackComponent]
+    meta_type: OpenStackInfrastructureApiEndpoint    
+    label: API Endpoint
+    order: 7.3
+    monitoring_templates: [ApiEndpoint]
+    properties:
+      service_type:
+        label: Type
+      url:
+        label: URL        
+        grid_display: false
+      source:
+        # source of this information - keystone[<interface>] or 
+        # a zprop name, for instance
+        label: Source
+    dynamicview_views: [service_view, openstack_view]
+    dynamicview_group: OpenStack Clusters
+    dynamicview_relations:
+      impacts: [region_if_public_keystone]
+      openstack_link: [region_if_public_keystone]
   Hypervisor:
     base: [OpenstackComponent]
     meta_type: OpenStackInfrastructureHypervisor

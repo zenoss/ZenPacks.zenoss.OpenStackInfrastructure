@@ -245,6 +245,27 @@ class TestImpact(zenpacklib.TestCase):
                             msg="host %s impacted by linux device %s" % (host.id, linuxhost.id))
 
     @require_zenpack('ZenPacks.zenoss.Impact')
+    def test_ApiService(self):
+
+        keystone_api = self.endpoint().public_keystone_apiendpoint()
+        self.assertIsNotNone(keystone_api)
+        impacts, impacted_by = impacts_for(keystone_api)
+
+        region = self.endpoint().getObjByPath("components/region")
+        self.assertIsNotNone(region)
+        self.assertEquals(region.meta_type, "OpenStackInfrastructureRegion")
+
+        self.assertTrue(region.id in impacts,
+                        msg="%s impacts region %s" % (keystone_api.id, region.id))
+
+        # another api endpoint that isn't the main public facing keystone one-
+        # should have no impact relationships.
+        keystone_api2 = self.endpoint().getObjByPath("components/apiendpoint-a8450514a5ca012fab799579ae4d7eec")
+        impacts, impacted_by = impacts_for(keystone_api2)
+        self.assertEqual(len(impacts), 0)
+        self.assertEqual(len(impacted_by), 0)
+
+    @require_zenpack('ZenPacks.zenoss.Impact')
     def test_NovaApi(self):
 
         nova_api = self.endpoint().getObjByPath("components/nova-api")
@@ -393,6 +414,15 @@ class TestImpact(zenpacklib.TestCase):
                                 msg="Region %s is impacted by its child Availability Zone %s" % (region.id, childOrg.id))
             else:
                 self.assertTrue(False, msg="Unrecognized Region child type %s" % (childOrg.meta_type))
+
+        keystone_api = self.endpoint().public_keystone_apiendpoint()
+        keystone_api2 = self.endpoint().getObjByPath("components/apiendpoint-a8450514a5ca012fab799579ae4d7eec")
+
+        self.assertTrue(keystone_api.id in impacted_by,
+                        msg="Region %s is impacted by public keystone API %s" % (region.id, keystone_api.id))
+
+        self.assertTrue(keystone_api2.id not in impacted_by,
+                        msg="Region %s is not impacted by internal keystone API %s" % (region.id, keystone_api2.id))
 
     @require_zenpack('ZenPacks.zenoss.Impact')
     def test_Instance(self):

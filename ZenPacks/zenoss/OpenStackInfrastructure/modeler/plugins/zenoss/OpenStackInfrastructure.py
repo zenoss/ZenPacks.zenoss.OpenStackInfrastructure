@@ -19,6 +19,7 @@ log = logging.getLogger('zen.OpenStackInfrastructure')
 import json
 import os
 import re
+import hashlib
 import itertools
 from urlparse import urlparse
 from collections import defaultdict
@@ -70,7 +71,8 @@ class OpenStackInfrastructure(PythonPlugin):
         'zOpenStackExtraHosts',
         'zOpenStackHostMapToId',
         'zOpenStackHostMapSame',
-        'get_host_mappings'
+        'get_host_mappings',
+        'zOpenStackExtraApiEndpoints',
     )
 
     _keystonev2errmsg = """
@@ -1260,6 +1262,46 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_tenant=prepId('tenant-{0}'.format(quota_key)),
                     )))
 
+        # API Endpoints
+        api_endpoints = []
+        api_endpoints.append(ObjectMap(
+            modname='ZenPacks.zenoss.OpenStackInfrastructure.ApiEndpoint',
+            data=dict(
+                id=prepId('apiendpoint-zOpenStackAuthUrl'),
+                title=device.zOpenStackAuthUrl,
+                service_type='identity',
+                url=device.zOpenStackAuthUrl,
+                source='zOpenStackAuthUrl'
+            )
+        ))
+
+        for api_endpoint in device.zOpenStackExtraApiEndpoints:
+            try:
+                service_type, url = api_endpoint.split(':')
+                url = url.lstrip()
+            except ValueError:
+                log.error("Ignoring invalid value in zOpenStackExtraApiEndpoints: %s", api_endpoint)
+
+            # create a component id for the api endpoint, based on the url
+            # and service type.
+            h = hashlib.new()
+            h.update(service_type)
+            h.update(url)
+            id_ = h.hexdigest()
+            api_endpoints.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.ApiEndpoint',
+                data=dict(
+                    id=prepId('apiendpoint-%s' % id_),
+                    title=url,
+                    service_type=service_type,
+                    url=url,
+                    source='zOpenStackExtraApiEndpoints'
+                )
+            ))
+        # Ideally we should also include the endpoints reported by
+        # keystone and model them here, but there are some issues
+        # in txapiclient that make this difficult at this time.
+
         objmaps = {
             'flavors': flavors,
             'hosts': hosts,
@@ -1282,6 +1324,7 @@ class OpenStackInfrastructure(PythonPlugin):
             # 'backups': backups,
             'pools': pools,
             'quotas': quotas,
+            'api_endpoints': api_endpoints
         }
 
         # If we have references to tenants which we did not discover during
@@ -1364,6 +1407,7 @@ class OpenStackInfrastructure(PythonPlugin):
                   'hosts', 'hypervisors', 'services', 'networks',
                   'subnets', 'routers', 'ports', 'agents', 'floatingips',
                   'voltypes', 'volumes', 'volsnapshots', 'pools', 'quotas',
+                  'api_endpoints'
                   ):
             for objmap in objmaps[i]:
                 componentsMap.append(objmap)

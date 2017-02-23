@@ -32,6 +32,7 @@ log = logging.getLogger('zen.OpenStack')
 
 from Products.ZenUtils.Utils import unused
 from OFS.CopySupport import CopyError
+from zExceptions import BadRequest
 
 from . import schema
 
@@ -43,6 +44,8 @@ NOVAHOST_PLUGINS = ['zenoss.cmd.linux.openstack.nova',
 
 
 class ZenPack(schema.ZenPack):
+    UNINSTALLING = False
+
     def install(self, app):
         self._migrate_productversions()
         self._update_plugins('/Server/SSH/Linux/NovaHost')
@@ -56,7 +59,7 @@ class ZenPack(schema.ZenPack):
         try:
             self.dmd.Devices.Server.SSH.Linux.NovaHost._updateProperty(
                 'zOpenStackNeutronConfigDir', '/etc/neutron')
-        except AttributeError:
+        except (AttributeError, BadRequest):
             pass
 
     def _update_plugins(self, organizer):
@@ -91,7 +94,11 @@ class ZenPack(schema.ZenPack):
                         raise Exception("Version '%s' is invalid or already in use." % new_version)
 
     def remove(self, app, leaveObjects=False):
-        super(ZenPack, self).remove(app, leaveObjects=leaveObjects)
+        try:
+            ZenPack.UNINSTALLING = True
+            super(ZenPack, self).remove(app, leaveObjects=leaveObjects)
+        finally:
+            ZenPack.UNINSTALLING = False
 
     def chmodScripts(self):
         for script in ('poll_openstack.py',
