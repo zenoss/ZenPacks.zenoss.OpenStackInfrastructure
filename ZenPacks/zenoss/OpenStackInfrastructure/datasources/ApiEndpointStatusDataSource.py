@@ -286,7 +286,7 @@ class ApiEndpointStatusDataSourcePlugin(PythonDataSourcePlugin):
             'eventKey': ds0.params['url']
         })
 
-        log.error('%s: %s', config.id, data['events'][-1]['summary'])
+        log.error('%s: %s', config.id, summary)
 
         return data
 
