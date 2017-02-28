@@ -732,6 +732,8 @@ to this ID value. For example:
 
 == Changes ==
 
+;2.3.3
+
 ;2.3.2
 * Wrap brain.getObject() into try/except block (ZPS-442)
 
