@@ -20,10 +20,15 @@ zProperties: !ZenPackSpec
     type: lines
   zOpenStackHostMapSame:
     type: lines
-  zOpenStackNeutronConfigDir: {}
-  zOpenStackRunNovaManageInContainer: {}
-  zOpenStackRunVirshQemuInContainer: {}
-  zOpenStackRunNeutronCommonInContainer: {}
+  zOpenStackNeutronConfigDir:
+    default: /etc/neutron
+  zOpenStackRunNovaManageInContainer:
+    default: ''
+  zOpenStackRunVirshQemuInContainer:
+    default: ''
+  zOpenStackRunNeutronCommonInContainer:
+    default: ''
+
 class_relationships:
 # Containing Relations
 - Endpoint(components) 1:MC OpenstackComponent
@@ -87,11 +92,7 @@ device_classes: !ZenPackSpec
   /Server/SSH/Linux/NovaHost:
     remove: True
     zProperties:
-      zOpenStackNeutronConfigDir: /etc/neutron
       zSshConcurrentSessions: 5
-      zOpenStackRunNovaManageInContainer: ''
-      zOpenStackRunVirshQemuInContainer: ''
-      zOpenStackRunNeutronCommonInContainer: ''
   /OpenStack: {}
   /OpenStack/Infrastructure:
     remove: true
