@@ -429,7 +429,7 @@ performance data will not be collected until the following steps are performed.
 
 ===Zenoss Configuration Steps===
 
-On the Zenoss host in Zenoss 4.X, or RabbitMQ container in Zenoss 5.X:
+On the Zenoss host in Zenoss 4.X, or zope container in Zenoss 5.X:
 
 * ssh in as the Zenoss user:
 * export ZPDIR=$ZENHOME/ZenPacks/ZenPacks.zenoss.OpenStackInfrastructure*
@@ -485,43 +485,9 @@ Next install the stable versions of 1.1.0 RPM:
   $ rpm -Uvh <ceilometer_zenoss rpm>
 </syntaxhighlight>
 
-The following configuration must be added to /etc/ceilometer/ceilometer.conf file:
-
-<syntaxhighlight lang="text">
-  [notification]
-  # Save event details.
-  store_events=True
-
-  [dispatcher_zenoss]
-  # Device that the OpenStack environment is registered as in Zenoss.
-  zenoss_device = ...
-  # The port number to which the underlying TCP connection is made.
-  # Usually, AMQP port is 5672.
-  amqp_port = ...
-  # Valid AMQP user id.
-  amqp_userid = ...
-  # Valid AMQP password for the above user id.
-  amqp_password = ...
-  # The name of the "virtual host" (or vhost) that specifies the namespace 
-  # for entities (exchanges and queues) referred to by the protocol.
-  amqp_virtual_host = ...
-  # It must be an accessible interface from your OpenStack system,
-  # and that interface must be one that accepts AMQP connections for your Zenoss installation.
-  amqp_hostname = ...
-</syntaxhighlight>
-
-For Liberty and prior versions, in the [DEFAULT] section, add the line:
-<syntaxhighlight lang="text">
-  dispatcher = zenoss
-</syntaxhighlight>
-
-For Mitaka and newer versions, in the [DEFAULT] section, add the lines:
-<syntaxhighlight lang="text">
-  meter_dispatchers = zenoss
-  event_dispatchers = zenoss
-</syntaxhighlight>
-
-;The order of the sections is important, the [dispatcher_zenoss] section needs to be added at the end of ceilometer.conf file.
+Ensure that the configuration options output by the openstack_amqp_config
+script previously are added to /etc/ceilometer/ceilometer.conf file on
+all openstack nodes.
 
 {{note}} Please restart all Ceilometer services on all hosts after making these changes.
 
@@ -556,13 +522,6 @@ For Mitaka:
 <syntaxhighlight lang="text">
   [oslo_messaging_notifications]
   driver = messagingv2
-</syntaxhighlight>
-
-These two entries should be under the section [vnc], not under [DEFAULT]
-<syntaxhighlight lang="text">
-  [vnc]
-  novncproxy_host=0.0.0.0
-  novncproxy_port=6080
 </syntaxhighlight>
 
 Save /etc/nova/nova.conf and restart nova services.

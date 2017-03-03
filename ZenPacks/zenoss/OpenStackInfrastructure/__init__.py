@@ -29,8 +29,6 @@ log = logging.getLogger('zen.OpenStack')
 
 from Products.ZenUtils.Utils import unused
 from OFS.CopySupport import CopyError
-from zExceptions import BadRequest
-from Products.ZenModel.ZenPack import DirectoryConfigContents
 
 from . import schema
 from service_migration import install_migrate_zenpython, remove_migrate_zenpython, fix_service_healthcheck_path

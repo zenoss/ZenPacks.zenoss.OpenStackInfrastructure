@@ -31,7 +31,8 @@ class DefaultZProps(ZenPackMigration):
         dmd = pack.dmd
 
         set_default_if_none = {
-            'zOpenStackNeutronConfigDir': '/etc/neutron'
+            'zOpenStackNeutronConfigDir': '/etc/neutron',
+            'zOpenStackAMQPUsername': 'openstack'
         }
 
         remove_local_copy_if_default = {

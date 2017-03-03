@@ -28,7 +28,8 @@ zProperties: !ZenPackSpec
     default: ''
   zOpenStackRunNeutronCommonInContainer:
     default: ''
-  zOpenStackAMQPUsername: {}    
+  zOpenStackAMQPUsername: 
+    default: openstack
   zOpenStackAMQPPassword:
     type: password
 
