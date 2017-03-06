@@ -28,6 +28,10 @@ zProperties: !ZenPackSpec
     default: ''
   zOpenStackRunNeutronCommonInContainer:
     default: ''
+  zOpenStackAMQPUsername: 
+    default: openstack
+  zOpenStackAMQPPassword:
+    type: password
 
 class_relationships:
 # Containing Relations
@@ -122,6 +126,10 @@ device_classes: !ZenPackSpec
             type: Python
             plugin_classname: ZenPacks.zenoss.OpenStackInfrastructure.dsplugins.MaintenanceDataSourcePlugin
             cycletime: 600
+          rabbitmq-credentials:
+            type: Python
+            plugin_classname: ZenPacks.zenoss.OpenStackInfrastructure.dsplugins.RabbitMQCeilometerCredentialsDataSourcePlugin
+            cycletime: 300
           openstack:
             type: COMMAND
             commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/poll_openstack.py

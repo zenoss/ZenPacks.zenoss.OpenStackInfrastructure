@@ -20,27 +20,32 @@ $ZENHOME/ZenPacks/easy-install.pth.
 
 from . import zenpacklib
 
-#------------------------------------------------------------------------------
-# Load Yaml here
-#------------------------------------------------------------------------------
+# Load YAML
 CFG = zenpacklib.load_yaml()
 
-#------------------------------------------------------------------------------
 import os
 import logging
 log = logging.getLogger('zen.OpenStack')
 
 from Products.ZenUtils.Utils import unused
 from OFS.CopySupport import CopyError
-from zExceptions import BadRequest
 
 from . import schema
+from service_migration import install_migrate_zenpython, remove_migrate_zenpython, fix_service_healthcheck_path
 
 NOVAHOST_PLUGINS = ['zenoss.cmd.linux.openstack.nova',
                     'zenoss.cmd.linux.openstack.libvirt',
                     'zenoss.cmd.linux.openstack.inifiles',
                     'zenoss.cmd.linux.openstack.hostfqdn',
                     ]
+
+try:
+    import servicemigration as sm
+    from Products.ZenModel.ZenPack import DirectoryConfigContents
+    sm.require("1.0.0")
+    VERSION5 = True
+except ImportError:
+    VERSION5 = False
 
 
 class ZenPack(schema.ZenPack):
@@ -49,18 +54,27 @@ class ZenPack(schema.ZenPack):
     def install(self, app):
         self._migrate_productversions()
         self._update_plugins('/Server/SSH/Linux/NovaHost')
-        self._update_properties()
         super(ZenPack, self).install(app)
-        self.chmodScripts()
+        install_migrate_zenpython()
+        if VERSION5:
+            try:
+                ctx = sm.ServiceContext()
+            except sm.ServiceMigrationError:
+                log.info("Couldn't generate service context, skipping.")
+                return
+            rabbitmq_ceil = filter(lambda s: s.name == "RabbitMQ-Ceilometer", ctx.services)
+            if not rabbitmq_ceil:
+                # from line 1278 of ZenPack.py
+                log.info("Loading RabbitMQ-Ceilometer service definition during upgrade")
+                sdFiles = self.getServiceDefinitionFiles()
+                toConfigPath = lambda x: os.path.join(os.path.dirname(x), '-CONFIGS-')
+                configFileMaps = [DirectoryConfigContents(toConfigPath(i)) for i in sdFiles]
+                self.installServicesFromFiles(sdFiles, configFileMaps, self.getServiceTag())
 
-    def _update_properties(self):
-        # ZEN-23536: Update zOpenStackNeutronConfigDir property type
-        # for existing /Server/SSH/Linux/NovaHost device class.
-        try:
-            self.dmd.Devices.Server.SSH.Linux.NovaHost._updateProperty(
-                'zOpenStackNeutronConfigDir', '/etc/neutron')
-        except (AttributeError, BadRequest):
-            pass
+            # Fix zenpack-provided healthcheck file paths (since the zenpack's)
+            # directory may change during install/upgrade
+            fix_service_healthcheck_path()
+        self.chmodScripts()
 
     def _update_plugins(self, organizer):
         log.debug('Update plugins list for NovaHost organizer')
@@ -99,6 +113,8 @@ class ZenPack(schema.ZenPack):
             super(ZenPack, self).remove(app, leaveObjects=leaveObjects)
         finally:
             ZenPack.UNINSTALLING = False
+
+        remove_migrate_zenpython()
 
     def chmodScripts(self):
         for script in ('poll_openstack.py',
