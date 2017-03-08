@@ -143,7 +143,8 @@ if __name__ == '__main__':
         from Products.ZenUtils.controlplane import ControlPlaneClient
 
         client = ControlPlaneClient(**getConnectionSettings())
-        for svc in client.queryServices('RabbitMQ-Ceilometer'):
+        for svc_id in [x.id for x in client.queryServices() if x.name == 'RabbitMQ-Ceilometer']:
+            svc = client.getService(svc_id)
             for ceil_endpoint in filter(lambda s: s['Name'] == 'rabbitmq_ceil', svc.getRawData()['Endpoints']):
                 try:
                     ip = ceil_endpoint['AddressAssignment']['IPAddr']
