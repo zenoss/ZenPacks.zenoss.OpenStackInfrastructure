@@ -325,7 +325,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 hostmap.add_hostref(agent['host'], source="neutron agents")
 
         for service in results['cinder_services']:
-            if 'host' in agent:
+            if 'host' in service:
                 hostmap.add_hostref(service['host'], source="cinder services")
 
         for hostname in results['zOpenStackNovaApiHosts']:
@@ -374,7 +374,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 agent['host'] = hostmap.get_hostid(agent['host'])
 
         for service in results['cinder_services']:
-            if 'host' in agent:
+            if 'host' in service:
                 service['host'] = hostmap.get_hostid(service['host'])
 
         results['zOpenStackNovaApiHosts'] = \
