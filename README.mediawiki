@@ -733,6 +733,7 @@ to this ID value. For example:
 == Changes ==
 
 ;2.3.3
+* Fix error in modeler when neutron agent extension is not available (ZPS-1243)
 
 ;2.3.2
 * Wrap brain.getObject() into try/except block (ZPS-442)
