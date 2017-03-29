@@ -47,7 +47,9 @@ class TestHostMap(BaseTestCase):
                 'test1': '1.2.3.4',
                 'test1.example.com': '1.2.3.4',
                 'test2': '1.2.3.5',
-                'test2.example.com': '1.2.3.5'
+                'test2.example.com': '1.2.3.5',
+                'test1.localdomain': '127.0.0.1',
+                'test2.localdomain': '127.0.0.1'
             })
         self._real_resolve_names = hostmap.resolve_names
         hostmap.resolve_names = resolve_names
@@ -133,6 +135,20 @@ class TestHostMap(BaseTestCase):
         self.assertEquals(hostmap.get_hostid("test1"), "host-test1.example.com")
         self.assertEquals(hostmap.get_hostid("test1:somecrazysuffix_thatisreallylong"), "host-test1.example.com")
 
+    def test_localdomain(self):
+        # See ZPS-1244 for details- in short, any hostname ending in .localdomain
+        # will resolve to 127.0.0.1 on our hosts, and some tripleO deployment models
+        # end up with hosts self-identifying with such hostnames.
+        # While this will cause other issues, at least hostmap should not conflate
+        # them.
+        hostmap = HostMap()
+        hostmap.add_hostref("test1.localdomain")
+        hostmap.add_hostref("test2.localdomain")
+
+        self.perform_mapping(hostmap)
+
+        # We want this to resolve to two host IDs, not be consolidated into one.
+        self.assertEquals(len(hostmap.all_hostids()), 2)
 
 def test_suite():
     from unittest import TestSuite, makeSuite
