@@ -723,6 +723,10 @@ endpoint). Allow user to specify additional ones via
 zOpenStackExtraApiEndpoints. Supported API services are included in the
 provided ApiEndpoint monitoring template.
 
+2.3.3
+- Fix error in modeler when neutron agent extension is not available (ZPS-1243)
+- Fix certain problems modeling openstack environments where hosts have .localdomain names (ZPS-1244)
+
 2.3.2
 
 - Wrap brain.getObject() into try/except block (ZPS-442)
