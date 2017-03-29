@@ -26,7 +26,7 @@ from Products.ZenUtils.Utils import monkeypatch
 from Products.Zuul.interfaces import ICatalogTool
 from Products.AdvancedQuery import Eq
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
-from Products.ZenUtils.IpUtil import getHostByName
+from Products.ZenUtils.IpUtil import getHostByName, IpAddressError
 
 
 def onDeviceDeleted(object, event):
@@ -176,7 +176,11 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
             device = self.proxy_deviceclass().createInstance(device_name)
             device.setProdState(self.productionState)
             device.setPerformanceMonitor(self.getPerformanceServer().id)
-            device.setManageIp()
+            try:
+                device.setManageIp()
+            except IpAddressError:
+                LOG.warning("Unable to set management IP based on %s", device_name)
+
 
         device.index_object()
         notify(IndexingEvent(device))

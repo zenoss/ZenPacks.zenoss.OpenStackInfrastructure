@@ -158,6 +158,10 @@ class HostMap(object):
         resolved_by_ip = defaultdict(set)
         for name, ip in resolved.iteritems():
             if ip is not None:
+                if ip.startswith("127."):
+                    log.debug("  %s resolves to an apparent local IP (%s) - ignoring it.", name, ip)
+                    continue
+
                 resolved_by_ip[ip].add(name)
 
             # If the name and IP are known references, but might not
