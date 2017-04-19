@@ -84,12 +84,10 @@ class Instance(schema.Instance):
         for f in search(titleOrId=flavorname,
                         meta_type='OpenStackInfrastructureFlavor'):
             try:
-                flavor = f.getObject()
+                flavors.append(f.getObject().id)
             except Exception:
                 # ignore a stale entry
                 pass
-            else:
-                flavors.append(flavor)
         if len(flavors):
             flavor = sorted(flavors)[0]
             if len(flavors) > 1:
@@ -109,12 +107,10 @@ class Instance(schema.Instance):
         for i in search(titleOrId=imagename,
                         meta_type='OpenStackInfrastructureImage'):
             try:
-                image = i.getObject()
+                images.append(i.getObject().id)
             except Exception:
                 # ignore a stale entry
                 pass
-            else:
-                images.append(image)
         if len(images):
             image = sorted(images)[0]
             if len(images) > 1:
