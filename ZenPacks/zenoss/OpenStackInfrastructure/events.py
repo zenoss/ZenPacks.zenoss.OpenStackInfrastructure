@@ -810,9 +810,9 @@ MAPPERS = {
     'openstack|compute.instance.live_migration.pre.start': (instance_id, None),
     'openstack|compute.instance.live_migration.pre.end': (instance_id, None),
     'openstack|compute.instance.live_migration.post.dest.start': (instance_id, None),
-    'openstack|compute.instance.live_migration.post.dest.end':  (instance_id, None),
+    'openstack|compute.instance.live_migration.post.dest.end':  (instance_id, instance_update),
     'openstack|compute.instance.live_migration._post.start':  (instance_id, None),
-    'openstack|compute.instance.live_migration._post.end': (instance_id, instance_update),
+    'openstack|compute.instance.live_migration._post.end': (instance_id, None),
 
     'openstack|compute.instance.power_off.start':  (instance_id, instance_powering_off),
     'openstack|compute.instance.power_off.end':    (instance_id, instance_powered_off),
