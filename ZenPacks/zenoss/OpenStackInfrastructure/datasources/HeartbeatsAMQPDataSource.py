@@ -116,8 +116,8 @@ class HeartbeatsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
         device_id = config.id
 
         for host in expected_heartbeats:
-            hostname = host['hostnames'][0]
-            possible_hostnames = host['hostnames']
+            hostname = host['hostnames'][0].lower()
+            possible_hostnames = [h.lower() for h in host['hostnames']]
             required_processes = host['processes']
 
             heartbeat_hostname = None
@@ -187,7 +187,7 @@ class HeartbeatsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
     def processMessage(self, device_id, message, contentbody):
         # add heartbeats to last_heard_heartbeats on per host, per process base
         msg = {}
-        hostname = contentbody['hostname']
+        hostname = contentbody['hostname'].lower()
         processname = contentbody['processname']
 
         if hostname not in last_heard_heartbeats:
