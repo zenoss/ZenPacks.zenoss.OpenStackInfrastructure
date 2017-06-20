@@ -512,6 +512,12 @@ every 10 minutes. This can be adjusted by modifying the "interval: 600"
 line in your pipeline.yaml file (typically
 /etc/ceilometer/pipeline.yaml).
 
+#### Troubleshooting
+
+For additional details on ceilometer integration and troubleshooting tips,
+please reference this [knowledgebase article](https://support.zenoss.com/hc/en-us/articles/115001165446-Understanding-and-Troubleshooting-OpenStack-Ceilometer-Integration-with-Zenoss-Resource-Manager).
+
+
 Host Identification
 -------------------
 
