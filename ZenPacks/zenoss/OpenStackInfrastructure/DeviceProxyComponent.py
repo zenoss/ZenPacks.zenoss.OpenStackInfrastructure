@@ -285,6 +285,12 @@ class PostEventPlugin(object):
     implements(IPostEventPlugin)
 
     def apply(self, eventProxy, dmd):
+
+        # See ZPS-1677 for explanation.  This workaround will hopefully be
+        # removed in the future (ZPS-1685)
+        if eventProxy.eventClass == '/Status/Ping':
+            return
+
         device = dmd.Devices.findDeviceByIdExact(eventProxy.device)
 
         if device and hasattr(device, 'openstackProxyComponentUUID'):
