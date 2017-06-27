@@ -154,7 +154,7 @@ class PerfAMQPDataSourcePlugin(AMQPDataSourcePlugin):
 
     @inlineCallbacks
     def collect(self, config):
-        log.debug("Collect for OpenStack AMQP (%s)" % config.id)
+        log.debug("Collect for OpenStack AMQP Perf (%s)" % config.id)
 
         data = yield super(PerfAMQPDataSourcePlugin, self).collect(config)
         device_id = config.configId

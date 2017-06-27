@@ -116,6 +116,7 @@ class HostMap(object):
         self.mapping[hostref] = None
 
     def assert_host_id(self, hostref, hostid):
+        log.debug("assert_host_id: %s=%s", hostref, hostid)
         self.asserted_host_id[hostref] = hostid
 
     def assert_same_host(self, hostref1, hostref2, source="Unknown", oneway=False):
@@ -135,24 +136,35 @@ class HostMap(object):
         if hostref1 == hostref2:
             return
 
+        log.debug("assert_same_host: (Source=%s) %s=%s", source, hostref1, hostref2)
         self.asserted_same[hostref1][hostref2] = source
 
         if not oneway:
+            log.debug("assert_same_host: (Source=%s) %s=%s  (symmetric)", source, hostref2, hostref1)
             self.asserted_same[hostref2][hostref1] = source
 
+    def all_asserted_same(self, hostref_a, seen=None, sources=None):
+        # recursively search for all hostrefs that are the same as the one
+        # passed in.
+
+        if seen is None:
+            seen = set(hostref_a)
+
+        if sources is None:
+            sources = []
+
+        same = []
+        for hostref_b, source in self.asserted_same[hostref_a].iteritems():
+            if hostref_b not in seen:
+                path_source = sources + ["%s: %s" % (hostref_b, source)]
+                seen.add(hostref_b)
+                same.append((hostref_b, path_source))
+                same.extend(self.all_asserted_same(hostref_b, seen=seen, sources=path_source))
+
+        return same
+
     @defer.inlineCallbacks
-    def perform_mapping(self):
-        """
-        Once all hostrefs have been registered, and all assertions made,
-        perform_mapping is called to resolve all these hostrefs to host IDs.
-
-        It takes into account frozen mappings and assertions, as well other
-        rules about how to map hosts to IDs and hostnames.
-
-        Once this is called, the all_hostids, get_hostid, and
-        get_hostname_for_hostid functions are available.
-        """
-
+    def resolve_and_assert_hostnames(self):
         log.debug("Resolving all referenced hostnames")
 
         # (ignore the obviously bogus ones, just to save time)
@@ -182,8 +194,27 @@ class HostMap(object):
                 if self.has_hostref(hostref1) and self.has_hostref(hostref2):
                     self.assert_same_host(hostref1, hostref2, source="Resolve to same IP")
 
-        new_mapping = {}
-        original_name = {}
+    @defer.inlineCallbacks
+    def perform_mapping(self):
+        """
+        Once all hostrefs have been registered, and all assertions made,
+        perform_mapping is called to resolve all these hostrefs to host IDs.
+
+        It takes into account frozen mappings and assertions, as well other
+        rules about how to map hosts to IDs and hostnames.
+
+        Once this is called, the all_hostids, get_hostid, and
+        get_hostname_for_hostid functions are available.
+        """
+
+        # Resolve all the hostnames and assert equality between hostnames with
+        # the same IP
+        yield self.resolve_and_assert_hostnames()
+
+        # Determine "naive" mappings for all hostrefs.  These are
+        # simple IDs based on the hostref with a host-prefix and a little
+        # light cleanup.
+        naive_mapping = {}
         for hostref in self.mapping:
             # Strip anything after an '@' or ':" and convert to lowercase.
             clean_hostref = re.sub(r'[@:].*$', '', hostref).lower()
@@ -191,48 +222,78 @@ class HostMap(object):
             # Remove any whitespace.
             clean_hostref = re.sub(r'\s', '', clean_hostref)
 
-            # Remember what the original one was.
-            original_name[clean_hostref] = hostref
+            # If that "cleaned up" hostref (that is, after we stripped
+            # off suffixes and whitespace) has also been seen, we can
+            # safely assume that they're the same underlying host.
+            if clean_hostref in self.mapping:
+                self.assert_same_host(
+                    hostref, clean_hostref,
+                    source="Cleaned name vs original name", oneway=True)
 
-            naive_hostid = prepId("host-{0}".format(clean_hostref))
+            naive_mapping[hostref] = prepId("host-{0}".format(clean_hostref))
 
+        new_mapping = {}
+        for hostref in self.mapping:
+            if hostref in new_mapping:
+                log.debug("Since hostref %s is already mapped to %s, skipping it", hostref, self.mapping[hostref])
+                continue
+
+            naive_hostid = naive_mapping[hostref]
             log.debug("Potential host mapping: %s -> %s", hostref, naive_hostid)
             new_mapping[hostref] = naive_hostid
 
-        # when we've seen both the cleaned name and the original name in
-        # different places, it's important to remember that they're the same.
-        for clean, orig in original_name.iteritems():
-            if clean in new_mapping and orig in new_mapping:
-                self.assert_same_host(orig, clean, source="Cleaned name vs original name", oneway=True)
+        already_logged = set()
+        for hostref in new_mapping:
+            # Apply the same mapping for other hostrefs that have been
+            # asserted (directly or indirectly) to be equivalent.
 
+            all_same = self.all_asserted_same(hostref)
+
+            other_hostrefs = set()
+            other_hostids = set()
+            for hostref_b, source_b in all_same:
+                other_hostrefs.add(hostref_b)
+                other_hostids.add(naive_mapping[hostref_b])
+
+            if len(other_hostids) > 1:
+                # choose the longest host ID as the one to use for all
+                # of these hostrefs.   Seems deterministic, and it's no
+                # more right or wrong than any other selection..
+                best_hostid = max(other_hostids, key=len)
+
+                ids = tuple(sorted(set(list(other_hostrefs) + [hostref])))
+                if ids not in already_logged:
+                    already_logged.add(ids)
+                    log.debug(
+                        "[%s] Multiple possible host IDs found for %s.  Selected %s",
+                        hostref,
+                        ", ".join(ids),
+                        best_hostid)
+
+                # Store that.
+                new_mapping[hostref] = best_hostid
+                # Store it for the other equivalent hostrefs too.
+                for hostref_b in other_hostrefs:
+                    source_b = ", ".join(itertools.chain.from_iterable([x[1] for x in all_same if x[0] == hostref_b]))
+                    if new_mapping[hostref_b] != best_hostid:
+                        log.debug(
+                            "  Extending potential mapping to %s -> %s same because of (%s)",
+                            hostref_b, best_hostid, source_b)
+                        new_mapping[hostref_b] = best_hostid
+
+        # apply user-asserted host IDs
         for hostref in new_mapping:
             if hostref in self.asserted_host_id:
                 log.debug("Forcing ID of %s to %s (asserted host ID)", hostref, self.asserted_host_id[hostref])
                 new_mapping[hostref] = self.asserted_host_id[hostref]
+
+                # Note that this does not pull in other host references
+                # that have been asserted to be the same as this one-
+                # if a user is having to drop down to this level, they
+                # might have a reason to do something other than what we expect.
                 continue
 
-            # Enforce assertions about different identifiers referring to the same host.
-            if hostref in self.asserted_same:
-                same_as_keys = set([new_mapping[x] for x in self.asserted_same[hostref]])
-
-                if len(same_as_keys) > 1:
-                    log.warning("The host referred to as '%s' is asserted to be identical to multiple hosts with conflicting IDs", hostref)
-                    for same_as in sorted(self.asserted_same[hostref]):
-                        log.error(" %s = %s = %s", hostref, same_as, new_mapping[same_as])
-                    same_as = sorted(self.asserted_same[hostref].keys())[0]
-                    if new_mapping[hostref] != new_mapping[same_as]:
-                        log.warning(" Selected %s (%s)", same_as, new_mapping[same_as])
-                        new_mapping[hostref] = new_mapping[same_as]
-                elif len(same_as_keys) == 1:
-                    same_as = self.asserted_same[hostref].keys()[0]
-                    if new_mapping[hostref] != new_mapping[same_as]:
-                        # choose the longest of the keys and use that for both.
-                        new_key = max([new_mapping[hostref], new_mapping[same_as]], key=len)
-
-                        log.debug("Since host %s is asserted to be identical to host %s, using ID %s for both", hostref, same_as, new_key)
-                        new_mapping[hostref] = new_key
-                        new_mapping[same_as] = new_key
-            elif hostref in self.frozen_mapping and new_mapping[hostref] != self.frozen_mapping[hostref]:
+            if hostref in self.frozen_mapping and new_mapping[hostref] != self.frozen_mapping[hostref]:
                 # if this hostref was previously mapped to a specific ID,
                 # maintain that mapping.
                 log.debug("Maintaining frozen mapping of host %s to ID %s", hostref, self.frozen_mapping[hostref])
