@@ -162,7 +162,8 @@ class PerfAMQPDataSourcePlugin(AMQPDataSourcePlugin):
         for ds in config.datasources:
             for entry in cache[device_id].get_perf(ds.params['resourceId'], ds.params['meter']):
                 log.debug("perf %s/%s=%s @ %s" % (ds.params['resourceId'], ds.params['meter'], entry.value, entry.timestamp))
-                data['values'][ds.component][ds.datasource] = (entry.value, entry.timestamp)
+                data['values'][ds.component].setdefault(ds.datasource, [])
+                data['values'][ds.component][ds.datasource].append((entry.value, entry.timestamp))
 
         # Look for new vNICs that we are getting data for from ceilometer, but
         # are not modeled in zenoss yet.  (vnic modeling only happens
