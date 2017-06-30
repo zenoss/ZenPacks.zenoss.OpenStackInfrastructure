@@ -57,19 +57,21 @@ def openstackInstance(self):
 
     # Nope?  OK, go to MAC addresses.
     instances = set()
-    macs = getIpInterfaceMacs(self)
     vnics = []
-    for v in catalog_search(
-            self.dmd.Devices,
-            'ZenPacks_zenoss_OpenStackInfrastructure_Vnic',
-            serialNumber=macs):
-        try:
-            vnic = v.getObject()
-        except Exception:
-            # ignore a stale entry
-            pass
-        else:
-            vnics.append(vnic)
+
+    macs = getIpInterfaceMacs(self)
+    if macs:
+        for v in catalog_search(
+                self.dmd.Devices,
+                'ZenPacks_zenoss_OpenStackInfrastructure_Vnic',
+                serialNumber=macs):
+            try:
+                vnic = v.getObject()
+            except Exception:
+                # ignore a stale entry
+                pass
+            else:
+                vnics.append(vnic)
 
     for vnic in vnics:
         instances.add(vnic.instance())
