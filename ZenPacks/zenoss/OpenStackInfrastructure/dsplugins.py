@@ -10,6 +10,7 @@
 import logging
 log = logging.getLogger('zen.OpenStack')
 
+import datetime
 from twisted.internet import defer
 from twisted.internet.defer import inlineCallbacks
 
@@ -32,8 +33,18 @@ zcml.load_config('configure.zcml', Products.ZenMessaging.queuemessaging)
 
 from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.txrabbitadminapi import RabbitMqAdminApiClient
 
+try:
+    import servicemigration as sm
+    sm.require("1.0.0")
+    VERSION5 = True
+except ImportError:
+    VERSION5 = False
+
 # cache of the last password set for each user during rabbitmq provisioning
 USER_PASSWORD = {}
+
+# and the last time it was checked
+USER_LASTCHECK = {}
 
 
 class MaintenanceDataSourcePlugin(PythonDataSourcePlugin):
@@ -80,11 +91,18 @@ class RabbitMQCeilometerCredentialsDataSourcePlugin(PythonDataSourcePlugin):
 
     @classmethod
     def config_key(cls, datasource, context):
-        # one task per username to provision (not per device)
+        # We would ideally run one task per username to provision.
+        # (not per device), but because the task splitter runs per device,
+        # this results in duplicate tasks, which fail silently to be allocated.
+        # (See ZEN-27883)
+        #
+        # Instead, we will run it once per device, but only perform the
+        # collection step a maximum of once every 5 minutes.
         return (
-            context.zOpenStackAMQPUsername,
+            context.device().id,
             datasource.getCycleTime(context),
             datasource.plugin_classname,
+            context.zOpenStackAMQPUsername
         )
 
     @classmethod
@@ -100,11 +118,27 @@ class RabbitMQCeilometerCredentialsDataSourcePlugin(PythonDataSourcePlugin):
         user = ds0.params['zOpenStackAMQPUsername']
         password = ds0.params['zOpenStackAMQPPassword']
 
+        if not VERSION5:
+            # This datasource is only applicable to v5.
+            defer.returnValue(None)
+
         if not user:
             # the task splitter will still consider no user as a valid
             # task differentiator.  So, if this is the task for the non
             # existant username, just exit without doing anything.
             defer.returnValue(None)
+
+        last_run = USER_LASTCHECK.get(user)
+        if last_run and datetime.datetime.now() - last_run < datetime.timedelta(minutes=5):
+            # This user has already been checked within the last
+            # 5 minutes.
+            log.debug(
+                "Skipping RabbitMQCeilometerCredentialsDataSourcePlugin for "
+                "user %s because it has already run recently", user)
+            defer.returnValue(None)
+
+        USER_LASTCHECK[user] = \
+            datetime.datetime.now()
 
         connectionInfo = getUtility(IAMQPConnectionInfo)
 
