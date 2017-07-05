@@ -64,7 +64,7 @@ def openstackInstance(self):
         for v in catalog_search(
                 self.dmd.Devices,
                 'ZenPacks_zenoss_OpenStackInfrastructure_Vnic',
-                serialNumber=macs):
+                macaddress=macs):
             try:
                 vnic = v.getObject()
             except Exception:
