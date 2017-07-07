@@ -108,19 +108,15 @@ used to force a host referred to by openstack with the given name to be
 represented in Zenoss as a host component with the given ID. (this is
 not commonly used) 
 - zOpenStackHostMapSame: A list of \<name1\>=\<name2\>,
-used to inform the modeler that the same host may be referred to with a
-different name by some part of openstack. (this is not commonly used) 
-- zOpenStackNeutronConfigDir: The path where to search for Neutron's
-configs. Default is /etc/neutron. 
-- zOpenStackProjectId: Corresponds to
-tenant name, project to work on. 
+used to inform the modeler that the same host may be referred to with an
+alternate name by some part of openstack. (this is not commonly used) 
+- zOpenStackNeutronConfigDir: Path to directory that contains Neutron configuration files. Default is /etc/neutron. 
+- zOpenStackProjectId: Corresponds to tenant name, project to work on. 
 - zOpenStackRegionName: The name of the OpenStack Region to use. Regions are 
 autonomous OpenStack clouds joined together through shared Keystone identity
 server and managed through a common interface. 
 - zOpenStackRunNovaManageInContainer, zOpenStackRunVirshQemuInContainer, zOpenStackRunNeutronCommonInContainer: 
-Used when openstack processes are running inside of docker containers. Provide 
-the container names (or a pattern to match them) here, or leave blank in a
-non-containerized openstack environment.
+Used when openstack processes are running inside of docker containers. Provide the container names (or a pattern to match them) here, or leave blank in a non-containerized openstack environment.
 
 ### Device Classes 
 - /OpenStack: Root OpenStack device class. Typically, devices should not be put in this device class. 
@@ -416,18 +412,41 @@ Although you may add an OpenStack device to Zenoss, as shown above,
 event and performance data will not be collected until the following
 steps are performed.
 
-### Zenoss Configuration Steps
+### Zenoss Configuration Steps - First-Time Installation
 
-On the Zenoss host in Zenoss 4.x, or zope container in Zenoss 5.x:
+The first time you install this zenpack, you must run `openstack_amqp_config` to create the RabbitMQ exchanges that are used to integrate with ceilometer.  
+
+To run this script, log into the master server (Zenoss 4.x) or Zope container (zenoss 5.x) and run it as follows:
 
 ``` {.bash}
 $ $ZENHOME/ZenPacks/ZenPacks.zenoss.OpenStackInfrastructure/ZenPacks/zenoss/OpenStackInfrastructure/bin/openstack_amqp_config
 ```
 
-This script will create a new user in RabbitMQ and set up its
-permissions. It will print out the proper values to use for
-amqp_hostname, amqp_port, amqp_userid, amqp_password, and
-amqp_virtualhost during ceilometer configuration (see below)
+It will do the following:
+
+* If not already set, populate the `zOpenStackAMQPUsername` and `zOpenStackAMQPPassword` zProperties.   (Generating a random password)
+* Create the required AMQP exchanges in RabbitMQ if they are missing
+* Register the user from `zOpenStackAMQPUsername` in rabbitmq and update its password to match `zOpenStackAMQPPassword`.
+* Display the configuration parameters that you will need to add to the `ceilometer.conf` file on your OpenStack servers (see below.)
+
+You may safely re-run `openstack_amqp_config` at any time to display the
+configuration parameters, or to update the username/password after you have changed `zOpenStackAMQPUsername` and `zOpenStackAMQPPassword`
+
+### Zenoss Configuration Steps - ZenPack Upgrades
+
+If this is the first time you are upgrading from a version of the zenpack prior to 2.4.0, you should first set `zOpenStackAMQPUsername` and `zOpenStackAMQPPassword` to match the values of `amqp_userid` and `amqp_password` from `ceilometer.conf` on your openstack systems.
+
+If you do not do this, if you run `openstack_amqp_config` in the future, it will generate a new password and reconfigure rabbitmq to use that password instead of the one you have been using, which would interrupt monitoring.
+
+For upgrade from version 2.4.0 or higher, there are no special steps required, no changes required on the OpenStack side, and no need to run `openstack_amqp_config`.
+
+### Zenoss 5.x - RabbitMQ-Ceilometer
+
+Version 2.4.0 of this zenpack introduces a new service, `RabbitMQ-Ceilometer`.  This is a dedicated instance of RabbitMQ on each collector which is used solely for integration with ceilometer, rather than using the standard `RabbitMQ` service that is used by Zenoss itself.  This better distributes any load as well as providing better support for distributed collector scenarios where the target OpenStack environment might not have network access to the central Zenoss servers.
+
+This ZenPack still supports the previous configuration, where messages were sent from ceilometer to the main `RabbitMQ` service in zenoss,  so if you were previously using it that way successfully, there is no need to reconfigure your ceilometer.conf to point it at the new location.
+
+For new openstack installs, we recommend using the RabbitMQ-Ceilometer endpoint, which is what will be reported by `openstack_amqp_config`.
 
 ### OpenStack Ceilometer Configuration Steps
 
