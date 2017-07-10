@@ -481,12 +481,18 @@ Alternatively, the module may be installed from source as follows:
 
 ``` {.bash]
 $ sudo pip -q install --force-reinstall https://github.com/zenoss/ceilometer_zenoss/archive/master.zip 
-$ sudo cp /usr/lib/*/site-packages/ceilometer_zenoss/event_definitions.yaml /etc/ceilometer/ 
 ```
 
-Once ceilometer_zenoss is installed, ensure that the configuration options
-output by the openstack_amqp_config script previously are added to
-/etc/ceilometer/ceilometer.conf file on all openstack nodes.
+It is then necessary to install a modified `/etc/ceilometer/event_definitions.yaml` file that
+is included in ceilometer_zenoss:
+
+``` {.bash}
+$ sudo cp /usr/lib/*/site-packages/ceilometer_zenoss/event_definitions.yaml /etc/ceilometer/
+```
+
+Then, ensure that the configuration options output by the `openstack_amqp_config`
+script previously are added to /etc/ceilometer/ceilometer.conf file on all
+openstack nodes.
 
 Restart all Ceilometer services on all hosts after making these changes.
 
