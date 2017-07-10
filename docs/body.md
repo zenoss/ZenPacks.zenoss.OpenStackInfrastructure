@@ -404,6 +404,16 @@ exposed via the Zenoss Event Console, and all metrics collected by Ceilometer
 may be collected and graphed in Zenoss through the use of custom monitoring 
 templates.
 
+Daemons
+-------
+
++--------------------------------------+--------------------------------------+
+| Type                                 | Name                                 |
++======================================+======================================+
+| Modeler                              | zenmodeler                           |
++--------------------------------------+--------------------------------------+
+| Performance Collector                | zencommand, zenpython                |
++--------------------------------------+--------------------------------------+
 
 Ceilometer Enablement
 ---------------------
