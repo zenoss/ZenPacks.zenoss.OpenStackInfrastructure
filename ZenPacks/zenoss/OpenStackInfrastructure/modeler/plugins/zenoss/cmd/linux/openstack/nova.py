@@ -1,7 +1,7 @@
 ###########################################################################
 #
 # This program is part of Zenoss Core, an open source monitoring platform.
-# Copyright (C) 2014, Zenoss Inc.
+# Copyright (C) 2014-2017, Zenoss Inc.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 or (at your
@@ -25,6 +25,31 @@ from ZenPacks.zenoss.OpenStackInfrastructure.ssh import SSHClient
 add_local_lib_path()
 
 import re
+
+def get_productKey(version):
+    VERSION_MAP = [
+        # in order versions, we used the returned version as the product key
+        ('2013',   version),   # Havana
+        ('2014.1', version),   # Icehouse
+        ('2014.2', version),   # Juno
+        ('2015.1', version),   # Kilo
+        ('2015.2', version),   # Liberty
+        ('2016.1', version),   # Mitaka
+
+        # Moving forward, we are using the product name as the product key.
+        # This will automatically create new products with that name, as well,
+        # if we don't include them in objects.xml, so that's a nice side effect.
+        ('14',    'Newton'),
+        ('15',    'Ocata'),
+        ('16',    'Pike'),
+    ]
+
+    for prefix, productKey in VERSION_MAP:
+        if version.startswith(prefix):
+            return productKey
+
+    # Unrecognized?  Well, just return the version and we'll use that.
+    return version
 
 
 class nova(PythonPlugin):
@@ -88,9 +113,10 @@ class nova(PythonPlugin):
             match = matcher.search(line)
             if match:
                 version = match.group('version')
+                productKey = get_productKey(version)
                 openstack_om = ObjectMap({
                     'compname': 'os',
-                    'setProductKey': MultiArgs(version, 'OpenStack')
+                    'setProductKey': MultiArgs(productKey, 'OpenStack')
                 })
 
                 return [ObjectMap({
