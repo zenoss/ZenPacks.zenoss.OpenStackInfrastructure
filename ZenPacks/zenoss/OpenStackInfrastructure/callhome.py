@@ -21,12 +21,18 @@ from Products.ZenCallHome import IDeviceResource
 from .Host import Host
 from .Hypervisor import Hypervisor
 from .Instance import Instance
+from .Router import Router
+from .Network import Network
+from .Volume import Volume
 
 # Exports
 __all__ = [
     'OSI_HOSTS',
     'OSI_HYPERVISORS',
     'OSI_INSTANCES',
+    'OSI_ROUTERS',
+    'OSI_NETWORKS',
+    'OSI_VOLUMES',
     'OSIResource',
     ]
 
@@ -34,6 +40,9 @@ __all__ = [
 OSI_HOSTS = 'OpenStack Infrastructure Host Count'
 OSI_HYPERVISORS = 'OpenStack Infrastructure Hypervisor Count'
 OSI_INSTANCES = 'OpenStack Infrastructure Instance Count'
+OSI_ROUTERS = 'OpenStack Infrastructure Router Count'
+OSI_NETWORKS = 'OpenStack Infrastructure Network Count'
+OSI_VOLUMES = 'OpenStack Infrastructure Volume Count'
 
 
 class OSIResource(object):
@@ -52,14 +61,20 @@ class OSIResource(object):
         Consider the following counters:
 
         * OpenStackInfrastructureController Host Count
-        * OpenStackInfrastructure Spine Hypervisor Count
-        * OpenStackInfrastructure Leaf Instance Count
+        * OpenStackInfrastructure Hypervisor Count
+        * OpenStackInfrastructure Instance Count
+        * OpenStackInfrastructure Router Count
+        * OpenStackInfrastructure Network Count
+        * OpenStackInfrastructure Volume Count
 
         """
         counter_keys = (
             OSI_HOSTS,
             OSI_HYPERVISORS,
             OSI_INSTANCES,
+            OSI_ROUTERS,
+            OSI_NETWORKS,
+            OSI_VOLUMES
             )
 
         # Initialize counters if needed.
@@ -74,3 +89,9 @@ class OSIResource(object):
         context[OSI_HYPERVISORS] += len(hypervisors)
         instances = self.device.componentSearch(meta_type=Instance.meta_type)
         context[OSI_INSTANCES] += len(instances)
+        routers = self.device.componentSearch(meta_type=Router.meta_type)
+        context[OSI_ROUTERS] += len(routers)
+        networks = self.device.componentSearch(meta_type=Network.meta_type)
+        context[OSI_NETWORKS] += len(networks)
+        volumes = self.device.componentSearch(meta_type=Volume.meta_type)
+        context[OSI_VOLUMES] += len(volumes)
