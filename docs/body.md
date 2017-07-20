@@ -751,6 +751,7 @@ Known Issues
     - Workaround: If you have been previously monitoring the endpoint as a User endpoint, delete the device before you re-add it as an Infrastructure endpoint.
 - [ZEN-17905](https://jira.zenoss.com/browse/ZEN-17905): Nova APIs component: Grey icons for Enabled and State after model/monitor.
     - OpenStack nova service API does not provide information about Nova-API, so its status is, in fact, unknown.
+- ZPS-1762: When using OpenvSwitch integration, the Linux devices must be added to the system first (normally through automatic discovery by the OpenStackInfrastructure ZenPack) before the corresponding OpenvSwitch devices are registered.  This is because the two devices use the same management IP address, and a special exclusion is in place for OpenvSwitch devices, allowing them to be added after the linux device, but not the other way around.
 
 
 Changes
