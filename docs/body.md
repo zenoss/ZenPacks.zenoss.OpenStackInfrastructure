@@ -280,7 +280,7 @@ where <filename> should have the form:
 
 ```
 /Devices/OpenStack/Infrastructure loader='openstackinfrastructure',\
-    loader_arg_keys=['deviceName', 'username', 'api_key', 'project_id', 'auth_url', 'ceilometer_url', 'region_name', 'collector']
+    loader_arg_keys=['deviceName', 'username', 'api_key', 'project_id', 'auth_url', 'region_name', 'collector']
 <devicename> username='<username>', api_key='<password>', project_id='<tenant ID>', \
     auth_url='http://<ip address>:5000/v2.0/', region_name='RegionOne'
 

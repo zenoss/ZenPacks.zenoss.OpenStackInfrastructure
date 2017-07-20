@@ -2,7 +2,6 @@ name: ZenPacks.zenoss.OpenStackInfrastructure
 zProperties: !ZenPackSpec
   DEFAULTS:
     category: OpenStack
-  zOpenStackCeilometerUrl: {}
   zOpenStackExtraHosts:
     type: lines
   zOpenStackHostDeviceClass:
