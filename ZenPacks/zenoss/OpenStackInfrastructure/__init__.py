@@ -146,7 +146,7 @@ class ZenPack(schema.ZenPack):
             'type': 'string'
         },
         'zOpenStackAMQPPassword': {
-            'label': 'Username for ceilometer AMQP integration',
+            'label': 'Password for ceilometer AMQP integration',
             'description': 'See documentation for details.',
             'type': 'password'
         }

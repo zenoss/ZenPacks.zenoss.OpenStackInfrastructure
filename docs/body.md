@@ -89,7 +89,6 @@ Installed Items
 
 ### Configuration Properties 
 - zOpenStackAuthUrl: The URL of the Identity endpoint. 
-- zOpenStackCeilometerUrl: The URL to the Ceilometer API. 
 - zOpenStackExtraHosts: The list of extra hosts that will be added to the
 system once OpenStack Infrastructure device is modeled. 
 - zOpenStackExtraApiEndpoints: A list of URLs to monitor for openstack
@@ -764,6 +763,7 @@ Changes
 endpoint). Allow user to specify additional ones via
 zOpenStackExtraApiEndpoints. Supported API services are included in the
 provided ApiEndpoint monitoring template.
+- Removed zOpenStackCeilometerUrl zproperty, which was unused
 
 2.3.3
 - Fix error in modeler when neutron agent extension is not available (ZPS-1243)
