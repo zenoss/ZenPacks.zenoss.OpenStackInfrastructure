@@ -26,6 +26,7 @@ add_local_lib_path()
 
 import re
 
+
 def get_productKey(version):
     VERSION_MAP = [
         # in order versions, we used the returned version as the product key
@@ -34,11 +35,12 @@ def get_productKey(version):
         ('2014.2', version),   # Juno
         ('2015.1', version),   # Kilo
         ('2015.2', version),   # Liberty
-        ('2016.1', version),   # Mitaka
 
         # Moving forward, we are using the product name as the product key.
         # This will automatically create new products with that name, as well,
         # if we don't include them in objects.xml, so that's a nice side effect.
+        ('12',    'Liberty'),
+        ('13',    'Mitaka'),
         ('14',    'Newton'),
         ('15',    'Ocata'),
         ('16',    'Pike'),
