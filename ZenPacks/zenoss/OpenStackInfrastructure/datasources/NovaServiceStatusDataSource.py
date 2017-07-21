@@ -30,7 +30,7 @@ from ZenPacks.zenoss.OpenStackInfrastructure.hostmap import HostMap
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import result_errmsg, add_local_lib_path
 add_local_lib_path()
 
-from apiclients.txapiclient import APIClient
+from apiclients.txapiclient import NovaClient
 
 
 class NovaServiceStatusDataSource(PythonDataSource):
@@ -111,16 +111,17 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
         log.debug("Collect for OpenStack Nova Service Status (%s)" % config.id)
         ds0 = config.datasources[0]
 
-        client = APIClient(
+        nova = NovaClient(
             ds0.zCommandUsername,
             ds0.zCommandPassword,
             ds0.zOpenStackAuthUrl,
-            ds0.zOpenStackProjectId)
+            ds0.zOpenStackProjectId,
+            ds0.zOpenStackRegionName)
 
         results = {}
 
         log.debug('Requesting services')
-        result = yield client.nova_services()
+        result = yield nova.services()
         results['services'] = result['services']
 
         yield self.preprocess_hosts(config, results)
