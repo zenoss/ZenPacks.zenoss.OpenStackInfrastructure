@@ -147,32 +147,11 @@ var addOpenStack = new Zenoss.Action({
                         editable: false,
                         allowBlank: false,
                         triggerAction: 'all',
-                        selectOnFocus: false,
-                        listeners: {
-                            select: this.updateCeilometer,
-                            scope: this
-                        }
+                        selectOnFocus: false
                     },{
                         xtype: 'label',
                         style: 'font-style: italic',
                         text: '(OS_REGION_NAME)',
-                        margin: '0 0 0 10'
-                    }]
-                }, {
-                    xtype: 'container',
-                    layout: 'hbox',
-                    items: [{
-                        xtype: 'textfield',
-                        name: 'ceilometer_url',
-                        fieldLabel: _t('Ceilometer URL'),
-                        labelWidth: 120,
-                        id: "openstack_ceilometer_url",
-                        width: 350,
-                        allowBlank: true
-                    },{
-                        xtype: 'label',
-                        style: 'font-style: italic',
-                        text: '',
                         margin: '0 0 0 10'
                     }]
                 }, {
@@ -258,31 +237,8 @@ var addOpenStack = new Zenoss.Action({
         } else {
             store.removeAll()
         }
-    },
-
-    updateCeilometer: function () {
-        form = Ext.getCmp('addopenstackinfrastructure-form').getForm();
-        formvalues = form.getFieldValues();
-        ceil_url = Ext.getCmp('openstack_ceilometer_url');
-
-        if (formvalues.username && formvalues.api_key && formvalues.project_id && 
-            formvalues.auth_url && formvalues.region_name && ! formvalues.ceilometer_url) {
-
-            Zenoss.remote.OpenStackInfrastructureRouter.getCeilometerUrl({
-                    username: formvalues.username,
-                    api_key: formvalues.api_key,
-                    project_id: formvalues.project_id,
-                    auth_url: formvalues.auth_url,
-                    region_name: formvalues.region_name
-                },
-                function(response) {
-                    if (response.success) {
-                        ceil_url.setValue(response.data);
-                    }                            
-                }
-            );
-        }
     }
+
 });
 
 // Push the addOpenStack action to the adddevice button

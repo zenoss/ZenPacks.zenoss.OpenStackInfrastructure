@@ -156,7 +156,6 @@ class PerfCeilometerAPIDataSourcePlugin(PythonDataSourcePlugin):
     proxy_attributes = ('zCommandUsername',
                         'zCommandPassword',
                         'zOpenStackAuthUrl',
-                        'zPerfCeilometerAPIUrl',
                         'zOpenStackProjectId',
                         'zOpenStackRegionName',
                         'resourceId')

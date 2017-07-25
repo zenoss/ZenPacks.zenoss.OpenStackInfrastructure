@@ -44,30 +44,6 @@ class OpenstackHelper(object):
 
         returnValue([{'key': c, 'label': c} for c in sorted(regions)])
 
-    @inlineCallbacks
-    def getCeilometerUrl(self, username, api_key, project_id, auth_url, region_name):
-        """Return the first defined ceilometer URL, given a keystone endpoint,
-        credentials, and a region.  May return an empty string if none is found."""
-
-        client = APIClient(
-            username=username,
-            password=api_key,
-            project_id=project_id,
-            auth_url=auth_url,
-        )
-
-        serviceCatalog = yield client.serviceCatalog()
-
-        for sc in serviceCatalog:
-            if sc['type'] == 'metering':
-                for endpoint in sc['endpoints']:
-                    if endpoint['region'] == region_name:
-                        returnValue(str(endpoint['publicURL']))
-                        return
-
-        # never found one.
-        returnValue("")
-
 
 if __name__ == '__main__':
     from twisted.internet import reactor
@@ -80,7 +56,6 @@ if __name__ == '__main__':
 
     supported_methods = {
         'getRegions': ('username', 'api_key', 'project_id', 'auth_url',),
-        'getCeilometerUrl': ('username', 'api_key', 'project_id', 'auth_url', 'region_name',)
     }
 
     if methodname in supported_methods:
