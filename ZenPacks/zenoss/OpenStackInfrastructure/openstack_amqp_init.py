@@ -79,7 +79,7 @@ def create_exchanges():
 def create_default_credentials(dmd):
     print "Checking default credentials"
     dc = dmd.getObjByPath("Devices/OpenStack/Infrastructure")
-    if not dc.getZ('zOpenStackAMQPPassword'):
+    if not dc.getProperty('zOpenStackAMQPPassword'):
         print "Generating random default zOpenStackAMQPPassword"
         random_password = uuid.uuid4().bytes.encode("base64")[:15]
         dc.setZenProperty('zOpenStackAMQPPassword', random_password)
