@@ -293,6 +293,7 @@ class SessionManager(object):
     def authenticated_POST_request(self, url, headers=None, body=None):
         if self.token_id is None:
             yield self.authenticate()
+        headers.setRawHeaders('X-Auth-Token', [self.token_id])
 
         try:
             result = yield self.POST_request(url, headers=headers, body=body)
@@ -300,6 +301,7 @@ class SessionManager(object):
         except UnauthorizedError:
             log.info("Received unauthorized response to http request, re-authenticating.  (%s)", url)
             yield self.authenticate()
+            headers.setRawHeaders('X-Auth-Token', [self.token_id])
 
         result = yield self.POST_request(url, headers=headers, body=body)
         returnValue(result)
