@@ -35,25 +35,24 @@ from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import (
 
 from ZenPacks.zenoss.OpenStackInfrastructure import ZenPack
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import result_errmsg
-from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.txapiclient import APIClient as KeystoneAPIClient
+from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.txapiclient import SessionManager
 
 
 class APIClient(object):
-    # Ideally, we would just use txapiclient.ApiClient, but that class is
-    # badly in need of redesign.  Its current form is too inflexible to use
-    # for this.  Instead, we use it for keystone auth only, and then do
+    # Ideally, this could use proper APIClient classes from txapiclient, but
+    # for now, we only use the SessionManager (for keystone auth only), and then do
     # our own basic GET requests with the resulting token.
 
-    keystone_client = None
+    session_manager = None
 
-    def __init__(self, username, password, auth_url, project_id):
-        self.keystone_client = KeystoneAPIClient(username, password, auth_url, project_id)
+    def __init__(self, username, password, auth_url, project_id, region_name):
+        self.session_manager = SessionManager(username, password, auth_url, project_id, region_name)
 
     @inlineCallbacks
     def authenticated_get(self, url):
-        if not self.keystone_client._token:
-            yield self.keystone_client.login()
-        headers = {'X-Auth-Token': self.keystone_client._token}
+        if not self.session_manager.token_id:
+            yield self.session_manager.authenticate()
+        headers = {'X-Auth-Token': self.session_manager.token_id}
 
         try:
             result = yield self.get(url, extra_headers=headers)
@@ -62,7 +61,7 @@ class APIClient(object):
             if int(e.status) == httplib.UNAUTHORIZED:
                 # Could be caused by expired token. Try to login.
                 log.debug("Unauthorized request- logging in")
-                yield self.keystone_client.login()
+                yield self.session_manager.login()
 
                 # Then try the call again.
                 result = yield self.get(url, extra_headers=headers)
@@ -210,6 +209,7 @@ class ApiEndpointStatusDataSourcePlugin(PythonDataSourcePlugin):
             'password': context.zCommandPassword,
             'project_id': context.zOpenStackProjectId,
             'auth_url': context.zOpenStackAuthUrl,
+            'region_name': context.zOpenStackRegionName,
             'auth_required': datasource.auth_required,
             'ok_result': datasource.ok_result
         }
@@ -243,7 +243,8 @@ class ApiEndpointStatusDataSourcePlugin(PythonDataSourcePlugin):
             ds0.params['username'],
             ds0.params['password'],
             ds0.params['auth_url'],
-            ds0.params['project_id']
+            ds0.params['project_id'],
+            ds0.params['region_name']
         )
 
         if ds0.params['auth_required']:
@@ -293,7 +294,7 @@ class ApiEndpointStatusDataSourcePlugin(PythonDataSourcePlugin):
 
 @inlineCallbacks
 def main():
-    client = APIClient('admin', 'adminpassword', 'http://192.168.2.15:5000/v2.0', 'admin')
+    client = APIClient('admin', 'adminpassword', 'http://192.168.2.15:5000/v2.0', 'admin', 'RegionOne')
 
     @inlineCallbacks
     def _check_unauthenticated(name, url):

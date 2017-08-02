@@ -45,8 +45,15 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import (
 
 add_local_lib_path()
 
-from apiclients.txapiclient import APIClient, APIClientError, NotFoundError
-
+from apiclients.session import SessionManager
+from apiclients.txapiclient import (
+    KeystoneClient,
+    NovaClient,
+    NeutronClient,
+    CinderClient,
+    APIClientError,
+    NotFoundError
+)
 
 # https://github.com/openstack/nova/blob/master/nova/compute/power_state.py
 POWER_STATE_MAP = {
@@ -88,18 +95,23 @@ class OpenStackInfrastructure(PythonPlugin):
     @inlineCallbacks
     def collect(self, device, unused):
 
-        client = APIClient(
+        sm = SessionManager(
             device.zCommandUsername,
             device.zCommandPassword,
             device.zOpenStackAuthUrl,
             device.zOpenStackProjectId,
+            device.zOpenStackRegionName
         )
+        keystone = KeystoneClient(session_manager=sm)
+        nova = NovaClient(session_manager=sm)
+        neutron = NeutronClient(session_manager=sm)
+        cinder = CinderClient(session_manager=sm)
 
         results = {}
 
         results['tenants'] = []
         try:
-            result = yield client.keystone_tenants()
+            result = yield keystone.tenants()
             results['tenants'] = result.get('tenants', [])
             log.debug('tenants: %s\n' % str(results['tenants']))
 
@@ -117,49 +129,47 @@ class OpenStackInfrastructure(PythonPlugin):
         except Exception, e:
             log.error(self._keystonev2errmsg, e)
 
-        results['nova_url'] = yield client.nova_url()
+        results['nova_url'] = yield nova.get_url()
 
-        result = yield client.nova_flavors(is_public=True)
+        result = yield nova.flavors(is_public=True)
         results['flavors'] = result.get('flavors', [])
-        result = yield client.nova_flavors(is_public=False)
+        result = yield nova.flavors(is_public=False)
         for flavor in result.get('flavors', []):
             if flavor not in results['flavors']:
                 results['flavors'].append(flavor)
         log.debug('flavors: %s\n' % str(results['flavors']))
 
-        result = yield client.nova_images()
+        result = yield nova.images()
         results['images'] = result.get('images', [])
         log.debug('images: %s\n' % str(results['images']))
 
-        result = yield client.nova_hypervisors(hypervisor_match='%',
-                                               servers=True)
+        result = yield nova.hypervisorservers(hypervisor_match='%')
         results['hypervisors'] = result.get('hypervisors', [])
         log.debug('hypervisors: %s\n' % str(results['hypervisors']))
 
-        result = yield client.nova_hypervisorsdetailed()
+        result = yield nova.hypervisorsdetailed()
         results['hypervisors_detailed'] = result.get('hypervisors', [])
         log.debug('hypervisors_detailed: %s\n' % str(results['hypervisors']))
 
         # get hypervisor details for each individual hypervisor
         results['hypervisor_details'] = {}
         for hypervisor in results['hypervisors']:
-            result = yield client.nova_hypervisors(
-                hypervisor_id=hypervisor['id'])
+            result = yield nova.hypervisor_detail_id(hypervisor_id=hypervisor['id'])
             hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
             results['hypervisor_details'][hypervisor_id] = result.get('hypervisor', [])
 
-        result = yield client.nova_servers()
+        result = yield nova.servers()
         results['servers'] = result.get('servers', [])
         log.debug('servers: %s\n' % str(results['servers']))
 
-        result = yield client.nova_services()
+        result = yield nova.services()
         results['services'] = result.get('services', [])
         log.debug('services: %s\n' % str(results['services']))
 
         # Neutron
         results['agents'] = []
         try:
-            result = yield client.neutron_agents()
+            result = yield neutron.agents()
             results['agents'] = result.get('agents', [])
         except NotFoundError:
             # Some networks, like Nuage network, do not have network agents
@@ -179,9 +189,7 @@ class OpenStackInfrastructure(PythonPlugin):
 
             if _agent['agent_type'].lower() == 'l3 agent':
                 try:
-                    router_data = yield \
-                        client.api_call('/v2.0/agents/%s/l3-routers'
-                                        % str(_agent['id']))
+                    router_data = yield neutron.agent_l3_routers(agent_id=str(_agent['id']))
                 except Exception, e:
                     log.warning("Unable to determine neutron URL for " +
                                 "l3 router agent discovery: %s" % e)
@@ -210,9 +218,7 @@ class OpenStackInfrastructure(PythonPlugin):
 
             if _agent['agent_type'].lower() == 'dhcp agent':
                 try:
-                    dhcp_data = yield \
-                        client.api_call('/v2.0/agents/%s/dhcp-networks' %
-                                        str(_agent['id']))
+                    dhcp_data = yield neutron.agent_dhcp_networks(agent_id=str(_agent['id']))
                 except Exception, e:
                     log.warning("Unable to determine neutron URL for " +
                                 "dhcp agent discovery: %s" % e)
@@ -226,43 +232,43 @@ class OpenStackInfrastructure(PythonPlugin):
                 _agent['dhcp_agent_subnets'] = _subnets
                 _agent['dhcp_agent_networks'] = _networks
 
-        result = yield client.neutron_networks()
+        result = yield neutron.networks()
         results['networks'] = result.get('networks', [])
 
-        result = yield client.neutron_subnets()
+        result = yield neutron.subnets()
         results['subnets'] = result.get('subnets', [])
 
-        result = yield client.neutron_routers()
+        result = yield neutron.routers()
         results['routers'] = result.get('routers', [])
 
-        result = yield client.neutron_ports()
+        result = yield neutron.ports()
         results['ports'] = result.get('ports', [])
 
-        result = yield client.neutron_floatingips()
+        result = yield neutron.floatingips()
         results['floatingips'] = result.get('floatingips', [])
 
         # Cinder
-        results['cinder_url'] = yield client.cinder_url()
+        results['cinder_url'] = yield cinder.get_url()
 
-        result = yield client.cinder_volumes()
+        result = yield cinder.volumes()
         results['volumes'] = result.get('volumes', [])
 
-        result = yield client.cinder_volumetypes()
+        result = yield cinder.volumetypes()
         results['volumetypes'] = result.get('volume_types', [])
 
-        result = yield client.cinder_volumesnapshots()
+        result = yield cinder.volumesnapshots()
         results['volsnapshots'] = result.get('snapshots', [])
 
-        result = yield client.cinder_services()
+        result = yield cinder.services()
         results['cinder_services'] = result.get('services', [])
 
-        result = yield client.cinder_pools()
+        result = yield cinder.pools()
         results['volume_pools'] = result.get('pools', [])
 
         results['quotas'] = {}
         for tenant in results['tenants']:
             try:
-                result = yield client.cinder_quotas(tenant=tenant['id'].encode(
+                result = yield cinder.quotas(tenant=tenant['id'].encode(
                     'ascii', 'ignore'), usage=False)
             except Exception, e:
                 try:
@@ -715,20 +721,24 @@ class OpenStackInfrastructure(PythonPlugin):
             hypervisor_type[hypervisor_id] = hypervisor.get('hypervisor_type', None)
             hypervisor_version[hypervisor_id] = hypervisor.get('hypervisor_version', None)
 
-        # if results['hypervisors_detailed'] did not give us hypervisor type,
-        # hypervisor version, try results['hypervisors_details']
-        for k, v in hypervisor_type.iteritems():
-            if v is None and k in results['hypervisor_details']:
-                hypervisor_type[k] = \
-                    results['hypervisor_details'][k].get(
+            if hypervisor_type[hypervisor_id] is None:
+                # if results['hypervisors_detailed'] did not give us hypervisor type,
+                # hypervisor version, try results['hypervisors_details']
+                hypervisor_type[hypervisor_id] = \
+                    results['hypervisor_details'][hypervisor_id].get(
                         'hypervisor_type', None)
-        for k, v in hypervisor_version.iteritems():
-            if v is None and k in results['hypervisor_details']:
-                h_ver = results['hypervisor_details'][k].get(
-                    'hypervisor_version', None)
-                if h_ver:
-                    h_ver_list = str(h_ver).split('00')
-                    hypervisor_version[k] = '.'.join(h_ver_list)
+
+            if hypervisor_version[hypervisor_id] is None:
+                # if results['hypervisors_detailed'] did not give us version,
+                # hypervisor version, try results['hypervisors_details']
+                hypervisor_version[hypervisor_id] = \
+                    results['hypervisor_details'][hypervisor_id].get(
+                        'hypervisor_version', None)
+
+            # Reformat the version string.
+            if hypervisor_version[hypervisor_id] is not None:            
+                hypervisor_version[hypervisor_id] = '.'.join(
+                    str(hypervisor_version[hypervisor_id]).split('00'))
 
         hypervisors = []
         server_hypervisor_instance_name = {}

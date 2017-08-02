@@ -30,7 +30,7 @@ from ZenPacks.zenoss.OpenStackInfrastructure.hostmap import HostMap
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import result_errmsg, add_local_lib_path
 add_local_lib_path()
 
-from apiclients.txapiclient import APIClient
+from apiclients.txapiclient import CinderClient
 
 
 class CinderServiceStatusDataSource(PythonDataSource):
@@ -111,19 +111,18 @@ class CinderServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
         log.debug("Collect for OpenStack Cinder Service Status (%s)" % config.id)
         ds0 = config.datasources[0]
 
-        client = APIClient(
+        cinder = CinderClient(
             ds0.zCommandUsername,
             ds0.zCommandPassword,
             ds0.zOpenStackAuthUrl,
-            ds0.zOpenStackProjectId)
+            ds0.zOpenStackProjectId,
+            ds0.zOpenStackRegionName)
 
         results = {}
 
         log.debug('Requesting services')
-        result = yield client.cinder_services()
+        result = yield cinder.services()
         results['services'] = result['services']
-
-        results['nova_url'] = yield client.nova_url()
 
         yield self.preprocess_hosts(config, results)
 
