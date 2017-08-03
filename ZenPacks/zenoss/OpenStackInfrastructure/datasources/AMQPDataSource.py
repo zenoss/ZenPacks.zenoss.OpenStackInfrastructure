@@ -109,7 +109,10 @@ class AMQPDataSourcePlugin(PythonDataSourcePlugin):
         # Instead, as each message arives over the AMQP listener, it goes through
         # processMessage(), and is placed into a cache where it can be processed
         # by the onSuccess method.
-        if self.queue_name not in amqp_client:
+
+        queue_key = "%s_%s" % (self.queue_name, config.id)
+
+        if queue_key not in amqp_client:
             # Spin up the AMQP queue listener
 
             zcml.load_config('configure.zcml', zope.component)
@@ -133,8 +136,8 @@ class AMQPDataSourcePlugin(PythonDataSourcePlugin):
             log.debug("Listening on queue: %s with binding to routing key %s" % (queue.name, queue.bindings[self.exchange_name].routing_key))
             yield amqp.listen(queue, callback=partial(self._processMessage, amqp, config.id))
             yield amqp_collector.listen(queue, callback=partial(self._processMessage, amqp_collector, config.id))
-            amqp_client[self.queue_name] = amqp
-            amqp_client[self.queue_name + "_collector"] = amqp_collector
+            amqp_client[queue_key] = amqp
+            amqp_client[queue_key + "_collector"] = amqp_collector
 
             # Give time for some of the existing messages to be processed during
             # this initial collection cycle
