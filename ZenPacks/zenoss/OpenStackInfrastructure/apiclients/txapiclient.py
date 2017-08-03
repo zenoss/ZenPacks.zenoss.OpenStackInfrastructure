@@ -90,8 +90,9 @@ class NovaClient(BaseClient):
     flavors = api('/flavors/detail')
     hosts = api('/os-hosts')
 
-    # note: this is apparently deprecated.  We may want to switch over to the
-    # newer api (/os-hypervisors?with_servers=True)
+    # Note: this will be deprecated in api microversion 2.53.
+    # We may want to switch over to the newer api (/os-hypervisors?with_servers=True)
+    # with the Pike release.
     hypervisorservers = api('/os-hypervisors/{param[hypervisor_match]}/servers')
 
     hypervisorsdetailed = api('/os-hypervisors/detail')
