@@ -385,6 +385,7 @@ class SessionManager(object):
 
             try:
                 self.token_id = str(data['access']['token']['id'])
+                log.debug("Acquired token: %s", self.token_id)
             except KeyError:
                 self.token_id = None
                 raise APIClientError("Unable to identify token ID in response: %s" % response_body)
@@ -432,6 +433,7 @@ class SessionManager(object):
 
             if response_headers.hasHeader('x-subject-token'):
                 self.token_id = str(response_headers.getRawHeaders('x-subject-token')[0])
+                log.debug("Acquired token: %s", self.token_id)
             else:
                 self.token_id = None
                 raise APIClientError("Unable to identify token ID in response: %s" % response_body)

@@ -82,16 +82,6 @@ class OpenStackInfrastructure(PythonPlugin):
         'zOpenStackExtraApiEndpoints',
     )
 
-    _keystonev2errmsg = """
-        Unable to connect to keystone Identity Admin API v2.0 to retrieve tenant
-        list.  Tenant names will be unknown (tenants will show with their IDs only)
-        until this is corrected, either by opening access to the admin API endpoint
-        as listed in the keystone service catalog, or by configuring zOpenStackAuthUrl
-        to point to a different, accessible endpoint which supports both the public and
-        admin APIs.  (This may be as simple as changing the port in the URL from
-        5000 to 35357)  Details: %s
-    """
-
     @inlineCallbacks
     def collect(self, device, unused):
 
@@ -109,27 +99,11 @@ class OpenStackInfrastructure(PythonPlugin):
 
         results = {}
 
-        results['tenants'] = []
-        try:
-            result = yield keystone.tenants()
-            results['tenants'] = result.get('tenants', [])
-            log.debug('tenants: %s\n' % str(results['tenants']))
-
-        except (ConnectError, TimeoutError), e:
-            log.error(self._keystonev2errmsg, e)
-        except APIClientError, e:
-            if len(e.args):
-                if isinstance(e.args[0], ConnectError) or \
-                   isinstance(e.args[0], TimeoutError):
-                    log.error(self._keystonev2errmsg, e.args[0])
-                else:
-                    log.error(self._keystonev2errmsg, e)
-            else:
-                log.error(self._keystonev2errmsg, e)
-        except Exception, e:
-            log.error(self._keystonev2errmsg, e)
-
         results['nova_url'] = yield nova.get_url()
+
+        result = yield keystone.tenants()
+        results['tenants'] = result.get('tenants', [])
+        log.debug('tenants: %s\n' % str(results['tenants']))
 
         result = yield nova.flavors(is_public=True)
         results['flavors'] = result.get('flavors', [])
@@ -149,7 +123,7 @@ class OpenStackInfrastructure(PythonPlugin):
 
         result = yield nova.hypervisorsdetailed()
         results['hypervisors_detailed'] = result.get('hypervisors', [])
-        log.debug('hypervisors_detailed: %s\n' % str(results['hypervisors']))
+        log.debug('hypervisors_detailed: %s\n' % str(results['hypervisors_detailed']))
 
         # get hypervisor details for each individual hypervisor
         results['hypervisor_details'] = {}
