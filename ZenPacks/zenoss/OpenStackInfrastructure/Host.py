@@ -34,12 +34,15 @@ class Host(schema.Host):
 
     def ensure_proxy_device(self):
         # ensure that the host exists.
-        self.proxy_device()
+        device = self.proxy_device()
+        if not device:
+            device = self.create_proxy_device()
+        return device
 
     def ensure_service_monitoring(self):
         # Based on the NovaServices we have modeled on the host, ensure that we
         # have the right OSProcess groups detected.
-        device = self.proxy_device()
+        device = self.ensure_proxy_device()
 
         # If we're getting IPServices directly from the OS (rather than port
         # scannning, there's no good reason to have such a low
