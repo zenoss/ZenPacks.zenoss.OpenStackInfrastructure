@@ -181,8 +181,8 @@ For Mitaka and newer versions,
     event_dispatchers = zenoss
 
 For Newton and newer versions,
-    [DEFAULT]
-    filter_project = services
+    [event]
+    drop_unmatched_notifications = true
 
 For all versions,
     [notification]
