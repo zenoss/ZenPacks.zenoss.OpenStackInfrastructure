@@ -16,7 +16,6 @@ LOG = logging.getLogger('zen.OpenStackDeviceProxyComponent')
 from zope.event import notify
 from zope.interface import implements
 
-from ZODB.transact import transact
 from OFS.interfaces import IObjectWillBeAddedEvent, IObjectWillBeMovedEvent
 from Products.Zuul.catalog.events import IndexingEvent
 from Products.ZenEvents.interfaces import IPostEventPlugin
@@ -32,8 +31,8 @@ from Products.ZenUtils.IpUtil import getHostByName, IpAddressError
 def onDeviceDeleted(object, event):
     '''
     Clean up the dangling reference to a device if that device has been removed.
-    (Note: we may re-create the device automatically next time someone tries to access
-    self.proxy_device, though)
+    (Note: we may re-create the device automatically next time someone calls
+    self.ensure_proxy_device, though)
     '''
     if not IObjectWillBeAddedEvent.providedBy(event) and not IObjectWillBeMovedEvent.providedBy(event):
         if hasattr(object, 'openstackProxyComponentUUID'):
@@ -109,14 +108,15 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         '''
         Ensure that the proxy device exists, creating it if necessary.
         '''
-        self.proxy_device()
+        if not self.proxy_device():
+            self.create_proxy_device()
 
         return True
 
     def proxy_device(self):
         '''
-        Return this component's corresponding proxy device, creating
-        it in the proxy_deviceclass if it does not exist.
+        Return this component's corresponding proxy device, or None if
+        it does not yet exist.
 
         Default assumes that the names must match.
         '''
@@ -142,11 +142,10 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
                 self.claim_proxy_device(device)
                 return device
             else:
-                return self.create_proxy_device()
+                return None
         else:
-            return self.create_proxy_device()
+            return None
 
-    @transact
     def create_proxy_device(self):
         '''
         Create a proxy device in the proxy_deviceclass.
@@ -180,7 +179,6 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
                 device.setManageIp()
             except IpAddressError:
                 LOG.warning("Unable to set management IP based on %s", device_name)
-
 
         device.index_object()
         notify(IndexingEvent(device))
@@ -241,6 +239,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         if device:
             graphs.extend(device.getGraphObjects())
         return graphs
+
 
 class DeviceLinkProvider(object):
     '''

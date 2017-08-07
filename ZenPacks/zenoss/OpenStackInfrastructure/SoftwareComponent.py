@@ -18,9 +18,11 @@ class SoftwareComponent(schema.SoftwareComponent):
 
     def osprocess_component(self):
         try:
-            for osprocess in self.hostedOn().proxy_device().getDeviceComponents(type='OSProcess'):
-                if osprocess.osProcessClass().id == self.binary:
-                    return osprocess
+            device = self.hostedOn().proxy_device()
+            if device:
+                for osprocess in device.getDeviceComponents(type='OSProcess'):
+                    if osprocess.osProcessClass().id == self.binary:
+                        return osprocess
         except Exception:
             pass
 

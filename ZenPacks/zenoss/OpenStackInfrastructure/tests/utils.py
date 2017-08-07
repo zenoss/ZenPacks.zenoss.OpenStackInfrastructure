@@ -296,7 +296,7 @@ def create_model_data(dmd):
     for component in endpoint.components():
         if isinstance(component, SoftwareComponent):
             binary = component.binary
-            linux_device = component.hostedOn().proxy_device()
+            linux_device = component.hostedOn().ensure_proxy_device()
 
             process_id = '%s_%s' % (linux_device.id, binary)
             process = OSProcess(process_id)
