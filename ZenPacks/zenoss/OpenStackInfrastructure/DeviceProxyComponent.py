@@ -296,13 +296,17 @@ class PostEventPlugin(object):
             LOG.debug("tagging event on %s with openstack proxy component component uuid %s",
                       eventProxy.device, device.openstackProxyComponentUUID)
 
-            tags = [device.openstackProxyComponentUUID]
+            tags = []
 
-            # Also tag it with the openstack endpoint that the component is part of,
-            # if possible.
             try:
                 component = GUIDManager(dmd).getObject(device.openstackProxyComponentUUID)
                 if component:
+
+                    # Tag the event with the corresponding openstack component.
+                    tags.append(device.openstackProxyComponentUUID)
+
+                    # Also tag it with the openstack endpoint that the
+                    # component is part of, if possible.
                     endpoint = component.device()
                     tags.append(IGlobalIdentifier(endpoint).getGUID())
             except Exception:
@@ -327,4 +331,5 @@ class PostEventPlugin(object):
                         LOG.debug("Unable to append event for OSProcess %s",
                                   osprocess.osProcessClass().id)
 
-            eventProxy.tags.addAll('ZenPacks.zenoss.OpenStackInfrastructure.DeviceProxyComponent', tags)
+            if tags:
+                eventProxy.tags.addAll('ZenPacks.zenoss.OpenStackInfrastructure.DeviceProxyComponent', tags)

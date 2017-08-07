@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2014, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2014-2017, all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -77,55 +77,60 @@ NEUTRON_TRAITMAPS = {
     },
 }
 
+
 # -----------------------------------------------------------------------------
 # ID Functions
 # -----------------------------------------------------------------------------
-def make_id(prefix, raw_id):
+def make_id(evt, prefix, try_traits=[]):
     """Return a valid id in "<prefix>-<raw_id>" format"""
-    if not raw_id:
-        LOG.warning("Missing data for %s Id" % prefix)
-        return None
-    return prepId("{0}-{1}".format(prefix,raw_id))
+    for traitname in try_traits:
+        raw_id = getattr(evt, traitname, None)
+        if raw_id is not None:
+            return prepId("{0}-{1}".format(prefix, raw_id))
+
+    # unable to find a valid component ID in this event.
+    return None
+
 
 def instance_id(evt):
-    if hasattr(evt, 'trait_instance_id'):
-        return make_id('server', evt.trait_instance_id)
+    return make_id(evt, 'server', ['trait_instance_id', 'trait_resource_id'])
+
 
 def floatingip_id(evt):
-    if hasattr(evt, 'trait_id'):
-        return make_id('floatingip', evt.trait_id)
+    return make_id(evt, 'floatingip', ['trait_id', 'trait_resource_id'])
+
 
 def network_id(evt):
-    if hasattr(evt, 'trait_id'):
-        return make_id('network', evt.trait_id)
+    return make_id(evt, 'network', ['trait_id', 'trait_resource_id'])
+
 
 def port_id(evt):
-    if hasattr(evt, 'trait_id'):
-        return make_id('port', evt.trait_id)
+    return make_id(evt, 'port', ['trait_id', 'trait_resource_id'])
+
 
 def router_id(evt):
-    if hasattr(evt, 'trait_id'):
-        return make_id('router', evt.trait_id)
+    return make_id(evt, 'router', ['trait_id', 'trait_resource_id'])
+
 
 def securitygroup_id(evt):
-    if hasattr(evt, 'trait_id'):
-        return make_id('securitygroup', evt.trait_id)
+    return make_id(evt, 'securitygroup', ['trait_id', 'trait_resource_id'])
+
 
 def subnet_id(evt):
-    if hasattr(evt, 'trait_id'):
-        return make_id('subnet', evt.trait_id)
+    return make_id(evt, 'subnet', ['trait_id', 'trait_resource_id'])
+
 
 def tenant_id(evt):
-    if hasattr(evt, 'trait_tenant_id'):
-        return make_id('tenant', evt.trait_tenant_id)
+    return make_id(evt, 'tenant', ['trait_tenant_id'])
+
 
 def volume_id(evt):
-    if hasattr(evt, 'trait_volume_id'):
-        return make_id('volume', evt.trait_volume_id)
+    return make_id(evt, 'volume', ['trait_volume_id'])
+
 
 def volsnapshot_id(evt):
-    if hasattr(evt, 'trait_snapshot_id'):
-        return make_id('volsnapshot', evt.trait_snapshot_id)
+    return make_id(evt, 'volsnapshot', ['trait_snapshot_id'])
+
 
 # -----------------------------------------------------------------------------
 # Traitmap Functions
@@ -309,22 +314,42 @@ def event_summary(component_name, evt):
 # -----------------------------------------------------------------------------
 # Event Functions
 # -----------------------------------------------------------------------------
+
+def instance_name(evt):
+    if hasattr(evt, 'trait_display_name'):
+        return evt.trait_display_name
+    else:
+        return instance_id(evt)
+
+
 def instance_create(device, dmd, evt):
-    evt.summary = "Instance %s created" % (evt.trait_display_name)
+    evt.summary = "Instance %s created" % (instance_name(evt))
+
+    if not instance_id(evt):
+        LOG.info("Unable to identify instance component from event: %s" % evt)
+        return []
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
 
 def instance_update(device, dmd, evt):
-    evt.summary = "Instance %s updated" % (evt.trait_display_name)
+    evt.summary = "Instance %s updated" % (instance_name(evt))
+
+    if not instance_id(evt):
+        LOG.info("Unable to identify instance component from event: %s" % evt)
+        return []
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
 
 def instance_delete(device, dmd, evt):
-    evt.summary = "Instance %s deleted" % (evt.trait_display_name)
+    evt.summary = "Instance %s deleted" % (instance_name(evt))
+
+    if not instance_id(evt):
+        LOG.info("Unable to identify instance component from event: %s" % evt)
+        return []
 
     objmap = instance_objmap(evt)
     objmap.remove = True
@@ -333,8 +358,12 @@ def instance_delete(device, dmd, evt):
 def instance_update_status(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
             evt,
-            "Instance %s updated" % (evt.trait_display_name)
+            "Instance %s updated" % (instance_name(evt))
             )
+
+    if not instance_id(evt):
+        LOG.info("Unable to identify instance component from event: %s" % evt)
+        return []
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
@@ -355,28 +384,36 @@ def add_statuschange_to_msg(evt, msg):
     return msg
 
 def instance_powering_on(device, dmd, evt):
-    evt.summary = "Instance %s powering on" % (evt.trait_display_name)
+    evt.summary = "Instance %s powering on" % (instance_name(evt))
     return []
 
 def instance_powered_on(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
             evt,
-            "Instance %s powered on" % (evt.trait_display_name)
+            "Instance %s powered on" % (instance_name(evt))
             )
+
+    if not instance_id(evt):
+        LOG.info("Unable to identify instance component from event: %s" % evt)
+        return []
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
 
 def instance_powering_off(device, dmd, evt):
-    evt.summary = "Instance %s powering off" % (evt.trait_display_name)
+    evt.summary = "Instance %s powering off" % (instance_name(evt))
     return []
 
 def instance_powered_off(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
             evt,
-            "Instance %s powered off" % (evt.trait_display_name)
+            "Instance %s powered off" % (instance_name(evt))
             )
+
+    if not instance_id(evt):
+        LOG.info("Unable to identify instance component from event: %s" % evt)
+        return []
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
@@ -385,8 +422,12 @@ def instance_powered_off(device, dmd, evt):
 def instance_shutting_down(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
             evt,
-            "Instance %s shutting down" % (evt.trait_display_name)
+            "Instance %s shutting down" % (instance_name(evt))
             )
+
+    if not instance_id(evt):
+        LOG.info("Unable to identify instance component from event: %s" % evt)
+        return []
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
@@ -395,8 +436,12 @@ def instance_shutting_down(device, dmd, evt):
 def instance_shut_down(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
             evt,
-            "Instance %s shut down" % (evt.trait_display_name)
+            "Instance %s shut down" % (instance_name(evt))
             )
+
+    if not instance_id(evt):
+        LOG.info("Unable to identify instance component from event: %s" % evt)
+        return []
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
@@ -405,8 +450,12 @@ def instance_shut_down(device, dmd, evt):
 def instance_rebooting(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
             evt,
-            "Instance %s rebooting" % (evt.trait_display_name)
+            "Instance %s rebooting" % (instance_name(evt))
             )
+
+    if not instance_id(evt):
+        LOG.info("Unable to identify instance component from event: %s" % evt)
+        return []
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
@@ -415,8 +464,12 @@ def instance_rebooting(device, dmd, evt):
 def instance_rebooted(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
             evt,
-            "Instance %s rebooted" % (evt.trait_display_name)
+            "Instance %s rebooted" % (instance_name(evt))
             )
+
+    if not instance_id(evt):
+        LOG.info("Unable to identify instance component from event: %s" % evt)
+        return []
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
@@ -425,8 +478,12 @@ def instance_rebooted(device, dmd, evt):
 def instance_rebuilding(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
             evt,
-            "Instance %s rebuilding" % (evt.trait_display_name)
+            "Instance %s rebuilding" % (instance_name(evt))
             )
+
+    if not instance_id(evt):
+        LOG.info("Unable to identify instance component from event: %s" % evt)
+        return []    
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
@@ -435,36 +492,52 @@ def instance_rebuilding(device, dmd, evt):
 def instance_rebuilt(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
             evt,
-            "Instance %s rebuilt" % (evt.trait_display_name)
+            "Instance %s rebuilt" % (instance_name(evt))
             )
+
+    if not instance_id(evt):
+        LOG.info("Unable to identify instance component from event: %s" % evt)
+        return []
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
 
 def instance_suspended(device, dmd, evt):
-    evt.summary = "Instance %s suspended" % (evt.trait_display_name)
+    evt.summary = "Instance %s suspended" % (instance_name(evt))
+
+    if not instance_id(evt):
+        LOG.info("Unable to identify instance component from event: %s" % evt)
+        return []
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
 
 def instance_resumed(device, dmd, evt):
-    evt.summary = "Instance %s resumed" % (evt.trait_display_name)
+    evt.summary = "Instance %s resumed" % (instance_name(evt))
+
+    if not instance_id(evt):
+        LOG.info("Unable to identify instance component from event: %s" % evt)
+        return []
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
 
 def instance_rescue(device, dmd, evt):
-    evt.summary = "Instance %s placed in rescue mode" % (evt.trait_display_name)
+    evt.summary = "Instance %s placed in rescue mode" % (instance_name(evt))
+
+    if not instance_id(evt):
+        LOG.info("Unable to identify instance component from event: %s" % evt)
+        return []
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
 
 def instance_unrescue(device, dmd, evt):
-    evt.summary = "Instance %s removed from rescue mode" % (evt.trait_display_name)
+    evt.summary = "Instance %s removed from rescue mode" % (instance_name(evt))
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
@@ -472,14 +545,14 @@ def instance_unrescue(device, dmd, evt):
 
 def instance_volume_attach(device, dmd, evt):
     evt.summary = "Instance %s being attached to a volume %s" % \
-        (evt.trait_display_name, evt.trait_volume_id)
+        (instance_name(evt), evt.trait_volume_id)
 
     # volume_update() for volume.attach.end will take care of it.
     return []
     
 def instance_volume_detach(device, dmd, evt):
     evt.summary = "Instance %s being detached from a volume %s" % \
-        (evt.trait_display_name, evt.trait_volume_id)
+        (instance_name(evt), evt.trait_volume_id)
 
     # volume_update() for volume.detach.end will take care of it.
     return []
@@ -499,6 +572,10 @@ def floatingip_update_start(device, dmd, evt):
 def floatingip_update(device, dmd, evt):
     evt.summary = event_summary("FloatingIp", evt)
 
+    if not floatingip_id(evt):
+        LOG.info("Unable to identify floatingip component from event: %s" % evt)
+        return []
+
     objmap = neutron_objmap(evt, "FloatingIp")
     _apply_neutron_traits(evt, objmap, 'floatingip')
 
@@ -513,6 +590,10 @@ def floatingip_delete_start(device, dmd, evt):
 
 def floatingip_delete_end(device, dmd, evt):
     evt.summary = "FloatingIp %s deleted" % (evt.trait_id)
+
+    if not floatingip_id(evt):
+        LOG.info("Unable to identify floatingip component from event: %s" % evt)
+        return []
 
     objmap = neutron_objmap(evt, 'FloatingIp')
     objmap.remove = True
@@ -532,6 +613,10 @@ def network_update_start(device, dmd, evt):
 def network_update(device, dmd, evt):
     evt.summary = event_summary("Network", evt)
 
+    if not network_id(evt):
+        LOG.info("Unable to identify network component from event: %s" % evt)
+        return []
+
     objmap = neutron_objmap(evt, "Network")
     _apply_neutron_traits(evt, objmap, 'network')
     return [objmap]
@@ -542,6 +627,10 @@ def network_delete_start(device, dmd, evt):
 
 def network_delete_end(device, dmd, evt):
     evt.summary = "Network %s deleted" % (evt.trait_id)
+
+    if not network_id(evt):
+        LOG.info("Unable to identify network component from event: %s" % evt)
+        return []
 
     objmap = neutron_objmap(evt, 'Network')
     objmap.remove = True
@@ -561,6 +650,10 @@ def port_update_start(device, dmd, evt):
 def port_update(device, dmd, evt):
     evt.summary = event_summary("Port", evt)
 
+    if not port_id(evt):
+        LOG.info("Unable to identify port component from event: %s" % evt)
+        return []
+
     objmap = neutron_objmap(evt, "Port")
     _apply_neutron_traits(evt, objmap, 'port')
     _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
@@ -571,7 +664,7 @@ def port_update(device, dmd, evt):
 
     if hasattr(evt, 'evt.trait_device_id'):
         port_instance = get_port_instance(evt.trait_device_owner,
-                                           evt.trait_device_id)
+                                          evt.trait_device_id)
         setattr(objmap, 'set_instance', port_instance)
 
     # get subnets and fixed_ips
@@ -610,6 +703,10 @@ def router_update_start(device, dmd, evt):
 def router_update(device, dmd, evt):
     evt.summary = event_summary("Router", evt)
 
+    if not router_id(evt):
+        LOG.info("Unable to identify router component from event: %s" % evt)
+        return []
+
     objmap = neutron_objmap(evt, "Router")
     _apply_neutron_traits(evt, objmap, 'router')
     _apply_router_gateway_info(evt, objmap)
@@ -640,6 +737,10 @@ def securityGroup_update_start(device, dmd, evt):
 def securityGroup_update(device, dmd, evt):
     evt.summary = event_summary("SecurityGroup", evt)
 
+    if not securitygroup_id(evt):
+        LOG.info("Unable to identify securitygroup component from event: %s" % evt)
+        return []
+
     objmap = neutron_objmap(evt, "SecurityGroup")
     _apply_neutron_traits(evt, objmap, 'security_group')
     return [objmap]
@@ -668,6 +769,10 @@ def subnet_update_start(device, dmd, evt):
 
 def subnet_update(device, dmd, evt):
     evt.summary = event_summary("Subnet", evt)
+
+    if not subnet_id(evt):
+        LOG.info("Unable to identify subnet component from event: %s" % evt)
+        return []
 
     objmap = neutron_objmap(evt, "Subnet")
     _apply_dns_info(evt, objmap)
@@ -711,6 +816,10 @@ def volume_update(device, dmd, evt):
         evt.summary = "Detach Volume %s from instance" % \
             (evt.trait_volume_id)
 
+    if not volume_id(evt):
+        LOG.info("Unable to identify volume component from event: %s" % evt)
+        return []
+
     objmap = cinder_objmap(evt, "Volume")
     _apply_dns_info(evt, objmap)
     _apply_cinder_traits(evt, objmap)
@@ -734,6 +843,10 @@ def volume_delete_start(device, dmd, evt):
 
 def volume_delete_end(device, dmd, evt):
     evt.summary = "Volume %s deleted" % (evt.trait_volume_id)
+
+    if not volume_id(evt):
+        LOG.info("Unable to identify volume component from event: %s" % evt)
+        return []
 
     objmap = cinder_objmap(evt, 'Volume')
     objmap.remove = True
@@ -762,6 +875,10 @@ def volsnapshot_update(device, dmd, evt):
     evt.summary = "Created Volume Snapshot %s for volume %s" % \
         (evt.trait_snapshot_id, evt.trait_volume_id)
 
+    if not volsnapshot_id(evt):
+        LOG.info("Unable to identify volsnapshotcomponent from event: %s" % evt)
+        return []
+
     objmap = cinder_objmap(evt, "VolSnapshot")
     _apply_dns_info(evt, objmap)
     _apply_cinder_traits(evt, objmap)
@@ -777,6 +894,10 @@ def volsnapshot_delete_start(device, dmd, evt):
 def volsnapshot_delete_end(device, dmd, evt):
     evt.summary = "Volume Snapshot %s deleted for volume %s" % \
         (evt.trait_snapshot_id, evt.trait_volume_id)
+
+    if not volsnapshot_id(evt):
+        LOG.info("Unable to identify volsnapshotcomponent from event: %s" % evt)
+        return []
 
     objmap = cinder_objmap(evt, 'VolSnapshot')
     objmap.remove = True

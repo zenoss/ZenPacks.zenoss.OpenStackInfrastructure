@@ -180,6 +180,10 @@ For Mitaka and newer versions,
     meter_dispatchers = zenoss
     event_dispatchers = zenoss
 
+For Newton and newer versions,
+    [DEFAULT]
+    filter_project = services
+
 For all versions,
     [notification]
     store_events=True
