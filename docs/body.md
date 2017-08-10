@@ -598,6 +598,26 @@ when this happens.
     or "10.1.1.1" to all be definitely identified as "my.example.com", without
     the ambiguity that could exist if zOpenStackHostMapSame were used.
 
+* zOpenStackHostLocalDomain
+
+    In some environments (in particular, the Red Hat OpenStack Platform),
+    hosts are assigned names that end in '.localdomain'.   This would cause
+    problems for zenoss, because it is not possible to create a device
+    in zenoss with such a name, as they all resolve to 127.0.0.1, rather than
+    their actual IP.
+
+    The default value of zOpenStackHostLocalDomain is a blank string, meaning
+    that the '.localdomain' suffix will be stripped from host names, and
+    devices will be created in zenoss with those shortened names.  If those
+    names do not resolve in DNS, they will be created without IPs, and
+    will not be modeled.  You would need to manually set their management IPs
+    so that they can be modeled.
+
+    Alternatively, if you already have these hostnames in dns, but just with
+    a different domain name than ".localdomain", you may specify this domain
+    name here, and it will be substituted for localdomain, and the devices 
+    will model automatically, based on the IPs returned from DNS.
+
 Modeling Containerized Environments
 -----------------------------------
 
