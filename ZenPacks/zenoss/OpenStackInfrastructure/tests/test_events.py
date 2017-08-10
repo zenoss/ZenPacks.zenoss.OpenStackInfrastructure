@@ -887,6 +887,22 @@ class TestEventTransforms(zenpacklib.TestCase):
         volsnapshot = self._delete_volsnapshot_end('test')
         self.assertIsNone(volsnapshot)
 
+    def test_ZPS1750(self):
+        self.assertTrue(self._eventsloaded)
+
+        # These events are deliberately wrong- they are the result of
+        # a misconfigured openstack (missing our event_definitions.yaml).
+        #
+        # We should process them as well as we can.
+
+        evt = buildEventFromDict(self._eventData['ZPS1750_port.update.start'])
+        self.process_event(evt)
+
+        evt = buildEventFromDict(self._eventData['ZPS1750_volume.detach.start'])
+        self.process_event(evt)
+
+        evt = buildEventFromDict(self._eventData['ZPS1750_snapshot.create.end'])
+        self.process_event(evt)
 
 @monkeypatch('Products.DataCollector.ApplyDataMap.ApplyDataMap')
 def logChange(self, device, compname, eventClass, msg):

@@ -96,28 +96,56 @@ def instance_id(evt):
     return make_id(evt, 'server', ['trait_instance_id', 'trait_resource_id'])
 
 
+def instance_name(evt):
+    return getattr(evt, "trait_display_name", instance_id(evt))
+
+
 def floatingip_id(evt):
     return make_id(evt, 'floatingip', ['trait_id', 'trait_resource_id'])
+
+
+def floatingip_name(evt):
+    return floatingip_id(evt)
 
 
 def network_id(evt):
     return make_id(evt, 'network', ['trait_id', 'trait_resource_id'])
 
 
+def network_name(evt):
+    return getattr(evt, "trait_name", network_id(evt))
+
+
 def port_id(evt):
     return make_id(evt, 'port', ['trait_id', 'trait_resource_id'])
+
+
+def port_name(evt):
+    return port_id(evt)
 
 
 def router_id(evt):
     return make_id(evt, 'router', ['trait_id', 'trait_resource_id'])
 
 
+def router_name(evt):
+    return router_id(evt)
+
+
 def securitygroup_id(evt):
     return make_id(evt, 'securitygroup', ['trait_id', 'trait_resource_id'])
 
 
+def securitygroup_name(evt):
+    return securitygroup_id(evt)
+
+
 def subnet_id(evt):
     return make_id(evt, 'subnet', ['trait_id', 'trait_resource_id'])
+
+
+def subnet_name(evt):
+    return subnet_id(evt)
 
 
 def tenant_id(evt):
@@ -125,11 +153,19 @@ def tenant_id(evt):
 
 
 def volume_id(evt):
-    return make_id(evt, 'volume', ['trait_volume_id'])
+    return make_id(evt, 'volume', ['trait_volume_id', 'trait_resource_id'])
+
+
+def volume_name(evt):
+    return volume_id(evt)
 
 
 def volsnapshot_id(evt):
-    return make_id(evt, 'volsnapshot', ['trait_snapshot_id'])
+    return make_id(evt, 'volsnapshot', ['trait_snapshot_id', 'trait_resource_id'])
+
+
+def volsnapshot_name(evt):
+    return volsnapshot_id(evt)
 
 
 # -----------------------------------------------------------------------------
@@ -246,8 +282,9 @@ def _apply_cinder_traits(evt, objmap):
                 'size':  ['size'],
                }
     if 'VolSnapshot' in objmap.modname:
-        # volume snapshot does not have volume_id, only volume does
+        # volume snapshot does not have volume_id or availability_zone, only volume does
         traitmap.pop('volume_id', None)
+        traitmap.pop('availability_zone', None)
     for trait in traitmap:
         for prop_name in traitmap[trait]:
             trait_field = 'trait_' + trait
@@ -302,25 +339,18 @@ def cinder_objmap(evt, Name):
               },
     )
 
-def event_summary(component_name, evt):
+def event_summary(component_type, component_name, evt):
     """ Gives correct summary for Create/Update event messages
     """
     if '.create' in evt.eventClassKey:
         action = "Created"
     else:
         action = "Updated"
-    return "%s %s %s" % (action, component_name, evt.trait_id)
+    return "%s %s %s" % (action, component_type, component_name)
 
 # -----------------------------------------------------------------------------
 # Event Functions
 # -----------------------------------------------------------------------------
-
-def instance_name(evt):
-    if hasattr(evt, 'trait_display_name'):
-        return evt.trait_display_name
-    else:
-        return instance_id(evt)
-
 
 def instance_create(device, dmd, evt):
     evt.summary = "Instance %s created" % (instance_name(evt))
@@ -545,14 +575,14 @@ def instance_unrescue(device, dmd, evt):
 
 def instance_volume_attach(device, dmd, evt):
     evt.summary = "Instance %s being attached to a volume %s" % \
-        (instance_name(evt), evt.trait_volume_id)
+        (instance_name(evt), volume_id(evt))
 
     # volume_update() for volume.attach.end will take care of it.
     return []
     
 def instance_volume_detach(device, dmd, evt):
     evt.summary = "Instance %s being detached from a volume %s" % \
-        (instance_name(evt), evt.trait_volume_id)
+        (instance_name(evt), volume_name(evt))
 
     # volume_update() for volume.detach.end will take care of it.
     return []
@@ -562,15 +592,15 @@ def instance_volume_detach(device, dmd, evt):
 # FloatingIp
 # -----------------------------------------------------------------------------
 def floatingip_create_start(device, dmd, evt):
-    evt.summary = "Creating FloatingIp %s" % (evt.trait_id)
+    evt.summary = "Creating FloatingIp %s" % (floatingip_name(evt))
     return []
 
 def floatingip_update_start(device, dmd, evt):
-    evt.summary = "Updating FloatingIp %s" % (evt.trait_id)
+    evt.summary = "Updating FloatingIp %s" % (floatingip_name(evt))
     return []
 
 def floatingip_update(device, dmd, evt):
-    evt.summary = event_summary("FloatingIp", evt)
+    evt.summary = event_summary("FloatingIp", floatingip_name(evt), evt)
 
     if not floatingip_id(evt):
         LOG.info("Unable to identify floatingip component from event: %s" % evt)
@@ -585,11 +615,11 @@ def floatingip_update(device, dmd, evt):
     return [objmap]
 
 def floatingip_delete_start(device, dmd, evt):
-    evt.summary = "Deleting FloatingIp %s " % (evt.trait_id)
+    evt.summary = "Deleting FloatingIp %s " % (floatingip_name(evt))
     return []
 
 def floatingip_delete_end(device, dmd, evt):
-    evt.summary = "FloatingIp %s deleted" % (evt.trait_id)
+    evt.summary = "FloatingIp %s deleted" % (floatingip_name(evt))
 
     if not floatingip_id(evt):
         LOG.info("Unable to identify floatingip component from event: %s" % evt)
@@ -603,15 +633,15 @@ def floatingip_delete_end(device, dmd, evt):
 # Network Event Functions
 # -----------------------------------------------------------------------------
 def network_create_start(device, dmd, evt):
-    evt.summary = "Creating Network %s" % (evt.trait_name)
+    evt.summary = "Creating Network %s" % (network_name(evt))
     return []
 
 def network_update_start(device, dmd, evt):
-    evt.summary = "Updating Network %s" % (evt.trait_id)
+    evt.summary = "Updating Network %s" % (network_name(evt))
     return []
 
 def network_update(device, dmd, evt):
-    evt.summary = event_summary("Network", evt)
+    evt.summary = event_summary("Network", network_name(evt), evt)
 
     if not network_id(evt):
         LOG.info("Unable to identify network component from event: %s" % evt)
@@ -622,11 +652,11 @@ def network_update(device, dmd, evt):
     return [objmap]
 
 def network_delete_start(device, dmd, evt):
-    evt.summary = "Deleting Network %s " % (evt.trait_id)
+    evt.summary = "Deleting Network %s " % (network_name(evt))
     return []
 
 def network_delete_end(device, dmd, evt):
-    evt.summary = "Network %s deleted" % (evt.trait_id)
+    evt.summary = "Network %s deleted" % (network_name(evt))
 
     if not network_id(evt):
         LOG.info("Unable to identify network component from event: %s" % evt)
@@ -640,15 +670,15 @@ def network_delete_end(device, dmd, evt):
 # Port Event Functions
 # -----------------------------------------------------------------------------
 def port_create_start(device, dmd, evt):
-    evt.summary = "Creating Port %s" % (evt.trait_id)
+    evt.summary = "Creating Port %s" % (port_name(evt))
     return []
 
 def port_update_start(device, dmd, evt):
-    evt.summary = "Updating Port %s" % (evt.trait_id)
+    evt.summary = "Updating Port %s" % (port_name(evt))
     return []
 
 def port_update(device, dmd, evt):
-    evt.summary = event_summary("Port", evt)
+    evt.summary = event_summary("Port", port_name(evt), evt)
 
     if not port_id(evt):
         LOG.info("Unable to identify port component from event: %s" % evt)
@@ -658,11 +688,12 @@ def port_update(device, dmd, evt):
     _apply_neutron_traits(evt, objmap, 'port')
     _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
 
-    # If device_owner is part of compute, then add device_id as set_instance
-    if 'compute' in evt.trait_device_owner and evt.trait_device_id:
-        _apply_trait_rel(evt, objmap, 'trait_device_id', 'server')
+    if hasattr(evt, 'trait_device_id') and hasattr(evt, 'trait_device_owner'):
 
-    if hasattr(evt, 'evt.trait_device_id'):
+        # If device_owner is part of compute, then add device_id as set_instance
+        if 'compute' in evt.trait_device_owner and evt.trait_device_id:
+            _apply_trait_rel(evt, objmap, 'trait_device_id', 'server')
+
         port_instance = get_port_instance(evt.trait_device_owner,
                                           evt.trait_device_id)
         setattr(objmap, 'set_instance', port_instance)
@@ -679,11 +710,11 @@ def port_update(device, dmd, evt):
     return [objmap]
 
 def port_delete_start(device, dmd, evt):
-    evt.summary = "Deleting Port %s " % (evt.trait_id)
+    evt.summary = "Deleting Port %s " % (port_name(evt))
     return []
 
 def port_delete_end(device, dmd, evt):
-    evt.summary = "Port %s deleted" % (evt.trait_id)
+    evt.summary = "Port %s deleted" % (port_name(evt))
 
     objmap = neutron_objmap(evt, 'Port')
     objmap.remove = True
@@ -693,15 +724,15 @@ def port_delete_end(device, dmd, evt):
 # Router Event Functions
 # -----------------------------------------------------------------------------
 def router_create_start(device, dmd, evt):
-    evt.summary = "Creating Router %s" % (evt.trait_id)
+    evt.summary = "Creating Router %s" % (router_name(evt))
     return []
 
 def router_update_start(device, dmd, evt):
-    evt.summary = "Updating Router %s" % (evt.trait_id)
+    evt.summary = "Updating Router %s" % (router_name(evt))
     return []
 
 def router_update(device, dmd, evt):
-    evt.summary = event_summary("Router", evt)
+    evt.summary = event_summary("Router", router_name(evt), evt)
 
     if not router_id(evt):
         LOG.info("Unable to identify router component from event: %s" % evt)
@@ -713,11 +744,11 @@ def router_update(device, dmd, evt):
     return [objmap]
 
 def router_delete_start(device, dmd, evt):
-    evt.summary = "Deleting Router %s " % (evt.trait_id)
+    evt.summary = "Deleting Router %s " % (router_name(evt))
     return []
 
 def router_delete_end(device, dmd, evt):
-    evt.summary = "Router %s deleted" % (evt.trait_id)
+    evt.summary = "Router %s deleted" % (router_name(evt))
 
     objmap = neutron_objmap(evt, 'Router')
     objmap.remove = True
@@ -727,15 +758,15 @@ def router_delete_end(device, dmd, evt):
 # SecurityGroup Event Functions: Carefull with the underscore differences
 # -----------------------------------------------------------------------------
 def securityGroup_create_start(device, dmd, evt):
-    evt.summary = "Creating SecurityGroup %s" % (evt.trait_id)
+    evt.summary = "Creating SecurityGroup %s" % (securitygroup_name(evt))
     return []
 
 def securityGroup_update_start(device, dmd, evt):
-    evt.summary = "Updating SecurityGroup %s" % (evt.trait_id)
+    evt.summary = "Updating SecurityGroup %s" % (securitygroup_name(evt))
     return []
 
 def securityGroup_update(device, dmd, evt):
-    evt.summary = event_summary("SecurityGroup", evt)
+    evt.summary = event_summary("SecurityGroup", securitygroup_name(evt), evt)
 
     if not securitygroup_id(evt):
         LOG.info("Unable to identify securitygroup component from event: %s" % evt)
@@ -746,11 +777,11 @@ def securityGroup_update(device, dmd, evt):
     return [objmap]
 
 def securityGroup_delete_start(device, dmd, evt):
-    evt.summary = "Deleting SecurityGroup %s " % (evt.trait_id)
+    evt.summary = "Deleting SecurityGroup %s " % (securitygroup_name(evt))
     return []
 
 def securityGroup_delete_end(device, dmd, evt):
-    evt.summary = "SecurityGroup %s deleted" % (evt.trait_id)
+    evt.summary = "SecurityGroup %s deleted" % (securitygroup_name(evt))
 
     objmap = neutron_objmap(evt, 'SecurityGroup')
     objmap.remove = True
@@ -760,15 +791,15 @@ def securityGroup_delete_end(device, dmd, evt):
 # Subnet Event Functions
 # -----------------------------------------------------------------------------
 def subnet_create_start(device, dmd, evt):
-    evt.summary = "Creating Subnet %s" % (evt.trait_id)
+    evt.summary = "Creating Subnet %s" % (subnet_name(evt))
     return []
 
 def subnet_update_start(device, dmd, evt):
-    evt.summary = "Updating Subnet %s" % (evt.trait_id)
+    evt.summary = "Updating Subnet %s" % (subnet_name(evt))
     return []
 
 def subnet_update(device, dmd, evt):
-    evt.summary = event_summary("Subnet", evt)
+    evt.summary = event_summary("Subnet", subnet_name(evt), evt)
 
     if not subnet_id(evt):
         LOG.info("Unable to identify subnet component from event: %s" % evt)
@@ -781,11 +812,11 @@ def subnet_update(device, dmd, evt):
     return [objmap]
 
 def subnet_delete_start(device, dmd, evt):
-    evt.summary = "Deleting Subnet %s " % (evt.trait_id)
+    evt.summary = "Deleting Subnet %s " % (subnet_name(evt))
     return []
 
 def subnet_delete_end(device, dmd, evt):
-    evt.summary = "Subnet %s deleted" % (evt.trait_id)
+    evt.summary = "Subnet %s deleted" % (subnet_name(evt))
 
     objmap = neutron_objmap(evt, 'Subnet')
     objmap.remove = True
@@ -796,25 +827,25 @@ def subnet_delete_end(device, dmd, evt):
 # Volume Event Functions
 # -----------------------------------------------------------------------------
 def volume_create_start(device, dmd, evt):
-    evt.summary = "Creating Volume %s" % (evt.trait_volume_id)
+    evt.summary = "Creating Volume %s" % (volume_name(evt))
     return []
 
 def volume_update_start(device, dmd, evt):
-    evt.summary = "Updating Volume %s" % (evt.trait_volume_id)
+    evt.summary = "Updating Volume %s" % (volume_name(evt))
     return []
 
 def volume_update(device, dmd, evt):
     if 'create.end' in evt.eventClassKey:
         # the volume is being created
-        evt.summary = "Created Volume %s" % (evt.trait_volume_id)
+        evt.summary = "Created Volume %s" % (volume_name(evt))
     elif 'attach.end' in evt.eventClassKey:
         # the volume is being attached to an instance
         evt.summary = "Attach Volume %s to instance %s " % \
-            (evt.trait_volume_id, evt.trait_instance_id)
+            (volume_name(evt), getattr(evt, "trait_instance_id", "[unknown]"))
     elif 'detach.end' in evt.eventClassKey:
         # the volume is being detached from an instance
         evt.summary = "Detach Volume %s from instance" % \
-            (evt.trait_volume_id)
+            (volume_name(evt))
 
     if not volume_id(evt):
         LOG.info("Unable to identify volume component from event: %s" % evt)
@@ -838,11 +869,11 @@ def volume_update(device, dmd, evt):
     return [objmap]
 
 def volume_delete_start(device, dmd, evt):
-    evt.summary = "Deleting Volume %s " % (evt.trait_volume_id)
+    evt.summary = "Deleting Volume %s " % (volume_name(evt))
     return []
 
 def volume_delete_end(device, dmd, evt):
-    evt.summary = "Volume %s deleted" % (evt.trait_volume_id)
+    evt.summary = "Volume %s deleted" % (volume_name(evt))
 
     if not volume_id(evt):
         LOG.info("Unable to identify volume component from event: %s" % evt)
@@ -853,12 +884,15 @@ def volume_delete_end(device, dmd, evt):
     return [objmap]
 
 def volume_attach_start(device, dmd, evt):
-    evt.summary = "Attaching Volume %s to instance" %  (evt.trait_display_name)
+    evt.summary = "Attaching Volume %s to instance %s" % \
+        (volume_name(evt),
+         getattr(evt, "trait_instance_id", "[unknown]"))
     return []
 
 def volume_detach_start(device, dmd, evt):
     evt.summary = "Detaching Volume %s from instance %s" % \
-        (evt.trait_display_name, evt.trait_instance_id)
+        (volume_name(evt),
+         getattr(evt, "trait_instance_id", "[unknown]"))
     return []
 
 
@@ -868,15 +902,15 @@ def volume_detach_start(device, dmd, evt):
 # -----------------------------------------------------------------------------
 def volsnapshot_create_start(device, dmd, evt):
     evt.summary = "Creating Volume Snapshot %s for volume %s" % \
-        (evt.trait_snapshot_id, evt.trait_volume_id)
+        (volsnapshot_name(evt), volume_name(evt))
     return []
 
 def volsnapshot_update(device, dmd, evt):
     evt.summary = "Created Volume Snapshot %s for volume %s" % \
-        (evt.trait_snapshot_id, evt.trait_volume_id)
+        (volsnapshot_name(evt), volume_name(evt))
 
     if not volsnapshot_id(evt):
-        LOG.info("Unable to identify volsnapshotcomponent from event: %s" % evt)
+        LOG.info("Unable to identify volsnapshot component from event: %s" % evt)
         return []
 
     objmap = cinder_objmap(evt, "VolSnapshot")
@@ -888,12 +922,12 @@ def volsnapshot_update(device, dmd, evt):
 
 def volsnapshot_delete_start(device, dmd, evt):
     evt.summary = "Deleting Snapshot %s for volume %s" % \
-        (evt.trait_snapshot_id, evt.trait_volume_id)
+        (volsnapshot_name(evt), volume_name(evt))
     return []
 
 def volsnapshot_delete_end(device, dmd, evt):
     evt.summary = "Volume Snapshot %s deleted for volume %s" % \
-        (evt.trait_snapshot_id, evt.trait_volume_id)
+        (volsnapshot_name(evt), volume_name(evt))
 
     if not volsnapshot_id(evt):
         LOG.info("Unable to identify volsnapshotcomponent from event: %s" % evt)
@@ -1125,19 +1159,29 @@ MAPPERS = {
 # ==============================================================================
 
 def process(evt, device, dmd, txnCommit):
-    (idfunc, mapper) = MAPPERS.get(evt.eventClassKey, (None, None))
+    try:
+        (idfunc, mapper) = MAPPERS.get(evt.eventClassKey, (None, None))
 
-    if idfunc:
-        evt.component = idfunc(evt)
+        if idfunc:
+            evt.component = idfunc(evt)
 
-    if mapper:
-        datamaps = mapper(device, dmd, evt)
-        if datamaps:
-            adm = ApplyDataMap(device)
-            for datamap in datamaps:
-                # LOG.debug("Applying %s" % datamap)
-                adm._applyDataMap(device, datamap)
+        if mapper:
+            datamaps = mapper(device, dmd, evt)
+            if datamaps:
+                adm = ApplyDataMap(device)
+                for datamap in datamaps:
+                    # LOG.debug("Applying %s" % datamap)
+                    adm._applyDataMap(device, datamap)
 
-        return len(datamaps)
-    else:
+            return len(datamaps)
+        else:
+            return 0
+    except Exception:
+        # We don't want any exceptions to make it back to zeneventd, as
+        # this will cause it to disable the transform, which will most likely
+        # cause more problems than it solves.  Exceptions are most likely
+        # to occur if we receive any event that is not formatted as we
+        # expect, and that could cause us to lose all event processing if
+        # the transform gets disabled.
+        LOG.exception("An exception occurred while processing an openstack event")
         return 0
