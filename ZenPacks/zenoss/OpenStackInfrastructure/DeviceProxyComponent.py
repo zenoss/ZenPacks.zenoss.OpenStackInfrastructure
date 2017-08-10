@@ -26,6 +26,8 @@ from Products.Zuul.interfaces import ICatalogTool
 from Products.AdvancedQuery import Eq
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
 from Products.ZenUtils.IpUtil import getHostByName, IpAddressError
+import socket
+import re
 
 
 def onDeviceDeleted(object, event):
@@ -134,7 +136,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
             return device
 
         # Does a device with a matching name exist?  Claim that one.
-        device = self.dmd.Devices.findDevice(self.name())
+        device = self.dmd.Devices.findDevice(self.suggested_device_name())
         if device:
             self_pdc_path = self.proxy_deviceclass().getPrimaryPath()
             device_path = device.getPrimaryPath()[:len(self_pdc_path)]
@@ -146,6 +148,25 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         else:
             return None
 
+    def suggested_device_name(self):
+        device_name = self.name()
+
+        # if the name ends in .localdomain, replace that with
+        # the suffix specified in zOpenStackHostLocalDomain.
+        localdomain = self.zOpenStackHostLocalDomain
+        if localdomain:
+            # if a value is specified, ensure that it starts with a '.',
+            # as this is almost certainly what is intended.
+            if not localdomain.startswith("."):
+                localdomain = "." + localdomain
+
+        device_name = re.sub(
+            r'\.localdomain$',
+            localdomain,
+            device_name,
+            flags=re.IGNORECASE)
+        return device_name
+
     def create_proxy_device(self):
         '''
         Create a proxy device in the proxy_deviceclass.
@@ -154,7 +175,8 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         '''
 
         # add the missing proxy device.
-        device_name = self.name()
+        device_name = self.suggested_device_name()
+
         try:
             device = self.dmd.Devices.findDeviceByIdOrIp(
                 getHostByName(device_name))
@@ -175,16 +197,27 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
             device = self.proxy_deviceclass().createInstance(device_name)
             device.setProdState(self.productionState)
             device.setPerformanceMonitor(self.getPerformanceServer().id)
+            can_model = False
             try:
-                device.setManageIp()
-            except IpAddressError:
+                ip = getHostByName(device_name)
+                if ip is None:
+                    LOG.info("%s does not resolve- not setting manageIp", device_name)
+                    can_model = False
+                elif ip.startswith("127") or ip.startswith("::1"):
+                    LOG.info("%s resolves to a loopback address- not setting manageIp", device_name)
+                else:
+                    device.setManageIp()
+                    can_model = True
+
+            except (IpAddressError, socket.gaierror):
                 LOG.warning("Unable to set management IP based on %s", device_name)
 
         device.index_object()
         notify(IndexingEvent(device))
 
-        LOG.info('Scheduling modeling job for %s' % device_name)
-        device.collectDevice(setlog=False, background=True)
+        if can_model:
+            LOG.info('Scheduling modeling job for %s' % device_name)
+            device.collectDevice(setlog=False, background=True)
 
         self.claim_proxy_device(device)
 

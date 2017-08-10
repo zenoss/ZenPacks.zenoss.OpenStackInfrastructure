@@ -149,6 +149,11 @@ class ZenPack(schema.ZenPack):
             'label': 'Password for ceilometer AMQP integration',
             'description': 'See documentation for details.',
             'type': 'password'
+        },
+        'zOpenStackHostLocalDomain': {
+            'label': "Replacement for .localdomain in hostnames",
+            'description': 'When openstack hosts report names ending in .localdomain, replace domain with this value.',
+            'type': 'string'
         }
     }
 

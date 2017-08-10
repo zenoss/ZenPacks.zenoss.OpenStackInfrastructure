@@ -31,6 +31,8 @@ zProperties: !ZenPackSpec
     default: openstack
   zOpenStackAMQPPassword:
     type: password
+  zOpenStackHostLocalDomain:
+    default: ''
 
 class_relationships:
 # Containing Relations
