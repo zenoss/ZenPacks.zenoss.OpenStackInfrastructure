@@ -428,7 +428,7 @@ The first time you install this zenpack, you must run `openstack_amqp_config` to
 To run this script, log into the master server (Zenoss 4.x) or Zope container (zenoss 5.x) and run it as follows:
 
 ``` {.bash}
-$ $ZENHOME/ZenPacks/ZenPacks.zenoss.OpenStackInfrastructure/ZenPacks/zenoss/OpenStackInfrastructure/bin/openstack_amqp_config
+$ $ZENHOME/ZenPacks/ZenPacks.zenoss.OpenStackInfrastructure*/ZenPacks/zenoss/OpenStackInfrastructure/bin/openstack_amqp_config
 ```
 
 It will do the following:

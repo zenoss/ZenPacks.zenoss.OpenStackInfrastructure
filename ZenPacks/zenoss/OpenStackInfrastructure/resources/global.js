@@ -113,7 +113,7 @@ var addOpenStack = new Zenoss.Action({
                     items: [{
                         xtype: 'textfield',
                         name: 'project_id',
-                        fieldLabel: _t('Project/Tenant ID'),
+                        fieldLabel: _t('Project/Tenant Name'),
                         labelWidth: 120,
                         id: "openstack_project_id",
                         width: 350,
