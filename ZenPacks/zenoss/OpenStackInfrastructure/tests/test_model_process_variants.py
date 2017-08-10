@@ -98,6 +98,7 @@ class TestModelProcessVariants(BaseTestCase):
         dc.setZenProperty('zOpenStackExtraHosts', [])
         dc.setZenProperty('zOpenStackHostMapToId', [])
         dc.setZenProperty('zOpenStackHostMapSame', [])
+        dc.setZenProperty('zOpenStackHostLocalDomain', '')        
         dc.setZenProperty('zOpenStackExtraApiEndpoints', [])
 
         self.d = dc.createInstance('zenoss.OpenStackInfrastructure.testDevice')

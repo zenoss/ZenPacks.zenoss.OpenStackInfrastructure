@@ -152,7 +152,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         device_name = self.name()
 
         # if the name ends in .localdomain, replace that with
-        # the suffix speciified in zOpenStackHostLocalDomain.
+        # the suffix specified in zOpenStackHostLocalDomain.
         localdomain = self.zOpenStackHostLocalDomain
         if localdomain:
             # if a value is specified, ensure that it starts with a '.',
@@ -200,7 +200,10 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
             can_model = False
             try:
                 ip = getHostByName(device_name)
-                if ip.startswith("127") or ip.startswith("::1"):
+                if ip is None:
+                    LOG.info("%s does not resolve- not setting manageIp", device_name)
+                    can_model = False
+                elif ip.startswith("127") or ip.startswith("::1"):
                     LOG.info("%s resolves to a loopback address- not setting manageIp", device_name)
                 else:
                     device.setManageIp()
