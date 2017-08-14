@@ -252,7 +252,7 @@ Choose that option and you'll be presented with a dialog asking for the
 following inputs.
 
 * Device To Create - non-empty, non-ip, non-dns, unique name to use for this device in Zenoss. ''See note below''.
-* Auth URL - A keystone URL, such as http://\<hostname\>:5000/v2.0/ for Keystone v2, or http://\<hostname\>:5000/v3/ for Keystone v3.
+* Auth URL - A keystone URL, such as http://\<hostname\>:5000/ (latest supported API version will be selected by default, to force an API version, add the path to the end of the URL, like http://\<hostname\>:5000/v3/ or http://\<hostname\>:5000/v2.0/).
 * Username, Password/API Key, Project/Tenant Name - *Administrative* credentials to your Zenoss instance.
 * Region Name - choose the correct region from the drop-down. You may only choose one, so each region you wish to manage must be registered as a separate endpoint in Zenoss.
 
@@ -474,10 +474,7 @@ ceilometer-agent-notification.
 Ceilometer_zenoss must be installed on all ceilometer nodes in the openstack
 environment.  To install the latest released version from RPM:
 
-Download the appropriate RPM and install as usual:
-
-* [ceilometer_zenoss-1.1.1-1.el6.noarch.rpm]
-* [ceilometer_zenoss-1.1.1-1.el7.noarch.rpm]
+Download the appropriate RPM and install as usual: [https://github.com/zenoss/ceilometer_zenoss/releases]()
 
 Alternatively, the module may be installed from source as follows:
 
@@ -541,11 +538,11 @@ changes will still be caught without this option enabled, it is
 recommended to leave notify_on_state_change disabled if your
 OpenStack environment is very large.
 
-#### Network and Router Info Events
+#### Network Events
 
 The OpenStack Infrastructure ZP pulls neutron events for Networks and Routers. However,
 if Neutron is not configured properly to send those events, they cannot be retrieved.
-If you are missing Info events, checks your OpenStack environment's 
+If you are missing events, checks your OpenStack environment's 
 /etc/neutron/neutron.conf. It should have the following:
 
 ```
