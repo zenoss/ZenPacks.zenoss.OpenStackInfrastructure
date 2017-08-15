@@ -459,6 +459,16 @@ This ZenPack still supports the previous configuration, where messages were sent
 
 For new openstack installs, we recommend using the RabbitMQ-Ceilometer endpoint, which is what will be reported by `openstack_amqp_config`.
 
+When the RabbitMQ-Ceilometer service is added to Control Center, two IP Assignments will be added as well.  One on port 55672 for the RabbitMQ node, and one on port 45672 for the management console.  Upon creation, they may be missing their IP addresses, in which case, they will default to automatic IP assignment.  In order to function properly, these services must have static IPs assigned.  If they have no IP address (only a port number), you must add the IP address by following these steps:
+
+1. In Control Center, open the service page for your Zenoss instance.
+2. Click "Assign" for the node IP assignment (port 55672).
+3. Select the appropriate IP from the "IP" select box on the "Assign IP" modal dialog.
+4. Click "Assign IP".
+5. Repeat for the management console IP Assignment (45672).
+
+NOTE: Control Center services will not be able to restart successfully until the IP addresses are added.
+
 ### OpenStack Ceilometer Configuration Steps
 
 Zenoss relies upon a Ceilometer dispatcher plugin to ship raw event and
