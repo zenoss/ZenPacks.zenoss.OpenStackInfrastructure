@@ -44,6 +44,12 @@
         factory=".datasources.EventsAMQPDataSource.EventsAMQPDataSourceInfo"
         />
 
+    <adapter
+        provides=".datasources.ApiEndpointStatusDataSource.IApiEndpointStatusDataSourceInfo"
+        for=".datasources.ApiEndpointStatusDataSource.ApiEndpointStatusDataSource"
+        factory=".datasources.ApiEndpointStatusDataSource.ApiEndpointStatusDataSourceInfo"
+        />
+
     <!-- Device Links -->
     <configure zcml:condition="have zenoss:IExpandedLinkProvider">
         <!-- hosts -->

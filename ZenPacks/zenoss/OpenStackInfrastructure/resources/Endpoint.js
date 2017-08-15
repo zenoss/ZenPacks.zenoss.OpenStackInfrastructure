@@ -78,7 +78,10 @@ Ext.apply(Zenoss.render, {
     },
 
     openstack_uppercase_renderer: function(value) {
-        return value.toUpperCase();
+        if value == null:
+            return ""
+        else:
+            return value.toUpperCase();
     },
 
 });

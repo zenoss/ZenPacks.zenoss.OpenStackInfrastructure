@@ -116,6 +116,17 @@ def create_model_data(dmd):
     # Endpoint
     endpoint = dc.createInstance('endpoint')
 
+    # API Endpoint for keystone
+    from ZenPacks.zenoss.OpenStackInfrastructure.ApiEndpoint import ApiEndpoint
+    keystone_apiendpoint = addContained(endpoint, "components", ApiEndpoint("apiendpoint-zOpenStackAuthUrl"))
+    keystone_apiendpoint.url = 'http://127.0.0.1:5000/v2.0'
+    keystone_apiendpoint.title = keystone_apiendpoint.url
+
+    # non-public api endpoint for load balanced keystone
+    keystone_apiendpoint2 = addContained(endpoint, "components", ApiEndpoint("apiendpoint-a8450514a5ca012fab799579ae4d7eec"))
+    keystone_apiendpoint2.url = 'http://127.0.0.1:1234/v2.0'
+    keystone_apiendpoint2.title = keystone_apiendpoint2.url
+
     # Org Structure
     from ZenPacks.zenoss.OpenStackInfrastructure.Region import Region
     from ZenPacks.zenoss.OpenStackInfrastructure.AvailabilityZone import AvailabilityZone
@@ -285,7 +296,7 @@ def create_model_data(dmd):
     for component in endpoint.components():
         if isinstance(component, SoftwareComponent):
             binary = component.binary
-            linux_device = component.hostedOn().proxy_device()
+            linux_device = component.hostedOn().ensure_proxy_device()
 
             process_id = '%s_%s' % (linux_device.id, binary)
             process = OSProcess(process_id)

@@ -16,7 +16,6 @@ LOG = logging.getLogger('zen.OpenStackDeviceProxyComponent')
 from zope.event import notify
 from zope.interface import implements
 
-from ZODB.transact import transact
 from OFS.interfaces import IObjectWillBeAddedEvent, IObjectWillBeMovedEvent
 from Products.Zuul.catalog.events import IndexingEvent
 from Products.ZenEvents.interfaces import IPostEventPlugin
@@ -26,14 +25,16 @@ from Products.ZenUtils.Utils import monkeypatch
 from Products.Zuul.interfaces import ICatalogTool
 from Products.AdvancedQuery import Eq
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
-from Products.ZenUtils.IpUtil import getHostByName
+from Products.ZenUtils.IpUtil import getHostByName, IpAddressError
+import socket
+import re
 
 
 def onDeviceDeleted(object, event):
     '''
     Clean up the dangling reference to a device if that device has been removed.
-    (Note: we may re-create the device automatically next time someone tries to access
-    self.proxy_device, though)
+    (Note: we may re-create the device automatically next time someone calls
+    self.ensure_proxy_device, though)
     '''
     if not IObjectWillBeAddedEvent.providedBy(event) and not IObjectWillBeMovedEvent.providedBy(event):
         if hasattr(object, 'openstackProxyComponentUUID'):
@@ -109,14 +110,15 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         '''
         Ensure that the proxy device exists, creating it if necessary.
         '''
-        self.proxy_device()
+        if not self.proxy_device():
+            self.create_proxy_device()
 
         return True
 
     def proxy_device(self):
         '''
-        Return this component's corresponding proxy device, creating
-        it in the proxy_deviceclass if it does not exist.
+        Return this component's corresponding proxy device, or None if
+        it does not yet exist.
 
         Default assumes that the names must match.
         '''
@@ -134,7 +136,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
             return device
 
         # Does a device with a matching name exist?  Claim that one.
-        device = self.dmd.Devices.findDevice(self.name())
+        device = self.dmd.Devices.findDevice(self.suggested_device_name())
         if device:
             self_pdc_path = self.proxy_deviceclass().getPrimaryPath()
             device_path = device.getPrimaryPath()[:len(self_pdc_path)]
@@ -142,11 +144,29 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
                 self.claim_proxy_device(device)
                 return device
             else:
-                return self.create_proxy_device()
+                return None
         else:
-            return self.create_proxy_device()
+            return None
 
-    @transact
+    def suggested_device_name(self):
+        device_name = self.name()
+
+        # if the name ends in .localdomain, replace that with
+        # the suffix specified in zOpenStackHostLocalDomain.
+        localdomain = self.zOpenStackHostLocalDomain
+        if localdomain:
+            # if a value is specified, ensure that it starts with a '.',
+            # as this is almost certainly what is intended.
+            if not localdomain.startswith("."):
+                localdomain = "." + localdomain
+
+        device_name = re.sub(
+            r'\.localdomain$',
+            localdomain,
+            device_name,
+            flags=re.IGNORECASE)
+        return device_name
+
     def create_proxy_device(self):
         '''
         Create a proxy device in the proxy_deviceclass.
@@ -155,7 +175,8 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         '''
 
         # add the missing proxy device.
-        device_name = self.name()
+        device_name = self.suggested_device_name()
+
         try:
             device = self.dmd.Devices.findDeviceByIdOrIp(
                 getHostByName(device_name))
@@ -176,13 +197,27 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
             device = self.proxy_deviceclass().createInstance(device_name)
             device.setProdState(self.productionState)
             device.setPerformanceMonitor(self.getPerformanceServer().id)
-            device.setManageIp()
+            can_model = False
+            try:
+                ip = getHostByName(device_name)
+                if ip is None:
+                    LOG.info("%s does not resolve- not setting manageIp", device_name)
+                    can_model = False
+                elif ip.startswith("127") or ip.startswith("::1"):
+                    LOG.info("%s resolves to a loopback address- not setting manageIp", device_name)
+                else:
+                    device.setManageIp()
+                    can_model = True
+
+            except (IpAddressError, socket.gaierror):
+                LOG.warning("Unable to set management IP based on %s", device_name)
 
         device.index_object()
         notify(IndexingEvent(device))
 
-        LOG.info('Scheduling modeling job for %s' % device_name)
-        device.collectDevice(setlog=False, background=True)
+        if can_model:
+            LOG.info('Scheduling modeling job for %s' % device_name)
+            device.collectDevice(setlog=False, background=True)
 
         self.claim_proxy_device(device)
 
@@ -238,6 +273,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
             graphs.extend(device.getGraphObjects())
         return graphs
 
+
 class DeviceLinkProvider(object):
     '''
     Provides a link on the device overview page to the openstack component the
@@ -281,19 +317,29 @@ class PostEventPlugin(object):
     implements(IPostEventPlugin)
 
     def apply(self, eventProxy, dmd):
+
+        # See ZPS-1677 for explanation.  This workaround will hopefully be
+        # removed in the future (ZPS-1685)
+        if eventProxy.eventClass == '/Status/Ping':
+            return
+
         device = dmd.Devices.findDeviceByIdExact(eventProxy.device)
 
         if device and hasattr(device, 'openstackProxyComponentUUID'):
             LOG.debug("tagging event on %s with openstack proxy component component uuid %s",
                       eventProxy.device, device.openstackProxyComponentUUID)
 
-            tags = [device.openstackProxyComponentUUID]
+            tags = []
 
-            # Also tag it with the openstack endpoint that the component is part of,
-            # if possible.
             try:
                 component = GUIDManager(dmd).getObject(device.openstackProxyComponentUUID)
                 if component:
+
+                    # Tag the event with the corresponding openstack component.
+                    tags.append(device.openstackProxyComponentUUID)
+
+                    # Also tag it with the openstack endpoint that the
+                    # component is part of, if possible.
                     endpoint = component.device()
                     tags.append(IGlobalIdentifier(endpoint).getGUID())
             except Exception:
@@ -318,5 +364,5 @@ class PostEventPlugin(object):
                         LOG.debug("Unable to append event for OSProcess %s",
                                   osprocess.osProcessClass().id)
 
-
-            eventProxy.tags.addAll('ZenPacks.zenoss.OpenStackInfrastructure.DeviceProxyComponent', tags)
+            if tags:
+                eventProxy.tags.addAll('ZenPacks.zenoss.OpenStackInfrastructure.DeviceProxyComponent', tags)

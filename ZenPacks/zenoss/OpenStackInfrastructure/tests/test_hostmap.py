@@ -2,7 +2,7 @@
 
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2016, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2016-2017, all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -47,7 +47,12 @@ class TestHostMap(BaseTestCase):
                 'test1': '1.2.3.4',
                 'test1.example.com': '1.2.3.4',
                 'test2': '1.2.3.5',
-                'test2.example.com': '1.2.3.5'
+                'test2.example.com': '1.2.3.5',
+                'test1.localdomain': '127.0.0.1',
+                'test2.localdomain': '127.0.0.1',
+
+                'ip-10-111-5-173': '10.111.5.173',
+                'ip-10-111-5-173.zenoss.loc': '10.111.5.173'
             })
         self._real_resolve_names = hostmap.resolve_names
         hostmap.resolve_names = resolve_names
@@ -132,6 +137,38 @@ class TestHostMap(BaseTestCase):
         # one..
         self.assertEquals(hostmap.get_hostid("test1"), "host-test1.example.com")
         self.assertEquals(hostmap.get_hostid("test1:somecrazysuffix_thatisreallylong"), "host-test1.example.com")
+
+    def test_localdomain(self):
+        # See ZPS-1244 for details- in short, any hostname ending in .localdomain
+        # will resolve to 127.0.0.1 on our hosts, and some tripleO deployment models
+        # end up with hosts self-identifying with such hostnames.
+        # While this will cause other issues, at least hostmap should not conflate
+        # them.
+        hostmap = HostMap()
+        hostmap.add_hostref("test1.localdomain")
+        hostmap.add_hostref("test2.localdomain")
+
+        self.perform_mapping(hostmap)
+
+        # We want this to resolve to two host IDs, not be consolidated into one.
+        self.assertEquals(len(hostmap.all_hostids()), 2)
+
+    def test_mixed_fqdns(self):
+        # This is replicating results seen in the QA environment where
+        # one host was being identified as 2, due to a mix of fqdn and short
+        # names being reported in the nova services list.  (ZPS-1709)
+        hostmap = HostMap()
+
+        hostmap.add_hostref("ip-10-111-5-173", source="nova services")
+        hostmap.add_hostref("ip-10-111-5-173.zenoss.loc", source="nova services")
+        hostmap.add_hostref("ip-10-111-5-173@lvm", source="cinder services")
+        hostmap.add_hostref("ip-10-111-5-173.zenoss.loc@lvm", source="cinder services")
+        hostmap.add_hostref("10.111.5.173", source="Nova API URL")
+
+        self.perform_mapping(hostmap)
+
+        # We want this to consolidated into one hostid.
+        self.assertEquals(len(hostmap.all_hostids()), 1)
 
 
 def test_suite():

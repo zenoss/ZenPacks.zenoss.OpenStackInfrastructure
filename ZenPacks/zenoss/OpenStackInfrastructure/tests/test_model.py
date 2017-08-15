@@ -88,10 +88,13 @@ class TestModel(BaseTestCase):
         dc.setZenProperty('zPythonClass', 'ZenPacks.zenoss.OpenStackInfrastructure.Endpoint')
         dc.setZenProperty('zOpenStackHostDeviceClass', '/Server/SSH/Linux/NovaHost')
         dc.setZenProperty('zOpenStackRegionName', 'RegionOne')
+        dc.setZenProperty('zOpenStackAuthUrl', 'http://1.2.3.4:5000/v2.0')
         dc.setZenProperty('zOpenStackNovaApiHosts', [])
         dc.setZenProperty('zOpenStackExtraHosts', [])
         dc.setZenProperty('zOpenStackHostMapToId', [])
         dc.setZenProperty('zOpenStackHostMapSame', [])
+        dc.setZenProperty('zOpenStackHostLocalDomain', '')
+        dc.setZenProperty('zOpenStackExtraApiEndpoints', [])
 
         self.d = dc.createInstance('zenoss.OpenStackInfrastructure.testDevice')
         self.d.setPerformanceMonitor('localhost')
