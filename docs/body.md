@@ -252,8 +252,7 @@ Choose that option and you'll be presented with a dialog asking for the
 following inputs.
 
 * Device To Create - non-empty, non-ip, non-dns, unique name to use for this device in Zenoss. ''See note below''.
-* Auth URL - A keystone URL, such as http://\<hostname\>:5000/ (latest supported API version will be selected by default, to force an API version, add the path to the end of the URL, like http://\<hostname\>:5000/v3/ or http://\<hostname\>:5000/v2.0/).
-* Username, Password/API Key, Project/Tenant Name - *Administrative* credentials to your Zenoss instance.
+* Auth URL - A keystone URL.  For Keystone's v3 API, it should look like `http://\<hostname\>:5000/v3/`.  For Keystone's v2 API, it should look like `http://\<hostname\>:5000/v2.0/`.  To have the ZenPack choose the newest supported API version, leave the path off, like `http://\<hostname\>:5000/`.
 * Region Name - choose the correct region from the drop-down. You may only choose one, so each region you wish to manage must be registered as a separate endpoint in Zenoss.
 
 Once you click Add, Zenoss will contact the OpenStack API and discover
