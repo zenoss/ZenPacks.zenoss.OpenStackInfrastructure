@@ -808,6 +808,7 @@ endpoint). Allow user to specify additional ones via
 zOpenStackExtraApiEndpoints. Supported API services are included in the
 provided ApiEndpoint monitoring template.
 - Removed zOpenStackCeilometerUrl zproperty, which was unused
+- Added descriptions for OpenStack configuration properties (ZPS-1590)
 
 2.3.3
 - Fix error in modeler when neutron agent extension is not available (ZPS-1243)
