@@ -67,7 +67,7 @@ Prerequisites
 - A supported OpenStack version (see below)
 - ceilometer_zenoss compatible with your version of OpenStack (See [Ceilometer Enablement](#ceilometer-enablement))
     - This Zenoss-specific plugin must be installed on all your Ceilometer nodes as described.
-      If not installed and configured properly,    Instances and vNICs graphs
+      If not installed and configured properly, Instances and vNICs graphs
       will be blank, and Zenoss will not detect changes (such as new instances or
       instance state changes) until a full model is performed.
 * Administrative credentials for your OpenStack environment 
@@ -83,6 +83,7 @@ Prerequisites
 * 2.1.x support Juno and Kilo
 * 2.2.x support Juno, Kilo, and Liberty
 * 2.3.x support Mitaka
+* 2.4.x support Mitaka, Newton, and Ocata
 
 Installed Items
 ---------------
@@ -116,6 +117,9 @@ autonomous OpenStack clouds joined together through shared Keystone identity
 server and managed through a common interface. 
 - zOpenStackRunNovaManageInContainer, zOpenStackRunVirshQemuInContainer, zOpenStackRunNeutronCommonInContainer: 
 Used when openstack processes are running inside of docker containers. Provide the container names (or a pattern to match them) here, or leave blank in a non-containerized openstack environment.
+- zOpenStackHostLocalDomain: When openstack hosts report names ending in .localdomain, replace domain with this value.
+- zOpenStackAMQPUsername: Username for ceilometer AMQP integration
+- zOpenStackAMQPPassword: Password for ceilometer AMQP integration
 
 ### Device Classes 
 - /OpenStack: Root OpenStack device class. Typically, devices should not be put in this device class. 
@@ -248,8 +252,8 @@ Choose that option and you'll be presented with a dialog asking for the
 following inputs.
 
 * Device To Create - non-empty, non-ip, non-dns, unique name to use for this device in Zenoss. ''See note below''.
-* Auth URL - A keystone URL, such as http://\<hostname\>:5000/v2.0/
-* Username, Password/API Key, Project/Tenant ID - *Administrative* credentials to your Zenoss instance.
+* Auth URL - A keystone URL, such as http://\<hostname\>:5000/ (latest supported API version will be selected by default, to force an API version, add the path to the end of the URL, like http://\<hostname\>:5000/v3/ or http://\<hostname\>:5000/v2.0/).
+* Username, Password/API Key, Project/Tenant Name - *Administrative* credentials to your Zenoss instance.
 * Region Name - choose the correct region from the drop-down. You may only choose one, so each region you wish to manage must be registered as a separate endpoint in Zenoss.
 
 Once you click Add, Zenoss will contact the OpenStack API and discover
@@ -299,6 +303,7 @@ The following organizational elements are discovered:
 * Regions
 * Availability Zones
 * Tenants
+* API Endpoints
 
 The following virtual-machine elements are discovered:
 
@@ -308,7 +313,6 @@ The following virtual-machine elements are discovered:
 * Hypervisors
 * Images
 * Flavors
-* Nova API Endpoints
 
 The following network elements are discovered:
 
@@ -323,7 +327,6 @@ The following network elements are discovered:
 The following block storage elements are discovered:
 
 * Cinder Services (processes supporting block storage)
-* Cinder API Endpoints
 * Volumes
 * Volume Snapshots
 * Volume Types
@@ -471,10 +474,7 @@ ceilometer-agent-notification.
 Ceilometer_zenoss must be installed on all ceilometer nodes in the openstack
 environment.  To install the latest released version from RPM:
 
-Download the appropriate RPM and install as usual:
-
-* [ceilometer_zenoss-1.1.1-1.el6.noarch.rpm]
-* [ceilometer_zenoss-1.1.1-1.el7.noarch.rpm]
+Download the appropriate RPM and install as usual: [https://github.com/zenoss/ceilometer_zenoss/releases]()
 
 Alternatively, the module may be installed from source as follows:
 
@@ -537,6 +537,19 @@ transforms in Zenoss to keep the model consistent. Since most instance
 changes will still be caught without this option enabled, it is
 recommended to leave notify_on_state_change disabled if your
 OpenStack environment is very large.
+
+#### Network Events
+
+The OpenStack Infrastructure ZP pulls neutron events for Networks and Routers. However,
+if Neutron is not configured properly to send those events, they cannot be retrieved.
+If you are missing events, checks your OpenStack environment's 
+/etc/neutron/neutron.conf. It should have the following:
+
+```
+[oslo_messaging_notifications]
+driver = messagingv2
+topics = notifications
+```
 
 #### Increasing Polling Interval
 
@@ -779,6 +792,8 @@ Changes
 
 2.4.0
 
+- Added support for Newton and Ocata
+- Added support for Keystone v3 authentication
 - Model API endpoints (currently only the public keystone API
 endpoint). Allow user to specify additional ones via
 zOpenStackExtraApiEndpoints. Supported API services are included in the

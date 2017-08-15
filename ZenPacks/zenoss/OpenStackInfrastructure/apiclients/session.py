@@ -27,6 +27,8 @@ from twisted.web.iweb import IBodyProducer
 from urllib import getproxies, urlencode
 from urlparse import urlparse, urlunparse, parse_qsl
 
+from distutils.version import LooseVersion
+
 from zope.interface import implements
 
 from .utils import getDeferredSemaphore, add_timeout, zenpack_version
@@ -330,16 +332,20 @@ class SessionManager(object):
             try:
                 data = json.loads(response_body)
                 version_url = {}
+                best_version = "v0.0"
                 for version in data['versions']['values']:
                     if version['status'] != 'stable':
                         continue
+                    if LooseVersion(version['id']) < LooseVersion(best_version):
+                        continue
+                    if LooseVersion(version['id']) >= LooseVersion("v4.0"):
+                        continue
+                    best_version = version['id']
                     for url in [x['href'] for x in version['links'] if x['rel'] == 'self']:
                         version_url[str(version['id'])] = base_url(str(url))
 
-                if 'v3.0' in version_url:
-                    returnValue((version_url['v3.0'], 'v3.0'))
-                elif 'v2.0' in version_url:
-                    returnValue((version_url['v2.0'], 'v2.0'))
+                if best_version in version_url:
+                    returnValue((version_url[best_version], best_version))
                 else:
                     log.error("No recognized API versions.  The following were found: %s", ", ".join(version_url.keys()))
                     raise ValueError("No recognized API versions")

@@ -169,7 +169,7 @@ the ceilometer.conf file:
     APIs.
 
 -   Make sure that the configuration settings documented in the zenpack
-    installation instructions have are correct:
+    installation instructions have been set correctly:
     -   \[notification\] store\_events = True
     -   \[DEFAULT\] notify_on_state\_change = vm_and_task_state
     -   Liberty: \[oslo_messaging_notifications\] notification_driver = messagingv2\

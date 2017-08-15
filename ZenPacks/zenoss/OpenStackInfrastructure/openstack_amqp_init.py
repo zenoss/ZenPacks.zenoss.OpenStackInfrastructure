@@ -169,11 +169,6 @@ if __name__ == '__main__':
 OpenStack Configuration
 -----------------------
 Add the following configuration to ceilometer.conf on all openstack nodes:
-For Liberty and prior versions,
-
-    [DEFAULT]
-    dispatcher=zenoss
-
 For Mitaka and newer versions,
 
     [DEFAULT]
