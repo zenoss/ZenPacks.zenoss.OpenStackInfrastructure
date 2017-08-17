@@ -770,9 +770,9 @@ External Impact Relationships
 ### Examples
 
 +:-----------------------------------------------:+:-------------------------------------------------------------------------------:+
-| [![][impact_instance.png]][impact_instance.png] | [![][impact_instance_with_floatingip.png]][impact_instance_with_floatingip.png] |
+| [![][impact_instance.png]][impact_instance.png] | [![][impact_ports.png]][impact_ports.png] |
 |                                                 |                                                                                 |
-| Impact (Instance)                               | Impact (Floating IP)                                                            |
+| Impact (Instance)                               | Impact (Network)                                                            |
 +-------------------------------------------------+---------------------------------------------------------------------------------+
 | [![][impact_region.png]][impact_region.png]     | [![][impact_tenant.png]][impact_tenant.png]                                     |
 |                                                 |                                                                                 |
@@ -892,7 +892,7 @@ provided ApiEndpoint monitoring template.
 [hypervisors.png]: ../docs/images/hypervisors.png "Hypervisor" {.gallerythumbnail}
 [images.png]: ../docs/images/images.png "Image" {.gallerythumbnail}
 [impact_instance.png]: ../docs/images/impact_instance.png "Impact Instance" {.gallerythumbnail}
-[impact_instance_with_floatingip.png]: ../docs/images/impact_instance_with_floatingip.png "Impact with FloatingIP" {.gallerythumbnail}
+[impact_ports.png]: ../docs/images/impact_ports.png "Impact Network Ports" {.gallerythumbnail}
 [impact_region.png]: ../docs/images/impact_region.png "Impact Region" {.gallerythumbnail}
 [impact_tenant.png]: ../docs/images/impact_tenant.png "Impact" {.gallerythumbnail}
 [instances.png]: ../docs/images/instances.png "Instance" {.gallerythumbnail}
