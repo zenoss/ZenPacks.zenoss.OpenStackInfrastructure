@@ -183,6 +183,10 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         except Exception:
             device = None
 
+        # we only need/want to try to model the device if we've added it as a
+        # new device and if it has a valid management IP (see below)
+        should_model = False
+
         if self.dmd.Devices.findDevice(device_name):
             device_name = device_name + "_nameconflict"
             LOG.info("Device name conflict with endpoint.  Changed name to %s" % device_name)
@@ -197,17 +201,16 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
             device = self.proxy_deviceclass().createInstance(device_name)
             device.setProdState(self.productionState)
             device.setPerformanceMonitor(self.getPerformanceServer().id)
-            can_model = False
             try:
                 ip = getHostByName(device_name)
                 if ip is None:
                     LOG.info("%s does not resolve- not setting manageIp", device_name)
-                    can_model = False
+                    should_model = False
                 elif ip.startswith("127") or ip.startswith("::1"):
                     LOG.info("%s resolves to a loopback address- not setting manageIp", device_name)
                 else:
                     device.setManageIp()
-                    can_model = True
+                    should_model = True
 
             except (IpAddressError, socket.gaierror):
                 LOG.warning("Unable to set management IP based on %s", device_name)
@@ -215,7 +218,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         device.index_object()
         notify(IndexingEvent(device))
 
-        if can_model:
+        if should_model:
             LOG.info('Scheduling modeling job for %s' % device_name)
             device.collectDevice(setlog=False, background=True)
 
