@@ -70,11 +70,9 @@ Prerequisites
       If not installed and configured properly, Instances and vNICs graphs
       will be blank, and Zenoss will not detect changes (such as new instances or
       instance state changes) until a full model is performed.
-* Administrative credentials for your OpenStack environment 
+- Administrative credentials for your OpenStack environment 
     - Username, password, keystone URL, Region
-- Once the zenpack is installed, provide SSH credentials to the linux devices in your OpenStack environment before adding any devices.
-    - Configure the zCommandUsername/zCommandPassword/zKeyPath properties on the /Devices/Server/SSH/Linux/NovaHost device class.
-    - If your OpenStack nodes are already managed under Zenoss, move them into /Devices/Server/SSH/Linux/NovaHost
+- SSH credentials to the linux devices in your OpenStack environment (See [Post-Installation Notes](#post-installation-notes))
 
 
 ### Supported OpenStack Releases
@@ -84,6 +82,14 @@ Prerequisites
 * 2.2.x support Juno, Kilo, and Liberty
 * 2.3.x support Mitaka
 * 2.4.x support Mitaka, Newton, and Ocata
+
+Post-Installation Notes
+-----------------------
+
+- Once the zenpack is installed, provide SSH credentials to the linux devices in your OpenStack environment before adding any devices.
+    - Configure the zCommandUsername/zCommandPassword/zKeyPath properties on the /Devices/Server/SSH/Linux/NovaHost device class.
+    - If your OpenStack nodes are already managed under Zenoss, move them into /Devices/Server/SSH/Linux/NovaHost
+- After upgrading the ZenPack, if running Zenoss 5.2.x, you may get a flare message with the error "TypeError: addOpenStack() got an unexpected keyword argument 'ceilometer_url'".  This is due to a caching issue in Zenoss.  To resolve the issue, restart the container for the Zenoss service (which runs the zproxy server that handles web requests).  You do not need to restart the child services, only the parent.  After restarting once, the issue should not recur.
 
 Installed Items
 ---------------
@@ -451,6 +457,8 @@ If you do not do this, if you run `openstack_amqp_config` in the future, it will
 
 For upgrade from version 2.4.0 or higher, there are no special steps required, no changes required on the OpenStack side, and no need to run `openstack_amqp_config`.
 
+NOTE: After upgrading the ZenPack, if running Zenoss 5.2.x, you may get a flare message with the error "TypeError: addOpenStack() got an unexpected keyword argument 'ceilometer_url'".  This is a known issue, due to a caching issue in Zenoss.  To resolve the issue, restart the container for the Zenoss service (which runs the zproxy server that handles web requests).  You do not need to restart the child services, only the parent.  After restarting once, the issue should not recur.
+
 ### Zenoss 5.x - RabbitMQ-Ceilometer
 
 Version 2.4.0 of this zenpack introduces a new service, `RabbitMQ-Ceilometer`.  This is a dedicated instance of RabbitMQ on each collector which is used solely for integration with ceilometer, rather than using the standard `RabbitMQ` service that is used by Zenoss itself.  This better distributes any load as well as providing better support for distributed collector scenarios where the target OpenStack environment might not have network access to the central Zenoss servers.
@@ -762,9 +770,9 @@ External Impact Relationships
 ### Examples
 
 +:-----------------------------------------------:+:-------------------------------------------------------------------------------:+
-| [![][impact_instance.png]][impact_instance.png] | [![][impact_instance_with_floatingip.png]][impact_instance_with_floatingip.png] |
+| [![][impact_instance.png]][impact_instance.png] | [![][impact_ports.png]][impact_ports.png] |
 |                                                 |                                                                                 |
-| Impact (Instance)                               | Impact (Floating IP)                                                            |
+| Impact (Instance)                               | Impact (Network)                                                            |
 +-------------------------------------------------+---------------------------------------------------------------------------------+
 | [![][impact_region.png]][impact_region.png]     | [![][impact_tenant.png]][impact_tenant.png]                                     |
 |                                                 |                                                                                 |
@@ -793,7 +801,9 @@ Known Issues
     - Workaround: If you have been previously monitoring the endpoint as a User endpoint, delete the device before you re-add it as an Infrastructure endpoint.
 - [ZEN-17905](https://jira.zenoss.com/browse/ZEN-17905): Nova APIs component: Grey icons for Enabled and State after model/monitor.
     - OpenStack nova service API does not provide information about Nova-API, so its status is, in fact, unknown.
-- ZPS-1762: When using OpenvSwitch integration, the Linux devices must be added to the system first (normally through automatic discovery by the OpenStackInfrastructure ZenPack) before the corresponding OpenvSwitch devices are registered.  This is because the two devices use the same management IP address, and a special exclusion is in place for OpenvSwitch devices, allowing them to be added after the linux device, but not the other way around.
+- [ZPS-1762](https://jira.zenoss.com/browse/ZPS-1762): When using OpenvSwitch integration, the Linux devices must be added to the system first (normally through automatic discovery by the OpenStackInfrastructure ZenPack) before the corresponding OpenvSwitch devices are registered.  This is because the two devices use the same management IP address, and a special exclusion is in place for OpenvSwitch devices, allowing them to be added after the linux device, but not the other way around.
+- [ZPS-1956](https://jira.zenoss.com/browse/ZEN-1956): After upgrading the ZenPack, if running Zenoss 5.2.x, you may get a flare message with the error "TypeError: addOpenStack() got an unexpected keyword argument 'ceilometer_url'".  This is due to a caching issue in Zenoss.  To resolve the issue, restart the container for the Zenoss service (which runs the zproxy server that handles web requests).  You do not need to restart the child services, only the parent.  After restarting once, the issue should not recur.
+- [ZPS-2004](https://jira.zenoss.com/browse/ZPS-2004): When adding an OSI device, if the same host is already added as a generic device (such as /SSH/Linux), the host device's device class will be changed, and an error generated, preventing modeling.  As a workaround, remove the Linux device before adding the OSI device.
 
 
 Changes
@@ -809,6 +819,7 @@ zOpenStackExtraApiEndpoints. Supported API services are included in the
 provided ApiEndpoint monitoring template.
 - Removed zOpenStackCeilometerUrl zproperty, which was unused
 - Added descriptions for OpenStack configuration properties (ZPS-1590)
+- Tested with Zenoss Resource Manager 5.2.6, Zenoss Resource Manager 4.2.5 RPS 743 and Service Impact 5.1.5
 
 2.3.3
 - Fix error in modeler when neutron agent extension is not available (ZPS-1243)
@@ -863,9 +874,6 @@ provided ApiEndpoint monitoring template.
 
 
 
-[ceilometer_zenoss-1.1.1-1.el6.noarch.rpm]: ceilometer_zenoss-1.1.1-1.el6.noarch.rpm
-[ceilometer_zenoss-1.1.1-1.el7.noarch.rpm]: ceilometer_zenoss-1.1.1-1.el7.noarch.rpm
-
 [impact.png]: ../docs/images/impact.png "Impact Diagram"
 
 [availabilityzones.png]: ../docs/images/availabilityzones.png "Availability Zones" {.gallerythumbnail}
@@ -875,7 +883,7 @@ provided ApiEndpoint monitoring template.
 [hypervisors.png]: ../docs/images/hypervisors.png "Hypervisor" {.gallerythumbnail}
 [images.png]: ../docs/images/images.png "Image" {.gallerythumbnail}
 [impact_instance.png]: ../docs/images/impact_instance.png "Impact Instance" {.gallerythumbnail}
-[impact_instance_with_floatingip.png]: ../docs/images/impact_instance_with_floatingip.png "Impact with FloatingIP" {.gallerythumbnail}
+[impact_ports.png]: ../docs/images/impact_ports.png "Impact Network Ports" {.gallerythumbnail}
 [impact_region.png]: ../docs/images/impact_region.png "Impact Region" {.gallerythumbnail}
 [impact_tenant.png]: ../docs/images/impact_tenant.png "Impact" {.gallerythumbnail}
 [instances.png]: ../docs/images/instances.png "Instance" {.gallerythumbnail}
