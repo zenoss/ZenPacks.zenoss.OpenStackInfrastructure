@@ -20,14 +20,17 @@ from twisted.internet import reactor
 from twisted.internet.error import TimeoutError
 from twisted.internet.defer import inlineCallbacks, returnValue, succeed
 from twisted.internet.endpoints import TCP4ClientEndpoint
-from twisted.web.client import ProxyAgent, Agent, HTTPConnectionPool, readBody
+from twisted.web.client import ProxyAgent, Agent, HTTPConnectionPool, readBody, BrowserLikePolicyForHTTPS
 from twisted.web.http_headers import Headers
-from twisted.web.iweb import IBodyProducer
+from twisted.web.iweb import IBodyProducer, IPolicyForHTTPS
+from twisted.internet.ssl import CertificateOptions
+from twisted.internet._sslverify import ClientTLSOptions
 
 from urllib import getproxies, urlencode
 from urlparse import urlparse, urlunparse, parse_qsl
 
 from zope.interface import implements
+from zope.interface.declarations import implementer
 
 from .utils import getDeferredSemaphore, add_timeout, zenpack_version
 from .exceptions import APIClientError, UnauthorizedError, BadRequestError, NotFoundError
@@ -63,6 +66,27 @@ class StringProducer(object):
 
     def stopProducing(self):
         pass
+
+
+# These classes are used to tweak the SSL policy so that we ignore SSL host
+# verification errors that occur with a self-signed certificate.
+class PermissiveClientTLSOptions(ClientTLSOptions):
+    def _identityVerifyingInfoCallback(self, connection, where, ret):
+        try:
+            super(PermissiveClientTLSOptions, self)._identityVerifyingInfoCallback(connection, where, ret)
+        except ValueError as e:
+            log.debug("Ignoring SSL hostname verification error for %s: %s", self._hostnameASCII, e)
+
+
+@implementer(IPolicyForHTTPS)
+class PermissiveBrowserLikePolicyForHTTPS(BrowserLikePolicyForHTTPS):
+    def creatorForNetloc(self, hostname, port):
+        certificateOptions = CertificateOptions(
+            trustRoot=self._trustRoot)
+
+        return PermissiveClientTLSOptions(
+            hostname.decode("ascii"),
+            certificateOptions.getContext())
 
 
 class SessionManager(object):
@@ -106,6 +130,7 @@ class SessionManager(object):
             pool.maxPersistentPerHost = 10
             pool.cachedConnectionTimeout = 15
 
+            contextFactory = PermissiveBrowserLikePolicyForHTTPS()
             proxies = getproxies()
 
             if 'http' in proxies or 'https' in proxies:
@@ -116,13 +141,16 @@ class SessionManager(object):
             if 'https' in proxies:
                 proxy = urlparse(proxies.get('https'))
                 if proxy:
+                    # Note- this isn't going to work completely.  It's not being
+                    # passed the modified contextFactory, and in fact it doesn't
+                    # even work properly for other reasons (ZPS-2061)
                     log.info("Creating https proxy (%s:%s)" % (proxy.hostname, proxy.port))
                     endpoint = TCP4ClientEndpoint(reactor, proxy.hostname, proxy.port, timeout=CONNECT_TIMEOUT)
                     SessionManager._agents['https'] = \
                         ProxyAgent(endpoint, reactor, pool=pool)
             else:
                 SessionManager._agents['https'] = \
-                    Agent(reactor, pool=pool, connectTimeout=CONNECT_TIMEOUT)
+                    Agent(reactor, pool=pool, connectTimeout=CONNECT_TIMEOUT, contextFactory=contextFactory)
 
             if 'http' in proxies:
                 proxy = urlparse(proxies.get('http'))
@@ -228,6 +256,7 @@ class SessionManager(object):
         except TimeoutError:
             raise TimeoutError("GET %s" % url)
         body = yield readBody(response)
+        log.debug("GET %s => %s", url, body)
 
         # If the request resulted in an error, raise an exception
         self.handle_error_response(response, body)
@@ -283,6 +312,7 @@ class SessionManager(object):
             raise TimeoutError("POST %s" % url)
 
         body = yield readBody(response)
+        log.debug("POST %s => %s", url, body)
 
         # If the request resulted in an error, raise an exception
         self.handle_error_response(response, body)
