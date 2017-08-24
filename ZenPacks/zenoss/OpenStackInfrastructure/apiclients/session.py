@@ -20,23 +20,20 @@ from twisted.internet import reactor
 from twisted.internet.error import TimeoutError
 from twisted.internet.defer import inlineCallbacks, returnValue, succeed
 from twisted.internet.endpoints import TCP4ClientEndpoint
-from twisted.web.client import ProxyAgent, Agent, HTTPConnectionPool, readBody, BrowserLikePolicyForHTTPS
+from twisted.web.client import ProxyAgent, Agent, HTTPConnectionPool, readBody
 from twisted.web.http_headers import Headers
-from twisted.web.iweb import IBodyProducer, IPolicyForHTTPS
-from twisted.internet.ssl import CertificateOptions
-from twisted.internet._sslverify import ClientTLSOptions
+from twisted.web.iweb import IBodyProducer
 
 from urllib import getproxies, urlencode
 from urlparse import urlparse, urlunparse, parse_qsl
 
 from zope.interface import implements
-from zope.interface.declarations import implementer
 
 from .utils import getDeferredSemaphore, add_timeout, zenpack_version
 from .exceptions import APIClientError, UnauthorizedError, BadRequestError, NotFoundError
+from .ssl import PermissiveBrowserLikePolicyForHTTPS
 
 
-# tbd
 CONNECT_TIMEOUT = 30
 READ_TIMEOUT = 30
 MAX_POOL_CONNECTIONS = 10
@@ -66,27 +63,6 @@ class StringProducer(object):
 
     def stopProducing(self):
         pass
-
-
-# These classes are used to tweak the SSL policy so that we ignore SSL host
-# verification errors that occur with a self-signed certificate.
-class PermissiveClientTLSOptions(ClientTLSOptions):
-    def _identityVerifyingInfoCallback(self, connection, where, ret):
-        try:
-            super(PermissiveClientTLSOptions, self)._identityVerifyingInfoCallback(connection, where, ret)
-        except ValueError as e:
-            log.debug("Ignoring SSL hostname verification error for %s: %s", self._hostnameASCII, e)
-
-
-@implementer(IPolicyForHTTPS)
-class PermissiveBrowserLikePolicyForHTTPS(BrowserLikePolicyForHTTPS):
-    def creatorForNetloc(self, hostname, port):
-        certificateOptions = CertificateOptions(
-            trustRoot=self._trustRoot)
-
-        return PermissiveClientTLSOptions(
-            hostname.decode("ascii"),
-            certificateOptions.getContext())
 
 
 class SessionManager(object):
