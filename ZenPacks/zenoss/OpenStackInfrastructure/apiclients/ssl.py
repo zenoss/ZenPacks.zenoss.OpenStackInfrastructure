@@ -11,14 +11,19 @@
 #
 ###########################################################################
 
+import logging
+log = logging.getLogger('zen.OpenStack.txapiclient')
 
 import attr
-from socket import inet_ntop, AF_INET, AF_INET6
+from socket import inet_ntop, inet_pton, AF_INET, AF_INET6
 import warnings
 
 from service_identity import VerificationError, CertificateError, SubjectAltNameWarning
-from service_identity.pyopenssl import decode, GeneralNames, extract_ids as si_extract_ids
-from service_identity._common import DNS_ID, _is_ip_address, text_type, verify_service_identity
+from service_identity.pyopenssl import (
+    decode, GeneralNames, IA5String, ID_ON_DNS_SRV)
+from service_identity._common import (
+    DNS_ID, DNSPattern, URIPattern, SRVPattern,
+    _is_ip_address, text_type, verify_service_identity)
 
 from twisted.python.failure import Failure
 from twisted.web.iweb import IPolicyForHTTPS
@@ -115,34 +120,72 @@ def verifyHostname(connection, hostname):
         hostname_id = DNS_ID(hostname)
 
     cert = connection.get_peer_certificate()
-    patterns = []
+    ids = []
 
-    # Capture iPAddress IDs from subjectAltnames (which are missing due to
-    # a bug in service_identity, https://github.com/pyca/service_identity/issues/12)
-    suppress_warning = False
+    # Basically the same as service_identity.pyopenssl.extract_ids, but with
+    # subjectAltName support for iPAddress IDs and IP Addresses stuck in dNSName ids
     for i in range(cert.get_extension_count()):
         ext = cert.get_extension(i)
         if ext.get_short_name() == b"subjectAltName":
             names, _ = decode(ext.get_data(), asn1Spec=GeneralNames())
             for n in names:
                 name_string = n.getName()
+
                 if name_string == "iPAddress":
-                    patterns.append(IPADDRESSPattern(n.getComponent().asOctets()))
-                    suppress_warning = True
+                    ids.append(IPADDRESSPattern(n.getComponent().asOctets()))
 
-    with warnings.catch_warnings():
+                elif name_string == "dNSName" and _is_ip_address(n.getComponent().asOctets().strip()):
+                    # If an IP Address is passed as a dNSName, it will
+                    # cause service_identity to throw an exception, as
+                    # it doesn't consider this valid.   From reading the
+                    # RFCs, i think it's a gray area, so i'm going to
+                    # allow it, since we've seen it happen with a customer.
+                    try:
+                        ip_string = n.getComponent().asOctets().strip()
+                        if ":" in ip_string:
+                            value = inet_pton(AF_INET6, ip_string)
+                        else:
+                            value = inet_pton(AF_INET, ip_string)
 
-        # si_extract_ids will warn that no subjectAltNames were found,
-        # but it's not looking for iPAddresses.  so, if we found those,
-        # we can turn off that warning.
-        if suppress_warning:
-            warnings.simplefilter("ignore", SubjectAltNameWarning)
+                        ids.append(IPADDRESSPattern(value))
+                    except CertificateError as e:
+                        log.warning(
+                            "Ignoring invalid dNSName record in subjectAltName: %s", e)
 
-        # Add in the other standard IDs.
-        patterns.extend(si_extract_ids(cert))
+                # Normal behavior below:
+                elif name_string == "dNSName":
+                    ids.append(DNSPattern(n.getComponent().asOctets()))
+                elif name_string == "uniformResourceIdentifier":
+                    ids.append(URIPattern(n.getComponent().asOctets()))
+                elif name_string == "otherName":
+                    comp = n.getComponent()
+                    oid = comp.getComponentByPosition(0)
+                    if oid == ID_ON_DNS_SRV:
+                        srv, _ = decode(comp.getComponentByPosition(1))
+                        if isinstance(srv, IA5String):
+                            ids.append(SRVPattern(srv.asOctets()))
+                        else:  # pragma: nocover
+                            raise CertificateError(
+                                "Unexpected certificate content.")
+
+    if not ids:
+        # http://tools.ietf.org/search/rfc6125#section-6.4.4
+        # A client MUST NOT seek a match for a reference identifier of CN-ID if
+        # the presented identifiers include a DNS-ID, SRV-ID, URI-ID, or any
+        # application-specific identifier types supported by the client.
+        warnings.warn(
+            "Certificate has no `subjectAltName`, falling back to check for a "
+            "`commonName` for now.  This feature is being removed by major "
+            "browsers and deprecated by RFC 2818.",
+            SubjectAltNameWarning
+        )
+        ids = [DNSPattern(c[1])
+               for c
+               in cert.get_subject().get_components()
+               if c[0] == b"CN"]
 
     verify_service_identity(
-        cert_patterns=patterns,
+        cert_patterns=ids,
         obligatory_ids=[hostname_id],
         optional_ids=[],
     )
