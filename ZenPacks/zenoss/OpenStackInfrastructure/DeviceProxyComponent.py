@@ -100,7 +100,10 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
 
     def need_maintenance(self):
         guid = IGlobalIdentifier(self).getGUID()
-        device = GUIDManager(self.dmd).getObject(getattr(self, 'openstackProxyDeviceUUID', None))
+        device = None
+        uuid = getattr(self, 'openstackProxyDeviceUUID', None) 
+        if uuid:
+            device = GUIDManager(self.dmd).getObject(uuid)
         if device and getattr(device, 'openstackProxyComponentUUID', None) \
                 and device.openstackProxyComponentUUID == guid:
             return False
@@ -123,7 +126,10 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         Default assumes that the names must match.
         '''
 
-        device = GUIDManager(self.dmd).getObject(getattr(self, 'openstackProxyDeviceUUID', None))
+        device = None
+        uuid = getattr(self, 'openstackProxyDeviceUUID', None)
+        if uuid:
+            device = GUIDManager(self.dmd).getObject(uuid)
         if device:
             guid = IGlobalIdentifier(self).getGUID()
 
