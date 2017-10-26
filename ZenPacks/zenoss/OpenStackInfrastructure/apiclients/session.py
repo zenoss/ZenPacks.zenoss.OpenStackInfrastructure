@@ -34,7 +34,7 @@ from zope.interface.declarations import implementer
 
 from .utils import getDeferredSemaphore, add_timeout, zenpack_version
 from .exceptions import APIClientError, UnauthorizedError, BadRequestError, NotFoundError
-from .ssl import PermissiveBrowserLikePolicyForHTTPS
+from .ssl import PermissiveBrowserLikePolicyForHTTPS, CertificateError
 
 
 CONNECT_TIMEOUT = 30
@@ -74,7 +74,7 @@ class PermissiveClientTLSOptions(ClientTLSOptions):
     def _identityVerifyingInfoCallback(self, connection, where, ret):
         try:
             super(PermissiveClientTLSOptions, self)._identityVerifyingInfoCallback(connection, where, ret)
-        except ValueError as e:
+        except (ValueError, CertificateError) as e:
             log.debug("Ignoring SSL hostname verification error for %s: %s", self._hostnameASCII, e)
 
 
