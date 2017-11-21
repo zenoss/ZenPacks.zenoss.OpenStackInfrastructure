@@ -176,10 +176,12 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
 
         # add the missing proxy device.
         device_name = self.suggested_device_name()
+        device = None
 
         try:
-            device = self.dmd.Devices.findDeviceByIdOrIp(
-                getHostByName(device_name))
+            ip = getHostByName(device_name)
+            if ip:
+                device = self.dmd.Devices.findDeviceByIdOrIp(ip)
         except Exception:
             device = None
 
