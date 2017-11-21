@@ -17,6 +17,7 @@ can handle a variety of self-signed cerficates.
 import logging
 logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger('zen.OpenStack')
+import warnings
 
 import os
 from socket import gethostname
@@ -170,7 +171,10 @@ class TestSSL(BaseTestCase):
         request_thread.join(30)
 
     def test_noaltnames(self):
-        self._dotest(altnames=None, hostname=gethostname())
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore")
+            self._dotest(altnames=None, hostname=gethostname())
+
 
     def test_dnsname_simple(self):
         self._dotest(
