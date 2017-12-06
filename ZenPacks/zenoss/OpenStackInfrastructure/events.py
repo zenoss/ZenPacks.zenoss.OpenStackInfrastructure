@@ -689,11 +689,6 @@ def port_update(device, dmd, evt):
     _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
 
     if hasattr(evt, 'trait_device_id') and hasattr(evt, 'trait_device_owner'):
-
-        # If device_owner is part of compute, then add device_id as set_instance
-        if 'compute' in evt.trait_device_owner and evt.trait_device_id:
-            _apply_trait_rel(evt, objmap, 'trait_device_id', 'server')
-
         port_instance = get_port_instance(evt.trait_device_owner,
                                           evt.trait_device_id)
         setattr(objmap, 'set_instance', port_instance)
