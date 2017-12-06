@@ -1158,6 +1158,11 @@ def process(evt, device, dmd, txnCommit):
         (idfunc, mapper) = MAPPERS.get(evt.eventClassKey, (None, None))
 
         if idfunc:
+            component_id = idfunc(evt)
+            if component_id is None:
+                LOG.error("Unable to identify component ID for %s event: %s",
+                          evt.eventClassKey, evt.getStateToCopy())
+                return 0
             evt.component = idfunc(evt)
 
         if mapper:
