@@ -674,6 +674,14 @@ def port_create_start(device, dmd, evt):
     return []
 
 def port_update_start(device, dmd, evt):
+    if not port_id(evt):
+        # It appears to be typical that port.update.start events are
+        # missing their ID and name attributes, so we can't do anything
+        # useful with them if that is the case.   The port.update.end
+        # event will be complete, so those are the ones we care about.
+        return []
+
+    evt.component = port_id(evt)
     evt.summary = "Updating Port %s" % (port_name(evt))
     return []
 
@@ -1058,7 +1066,7 @@ MAPPERS = {
     # -------------------------------------------------------------------------
     'openstack|port.create.start':           (port_id, port_create_start),
     'openstack|port.create.end':             (port_id, port_update),
-    'openstack|port.update.start':           (port_id, port_update_start),
+    'openstack|port.update.start':           (None, port_update_start),
     'openstack|port.update.end':             (port_id, port_update),
     'openstack|port.delete.start':           (port_id, port_delete_start),
     'openstack|port.delete.end':             (port_id, port_delete_end),
