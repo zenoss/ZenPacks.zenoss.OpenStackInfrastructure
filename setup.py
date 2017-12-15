@@ -2,7 +2,11 @@
 # or saved.  Do not modify them directly here.
 # NB: PACKAGES is deprecated
 NAME = "ZenPacks.zenoss.OpenStackInfrastructure"
+<<<<<<< HEAD
 VERSION = "2.5.0"
+=======
+VERSION = "2.4.1"
+>>>>>>> hotfix/2.4.1
 AUTHOR = "Zenoss"
 LICENSE = "GPLv2"
 NAMESPACE_PACKAGES = [u'ZenPacks', u'ZenPacks.zenoss']

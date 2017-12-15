@@ -197,11 +197,11 @@ result in all data being dropped by rabbitmq.
 
 ![](/hc/article_attachments/115003271263/overview2.png)
 
-Once messages enter the exchange (zenoss.OpenStack.ceilometer), the data
+Once messages enter the exchange (zenoss.openstack.ceilometer), the data
 flow is as follows:
 
 A.  Messages are published from OpenStack (ceilometer_zenoss) to the
-    zenoss.OpenStack.ceilometer exchange.
+    zenoss.openstack.ceilometer exchange.
 B.  RabbitMQ routes the message to a queue based on their routing key
     and the queue bindings. There are multiple queues per device,
     including one for perf data and one for event data.
@@ -221,7 +221,7 @@ F.  Each time the event task executes collect(), all cached event data
 
 ### Check Exchange
 
-On Zenoss 5.x, the exchange (zenoss.OpenStack.ceilometer) is created
+On Zenoss 5.x, the exchange (zenoss.openstack.ceilometer) is created
 automatically when the RabbitMQ-Ceilometer service is started.
 
 On Zenoss 4.2, the user invokes the "openstack_amqp_config" script,
@@ -232,7 +232,7 @@ To confirm that the exchange is present, attach to the
 rabbitmq-ceilometer container and run
 
 ``` {.bash}
-$ sudo rabbitmqctl -p /zenoss list_exchanges | grep OpenStack
+$ sudo rabbitmqctl -p /zenoss list_exchanges | grep openstack
 ```
 
 The correct output is:
@@ -250,10 +250,10 @@ published in the ceilometer_zenoss log on the OpenStack side), attach
 to the rabbitmq-ceilometer container and run
 
 ``` {.bash}
-$ sudo rabbitmqctl -p /zenoss list_queues | grep OpenStack
+$ sudo rabbitmqctl -p /zenoss list_queues | grep openstack
 
-zenoss.queues.OpenStack.ceilometer.ostack.event 0
-zenoss.queues.OpenStack.ceilometer.ostack.perf 0
+zenoss.queues.openstack.ceilometer.ostack.event 0
+zenoss.queues.openstack.ceilometer.ostack.perf 0
 ```
 
 Since messages are being consumed constantly by zenpython (C and E in
@@ -262,19 +262,19 @@ while watching the ceilometer logs. These counts should go up one for
 every message published by ceilometer_zenoss:
 
 ``` {.bash}
-$ sudo rabbitmqctl -p /zenoss list_queues | grep OpenStack
+$ sudo rabbitmqctl -p /zenoss list_queues | grep openstack
 
-zenoss.queues.OpenStack.ceilometer.ostack.event 3
-zenoss.queues.OpenStack.ceilometer.ostack.perf 15
+zenoss.queues.openstack.ceilometer.ostack.event 3
+zenoss.queues.openstack.ceilometer.ostack.perf 15
 ```
 
 Then, restart zenpython, and they should drop again:
 
 ``` {.bash}
-$ sudo rabbitmqctl -p /zenoss list_queues | grep OpenStack
+$ sudo rabbitmqctl -p /zenoss list_queues | grep openstack
 
-zenoss.queues.OpenStack.ceilometer.ostack.event 0
-zenoss.queues.OpenStack.ceilometer.ostack.perf 0
+zenoss.queues.openstack.ceilometer.ostack.event 0
+zenoss.queues.openstack.ceilometer.ostack.perf 0
 ```
 
 If this is true, we have confirmed that the communication is working

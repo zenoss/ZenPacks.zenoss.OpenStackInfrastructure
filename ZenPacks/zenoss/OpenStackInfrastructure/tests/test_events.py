@@ -18,7 +18,7 @@ import json
 import Globals
 
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
 log = logging.getLogger('zen.OpenStack')
 
 from zExceptions import NotFound

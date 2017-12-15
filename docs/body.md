@@ -809,6 +809,15 @@ Known Issues
 Changes
 -------
 
+2.4.1
+
+- Disallow spaces in device IDs in the 'Add OpenStack Endpoint' dialog (ZPS-2583)
+- Remove certain warnings related to port update events (ZPS-2606)
+- Eliminate warnings when running tests under 6.x (ZPS-2574)
+- Support for self-signed certificates which include an IP address as a subjectAltName (ZPS-2056)
+- Fix situation where certain errors are reported as TimeoutError instead of the actual error message (ZPS-2039)
+- Fix for errors when modeling when the hosts already exist in a different device class (ZPS-2004)
+
 2.4.0
 
 - Added support for Newton and Ocata
