@@ -38,6 +38,7 @@ var addOpenStack = new Zenoss.Action({
                         id: "openstack_device_name",
                         width: 350,
                         allowBlank: false,
+                        vtype: 'hostnameorIP'
                     },{
                         xtype: 'label',
                         style: 'font-style: italic',

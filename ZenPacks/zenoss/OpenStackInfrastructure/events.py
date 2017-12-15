@@ -674,6 +674,14 @@ def port_create_start(device, dmd, evt):
     return []
 
 def port_update_start(device, dmd, evt):
+    if not port_id(evt):
+        # It appears to be typical that port.update.start events are
+        # missing their ID and name attributes, so we can't do anything
+        # useful with them if that is the case.   The port.update.end
+        # event will be complete, so those are the ones we care about.
+        return []
+
+    evt.component = port_id(evt)
     evt.summary = "Updating Port %s" % (port_name(evt))
     return []
 
@@ -689,11 +697,6 @@ def port_update(device, dmd, evt):
     _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
 
     if hasattr(evt, 'trait_device_id') and hasattr(evt, 'trait_device_owner'):
-
-        # If device_owner is part of compute, then add device_id as set_instance
-        if 'compute' in evt.trait_device_owner and evt.trait_device_id:
-            _apply_trait_rel(evt, objmap, 'trait_device_id', 'server')
-
         port_instance = get_port_instance(evt.trait_device_owner,
                                           evt.trait_device_id)
         setattr(objmap, 'set_instance', port_instance)
@@ -1063,7 +1066,7 @@ MAPPERS = {
     # -------------------------------------------------------------------------
     'openstack|port.create.start':           (port_id, port_create_start),
     'openstack|port.create.end':             (port_id, port_update),
-    'openstack|port.update.start':           (port_id, port_update_start),
+    'openstack|port.update.start':           (None, port_update_start),
     'openstack|port.update.end':             (port_id, port_update),
     'openstack|port.delete.start':           (port_id, port_delete_start),
     'openstack|port.delete.end':             (port_id, port_delete_end),
@@ -1163,6 +1166,11 @@ def process(evt, device, dmd, txnCommit):
         (idfunc, mapper) = MAPPERS.get(evt.eventClassKey, (None, None))
 
         if idfunc:
+            component_id = idfunc(evt)
+            if component_id is None:
+                LOG.error("Unable to identify component ID for %s event: %s",
+                          evt.eventClassKey, evt.getStateToCopy())
+                return 0
             evt.component = idfunc(evt)
 
         if mapper:

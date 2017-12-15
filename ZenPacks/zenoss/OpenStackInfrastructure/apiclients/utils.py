@@ -17,6 +17,7 @@
 
 from twisted.internet import reactor, defer, error
 from twisted.python import failure
+from twisted.web._newclient import ResponseNeverReceived
 
 import logging
 LOG = logging.getLogger('zen.OpenStack.apiclient.utils')
@@ -35,7 +36,7 @@ def zenpack_version():
 
 
 def add_timeout(deferred, seconds, exception_class=error.TimeoutError):
-    """Return new Deferred that will errback TimeoutError after seconds."""
+    """Return new Deferred that will errback exception_class after seconds."""
     deferred_with_timeout = defer.Deferred()
 
     def fire_timeout():
@@ -47,19 +48,28 @@ def add_timeout(deferred, seconds, exception_class=error.TimeoutError):
     delayed_timeout = reactor.callLater(seconds, fire_timeout)
 
     def handle_result(result):
-        # Cancel the timeout if it hasn't yet occurred.
+        is_failure = isinstance(result, failure.Failure)
+        is_cancelled = is_failure and isinstance(result.value, defer.CancelledError)
+
+        # With twisted.web._newclient, errors may be wrapped in a
+        # 'ResponseNeverReceived', including CancelledError.  If it is,
+        # set is_cancelled.
+        if is_failure and isinstance(result.value, ResponseNeverReceived):
+            if any([isinstance(x, failure.Failure) and isinstance(x.value, defer.CancelledError)
+                    for x in result.value.reasons]):
+                is_cancelled = True
+
         if delayed_timeout.active():
+            # Cancel the timeout since a result came before it fired.
             delayed_timeout.cancel()
+        elif is_cancelled:
+            # Don't propagate cancellations that we caused.
+            return
 
-        if isinstance(result, failure.Failure):
-            # Stop the errback chain if deferred was canceled by timeout.
-            if isinstance(result.value, defer.CancelledError):
-                return
-
-            # Propagate other errors.
-            deferred_with_timeout.errback(exception_class())
+        # Propagate remaining results.
+        if is_failure:
+            deferred_with_timeout.errback(result)
         else:
-            # Propagate all good results.
             deferred_with_timeout.callback(result)
 
     deferred.addBoth(handle_result)

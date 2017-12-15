@@ -176,12 +176,18 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
 
         # add the missing proxy device.
         device_name = self.suggested_device_name()
+        device = None
 
         try:
-            device = self.dmd.Devices.findDeviceByIdOrIp(
-                getHostByName(device_name))
+            ip = getHostByName(device_name)
+            if ip:
+                device = self.dmd.Devices.findDeviceByIdOrIp(ip)
         except Exception:
             device = None
+
+        # we only need/want to try to model the device if we've added it as a
+        # new device and if it has a valid management IP (see below)
+        should_model = False
 
         if self.dmd.Devices.findDevice(device_name):
             device_name = device_name + "_nameconflict"
@@ -197,17 +203,16 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
             device = self.proxy_deviceclass().createInstance(device_name)
             device.setProdState(self.productionState)
             device.setPerformanceMonitor(self.getPerformanceServer().id)
-            can_model = False
             try:
                 ip = getHostByName(device_name)
                 if ip is None:
                     LOG.info("%s does not resolve- not setting manageIp", device_name)
-                    can_model = False
+                    should_model = False
                 elif ip.startswith("127") or ip.startswith("::1"):
                     LOG.info("%s resolves to a loopback address- not setting manageIp", device_name)
                 else:
                     device.setManageIp()
-                    can_model = True
+                    should_model = True
 
             except (IpAddressError, socket.gaierror):
                 LOG.warning("Unable to set management IP based on %s", device_name)
@@ -215,7 +220,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         device.index_object()
         notify(IndexingEvent(device))
 
-        if can_model:
+        if should_model:
             LOG.info('Scheduling modeling job for %s' % device_name)
             device.collectDevice(setlog=False, background=True)
 
@@ -347,22 +352,23 @@ class PostEventPlugin(object):
                           device.openstackProxyComponentUUID)
 
             # Get OSProcess component, if the event has one
-            for brain in ICatalogTool(dmd).search('Products.ZenModel.OSProcess.OSProcess', query=Eq('id', eventProxy.component)):
-                try:
-                    osprocess = brain.getObject()
-                except Exception:
-                    # ignore a stale entry
-                    pass
-                else:
-                    # Figure out if we have a corresponding software component:
+            if eventProxy.component:
+                for brain in ICatalogTool(dmd).search('Products.ZenModel.OSProcess.OSProcess', query=Eq('id', eventProxy.component)):
                     try:
-                        for software in component.hostedSoftware():
-                            if software.binary == osprocess.osProcessClass().id:
-                                # Matches!
-                                tags.append(IGlobalIdentifier(software).getGUID())
+                        osprocess = brain.getObject()
                     except Exception:
-                        LOG.debug("Unable to append event for OSProcess %s",
-                                  osprocess.osProcessClass().id)
+                        # ignore a stale entry
+                        pass
+                    else:
+                        # Figure out if we have a corresponding software component:
+                        try:
+                            for software in component.hostedSoftware():
+                                if software.binary == osprocess.osProcessClass().id:
+                                    # Matches!
+                                    tags.append(IGlobalIdentifier(software).getGUID())
+                        except Exception:
+                            LOG.debug("Unable to append event for OSProcess %s",
+                                      osprocess.osProcessClass().id)
 
             if tags:
                 eventProxy.tags.addAll('ZenPacks.zenoss.OpenStackInfrastructure.DeviceProxyComponent', tags)
