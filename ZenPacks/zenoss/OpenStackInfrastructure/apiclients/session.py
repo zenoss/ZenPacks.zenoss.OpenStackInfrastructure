@@ -205,7 +205,7 @@ class SessionManager(object):
             def __getitem__(self, key):
                 value = dict.__getitem__(self, key)
                 del self[key]
-                return urllib.quote(value)
+                return urllib.quote(str(value))
 
         q = apiparams(params)
         try:
