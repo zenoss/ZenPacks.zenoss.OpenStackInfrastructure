@@ -809,6 +809,10 @@ Known Issues
 Changes
 -------
 
+2.4.2
+
+- Make all host references case-insensitive (ZPS-3989)
+
 2.4.1
 
 - Disallow spaces in device IDs in the 'Add OpenStack Endpoint' dialog (ZPS-2583)

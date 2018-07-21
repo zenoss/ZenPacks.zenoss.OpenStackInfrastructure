@@ -401,3 +401,10 @@ def filter_FQDNs(dnlist):
             goodlist.append(dn)
 
     return goodlist, host_errors
+
+
+def normalize_hostname(hostref):
+    if not hostref:
+        return
+
+    return re.sub(r'[@:].*$', '', hostref).lower()

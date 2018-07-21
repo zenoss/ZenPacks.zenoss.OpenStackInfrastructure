@@ -16,7 +16,8 @@ import re
 from twisted.internet import defer
 
 from Products.ZenUtils.Utils import prepId
-from ZenPacks.zenoss.OpenStackInfrastructure.utils import resolve_names
+from ZenPacks.zenoss.OpenStackInfrastructure.utils import (resolve_names, 
+                                                           normalize_hostname)
 
 
 class InvalidHostIdException(Exception):
@@ -91,9 +92,11 @@ class HostMap(object):
         """
         Check if there exists a hostref in self.mapping
         """
-        return hostref in self.mapping
+        if hostref:
+            return normalize_hostname(hostref) in self.mapping
 
     def check_hostref(self, hostref, source):
+        hostref = normalize_hostname(hostref)
         if not self.has_hostref(hostref):
             log.error("Hostref: '%s' from source: '%s' is not in known mapping! "
                       "Please check that this is a valid host...", hostref, source)
@@ -103,6 +106,7 @@ class HostMap(object):
         Notify the host mapper about a host reference.
         """
 
+        hostref = normalize_hostname(hostref)
         self.mapping_complete = False
 
         if self.has_hostref(hostref):
@@ -116,6 +120,9 @@ class HostMap(object):
         self.mapping[hostref] = None
 
     def assert_host_id(self, hostref, hostid):
+        hostref = normalize_hostname(hostref)
+        if not hostref:
+            return
         log.debug("assert_host_id: %s=%s", hostref, hostid)
         self.asserted_host_id[hostref] = hostid
 
@@ -125,6 +132,8 @@ class HostMap(object):
         same host.
         """
 
+        hostref1 = normalize_hostname(hostref1)
+        hostref2 = normalize_hostname(hostref2)
         if not self.has_hostref(hostref1):
             log.warning("assert_same_host: (Source=%s): %s is not a valid host reference -- ignoring", source, hostref1)
             return
@@ -147,6 +156,7 @@ class HostMap(object):
         # recursively search for all hostrefs that are the same as the one
         # passed in.
 
+        hostref_a = normalize_hostname(hostref_a)
         if seen is None:
             seen = set(hostref_a)
 
@@ -316,6 +326,7 @@ class HostMap(object):
         For a host reference, return the canonical host ID to use.
         """
 
+        hostref = normalize_hostname(hostref)
         if not self.mapping_complete:
             raise Exception("perform_mapping must be called before get_hostid")
 
