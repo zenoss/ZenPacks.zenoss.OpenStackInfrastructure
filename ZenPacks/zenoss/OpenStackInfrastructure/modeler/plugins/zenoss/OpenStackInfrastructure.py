@@ -681,6 +681,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     id=host_id,
                     title=hostname,
                     hostname=hostname,
+                    host_ip=self.hostmap.get_ip_for_hostid(host_id),
                     set_orgComponent=host_orgComponent[host_id],
                 )))
 

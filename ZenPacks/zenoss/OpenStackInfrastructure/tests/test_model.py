@@ -28,9 +28,10 @@ from Products.Five import zcml
 
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
 from Products.ZenTestCase.BaseTestCase import BaseTestCase
+from Products.ZenUtils.guid.interfaces import IGlobalIdentifier
 from Products.ZenUtils.Utils import unused
 
-from ZenPacks.zenoss.OpenStackInfrastructure.tests.utils import setup_crochet
+from ZenPacks.zenoss.OpenStackInfrastructure.tests.utils import setup_crochet, FilteredLog
 from ZenPacks.zenoss.OpenStackInfrastructure.modeler.plugins.zenoss.OpenStackInfrastructure \
     import OpenStackInfrastructure as OpenStackInfrastructureModeler
 
@@ -45,12 +46,23 @@ crochet = setup_crochet()
 MOCK_DNS = {
     "liberty.yichi.local": "10.0.2.34",
     "liberty.zenoss.local": "192.168.56.122",
+    "liberty.zenoss": "192.168.56.122",
+    "wily.zenoss.local": "192.168.56.110",
+    "bugs.zenoss.local": "192.168.56.111",
+    "foghorn.zenoss.local": "192.168.56.112",
+    "leghorn.zenoss.local": "192.168.56.112",
     "host-10-0-0-1.openstacklocal.": "10.0.0.1",
     "host-10-0-0-2.openstacklocal.": "10.0.0.2",
     "host-10-0-0-3.openstacklocal.": "10.0.0.3",
     "host-172-24-4-226.openstacklocal.": "172.24.4.226",
     "overcloud-controller-1.localdomain": "10.88.0.100"
 }
+
+
+def getHostObjectByName(hosts, name):
+    for h in hosts:
+        if name in h.id:
+            return h
 
 
 class TestModel(BaseTestCase):
@@ -65,6 +77,19 @@ class TestModel(BaseTestCase):
 
     def afterSetUp(self):
         super(TestModel, self).afterSetUp()
+
+        # Workaround for IMP-389:
+        # When Impact 5.2.1-5.2.3 (at least) are installed, setProdState
+        # is patched to re-index the object in the global catalog specifically
+        # on the productionState column, but at least on older verions of RM,
+        # the sandboxed version of global_catalog does not index that column,
+        # which causes setProdState to fail.  Add the index for now, to
+        # work around this.
+        if (hasattr(self.dmd.global_catalog, 'indexes') and
+                'productionState' not in self.dmd.global_catalog.indexes()):
+            from Products.ZenUtils.Search import makeCaseSensitiveFieldIndex
+            self.dmd.global_catalog.addIndex('productionState', makeCaseSensitiveFieldIndex('productionState'))
+            self.dmd.global_catalog.addColumn('productionState')
 
         # Patch to remove DNS dependencies
         def getHostByName(name):
@@ -111,11 +136,50 @@ class TestModel(BaseTestCase):
         import ZenPacks.zenoss.OpenStackInfrastructure
         zcml.load_config('configure.zcml', ZenPacks.zenoss.OpenStackInfrastructure)
 
+        self._loadBadHosts()
         self._loadZenossData()
 
     @crochet.wait_for(timeout=30)
     def _preprocessHosts(self, modeler, results):
         return modeler.preprocess_hosts(self.d, results)
+
+    def _loadBadHosts(self):
+        # liberty, wily, and bugs are in the wrong device class, and so
+        # won't be claimable.
+
+        device_name = 'liberty.zenoss'
+        dc = self.dmd.Devices.createOrganizer('/Devices/Server/SSH/Linux')
+        bad_liberty = dc.createInstance(device_name)
+        bad_liberty.setProdState(1000)
+        bad_liberty.setPerformanceMonitor('localhost')
+        bad_liberty.setManageIp('1.22.33.44')
+        bad_liberty.index_object()
+        notify(IndexingEvent(bad_liberty))
+
+        device_name = 'wily.zenoss.local'
+        repeated_ip_device = dc.createInstance(device_name)
+        repeated_ip_device.setProdState(1000)
+        repeated_ip_device.setPerformanceMonitor('localhost')
+        repeated_ip_device.setManageIp('192.168.56.110')
+        repeated_ip_device.index_object()
+        notify(IndexingEvent(repeated_ip_device))
+
+        device_name = 'bugs.zenoss.local'
+        wrong_dc = dc.createInstance(device_name)
+        wrong_dc.setProdState(1000)
+        wrong_dc.setPerformanceMonitor('localhost')
+        wrong_dc.setManageIp('192.168.56.111')
+        wrong_dc.index_object()
+        notify(IndexingEvent(wrong_dc))
+
+        dc = self.dmd.Devices.createOrganizer('/Devices/Server/SSH/Linux/NovaHost')
+        device_name = 'foghorn.zenoss.local'
+        foghorn_dc = dc.createInstance(device_name)
+        foghorn_dc.setProdState(1000)
+        foghorn_dc.setPerformanceMonitor('localhost')
+        foghorn_dc.setManageIp('192.168.56.112')
+        foghorn_dc.index_object()
+        notify(IndexingEvent(foghorn_dc))
 
     def _loadZenossData(self):
         if hasattr(self, '_modeled'):
@@ -288,18 +352,60 @@ class TestModel(BaseTestCase):
         self.assertTrue(self._modeled)
 
         hosts = self.d.getDeviceComponents(type='OpenStackInfrastructureHost')
-        self.assertEquals(len(hosts), 2)
-        self.assertEquals(hosts[0].device().id,
+        bugs = getHostObjectByName(hosts, 'bugs')
+        wily = getHostObjectByName(hosts, 'wily')
+        overcloud = getHostObjectByName(hosts, 'overcloud')
+
+        self.assertEquals(len(hosts), 5)
+        self.assertEquals(bugs.device().id,
                           'zenoss.OpenStackInfrastructure.testDevice')
-        self.assertEquals(hosts[0].name(), 'liberty.zenoss.local')
-        self.assertEquals(hosts[0].hypervisor.id, 'hypervisor')
-        self.assertEquals(hosts[0].hypervisor.name(), 'liberty.zenoss.local')
-        self.assertEquals(hosts[1].device().id,
+        self.assertEquals(bugs.name(), 'bugs.zenoss.local')
+        self.assertEquals(bugs.hypervisor.id, 'hypervisor')
+        self.assertEquals(bugs.hypervisor.name(), 'bugs.zenoss.local')
+        self.assertEquals(overcloud.device().id,
                           'zenoss.OpenStackInfrastructure.testDevice')
-        self.assertEquals(hosts[1].name(), 'overcloud-controller-1.localdomain')
-        self.assertEquals(hosts[1].hypervisor.id, 'hypervisor')
-        self.assertEquals(hosts[1].hypervisor.name(),
+        self.assertEquals(overcloud.name(), 'overcloud-controller-1.localdomain')
+        self.assertEquals(overcloud.hypervisor.id, 'hypervisor')
+        self.assertEquals(overcloud.hypervisor.name(),
                           'overcloud-controller-1.localdomain')
+
+        hostedSoftware = wily.hostedSoftware()[0]
+        self.assertEquals(hostedSoftware.id,
+                'service-nova-conductor-wily.zenoss.local-internal')
+
+        self.assertEquals(hostedSoftware.orgComponent().id,
+                'zone-internal')
+
+
+    def testDeviceProxyIntegrity(self):
+        self.assertTrue(self._modeled)
+        hosts = self.d.getDeviceComponents(type='OpenStackInfrastructureHost')
+        self.assertEquals(len(hosts), 5)
+        bugs = getHostObjectByName(hosts, 'bugs')
+        wily = getHostObjectByName(hosts, 'wily')
+        liberty = getHostObjectByName(hosts, 'liberty')
+        leghorn = getHostObjectByName(hosts, 'leghorn')
+
+        # Ensure the following hosts don't have proxy_device():
+        self.assertIsNone(wily.proxy_device())
+        self.assertIsNone(bugs.proxy_device())
+        self.assertIsNotNone(liberty.proxy_device())
+
+        # Ensure the leghorn has foghorn as proxy_device():
+        leghorn_proxy = leghorn.proxy_device()
+        self.assertEquals(leghorn_proxy.id, 'foghorn.zenoss.local')
+        self.assertEquals(leghorn_proxy.manageIp, '192.168.56.112')
+
+        # Break the proxy device linkage by changing leghorn device's uuid
+        old_uuid = leghorn.openstackProxyDeviceUUID
+        IGlobalIdentifier(leghorn_proxy).setGUID('97e184b1-ed49-481e-bb7c-cce3bba1d171')
+
+        # Test fixage of the proxy_device claim for leghorn:
+        with FilteredLog(["zen.OpenStackDeviceProxyComponent"], ["but it is not linked back.  Disregarding linkage."]):
+            self.assertEquals(leghorn.proxy_device(), leghorn_proxy)
+
+        self.assertNotEquals(leghorn.openstackProxyDeviceUUID, old_uuid)
+
 
     def testHypervisor(self):
         self.assertTrue(self._modeled)
