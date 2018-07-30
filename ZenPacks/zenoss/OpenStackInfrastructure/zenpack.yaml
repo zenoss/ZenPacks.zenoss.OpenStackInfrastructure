@@ -1174,6 +1174,10 @@ classes: !ZenPackSpec
         label: Host Title
         index_type: field
         grid_display: false
+      host_ip:
+        label: Host Management IP
+        grid_display: false
+
     relationships:
       orgComponent:
         label: Supporting
