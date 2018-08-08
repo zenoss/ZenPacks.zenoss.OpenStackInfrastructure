@@ -163,11 +163,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
 
         suggested_name = self.suggested_device_name()
 
-<<<<<<< HEAD
         search_values = [x for x in self.id, suggested_name, self.hostname, self.host_ip if x is not None]
-=======
-        search_values = [self.id, suggested_name, self.hostname, self.host_ip]
->>>>>>> Refactor DeviceProxyComponent to no longer create _nameconflict devices
         brains = device_class.deviceSearch.evalAdvancedQuery(
             And(
                 MatchGlob('getDeviceClassPath', device_class.getOrganizerName() + "*"),
