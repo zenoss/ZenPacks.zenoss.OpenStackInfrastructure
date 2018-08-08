@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2016, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2016-2018, all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -16,13 +16,11 @@ import re
 from twisted.internet import defer
 
 from Products.ZenUtils.Utils import prepId
-from ZenPacks.zenoss.OpenStackInfrastructure.utils import (resolve_names, 
-                                                           normalize_hostname)
+from ZenPacks.zenoss.OpenStackInfrastructure.utils import resolve_names
 
 
 class InvalidHostIdException(Exception):
         pass
-
 
 class HostMap(object):
     """
@@ -73,6 +71,23 @@ class HostMap(object):
         self.asserted_same = defaultdict(dict)
         self.asserted_host_id = {}
 
+    def normalize_hostref(self, hostref):
+        # convert to lowercase and strip leading or trailing whitespace.
+        if hostref:
+            return hostref.lower().strip()
+
+    def clean_hostref(self, hostref):
+        # this takes things further than normalize_hostref does, also stripping
+        # all whitespace and anything after a @ or :
+
+        # Strip anything after an '@' or ':" and convert to lowercase.
+        clean_hostref = re.sub(r'[@:].*$', '', hostref).lower()
+
+        # Remove any whitespace.
+        clean_hostref = re.sub(r'\s', '', clean_hostref)
+
+        return clean_hostref
+
     def thaw_mappings(self, from_db):
         """
         Given a value (previously returned by freeze_mappings() and stored)
@@ -92,11 +107,11 @@ class HostMap(object):
         """
         Check if there exists a hostref in self.mapping
         """
-        if hostref:
-            return normalize_hostname(hostref) in self.mapping
+        hostref = self.normalize_hostref(hostref)
+        return hostref in self.mapping
 
     def check_hostref(self, hostref, source):
-        hostref = normalize_hostname(hostref)
+        hostref = self.normalize_hostref(hostref)
         if not self.has_hostref(hostref):
             log.error("Hostref: '%s' from source: '%s' is not in known mapping! "
                       "Please check that this is a valid host...", hostref, source)
@@ -106,7 +121,7 @@ class HostMap(object):
         Notify the host mapper about a host reference.
         """
 
-        hostref = normalize_hostname(hostref)
+        hostref = self.normalize_hostref(hostref)
         self.mapping_complete = False
 
         if self.has_hostref(hostref):
@@ -120,9 +135,9 @@ class HostMap(object):
         self.mapping[hostref] = None
 
     def assert_host_id(self, hostref, hostid):
-        hostref = normalize_hostname(hostref)
-        if not hostref:
-            return
+        hostref = self.normalize_hostref(hostref)
+
+
         log.debug("assert_host_id: %s=%s", hostref, hostid)
         self.asserted_host_id[hostref] = hostid
 
@@ -132,8 +147,8 @@ class HostMap(object):
         same host.
         """
 
-        hostref1 = normalize_hostname(hostref1)
-        hostref2 = normalize_hostname(hostref2)
+        hostref1 = self.normalize_hostref(hostref1)
+        hostref2 = self.normalize_hostref(hostref2)
         if not self.has_hostref(hostref1):
             log.warning("assert_same_host: (Source=%s): %s is not a valid host reference -- ignoring", source, hostref1)
             return
@@ -156,7 +171,7 @@ class HostMap(object):
         # recursively search for all hostrefs that are the same as the one
         # passed in.
 
-        hostref_a = normalize_hostname(hostref_a)
+        hostref_a = self.normalize_hostref(hostref_a)
         if seen is None:
             seen = set(hostref_a)
 
@@ -226,11 +241,7 @@ class HostMap(object):
         # light cleanup.
         naive_mapping = {}
         for hostref in self.mapping:
-            # Strip anything after an '@' or ':" and convert to lowercase.
-            clean_hostref = re.sub(r'[@:].*$', '', hostref).lower()
-
-            # Remove any whitespace.
-            clean_hostref = re.sub(r'\s', '', clean_hostref)
+            clean_hostref = self.clean_hostref(hostref)
 
             # If that "cleaned up" hostref (that is, after we stripped
             # off suffixes and whitespace) has also been seen, we can
@@ -326,7 +337,7 @@ class HostMap(object):
         For a host reference, return the canonical host ID to use.
         """
 
-        hostref = normalize_hostname(hostref)
+        hostref = self.normalize_hostref(hostref)
         if not self.mapping_complete:
             raise Exception("perform_mapping must be called before get_hostid")
 

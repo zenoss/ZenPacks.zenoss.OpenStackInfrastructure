@@ -811,7 +811,7 @@ Changes
 
 2.4.2
 
-- Make all host references case-insensitive (ZPS-3989)
+- When mapping hostnames, treat all host references in case-insensitive manner (ZPS-3989)
 
 2.4.1
 
