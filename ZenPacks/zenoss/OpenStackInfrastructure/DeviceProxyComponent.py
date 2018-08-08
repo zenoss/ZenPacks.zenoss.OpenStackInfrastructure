@@ -163,7 +163,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
 
         suggested_name = self.suggested_device_name()
 
-        search_values = [self.id, suggested_name, self.hostname, self.host_ip]
+        search_values = [x for x in self.id, suggested_name, self.hostname, self.host_ip if x is not None]
         brains = device_class.deviceSearch.evalAdvancedQuery(
             And(
                 MatchGlob('getDeviceClassPath', device_class.getOrganizerName() + "*"),
