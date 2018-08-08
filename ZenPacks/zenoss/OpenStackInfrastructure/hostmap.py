@@ -56,6 +56,7 @@ class HostMap(object):
     mapping = {}
     asserted_same = {}
     asserted_host_id = {}
+    resolved_hostnames = {}
 
     def __init__(self):
         self.clear_mappings()
@@ -71,6 +72,7 @@ class HostMap(object):
         self.mapping = {}
         self.asserted_same = defaultdict(dict)
         self.asserted_host_id = {}
+        self.resolved_hostnames = {}
 
     def thaw_mappings(self, from_db):
         """
@@ -306,6 +308,10 @@ class HostMap(object):
 
         self.mapping_complete = True
 
+        # Determine IPs for all hostnames, if possible
+        all_hostnames = [self.get_hostname_for_hostid(x) for x in self.all_hostids()]
+        self.resolved_hostnames = yield resolve_names(all_hostnames)
+
         yield None
 
     def all_hostids(self):
@@ -323,6 +329,14 @@ class HostMap(object):
             raise Exception("Host reference %s unrecognized. Ensure that add_hostref(%s) is done before attempting to get_hostid(%s)" % (hostref, hostref, hostref))
 
         return self.mapping[hostref]
+
+    def get_ip_for_hostid(self, hostid):
+        """
+        Returns the IP corresponding to the hostname for this hostid, if
+        it resolves, or None if it does not.
+        """
+        hostname = self.get_hostname_for_hostid(hostid)
+        return self.resolved_hostnames.get(hostname, None)
 
     def get_hostname_for_hostid(self, hostid):
         """

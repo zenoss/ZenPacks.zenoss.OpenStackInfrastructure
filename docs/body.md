@@ -809,6 +809,10 @@ Known Issues
 Changes
 -------
 
+2.4.2
+
+- Avoid nameconfict for proxy devices (ZPS-3991)
+
 2.4.1
 
 - Disallow spaces in device IDs in the 'Add OpenStack Endpoint' dialog (ZPS-2583)
