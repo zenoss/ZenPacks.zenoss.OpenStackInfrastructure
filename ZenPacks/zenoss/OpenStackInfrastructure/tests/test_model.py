@@ -71,7 +71,6 @@ class TestModel(BaseTestCase):
 
     def tearDown(self):
         super(TestModel, self).tearDown()
-        DeviceProxyComponent.getHostByName = self._real_getHostByName
         Device.getHostByName = self._real_getHostByName
         hostmap.resolve_names = self._real_resolve_names
 
@@ -104,8 +103,7 @@ class TestModel(BaseTestCase):
         self._real_resolve_names = hostmap.resolve_names
         hostmap.resolve_names = resolve_names
 
-        self._real_getHostByName = DeviceProxyComponent.getHostByName
-        DeviceProxyComponent.getHostByName = getHostByName
+        self._real_getHostByName = Device.getHostByName
         Device.getHostByName = getHostByName
 
         dc = self.dmd.Devices.createOrganizer('/Devices/OpenStack/Infrastructure')

@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2014, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2014-2018, all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -27,10 +27,16 @@ class OpenStackService(HubService):
                 hostnames.add(host.hostname)
                 if host.hostfqdn:
                     hostnames.add(host.hostfqdn)
+                if host.hostlocalname:
+                    hostnames.add(host.hostlocalname)
+                for hostref in [x[0] for x in device.get_host_mappings().items() if x[1] == host.id]:
+                    hostnames.add(hostref)
 
                 processes = set()
                 linux_device = host.proxy_device()
                 if linux_device:
+                    hostnames.add(linux_device.titleOrId())
+
                     for process in linux_device.getDeviceComponents(type='OSProcess'):
                         process_name = process.osProcessClass().id
                         if process_name in ('ceilometer-collector'):
