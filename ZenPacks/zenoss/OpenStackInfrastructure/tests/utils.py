@@ -69,6 +69,29 @@ def setup_crochet():
     crochet.setup()
     return crochet
 
+
+class FilteredLog(logging.Filter):
+    # Context manager that filters/ignores log messages that contain a substring.
+    
+    def __init__(self, loggers, filter_msgs):
+        super(FilteredLog, self).__init__()
+        self.loggers = loggers
+        self.filter_msgs = filter_msgs
+
+    def __enter__(self):
+        for logger in self.loggers:
+            logging.getLogger(logger).addFilter(self)
+    def __exit__(self, type, value, traceback):
+        for logger in self.loggers:
+            logging.getLogger(logger).removeFilter(self)
+
+    def filter(self, record):
+        for msg in self.filter_msgs:
+            if msg in record.getMessage():
+                return False
+        return True
+
+
 # When a manually-created python object is first added to its container, we
 # need to reload it, as its in-memory representation is changed.
 def addContained(object, relname, target):

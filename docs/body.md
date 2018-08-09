@@ -811,6 +811,7 @@ Changes
 
 2.4.2
 
+- Avoid nameconfict for proxy devices and be more flexible in linking to existing devices when appropriate. (ZPS-3991)
 - When mapping hostnames, treat all host references in case-insensitive manner (ZPS-3989)
 
 2.4.1
