@@ -58,7 +58,7 @@ class TestCVIM(BaseTestCase):
             host = Host(host_id)
             host.title = self.hostmap.get_hostname_for_hostid(host_id)
             if set_ips:
-                host.host_ip = self.hostname.get_ip_for_hostid(host_id)                
+                host.host_ip = self.hostmap.get_ip_for_hostid(host_id)
             else:
                 host.host_ip = None
             hosts.append(addContained(self.d, "components", host))
