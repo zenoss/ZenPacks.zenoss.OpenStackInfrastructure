@@ -53,9 +53,10 @@ class HostMap(object):
     mapping_complete = False
     frozen_mapping = {}
     mapping = {}
+    hostref_sources = {}
     asserted_same = {}
     asserted_host_id = {}
-    resolved_hostnames = {}
+    resolved_hostnames = {}    
 
     def __init__(self):
         self.clear_mappings()
@@ -69,6 +70,7 @@ class HostMap(object):
         self.mapping_complete = False
         self.frozen_mapping = {}
         self.mapping = {}
+        self.hostref_sources = defaultdict(set)
         self.asserted_same = defaultdict(dict)
         self.asserted_host_id = {}
         self.resolved_hostnames = {}
@@ -126,15 +128,15 @@ class HostMap(object):
         hostref = self.normalize_hostref(hostref)
         self.mapping_complete = False
 
-        if self.has_hostref(hostref):
-            return
-
         if hostref in self.frozen_mapping:
             log.debug("Tracking hostref %s (frozen to ID %s) (source=%s)", hostref, self.frozen_mapping[hostref], source)
         else:
             log.debug("Tracking hostref %s (source=%s)", hostref, source)
 
-        self.mapping[hostref] = None
+        self.hostref_sources[hostref].add(source)
+
+        if not self.has_hostref(hostref):
+            self.mapping[hostref] = None
 
     def assert_host_id(self, hostref, hostid):
         hostref = self.normalize_hostref(hostref)
@@ -385,6 +387,17 @@ class HostMap(object):
         # So just strip off the host- prefix and go with that.  This may
         # not always be the way this works in the future, though!
         return hostid[5:]
+
+    def get_sources_for_hostid(self, hostid):
+        if not self.mapping_complete:
+            raise Exception("perform_mapping must be called before get_sources_for_hostid")
+
+        sources = set()
+        for hostref, mapped_hostid in self.mapping.iteritems():
+            if mapped_hostid == hostid:
+                sources.update(self.hostref_sources[hostref])
+
+        return list(sources)
 
     def freeze_mappings(self):
         """
