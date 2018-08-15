@@ -1170,10 +1170,18 @@ classes: !ZenPackSpec
         label: FQDN
         index_type: field
         grid_display: false
+      hostlocalname:
+        label: Local Hostname
+        index_type: field
+        grid_display: false
       hostname:
         label: Host Title
         index_type: field
         grid_display: false
+      host_ip:
+        label: Host Management IP
+        grid_display: false
+
     relationships:
       orgComponent:
         label: Supporting

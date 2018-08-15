@@ -501,7 +501,7 @@
                           "status": "enabled",
                           "binary": "cinder-scheduler",
                           "zone": "nova",
-                          "host": "liberty.zenoss.local",
+                          "host": "liberty.zenoss",
                           "updated_at": "2015-12-16T21:11:22.000000",
                           "state": "up",
                           "disabled_reason": null
@@ -1063,7 +1063,7 @@
                   "zone": "internal",
                   "state": "up",
                   "updated_at": "2015-12-16T21:11:22.000000",
-                  "host": "liberty.zenoss.local",
+                  "host": "bugs.zenoss.local",
                   "disabled_reason": null,
                   "id": 2
                 },
@@ -1073,7 +1073,7 @@
                   "zone": "internal",
                   "state": "up",
                   "updated_at": "2015-12-16T21:11:21.000000",
-                  "host": "liberty.zenoss.local",
+                  "host": "wily.zenoss.local",
                   "disabled_reason": null,
                   "id": 3
                 },
@@ -1093,7 +1093,7 @@
                   "zone": "internal",
                   "state": "up",
                   "updated_at": "2015-12-16T21:11:22.000000",
-                  "host": "liberty.zenoss.local",
+                  "host": "leghorn.zenoss.local",
                   "disabled_reason": null,
                   "id": 5
                 },

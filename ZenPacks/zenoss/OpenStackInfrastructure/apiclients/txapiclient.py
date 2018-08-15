@@ -135,17 +135,18 @@ def main():
     import pprint
 
     # sm = SessionManager('admin', '0ed3ab06fb234024', 'http://192.168.2.12:5000/v2.0/', 'admin', 'RegionOne')
-    sm = SessionManager('admin', '0ed3ab06fb234024', 'http://192.168.2.12:5000/v3/', 'admin', 'RegionOne')
+    # sm = SessionManager('admin', '0ed3ab06fb234024', 'http://192.168.2.12:5000/v3/', 'admin', 'RegionOne')
     # sm = SessionManager('admin', '0ed3ab06fb234024', 'http://192.168.2.12:5000/', 'admin', 'RegionOne')
+    sm = SessionManager('admin', '354f6fc8937c47f7', 'http://192.168.2.15:5000/v3/', 'admin', 'RegionOne')
     version = yield sm.get_api_version()
     print "Identity API %s" % version
 
-    keystone = KeystoneClient(sm)
+    keystone = KeystoneClient(session_manager=sm)
     tenants = yield keystone.tenants()
 
-    nova = NovaClient(sm)
-    neutron = NeutronClient(sm)
-    cinder = CinderClient(sm)
+    nova = NovaClient(session_manager=sm)
+    neutron = NeutronClient(session_manager=sm)
+    cinder = CinderClient(session_manager=sm)
 
     # Nova
     try:

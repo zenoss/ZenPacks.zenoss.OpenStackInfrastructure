@@ -26,6 +26,7 @@ from twisted.web.iweb import IBodyProducer, IPolicyForHTTPS
 from twisted.internet.ssl import CertificateOptions
 from twisted.internet._sslverify import ClientTLSOptions
 
+import urllib
 from urllib import getproxies, urlencode
 from urlparse import urlparse, urlunparse, parse_qsl
 
@@ -204,7 +205,7 @@ class SessionManager(object):
             def __getitem__(self, key):
                 value = dict.__getitem__(self, key)
                 del self[key]
-                return value
+                return urllib.quote(str(value))
 
         q = apiparams(params)
         try:

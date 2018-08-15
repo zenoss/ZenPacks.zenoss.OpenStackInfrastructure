@@ -171,6 +171,14 @@ class TestHostMap(BaseTestCase):
         self.assertEquals(len(hostmap.all_hostids()), 1)
 
 
+    def test_case_insensitve_assert_host_id(self):
+        hostmap = HostMap()
+        hostmap.add_hostref("Test1")
+        hostmap.assert_host_id("test1", "host-test1-forcedid")
+        self.perform_mapping(hostmap)
+        self.assertEquals(hostmap.get_hostid("test1"), "host-test1-forcedid")
+        self.assertEquals(hostmap.get_hostid("Test1"), "host-test1-forcedid")
+
 def test_suite():
     from unittest import TestSuite, makeSuite
     suite = TestSuite()

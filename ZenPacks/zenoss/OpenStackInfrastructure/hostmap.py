@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2016, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2016-2018, all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -21,7 +21,6 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import resolve_names
 
 class InvalidHostIdException(Exception):
         pass
-
 
 class HostMap(object):
     """
@@ -54,8 +53,10 @@ class HostMap(object):
     mapping_complete = False
     frozen_mapping = {}
     mapping = {}
+    hostref_sources = {}
     asserted_same = {}
     asserted_host_id = {}
+    resolved_hostnames = {}    
 
     def __init__(self):
         self.clear_mappings()
@@ -69,8 +70,27 @@ class HostMap(object):
         self.mapping_complete = False
         self.frozen_mapping = {}
         self.mapping = {}
+        self.hostref_sources = defaultdict(set)
         self.asserted_same = defaultdict(dict)
         self.asserted_host_id = {}
+        self.resolved_hostnames = {}
+
+    def normalize_hostref(self, hostref):
+        # convert to lowercase and strip leading or trailing whitespace.
+        if hostref:
+            return hostref.lower().strip()
+
+    def clean_hostref(self, hostref):
+        # this takes things further than normalize_hostref does, also stripping
+        # all whitespace and anything after a @ or :
+
+        # Strip anything after an '@' or ':" and convert to lowercase.
+        clean_hostref = re.sub(r'[@:].*$', '', hostref).lower()
+
+        # Remove any whitespace.
+        clean_hostref = re.sub(r'\s', '', clean_hostref)
+
+        return clean_hostref
 
     def thaw_mappings(self, from_db):
         """
@@ -91,9 +111,11 @@ class HostMap(object):
         """
         Check if there exists a hostref in self.mapping
         """
+        hostref = self.normalize_hostref(hostref)
         return hostref in self.mapping
 
     def check_hostref(self, hostref, source):
+        hostref = self.normalize_hostref(hostref)
         if not self.has_hostref(hostref):
             log.error("Hostref: '%s' from source: '%s' is not in known mapping! "
                       "Please check that this is a valid host...", hostref, source)
@@ -103,19 +125,23 @@ class HostMap(object):
         Notify the host mapper about a host reference.
         """
 
+        hostref = self.normalize_hostref(hostref)
         self.mapping_complete = False
-
-        if self.has_hostref(hostref):
-            return
 
         if hostref in self.frozen_mapping:
             log.debug("Tracking hostref %s (frozen to ID %s) (source=%s)", hostref, self.frozen_mapping[hostref], source)
         else:
             log.debug("Tracking hostref %s (source=%s)", hostref, source)
 
-        self.mapping[hostref] = None
+        self.hostref_sources[hostref].add(source)
+
+        if not self.has_hostref(hostref):
+            self.mapping[hostref] = None
 
     def assert_host_id(self, hostref, hostid):
+        hostref = self.normalize_hostref(hostref)
+
+
         log.debug("assert_host_id: %s=%s", hostref, hostid)
         self.asserted_host_id[hostref] = hostid
 
@@ -125,6 +151,8 @@ class HostMap(object):
         same host.
         """
 
+        hostref1 = self.normalize_hostref(hostref1)
+        hostref2 = self.normalize_hostref(hostref2)
         if not self.has_hostref(hostref1):
             log.warning("assert_same_host: (Source=%s): %s is not a valid host reference -- ignoring", source, hostref1)
             return
@@ -147,6 +175,7 @@ class HostMap(object):
         # recursively search for all hostrefs that are the same as the one
         # passed in.
 
+        hostref_a = self.normalize_hostref(hostref_a)
         if seen is None:
             seen = set(hostref_a)
 
@@ -216,11 +245,7 @@ class HostMap(object):
         # light cleanup.
         naive_mapping = {}
         for hostref in self.mapping:
-            # Strip anything after an '@' or ':" and convert to lowercase.
-            clean_hostref = re.sub(r'[@:].*$', '', hostref).lower()
-
-            # Remove any whitespace.
-            clean_hostref = re.sub(r'\s', '', clean_hostref)
+            clean_hostref = self.clean_hostref(hostref)
 
             # If that "cleaned up" hostref (that is, after we stripped
             # off suffixes and whitespace) has also been seen, we can
@@ -306,6 +331,10 @@ class HostMap(object):
 
         self.mapping_complete = True
 
+        # Determine IPs for all hostnames, if possible
+        all_hostnames = [self.get_hostname_for_hostid(x) for x in self.all_hostids()]
+        self.resolved_hostnames = yield resolve_names(all_hostnames)
+
         yield None
 
     def all_hostids(self):
@@ -316,6 +345,7 @@ class HostMap(object):
         For a host reference, return the canonical host ID to use.
         """
 
+        hostref = self.normalize_hostref(hostref)
         if not self.mapping_complete:
             raise Exception("perform_mapping must be called before get_hostid")
 
@@ -323,6 +353,14 @@ class HostMap(object):
             raise Exception("Host reference %s unrecognized. Ensure that add_hostref(%s) is done before attempting to get_hostid(%s)" % (hostref, hostref, hostref))
 
         return self.mapping[hostref]
+
+    def get_ip_for_hostid(self, hostid):
+        """
+        Returns the IP corresponding to the hostname for this hostid, if
+        it resolves, or None if it does not.
+        """
+        hostname = self.get_hostname_for_hostid(hostid)
+        return self.resolved_hostnames.get(hostname, None)
 
     def get_hostname_for_hostid(self, hostid):
         """
@@ -349,6 +387,17 @@ class HostMap(object):
         # So just strip off the host- prefix and go with that.  This may
         # not always be the way this works in the future, though!
         return hostid[5:]
+
+    def get_sources_for_hostid(self, hostid):
+        if not self.mapping_complete:
+            raise Exception("perform_mapping must be called before get_sources_for_hostid")
+
+        sources = set()
+        for hostref, mapped_hostid in self.mapping.iteritems():
+            if mapped_hostid == hostid:
+                sources.update(self.hostref_sources[hostref])
+
+        return list(sources)
 
     def freeze_mappings(self):
         """
