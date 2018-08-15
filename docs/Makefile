@@ -6,7 +6,7 @@ docs:
 	[ -d $(DISTDIR) ] || mkdir $(DISTDIR)
 	pandoc header.md --template=template.html > $(LOCAL_OUTPUT_HTML)
 	pandoc releases.md --template=template.html >> $(LOCAL_OUTPUT_HTML)
-	pandoc body.md --template=template.html --table-of-contents >> $(LOCAL_OUTPUT_HTML)
+	pandoc body.md --template=template.html >> $(LOCAL_OUTPUT_HTML)
 
 	# build a version with the right links for the public site
 	cp $(LOCAL_OUTPUT_HTML) $(OUTPUT_HTML)
