@@ -1,7 +1,7 @@
 ###########################################################################
 #
 # This program is part of Zenoss Core, an open source monitoring platform.
-# Copyright (C) 2014, Zenoss Inc.
+# Copyright (C) 2014-2018, Zenoss Inc.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 or (at your
@@ -22,48 +22,65 @@ add_local_lib_path()
 import re
 
 import logging
-log = logging.getLogger('zen.OpenStack.hostfqdn')
+LOG = logging.getLogger('zen.OpenStack.hostfqdn')
+
+
+def command_from_commands(*commands):
+    """Return a single command given an iterable of commands.
+
+    The results of each command will be separated by __SPLIT__, and the
+    results will contain only the commands' stdout.
+
+    """
+    return " ; echo __SPLIT__ ; ".join("{} 2>/dev/null".format(c) for c in commands)
+
+
+def results_from_result(result):
+    """Return results split into a list of per-command output."""
+    try:
+        return [r.strip() for r in result.split("__SPLIT__")]
+    except Exception:
+        return []
 
 
 class hostfqdn(CommandPlugin):
 
-    command = "/bin/hostname;/bin/hostname -f;/bin/dnsdomainname"
+    command = command_from_commands(
+        "/bin/hostname",
+        "/bin/hostname -f",
+        "/bin/dnsdomainname"
+    )
 
     def process(self, device, results, log):
         log.info("Modeler %s processing data for device %s",
                  self.name(), device.id)
 
-        fqdn = ''
+        results = results_from_result(results)
 
-        matcher=re.compile(r'^(?P<fqdn>(?=^.{1,254}$)(^(?:(?!\d+\.|-)[a-zA-Z0-9_\-]{1,63}(?<!-)\.)+(?:[a-zA-Z]{2,})$))')
-
-        lines = results.split('\n')
-        # expect three lines of results plus an empty one
-        if len(lines) < 4:
+        if len(results) != 3:
+            LOG.error("Unable to process results.  Expected 3 results, but got %d (%s)", len(results), results)
             return []
 
-        hostname = lines[0]
-        hostname_f = lines[1]
-        dnsdomainname = lines[2]
-        m1 = matcher.search(hostname)
-        m2 = matcher.search(hostname_f)
-        m3 = matcher.search(dnsdomainname)
+        hostname, hostname_f, dnsdomainname = results
 
-        # we are looking for FQDN like 'x.y.z'
-        if m1:
-            fqdn = m1.group('fqdn')
-        elif m2 and m2.group('fqdn') == (hostname + '.' + dnsdomainname):
-            fqdn = m2.group('fqdn')
-        elif hostname.find('.') < 0:     # no '.' in hostname
-            fqdn = hostname + '.' + dnsdomainname
+        # the FQDN could be either "hostname -f", or "hostname" + "dnsdomainname"
+        fqdn = hostname_f
+        if "." not in hostname and len(dnsdomainname) > 0:
+            merged_fqdn = hostname + '.' + dnsdomainname
+        else:
+            merged_fqdn = ""
 
-        if not fqdn:
-            return []
+        # pick the longer of the two
+        if len(merged_fqdn) > len(fqdn):
+            fqdn = merged_fqdn
 
         hostfqdn_om = ObjectMap({
-            'hostfqdn': fqdn
+            'hostfqdn': fqdn,
+            'hostlocalname': hostname
         })
+
+        LOG.info("Hostname: %s (%s)", hostname, fqdn)
 
         return [ObjectMap({
             'setApplyDataMapToOpenStackInfrastructureHost': hostfqdn_om
-            })]
+        })]

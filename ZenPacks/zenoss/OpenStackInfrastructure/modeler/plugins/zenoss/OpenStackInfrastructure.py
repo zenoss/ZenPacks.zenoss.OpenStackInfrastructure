@@ -309,6 +309,14 @@ class OpenStackInfrastructure(PythonPlugin):
 
         for service in results['cinder_services']:
             if 'host' in service:
+
+                # with the ceph backend, it seems like the cinder-volume
+                # hostname may not be relevant.  (At least on the test servers,
+                # I see 'ceph@ceph' here, which is meaningless)  (ZPS-3751)
+                if service['binary'] == 'cinder-volume' and service['host'].endswith('@ceph'):
+                    log.debug("Ignoring host '%s' from cinder-volume service", service['host'])
+                    continue
+
                 hostmap.add_hostref(service['host'], source="cinder services")
 
         for hostname in results['zOpenStackNovaApiHosts']:
@@ -361,7 +369,11 @@ class OpenStackInfrastructure(PythonPlugin):
 
         for service in results['cinder_services']:
             if 'host' in service:
-                service['host'] = hostmap.get_hostid(service['host'])
+                if hostmap.has_hostref(service['host']):
+                    service['host'] = hostmap.get_hostid(service['host'])
+                else:
+                    service['host'] = None
+
 
         results['zOpenStackNovaApiHosts'] = \
             [hostmap.get_hostid(x) for x in results['zOpenStackNovaApiHosts']]
@@ -617,24 +629,34 @@ class OpenStackInfrastructure(PythonPlugin):
             # well, guest what? volume services do not have 'id' key !
 
             host_id = service['host']
-            try:
-                hostname = self.hostmap.get_hostname_for_hostid(host_id)
-            except InvalidHostIdException:
-                log.error("An invalid Host ID: '%s' was provided.\n"
-                          "\tPlease examine zOpenStackHostMapToId and zOpenStackHostMapSame.", host_id)
-                continue
-            except Exception:
-                log.warning("An unknown error for Host ID: '%s' occurred", host_id)
 
-            host_base_id = re.sub(r'^host-', '', host_id)
-            zone_id = prepId("zone-{0}".format(service.get('zone', '')))
-            title = '{0}@{1} ({2})'.format(service.get('binary', ''),
-                                           hostname,
-                                           service.get('zone', ''))
-            service_id = prepId('service-{0}-{1}-{2}'.format(
-                service.get('binary', ''), host_base_id, service.get('zone', '')))
+            if host_id is None:
+                zone_id = prepId("zone-{0}".format(service.get('zone', '')))
+                title = '{0} ({1})'.format(
+                    service.get('binary', ''),
+                    service.get('zone', ''))
+                service_id = prepId('service-{0}-{1}'.format(
+                    service.get('binary', ''), service.get('zone', '')))
 
-            if host_id not in host_orgComponent:
+            else:
+                try:
+                    hostname = self.hostmap.get_hostname_for_hostid(host_id)
+                except InvalidHostIdException:
+                    log.error("An invalid Host ID: '%s' was provided.\n"
+                              "\tPlease examine zOpenStackHostMapToId and zOpenStackHostMapSame.", host_id)
+                    continue
+                except Exception:
+                    log.warning("An unknown error for Host ID: '%s' occurred", host_id)
+
+                host_base_id = re.sub(r'^host-', '', host_id)
+                zone_id = prepId("zone-{0}".format(service.get('zone', '')))
+                title = '{0}@{1} ({2})'.format(service.get('binary', ''),
+                                               hostname,
+                                               service.get('zone', ''))
+                service_id = prepId('service-{0}-{1}-{2}'.format(
+                    service.get('binary', ''), host_base_id, service.get('zone', '')))
+
+            if host_id is not None and host_id not in host_orgComponent:
                 host_orgComponent[host_id] = zone_id
 
             services.append(ObjectMap(
@@ -666,8 +688,26 @@ class OpenStackInfrastructure(PythonPlugin):
             if device.zOpenStackExtraHosts:
                 log.info("  Adding zOpenStackExtraHosts=%s" % device.zOpenStackExtraHosts)
 
+        log.debug("Modeled Hosts:")
         hosts = []
+        seen_hostids = set()
         for host_id in self.hostmap.all_hostids():
+
+            if host_id in seen_hostids:
+                log.debug("  (disregarding duplicate host ID: %s)", host_id)
+                continue
+            seen_hostids.add(host_id)
+
+            sources = set(self.hostmap.get_sources_for_hostid(host_id))
+
+            # skip hosts which were only seen in the API urls
+            for api_source in ['Nova API URL', 'Cinder API URL']:
+                if api_source in sources:
+                    sources.remove(api_source)
+
+            if len(sources) == 0:
+                continue
+
             try:
                 hostname = self.hostmap.get_hostname_for_hostid(host_id)
             except Exception:
@@ -675,12 +715,15 @@ class OpenStackInfrastructure(PythonPlugin):
                 log.error("Ensure that zOpenStackHost* properties are correct!")
                 continue
 
+            log.debug("  Host %s (%s) (sources=%s)", host_id, hostname, self.hostmap.get_sources_for_hostid(host_id))
+
             hosts.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Host',
                 data=dict(
                     id=host_id,
                     title=hostname,
                     hostname=hostname,
+                    host_ip=self.hostmap.get_ip_for_hostid(host_id),
                     set_orgComponent=host_orgComponent[host_id],
                 )))
 
