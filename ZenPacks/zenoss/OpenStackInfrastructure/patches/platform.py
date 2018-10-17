@@ -21,7 +21,7 @@ from Products.Zuul.facades.devicefacade import DeviceFacade
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import getIpInterfaceMacs
 from ZenPacks.zenoss.OpenStackInfrastructure.DeviceProxyComponent import DeviceProxyComponent
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
-from ..zenpacklib import catalog_search
+from ZenPacks.zenoss.ZenPackLib.zenpacklib import catalog_search
 
 # LinuxDevice only exists in LinuxMonitor >= 2.0.
 try:

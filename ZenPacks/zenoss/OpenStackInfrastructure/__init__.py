@@ -18,7 +18,7 @@ $ZENHOME/ZenPacks/easy-install.pth.
 
 """
 
-from . import zenpacklib
+from ZenPacks.zenoss.ZenPackLib import zenpacklib
 
 # Load YAML
 CFG = zenpacklib.load_yaml()
@@ -30,6 +30,7 @@ log = logging.getLogger('zen.OpenStack')
 from Products.ZenUtils.Utils import unused
 from OFS.CopySupport import CopyError
 
+schema = CFG.zenpack_module.schema
 from . import schema
 from service_migration import install_migrate_zenpython, remove_migrate_zenpython, fix_service_healthcheck_path
 

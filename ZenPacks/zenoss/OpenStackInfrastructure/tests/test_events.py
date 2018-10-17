@@ -31,7 +31,7 @@ from Products.ZenUtils.Utils import unused
 unused(Globals)
 
 from ZenPacks.zenoss.OpenStackInfrastructure.events import process as process_event
-from ZenPacks.zenoss.OpenStackInfrastructure import zenpacklib
+from ZenPacks.zenoss.ZenPackLib import zenpacklib
 # Required before zenpacklib.TestCase can be used.
 zenpacklib.enableTesting()
 
