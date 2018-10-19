@@ -724,7 +724,7 @@ class TestEventTransforms(zenpacklib.TestCase):
         self.assertIsNotNone(volume)
         self.assertEquals(volume.tenant.id, 'tenant')
         self.assertEquals(volume.id, 'volume-test')
-        self.assertEquals(volume.size, '1')
+        self.assertEquals(volume.size, 1)
 
 
     def test_volume_update_start(self):
@@ -751,7 +751,7 @@ class TestEventTransforms(zenpacklib.TestCase):
         self.assertIsNotNone(volume)
         self.assertEquals(volume.tenant.id, 'tenant')
         self.assertEquals(volume.id, 'volume-test')
-        self.assertEquals(volume.size, '2')
+        self.assertEquals(volume.size, 2)
 
 
     def test_volume_attach_start(self):
@@ -776,7 +776,7 @@ class TestEventTransforms(zenpacklib.TestCase):
         self.assertIsNotNone(volume)
         self.assertEquals(volume.tenant.id, 'tenant')
         self.assertEquals(volume.id, 'volume-test')
-        self.assertEquals(volume.size, '1')
+        self.assertEquals(volume.size, 1)
         self.assertEquals(volume.title, 'test volume')
 
 
@@ -806,7 +806,7 @@ class TestEventTransforms(zenpacklib.TestCase):
         self.assertIsNotNone(volume)
         self.assertEquals(volume.tenant.id, 'tenant')
         self.assertEquals(volume.id, 'volume-test')
-        self.assertEquals(volume.size, '1')
+        self.assertEquals(volume.size, 1)
         self.assertEquals(volume.title, 'test volume')
 
 
