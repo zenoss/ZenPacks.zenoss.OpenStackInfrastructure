@@ -31,7 +31,6 @@ from Products.ZenUtils.Utils import unused
 from OFS.CopySupport import CopyError
 
 schema = CFG.zenpack_module.schema
-from . import schema
 from service_migration import install_migrate_zenpython, remove_migrate_zenpython, fix_service_healthcheck_path
 
 NOVAHOST_PLUGINS = ['zenoss.cmd.linux.openstack.nova',
