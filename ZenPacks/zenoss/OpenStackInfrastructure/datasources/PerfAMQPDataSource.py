@@ -160,8 +160,8 @@ class PerfAMQPDataSourcePlugin(AMQPDataSourcePlugin):
         device_id = config.configId
 
         for ds in config.datasources:
-            for entry in cache[device_id].get_perf(ds.params['resourceId'], ds.params['meter']):
-                log.debug("perf %s/%s=%s @ %s" % (ds.params['resourceId'], ds.params['meter'], entry.value, entry.timestamp))
+            for entry in cache[device_id].get_perf(ds.params.get('resourceId'), ds.params.get('meter')):
+                log.debug("perf %s/%s=%s @ %s" % (ds.params.get('resourceId'), ds.params.get('meter'), entry.value, entry.timestamp))
                 data['values'][ds.component].setdefault(ds.datasource, [])
                 data['values'][ds.component][ds.datasource].append((entry.value, entry.timestamp))
 
@@ -171,9 +171,9 @@ class PerfAMQPDataSourcePlugin(AMQPDataSourcePlugin):
         known_instances = dict()
         known_vnics = dict()
         for ds in config.datasources:
-            if ds.params['component_meta_type'] == 'OpenStackInfrastructureInstance':
+            if ds.params.get('component_meta_type') == 'OpenStackInfrastructureInstance':
                 known_instances[ds.params['resourceId']] = ds.component
-            elif ds.params['component_meta_type'] == 'OpenStackInfrastructureVnic':
+            elif ds.params.get('component_meta_type') == 'OpenStackInfrastructureVnic':
                 known_vnics[ds.params['resourceId']] = ds.component
 
         potential_vnic_resourceIds = set()
