@@ -85,6 +85,14 @@ class OpenStackInfrastructure(PythonPlugin):
     @inlineCallbacks
     def collect(self, device, unused):
 
+        if not device.zCommandUsername or not device.zCommandPassword:
+            log.error("Password/Username should be set to proper values. Check your Openstack credentials.")
+            returnValue({})
+
+        if not device.zOpenStackAuthUrl or not device.zOpenStackProjectId or not device.zOpenStackRegionName:
+            log.error("Openstack credentials should be set to proper values. Check your OpenStackAuthUrl, OpenStackProjectId and OpenStackRegionName")
+            returnValue({})
+
         sm = SessionManager(
             device.zCommandUsername,
             device.zCommandPassword,
@@ -753,7 +761,7 @@ class OpenStackInfrastructure(PythonPlugin):
                         'hypervisor_version', None)
 
             # Reformat the version string.
-            if hypervisor_version[hypervisor_id] is not None:            
+            if hypervisor_version[hypervisor_id] is not None:
                 hypervisor_version[hypervisor_id] = '.'.join(
                     str(hypervisor_version[hypervisor_id]).split('00'))
 
