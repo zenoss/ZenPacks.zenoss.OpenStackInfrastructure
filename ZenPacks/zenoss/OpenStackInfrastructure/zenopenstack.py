@@ -259,6 +259,7 @@ class WebServer(object):
 
 
 class OpenStackCollectorDaemon(CollectorDaemon):
+    initialServices = CollectorDaemon.initialServices + ['ModelerService']
 
     def _updateConfig(self, cfg):
         configId = cfg.configId
@@ -272,6 +273,18 @@ class OpenStackCollectorDaemon(CollectorDaemon):
         self.log.debug("Removing config for %s", deviceId)
 
         REGISTRY.remove_device(deviceId)
+
+    def getInitialServices(self):
+        # CollectorDaemon does not honor initialServices currently (it is
+        # overwritten to just the base services pl`us the configuration service),
+        # so ModelerService will not be available unless we force the issue:
+
+        for service in OpenStackCollectorDaemon.initialServices:
+            if service not in self.initialServices:
+                log.info("Re-adding initialService: %s", service)
+                self.initialServices.append(service)
+
+        return super(OpenStackCollectorDaemon, self).getInitialServices()
 
 
 class TaskSplitter(NullTaskSplitter):
@@ -376,7 +389,7 @@ class OpenStackMapTask(BaseTask):
     def doTask(self):
         log.debug("Draining datamap queue")
 
-        remoteProxy = self.getModelerService()
+        remoteProxy = self._collector.getServiceNow('ModelerService')
 
         maps = {}
         for device_id, datamap in MAP_QUEUE:
