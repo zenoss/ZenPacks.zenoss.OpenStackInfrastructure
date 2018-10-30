@@ -160,7 +160,10 @@ class PerfAMQPDataSourcePlugin(AMQPDataSourcePlugin):
         device_id = config.configId
 
         for ds in config.datasources:
-            for entry in cache[device_id].get_perf(ds.params['resourceId'], ds.params['meter']):
+            if 'meter' not in ds.params or 'resourceId' not in ds.params:
+                log.warn('Skipping collection for bad datasource %s', ds)
+                continue
+            for entry in cache[device_id].get_perf(ds.params.get('resourceId'), ds.params.get('meter')):
                 log.debug("perf %s/%s=%s @ %s" % (ds.params['resourceId'], ds.params['meter'], entry.value, entry.timestamp))
                 data['values'][ds.component].setdefault(ds.datasource, [])
                 data['values'][ds.component][ds.datasource].append((entry.value, entry.timestamp))
@@ -171,6 +174,9 @@ class PerfAMQPDataSourcePlugin(AMQPDataSourcePlugin):
         known_instances = dict()
         known_vnics = dict()
         for ds in config.datasources:
+            if 'resourceId' not in ds.params:
+                log.warn('Skipping identification for bad datasource %s', ds)
+                continue
             if ds.params['component_meta_type'] == 'OpenStackInfrastructureInstance':
                 known_instances[ds.params['resourceId']] = ds.component
             elif ds.params['component_meta_type'] == 'OpenStackInfrastructureVnic':
