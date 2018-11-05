@@ -813,6 +813,17 @@ Changes
 
 - Fix KeyError in PerfAMQPDataSource vNIC discovery (ZPS-4661)
 
+2.4.2
+
+- Avoid nameconfict for proxy devices and be more flexible in linking to existing devices when appropriate. (ZPS-3991)
+- Prevent modeling invalid host components for ceph storage backend and API endpoints (ZPS-3751, ZPS-3971, ZPS-4183)
+- When mapping hostnames, treat all host references in case-insensitive manner (ZPS-3989)
+- Fix hostfqdn modeler plugin for systems where the 'dnsdomainname' command is not available (ZPS-4083)
+- expected_ceilometer_heartbeats includes additional possible names for a host, based on hostmap, proxy device, and the host's local 'hostname' (ZPS-4082)
+- Fix for "OpenStack Component View" option missing in lefthand nav (ZPS-3927)
+- Corrected URL escaping in modeler plugin to avoid receiving 400 error when a proxy is in front of nova-api services (ZPS-3894)
+- Tested with Zenoss Resource Manager 6.2.0, Zenoss Resource Manager 5.3.3 and Service Impact 5.3.1
+
 2.4.1
 
 - Disallow spaces in device IDs in the 'Add OpenStack Endpoint' dialog (ZPS-2583)

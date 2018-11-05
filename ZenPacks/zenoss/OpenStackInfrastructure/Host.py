@@ -15,6 +15,7 @@ LOG = logging.getLogger('zen.OpenStackInfrastructureHost')
 
 from Products.ZenEvents.ZenEventClasses import Clear, Warning
 from DateTime import DateTime
+import re
 
 
 class Host(schema.Host):
@@ -29,8 +30,9 @@ class Host(schema.Host):
         return 'zOpenStackHostDeviceClass'
 
     def maintain_proxy_device(self):
-        self.ensure_proxy_device()
-        self.ensure_service_monitoring()
+        device = self.ensure_proxy_device()
+        if device:
+            self.ensure_service_monitoring()
 
     def ensure_proxy_device(self):
         # ensure that the host exists.
@@ -43,6 +45,8 @@ class Host(schema.Host):
         # Based on the NovaServices we have modeled on the host, ensure that we
         # have the right OSProcess groups detected.
         device = self.ensure_proxy_device()
+        if not device:
+            return
 
         # If we're getting IPServices directly from the OS (rather than port
         # scannning, there's no good reason to have such a low
@@ -81,7 +85,7 @@ class Host(schema.Host):
                     eventClass='/Status/OpenStack',
                     eventKey='ServiceMonitoring-' + service,
                     severity=Warning,
-                    ))
+                ))
             else:
                 self.dmd.ZenEventManager.sendEvent(dict(
                     device=self.id,
@@ -89,7 +93,29 @@ class Host(schema.Host):
                     eventClass='/Status/OpenStack',
                     eventKey='ServiceMonitoring-' + service,
                     severity=Clear,
-                    ))
+                ))
+
+    def suggested_device_name(self):
+        device_name = self.name()
+
+        # if the name ends in .localdomain, replace that with
+        # the suffix specified in zOpenStackHostLocalDomain.
+        localdomain = self.zOpenStackHostLocalDomain
+        if localdomain:
+            # if a value is specified, ensure that it starts with a '.',
+            # as this is almost certainly what is intended.
+            if not localdomain.startswith("."):
+                localdomain = "." + localdomain
+
+        device_name = re.sub(
+            r'\.localdomain$',
+            localdomain,
+            device_name,
+            flags=re.IGNORECASE)
+        return device_name
+
+    def suggested_host_ip(self):
+        return self.host_ip
 
     def devicelink_descr(self):
         '''

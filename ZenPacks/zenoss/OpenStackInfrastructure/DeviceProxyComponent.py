@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2013-2014, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2013-2018, all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -19,15 +19,15 @@ from zope.interface import implements
 from OFS.interfaces import IObjectWillBeAddedEvent, IObjectWillBeMovedEvent
 from Products.Zuul.catalog.events import IndexingEvent
 from Products.ZenEvents.interfaces import IPostEventPlugin
+from Products.ZenModel.Exceptions import DeviceExistsError
 from Products.ZenUtils.guid.interfaces import IGlobalIdentifier
 from Products.ZenUtils.guid.guid import GUIDManager
 from Products.ZenUtils.Utils import monkeypatch
 from Products.Zuul.interfaces import ICatalogTool
-from Products.AdvancedQuery import Eq
+from Products.AdvancedQuery import Eq, And, Or, In, MatchGlob
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
 from Products.ZenUtils.IpUtil import getHostByName, IpAddressError
 import socket
-import re
 
 
 def onDeviceDeleted(object, event):
@@ -67,8 +67,17 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
 
         uuid = getattr(device, 'openstackProxyComponentUUID', None)
         if uuid:
-            return GUIDManager(device.dmd).getObject(uuid)
+            component = GUIDManager(device.dmd).getObject(uuid)
 
+            # ensure that the component is also linked back to this device-
+            # a uni-directional linkage (device to component, but not 
+            # component to device) is not valid.
+            component_device_uuid = getattr(component, 'openstackProxyDeviceUUID', None)
+            if component_device_uuid == IGlobalIdentifier(device).getGUID():
+                return component
+            else:                
+                LOG.warning("Device %s is linked to component %s, but it is not linked back.  Disregarding linkage.",
+                            device, component)
         return None
 
     def proxy_deviceclass_zproperty(self):
@@ -113,109 +122,177 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         if not self.proxy_device():
             self.create_proxy_device()
 
-        return True
+            return True
+
+    def claim_proxy_device(self, device):
+        LOG.debug("%s component '%s' is now linked to device '%s'" % (self.meta_type, self.name(), device.name()))
+        device.openstackProxyComponentUUID = IGlobalIdentifier(self).getGUID()
+        self.openstackProxyDeviceUUID = IGlobalIdentifier(device).getGUID()
+
+    def ensure_valid_claim(self, device):
+        component_guid = IGlobalIdentifier(self).getGUID()
+        device_guid = IGlobalIdentifier(device).getGUID()
+        valid = True
+
+        # Confirm forward linkage
+        if getattr(self, 'openstackProxyDeviceUUID', None) != device_guid:
+            valid = False
+
+        # Confirm reverse linkage
+        if getattr(device, 'openstackProxyComponentUUID', None) != component_guid:
+            valid = False
+
+        if not valid:
+            # the linkage is broken in at least one direction.  Just re-claim
+            # it to set it right.
+            LOG.info("%s component '%s' linkage to device '%s' is broken. "
+                     "Re-claiming it.",
+                     self.meta_type, self.name(), device.name())
+            self.claim_proxy_device(device)
+        return device
+
+    def find_claimable_device(self, device_class=None):
+        '''
+        Find a possible Linux device for the host:
+
+        Search by id, title, and management IP, against id, hostnames, and IPs
+        '''
+
+        if device_class is None:
+            device_class = self.proxy_deviceclass()
+
+        suggested_name = self.suggested_device_name()
+
+        search_values = [x for x in self.id, suggested_name, self.hostname, self.host_ip if x is not None]
+        brains = device_class.deviceSearch.evalAdvancedQuery(
+            And(
+                MatchGlob('getDeviceClassPath', device_class.getOrganizerName() + "*"),
+                Or(In('id', search_values),
+                   In('titleOrId', search_values),
+                   In('getDeviceIp', search_values))))
+
+        possible_devices = []
+        for brain in brains:
+            try:
+                device = brain.getObject()
+
+                if device.openstack_hostComponent() is None:
+                    possible_devices.append(device)
+                else:
+                    LOG.info("%s component %s unable to claim device %s, because it is already linked to %s",
+                             self.meta_type, self.name(), device.id, device.openstack_hostComponent().id)
+            except Exception:
+                pass
+
+        # 1. First look by matching id against my id/suggested_name/hostname
+        for device in possible_devices:
+            if device.id == self.id:
+                return device
+
+        for device in possible_devices:
+            if device.id == suggested_name or device.id == self.hostname:
+                return device
+
+        # 2. Next find by matching name against my id/suggested_name/hostname
+        for device in possible_devices:
+            if device.name() == self.id:
+                return device
+
+        for device in possible_devices:
+            if device.name() == suggested_name or device.name() == self.hostname:
+                return device
+
+        # Otherwise, return the first device, if one was found
+        if possible_devices:
+            return possible_devices[0]
+
+        if device_class == self.proxy_deviceclass():
+            # check for other devices that we would have claimed, if they
+            # had been in the right device class
+            device = self.find_claimable_device(device_class=self.dmd.Devices)
+            if device:
+                LOG.info(
+                    "No claimable device found for %s, but %s was found "
+                    "in another device class.  Moving it to %s will make "
+                    "it eligible.", self.id, device.id, self.proxy_deviceclass().getOrganizerName())
+
+        # No claimable device was found.
+        return None
 
     def proxy_device(self):
         '''
         Return this component's corresponding proxy device, or None if
-        it does not yet exist.
-
-        Default assumes that the names must match.
+        there isn't one at this time.   This method will not attempt to
+        create a new device.
         '''
 
+        # A claimed device already exists.
         device = GUIDManager(self.dmd).getObject(getattr(self, 'openstackProxyDeviceUUID', None))
         if device:
-            guid = IGlobalIdentifier(self).getGUID()
+            # Make sure that the GUID is correct in the reverse direction,
+            # then return it.
+            return self.ensure_valid_claim(device)
 
-            # this shouldn't happen, but if we've somehow become half-connected
-            # (we know about the device, it doesn't know about us), reconnect.
-            if getattr(device, 'openstackProxyComponentUUID', None) != guid:
-                LOG.info("%s component '%s' linkage to device '%s' is broken.  Re-claiming it." % (self.meta_type, self.name(), device.name()))
-                self.claim_proxy_device(device)
+        # Look for device that matches our requirements
+        device = self.find_claimable_device()
 
+        # Claim it.
+        if device:
+            self.claim_proxy_device(device)
             return device
 
-        # Does a device with a matching name exist?  Claim that one.
-        device = self.dmd.Devices.findDevice(self.suggested_device_name())
-        if device:
-            self_pdc_path = self.proxy_deviceclass().getPrimaryPath()
-            device_path = device.getPrimaryPath()[:len(self_pdc_path)]
-            if device_path == self_pdc_path and device.id != self.device().id:
-                self.claim_proxy_device(device)
-                return device
-            else:
-                return None
-        else:
-            return None
+        # We found nothing to claim, so return None.
+        return None
 
     def suggested_device_name(self):
-        device_name = self.name()
+        return self.name()
 
-        # if the name ends in .localdomain, replace that with
-        # the suffix specified in zOpenStackHostLocalDomain.
-        localdomain = self.zOpenStackHostLocalDomain
-        if localdomain:
-            # if a value is specified, ensure that it starts with a '.',
-            # as this is almost certainly what is intended.
-            if not localdomain.startswith("."):
-                localdomain = "." + localdomain
-
-        device_name = re.sub(
-            r'\.localdomain$',
-            localdomain,
-            device_name,
-            flags=re.IGNORECASE)
-        return device_name
+    def suggested_host_ip(self):
+        return getHostByName(self.suggested_device_name())
 
     def create_proxy_device(self):
         '''
         Create a proxy device in the proxy_deviceclass.
 
-        Default assumes that the names will match.
+        Returns created device, or None if unable to create the device
+        (due to ID conflict, etc)
         '''
 
-        # add the missing proxy device.
         device_name = self.suggested_device_name()
-        device = None
 
+        LOG.info('Adding device for %s %s' % (self.meta_type, self.title))
         try:
-            ip = getHostByName(device_name)
-            if ip:
-                device = self.dmd.Devices.findDeviceByIdOrIp(ip)
-        except Exception:
-            device = None
-
-        # we only need/want to try to model the device if we've added it as a
-        # new device and if it has a valid management IP (see below)
-        should_model = False
-
-        if self.dmd.Devices.findDevice(device_name):
-            device_name = device_name + "_nameconflict"
-            LOG.info("Device name conflict with endpoint.  Changed name to %s" % device_name)
-
-        if device and device.getDeviceClassName() == '/Server/SSH/Linux':
-            LOG.info("Change device class  for existing device %s"
-                     % device.title)
-            device.changeDeviceClass('/Server/SSH/Linux/NovaHost')
-        elif not device:
-            LOG.info('Adding device for %s %s' % (self.meta_type, self.title))
-
             device = self.proxy_deviceclass().createInstance(device_name)
             device.setProdState(self.productionState)
             device.setPerformanceMonitor(self.getPerformanceServer().id)
-            try:
-                ip = getHostByName(device_name)
-                if ip is None:
-                    LOG.info("%s does not resolve- not setting manageIp", device_name)
-                    should_model = False
-                elif ip.startswith("127") or ip.startswith("::1"):
-                    LOG.info("%s resolves to a loopback address- not setting manageIp", device_name)
-                else:
-                    device.setManageIp()
-                    should_model = True
+        except DeviceExistsError:
+            LOG.info("Unable to create linux device (%s) because a device with that ID already exists.",
+                     device_name)
+            return None
+        except Exception as ex:
+            # Device creation fails for other reasons.
+            LOG.warning("Error creating device (%s): %s",
+                        device_name, ex)
+            return None
 
-            except (IpAddressError, socket.gaierror):
-                LOG.warning("Unable to set management IP based on %s", device_name)
+        # A new device now exists.
+        # We should only model the device if we've added it as a new device and
+        # if it has a valid management IP (see below)
+        should_model = False
+
+        # Set the new device IP if possible.
+        try:
+            ip = self.suggested_host_ip()
+            if ip is None:
+                LOG.info("%s does not resolve- not setting manageIp", device_name)
+            elif ip.startswith("127") or ip.startswith("::1"):
+                LOG.info("%s resolves to a loopback address- not setting manageIp", device_name)
+            else:
+                device.setManageIp(ip)
+                should_model = True
+
+        except (IpAddressError, socket.gaierror):
+            LOG.warning("Unable to set management IP based on %s", device_name)
 
         device.index_object()
         notify(IndexingEvent(device))
@@ -227,11 +304,6 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
         self.claim_proxy_device(device)
 
         return device
-
-    def claim_proxy_device(self, device):
-        LOG.debug("%s component '%s' is now linked to device '%s'" % (self.meta_type, self.name(), device.name()))
-        device.openstackProxyComponentUUID = IGlobalIdentifier(self).getGUID()
-        self.openstackProxyDeviceUUID = IGlobalIdentifier(device).getGUID()
 
     def release_proxy_device(self):
         device = GUIDManager(self.dmd).getObject(getattr(self, 'openstackProxyDeviceUUID', None))
