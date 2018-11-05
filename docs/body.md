@@ -809,6 +809,10 @@ Known Issues
 Changes
 -------
 
+2.5.0
+
+- Fix KeyError in PerfAMQPDataSource vNIC discovery (ZPS-4661)
+
 2.4.1
 
 - Disallow spaces in device IDs in the 'Add OpenStack Endpoint' dialog (ZPS-2583)
