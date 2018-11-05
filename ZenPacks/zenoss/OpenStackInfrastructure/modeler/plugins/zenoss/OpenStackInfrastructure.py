@@ -25,7 +25,6 @@ from urlparse import urlparse
 from collections import defaultdict
 
 from twisted.internet.defer import inlineCallbacks, returnValue
-from twisted.internet.error import ConnectError, TimeoutError
 
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
@@ -51,7 +50,6 @@ from apiclients.txapiclient import (
     NovaClient,
     NeutronClient,
     CinderClient,
-    APIClientError,
     NotFoundError
 )
 
@@ -381,7 +379,6 @@ class OpenStackInfrastructure(PythonPlugin):
                     service['host'] = hostmap.get_hostid(service['host'])
                 else:
                     service['host'] = None
-
 
         results['zOpenStackNovaApiHosts'] = \
             [hostmap.get_hostid(x) for x in results['zOpenStackNovaApiHosts']]
@@ -1282,13 +1279,22 @@ class OpenStackInfrastructure(PythonPlugin):
         quotas = []
         for quota_key in results['quotas'].keys():
             quota = results['quotas'][quota_key]
-            tenant = [t for t in quota_tenants if t['id'] == quota_key][0]
+
+            # Find and use the tenant that corresponds to this quota:
+            q_tenant = None
+            for _ten in quota_tenants:
+                if _ten.get('id') == quota_key:
+                    q_tenant = _ten
+                    break
+
+            if not q_tenant:
+                continue
 
             quotas.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Quota',
                 data=dict(
-                    id=prepId('quota-{0}'.format(tenant['name'])),
-                    tenant_name=tenant['name'],
+                    id=prepId('quota-{0}'.format(quota_key)),
+                    tenant_name=q_tenant['name'],
                     volumes=quota.get('volumes', 0),
                     snapshots=quota.get('snapshots', 0),
                     bytes=quota.get('gigabytes', 0),

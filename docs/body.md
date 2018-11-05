@@ -812,6 +812,7 @@ Changes
 2.5.0
 
 - Fix KeyError in PerfAMQPDataSource vNIC discovery (ZPS-4661)
+- Guard against missing tenant quota. (ZPS-4627)
 
 2.4.2
 
