@@ -809,6 +809,10 @@ Known Issues
 Changes
 -------
 
+2.5.0
+
+- Fix KeyError in PerfAMQPDataSource vNIC discovery (ZPS-4661)
+
 2.4.2
 
 - Avoid nameconfict for proxy devices and be more flexible in linking to existing devices when appropriate. (ZPS-3991)
