@@ -19,6 +19,9 @@ from zope.component import adapts
 from zope.interface import implements
 
 from Products.ZenEvents import ZenEventClasses
+from Products.Zuul.form import schema
+from Products.Zuul.infos import ProxyProperty
+from Products.Zuul.utils import ZuulMessageFactory as _t
 
 from ZenPacks.zenoss.OpenStackInfrastructure.datasources.AMQPDataSource import (
     AMQPDataSource, AMQPDataSourcePlugin, AMQPDataSourceInfo,
@@ -61,7 +64,10 @@ class IEventsAMQPDataSourceInfo(IAMQPDataSourceInfo):
     API Info interface for IEventsAMQPDataSource.
     '''
 
-    pass
+    cycletime = schema.TextLine(
+        group=_t('OpenStack Ceilometer'),
+        title=_t('Cycletime')
+    )
 
 
 class EventsAMQPDataSourceInfo(AMQPDataSourceInfo):
@@ -71,6 +77,8 @@ class EventsAMQPDataSourceInfo(AMQPDataSourceInfo):
 
     implements(IEventsAMQPDataSourceInfo)
     adapts(EventsAMQPDataSource)
+
+    cycletime = ProxyProperty('cycletime')
 
     testable = False
 
