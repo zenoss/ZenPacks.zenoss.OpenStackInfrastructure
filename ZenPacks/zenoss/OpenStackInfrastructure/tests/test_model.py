@@ -36,7 +36,6 @@ from ZenPacks.zenoss.OpenStackInfrastructure.modeler.plugins.zenoss.OpenStackInf
     import OpenStackInfrastructure as OpenStackInfrastructureModeler
 
 from Products.ZenModel import Device
-from ZenPacks.zenoss.OpenStackInfrastructure import DeviceProxyComponent
 from ZenPacks.zenoss.OpenStackInfrastructure import hostmap
 
 unused(Globals)
@@ -369,11 +368,10 @@ class TestModel(BaseTestCase):
 
         hostedSoftware = wily.hostedSoftware()[0]
         self.assertEquals(hostedSoftware.id,
-                'service-nova-conductor-wily.zenoss.local-internal')
+                          'service-nova-conductor-wily.zenoss.local-internal')
 
         self.assertEquals(hostedSoftware.orgComponent().id,
-                'zone-internal')
-
+                          'zone-internal')
 
     def testDeviceProxyIntegrity(self):
         self.assertTrue(self._modeled)
@@ -403,7 +401,6 @@ class TestModel(BaseTestCase):
             self.assertEquals(leghorn.proxy_device(), leghorn_proxy)
 
         self.assertNotEquals(leghorn.openstackProxyDeviceUUID, old_uuid)
-
 
     def testHypervisor(self):
         self.assertTrue(self._modeled)
@@ -661,9 +658,9 @@ class TestModel(BaseTestCase):
 
         quotas = self.d.getDeviceComponents(type='OpenStackInfrastructureQuota')
         self.assertEquals(len(quotas), 3)
-        self.assertEquals(quotas[0].id, 'quota-demo')
-        self.assertEquals(quotas[1].id, 'quota-services')
-        self.assertEquals(quotas[2].id, 'quota-admin')
+        self.assertEquals(quotas[0].id, 'quota-28a2787a215a4187b22f800f51e58665')
+        self.assertEquals(quotas[1].id, 'quota-5b79c3f4df73447a9850887b2ea17372')
+        self.assertEquals(quotas[2].id, 'quota-e6bae7721b8745ce8b14f3908de17b8c')
         self.assertEquals(quotas[0].tenant_name, 'demo')
         self.assertEquals(quotas[1].tenant_name, 'services')
         self.assertEquals(quotas[2].tenant_name, 'admin')
