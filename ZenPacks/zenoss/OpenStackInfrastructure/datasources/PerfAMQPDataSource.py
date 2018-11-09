@@ -74,6 +74,10 @@ class IPerfAMQPDataSourceInfo(IAMQPDataSourceInfo):
         group=_t('OpenStack Ceilometer'),
         title=_t('meter Name'))
 
+    cycletime = schema.TextLine(
+        group=_t('OpenStack Ceilometer'),
+        title=_t('Cycletime')
+    )
 
 class PerfAMQPDataSourceInfo(AMQPDataSourceInfo):
     '''
@@ -82,6 +86,8 @@ class PerfAMQPDataSourceInfo(AMQPDataSourceInfo):
 
     implements(IPerfAMQPDataSourceInfo)
     adapts(PerfAMQPDataSource)
+
+    cycletime = ProxyProperty('cycletime')
 
     testable = False
 
