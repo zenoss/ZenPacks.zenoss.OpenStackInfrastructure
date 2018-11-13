@@ -1807,9 +1807,14 @@ classes:
         order: 21.1
       host:
         label: Host
+        type: entity
         label_width: 100
         content_width: 100
         order: 21.2
+        api_only: true
+        api_backendtype: method
+      backend:
+        label: Back End
       status:
         label: Status
         label_width: 60

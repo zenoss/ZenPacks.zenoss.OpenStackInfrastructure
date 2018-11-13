@@ -1160,7 +1160,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 avzone=volume.get('availability_zone', ''),
                 created_at=volume.get('created_at', '').replace('T', ' '),
                 sourceVolumeId=volume.get('source_volid', ''),
-                host=volume.get('os-vol-host-attr:host', ''),
+                backend=volume.get('os-vol-host-attr:host', ''),
                 size=volume.get('size', 0),
                 bootable=volume.get('bootable', 'FALSE').upper(),
                 status=volume.get('status', 'UNKNOWN').upper(),
