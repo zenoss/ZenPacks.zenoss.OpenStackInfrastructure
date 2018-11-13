@@ -287,22 +287,23 @@ class TestModel(BaseTestCase):
 
         avzones = self.d.getDeviceComponents(type='OpenStackInfrastructureAvailabilityZone')
         self.assertEquals(len(avzones), 2)
-        self.assertEquals('zone-nova', avzones[0].id)
-        self.assertEquals('nova', avzones[0].name())
-        self.assertEquals('zone-internal', avzones[1].id)
-        self.assertEquals('internal', avzones[1].name())
-        self.assertEquals(avzones[0].endpoint.id, 'endpoint')
-        self.assertEquals(avzones[0].endpoint.name(), 'nova')
-        self.assertEquals(avzones[0].hosts.id, 'hosts')
-        self.assertEquals(avzones[0].hosts.name(), 'nova')
-        self.assertEquals(avzones[0].pools.id, 'pools')
-        self.assertEquals(avzones[0].pools.name(), 'nova')
-        self.assertEquals(avzones[1].endpoint.id, 'endpoint')
-        self.assertEquals(avzones[1].endpoint.name(), 'internal')
-        self.assertEquals(avzones[1].hosts.id, 'hosts')
-        self.assertEquals(avzones[1].hosts.name(), 'internal')
-        self.assertEquals(avzones[1].pools.id, 'pools')
-        self.assertEquals(avzones[1].pools.name(), 'internal')
+        for zone in avzones:
+            if 'zone-internal' in zone.id: zone_internal = zone
+            if 'zone-nova' in zone.id: zone_nova = zone
+
+        self.assertEquals(zone_nova.endpoint.id, 'endpoint')
+        self.assertEquals(zone_nova.endpoint.name(), 'nova')
+        self.assertEquals(zone_nova.hosts.id, 'hosts')
+        self.assertEquals(zone_nova.hosts.name(), 'nova')
+        self.assertEquals(zone_nova.pools.id, 'pools')
+        self.assertEquals(zone_nova.pools.name(), 'nova')
+
+        self.assertEquals(zone_internal.endpoint.id, 'endpoint')
+        self.assertEquals(zone_internal.endpoint.name(), 'internal')
+        self.assertEquals(zone_internal.hosts.id, 'hosts')
+        self.assertEquals(zone_internal.hosts.name(), 'internal')
+        self.assertEquals(zone_internal.pools.id, 'pools')
+        self.assertEquals(zone_internal.pools.name(), 'internal')
 
     def testFlavor(self):
         self.assertTrue(self._modeled)

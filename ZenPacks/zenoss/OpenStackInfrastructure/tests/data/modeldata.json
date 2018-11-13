@@ -300,6 +300,7 @@
   "agents": [
               {
                 "l3_agent_networks": ["a13b2c35-d734-4021-9850-432dfa7fa7a3"], 
+                "availability_zone": "nova",
                 "binary": "neutron-l3-agent", 
                 "l3_agent_gateways": ["172.24.4.226"], 
                 "description": null, 
@@ -332,6 +333,7 @@
                                     }
               }, 
               {
+                "availability_zone": "nova",
                 "binary": "neutron-metadata-agent", 
                 "description": null, 
                 "admin_state_up": true, 
@@ -354,6 +356,7 @@
                                     }
               }, 
               {
+                "availability_zone": "nova",
                 "binary": "neutron-openvswitch-agent", 
                 "description": null, 
                 "admin_state_up": true, 
@@ -389,6 +392,7 @@
                 "alive": true,
                 "id": "fade4d15-487c-4998-ac80-bff91b4532e9",
                 "topic": "dhcp_agent",
+                "availability_zone": "nova",
                 "dhcp_agent_networks": ["7a2d66f2-35e6-4459-92b9-260411a39039", "a13b2c35-d734-4021-9850-432dfa7fa7a3"],
                 "host": "liberty.zenoss.local",
                 "agent_type": "DHCP agent",
@@ -412,6 +416,7 @@
                 "admin_state_up": true,
                 "heartbeat_timestamp": "2015-12-07 17:45:18",
                 "dhcp_agent_subnets": [],
+                "availability_zone": null,
                 "alive": true,
                 "id": "37c80256-d843-45c3-a9b6-fb0fde13ac89",
                 "topic": "f5-lbaas-process-on-agent",
@@ -792,48 +797,44 @@
   "zOpenStackNovaApiHosts": [],
   "zOpenStackCinderApiHosts": [],
   "zOpenStackExtraHosts": [],
-  "quotas":
-            {
-              "28a2787a215a4187b22f800f51e58665":
-                                                  {
-                                                    "per_volume_gigabytes": -1,
-                                                    "volumes": 10,
-                                                    "gigabytes": 1000,
-                                                    "backup_gigabytes": 1000,
-                                                    "snapshots": 10,
-                                                    "volumes_iscsi": -1,
-                                                    "snapshots_iscsi": -1,
-                                                    "backups": 10,
-                                                    "gigabytes_iscsi": -1,
-                                                    "id": "28a2787a215a4187b22f800f51e58665"
-                                                  },
-              "5b79c3f4df73447a9850887b2ea17372":
-                                                  {
-                                                    "per_volume_gigabytes": -1,
-                                                    "volumes": 10,
-                                                    "gigabytes": 1000,
-                                                    "backup_gigabytes": 1000,
-                                                    "snapshots": 10,
-                                                    "volumes_iscsi": -1,
-                                                    "snapshots_iscsi": -1,
-                                                    "backups": 10,
-                                                    "gigabytes_iscsi": -1,
-                                                    "id": "5b79c3f4df73447a9850887b2ea17372"
-                                                  },
-              "e6bae7721b8745ce8b14f3908de17b8c":
-                                                  {
-                                                    "per_volume_gigabytes": -1,
-                                                    "volumes": 10,
-                                                    "gigabytes": 1000,
-                                                    "backup_gigabytes": 1000,
-                                                    "snapshots": 10,
-                                                    "volumes_iscsi": -1,
-                                                    "snapshots_iscsi": -1,
-                                                    "backups": 10,
-                                                    "gigabytes_iscsi": -1,
-                                                    "id": "e6bae7721b8745ce8b14f3908de17b8c"
-                                                  }
-            },
+  "quotas": [
+               {
+                 "per_volume_gigabytes": -1,
+                 "volumes": 10,
+                 "gigabytes": 1000,
+                 "backup_gigabytes": 1000,
+                 "snapshots": 10,
+                 "volumes_iscsi": -1,
+                 "snapshots_iscsi": -1,
+                 "backups": 10,
+                 "gigabytes_iscsi": -1,
+                 "id": "28a2787a215a4187b22f800f51e58665"
+               },
+               {
+                 "per_volume_gigabytes": -1,
+                 "volumes": 10,
+                 "gigabytes": 1000,
+                 "backup_gigabytes": 1000,
+                 "snapshots": 10,
+                 "volumes_iscsi": -1,
+                 "snapshots_iscsi": -1,
+                 "backups": 10,
+                 "gigabytes_iscsi": -1,
+                 "id": "5b79c3f4df73447a9850887b2ea17372"
+               },
+               {
+                 "per_volume_gigabytes": -1,
+                 "volumes": 10,
+                 "gigabytes": 1000,
+                 "backup_gigabytes": 1000,
+                 "snapshots": 10,
+                 "volumes_iscsi": -1,
+                 "snapshots_iscsi": -1,
+                 "backups": 10,
+                 "gigabytes_iscsi": -1,
+                 "id": "e6bae7721b8745ce8b14f3908de17b8c"
+               }
+            ],
   "volumetypes": [
                     {
                         "volume_backend_name": "ceph",
