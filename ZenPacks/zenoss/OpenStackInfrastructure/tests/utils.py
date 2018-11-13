@@ -16,6 +16,7 @@ import functools
 import importlib
 import re
 
+from Products.DataCollector.plugins.DataMaps import ObjectMap
 from Products.ZenRelations.RelationshipBase import RelationshipBase
 from Products.ZenRelations.ToManyContRelationship import ToManyContRelationship
 from Products.ZenUtils.Utils import unused
@@ -72,7 +73,7 @@ def setup_crochet():
 
 class FilteredLog(logging.Filter):
     # Context manager that filters/ignores log messages that contain a substring.
-    
+
     def __init__(self, loggers, filter_msgs):
         super(FilteredLog, self).__init__()
         self.loggers = loggers
@@ -81,6 +82,7 @@ class FilteredLog(logging.Filter):
     def __enter__(self):
         for logger in self.loggers:
             logging.getLogger(logger).addFilter(self)
+
     def __exit__(self, type, value, traceback):
         for logger in self.loggers:
             logging.getLogger(logger).removeFilter(self)
@@ -329,7 +331,6 @@ def create_model_data(dmd):
             process_class = re.sub(r'\d+$', '', binary)
             process.setOSProcessClass("Processes/OpenStack/osProcessClasses/%s" % process_class)
 
-
     # Cinder
     from ZenPacks.zenoss.OpenStackInfrastructure.Volume import Volume
     from ZenPacks.zenoss.OpenStackInfrastructure.VolSnapshot import VolSnapshot
@@ -343,3 +344,39 @@ def create_model_data(dmd):
         'phys_dc': phys_dc,
         'guest_dc': guest_dc
     }
+
+
+def is_iterable(obj):
+    """
+    Returns true of the supplied object is iterable, but not a string.
+    """
+
+    if isinstance(obj, basestring):
+        return False
+    try:
+        iter(obj)
+        return True
+    except TypeError:
+        return False
+
+
+def all_objmaps(iterable):
+    """
+    Loop through an iterable (list, etc) and through any nested iterables,
+    finding all objmaps and yielding them.  This includes objmaps nested in
+    relationshipmaps and/or other objmaps, lists of lists, etc.
+    """
+    for item in iterable:
+        if isinstance(item, ObjectMap):
+            yield item
+
+            # look for any attribute values in the objmap that contain
+            # nested objmaps.
+            for k, v in item.items():
+                if is_iterable(v):
+                    for r_item in all_objmaps(v):
+                        yield r_item
+
+        elif is_iterable(item):
+            for r_item in all_objmaps(item):
+                yield r_item
