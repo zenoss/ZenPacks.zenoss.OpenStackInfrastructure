@@ -22,7 +22,7 @@ from Products.ZenUtils.Utils import unused
 unused(Globals)
 
 from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.session import SessionManager
-from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.exceptions import *
+from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.exceptions import APIClientError
 from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.base import BaseClient, api
 
 from twisted.internet import reactor

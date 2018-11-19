@@ -25,6 +25,7 @@ import re
 from urlparse import urlparse
 
 from twisted.internet.defer import inlineCallbacks, returnValue
+from twisted.internet.error import ConnectionRefusedError
 
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
@@ -50,8 +51,8 @@ from apiclients.txapiclient import (
     NovaClient,
     NeutronClient,
     CinderClient,
-    NotFoundError
 )
+from apiclients.exceptions import APIClientError, NotFoundError
 
 # https://github.com/openstack/nova/blob/master/nova/compute/power_state.py
 POWER_STATE_MAP = {
@@ -84,8 +85,31 @@ def api_call(method, key, **kwargs):
 
     try:
         result = yield method(**kwargs)
+
     except NotFoundError as ex:
-        log.info("Method not found for '%s': %s", debug_string, ex)
+        log.error("Method not found for '%s': %s. "
+                  "Check the API configuration.", debug_string, ex)
+        returnValue([])
+
+    except ConnectionRefusedError as ex:
+        log.error("Connection refused for '%s': %s. "
+                  "Check the OpenStack service configuration.", debug_string, ex)
+        returnValue([])
+
+    except APIClientError as ex:
+        log.error("API client error for '%s': %s.", debug_string, ex)
+
+        if "401 Unauthorized" in ex.message:
+            log.error("Unauthorized: check OpenStack username and password.")
+
+        if "403 Forbidden" in ex.message:
+            log.warning("OpenStack user doesn't have access to this call. "
+                        "Partial Modeling will proceed regardless."
+                        )
+
+        if "503 Service Unavailable" in ex.message:
+            log.error("Service is unavailable. Check Openstack Services.")
+
         returnValue([])
 
     except Exception as ex:
@@ -95,10 +119,7 @@ def api_call(method, key, **kwargs):
 
         # * TODO: What is meant by "handle nicely" for 4x/5x?
 
-        # Some kind of warning about not being able to get that data.  We might
-        # want to pass in the warning text, so that we can give the user an indication of
-        # what won't work because this api call wasn't available.
-        log.info("API called failed for '%s': %s", debug_string, ex)
+        log.warning("API call failure for '%s': %s", debug_string, ex)
         returnValue([])
 
     else:
@@ -1473,15 +1494,15 @@ class OpenStackInfrastructure(PythonPlugin):
 
         results['zOpenStackNovaApiHosts'], host_errors = filter_FQDNs(device.zOpenStackNovaApiHosts)
         if host_errors:
-            log.warn('Invalid host in zOpenStackNovaApiHosts')
+            log.warning('Invalid host in zOpenStackNovaApiHosts')
 
         results['zOpenStackCinderApiHosts'], host_errors = filter_FQDNs(device.zOpenStackCinderApiHosts)
         if host_errors:
-            log.warn('Invalid host in zOpenStackCinderApiHosts')
+            log.warning('Invalid host in zOpenStackCinderApiHosts')
 
         results['zOpenStackExtraHosts'], host_errors = filter_FQDNs(device.zOpenStackExtraHosts)
         if host_errors:
-            log.warn('Invalid host in zOpenStackExtraHosts')
+            log.warning('Invalid host in zOpenStackExtraHosts')
 
         try:
             results['nova_url_host'] = urlparse(results['nova_url']).hostname
