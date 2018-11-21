@@ -1036,7 +1036,7 @@ classes:
         grid_display: false
       serverId:
         label: Server ID
-        grid_display: false
+        label_width: 200
       powerState:
         label: Power State
         label_width: 50
