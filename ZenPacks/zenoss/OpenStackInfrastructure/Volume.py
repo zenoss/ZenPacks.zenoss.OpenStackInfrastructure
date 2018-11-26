@@ -15,5 +15,5 @@ class Volume(schema.Volume):
     def host(self):
         hosts = self.device().hosts()
         for host in hosts:
-            if host.hostname == self.backend.split('@')[0]:
+            if self.backend and host.hostname == self.backend.split('@')[0]:
                 return host
