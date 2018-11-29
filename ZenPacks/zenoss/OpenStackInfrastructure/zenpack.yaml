@@ -2247,6 +2247,7 @@ event_classes:
   /OpenStack/Cinder:
     remove: true
   /OpenStack/Cinder/Volume:
+    remove: true    
     mappings:
       cinder.volume default mapping:
         remove: true
