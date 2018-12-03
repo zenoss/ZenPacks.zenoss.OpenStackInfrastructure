@@ -102,6 +102,7 @@ class TestModelProcess(BaseTestCase):
 
         # import ZenPacks.zenoss.OpenStackInfrastructure
         # zcml.load_config('configure.zcml', ZenPacks.zenoss.OpenStackInfrastructure)
+        self.data = self._loadTestData()
 
     @crochet.wait_for(timeout=30)
     def _preprocessHosts(self, modeler, results):
@@ -110,7 +111,8 @@ class TestModelProcess(BaseTestCase):
     def _loadTestData(self):
         with open(os.path.join(os.path.dirname(__file__),
                                'data',
-                               'modeldata.json')) as json_file:
+                               'model',
+                               'base.json')) as json_file:
             return json.load(json_file)
 
     def _processTestData(self, data):
@@ -122,7 +124,7 @@ class TestModelProcess(BaseTestCase):
         # Test situation where the neutron 'agents' call doesn't work on
         # the target environment.  (ZPS-1243)
 
-        data = self._loadTestData()
+        data = self.data.copy()
 
         # no neutron agents available on this target..
         data['agents'] = []
@@ -133,7 +135,7 @@ class TestModelProcess(BaseTestCase):
     def testAccessIPs(self):
         # the test data doesn't have any instances with these properties set-
         # just go ahead and add them, and make sure we model them.
-        data = self._loadTestData()
+        data = self.data.copy()
 
         data['servers'][0]['accessIPv4'] = "127.0.0.1"
         data['servers'][0]['accessIPv6'] = "::1"
@@ -145,7 +147,7 @@ class TestModelProcess(BaseTestCase):
                 self.assertIn("::1", objmap.publicIps)
 
     def testDefaultModel(self):
-        data = self._loadTestData()
+        data = self.data.copy()
         obj_map = {}
         type_count = Counter()
         for om in all_objmaps(self._processTestData(data)):
