@@ -185,7 +185,8 @@ class TestModel(BaseTestCase):
         modeler = OpenStackInfrastructureModeler()
         with open(os.path.join(os.path.dirname(__file__),
                                'data',
-                               'modeldata.json')) as json_file:
+                               'model',
+                               'base.json')) as json_file:
             results = json.load(json_file)
 
         self._preprocessHosts(modeler, results)

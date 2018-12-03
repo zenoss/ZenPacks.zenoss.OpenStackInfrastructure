@@ -644,16 +644,17 @@ class OpenStackInfrastructure(PythonPlugin):
                 log.info("  Adding zOpenStackExtraHosts=%s" % device.zOpenStackExtraHosts)
 
         log.debug("Modeling Hosts:")
+        hostmap = results.get('hostmap')
         hosts = []
         seen_hostids = set()
-        for host_id in self.hostmap.all_hostids():
+        for host_id in hostmap.all_hostids():
 
             if host_id in seen_hostids:
                 log.debug("  (disregarding duplicate host ID: %s)", host_id)
                 continue
             seen_hostids.add(host_id)
 
-            sources = set(self.hostmap.get_sources_for_hostid(host_id))
+            sources = set(hostmap.get_sources_for_hostid(host_id))
 
             # skip hosts which were only seen in the API urls
             for api_source in ['Nova API URL', 'Cinder API URL']:
@@ -664,13 +665,13 @@ class OpenStackInfrastructure(PythonPlugin):
                 continue
 
             try:
-                hostname = self.hostmap.get_hostname_for_hostid(host_id)
+                hostname = hostmap.get_hostname_for_hostid(host_id)
             except Exception:
                 log.error("Invalid hostname for host_id: '%s'", host_id)
                 log.error("Ensure that zOpenStackHost* properties are correct!")
                 continue
 
-            log.debug("  Host %s (%s) (sources=%s)", host_id, hostname, self.hostmap.get_sources_for_hostid(host_id))
+            log.debug("  Host %s (%s) (sources=%s)", host_id, hostname, hostmap.get_sources_for_hostid(host_id))
 
             hosts.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Host',
@@ -678,7 +679,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     id=host_id,
                     title=hostname,
                     hostname=hostname,
-                    host_ip=self.hostmap.get_ip_for_hostid(host_id),
+                    host_ip=hostmap.get_ip_for_hostid(host_id),
                     set_orgComponent=getHostOrgComponent(host_id, results),
                 )))
 
@@ -755,8 +756,9 @@ class OpenStackInfrastructure(PythonPlugin):
                 continue
 
             host_id = service['host']
+            hostmap = results.get('hostmap')
             try:
-                hostname = self.hostmap.get_hostname_for_hostid(host_id)
+                hostname = hostmap.get_hostname_for_hostid(host_id)
             except InvalidHostIdException:
                 log.error("An invalid Host ID: '%s' was provided.\n"
                           "\tPlease examine zOpenStackHostMapToId "
@@ -806,7 +808,7 @@ class OpenStackInfrastructure(PythonPlugin):
         # Append nova_api_hosts to services here.
         nova_api_hosts = results['process_nova_api_hosts']
         for host_id in sorted(nova_api_hosts):
-            hostname = self.hostmap.get_hostname_for_hostid(host_id)
+            hostname = hostmap.get_hostname_for_hostid(host_id)
             host_base_id = re.sub(r'^host-', '', host_id)
             title = '{0}@{1} ({2})'.format('nova-api', hostname, device.zOpenStackRegionName)
             nova_api_id = prepId('service-nova-api-{0}-{1}'.format(host_base_id, device.zOpenStackRegionName))
@@ -834,6 +836,7 @@ class OpenStackInfrastructure(PythonPlugin):
             host_id = service['host']
             zone_name, zone_id = getServiceZoneNameId(device.zOpenStackRegionName, service)
             binary_name = service.get('binary')
+            hostmap = results.get('hostmap')
 
             if host_id is None:
                 title = '{0} ({1})'.format(
@@ -844,7 +847,7 @@ class OpenStackInfrastructure(PythonPlugin):
 
             else:
                 try:
-                    hostname = self.hostmap.get_hostname_for_hostid(host_id)
+                    hostname = hostmap.get_hostname_for_hostid(host_id)
                 except InvalidHostIdException:
                     log.error("An invalid Host ID: '%s' was provided.\n"
                               "\tPlease examine zOpenStackHostMapToId "
@@ -852,7 +855,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     continue
                 except Exception:
                     log.warning("An unknown error for Host ID: '%s' occurred", host_id)
-                    # TODO: Shouldn't there be a 'continue' here as well?
+                    continue
 
                 host_base_id = re.sub(r'^host-', '', host_id)
                 title = '{0}@{1} ({2})'.format(binary_name,
@@ -883,7 +886,7 @@ class OpenStackInfrastructure(PythonPlugin):
         # Append cinder_api_hosts to services here.
         cinder_api_hosts = results['process_cinder_api_hosts']
         for host_id in cinder_api_hosts:
-            hostname = self.hostmap.get_hostname_for_hostid(host_id)
+            hostname = hostmap.get_hostname_for_hostid(host_id)
             host_base_id = re.sub(r'^host-', '', host_id)
             title = '{0}@{1} ({2})'.format('cinder-api', hostname, device.zOpenStackRegionName)
             cinder_api_id = prepId('service-cinder-api-{0}-{1}'.format(host_base_id, device.zOpenStackRegionName))
@@ -907,6 +910,8 @@ class OpenStackInfrastructure(PythonPlugin):
         Sample data::
 
         """
+        hostmap = results.get('hostmap')
+
         agents = []
         for agent in results['agents']:
             if not agent.get('id'):
@@ -942,7 +947,7 @@ class OpenStackInfrastructure(PythonPlugin):
             l3_agent_routers = ['router-{0}'.format(x)
                                 for x in agent['l3_agent_routers']]
             try:
-                hostname = self.hostmap.get_hostname_for_hostid(agent['host'])
+                hostname = hostmap.get_hostname_for_hostid(agent['host'])
             except InvalidHostIdException:
                 log.error("An invalid Host ID: '%s' was provided.\n"
                           "\tPlease examine zOpenStackHostMapToId and "
@@ -1526,7 +1531,7 @@ class OpenStackInfrastructure(PythonPlugin):
         # mapping at all.
 
         hostmap = HostMap()
-        self.hostmap = hostmap
+        results['hostmap'] = hostmap
 
         # load in previous mappings..
         if callable(device.get_host_mappings):
@@ -1759,11 +1764,12 @@ class OpenStackInfrastructure(PythonPlugin):
             for objmap in objmaps[i]:
                 componentsMap.append(objmap)
 
+        hostmap = results.get('hostmap')
         endpointObjMap = ObjectMap(
             modname='ZenPacks.zenoss.OpenStackInfrastructure.Endpoint',
             data=dict(
                 set_maintain_proxydevices=True,
-                set_host_mappings=self.hostmap.freeze_mappings()
+                set_host_mappings=hostmap.freeze_mappings()
             )
         )
 
