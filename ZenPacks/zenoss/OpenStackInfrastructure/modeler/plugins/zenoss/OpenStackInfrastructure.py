@@ -1531,7 +1531,6 @@ class OpenStackInfrastructure(PythonPlugin):
         # mapping at all.
 
         hostmap = HostMap()
-        results['hostmap'] = hostmap
 
         # load in previous mappings..
         if callable(device.get_host_mappings):
@@ -1599,8 +1598,16 @@ class OpenStackInfrastructure(PythonPlugin):
         # generate host IDs
         yield hostmap.perform_mapping()
 
-        # replace all references to hosts with their host IDs, so
-        # process() doesn't have to think about this stuff.
+        # store the entire hostmap object so that it is available in process()
+        results['hostmap'] = hostmap
+
+        # remember to build an ObjectMap to store these for next time..
+        results['host_mappings'] = hostmap.freeze_mappings()
+
+    def replace_hosts_with_ids(self, hostmap, results):
+        # replace all references to hosts in results with their host IDs,
+        # using the information in the hostmap object.
+
         for service in results['services']:
             if 'host' in service:
                 service['host'] = hostmap.get_hostid(service['host'])
@@ -1628,10 +1635,10 @@ class OpenStackInfrastructure(PythonPlugin):
         if results['cinder_url_host']:
             results['cinder_url_host'] = hostmap.get_hostid(results['cinder_url_host'])
 
-        # remember to build an ObjectMap to store these for next time..
-        results['host_mappings'] = hostmap.freeze_mappings()
-
     def process(self, device, results, unused):
+        # normalize all hostnames to host IDs, so that the rest of
+        # process() doesn't have to think about that.
+        self.replace_hosts_with_ids(results['hostmap'], results)
 
         tenants = self.map_tenants(device, results)
         regions = self.map_regions(device, results)
