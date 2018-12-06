@@ -552,6 +552,7 @@ class SharedModelTestLayer(ZenossTestCaseLayer):
         cls.device.index_object()
         notify(IndexingEvent(cls.device))
 
+        # ZEN-31147 workaround:
         from Products.Zuul.catalog.global_catalog import IIndexableWrapper
         from zope.component.interfaces import ComponentLookupError
         try:
