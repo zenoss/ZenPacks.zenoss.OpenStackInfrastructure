@@ -14,13 +14,11 @@
 ###########################################################################
 
 import os
-import json
+
 import logging
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('zen.OpenStackInfrastructure')
 
-from mock import MagicMock
-import re
 
 import Globals
 
@@ -28,55 +26,27 @@ from Products.DataCollector.ApplyDataMap import ApplyDataMap
 from Products.ZenUtils.Utils import unused
 
 from ZenPacks.zenoss.OpenStackInfrastructure.tests.utils import SharedModelTestLayer, SharedModelTestCase
-from ZenPacks.zenoss.OpenStackInfrastructure.modeler.plugins.zenoss.OpenStackInfrastructure \
-    import OpenStackInfrastructure as OpenStackInfrastructureModeler
 
 unused(Globals)
 
 
-class TestModelPLayer(SharedModelTestLayer):
+class TestModelOSIPAdminLayer(SharedModelTestLayer):
     pass
 
 
-class TestModelP(SharedModelTestCase):
+class TestModelOSIPAdmin(SharedModelTestCase):
 
     disableLogging = False
-    layer = TestModelPLayer
+    layer = TestModelOSIPAdminLayer
 
     def setUp(self):
-        super(TestModelP, self).setUp()
+        super(TestModelOSIPAdmin, self).setUp()
 
         self.applyDataMap = ApplyDataMap()._applyDataMap
 
         if not self.device:
-            self.createDevice('testmodelP')
-            self._loadZenossData()
-
-    def _loadZenossData(self):
-        modeler = OpenStackInfrastructureModeler()
-        with open(os.path.join(os.path.dirname(__file__),
-                               'data',
-                               'model',
-                               'osi_p_admin.json')) as json_file:
-            results = json.load(json_file)
-
-        # Mock out results['hostmap'] enough for the process method.  We could
-        # also actually run it for real, as is done in TestModelProcess, by
-        # faking out the dns lookups based on results['hostmap_dns'], but
-        # for the moment, this is simpler.
-        all_hostids = [str(x) for x in set(results['hostmap_mappings'].values())]
-        results['hostmap'] = MagicMock()
-        results['hostmap'].all_hostids.return_value = all_hostids
-        results['hostmap'].get_hostid = lambda x: str("host-" + x)
-        results['hostmap'].get_hostname_for_hostid = lambda x: re.sub(r'^host-', '', x)
-        results['hostmap'].get_ip_for_hostid = lambda x: results['hostmap_dns'].get(re.sub(r'^host-', '', x))
-        results['hostmap'].get_sources_for_hostid.return_value = ["mock hostmap"]
-
-        # (compatibility with old versions of OpenStackInfrastructure modeler)
-        modeler.hostmap = results['hostmap']
-
-        for data_map in modeler.process(self.device, results, log):
-            self.applyDataMap(self.device, data_map)
+            json_filename = os.path.dirname(__file__) + "/data/model/osi_p_admin.json"
+            self.createDevice('testmodelOSIPAdmin', json_filename=json_filename)
 
         # from ZenPacks.zenoss.OpenStackInfrastructure.tests.utils import device_to_tests
         # print device_to_tests(self.device)
@@ -849,7 +819,7 @@ class TestModelP(SharedModelTestCase):
 def test_suite():
     from unittest import TestSuite, makeSuite
     suite = TestSuite()
-    suite.addTest(makeSuite(TestModelP))
+    suite.addTest(makeSuite(TestModelOSIPAdmin))
     return suite
 
 
