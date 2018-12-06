@@ -448,7 +448,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
         self.assertIsNotNone(component.networks())
         self.assertEquals(sorted([x.id for x in component.networks()]), ['network-a7d05a2d-2cab-4b4b-8cd1-ff5089860e27'])
         self.assertIsNotNone(component.orgComponent())
-        self.assertEquals(component.orgComponent().id, 'zone-internal')
+        self.assertEquals(component.orgComponent().id, 'zone-nova')
 
         component = self.device.getObjByPath('components/agent-7aae7414-4161-4ee1-a7dd-575338f072d1')
         self.assertEquals(component.title, 'L3 agent@nfvi-micropod-node-2')
@@ -463,7 +463,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
         self.assertIsNotNone(component.networks())
         self.assertEquals(sorted([x.id for x in component.networks()]), ['network-a7d05a2d-2cab-4b4b-8cd1-ff5089860e27'])
         self.assertIsNotNone(component.orgComponent())
-        self.assertEquals(component.orgComponent().id, 'zone-internal')
+        self.assertEquals(component.orgComponent().id, 'zone-nova')
 
         component = self.device.getObjByPath('components/agent-7d3c0f7e-f38b-4a47-8f1b-711461f26101')
         self.assertEquals(component.title, 'L3 agent@nfvi-micropod-node-3')
@@ -478,7 +478,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
         self.assertIsNotNone(component.networks())
         self.assertEquals(sorted([x.id for x in component.networks()]), ['network-a7d05a2d-2cab-4b4b-8cd1-ff5089860e27'])
         self.assertIsNotNone(component.orgComponent())
-        self.assertEquals(component.orgComponent().id, 'zone-internal')
+        self.assertEquals(component.orgComponent().id, 'zone-nova')
 
         component = self.device.getObjByPath('components/agent-86d17ce3-a8f8-4174-9389-d23118afbd42')
         self.assertEquals(component.title, 'Metadata agent@nfvi-micropod-node-3')
@@ -508,7 +508,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
         self.assertIsNotNone(component.networks())
         self.assertEquals(sorted([x.id for x in component.networks()]), ['network-18ed9913-25ba-453a-a798-db1b1d0d2db8', 'network-8d14cd44-145c-4e39-ad55-d44afe95d3c8', 'network-a7d05a2d-2cab-4b4b-8cd1-ff5089860e27'])
         self.assertIsNotNone(component.orgComponent())
-        self.assertEquals(component.orgComponent().id, 'zone-internal')
+        self.assertEquals(component.orgComponent().id, 'zone-nova')
 
         component = self.device.getObjByPath('components/agent-d7ad6926-236c-4cbd-ae14-8f1cfc18de77')
         self.assertEquals(component.title, 'Metadata agent@nfvi-micropod-node-2')
@@ -538,7 +538,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
         self.assertIsNotNone(component.networks())
         self.assertEquals(sorted([x.id for x in component.networks()]), ['network-18ed9913-25ba-453a-a798-db1b1d0d2db8', 'network-1fe866ac-45f4-4549-a2fd-0fc468c00b1d'])
         self.assertIsNotNone(component.orgComponent())
-        self.assertEquals(component.orgComponent().id, 'zone-internal')
+        self.assertEquals(component.orgComponent().id, 'zone-nova')
 
         component = self.device.getObjByPath('components/agent-f06fc5e8-a7ed-4c83-8018-05fa250c998a')
         self.assertEquals(component.title, 'DHCP agent@nfvi-micropod-node-2')
@@ -553,7 +553,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
         self.assertIsNotNone(component.networks())
         self.assertEquals(sorted([x.id for x in component.networks()]), ['network-1fe866ac-45f4-4549-a2fd-0fc468c00b1d', 'network-8d14cd44-145c-4e39-ad55-d44afe95d3c8', 'network-a7d05a2d-2cab-4b4b-8cd1-ff5089860e27'])
         self.assertIsNotNone(component.orgComponent())
-        self.assertEquals(component.orgComponent().id, 'zone-internal')
+        self.assertEquals(component.orgComponent().id, 'zone-nova')
 
     def test_NovaService(self):
         component = self.device.getObjByPath('components/service-nova-conductor-nfvi-micropod-node-3-internal')
@@ -1124,7 +1124,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
         self.assertEquals(component.avzone, 'nova')
         self.assertEquals(component.bootable, 'FALSE')
         self.assertEquals(component.created_at, '2018-11-29 17:53:44.000000')
-        self.assertEquals(component.backend, None)
+        self.assertEquals(component.backend, 'ceph@ceph#ceph')
         self.assertEquals(component.resourceId, None)
         self.assertEquals(component.size, 2)
         self.assertEquals(component.sourceVolumeId, None)

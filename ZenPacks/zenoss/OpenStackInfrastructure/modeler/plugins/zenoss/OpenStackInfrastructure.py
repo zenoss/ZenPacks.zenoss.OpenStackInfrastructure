@@ -136,14 +136,20 @@ def getHostOrgComponent(host_id, results):
 
     Iterate through Nova and Cinder services to get zone related to host_id
     Note: There are some services that can be related to multiple zones so
-          the result is not deterministic.
-    """
-    for service in results['services'] + results['cinder_services']:
-        zone_name = service.get('zone')
-        if not zone_name:
-            continue
+          the result somewhat deterministic, based on the order that they
+          were processed in older versions of the modeler.  Last nova
+          service wins out, and if no nova service matches, then the first
+          cinder service that matches, and failing that, the region.
 
-        if service['host'] == host_id:
+    """
+    for service in reversed(results['services']):
+        zone_name = service.get('zone')
+        if zone_name and service['host'] == host_id:
+            return prepId("zone-{0}".format(service.get('zone')))
+
+    for service in results['cinder_services']:
+        zone_name = service.get('zone')
+        if zone_name and service['host'] == host_id:
             return prepId("zone-{0}".format(service.get('zone')))
 
     return results.get('process_region_id')
@@ -1203,7 +1209,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 avzone=volume.get('availability_zone', ''),
                 created_at=volume.get('created_at', '').replace('T', ' '),
                 sourceVolumeId=volume.get('source_volid', ''),
-                host=volume.get('os-vol-host-attr:host', ''),
+                backend=volume.get('os-vol-host-attr:host', ''),
                 size=volume.get('size', 0),
                 bootable=volume.get('bootable', 'FALSE').upper(),
                 status=volume.get('status', 'UNKNOWN').upper(),

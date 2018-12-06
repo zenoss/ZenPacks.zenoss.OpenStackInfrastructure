@@ -801,7 +801,7 @@ class TestModelOSIPAdmin(SharedModelTestCase):
         self.assertEquals(component.avzone, 'nova')
         self.assertEquals(component.bootable, 'FALSE')
         self.assertEquals(component.created_at, '2018-11-12 16:14:15.000000')
-        self.assertEquals(component.host, None)
+        self.assertEquals(component.backend, None)
         self.assertEquals(component.resourceId, None)
         self.assertEquals(component.size, 100)
         self.assertEquals(component.sourceVolumeId, None)
