@@ -398,7 +398,7 @@ class TestModelProcess(BaseTestCase):
             'hostname': 'liberty.zenoss.local',
             'id': 'host-liberty.zenoss.local',
             'modname': 'ZenPacks.zenoss.OpenStackInfrastructure.Host',
-            'set_orgComponent': 'zone-internal',
+            'set_orgComponent': 'zone-nova',
             'title': 'liberty.zenoss.local'})
 
         self.assertEquals(obj_map['host-overcloud-controller-1.localdomain'], {
