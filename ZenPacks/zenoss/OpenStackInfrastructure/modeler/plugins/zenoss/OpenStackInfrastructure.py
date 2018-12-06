@@ -138,7 +138,7 @@ def getHostOrgComponent(host_id, results):
     Note: There are some services that can be related to multiple zones so
           the result is not deterministic.
     """
-    for service in  results['cinder_services'] + results['services']:
+    for service in results['services'] + results['cinder_services']:
         zone_name = service.get('zone')
         if not zone_name:
             continue

@@ -1124,7 +1124,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
         self.assertEquals(component.avzone, 'nova')
         self.assertEquals(component.bootable, 'FALSE')
         self.assertEquals(component.created_at, '2018-11-29 17:53:44.000000')
-        self.assertEquals(component.host, None)
+        self.assertEquals(component.backend, None)
         self.assertEquals(component.resourceId, None)
         self.assertEquals(component.size, 2)
         self.assertEquals(component.sourceVolumeId, None)
