@@ -124,9 +124,13 @@ class HostMap(object):
         """
         Notify the host mapper about a host reference.
         """
-
         hostref = self.normalize_hostref(hostref)
         self.mapping_complete = False
+
+        # a 'None' hostref is useless, just ignore it and return.
+        if hostref is None:
+            log.debug("Ignoring null hostref (source=%s)", source)
+            return
 
         if hostref in self.frozen_mapping:
             log.debug("Tracking hostref %s (frozen to ID %s) (source=%s)", hostref, self.frozen_mapping[hostref], source)
