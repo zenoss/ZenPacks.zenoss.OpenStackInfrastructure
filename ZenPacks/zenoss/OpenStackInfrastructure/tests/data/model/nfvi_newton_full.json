@@ -679,8 +679,8 @@
         "nfvi-micropod-new-compute-1": "host-linux-878d52df-664a-494f-b4c1-15682d0e6088", 
         "nfvi-micropod-new-compute-2": "host-linux-af87f135-2026-4f09-a693-bb1ab0107221"
     }, 
-    "quotas": {
-        "a11e16faa31e4b698be8bc3af0a7ae57": {
+    "quotas": [
+        {
             "per_volume_gigabytes": -1, 
             "gigabytes": 1000, 
             "backup_gigabytes": 1000, 
@@ -688,8 +688,8 @@
             "volumes": 10, 
             "backups": 10, 
             "id": "a11e16faa31e4b698be8bc3af0a7ae57"
-        }, 
-        "b2b1a48714a641fcaa82c4d48aa444c9": {
+        },
+        {
             "per_volume_gigabytes": -1, 
             "gigabytes": 1000, 
             "backup_gigabytes": 1000, 
@@ -698,7 +698,7 @@
             "backups": 10, 
             "id": "b2b1a48714a641fcaa82c4d48aa444c9"
         }
-    }, 
+    ], 
     "cinder_services": [
         {
             "status": "enabled", 
