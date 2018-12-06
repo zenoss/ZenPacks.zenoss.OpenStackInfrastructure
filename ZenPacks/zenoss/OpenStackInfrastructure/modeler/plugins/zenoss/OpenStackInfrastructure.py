@@ -1554,7 +1554,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 # with the ceph backend, it seems like the cinder-volume
                 # hostname may not be relevant.  (At least on the test servers,
                 # I see 'ceph@ceph' here, which is meaningless)  (ZPS-3751)
-                if service['binary'] == 'cinder-volume' and service['host'].endswith('@ceph'):
+                if service['binary'] == 'cinder-volume' and service['host'] is not None and service['host'].endswith('@ceph'):
                     log.debug("Ignoring host '%s' from cinder-volume service", service['host'])
                     continue
 
