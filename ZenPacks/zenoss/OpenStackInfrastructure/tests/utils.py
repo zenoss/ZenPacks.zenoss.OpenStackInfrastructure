@@ -14,6 +14,8 @@ import Globals
 
 import functools
 import importlib
+import json
+from mock import MagicMock
 import re
 import unittest
 import zope.component
@@ -566,9 +568,13 @@ class SharedModelTestCase(unittest.TestCase):
     layer = None
     device = None
 
-    def createDevice(self, devname):
+    def createDevice(self, devname, json_filename=None):
         self.layer.createDevice(devname)
         self.device = self.layer.device
+
+        if json_filename:
+            self.applyJSONData(json_filename)
+
         return self.device
 
     def setUp(self):
@@ -580,3 +586,33 @@ class SharedModelTestCase(unittest.TestCase):
         # Pull down the shared environment from the layer
         self.dmd = self.layer.tc.dmd
         self.device = self.layer.device
+
+    def applyJSONData(self, json_filename):
+        from ZenPacks.zenoss.OpenStackInfrastructure.modeler.plugins.zenoss.OpenStackInfrastructure \
+            import OpenStackInfrastructure as OpenStackInfrastructureModeler
+
+        modeler = OpenStackInfrastructureModeler()
+        with open(json_filename) as json_file:
+            results = json.load(json_file)
+
+        self._preprocessHosts(modeler, results)
+
+        for data_map in modeler.process(self.device, results, LOG):
+            self.applyDataMap(self.device, data_map)
+
+    def _preprocessHosts(self, modeler, results):
+        # Mock out results['hostmap'] enough for the process method.  We could
+        # also actually run it for real, as is done in TestModelNFVINewtonFull,
+        # but this mock version is simpler and doesn't require involving
+        # crochet / twisted.   It's not sufficient for all data sets though.
+        all_hostids = [str(x) for x in set(results['hostmap_mappings'].values())]
+        results['hostmap'] = MagicMock()
+        results['hostmap'].all_hostids.return_value = all_hostids
+        results['hostmap'].get_hostid = lambda x: str("host-%s" % x)
+        results['hostmap'].get_hostname_for_hostid = lambda x: re.sub(r'^host-', '', x)
+        results['hostmap'].get_ip_for_hostid = lambda x: results['hostmap_dns'].get(re.sub(r'^host-', '', x))
+        results['hostmap'].get_sources_for_hostid.return_value = ["mock hostmap"]
+
+        # (compatibility with old versions of OpenStackInfrastructure modeler)
+        modeler.hostmap = results['hostmap']
+
