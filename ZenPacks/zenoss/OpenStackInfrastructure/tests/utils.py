@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2014, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2014-2018, all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -14,11 +14,27 @@ import Globals
 
 import functools
 import importlib
+import json
+from mock import MagicMock
 import re
+import unittest
+import zope.component
+from zope.event import notify
+from zope.traversing.adapters import DefaultTraversable
 
+from Products.DataCollector.plugins.DataMaps import ObjectMap
+from Products.Five import zcml
+from Products.ZenModel.ManagedEntity import ManagedEntity
 from Products.ZenRelations.RelationshipBase import RelationshipBase
 from Products.ZenRelations.ToManyContRelationship import ToManyContRelationship
+from Products.ZenTestCase.BaseTestCase import ZenossTestCaseLayer
+from Products.ZenUtils.IpUtil import ipToDecimal, decimalIpToStr
 from Products.ZenUtils.Utils import unused
+from Products.Zuul.catalog.events import IndexingEvent
+
+from ZenPacks.zenoss.ZenPackLib import zenpacklib
+# Required before zenpacklib.TestCase can be used.
+zenpacklib.enableTesting()
 
 unused(Globals)
 
@@ -72,7 +88,7 @@ def setup_crochet():
 
 class FilteredLog(logging.Filter):
     # Context manager that filters/ignores log messages that contain a substring.
-    
+
     def __init__(self, loggers, filter_msgs):
         super(FilteredLog, self).__init__()
         self.loggers = loggers
@@ -81,6 +97,7 @@ class FilteredLog(logging.Filter):
     def __enter__(self):
         for logger in self.loggers:
             logging.getLogger(logger).addFilter(self)
+
     def __exit__(self, type, value, traceback):
         for logger in self.loggers:
             logging.getLogger(logger).removeFilter(self)
@@ -329,7 +346,6 @@ def create_model_data(dmd):
             process_class = re.sub(r'\d+$', '', binary)
             process.setOSProcessClass("Processes/OpenStack/osProcessClasses/%s" % process_class)
 
-
     # Cinder
     from ZenPacks.zenoss.OpenStackInfrastructure.Volume import Volume
     from ZenPacks.zenoss.OpenStackInfrastructure.VolSnapshot import VolSnapshot
@@ -343,3 +359,260 @@ def create_model_data(dmd):
         'phys_dc': phys_dc,
         'guest_dc': guest_dc
     }
+
+
+def is_iterable(obj):
+    """
+    Returns true of the supplied object is iterable, but not a string.
+    """
+
+    if isinstance(obj, basestring):
+        return False
+    try:
+        iter(obj)
+        return True
+    except TypeError:
+        return False
+
+
+def all_objmaps(iterable):
+    """
+    Loop through an iterable (list, etc) and through any nested iterables,
+    finding all objmaps and yielding them.  This includes objmaps nested in
+    relationshipmaps and/or other objmaps, lists of lists, etc.
+    """
+    for item in iterable:
+        if isinstance(item, ObjectMap):
+            yield item
+
+            # look for any attribute values in the objmap that contain
+            # nested objmaps.
+            for k, v in item.items():
+                if is_iterable(v):
+                    for r_item in all_objmaps(v):
+                        yield r_item
+
+        elif is_iterable(item):
+            for r_item in all_objmaps(item):
+                yield r_item
+
+
+current_ip_address = [ipToDecimal("10.0.0.12")]
+
+
+def next_ip_address():
+    current_ip_address[0] += 1
+    return decimalIpToStr(current_ip_address[0])
+
+
+def component_to_tests(component, one_sided=True):
+    device_path = '/'.join(component.device().getPrimaryPath())
+    component_path = '/'.join(component.getPrimaryPath())
+    component_path = re.sub('^' + device_path + '/', '', component_path)
+
+    me = ManagedEntity('')
+    propnames = sorted(set(component.propertyIds()) -
+                       set(me.propertyIds()))
+    relnames = sorted(set(component.getRelationshipNames()) -
+                      set(me.getRelationshipNames()) -
+                      set(('depedencies', 'dependents', 'maintenanceWindows')))
+
+    if one_sided:
+        # remove relationships that are not alphabetically the first
+        # one between themselves and the remote end of of the relationship.
+        # This assumes that we'll be building tests for the other side of the
+        # relationship and avoids duplicate tests.
+        new_relnames = []
+        for relname in relnames:
+            rel = component._getOb(relname)
+            if rel.id < rel.remoteName():
+                new_relnames.append(relname)
+        relnames = new_relnames
+
+    out = []
+    out.append("        component = self.device.getObjByPath(%r)" % component_path)
+    for propname in ['title'] + propnames:
+        out.append("        self.assertEquals(component.%s, %r)" % (propname, getattr(component, propname)))
+
+    for relname in relnames:
+        rel = getattr(component, relname)
+        objs = rel()
+        if objs is None:
+            out.append("        self.assertIsNone(component.%s())" % relname)
+        elif isinstance(objs, list):
+            out.append("        self.assertIsNotNone(component.%s())" % relname)
+            objids = sorted([x.id for x in objs])
+            out.append("        self.assertEquals(sorted([x.id for x in component.%s()]), %r)" % (relname, objids))
+        else:
+            out.append("        self.assertIsNotNone(component.%s())" % relname)
+            out.append("        self.assertEquals(component.%s().id, %r)" % (relname, objs.id))
+
+    return "\n".join(out)
+
+
+def device_to_tests(device):
+    tests = {}
+    out = []
+
+    for component in device.getDeviceComponents():
+        component_type = component.__class__.__name__
+        tests.setdefault(component_type, [])
+        tests[component_type].append(component_to_tests(component))
+
+    for component_type in sorted(tests.keys()):
+        out.append("")
+        out.append("    def test_%s(self):" % component_type)
+        for test in tests[component_type]:
+            out.append(test)
+            out.append("")
+
+    return "\n".join(out)
+
+
+class SharedModelTestLayer(ZenossTestCaseLayer):
+    tc = None
+    device = None
+
+    # Note: This will only get run *once* across all layers.  If you want something to
+    # be invoked for each layer, put it in ModelTestCaseLayer.setUp() instead.
+    @classmethod
+    def setUp(cls):
+        zope.component.testing.setUp(cls)
+        zope.component.provideAdapter(DefaultTraversable, (None,))
+        import Products.ZenTestCase
+        zcml.load_config('testing-noevent.zcml', Products.ZenTestCase)
+        import Products.ZenTestCase
+        zcml.load_config('testing-noevent.zcml', Products.ZenTestCase)
+        import ZenPacks.zenoss.OpenStackInfrastructure
+        zcml.load_config('configure.zcml', ZenPacks.zenoss.OpenStackInfrastructure)
+
+        # Silly trickery here.
+        # We create a single TestCase, and share the environment that it creates
+        # across all our ModelTestCases (which we have inheriting from unittest.TestCase
+        # instead)
+        class DummyTestCase(zenpacklib.TestCase):
+            disableLogging = False
+            maxDiff = None
+            zenpack_module_name = 'ZenPacks.zenoss.OpenStackInfrastructure'
+
+            def test_donothing(self):
+                pass
+        cls.tc = DummyTestCase("test_donothing")
+        cls.tc.setUp()
+        cls.tc.afterSetUp()
+        cls.tc.dmd.REQUEST = None
+
+        # Workaround for IMP-389:
+        # When Impact 5.2.1-5.2.3 (at least) are installed, setProdState
+        # is patched to re-index the object in the global catalog specifically
+        # on the productionState column, but at least on older verions of RM,
+        # the sandboxed version of global_catalog does not index that column,
+        # which causes setProdState to fail.  Add the index for now, to
+        # work around this.
+        if (hasattr(cls.tc.dmd.global_catalog, 'indexes') and
+                'productionState' not in cls.tc.dmd.global_catalog.indexes()):
+            from Products.ZenUtils.Search import makeCaseSensitiveFieldIndex
+            cls.tc.dmd.global_catalog.addIndex('productionState', makeCaseSensitiveFieldIndex('productionState'))
+            cls.tc.dmd.global_catalog.addColumn('productionState')
+
+        dc = cls.tc.dmd.Devices.createOrganizer('/Devices/OpenStack/Infrastructure')
+
+        dc.setZenProperty('zPythonClass', 'ZenPacks.zenoss.OpenStackInfrastructure.Endpoint')
+        dc.setZenProperty('zOpenStackHostDeviceClass', '/Server/SSH/Linux/NovaHost')
+        dc.setZenProperty('zOpenStackRegionName', 'RegionOne')
+        dc.setZenProperty('zOpenStackAuthUrl', 'http://1.2.3.4:5000/v2.0')
+        dc.setZenProperty('zOpenStackNovaApiHosts', [])
+        dc.setZenProperty('zOpenStackExtraHosts', [])
+        dc.setZenProperty('zOpenStackHostMapToId', [])
+        dc.setZenProperty('zOpenStackHostMapSame', [])
+        dc.setZenProperty('zOpenStackHostLocalDomain', '')
+        dc.setZenProperty('zOpenStackExtraApiEndpoints', [])
+
+        # Create catalog
+        try:
+            from Products.ZenTestCase.BaseTestCase import init_model_catalog_for_tests
+            init_model_catalog_for_tests()
+        except ImportError:
+            pass
+
+    @classmethod
+    def tearDown(cls):
+        if cls.device:
+            cls.device.deleteDevice()
+
+    @classmethod
+    def createDevice(cls, devname):
+        # Due to ZEN-29804 we cannot rely on `findDevice()` results as it
+        # uses catalog, which can be purged between tests.
+        device = cls.device or cls.tc.dmd.Devices.findDevice(devname)
+        if device:
+            device.deleteDevice()
+
+        dc = cls.tc.dmd.Devices.createOrganizer('/Devices/OpenStack/Infrastructure')
+        cls.device = dc.createInstance(devname)
+        cls.device.setPerformanceMonitor('localhost')
+        cls.device.index_object()
+        notify(IndexingEvent(cls.device))
+
+        # ZEN-31147 workaround:
+        from Products.Zuul.catalog.global_catalog import IIndexableWrapper
+        from zope.component.interfaces import ComponentLookupError
+        try:
+            IIndexableWrapper(cls.device).searchIcon()
+        except ComponentLookupError:
+            import Products.ZenUtils.virtual_root
+            Products.ZenUtils.virtual_root.register_cse_virtual_root()
+
+
+class SharedModelTestCase(unittest.TestCase):
+    layer = None
+    device = None
+
+    def createDevice(self, devname, json_filename=None):
+        self.layer.createDevice(devname)
+        self.device = self.layer.device
+
+        if json_filename:
+            self.applyJSONData(json_filename)
+
+        return self.device
+
+    def setUp(self):
+        super(SharedModelTestCase, self).setUp()
+
+        import ZenPacks.zenoss.OpenStackInfrastructure
+        zcml.load_config('configure.zcml', ZenPacks.zenoss.OpenStackInfrastructure)
+
+        # Pull down the shared environment from the layer
+        self.dmd = self.layer.tc.dmd
+        self.device = self.layer.device
+
+    def applyJSONData(self, json_filename):
+        from ZenPacks.zenoss.OpenStackInfrastructure.modeler.plugins.zenoss.OpenStackInfrastructure \
+            import OpenStackInfrastructure as OpenStackInfrastructureModeler
+
+        modeler = OpenStackInfrastructureModeler()
+        with open(json_filename) as json_file:
+            results = json.load(json_file)
+
+        self._preprocessHosts(modeler, results)
+
+        for data_map in modeler.process(self.device, results, LOG):
+            self.applyDataMap(self.device, data_map)
+
+    def _preprocessHosts(self, modeler, results):
+        # Mock out results['hostmap'] enough for the process method.  We could
+        # also actually run it for real, as is done in TestModelNFVINewtonFull,
+        # but this mock version is simpler and doesn't require involving
+        # crochet / twisted.   It's not sufficient for all data sets though.
+        all_hostids = [str(x) for x in set(results['hostmap_mappings'].values())]
+        results['hostmap'] = MagicMock()
+        results['hostmap'].all_hostids.return_value = all_hostids
+        results['hostmap'].get_hostid = lambda x: str("host-%s" % x)
+        results['hostmap'].get_hostname_for_hostid = lambda x: re.sub(r'^host-', '', x)
+        results['hostmap'].get_ip_for_hostid = lambda x: results['hostmap_dns'].get(re.sub(r'^host-', '', x))
+        results['hostmap'].get_sources_for_hostid.return_value = ["mock hostmap"]
+
+        # (compatibility with old versions of OpenStackInfrastructure modeler)
+        modeler.hostmap = results['hostmap']
+

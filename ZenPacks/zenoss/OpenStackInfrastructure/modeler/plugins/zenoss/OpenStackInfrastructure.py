@@ -1,4 +1,4 @@
-###########################################################################
+##########################################################################
 #
 # This program is part of Zenoss Core, an open source monitoring platform.
 # Copyright (C) 2014, Zenoss Inc.
@@ -16,30 +16,31 @@
 import logging
 log = logging.getLogger('zen.OpenStackInfrastructure')
 
+from collections import defaultdict
+import hashlib
+import itertools
 import json
 import os
 import re
-import hashlib
-import itertools
 from urlparse import urlparse
-from collections import defaultdict
 
 from twisted.internet.defer import inlineCallbacks, returnValue
+from twisted.internet.error import ConnectionRefusedError
 
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
-from Products.ZenUtils.Utils import prepId
 from Products.ZenUtils.Time import isoToTimestamp, LocalDateTime
+from Products.ZenUtils.Utils import prepId
 
 from ZenPacks.zenoss.OpenStackInfrastructure.hostmap import HostMap, InvalidHostIdException
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import (
     add_local_lib_path,
-    zenpack_path,
-    get_subnets_from_fixedips,
-    get_port_instance,
+    filter_FQDNs,
     getNetSubnetsGws_from_GwInfo,
     get_port_fixedips,
-    filter_FQDNs,
+    get_port_instance,
+    get_subnets_from_fixedips,
+    zenpack_path,
 )
 
 add_local_lib_path()
@@ -50,8 +51,8 @@ from apiclients.txapiclient import (
     NovaClient,
     NeutronClient,
     CinderClient,
-    NotFoundError
 )
+from apiclients.exceptions import APIClientError, NotFoundError
 
 # https://github.com/openstack/nova/blob/master/nova/compute/power_state.py
 POWER_STATE_MAP = {
@@ -62,6 +63,112 @@ POWER_STATE_MAP = {
     6: 'crashed',
     7: 'suspended',
 }
+
+
+@inlineCallbacks
+def api_call(method, key, **kwargs):
+    """
+    A smart API calling method, which handles possible errors.
+
+    API gets called like this:
+
+        results['cinder_url'] = yield api_call(cinder.get_url, None)
+        results['tenants'] = yield api_call(keystone.tenants, 'tenants')
+        results['flavors'] = yield api_call(nova.flavors, 'flavors', is_public=True)
+
+    """
+    method_class = '{}'.format(method.__self__.__class__.__name__)
+    debug_string = "class '{}', key '{}', kwargs '{}'".format(method_class,
+                                                              key,
+                                                              str(kwargs))
+    log.debug("api_call: %s", debug_string)
+
+    try:
+        result = yield method(**kwargs)
+
+    except NotFoundError as ex:
+        log.error("Method not found for '%s': %s. "
+                  "Check the API configuration.", debug_string, ex)
+        returnValue([])
+
+    except ConnectionRefusedError as ex:
+        log.error("Connection refused for '%s': %s. "
+                  "Check the OpenStack service configuration.", debug_string, ex)
+        returnValue([])
+
+    except APIClientError as ex:
+        log.error("API client error for '%s': %s.", debug_string, ex)
+
+        if "401 Unauthorized" in ex.message:
+            log.error("Unauthorized: check OpenStack username and password.")
+
+        if "403 Forbidden" in ex.message:
+            log.warning("OpenStack user doesn't have access to this call. "
+                        "Partial Modeling will proceed regardless."
+                        )
+
+        if "503 Service Unavailable" in ex.message:
+            log.error("Service is unavailable. Check Openstack Services.")
+
+        returnValue([])
+
+    except Exception as ex:
+        # Probably mainly 4xx/5xx exceptions we want to handle nicely.
+        # Anything else we could allow to fall through, as it's probably
+        # not an API error, but something broken on our side (DNS error, etc)
+
+        # * TODO: What is meant by "handle nicely" for 4x/5x?
+
+        log.warning("API call failure for '%s': %s", debug_string, ex)
+        returnValue([])
+
+    else:
+        if key:
+            returnValue(result.get(key, []))
+            log.debug('%s: %s\n', debug_string, str(result[key]))
+        else:
+            returnValue(result)
+
+
+def getHostOrgComponent(host_id, results):
+    """
+    Get zone-id related to host.
+
+    Iterate through Nova and Cinder services to get zone related to host_id
+    Note: There are some services that can be related to multiple zones so
+          the result somewhat deterministic, based on the order that they
+          were processed in older versions of the modeler.  Last nova
+          service wins out, and if no nova service matches, then the first
+          cinder service that matches, and failing that, the region.
+
+    """
+    for service in reversed(results['services']):
+        zone_name = service.get('zone')
+        if zone_name and service['host'] == host_id:
+            return prepId("zone-{0}".format(service.get('zone')))
+
+    for service in results['cinder_services']:
+        zone_name = service.get('zone')
+        if zone_name and service['host'] == host_id:
+            return prepId("zone-{0}".format(service.get('zone')))
+
+    return results.get('process_region_id')
+
+
+def getServiceZoneNameId(region_name, service):
+    """Get zone from service.
+
+       @Returns a tuple: (zone_name, zone_id)
+       Services should have a zone name but in case missing, set to region
+    """
+    zone_name = service.get('zone')
+    if not zone_name:
+        zone_name = region_name
+        zone_id = prepId("region-{0}".format(zone_name))
+    else:
+        zone_id = prepId("zone-{0}".format(zone_name))
+
+    return zone_name, zone_id
 
 
 class OpenStackInfrastructure(PythonPlugin):
@@ -80,328 +187,29 @@ class OpenStackInfrastructure(PythonPlugin):
         'zOpenStackExtraApiEndpoints',
     )
 
-    @inlineCallbacks
-    def collect(self, device, unused):
-
-        if not device.zCommandUsername or not device.zCommandPassword:
-            log.error("Password/Username should be set to proper values. Check your Openstack credentials.")
-            returnValue({})
-
-        if not device.zOpenStackAuthUrl or not device.zOpenStackProjectId or not device.zOpenStackRegionName:
-            log.error("Openstack credentials should be set to proper values. Check your OpenStackAuthUrl, OpenStackProjectId and OpenStackRegionName")
-            returnValue({})
-
-        sm = SessionManager(
-            device.zCommandUsername,
-            device.zCommandPassword,
-            device.zOpenStackAuthUrl,
-            device.zOpenStackProjectId,
-            device.zOpenStackRegionName
-        )
-        keystone = KeystoneClient(session_manager=sm)
-        nova = NovaClient(session_manager=sm)
-        neutron = NeutronClient(session_manager=sm)
-        cinder = CinderClient(session_manager=sm)
-
-        results = {}
-
-        results['nova_url'] = yield nova.get_url()
-
-        result = yield keystone.tenants()
-        results['tenants'] = result.get('tenants', [])
-        log.debug('tenants: %s\n' % str(results['tenants']))
-
-        result = yield nova.flavors(is_public=True)
-        results['flavors'] = result.get('flavors', [])
-        result = yield nova.flavors(is_public=False)
-        for flavor in result.get('flavors', []):
-            if flavor not in results['flavors']:
-                results['flavors'].append(flavor)
-        log.debug('flavors: %s\n' % str(results['flavors']))
-
-        result = yield nova.images()
-        results['images'] = result.get('images', [])
-        log.debug('images: %s\n' % str(results['images']))
-
-        result = yield nova.hypervisorservers(hypervisor_match='%')
-        results['hypervisors'] = result.get('hypervisors', [])
-        log.debug('hypervisors: %s\n' % str(results['hypervisors']))
-
-        result = yield nova.hypervisorsdetailed()
-        results['hypervisors_detailed'] = result.get('hypervisors', [])
-        log.debug('hypervisors_detailed: %s\n' % str(results['hypervisors_detailed']))
-
-        # get hypervisor details for each individual hypervisor
-        results['hypervisor_details'] = {}
-        for hypervisor in results['hypervisors']:
-            result = yield nova.hypervisor_detail_id(hypervisor_id=hypervisor['id'])
-            hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
-            results['hypervisor_details'][hypervisor_id] = result.get('hypervisor', [])
-
-        result = yield nova.servers()
-        results['servers'] = result.get('servers', [])
-        log.debug('servers: %s\n' % str(results['servers']))
-
-        result = yield nova.services()
-        results['services'] = result.get('services', [])
-        log.debug('services: %s\n' % str(results['services']))
-
-        # Neutron
-        results['agents'] = []
-        try:
-            result = yield neutron.agents()
-            results['agents'] = result.get('agents', [])
-        except NotFoundError:
-            # Some networks, like Nuage network, do not have network agents
-            log.info("Neutron agents not found.")
-        except Exception, e:
-            log.error('Error modeling neutron agents: %s' % e)
-
-        # ---------------------------------------------------------------------
-        # Insert the l3_agents -> (routers, networks, subnets, gateways) data
-        # ---------------------------------------------------------------------
-        for _agent in results['agents']:
-            _agent['l3_agent_routers'] = []
-            _routers = set()
-            _subnets = set()
-            _gateways = set()
-            _networks = set()
-
-            if _agent['agent_type'].lower() == 'l3 agent':
-                try:
-                    router_data = yield neutron.agent_l3_routers(agent_id=str(_agent['id']))
-                except Exception, e:
-                    log.warning("Unable to determine neutron URL for " +
-                                "l3 router agent discovery: %s" % e)
-                    continue
-
-                for r in router_data['routers']:
-                    _routers.add(r.get('id'))
-                    (net, snets, gws) = \
-                        getNetSubnetsGws_from_GwInfo(r['external_gateway_info'])
-                    if net: _networks.add(net)
-                    _subnets = _subnets.union(snets)
-                    _gateways = _gateways.union(gws)
-
-                _agent['l3_agent_networks'] = list(_networks)
-                _agent['l3_agent_subnets'] = list(_subnets)
-                _agent['l3_agent_gateways'] = list(_gateways)  # Not used yet
-                _agent['l3_agent_routers'] = list(_routers)
-
-        # ---------------------------------------------------------------------
-        # Insert the DHCP agents-subnets info
-        # ---------------------------------------------------------------------
-        for _agent in results['agents']:
-            _agent['dhcp_agent_subnets'] = []
-            _subnets = []
-            _networks = []
-
-            if _agent['agent_type'].lower() == 'dhcp agent':
-                try:
-                    dhcp_data = yield neutron.agent_dhcp_networks(agent_id=str(_agent['id']))
-                except Exception, e:
-                    log.warning("Unable to determine neutron URL for " +
-                                "dhcp agent discovery: %s" % e)
-                    continue
-
-                for network in dhcp_data['networks']:
-                    _networks.append(network.get('id'))
-                    for subnet in network['subnets']:
-                        _subnets.append(subnet)
-
-                _agent['dhcp_agent_subnets'] = _subnets
-                _agent['dhcp_agent_networks'] = _networks
-
-        result = yield neutron.networks()
-        results['networks'] = result.get('networks', [])
-
-        result = yield neutron.subnets()
-        results['subnets'] = result.get('subnets', [])
-
-        result = yield neutron.routers()
-        results['routers'] = result.get('routers', [])
-
-        result = yield neutron.ports()
-        results['ports'] = result.get('ports', [])
-
-        result = yield neutron.floatingips()
-        results['floatingips'] = result.get('floatingips', [])
-
-        # Cinder
-        results['cinder_url'] = yield cinder.get_url()
-
-        result = yield cinder.volumes()
-        results['volumes'] = result.get('volumes', [])
-
-        result = yield cinder.volumetypes()
-        results['volumetypes'] = result.get('volume_types', [])
-
-        result = yield cinder.volumesnapshots()
-        results['volsnapshots'] = result.get('snapshots', [])
-
-        result = yield cinder.services()
-        results['cinder_services'] = result.get('services', [])
-
-        result = yield cinder.pools()
-        results['volume_pools'] = result.get('pools', [])
-
-        results['quotas'] = {}
-        for tenant in results['tenants']:
-            try:
-                result = yield cinder.quotas(tenant=tenant['id'].encode(
-                    'ascii', 'ignore'), usage=False)
-            except Exception, e:
-                try:
-                    message = re.search('\"message\":\s?\"(.*)\.\"', e.message).groups()[0]
-                except AttributeError:
-                    message = e.message
-
-                log.warn("Unable to obtain quotas for %s. Error message: %s" %
-                         (tenant['name'], message))
-            else:
-                results['quotas'][tenant['id']] = result.get('quota_set', [])
-
-        results['zOpenStackNovaApiHosts'], host_errors = filter_FQDNs(device.zOpenStackNovaApiHosts)
-        if host_errors:
-            log.warn('Invalid host in zOpenStackNovaApiHosts')
-
-        results['zOpenStackCinderApiHosts'], host_errors = filter_FQDNs(device.zOpenStackCinderApiHosts)
-        if host_errors:
-            log.warn('Invalid host in zOpenStackCinderApiHosts')
-
-        results['zOpenStackExtraHosts'], host_errors = filter_FQDNs(device.zOpenStackExtraHosts)
-        if host_errors:
-            log.warn('Invalid host in zOpenStackExtraHosts')
-
-        try:
-            results['nova_url_host'] = urlparse(results['nova_url']).hostname
-        except:
-            results['nova_url_host'] = None
-
-        try:
-            results['cinder_url_host'] = urlparse(results['cinder_url']).hostname
-        except:
-            results['cinder_url_host'] = None
-
-        yield self.preprocess_hosts(device, results)
-
-        returnValue(results)
-
-    @inlineCallbacks
-    def preprocess_hosts(self, device, results):
-        # spin through the collected data, pre-processing all the fields
-        # that reference hosts to have consistent host IDs, so that the
-        # process() method does not have to worry about hostname -> ID
-        # mapping at all.
-
-        hostmap = HostMap()
-        self.hostmap = hostmap
-
-        # load in previous mappings..
-        if callable(device.get_host_mappings):
-            # needed when we are passed a real device, rather than a
-            # deviceproxy, during testing
-            hostmap.thaw_mappings(device.get_host_mappings())
-        else:
-            hostmap.thaw_mappings(device.get_host_mappings)
-
-        for service in results['services']:
-            if 'host' in service:
-                hostmap.add_hostref(service['host'], source="nova services")
-
-        for agent in results['agents']:
-            if 'host' in agent:
-                hostmap.add_hostref(agent['host'], source="neutron agents")
-
-        for service in results['cinder_services']:
-            if 'host' in service:
-
-                # with the ceph backend, it seems like the cinder-volume
-                # hostname may not be relevant.  (At least on the test servers,
-                # I see 'ceph@ceph' here, which is meaningless)  (ZPS-3751)
-                if service['binary'] == 'cinder-volume' and service['host'].endswith('@ceph'):
-                    log.debug("Ignoring host '%s' from cinder-volume service", service['host'])
-                    continue
-
-                hostmap.add_hostref(service['host'], source="cinder services")
-
-        for hostname in results['zOpenStackNovaApiHosts']:
-            hostmap.add_hostref(hostname, source="zOpenStackNovaApiHosts")
-
-        for hostname in results['zOpenStackExtraHosts']:
-            hostmap.add_hostref(hostname, source="zOpenStackExtraHosts")
-
-        if results['nova_url_host']:
-            hostmap.add_hostref(results['nova_url_host'], "Nova API URL")
-
-        if results['cinder_url_host']:
-            hostmap.add_hostref(results['cinder_url_host'], "Cinder API URL")
-
-        for mapping in device.zOpenStackHostMapToId:
-            if not mapping: continue
-            try:
-                hostref, hostid = mapping.split("=")
-                hostmap.check_hostref(hostref, 'zOpenStackHostMapToId')
-                hostmap.add_hostref(hostref, source="zOpenStackHostMapToId")
-                hostmap.assert_host_id(hostref, hostid)
-            except Exception as ex:
-                log.error("Invalid value in zOpenStackHostMapToId: '%s'", mapping)
-
-        for mapping in device.zOpenStackHostMapSame:
-            if not mapping: continue
-            try:
-                hostref1, hostref2 = mapping.split("=")
-                hostmap.check_hostref(hostref1, 'zOpenStackHostMapSame')
-                hostmap.check_hostref(hostref2, 'zOpenStackHostMapSame')
-                hostmap.add_hostref(hostref1, source="zOpenStackHostMapSame")
-                hostmap.add_hostref(hostref2, source="zOpenStackHostMapSame")
-                hostmap.assert_same_host(hostref1, hostref2)
-            except Exception as ex:
-                log.error("assert_same_host error: %s", ex)
-                log.error("Invalid value in zOpenStackHostMapSame: '%s'", mapping)
-
-        # generate host IDs
-        yield hostmap.perform_mapping()
-
-        # replace all references to hosts with their host IDs, so
-        # process() doesn't have to think about this stuff.
-        for service in results['services']:
-            if 'host' in service:
-                service['host'] = hostmap.get_hostid(service['host'])
-
-        for agent in results['agents']:
-            if 'host' in agent:
-                agent['host'] = hostmap.get_hostid(agent['host'])
-
-        for service in results['cinder_services']:
-            if 'host' in service:
-                if hostmap.has_hostref(service['host']):
-                    service['host'] = hostmap.get_hostid(service['host'])
-                else:
-                    service['host'] = None
-
-        results['zOpenStackNovaApiHosts'] = \
-            [hostmap.get_hostid(x) for x in results['zOpenStackNovaApiHosts']]
-
-        results['zOpenStackExtraHosts'] = \
-            [hostmap.get_hostid(x) for x in results['zOpenStackExtraHosts']]
-
-        if results['nova_url_host']:
-            results['nova_url_host'] = hostmap.get_hostid(results['nova_url_host'])
-
-        if results['cinder_url_host']:
-            results['cinder_url_host'] = hostmap.get_hostid(results['cinder_url_host'])
-
-        # remember to build an ObjectMap to store these for next time..
-        results['host_mappings'] = hostmap.freeze_mappings()
-
-    def process(self, device, results, unused):
+    # -------------------------------------------------------------------------
+    # ----------------- Mapping functions for process() -----------------------
+    # -------------------------------------------------------------------------
+    def map_tenants(self, device, results):
+        """
+        Map tenants list.
+
+        Sample tenant::
+
+           {'enabled': True,
+            'description': 'admin tenant',
+            'name': 'admin',
+            'id': '313da8e3ab19478e82be9c50e6b1a04b'
+           }
+
+        """
         tenants = []
-        quota_tenants = []                   # for use by quota later
+        quota_tenants = []
+
         for tenant in results['tenants']:
-            if tenant.get('enabled', False) is not True:
+            if tenant.get('enabled') is not True:
                 continue
-            if not tenant.get('id', None):
+            if not tenant.get('id'):
                 continue
 
             quota_tenant = dict(name=tenant.get('name', tenant['id']),
@@ -413,10 +221,15 @@ class OpenStackInfrastructure(PythonPlugin):
                 data=dict(
                     id=prepId('tenant-{0}'.format(tenant['id'])),
                     title=tenant.get('name', tenant['id']),
-                    description=tenant.get('description', ''),
+                    description=tenant.get('description'),
                     tenantId=tenant['id']
                 )))
 
+        results['process_quota_tenants'] = quota_tenants
+        return tenants
+
+    def map_regions(self, device, results):
+        """Map the OpenStack Region via device.zOpenStackRegionName"""
         region_id = prepId("region-{0}".format(device.zOpenStackRegionName))
         region = ObjectMap(
             modname='ZenPacks.zenoss.OpenStackInfrastructure.Region',
@@ -424,10 +237,57 @@ class OpenStackInfrastructure(PythonPlugin):
                 id=region_id,
                 title=device.zOpenStackRegionName
             ))
+        results['process_region_id'] = region_id
+        return [region]
 
+    def map_zones(self, device, results):
+        zones = []
+        zone_ids = []
+
+        for service in results['services'] + results['cinder_services']:
+            zone_name = service.get('zone')
+            if not zone_name or not service.get('id'):
+                continue
+            _zid = prepId("zone-{0}".format(zone_name))
+            if _zid in zone_ids:
+                continue
+
+            zone_ids.append(_zid)
+            zones.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.AvailabilityZone',
+                data=dict(
+                    id=_zid,
+                    title=zone_name,
+                    set_parentOrg=results.get('process_region_id')
+                )))
+
+        return zones
+
+    def map_flavors(self, device, results):
+        """
+        Map flavors list from NovaClient:/flavors API call.
+
+        Sample flavor::
+
+            {'OS-FLV-DISABLED:disabled': False,
+             'OS-FLV-EXT-DATA:ephemeral': 0,
+             'disk': 1,
+             'id': '1',
+             'links': [{'href': 'http://10.87.209.165:8774/v2.1/313da8e3ab19478e82be9c50e6b1a04b/flavors/1',
+                        'rel': 'self'},
+                        {'href': 'http://10.87.209.165:8774/313da8e3ab19478e82be9c50e6b1a04b/flavors/1',
+                        'rel': 'bookmark'}],
+             'name': 'm1.tiny',
+             'os-flavor-access:is_public': True,
+             'ram': 512,
+             'rxtx_factor': 1.0,
+             'swap': '',
+             'vcpus': 1}
+
+        """
         flavors = []
         for flavor in results['flavors']:
-            if not flavor.get('id', None):
+            if not flavor.get('id'):
                 continue
 
             flavors.append(ObjectMap(
@@ -440,13 +300,38 @@ class OpenStackInfrastructure(PythonPlugin):
                     flavorDisk=flavor.get('disk', 0) * 1024 * 1024 * 1024,
                     flavorVCPUs=flavor.get('vcpus', 0),
                     # default to True, since default flavor is always public
-                    flavorType=str(flavor.get('os-flavor-access:is_public',
-                                              True)),
+                    flavorType=str(flavor.get('os-flavor-access:is_public', True)),
                 )))
+        return flavors
 
+    def map_images(self, device, results):
+        """
+        Map image list from NovaClient:/images(detailed=True) API call.
+
+        Sample image::
+
+            {'OS-EXT-IMG-SIZE:size': 13267968,
+             'created': '2018-10-31T19:52:53Z',
+             'id': 'fc6607b7-ccbf-4834-be6c-0a09faef19ec',
+             'links': [{'href': 'http://10.87.209.165:8774/v2.1/313da8e3ab19478e82be9c50e6b1a04b/images/fc6607b7-ccbf-4834-be6c-0a09faef19ec',
+                        'rel': 'self'},
+                       {'href': 'http://10.87.209.165:8774/313da8e3ab19478e82be9c50e6b1a04b/images/fc6607b7-ccbf-4834-be6c-0a09faef19ec',
+                         'rel': 'bookmark'},
+                       {'href': 'http://10.87.209.165:9292/images/fc6607b7-ccbf-4834-be6c-0a09faef19ec',
+                         'rel': 'alternate',
+                         'type': 'application/vnd.openstack.image'}],
+             'metadata': {},
+             'minDisk': 0,
+             'minRam': 0,
+             'name': 'cirros',
+             'progress': 100,
+             'status': 'ACTIVE',
+             'updated': '2018-10-31T19:52:53Z'}
+
+        """
         images = []
         for image in results['images']:
-            if not image.get('id', None):
+            if not image.get('id'):
                 continue
 
             # If we can, change dates like '2014-09-30T19:45:44Z' to '2014/09/30 19:45:44.00'
@@ -473,11 +358,187 @@ class OpenStackInfrastructure(PythonPlugin):
                     imageUpdated=imageUpdated,  # 2014/09/30 19:45:44.000
                 )))
 
-        # instances
+        return images
+
+    def map_hypervisors(self, device, results):
+        """
+        Map hypervisor list from the
+        nova:/os-hypervisors/{param[hypervisor_match]}/servers  API call
+
+        Sample hypervisor::
+
+            {
+             'cpu_info': <a long unicode string>,
+             'current_workload': 0,
+             'disk_available_least': 46,
+             'free_disk_gb': 49,
+             'free_ram_mb': 7679,
+             'host_ip': u'10.87.209.165',
+             'hypervisor_hostname': u'osi-p',
+             'hypervisor_type': u'QEMU',
+             'hypervisor_version': 2010000,
+             'id': 1,
+             'local_gb': 49,
+             'local_gb_used': 0,
+             'memory_mb': 8191,
+             'memory_mb_used': 512,
+             'running_vms': 0,
+             'service': {u'disabled_reason': None, u'host': u'osi-p', u'id': 6},
+             'state': u'up',
+             'status': u'enabled',
+             'vcpus': 7,
+             'vcpus_used': 0}
+
+        """
+        hypervisor_type = {}
+        hypervisor_version = {}
+        for hypervisor in results['hypervisors_detailed']:
+            if not hypervisor.get('id'):
+                continue
+
+            hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
+
+            hypervisor_type[hypervisor_id] = hypervisor.get('hypervisor_type')
+            hypervisor_version[hypervisor_id] = hypervisor.get('hypervisor_version')
+
+            if hypervisor_type[hypervisor_id] is None:
+                # if results['hypervisors_detailed'] did not give us hypervisor type,
+                # hypervisor version, try results['hypervisors_details']
+                hypervisor_type[hypervisor_id] = \
+                    results['hypervisor_details'][hypervisor_id].get(
+                        'hypervisor_type')
+
+            if hypervisor_version[hypervisor_id] is None:
+                # if results['hypervisors_detailed'] did not give us version,
+                # hypervisor version, try results['hypervisors_details']
+                hypervisor_version[hypervisor_id] = \
+                    results['hypervisor_details'][hypervisor_id].get(
+                        'hypervisor_version')
+
+            # Reformat the version string.
+            if hypervisor_version[hypervisor_id] is not None:
+                hypervisor_version[hypervisor_id] = '.'.join(
+                    str(hypervisor_version[hypervisor_id]).split('00'))
+
+        hypervisors = []
+        server_hypervisor_instance_name = {}
+        for hypervisor in results['hypervisors']:
+            if not hypervisor.get('id'):
+                continue
+
+            hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
+
+            # this is how a hypervisor discovers the instances belonging to it
+            hypervisor_servers = []
+            if 'servers' in hypervisor:
+                for server in hypervisor['servers']:
+                    server_id = 'server-{0}'.format(server.get('uuid', ''))
+                    hypervisor_servers.append(server_id)
+                    server_hypervisor_instance_name[server_id] = server.get('name', '')
+
+            hypervisor_dict = dict(
+                id=hypervisor_id,
+                title='{0}.{1}'.format(hypervisor.get('hypervisor_hostname', ''),
+                                       hypervisor['id']),
+                hypervisorId=hypervisor['id'],  # 1
+                hypervisor_type=hypervisor_type.get(hypervisor_id, ''),
+                hypervisor_version=hypervisor_version.get(hypervisor_id),
+                # hypervisor state: power state, UP/DOWN
+                hstate=hypervisor.get('state', 'unknown').upper(),
+                # hypervisor status: ENABLED/DISABLED
+                hstatus=hypervisor.get('status', 'unknown').upper(),
+                # hypervisor ip: internal ip address
+                host_ip=results['hypervisor_details'].get(
+                    hypervisor_id, {}).get('host_ip'),
+                vcpus=results['hypervisor_details'].get(
+                    hypervisor_id, {}).get('vcpus'),
+                vcpus_used=results['hypervisor_details'].get(
+                    hypervisor_id, {}).get('vcpus_used'),
+                memory=results['hypervisor_details'].get(
+                    hypervisor_id, {}).get('memory_mb'),
+                memory_used=results['hypervisor_details'].get(
+                    hypervisor_id, {}).get('memory_mb_used'),
+                memory_free=results['hypervisor_details'].get(
+                    hypervisor_id, {}).get('free_ram_mb'),
+                disk=results['hypervisor_details'].get(
+                    hypervisor_id, {}).get('local_gb'),
+                disk_used=results['hypervisor_details'].get(
+                    hypervisor_id, {}).get('local_gb_used'),
+                disk_free=results['hypervisor_details'].get(
+                    hypervisor_id, {}).get('free_disk_gb'),
+                set_instances=hypervisor_servers,
+                set_hostByName=hypervisor.get('hypervisor_hostname', ''),
+            )
+
+            if hypervisor_dict['hypervisor_type'] == 'VMware vCenter Server':
+                # This hypervisor type does not run on a specific host, so
+                # omit the host relationship.
+                del hypervisor_dict['set_hostByName']
+
+            hypervisors.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.Hypervisor',
+                data=hypervisor_dict))
+
+        results['process_server_hypervisor_instance_name'] = server_hypervisor_instance_name
+        return hypervisors
+
+    def map_servers(self, device, results):
+        """
+        Map 'Instance' servers from nova:/servers/detailed API call.
+
+        Sample server::
+
+        {
+            "OS-EXT-STS:power_state": 1,
+            "OS-EXT-STS:task_state": null,
+            "OS-EXT-STS:vm_state": "active",
+            "accessIPv4": "1.2.3.4",
+            "accessIPv6": "80fe::",
+            "addresses": {
+                "private": [
+                    {"OS-EXT-IPS-MAC:mac_addr": "aa:bb:cc:dd:ee:ff",
+                     "OS-EXT-IPS:type": "fixed",
+                     "addr": "192.168.0.3",
+                     "version": 4
+                    }
+                ]
+            },
+            "created": "2017-10-10T15:49:08Z",
+            "flavor": {"disk": 1,
+                       "original_name": "m1.tiny.specs",
+                       "vcpus": 1
+                       },
+            "hostId": "2091634baaccdc4c5a1d57069c833e402921df696b7f970791b12ec6",
+            "host_status": "UP",
+            "id": "569f39f9-7c76-42a1-9c2d-8394e2638a6d",
+            "image": {
+                "id": "70a599e0-31e7-49b7-b260-868f441e862b",
+                 ...
+            },
+            "key_name": null,
+            "locked": false,
+            "metadata": { "My Server Name": "Apache1" },
+            "name": "new-server-test",
+            "os-extended-volumes:volumes_attached": [],
+            "progress": 0,
+            "security_groups": [ { "name": "default" } ],
+            "status": "ACTIVE",
+            "tags": [],
+            "tenant_id": "6f70656e737461636b20342065766572",
+            "trusted_image_certificates": [
+                "0b5d2c72-12cc-4ba6-a8d7-3ff5cc1d8cb8",
+                "674736e3-f25c-405c-8362-bbf991e0ce0a"
+            ],
+            "updated": "2017-10-10T15:49:09Z",
+            "user_id": "fake"
+        }
+
+        """
         servers = []
         for server in results['servers']:
-            if not server.get('id', None):
+            if not server.get('id'):
                 continue
+            server_uid = server['id']
 
             # Backup support is optional. Guard against it not existing.
             backup_schedule_enabled = server.get('backup_schedule',
@@ -503,20 +564,27 @@ class OpenStackInfrastructure(PythonPlugin):
             if address_group:
                 for network_name, net_addresses in address_group.items():
                     for address in net_addresses:
+                        ip_addr = address.get('addr')
                         if address.get('OS-EXT-IPS:type') == 'fixed':
-                            private_ips.add(address.get('addr'))
+                            private_ips.add(ip_addr)
                         elif address.get('OS-EXT-IPS:type') == 'floating':
-                            public_ips.add(address.get('addr'))
+                            public_ips.add(ip_addr)
                         else:
-                            log.info("Address type not found for %s", address.get('addr'))
-                            log.info("Adding %s to private_ips", address.get('addr'))
-                            private_ips.add(address.get('addr'))
+                            message = ("Address type not found for {0}.\n"
+                                       "Adding {0} to private_ips "
+                                       "for server: {1}"
+                                       ).format(ip_addr, server_uid)
 
-            # Flavor and Image IDs could be specified two different ways.
-            flavor_id = server.get('flavorId', None) or \
-                server.get('flavor', {}).get('id', None)
+                            log.info(message)
+                            private_ips.add(ip_addr)
 
-            tenant_id = server.get('tenant_id', '')
+            flavor = server.get('flavor', {}).get('id')
+            if flavor:
+                flavor_id = prepId('flavor-{0}'.format(flavor))
+
+            tenant = server.get('tenant_id')
+            if tenant:
+                tenant_id = prepId('tenant-{0}'.format(tenant))
 
             power_state = server.get('OS-EXT-STS:power_state', 0)
             task_state = server.get('OS-EXT-STS:task_state')
@@ -526,18 +594,18 @@ class OpenStackInfrastructure(PythonPlugin):
 
             # Note: volume relations are added in volumes map below
             server_dict = dict(
-                id=prepId('server-{0}'.format(server['id'])),
-                title=server.get('name', server['id']),
-                resourceId=server['id'],
-                serverId=server['id'],  # 847424
+                id=prepId('server-{0}'.format(server_uid)),
+                title=server.get('name', server_uid),
+                resourceId=server_uid,
+                serverId=server_uid,
                 serverStatus=server.get('status', '').lower(),
                 serverBackupEnabled=backup_schedule_enabled,
                 serverBackupDaily=backup_schedule_daily,
                 serverBackupWeekly=backup_schedule_weekly,
                 publicIps=list(public_ips),
                 privateIps=list(private_ips),
-                set_flavor=prepId('flavor-{0}'.format(flavor_id)),
-                set_tenant=prepId('tenant-{0}'.format(tenant_id)),
+                set_flavor=flavor_id,
+                set_tenant=tenant_id,
                 hostId=server.get('hostId', ''),
                 hostName=server.get('name', ''),
                 powerState=POWER_STATE_MAP.get(power_state),
@@ -546,15 +614,8 @@ class OpenStackInfrastructure(PythonPlugin):
                 )
 
             # Some Instances are created from pre-existing volumes
-            # This implies no image exists.
-            image_id = None
-            if 'imageId' in server:
-                image_id = server['imageId']
-            elif 'image' in server \
-                    and isinstance(server['image'], dict) \
-                    and 'id' in server['image']:
-                image_id = server['image']['id']
-
+            # This implies no image may exists.
+            image_id = server.get('image', {}).get('id')
             if image_id:
                 server_dict['set_image'] = prepId('image-{0}'.format(image_id))
 
@@ -562,129 +623,24 @@ class OpenStackInfrastructure(PythonPlugin):
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Instance',
                 data=server_dict))
 
-        services = []
-        zones = {}
-        host_orgComponent = defaultdict(lambda: region_id)
+        # Add hypervisor instance name to the existing server objectmaps.
+        server_hypervisor_instance_name = results.get('process_server_hypervisor_instance_name')
+        for om in servers:
+            if om.id in server_hypervisor_instance_name:
+                om.hypervisorInstanceName = server_hypervisor_instance_name[om.id]
 
-        # Find all hosts which have a nova service on them.
-        for service in results['services']:
-            if not service.get('id', None):
-                continue
+        return servers
 
-            host_id = service['host']
-            try:
-                hostname = self.hostmap.get_hostname_for_hostid(host_id)
-            except InvalidHostIdException:
-                log.error("An invalid Host ID: '%s' was provided.\n"
-                          "\tPlease examine zOpenStackHostMapToId and zOpenStackHostMapSame.", host_id)
-                continue
-            except Exception:
-                log.warning("An unknown error for Host ID: '%s' occurred", host_id)
-                continue
+    def map_hosts(self, device, results):
+        """
+        Map hosts:
 
-            host_base_id = re.sub(r'^host-', '', host_id)
+            * Add any user-specified hosts which we haven't already found.
+            * Note: Hosts were already added to the hostmap by preprocess_hosts.
+                    This method further augments that hostmap data.
 
-            title = '{0}@{1} ({2})'.format(service.get('binary', ''),
-                                           hostname,
-                                           service.get('zone', ''))
-            service_id = prepId('service-{0}-{1}-{2}'.format(
-                service.get('binary', ''),
-                host_base_id,
-                service.get('zone', '')))
-            zone_id = prepId("zone-{0}".format(service.get('zone', '')))
+        """
 
-            host_orgComponent[host_id] = zone_id
-
-            zones.setdefault(zone_id, ObjectMap(
-                modname='ZenPacks.zenoss.OpenStackInfrastructure.AvailabilityZone',
-                data=dict(
-                    id=zone_id,
-                    title=service.get('zone', ''),
-                    set_parentOrg=region_id
-                )))
-
-            # Currently, nova-api doesn't show in the nova service list.
-            # Even if it does show up there in the future, I don't model
-            # it as a NovaService, but rather as its own type of software
-            # component.   (See below)
-            if service.get('binary', '') == 'nova-api':
-                continue
-
-            services.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStackInfrastructure.NovaService',
-                data=dict(
-                    id=service_id,
-                    title=title,
-                    binary=service.get('binary', ''),
-                    enabled={
-                        'enabled': True,
-                        'disabled': False
-                    }.get(service.get('status', None), False),
-                    operStatus={
-                        'up': 'UP',
-                        'down': 'DOWN'
-                    }.get(service.get('state', None), 'UNKNOWN'),
-                    set_hostedOn=host_id,
-                    set_orgComponent=zone_id
-                )))
-
-        # Find all hosts which have a cinder service on them
-        # where cinder services are: cinder-backup, cinder-scheduler, cinder-volume
-        for service in results['cinder_services']:
-            # well, guest what? volume services do not have 'id' key !
-
-            host_id = service['host']
-
-            if host_id is None:
-                zone_id = prepId("zone-{0}".format(service.get('zone', '')))
-                title = '{0} ({1})'.format(
-                    service.get('binary', ''),
-                    service.get('zone', ''))
-                service_id = prepId('service-{0}-{1}'.format(
-                    service.get('binary', ''), service.get('zone', '')))
-
-            else:
-                try:
-                    hostname = self.hostmap.get_hostname_for_hostid(host_id)
-                except InvalidHostIdException:
-                    log.error("An invalid Host ID: '%s' was provided.\n"
-                              "\tPlease examine zOpenStackHostMapToId and zOpenStackHostMapSame.", host_id)
-                    continue
-                except Exception:
-                    log.warning("An unknown error for Host ID: '%s' occurred", host_id)
-
-                host_base_id = re.sub(r'^host-', '', host_id)
-                zone_id = prepId("zone-{0}".format(service.get('zone', '')))
-                title = '{0}@{1} ({2})'.format(service.get('binary', ''),
-                                               hostname,
-                                               service.get('zone', ''))
-                service_id = prepId('service-{0}-{1}-{2}'.format(
-                    service.get('binary', ''), host_base_id, service.get('zone', '')))
-
-            if host_id is not None and host_id not in host_orgComponent:
-                host_orgComponent[host_id] = zone_id
-
-            services.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStackInfrastructure.CinderService',
-                data=dict(
-                    id=service_id,
-                    title=title,
-                    binary=service.get('binary', ''),
-                    enabled={
-                        'enabled': True,
-                        'disabled': False
-                    }.get(service.get('status', None), False),
-                    operStatus={
-                        'up': 'UP',
-                        'down': 'DOWN'
-                    }.get(service.get('state', None), 'UNKNOWN'),
-                    set_hostedOn=host_id,
-                    set_orgComponent=zone_id
-                )))
-
-        # add any user-specified hosts which we haven't already found.
-        # (note: they were already added to the hostmap by preprocess_hosts, so
-        # this message is just informational)
         if device.zOpenStackNovaApiHosts or device.zOpenStackExtraHosts:
             log.info("Finding additional hosts")
 
@@ -693,17 +649,18 @@ class OpenStackInfrastructure(PythonPlugin):
             if device.zOpenStackExtraHosts:
                 log.info("  Adding zOpenStackExtraHosts=%s" % device.zOpenStackExtraHosts)
 
-        log.debug("Modeled Hosts:")
+        log.debug("Modeling Hosts:")
+        hostmap = results.get('hostmap')
         hosts = []
         seen_hostids = set()
-        for host_id in self.hostmap.all_hostids():
+        for host_id in hostmap.all_hostids():
 
             if host_id in seen_hostids:
                 log.debug("  (disregarding duplicate host ID: %s)", host_id)
                 continue
             seen_hostids.add(host_id)
 
-            sources = set(self.hostmap.get_sources_for_hostid(host_id))
+            sources = set(hostmap.get_sources_for_hostid(host_id))
 
             # skip hosts which were only seen in the API urls
             for api_source in ['Nova API URL', 'Cinder API URL']:
@@ -714,13 +671,13 @@ class OpenStackInfrastructure(PythonPlugin):
                 continue
 
             try:
-                hostname = self.hostmap.get_hostname_for_hostid(host_id)
+                hostname = hostmap.get_hostname_for_hostid(host_id)
             except Exception:
                 log.error("Invalid hostname for host_id: '%s'", host_id)
                 log.error("Ensure that zOpenStackHost* properties are correct!")
                 continue
 
-            log.debug("  Host %s (%s) (sources=%s)", host_id, hostname, self.hostmap.get_sources_for_hostid(host_id))
+            log.debug("  Host %s (%s) (sources=%s)", host_id, hostname, hostmap.get_sources_for_hostid(host_id))
 
             hosts.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Host',
@@ -728,119 +685,25 @@ class OpenStackInfrastructure(PythonPlugin):
                     id=host_id,
                     title=hostname,
                     hostname=hostname,
-                    host_ip=self.hostmap.get_ip_for_hostid(host_id),
-                    set_orgComponent=host_orgComponent[host_id],
+                    host_ip=hostmap.get_ip_for_hostid(host_id),
+                    set_orgComponent=getHostOrgComponent(host_id, results),
                 )))
 
-        hypervisor_type = {}
-        hypervisor_version = {}
-        for hypervisor in results['hypervisors_detailed']:
-            if not hypervisor.get('id', None):
-                continue
-
-            hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
-
-            hypervisor_type[hypervisor_id] = hypervisor.get('hypervisor_type', None)
-            hypervisor_version[hypervisor_id] = hypervisor.get('hypervisor_version', None)
-
-            if hypervisor_type[hypervisor_id] is None:
-                # if results['hypervisors_detailed'] did not give us hypervisor type,
-                # hypervisor version, try results['hypervisors_details']
-                hypervisor_type[hypervisor_id] = \
-                    results['hypervisor_details'][hypervisor_id].get(
-                        'hypervisor_type', None)
-
-            if hypervisor_version[hypervisor_id] is None:
-                # if results['hypervisors_detailed'] did not give us version,
-                # hypervisor version, try results['hypervisors_details']
-                hypervisor_version[hypervisor_id] = \
-                    results['hypervisor_details'][hypervisor_id].get(
-                        'hypervisor_version', None)
-
-            # Reformat the version string.
-            if hypervisor_version[hypervisor_id] is not None:
-                hypervisor_version[hypervisor_id] = '.'.join(
-                    str(hypervisor_version[hypervisor_id]).split('00'))
-
-        hypervisors = []
-        server_hypervisor_instance_name = {}
-        for hypervisor in results['hypervisors']:
-            if not hypervisor.get('id', None):
-                continue
-
-            hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
-
-            # this is how a hypervisor discovers the instances belonging to it
-            hypervisor_servers = []
-            if 'servers' in hypervisor:
-                for server in hypervisor['servers']:
-                    server_id = 'server-{0}'.format(server.get('uuid', ''))
-                    hypervisor_servers.append(server_id)
-                    server_hypervisor_instance_name[server_id] = server.get('name', '')
-
-            hypervisor_dict = dict(
-                id=hypervisor_id,
-                title='{0}.{1}'.format(hypervisor.get('hypervisor_hostname', ''),
-                                       hypervisor['id']),
-                hypervisorId=hypervisor['id'],  # 1
-                hypervisor_type=hypervisor_type.get(hypervisor_id, ''),
-                hypervisor_version=hypervisor_version.get(hypervisor_id, None),
-                # hypervisor state: power state, UP/DOWN
-                hstate=hypervisor.get('state', 'unknown').upper(),
-                # hypervisor status: ENABLED/DISABLED
-                hstatus=hypervisor.get('status', 'unknown').upper(),
-                # hypervisor ip: internal ip address
-                host_ip=results['hypervisor_details'].get(
-                    hypervisor_id, {}).get('host_ip', None),
-                vcpus=results['hypervisor_details'].get(
-                    hypervisor_id, {}).get('vcpus', None),
-                vcpus_used=results['hypervisor_details'].get(
-                    hypervisor_id, {}).get('vcpus_used', None),
-                memory=results['hypervisor_details'].get(
-                    hypervisor_id, {}).get('memory_mb', None),
-                memory_used=results['hypervisor_details'].get(
-                    hypervisor_id, {}).get('memory_mb_used', None),
-                memory_free=results['hypervisor_details'].get(
-                    hypervisor_id, {}).get('free_ram_mb', None),
-                disk=results['hypervisor_details'].get(
-                    hypervisor_id, {}).get('local_gb', None),
-                disk_used=results['hypervisor_details'].get(
-                    hypervisor_id, {}).get('local_gb_used', None),
-                disk_free=results['hypervisor_details'].get(
-                    hypervisor_id, {}).get('free_disk_gb', None),
-                set_instances=hypervisor_servers,
-                set_hostByName=hypervisor.get('hypervisor_hostname', ''),
-            )
-
-            if hypervisor_dict['hypervisor_type'] == 'VMware vCenter Server':
-                # This hypervisor type does not run on a specific host, so
-                # omit the host relationship.
-                del hypervisor_dict['set_hostByName']
-
-            hypervisors.append(ObjectMap(
-                modname='ZenPacks.zenoss.OpenStackInfrastructure.Hypervisor',
-                data=hypervisor_dict))
-
-        # add hypervisor instance name to the existing server objectmaps.
-        for om in servers:
-            if om.id in server_hypervisor_instance_name:
-                om.hypervisorInstanceName = server_hypervisor_instance_name[om.id]
-
-        # nova-api support.
+        # nova-api host support.
         # Place it on the user-specified hosts, or also find it if it's
         # in the nova-service list (which we ignored earlier). It should not
         # be, under icehouse, at least, but just in case this changes..)
         nova_api_hosts = set(results['zOpenStackNovaApiHosts'])
         cinder_api_hosts = []
         for service in results['services']:
-            if service.get('binary', '') == 'nova-api':
+            if service.get('binary') == 'nova-api':
                 if service['host'] not in nova_api_hosts:
                     nova_api_hosts.add(service['host'])
 
-        # cinder-api support.
+        # cinder-api host support.
         cinder_api_hosts = set(results['zOpenStackCinderApiHosts'])
         for service in results['cinder_services']:
-            if service.get('binary', '') == 'cinder-api':
+            if service.get('binary') == 'cinder-api':
                 if service['host'] not in cinder_api_hosts:
                     cinder_api_hosts.append(service['host'])
 
@@ -852,15 +715,106 @@ class OpenStackInfrastructure(PythonPlugin):
         if nova_url_host and (nova_url_host in known_hosts):
             nova_api_hosts.add(nova_url_host)
 
+        if not nova_api_hosts:
+            log.warning("No nova-api hosts have been identified. "
+                        "You must set zOpenStackNovaApiHosts to the "
+                        "list of hosts upon which nova-api runs.")
+
+        results['process_nova_api_hosts'] = nova_api_hosts
+
         cinder_url_host = results['cinder_url_host']
         if cinder_url_host and (cinder_url_host in known_hosts):
             cinder_api_hosts.add(cinder_url_host)
 
-        if not nova_api_hosts:
-            log.warning("No nova-api hosts have been identified.   You must set zOpenStackNovaApiHosts to the list of hosts upon which nova-api runs.")
+        if not cinder_api_hosts:
+            log.warning("No cinder-api hosts have been identified. "
+                        "You must set zOpenStackCinderApiHosts to the "
+                        "list of hosts upon which cinder-api runs.")
 
+        results['process_cinder_api_hosts'] = cinder_api_hosts
+
+        return hosts
+
+    def map_nova_services(self, device, results):
+        """
+        Map services list that come from nova:/os-services API call.
+
+        Sample service::
+
+            {
+                "id": 1,
+                "binary": "nova-scheduler",
+                "disabled_reason": "test1",
+                "host": "host-osi8",
+                "state": "up",
+                "status": "disabled",
+                "updated_at": "2012-10-29T13:42:02.000000",
+                "forced_down": false,
+                "zone": "internal"
+            },
+
+        """
+        services = []
+
+        # Find all hosts which have a nova service on them.
+        for service in results['services']:
+            if not service.get('id'):
+                continue
+
+            host_id = service['host']
+            hostmap = results.get('hostmap')
+            try:
+                hostname = hostmap.get_hostname_for_hostid(host_id)
+            except InvalidHostIdException:
+                log.error("An invalid Host ID: '%s' was provided.\n"
+                          "\tPlease examine zOpenStackHostMapToId "
+                          "and zOpenStackHostMapSame.", host_id)
+                continue
+            except Exception:
+                log.warning("An unknown error for Host ID: '%s' occurred", host_id)
+                continue
+
+            host_base_id = re.sub(r'^host-', '', host_id)
+
+            zone_name, zone_id = getServiceZoneNameId(device.zOpenStackRegionName, service)
+            binary_name = service.get('binary')
+            title = '{0}@{1} ({2})'.format(binary_name,
+                                           hostname,
+                                           zone_name)
+            service_id = prepId('service-{0}-{1}-{2}'.format(
+                binary_name,
+                host_base_id,
+                zone_name))
+
+            # Currently, nova-api doesn't show in the nova service list.
+            # Even if it does show up there in the future, I don't model
+            # it as a NovaService, but rather as its own type of software
+            # component.   (See below)
+            if binary_name == 'nova-api':
+                continue
+
+            services.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.NovaService',
+                data=dict(
+                    id=service_id,
+                    title=title,
+                    binary=binary_name,
+                    enabled={
+                        'enabled': True,
+                        'disabled': False
+                    }.get(service.get('status'), False),
+                    operStatus={
+                        'up': 'UP',
+                        'down': 'DOWN'
+                    }.get(service.get('state'), 'UNKNOWN'),
+                    set_hostedOn=host_id,
+                    set_orgComponent=zone_id
+                )))
+
+        # Append nova_api_hosts to services here.
+        nova_api_hosts = results['process_nova_api_hosts']
         for host_id in sorted(nova_api_hosts):
-            hostname = self.hostmap.get_hostname_for_hostid(host_id)
+            hostname = hostmap.get_hostname_for_hostid(host_id)
             host_base_id = re.sub(r'^host-', '', host_id)
             title = '{0}@{1} ({2})'.format('nova-api', hostname, device.zOpenStackRegionName)
             nova_api_id = prepId('service-nova-api-{0}-{1}'.format(host_base_id, device.zOpenStackRegionName))
@@ -872,15 +826,73 @@ class OpenStackInfrastructure(PythonPlugin):
                     title=title,
                     binary='nova-api',
                     set_hostedOn=host_id,
-                    set_orgComponent=region_id
+                    set_orgComponent=results.get('process_region_id')
                 )))
 
-        if not cinder_api_hosts:
-            log.warning("No cinder-api hosts have been identified.   You must set zOpenStackCinderApiHosts to the list of hosts upon which cinder-api runs.")
+        return services
 
-        # hosts
+    def map_cinder_services(self, device, results):
+        services = []
+
+        # Find all hosts which have a cinder service on them
+        # where cinder services are: cinder-backup, cinder-scheduler, cinder-volume
+        for service in results['cinder_services']:
+            # well, guest what? volume services do not have 'id' key !
+
+            host_id = service['host']
+            zone_name, zone_id = getServiceZoneNameId(device.zOpenStackRegionName, service)
+            binary_name = service.get('binary')
+            hostmap = results.get('hostmap')
+
+            if host_id is None:
+                title = '{0} ({1})'.format(
+                    binary_name,
+                    zone_name)
+                service_id = prepId('service-{0}-{1}'.format(
+                    binary_name, zone_name))
+
+            else:
+                try:
+                    hostname = hostmap.get_hostname_for_hostid(host_id)
+                except InvalidHostIdException:
+                    log.error("An invalid Host ID: '%s' was provided.\n"
+                              "\tPlease examine zOpenStackHostMapToId "
+                              "and zOpenStackHostMapSame.", host_id)
+                    continue
+                except Exception:
+                    log.warning("An unknown error for Host ID: '%s' occurred", host_id)
+                    continue
+
+                host_base_id = re.sub(r'^host-', '', host_id)
+                title = '{0}@{1} ({2})'.format(binary_name,
+                                               hostname,
+                                               zone_name)
+                service_id = prepId('service-{0}-{1}-{2}'.format(binary_name,
+                                                                 host_base_id,
+                                                                 zone_name))
+
+            services.append(ObjectMap(
+                modname='ZenPacks.zenoss.OpenStackInfrastructure.CinderService',
+                data=dict(
+                    id=service_id,
+                    title=title,
+                    binary=binary_name,
+                    enabled={
+                        'enabled': True,
+                        'disabled': False
+                    }.get(service.get('status'), False),
+                    operStatus={
+                        'up': 'UP',
+                        'down': 'DOWN'
+                    }.get(service.get('state'), 'UNKNOWN'),
+                    set_hostedOn=host_id,
+                    set_orgComponent=zone_id
+                )))
+
+        # Append cinder_api_hosts to services here.
+        cinder_api_hosts = results['process_cinder_api_hosts']
         for host_id in cinder_api_hosts:
-            hostname = self.hostmap.get_hostname_for_hostid(host_id)
+            hostname = hostmap.get_hostname_for_hostid(host_id)
             host_base_id = re.sub(r'^host-', '', host_id)
             title = '{0}@{1} ({2})'.format('cinder-api', hostname, device.zOpenStackRegionName)
             cinder_api_id = prepId('service-cinder-api-{0}-{1}'.format(host_base_id, device.zOpenStackRegionName))
@@ -892,13 +904,23 @@ class OpenStackInfrastructure(PythonPlugin):
                     title=title,
                     binary='cinder-api',
                     set_hostedOn=host_id,
-                    set_orgComponent=region_id
+                    set_orgComponent=results.get('process_region_id')
                 )))
 
-        # agent
+        return services
+
+    def map_agents(self, device, results):
+        """
+        Map agents list that comes from neutron:/v2.0/agents.json API call.
+
+        Sample data::
+
+        """
+        hostmap = results.get('hostmap')
+
         agents = []
         for agent in results['agents']:
-            if not agent.get('id', None):
+            if not agent.get('id'):
                 continue
 
             agent_hostid = agent['host']
@@ -927,19 +949,30 @@ class OpenStackInfrastructure(PythonPlugin):
 
             # ------------------------------------------------------------------
             # format l3_agent_routers
+            # ------------------------------------------------------------------
             l3_agent_routers = ['router-{0}'.format(x)
                                 for x in agent['l3_agent_routers']]
             try:
-                hostname = self.hostmap.get_hostname_for_hostid(agent['host'])
+                hostname = hostmap.get_hostname_for_hostid(agent['host'])
             except InvalidHostIdException:
                 log.error("An invalid Host ID: '%s' was provided.\n"
-                          "\tPlease examine zOpenStackHostMapToId and zOpenStackHostMapSame.", host_id)
+                          "\tPlease examine zOpenStackHostMapToId and "
+                          "zOpenStackHostMapSame.", agent_hostid)
                 continue
             except Exception:
-                log.warning("An unknown error for Host ID: '%s' occurred", host_id)
+                log.warning("An unknown error for Host ID: "
+                            "'%s' occurred", agent_hostid)
 
-            title = '{0}@{1}'.format(agent.get('agent_type', ''),
-                                     hostname)
+            title = '{0}@{1}'.format(agent.get('agent_type', ''), hostname)
+
+            # ------------------------------------------------------------------
+            # Divine the availability_zone
+            # ------------------------------------------------------------------
+            availability_zone = agent.get('availability_zone')
+            if availability_zone:
+                zone_id = prepId("zone-{0}".format(availability_zone))
+            else:
+                zone_id = getHostOrgComponent(agent_hostid, results)
 
             agents.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.NeutronAgent',
@@ -951,7 +984,7 @@ class OpenStackInfrastructure(PythonPlugin):
                     operStatus={
                         True: 'UP',
                         False: 'DOWN'
-                    }.get(agent.get('alive', None), 'UNKNOWN'),
+                    }.get(agent.get('alive'), 'UNKNOWN'),
 
                     agentId=agent['id'],
                     type=agent.get('agent_type', ''),
@@ -960,13 +993,14 @@ class OpenStackInfrastructure(PythonPlugin):
                     set_subnets=agent_subnets,
                     set_networks=agent_networks,
                     set_hostedOn=agent_hostid,
-                    set_orgComponent=host_orgComponent[agent_hostid],
+                    set_orgComponent=zone_id,
                 )))
+        return agents
 
-        # networking
+    def map_networks(self, device, results):
         networks = []
         for net in results['networks']:
-            if not net.get('id', None):
+            if not net.get('id'):
                 continue
 
             networks.append(ObjectMap(
@@ -981,11 +1015,12 @@ class OpenStackInfrastructure(PythonPlugin):
                     netStatus=net.get('status', 'UNKNOWN'),                      # ACTIVE
                     netType=net.get('provider:network_type', 'UNKNOWN').upper()  # local/global
                 )))
+        return networks
 
-        # subnet
+    def map_subnets(self, device, results):
         subnets = []
         for subnet in results['subnets']:
-            if not subnet.get('id', None):
+            if not subnet.get('id'):
                 continue
 
             subnets.append(ObjectMap(
@@ -1000,12 +1035,13 @@ class OpenStackInfrastructure(PythonPlugin):
                     subnetId=subnet['id'],
                     title=subnet.get('name', subnet['id']),
                     )))
+        return subnets
 
-        # port
+    def map_ports(self, device, results):
         ports = []
         device_subnet_list = defaultdict(set)
         for port in results['ports']:
-            if not port.get('id', None):
+            if not port.get('id'):
                 continue
             port_dict = dict()
             # Fetch the subnets for later use
@@ -1019,9 +1055,9 @@ class OpenStackInfrastructure(PythonPlugin):
                 device_subnet_list[port_router_id] = \
                     device_subnet_list[port_router_id].union(raw_subnets)
             port_tenant = None
-            if port.get('tenant_id', None):
-                port_tenant = prepId('tenant-{0}'.format(port.get('tenant_id',
-                                                                  '')))
+            if port.get('tenant_id'):
+                port_tenant = prepId('tenant-{0}'
+                                     .format(port.get('tenant_id', '')))
                 port_dict['set_tenant'] = port_tenant
 
             device_owner = port.get('device_owner', '')
@@ -1030,7 +1066,7 @@ class OpenStackInfrastructure(PythonPlugin):
             if port_instance:
                 port_instance = prepId(port_instance)
                 port_dict['set_instance'] = port_instance
-            port_network = port.get('network_id', None)
+            port_network = port.get('network_id')
             if port_network:
                 port_network = prepId('network-{0}'.format(port_network))
                 port_dict['set_network'] = port_network
@@ -1054,15 +1090,18 @@ class OpenStackInfrastructure(PythonPlugin):
                     vif_type=port.get('binding:vif_type', 'UNKNOWN'),
                     **port_dict
                     )))
+        results['process_device_subnet_list'] = device_subnet_list
+        return ports
 
-        # router
+    def map_routers(self, device, results):
         routers = []
         for router in results['routers']:
-            if not router.get('id', None):
+            if not router.get('id'):
                 continue
 
             _gateways = set()
             _network_id = None
+            device_subnet_list = results['process_device_subnet_list']
             # This should be all of the associated subnets
             _subnets = device_subnet_list[router['id']]
 
@@ -1071,9 +1110,9 @@ class OpenStackInfrastructure(PythonPlugin):
             if external_gateway_info:
                 _network_id = external_gateway_info.get('network_id', '')
                 for _ip in external_gateway_info.get('external_fixed_ips', []):
-                    _gateways.add(_ip.get('ip_address', None))
+                    _gateways.add(_ip.get('ip_address'))
                     # This should not be required, but it doesn't hurt set()
-                    _subnets.add(_ip.get('subnet_id', None))
+                    _subnets.add(_ip.get('subnet_id'))
 
             _network = None
             if _network_id:
@@ -1098,21 +1137,23 @@ class OpenStackInfrastructure(PythonPlugin):
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Router',
                 data=router_dict))
 
-        # floatingip
+        return routers
+
+    def map_floatingips(self, device, results):
         floatingips = []
         for floatingip in results['floatingips']:
-            if not floatingip.get('id', None):
+            if not floatingip.get('id'):
                 continue
 
             floatingip_dict = dict(
-                    floatingipId=floatingip['id'],
-                    fixed_ip_address=floatingip.get('fixed_ip_address', ''),
-                    floating_ip_address=floatingip.get('floating_ip_address', ''),
-                    id=prepId('floatingip-{0}'.format(floatingip['id'])),
-                    set_network=prepId('network-{0}'.format(floatingip.get('floating_network_id', ''))),
-                    set_tenant=prepId('tenant-{0}'.format(floatingip.get('tenant_id', ''))),
-                    status=floatingip.get('status', 'UNKNOWN'),
-                    )
+                floatingipId=floatingip['id'],
+                fixed_ip_address=floatingip.get('fixed_ip_address', ''),
+                floating_ip_address=floatingip.get('floating_ip_address', ''),
+                id=prepId('floatingip-{0}'.format(floatingip['id'])),
+                set_network=prepId('network-{0}'.format(floatingip.get('floating_network_id', ''))),
+                set_tenant=prepId('tenant-{0}'.format(floatingip.get('tenant_id', ''))),
+                status=floatingip.get('status', 'UNKNOWN'),
+                )
 
             if floatingip.get('router_id'):
                 floatingip_dict['set_router'] = prepId('router-{0}'.format(floatingip.get('router_id', '')))
@@ -1124,6 +1165,9 @@ class OpenStackInfrastructure(PythonPlugin):
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.FloatingIp',
                 data=floatingip_dict))
 
+        return floatingips
+
+    def map_voltypes(self, device, results):
         # volume Types
         voltypes = []
         for voltype in results['volumetypes']:
@@ -1137,8 +1181,13 @@ class OpenStackInfrastructure(PythonPlugin):
                     title=voltype.get('name', 'UNKNOWN'),
                 )))
 
+        results['process_voltypes'] = voltypes
+        return voltypes
+
+    def map_volumes(self, device, results):
         # volumes
         volumes = []
+        voltypes = results.get('process_voltypes')
         for volume in results['volumes']:
             if not volume.get('id'):
                 continue
@@ -1182,11 +1231,12 @@ class OpenStackInfrastructure(PythonPlugin):
             volumes.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Volume',
                 data=volume_dict))
+        return volumes
 
-        # volume Snapshots
-        volsnapshots = []
+    def map_volumesnapshots(self, device, results):
+        volumesnapshots = []
         for snapshot in results['volsnapshots']:
-            if not snapshot.get('id', None):
+            if not snapshot.get('id'):
                 continue
 
             volsnap_dict = dict(
@@ -1197,43 +1247,19 @@ class OpenStackInfrastructure(PythonPlugin):
                 description=snapshot.get('description', ''),
                 status=snapshot.get('status', 'UNKNOWN').upper(),
             )
-            if snapshot.get('volume_id', None):
+            if snapshot.get('volume_id'):
                 volsnap_dict['set_volume'] = \
                     prepId('volume-{0}'.format(snapshot.get('volume_id', '')))
-            if snapshot.get('os-extended-snapshot-attributes:project_id', None):
+            if snapshot.get('os-extended-snapshot-attributes:project_id'):
                 volsnap_dict['set_tenant'] = \
                     prepId('tenant-{0}'.format(snapshot.get(
                         'os-extended-snapshot-attributes:project_id', '')))
-            volsnapshots.append(ObjectMap(
+            volumesnapshots.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.VolSnapshot',
                 data=volsnap_dict))
+        return volumesnapshots
 
-        # volume backup is not ready. but also don't want to waste efforts
-        # either
-
-        # Backups
-        # backups = []
-        # for backup in results['backups']:
-        #     if not backup.get('id', None):
-        #         continue
-        #
-        #     backups.append(ObjectMap(
-        #         modname='ZenPacks.zenoss.OpenStackInfrastructure.Backup',
-        #         data=dict(
-        #             snapshotId=backup['id'],
-        #             id=prepId('backup-{0}'.format(backup['id'])),
-        #             name=backup.get('name', ''),
-        #             created_at=backup.get('created_at', ''),
-        #             size=str(backup.get('size', 0)) + ' GB',
-        #             description=backup.get('description', ''),
-        #             snapshot=backup.get('backup_id', ''),
-        #             status=backup.get('status', 'UNKNOWN').upper(),
-        #             set_volume=prepId('volume-{0}'.format(backup.get('volume_id',''))),
-        #             set_tenant=prepId('tenant-{0}'.format(backup.get('os-extended-snapshot-attributes:project_id',''))),
-        #             )))
-        #
-
-        # Pools
+    def map_pools(self, device, results):
         pools = []
         for pool in results['volume_pools']:
             # does pool have id?
@@ -1275,14 +1301,16 @@ class OpenStackInfrastructure(PythonPlugin):
                     volume_backend=pool.get('capabilities', {}).get('volume_backend', 0),
                     )))
 
-        # Quotas
+        return pools
+
+    def map_quotas(self, device, results):
         quotas = []
-        for quota_key in results['quotas'].keys():
-            quota = results['quotas'][quota_key]
+        for quota in results['quotas']:
+            quota_key = quota.get('id')
 
             # Find and use the tenant that corresponds to this quota:
             q_tenant = None
-            for _ten in quota_tenants:
+            for _ten in results.get('process_quota_tenants'):
                 if _ten.get('id') == quota_key:
                     q_tenant = _ten
                     break
@@ -1302,7 +1330,9 @@ class OpenStackInfrastructure(PythonPlugin):
                     backup_bytes=quota.get('backup_gigabytes', 0),
                     set_tenant=prepId('tenant-{0}'.format(quota_key)),
                     )))
+        return quotas
 
+    def map_api_endpoints(self, device, results):
         # API Endpoints
         api_endpoints = []
         api_endpoints.append(ObjectMap(
@@ -1342,17 +1372,313 @@ class OpenStackInfrastructure(PythonPlugin):
         # Ideally we should also include the endpoints reported by
         # keystone and model them here, but there are some issues
         # in txapiclient that make this difficult at this time.
+        return api_endpoints
+
+    # -------------------------------------------------------------------------
+    # --------------- End Mapping functions for process() ---------------------
+    # -------------------------------------------------------------------------
+
+    @inlineCallbacks
+    def collect(self, device, unused):
+
+        if not device.zCommandUsername or not device.zCommandPassword:
+            log.error("Password/Username should be set to proper values. Check your Openstack credentials.")
+            returnValue({})
+
+        if not device.zOpenStackAuthUrl or not device.zOpenStackProjectId or not device.zOpenStackRegionName:
+            log.error("Openstack credentials should be set to proper values. Check your OpenStackAuthUrl, OpenStackProjectId and OpenStackRegionName")
+            returnValue({})
+
+        sm = SessionManager(
+            device.zCommandUsername,
+            device.zCommandPassword,
+            device.zOpenStackAuthUrl,
+            device.zOpenStackProjectId,
+            device.zOpenStackRegionName
+        )
+        keystone = KeystoneClient(session_manager=sm)
+        nova = NovaClient(session_manager=sm)
+        neutron = NeutronClient(session_manager=sm)
+        cinder = CinderClient(session_manager=sm)
+
+        results = {}
+
+        results['nova_url'] = yield api_call(nova.get_url, None)
+        results['tenants'] = yield api_call(keystone.tenants, 'tenants')
+        results['flavors'] = yield api_call(nova.flavors, 'flavors', is_public=True)
+
+        private_flavors = yield api_call(nova.flavors, 'flavors', is_public=False)
+        for flavor in private_flavors:
+            if flavor not in results['flavors']:
+                results['flavors'].append(flavor)
+
+        results['images'] = yield api_call(nova.images, 'images')
+        results['hypervisors'] = yield api_call(nova.hypervisorservers, 'hypervisors', hypervisor_match='%')
+        results['hypervisors_detailed'] = yield api_call(nova.hypervisorsdetailed, 'hypervisors')
+
+        # Get hypervisor details for each individual hypervisor
+        results['hypervisor_details'] = {}
+        for hypervisor in results['hypervisors']:
+            hypervisor_detail_id = yield api_call(nova.hypervisor_detail_id,
+                                                  'hypervisor',
+                                                  hypervisor_id=hypervisor['id'])
+            hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
+            results['hypervisor_details'][hypervisor_id] = hypervisor_detail_id
+
+        results['servers'] = yield api_call(nova.servers, 'servers')
+        results['services'] = yield api_call(nova.services, 'services')
+        results['agents'] = yield api_call(neutron.agents, 'agents')
+
+        # ---------------------------------------------------------------------
+        # Insert the l3_agents -> (routers, networks, subnets, gateways) data
+        # ---------------------------------------------------------------------
+        for _agent in results['agents']:
+            _agent['l3_agent_routers'] = []
+            _routers = set()
+            _subnets = set()
+            _gateways = set()
+            _networks = set()
+
+            if _agent['agent_type'].lower() == 'l3 agent':
+                try:
+                    router_data = yield api_call(neutron.agent_l3_routers, None, agent_id=str(_agent['id']))
+                except Exception, e:
+                    log.warning("Unable to determine neutron URL for " +
+                                "l3 router agent discovery: %s" % e)
+                    continue
+
+                for r in router_data['routers']:
+                    _routers.add(r.get('id'))
+                    (net, snets, gws) = \
+                        getNetSubnetsGws_from_GwInfo(r['external_gateway_info'])
+                    if net: _networks.add(net)
+                    _subnets = _subnets.union(snets)
+                    _gateways = _gateways.union(gws)
+
+                _agent['l3_agent_networks'] = list(_networks)
+                _agent['l3_agent_subnets'] = list(_subnets)
+                _agent['l3_agent_gateways'] = list(_gateways)  # Not used yet
+                _agent['l3_agent_routers'] = list(_routers)
+
+        # ---------------------------------------------------------------------
+        # Insert the DHCP agents-subnets info
+        # ---------------------------------------------------------------------
+        for _agent in results['agents']:
+            _agent['dhcp_agent_subnets'] = []
+            _subnets = []
+            _networks = []
+
+            if _agent['agent_type'].lower() == 'dhcp agent':
+                try:
+                    dhcp_data = yield api_call(neutron.agent_dhcp_networks, None, agent_id=str(_agent['id']))
+                except Exception, e:
+                    log.warning("Unable to determine neutron URL for " +
+                                "dhcp agent discovery: %s" % e)
+                    continue
+
+                for network in dhcp_data['networks']:
+                    _networks.append(network.get('id'))
+                    for subnet in network['subnets']:
+                        _subnets.append(subnet)
+
+                _agent['dhcp_agent_subnets'] = _subnets
+                _agent['dhcp_agent_networks'] = _networks
+
+        results['networks'] = yield api_call(neutron.networks, 'networks')
+        results['subnets'] = yield api_call(neutron.subnets, 'subnets')
+        results['routers'] = yield api_call(neutron.routers, 'routers')
+        results['ports'] = yield api_call(neutron.ports, 'ports')
+        results['floatingips'] = yield api_call(neutron.floatingips, 'floatingips')
+        results['cinder_url'] = yield api_call(cinder.get_url, None)
+        results['volumes'] = yield api_call(cinder.volumes, 'volumes')
+        results['volumetypes'] = yield api_call(cinder.volumetypes, 'volume_types')
+        results['volsnapshots'] = yield api_call(cinder.volumesnapshots, 'snapshots')
+        results['cinder_services'] = yield api_call(cinder.services, 'services')
+        results['volume_pools'] = yield api_call(cinder.pools, 'pools')
+
+        results['quotas'] = []
+        for tenant in results['tenants']:
+            quota_set = yield api_call(cinder.quotas, 'quota_set',
+                                       tenant=tenant['id'],
+                                       usage=False)
+            results['quotas'].append(quota_set)
+
+        results['zOpenStackNovaApiHosts'], host_errors = filter_FQDNs(device.zOpenStackNovaApiHosts)
+        if host_errors:
+            log.warning('Invalid host in zOpenStackNovaApiHosts')
+
+        results['zOpenStackCinderApiHosts'], host_errors = filter_FQDNs(device.zOpenStackCinderApiHosts)
+        if host_errors:
+            log.warning('Invalid host in zOpenStackCinderApiHosts')
+
+        results['zOpenStackExtraHosts'], host_errors = filter_FQDNs(device.zOpenStackExtraHosts)
+        if host_errors:
+            log.warning('Invalid host in zOpenStackExtraHosts')
+
+        try:
+            results['nova_url_host'] = urlparse(results['nova_url']).hostname
+        except:
+            results['nova_url_host'] = None
+
+        try:
+            results['cinder_url_host'] = urlparse(results['cinder_url']).hostname
+        except:
+            results['cinder_url_host'] = None
+
+        yield self.preprocess_hosts(device, results)
+
+        returnValue(results)
+
+    @inlineCallbacks
+    def preprocess_hosts(self, device, results):
+        # spin through the collected data, pre-processing all the fields
+        # that reference hosts to have consistent host IDs, so that the
+        # process() method does not have to worry about hostname -> ID
+        # mapping at all.
+
+        hostmap = HostMap()
+
+        # load in previous mappings..
+        if callable(device.get_host_mappings):
+            # needed when we are passed a real device, rather than a
+            # deviceproxy, during testing
+            hostmap.thaw_mappings(device.get_host_mappings())
+        else:
+            hostmap.thaw_mappings(device.get_host_mappings)
+
+        for service in results['services']:
+            if 'host' in service:
+                hostmap.add_hostref(service['host'], source="nova services")
+
+        for agent in results['agents']:
+            if 'host' in agent:
+                hostmap.add_hostref(agent['host'], source="neutron agents")
+
+        for service in results['cinder_services']:
+            if 'host' in service:
+
+                # with the ceph backend, it seems like the cinder-volume
+                # hostname may not be relevant.  (At least on the test servers,
+                # I see 'ceph@ceph' here, which is meaningless)  (ZPS-3751)
+                if service['binary'] == 'cinder-volume' and service['host'] is not None and service['host'].endswith('@ceph'):
+                    log.debug("Ignoring host '%s' from cinder-volume service", service['host'])
+                    continue
+
+                hostmap.add_hostref(service['host'], source="cinder services")
+
+        for hostname in results['zOpenStackNovaApiHosts']:
+            hostmap.add_hostref(hostname, source="zOpenStackNovaApiHosts")
+
+        for hostname in results['zOpenStackExtraHosts']:
+            hostmap.add_hostref(hostname, source="zOpenStackExtraHosts")
+
+        if results['nova_url_host']:
+            hostmap.add_hostref(results['nova_url_host'], "Nova API URL")
+
+        if results['cinder_url_host']:
+            hostmap.add_hostref(results['cinder_url_host'], "Cinder API URL")
+
+        for mapping in device.zOpenStackHostMapToId:
+            if not mapping: continue
+            try:
+                hostref, hostid = mapping.split("=")
+                hostmap.check_hostref(hostref, 'zOpenStackHostMapToId')
+                hostmap.add_hostref(hostref, source="zOpenStackHostMapToId")
+                hostmap.assert_host_id(hostref, hostid)
+            except Exception as ex:
+                log.error("Invalid value in zOpenStackHostMapToId: '%s'", mapping)
+
+        for mapping in device.zOpenStackHostMapSame:
+            if not mapping: continue
+            try:
+                hostref1, hostref2 = mapping.split("=")
+                hostmap.check_hostref(hostref1, 'zOpenStackHostMapSame')
+                hostmap.check_hostref(hostref2, 'zOpenStackHostMapSame')
+                hostmap.add_hostref(hostref1, source="zOpenStackHostMapSame")
+                hostmap.add_hostref(hostref2, source="zOpenStackHostMapSame")
+                hostmap.assert_same_host(hostref1, hostref2)
+            except Exception as ex:
+                log.error("assert_same_host error: %s", ex)
+                log.error("Invalid value in zOpenStackHostMapSame: '%s'", mapping)
+
+        # generate host IDs
+        yield hostmap.perform_mapping()
+
+        # store the entire hostmap object so that it is available in process()
+        results['hostmap'] = hostmap
+
+        # remember to build an ObjectMap to store these for next time..
+        results['host_mappings'] = hostmap.freeze_mappings()
+
+    def replace_hosts_with_ids(self, hostmap, results):
+        # replace all references to hosts in results with their host IDs,
+        # using the information in the hostmap object.
+
+        for service in results['services']:
+            if 'host' in service:
+                service['host'] = hostmap.get_hostid(service['host'])
+
+        for agent in results['agents']:
+            if 'host' in agent:
+                agent['host'] = hostmap.get_hostid(agent['host'])
+
+        for service in results['cinder_services']:
+            if 'host' in service:
+                if hostmap.has_hostref(service['host']):
+                    service['host'] = hostmap.get_hostid(service['host'])
+                else:
+                    service['host'] = None
+
+        results['zOpenStackNovaApiHosts'] = \
+            [hostmap.get_hostid(x) for x in results['zOpenStackNovaApiHosts']]
+
+        results['zOpenStackExtraHosts'] = \
+            [hostmap.get_hostid(x) for x in results['zOpenStackExtraHosts']]
+
+        if results['nova_url_host']:
+            results['nova_url_host'] = hostmap.get_hostid(results['nova_url_host'])
+
+        if results['cinder_url_host']:
+            results['cinder_url_host'] = hostmap.get_hostid(results['cinder_url_host'])
+
+    def process(self, device, results, unused):
+        # normalize all hostnames to host IDs, so that the rest of
+        # process() doesn't have to think about that.
+        self.replace_hosts_with_ids(results['hostmap'], results)
+
+        tenants = self.map_tenants(device, results)
+        regions = self.map_regions(device, results)
+        zones = self.map_zones(device, results)
+        flavors = self.map_flavors(device, results)
+        images = self.map_images(device, results)
+        hypervisors = self.map_hypervisors(device, results)
+        servers = self.map_servers(device, results)
+        hosts = self.map_hosts(device, results)
+        services = self.map_nova_services(device, results)
+        cinder_services = self.map_cinder_services(device, results)
+        agents = self.map_agents(device, results)
+        networks = self.map_networks(device, results)
+        subnets = self.map_subnets(device, results)
+        ports = self.map_ports(device, results)
+        routers = self.map_routers(device, results)
+        floatingips = self.map_floatingips(device, results)
+        voltypes = self.map_voltypes(device, results)
+        volumes = self.map_volumes(device, results)
+        volsnapshots = self.map_volumesnapshots(device, results)
+        pools = self.map_pools(device, results)
+        quotas = self.map_quotas(device, results)
+        api_endpoints = self.map_api_endpoints(device, results)
 
         objmaps = {
             'flavors': flavors,
             'hosts': hosts,
             'hypervisors': hypervisors,
             'images': images,
-            'regions': [region],
+            'regions': regions,
             'servers': servers,
-            'services': services,
+            'services': services + cinder_services,
             'tenants': tenants,
-            'zones': zones.values(),
+            'zones': zones,
             'agents': agents,
             'networks': networks,
             'subnets': subnets,
@@ -1362,7 +1688,6 @@ class OpenStackInfrastructure(PythonPlugin):
             'volumes': volumes,
             'voltypes': voltypes,
             'volsnapshots': volsnapshots,
-            # 'backups': backups,
             'pools': pools,
             'quotas': quotas,
             'api_endpoints': api_endpoints
@@ -1410,9 +1735,9 @@ class OpenStackInfrastructure(PythonPlugin):
                 if key in static_objmaps and len(static_objmaps[key]):
                     starting_count = len(objmaps[key])
                     for om_dict in static_objmaps[key]:
-                        compname = om_dict.pop('compname', None)
-                        modname = om_dict.pop('modname', None)
-                        classname = om_dict.pop('classname', None)
+                        compname = om_dict.pop('compname')
+                        modname = om_dict.pop('modname')
+                        classname = om_dict.pop('classname')
                         for v in om_dict:
                             om_dict[v] = str(om_dict[v])
 
@@ -1453,11 +1778,12 @@ class OpenStackInfrastructure(PythonPlugin):
             for objmap in objmaps[i]:
                 componentsMap.append(objmap)
 
+        hostmap = results.get('hostmap')
         endpointObjMap = ObjectMap(
             modname='ZenPacks.zenoss.OpenStackInfrastructure.Endpoint',
             data=dict(
                 set_maintain_proxydevices=True,
-                set_host_mappings=self.hostmap.freeze_mappings()
+                set_host_mappings=hostmap.freeze_mappings()
             )
         )
 
