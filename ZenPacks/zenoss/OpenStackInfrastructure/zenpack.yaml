@@ -2048,4 +2048,385 @@ classes:
         label_width: 80
         content_width: 80
 
-#
+event_classes:
+  /OpenStack:
+    remove: true
+    mappings:
+      OpenStack Events Default:
+        remove: true
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: defaultmapping
+        sequence: 999
+        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|')
+        example: openstack|compute.instance.create.start
+        explanation: Default event transform for all OpenStack Ceilometer notifications.  Maps to /OpenStack, history.
+        zProperties:
+          zEventAction: history
+  /OpenStack/compute:
+    remove: true
+  /OpenStack/compute/instance:
+    remove: true
+    mappings:
+      compute.instance default mapping:
+        remove: true
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: defaultmapping
+        sequence: 59
+        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|compute.instance.')
+        explanation: All compute.instance events not otherwise mapped will be placed in the /OpenStackInfrastructure/compute/instance class history.
+        zProperties:
+          zEventAction: history
+      compute.instance.create.error:
+        remove: true
+        eventClassKey: openstack|compute.instance.create.error
+        sequence: 51
+        explanation: An error has occurred while creating an instance
+        zProperties:
+          zEventSeverity: 4
+      compute.instance.exists:
+        remove: true
+        eventClassKey: openstack|compute.instance.exists
+        sequence: 52
+        explanation: Drop compute.instance.exists events, not worth storing in event history.
+        zProperties:
+          zEventAction: drop
+      compute.instance.exists.verified.old:
+        remove: true
+        eventClassKey: openstack|compute.instance.exists.verified.old
+        sequence: 53
+        explanation: Drop compute.instance.exists.verified.old events, not worth storing in event history.
+        zProperties:
+          zEventAction: drop
+  /OpenStack/dhcp_agent:
+    remove: true
+    mappings:
+      dhcp_agent defaultmapping:
+        remove: true
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: defaultmapping
+        sequence: 100
+        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|dhcp_agent.')
+        zProperties:
+          zEventAction: history
+  /OpenStack/firewall:
+    remove: true
+    mappings:
+      firewall defaultmapping:
+        remove: true
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: defaultmapping
+        sequence: 200
+        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|firewall.')
+        zProperties:
+          zEventAction: history
+  /OpenStack/firewall_policy:
+    remove: true
+    mappings:
+      firewall_policy defaultmapping:
+        remove: true
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: defaultmapping
+        sequence: 210
+        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|firewall_policy.')
+        zProperties:
+          zEventAction: history
+  /OpenStack/firewall_rule:
+    remove: true
+    mappings:
+      firewall_rule defaultmapping:
+        remove: true
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: defaultmapping
+        sequence: 220
+        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|firewall_rule.')
+        zProperties:
+          zEventAction: history
+  /OpenStack/floatingip:
+    remove: true
+    mappings:
+      floatingip defaultmapping:
+        remove: true
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: defaultmapping
+        sequence: 300
+        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|floatingip.')
+        zProperties:
+          zEventAction: history
+  /OpenStack/network:
+    remove: true
+    mappings:
+      network defaultmapping:
+        remove: true
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: defaultmapping
+        sequence: 400
+        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|network.')
+        zProperties:
+          zEventAction: history
+  /OpenStack/port:
+    remove: true
+    mappings:
+      port defaultmapping:
+        remove: true
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: defaultmapping
+        sequence: 500
+        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|port.')
+        zProperties:
+          zEventAction: history
+  /OpenStack/router:
+    remove: true
+    mappings:
+      router defaultmapping:
+        remove: true
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: defaultmapping
+        sequence: 600
+        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|router')
+        zProperties:
+          zEventAction: history
+  /OpenStack/security_group:
+    remove: true
+    mappings:
+      security_group defaultmapping:
+        remove: true
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: defaultmapping
+        sequence: 700
+        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|security_group.')
+        zProperties:
+          zEventAction: history
+  /OpenStack/security_group_rule:
+    remove: true
+    mappings:
+      security_group_rule defaultmapping:
+        remove: true
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: defaultmapping
+        sequence: 710
+        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|security_group_rule.')
+        zProperties:
+          zEventAction: history
+  /OpenStack/subnet:
+    remove: true
+    mappings:
+      subnet defaultmapping:
+        remove: true
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: defaultmapping
+        sequence: 800
+        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|subnet.')
+        zProperties:
+          zEventAction: history
+  /OpenStack/Cinder:
+    remove: true
+  /OpenStack/Cinder/Volume:
+    remove: true    
+    mappings:
+      cinder.volume default mapping:
+        remove: true
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: defaultmapping
+        sequence: 900
+        rule: getattr(evt, 'eventClassKey', '') or '').startswith('openstack|volume')
+        explanation: All volume events not otherwise mapped will be placed in the /OpenStackInfrastructure/Cinder/Volume class history.
+        zProperties:
+          zEventAction: history
+  /OpenStack/Cinder/Snapshot:
+    remove: true
+    mappings:
+      Cinder Snapshot default mapping:
+        remove: true
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: defaultmapping
+        sequence: 900
+        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|snapshot')
+        explanation: All snapshot events not otherwise mapped will be placed in the /OpenStackInfrastructure/Cinder/Snapshot class history.
+        zProperties:
+          zEventAction: history
+  /Status:
+    remove: true
+  /Status/Heartbeat:
+    remove: true
+  /Status/Heartbeat/instances:
+    remove: true
+    mappings:
+      openStackCeilometerHeartbeat:
+        remove: true
+        eventClassKey: openStackCeilometerHeartbeat
+        sequence: 10
+  /Status/instances:
+    remove: true
+    mappings:
+      openStackIniFileAccess:
+        remove: true
+        eventClassKey: openStackIniFileAccess
+        sequence: 12
+        explanation: An openstack configuration file could not be accessed.
+        resolution: Correct the permissions so that the file is accessible.
+      openStackIniFileOptionParsing:
+        remove: true
+        eventClassKey: openStackIniFileOptionParsing
+        sequence: 12
+        explanation: A required option was not found in an ini file on the openstack host.
+        resolution: Add the required option to the file.
+      openStackCinderServiceStatus:
+        remove: true
+        eventClassKey: openStackNeutronAgentStatus
+        sequence: 12
+        explanation: A neutron agent is not running properly
+        resolution: Restart the offending agent.
+      openStackCinderServiceStatus:
+        remove: true
+        eventClassKey: openStackNeutronAgentStatus
+        sequence: 12
+        explanation: A cinder agent is not running properly
+        resolution: Restart the offending agent.
+      openStackApiEndpointStatus:
+        remove: true
+        sequence: 12
+        explanation: An openstack API endpoint is not responding to http queries.
+        resolution: Troubleshoot or restart the responsible process.
+      openStackNovaServiceStatus:
+        remove: true
+        sequence: 12
+        explanation: A nova service is not running properly
+        resolution: Restart the offending service.
+
+process_class_organizers:
+  /OpenStack:
+    zProperties:
+      zModelerLock: 1
+    process_classes:
+      ceilometer-agent-central:
+          includeRegex: 'ceilometer-agent-central'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      ceilometer-agent-compute:
+          includeRegex: 'ceilometer-agent-compute'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      ceilometer-agent-notification:
+          includeRegex: 'ceilometer-agent-notification'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      ceilometer-alarm-evaluator:
+          includeRegex: 'ceilometer-alarm-evaluator'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      ceilometer-alarm-notifier:
+          includeRegex: 'ceilometer-alarm-notifier'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      ceilometer-api:
+          includeRegex: 'ceilometer-api'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      ceilometer-collector:
+          includeRegex: 'ceilometer-collector'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      ceilometer-polling:
+          includeRegex: 'ceilometer-polling'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      neutron-dhcp-agent:
+          includeRegex: 'neutron-dhcp-agent'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      neutron-l3-agent:
+          includeRegex: 'neutron-l3-agent'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      neutron-metadata-agent:
+          includeRegex: 'neutron-metadata-agent'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      neutron-openvswitch-agent:
+          includeRegex: 'neutron-openvswitch-agent'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      neutron-server:
+          includeRegex: 'neutron-server'
+          excludeRegex: '\b(vim|tail|grep|pgrep|tar|cat|bash)\b'
+      nova-api:
+          includeRegex: 'nova-api'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      nova-cert:
+          includeRegex: 'nova-cert'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      nova-compute:
+          includeRegex: 'nova-compute'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      nova-conductor:
+          includeRegex: 'nova-conductor'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      nova-consoleauth:
+          includeRegex: 'nova-consoleauth'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      nova-network:
+          includeRegex: 'nova-network'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      nova-scheduler:
+          includeRegex: 'nova-scheduler'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      cinder-api:
+          includeRegex: 'cinder-api'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      cinder-scheduler:
+          includeRegex: 'cinder-scheduler'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      cinder-volume:
+          includeRegex: 'cinder-volume'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      cinder-backup:
+          includeRegex: 'cinder-backup'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      glance-api:
+          includeRegex: 'glance-api'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      glance-registry:
+          includeRegex: 'glance-registry'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      gnocchi-metricd:
+          includeRegex: 'gnocchi-metricd'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      gnocchi-statsd:
+          includeRegex: 'gnocchi-statsd'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      keystone-all:
+          includeRegex: 'keystone-all'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      keystone-admin:
+          includeRegex: 'keystone-admin'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      keystone-main:
+          includeRegex: 'keystone-main'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      rabbitmq-server:
+          includeRegex: 'rabbitmq-server'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      neutron-lbaas-agent:
+          includeRegex: 'neutron-lbaas-agent'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      neutron-metering-agent:
+          includeRegex: 'neutron-metering-agent'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
