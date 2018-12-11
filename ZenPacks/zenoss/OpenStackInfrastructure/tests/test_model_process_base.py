@@ -819,6 +819,18 @@ class TestModelProcess(BaseTestCase):
             'set_parentOrg': 'region-RegionOne',
             'title': u'nova'})
 
+    def testBadImages(self):
+        # If server data has an empty image (a missing structure is possible!),
+        # make sure modeler does not fail and omits set_image on object.
+        data = self.data.copy()
+
+        data['servers'][0]['image'] = ''
+        server_id = 'server-' + data['servers'][0]['id']
+
+        for objmap in all_objmaps(self._processTestData(data)):
+            if getattr(objmap, 'id', None) == server_id:
+                self.assertFalse(hasattr(objmap, 'set_image'))
+
 
 def test_suite():
     from unittest import TestSuite, makeSuite

@@ -615,8 +615,9 @@ class OpenStackInfrastructure(PythonPlugin):
 
             # Some Instances are created from pre-existing volumes
             # This implies no image may exists.
-            image_id = server.get('image', {}).get('id')
-            if image_id:
+            image = server.get('image')
+            if image:
+                image_id = image.get('id')
                 server_dict['set_image'] = prepId('image-{0}'.format(image_id))
 
             servers.append(ObjectMap(
