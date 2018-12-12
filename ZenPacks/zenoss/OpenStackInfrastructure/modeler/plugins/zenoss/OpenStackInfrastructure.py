@@ -14,7 +14,7 @@
 """ Get component information using OpenStack API clients """
 
 import logging
-log = logging.getLogger('zen.OpenStackInfrastructure')
+LOG = logging.getLogger('zen.OpenStackInfrastructure')
 
 from collections import defaultdict
 import hashlib
@@ -63,71 +63,6 @@ POWER_STATE_MAP = {
     6: 'crashed',
     7: 'suspended',
 }
-
-
-@inlineCallbacks
-def api_call(method, key, **kwargs):
-    """
-    A smart API calling method, which handles possible errors.
-
-    API gets called like this:
-
-        results['cinder_url'] = yield api_call(cinder.get_url, None)
-        results['tenants'] = yield api_call(keystone.tenants, 'tenants')
-        results['flavors'] = yield api_call(nova.flavors, 'flavors', is_public=True)
-
-    """
-    method_class = '{}'.format(method.__self__.__class__.__name__)
-    debug_string = "class '{}', key '{}', kwargs '{}'".format(method_class,
-                                                              key,
-                                                              str(kwargs))
-    log.debug("api_call: %s", debug_string)
-
-    try:
-        result = yield method(**kwargs)
-
-    except NotFoundError as ex:
-        log.error("Method not found for '%s': %s. "
-                  "Check the API configuration.", debug_string, ex)
-        returnValue([])
-
-    except ConnectionRefusedError as ex:
-        log.error("Connection refused for '%s': %s. "
-                  "Check the OpenStack service configuration.", debug_string, ex)
-        returnValue([])
-
-    except APIClientError as ex:
-        log.error("API client error for '%s': %s.", debug_string, ex)
-
-        if "401 Unauthorized" in ex.message:
-            log.error("Unauthorized: check OpenStack username and password.")
-
-        if "403 Forbidden" in ex.message:
-            log.warning("OpenStack user doesn't have access to this call. "
-                        "Partial Modeling will proceed regardless."
-                        )
-
-        if "503 Service Unavailable" in ex.message:
-            log.error("Service is unavailable. Check Openstack Services.")
-
-        returnValue([])
-
-    except Exception as ex:
-        # Probably mainly 4xx/5xx exceptions we want to handle nicely.
-        # Anything else we could allow to fall through, as it's probably
-        # not an API error, but something broken on our side (DNS error, etc)
-
-        # * TODO: What is meant by "handle nicely" for 4x/5x?
-
-        log.warning("API call failure for '%s': %s", debug_string, ex)
-        returnValue([])
-
-    else:
-        if key:
-            returnValue(result.get(key, []))
-            log.debug('%s: %s\n', debug_string, str(result[key]))
-        else:
-            returnValue(result)
 
 
 def getHostOrgComponent(host_id, results):
@@ -338,13 +273,13 @@ class OpenStackInfrastructure(PythonPlugin):
             try:
                 imageCreated = LocalDateTime(isoToTimestamp(image.get('created', '').replace('Z', '')))
             except Exception:
-                log.debug("Unable to reformat imageCreated '%s'" % image.get('created', ''))
+                LOG.debug("Unable to reformat imageCreated '%s'" % image.get('created', ''))
                 imageCreated = image.get('created', '')
 
             try:
                 imageUpdated = LocalDateTime(isoToTimestamp(image.get('updated', '').replace('Z', '')))
             except Exception:
-                log.debug("Unable to reformat imageUpdated '%s'" % image.get('updated', ''))
+                LOG.debug("Unable to reformat imageUpdated '%s'" % image.get('updated', ''))
                 imageUpdated = image.get('updated', '')
 
             images.append(ObjectMap(
@@ -575,7 +510,7 @@ class OpenStackInfrastructure(PythonPlugin):
                                        "for server: {1}"
                                        ).format(ip_addr, server_uid)
 
-                            log.info(message)
+                            LOG.info(message)
                             private_ips.add(ip_addr)
 
             flavor = server.get('flavor', {}).get('id')
@@ -643,21 +578,21 @@ class OpenStackInfrastructure(PythonPlugin):
         """
 
         if device.zOpenStackNovaApiHosts or device.zOpenStackExtraHosts:
-            log.info("Finding additional hosts")
+            LOG.info("Finding additional hosts")
 
             if device.zOpenStackNovaApiHosts:
-                log.info("  Adding zOpenStackNovaApiHosts=%s" % device.zOpenStackNovaApiHosts)
+                LOG.info("  Adding zOpenStackNovaApiHosts=%s" % device.zOpenStackNovaApiHosts)
             if device.zOpenStackExtraHosts:
-                log.info("  Adding zOpenStackExtraHosts=%s" % device.zOpenStackExtraHosts)
+                LOG.info("  Adding zOpenStackExtraHosts=%s" % device.zOpenStackExtraHosts)
 
-        log.debug("Modeling Hosts:")
+        LOG.debug("Modeling Hosts:")
         hostmap = results.get('hostmap')
         hosts = []
         seen_hostids = set()
         for host_id in hostmap.all_hostids():
 
             if host_id in seen_hostids:
-                log.debug("  (disregarding duplicate host ID: %s)", host_id)
+                LOG.debug("  (disregarding duplicate host ID: %s)", host_id)
                 continue
             seen_hostids.add(host_id)
 
@@ -674,11 +609,11 @@ class OpenStackInfrastructure(PythonPlugin):
             try:
                 hostname = hostmap.get_hostname_for_hostid(host_id)
             except Exception:
-                log.error("Invalid hostname for host_id: '%s'", host_id)
-                log.error("Ensure that zOpenStackHost* properties are correct!")
+                LOG.error("Invalid hostname for host_id: '%s'", host_id)
+                LOG.error("Ensure that zOpenStackHost* properties are correct!")
                 continue
 
-            log.debug("  Host %s (%s) (sources=%s)", host_id, hostname, hostmap.get_sources_for_hostid(host_id))
+            LOG.debug("  Host %s (%s) (sources=%s)", host_id, hostname, hostmap.get_sources_for_hostid(host_id))
 
             hosts.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Host',
@@ -717,7 +652,7 @@ class OpenStackInfrastructure(PythonPlugin):
             nova_api_hosts.add(nova_url_host)
 
         if not nova_api_hosts:
-            log.warning("No nova-api hosts have been identified. "
+            LOG.warning("No nova-api hosts have been identified. "
                         "You must set zOpenStackNovaApiHosts to the "
                         "list of hosts upon which nova-api runs.")
 
@@ -728,7 +663,7 @@ class OpenStackInfrastructure(PythonPlugin):
             cinder_api_hosts.add(cinder_url_host)
 
         if not cinder_api_hosts:
-            log.warning("No cinder-api hosts have been identified. "
+            LOG.warning("No cinder-api hosts have been identified. "
                         "You must set zOpenStackCinderApiHosts to the "
                         "list of hosts upon which cinder-api runs.")
 
@@ -767,12 +702,12 @@ class OpenStackInfrastructure(PythonPlugin):
             try:
                 hostname = hostmap.get_hostname_for_hostid(host_id)
             except InvalidHostIdException:
-                log.error("An invalid Host ID: '%s' was provided.\n"
+                LOG.error("An invalid Host ID: '%s' was provided.\n"
                           "\tPlease examine zOpenStackHostMapToId "
                           "and zOpenStackHostMapSame.", host_id)
                 continue
             except Exception:
-                log.warning("An unknown error for Host ID: '%s' occurred", host_id)
+                LOG.warning("An unknown error for Host ID: '%s' occurred", host_id)
                 continue
 
             host_base_id = re.sub(r'^host-', '', host_id)
@@ -856,12 +791,12 @@ class OpenStackInfrastructure(PythonPlugin):
                 try:
                     hostname = hostmap.get_hostname_for_hostid(host_id)
                 except InvalidHostIdException:
-                    log.error("An invalid Host ID: '%s' was provided.\n"
+                    LOG.error("An invalid Host ID: '%s' was provided.\n"
                               "\tPlease examine zOpenStackHostMapToId "
                               "and zOpenStackHostMapSame.", host_id)
                     continue
                 except Exception:
-                    log.warning("An unknown error for Host ID: '%s' occurred", host_id)
+                    LOG.warning("An unknown error for Host ID: '%s' occurred", host_id)
                     continue
 
                 host_base_id = re.sub(r'^host-', '', host_id)
@@ -956,12 +891,12 @@ class OpenStackInfrastructure(PythonPlugin):
             try:
                 hostname = hostmap.get_hostname_for_hostid(agent['host'])
             except InvalidHostIdException:
-                log.error("An invalid Host ID: '%s' was provided.\n"
+                LOG.error("An invalid Host ID: '%s' was provided.\n"
                           "\tPlease examine zOpenStackHostMapToId and "
                           "zOpenStackHostMapSame.", agent_hostid)
                 continue
             except Exception:
-                log.warning("An unknown error for Host ID: "
+                LOG.warning("An unknown error for Host ID: "
                             "'%s' occurred", agent_hostid)
 
             title = '{0}@{1}'.format(agent.get('agent_type', ''), hostname)
@@ -1352,7 +1287,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 service_type, url = api_endpoint.split(':')
                 url = url.lstrip()
             except ValueError:
-                log.error("Ignoring invalid value in zOpenStackExtraApiEndpoints: %s", api_endpoint)
+                LOG.error("Ignoring invalid value in zOpenStackExtraApiEndpoints: %s", api_endpoint)
 
             # create a component id for the api endpoint, based on the url
             # and service type.
@@ -1380,14 +1315,93 @@ class OpenStackInfrastructure(PythonPlugin):
     # -------------------------------------------------------------------------
 
     @inlineCallbacks
+    def api_call(self, method, key, **kwargs):
+        """
+        A smart API calling method, which handles possible errors.
+
+        API gets called like this:
+
+            results['cinder_url'] = yield api_call(cinder.get_url, None)
+            results['tenants'] = yield api_call(keystone.tenants, 'tenants')
+            results['flavors'] = yield api_call(nova.flavors, 'flavors', is_public=True)
+
+        """
+        if self.api_client_logs is None:
+            self.api_client_logs = []
+
+        method_class = '{}'.format(method.__self__.__class__.__name__)
+        debug_string = "{}".format(method_class)
+        if key:
+            debug_string += ".{}".format(key)
+        if kwargs:
+            debug_string += ".{}".format(str(kwargs))
+
+        LOG.debug("api_call: %s", debug_string)
+
+        try:
+            result = yield method(**kwargs)
+
+        except NotFoundError as ex:
+            LOG.error("Method not found for '%s': %s. "
+                      "Check the API configuration.", debug_string, ex)
+            returnValue([])
+
+        except ConnectionRefusedError as ex:
+            LOG.error("Connection refused for '%s': %s. "
+                      "Check the OpenStack service configuration.", debug_string, ex)
+            returnValue([])
+
+        except APIClientError as ex:
+            messages = ''
+
+            # Add a single authorization error message to top of list.
+            if "401 Unauthorized" in ex.message:
+                if not any('Check zCommandUsername' in m
+                           for m in
+                           self.api_client_logs):
+                    messages += "Authorization Errors: Check zCommandUsername and zCommandPassword!\n  "
+
+            ex_message = ex.message.replace(' (check username and password)', '')
+            messages += "API client error for '{}': {}".format(debug_string, ex_message)
+
+            if "403 Forbidden" in ex.message:
+                messages += (" OpenStack user lacks access to this call."
+                             " Partial Modeling will proceed regardless.")
+
+            if "503 Service Unavailable" in ex.message:
+                messages += "Check Openstack services setup."
+
+            self.api_client_logs.append(messages)
+            returnValue([])
+
+        except Exception as ex:
+            # Probably mainly 4xx/5xx exceptions we want to handle nicely.
+            # Anything else we could allow to fall through, as it's probably
+            # not an API error, but something broken on our side (DNS error, etc)
+
+            # * TODO: What is meant by "handle nicely" for 4x/5x?
+
+            LOG.warning("API call failure for '%s': %s", debug_string, ex)
+            returnValue([])
+
+        else:
+            if key:
+                returnValue(result.get(key, []))
+                LOG.debug('%s: %s\n', debug_string, str(result[key]))
+            else:
+                returnValue(result)
+
+    @inlineCallbacks
     def collect(self, device, unused):
 
+        self.api_client_logs = None
+
         if not device.zCommandUsername or not device.zCommandPassword:
-            log.error("Password/Username should be set to proper values. Check your Openstack credentials.")
+            LOG.error("Password/Username should be set to proper values. Check your Openstack credentials.")
             returnValue({})
 
         if not device.zOpenStackAuthUrl or not device.zOpenStackProjectId or not device.zOpenStackRegionName:
-            log.error("Openstack credentials should be set to proper values. Check your OpenStackAuthUrl, OpenStackProjectId and OpenStackRegionName")
+            LOG.error("Openstack credentials should be set to proper values. Check your OpenStackAuthUrl, OpenStackProjectId and OpenStackRegionName")
             returnValue({})
 
         sm = SessionManager(
@@ -1404,31 +1418,31 @@ class OpenStackInfrastructure(PythonPlugin):
 
         results = {}
 
-        results['nova_url'] = yield api_call(nova.get_url, None)
-        results['tenants'] = yield api_call(keystone.tenants, 'tenants')
-        results['flavors'] = yield api_call(nova.flavors, 'flavors', is_public=True)
+        results['nova_url'] = yield self.api_call(nova.get_url, None)
+        results['tenants'] = yield self.api_call(keystone.tenants, 'tenants')
+        results['flavors'] = yield self.api_call(nova.flavors, 'flavors', is_public=True)
 
-        private_flavors = yield api_call(nova.flavors, 'flavors', is_public=False)
+        private_flavors = yield self.api_call(nova.flavors, 'flavors', is_public=False)
         for flavor in private_flavors:
             if flavor not in results['flavors']:
                 results['flavors'].append(flavor)
 
-        results['images'] = yield api_call(nova.images, 'images')
-        results['hypervisors'] = yield api_call(nova.hypervisorservers, 'hypervisors', hypervisor_match='%')
-        results['hypervisors_detailed'] = yield api_call(nova.hypervisorsdetailed, 'hypervisors')
+        results['images'] = yield self.api_call(nova.images, 'images')
+        results['hypervisors'] = yield self.api_call(nova.hypervisorservers, 'hypervisors', hypervisor_match='%')
+        results['hypervisors_detailed'] = yield self.api_call(nova.hypervisorsdetailed, 'hypervisors')
 
         # Get hypervisor details for each individual hypervisor
         results['hypervisor_details'] = {}
         for hypervisor in results['hypervisors']:
-            hypervisor_detail_id = yield api_call(nova.hypervisor_detail_id,
-                                                  'hypervisor',
-                                                  hypervisor_id=hypervisor['id'])
+            hypervisor_detail_id = yield self.api_call(nova.hypervisor_detail_id,
+                                                       'hypervisor',
+                                                       hypervisor_id=hypervisor['id'])
             hypervisor_id = prepId("hypervisor-{0}".format(hypervisor['id']))
             results['hypervisor_details'][hypervisor_id] = hypervisor_detail_id
 
-        results['servers'] = yield api_call(nova.servers, 'servers')
-        results['services'] = yield api_call(nova.services, 'services')
-        results['agents'] = yield api_call(neutron.agents, 'agents')
+        results['servers'] = yield self.api_call(nova.servers, 'servers')
+        results['services'] = yield self.api_call(nova.services, 'services')
+        results['agents'] = yield self.api_call(neutron.agents, 'agents')
 
         # ---------------------------------------------------------------------
         # Insert the l3_agents -> (routers, networks, subnets, gateways) data
@@ -1442,9 +1456,9 @@ class OpenStackInfrastructure(PythonPlugin):
 
             if _agent['agent_type'].lower() == 'l3 agent':
                 try:
-                    router_data = yield api_call(neutron.agent_l3_routers, None, agent_id=str(_agent['id']))
+                    router_data = yield self.api_call(neutron.agent_l3_routers, None, agent_id=str(_agent['id']))
                 except Exception, e:
-                    log.warning("Unable to determine neutron URL for " +
+                    LOG.warning("Unable to determine neutron URL for " +
                                 "l3 router agent discovery: %s" % e)
                     continue
 
@@ -1471,9 +1485,9 @@ class OpenStackInfrastructure(PythonPlugin):
 
             if _agent['agent_type'].lower() == 'dhcp agent':
                 try:
-                    dhcp_data = yield api_call(neutron.agent_dhcp_networks, None, agent_id=str(_agent['id']))
+                    dhcp_data = yield self.api_call(neutron.agent_dhcp_networks, None, agent_id=str(_agent['id']))
                 except Exception, e:
-                    log.warning("Unable to determine neutron URL for " +
+                    LOG.warning("Unable to determine neutron URL for " +
                                 "dhcp agent discovery: %s" % e)
                     continue
 
@@ -1485,36 +1499,36 @@ class OpenStackInfrastructure(PythonPlugin):
                 _agent['dhcp_agent_subnets'] = _subnets
                 _agent['dhcp_agent_networks'] = _networks
 
-        results['networks'] = yield api_call(neutron.networks, 'networks')
-        results['subnets'] = yield api_call(neutron.subnets, 'subnets')
-        results['routers'] = yield api_call(neutron.routers, 'routers')
-        results['ports'] = yield api_call(neutron.ports, 'ports')
-        results['floatingips'] = yield api_call(neutron.floatingips, 'floatingips')
-        results['cinder_url'] = yield api_call(cinder.get_url, None)
-        results['volumes'] = yield api_call(cinder.volumes, 'volumes')
-        results['volumetypes'] = yield api_call(cinder.volumetypes, 'volume_types')
-        results['volsnapshots'] = yield api_call(cinder.volumesnapshots, 'snapshots')
-        results['cinder_services'] = yield api_call(cinder.services, 'services')
-        results['volume_pools'] = yield api_call(cinder.pools, 'pools')
+        results['networks'] = yield self.api_call(neutron.networks, 'networks')
+        results['subnets'] = yield self.api_call(neutron.subnets, 'subnets')
+        results['routers'] = yield self.api_call(neutron.routers, 'routers')
+        results['ports'] = yield self.api_call(neutron.ports, 'ports')
+        results['floatingips'] = yield self.api_call(neutron.floatingips, 'floatingips')
+        results['cinder_url'] = yield self.api_call(cinder.get_url, None)
+        results['volumes'] = yield self.api_call(cinder.volumes, 'volumes')
+        results['volumetypes'] = yield self.api_call(cinder.volumetypes, 'volume_types')
+        results['volsnapshots'] = yield self.api_call(cinder.volumesnapshots, 'snapshots')
+        results['cinder_services'] = yield self.api_call(cinder.services, 'services')
+        results['volume_pools'] = yield self.api_call(cinder.pools, 'pools')
 
         results['quotas'] = []
         for tenant in results['tenants']:
-            quota_set = yield api_call(cinder.quotas, 'quota_set',
-                                       tenant=tenant['id'],
-                                       usage=False)
+            quota_set = yield self.api_call(cinder.quotas, 'quota_set',
+                                            tenant=tenant['id'],
+                                            usage=False)
             results['quotas'].append(quota_set)
 
         results['zOpenStackNovaApiHosts'], host_errors = filter_FQDNs(device.zOpenStackNovaApiHosts)
         if host_errors:
-            log.warning('Invalid host in zOpenStackNovaApiHosts')
+            LOG.warning('Invalid host in zOpenStackNovaApiHosts')
 
         results['zOpenStackCinderApiHosts'], host_errors = filter_FQDNs(device.zOpenStackCinderApiHosts)
         if host_errors:
-            log.warning('Invalid host in zOpenStackCinderApiHosts')
+            LOG.warning('Invalid host in zOpenStackCinderApiHosts')
 
         results['zOpenStackExtraHosts'], host_errors = filter_FQDNs(device.zOpenStackExtraHosts)
         if host_errors:
-            log.warning('Invalid host in zOpenStackExtraHosts')
+            LOG.warning('Invalid host in zOpenStackExtraHosts')
 
         try:
             results['nova_url_host'] = urlparse(results['nova_url']).hostname
@@ -1525,6 +1539,12 @@ class OpenStackInfrastructure(PythonPlugin):
             results['cinder_url_host'] = urlparse(results['cinder_url']).hostname
         except:
             results['cinder_url_host'] = None
+
+        # Dump all API Error logs at once:
+        if self.api_client_logs:
+            _api_logs = "collect() API Errors detected: \n  "
+            _api_logs += "\n  ".join(self.api_client_logs)
+            LOG.warning(_api_logs)
 
         yield self.preprocess_hosts(device, results)
 
@@ -1562,7 +1582,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 # hostname may not be relevant.  (At least on the test servers,
                 # I see 'ceph@ceph' here, which is meaningless)  (ZPS-3751)
                 if service['binary'] == 'cinder-volume' and service['host'] is not None and service['host'].endswith('@ceph'):
-                    log.debug("Ignoring host '%s' from cinder-volume service", service['host'])
+                    LOG.debug("Ignoring host '%s' from cinder-volume service", service['host'])
                     continue
 
                 hostmap.add_hostref(service['host'], source="cinder services")
@@ -1587,7 +1607,7 @@ class OpenStackInfrastructure(PythonPlugin):
                 hostmap.add_hostref(hostref, source="zOpenStackHostMapToId")
                 hostmap.assert_host_id(hostref, hostid)
             except Exception as ex:
-                log.error("Invalid value in zOpenStackHostMapToId: '%s'", mapping)
+                LOG.error("Invalid value in zOpenStackHostMapToId: '%s'", mapping)
 
         for mapping in device.zOpenStackHostMapSame:
             if not mapping: continue
@@ -1599,8 +1619,8 @@ class OpenStackInfrastructure(PythonPlugin):
                 hostmap.add_hostref(hostref2, source="zOpenStackHostMapSame")
                 hostmap.assert_same_host(hostref1, hostref2)
             except Exception as ex:
-                log.error("assert_same_host error: %s", ex)
-                log.error("Invalid value in zOpenStackHostMapSame: '%s'", mapping)
+                LOG.error("assert_same_host error: %s", ex)
+                LOG.error("Invalid value in zOpenStackHostMapSame: '%s'", mapping)
 
         # generate host IDs
         yield hostmap.perform_mapping()
@@ -1722,7 +1742,7 @@ class OpenStackInfrastructure(PythonPlugin):
         # (this is mostly for testing purposes!)
         filename = zenpack_path('static_objmaps.json')
         if os.path.exists(filename):
-            log.info("Loading %s" % filename)
+            LOG.info("Loading %s" % filename)
             data = ''
             with open(filename) as f:
                 for line in f:
@@ -1751,12 +1771,12 @@ class OpenStackInfrastructure(PythonPlugin):
                                     found = True
                                     for attr in om_dict:
                                         if attr != 'title':
-                                            log.info("  Adding %s=%s to %s (%s)" % (attr, om_dict[attr], om.id, om.title))
+                                            LOG.info("  Adding %s=%s to %s (%s)" % (attr, om_dict[attr], om.id, om.title))
                                             setattr(om, attr, om_dict[attr])
                                     break
 
                             if not found:
-                                log.error("Unable to find a matching objectmap to extend: %s" % om_dict)
+                                LOG.error("Unable to find a matching objectmap to extend: %s" % om_dict)
 
                             continue
 
@@ -1766,7 +1786,7 @@ class OpenStackInfrastructure(PythonPlugin):
                                                       data=om_dict))
                     added_count = len(objmaps[key]) - starting_count
                     if added_count > 0:
-                        log.info("  Added %d new objectmaps to %s" % (added_count, key))
+                        LOG.info("  Added %d new objectmaps to %s" % (added_count, key))
 
         # Apply the objmaps in the right order.
         componentsMap = RelationshipMap(relname='components')
