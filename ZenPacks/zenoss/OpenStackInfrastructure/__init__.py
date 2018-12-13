@@ -31,7 +31,7 @@ from Products.ZenUtils.Utils import unused
 from OFS.CopySupport import CopyError
 
 schema = CFG.zenpack_module.schema
-from service_migration import install_migrate_zenpython, remove_migrate_zenpython, fix_service_healthcheck_path
+from service_migration import install_migrate_zenpython, remove_migrate_zenpython, fix_service_healthcheck_path, force_update_configs
 
 NOVAHOST_PLUGINS = ['zenoss.cmd.linux.openstack.nova',
                     'zenoss.cmd.linux.openstack.libvirt',
@@ -41,7 +41,6 @@ NOVAHOST_PLUGINS = ['zenoss.cmd.linux.openstack.nova',
 
 try:
     import servicemigration as sm
-    from Products.ZenModel.ZenPack import DirectoryConfigContents
     sm.require("1.0.0")
     VERSION5 = True
 except ImportError:
@@ -163,24 +162,45 @@ class ZenPack(schema.ZenPack):
         super(ZenPack, self).install(app)
         install_migrate_zenpython()
         if VERSION5:
-            try:
-                ctx = sm.ServiceContext()
-            except sm.ServiceMigrationError:
-                log.info("Couldn't generate service context, skipping.")
-                return
-            rabbitmq_ceil = filter(lambda s: s.name == "RabbitMQ-Ceilometer", ctx.services)
-            if not rabbitmq_ceil:
-                # from line 1278 of ZenPack.py
-                log.info("Loading RabbitMQ-Ceilometer service definition during upgrade")
-                sdFiles = self.getServiceDefinitionFiles()
-                toConfigPath = lambda x: os.path.join(os.path.dirname(x), '-CONFIGS-')
-                configFileMaps = [DirectoryConfigContents(toConfigPath(i)) for i in sdFiles]
-                self.installServicesFromFiles(sdFiles, configFileMaps, self.getServiceTag())
+            # by default, services are only installed during initial zenpack
+            # installs, not upgrades.   We run it every time instead, but make
+            # it only process service definitions that are missing, by
+            # overriding getServiceDefinitionFiles to be intelligent.
+            self.installServices()
 
             # Fix zenpack-provided healthcheck file paths (since the zenpack's)
             # directory may change during install/upgrade
             fix_service_healthcheck_path()
+
+            # We ship a shell script as a "config" file- make sure that
+            # the config is updated if the script has changed.
+            force_update_configs(self, "proxy-zenopenstack", ["opt/zenoss/bin/proxy-zenopenstack"])
+
+
+
         self.chmodScripts()
+
+    def getServiceDefinitionFiles(self):
+        # The default version of this is only called during initial installation,
+        # and returns all services.   This version can be called during upgrades
+        # as well, because it returns only services that are not already installed.
+
+        try:
+            ctx = sm.ServiceContext()
+        except sm.ServiceMigrationError:
+            log.info("Couldn't generate service context, skipping.")
+            return
+
+        svcs = set([s.name for s in ctx.services])
+        files = []
+        if "RabbitMQ-Ceilometer" not in svcs:
+            files.append(self.path('service_definition', "RabbitMQ-Ceilometer.json"))
+        if "zenopenstack" not in svcs:
+            files.append(self.path('service_definition', "zenopenstack.json"))
+        if "proxy-zenopenstack" not in svcs:
+            files.append(self.path('service_definition', "proxy-zenopenstack.json"))
+
+        return files
 
     def _update_plugins(self, organizer):
         log.debug('Update plugins list for NovaHost organizer')
