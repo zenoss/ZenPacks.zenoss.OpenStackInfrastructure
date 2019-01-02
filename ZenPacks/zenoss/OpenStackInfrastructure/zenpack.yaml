@@ -2283,8 +2283,8 @@ event_classes:
           from ZenPacks.zenoss.OpenStackInfrastructure.events import process
           process(evt, device, dmd, txnCommit)
         eventClassKey: defaultmapping
-        sequence: 900
-        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|image')
+        sequence: 910
+        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|image.')
         zProperties:
           zEventAction: history
   /Status:
