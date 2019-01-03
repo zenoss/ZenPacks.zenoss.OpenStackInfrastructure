@@ -2274,6 +2274,19 @@ event_classes:
         explanation: All snapshot events not otherwise mapped will be placed in the /OpenStackInfrastructure/Cinder/Snapshot class history.
         zProperties:
           zEventAction: history
+  /OpenStack/image:
+    remove: true
+    mappings:
+      Image defaultmapping:
+        remove: true
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: defaultmapping
+        sequence: 910
+        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|image.')
+        zProperties:
+          zEventAction: history
   /Status:
     remove: true
   /Status/Heartbeat:
