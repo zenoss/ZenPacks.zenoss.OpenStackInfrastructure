@@ -19,8 +19,10 @@ log = logging.getLogger('zen.OpenStack.zenopenstack')
 
 import Globals
 
-from collections import deque
+from collections import defaultdict, deque
+from functools import partial
 import json
+from metrology import Metrology
 import time
 
 from twisted.internet import reactor, defer
@@ -36,8 +38,6 @@ from Products.ZenCollector.interfaces import (
     ICollector,
     ICollectorPreferences,
     IDataService,
-    IEventService,
-    IStatisticsService,
     IScheduledTask
 )
 
@@ -54,6 +54,76 @@ unused(Globals)
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import amqp_timestamp_to_int
 from ZenPacks.zenoss.OpenStackInfrastructure.services.OpenStackConfig import OpenStackDataSourceConfig
 pb.setUnjellyableForClass(OpenStackDataSourceConfig, OpenStackDataSourceConfig)
+
+
+class CeilometerMessageCache(object):
+    """
+    Process payload data that looks like following:
+
+        [{u'event_type': u'volume.update.end',
+        u'generated': u'2019-01-03T14:47:05.300175',
+        u'message_id': u'239a077f-910b-4131-926d-460c4d81da58',
+        u'raw': {},
+        u'traits': [[u'status', 1, u'available'],
+                    [u'user_id', 1, u'4b3448a3057c411d827de9bfb77a5599'],
+                    [u'service', 1, u'volume.osi-p'],
+                    [u'availability_zone', 1, u'nova'],
+                    [u'tenant_id', 1, u'313da8e3ab19478e82be9c50e6b1a04b'],
+                    [u'created_at', 1, u'2018-12-13T17:02:14+00:00'],
+                    [u'resource_id', 1, u'375666bf-833a-4102-972e-402031f47f41'],
+                    [u'host', 1, u'osi-p@lvm#lvm'],
+                    [u'request_id', 1, u'req-b34e6276-5fae-4914-9736-60fe259c24db'],
+                    [u'display_name', 1, u'junkVolume2'],
+                    [u'project_id', 1, u'313da8e3ab19478e82be9c50e6b1a04b'],
+                    [u'type', 1, u'45bbf67b-c222-4bc6-a3a1-97804d9b1d53'],
+                    [u'size', 1, u'1']]}]
+    """
+
+    def __init__(self):
+        # Create a dict cache that consists of deques max size 100:
+        self.cache = defaultdict(partial(deque, maxlen=100))
+
+    def store_message(self, request):
+        """Store events in the cache, update statistics.
+
+        Hostname formatted as <host>:<port>/<uri> . For example:
+        '10.1.1.12:8242/ceilometer/v1/samples/osi_p'
+
+        This allows for separate samples and events cache data.
+        """
+
+        # Create a unique host_url that has: host:port/uri
+        host_port = request.getAllHeaders().get('host')
+        host_url = host_port + request.uri
+        message = request.content.getvalue()
+
+        # Add the host's message to the cache
+        if host_url:
+            self.cache[host_url].append(message)
+
+        # Now use Metrology to record the event
+        Metrology.meter(host_url).mark()
+
+    def get_host_urls(self):
+        """Return list of hosts URLs monitored."""
+        return self.cache.keys()
+
+    def get_messages(self, host_url):
+        """Return list of events for host_url."""
+        if host_url in self.cache:
+            return self.cache.get(host_url, [])
+
+    def get_fifteen_minute_rate(self, host_url):
+        """Return fifteen minute collection rate for host_url."""
+        return Metrology.meter(host_url).fifteen_minute_rate
+
+    def get_five_minute_rate(self, host_url):
+        """Return five minute collection rate for host_url."""
+        return Metrology.meter(host_url).five_minute_rate
+
+    def get_count(self, host_url):
+        """Return total metric + event count for host_url."""
+        return Metrology.meter(host_url).count
 
 
 class Registry(object):
@@ -92,6 +162,7 @@ REGISTRY = Registry()
 METRIC_QUEUE = deque()
 EVENT_QUEUE = deque()
 MAP_QUEUE = deque()
+MESSAGE_CACHE = CeilometerMessageCache()
 
 
 class Root(Resource):
@@ -153,6 +224,8 @@ class CeilometerV1Samples(Resource):
     isLeaf = True
 
     def render_POST(self, request):
+        MESSAGE_CACHE.store_message(request)
+
         if len(request.postpath) != 1:
             return NoResource().render(request)
 
@@ -207,6 +280,8 @@ class CeilometerV1Events(Resource):
     isLeaf = True
 
     def render_POST(self, request):
+        MESSAGE_CACHE.store_message(request)
+
         if len(request.postpath) != 1:
             return NoResource().render(request)
 
@@ -218,7 +293,7 @@ class CeilometerV1Events(Resource):
         if request.received_headers.get('content-type') != 'application/json':
             return ErrorPage(415, "Unsupported Media Type", "Unsupported Media Type").render(request)
         try:
-            payload = json.loads(request.content.getvalue())
+            payload = json.loads(request.content.getvalue())  # noqa : Remove comment once method is complete.
         except Exception, e:
             log.exception("Error parsing JSON data")
             return ErrorPage(400, "Bad Request", "Error parsing JSON data: %s" % e).render(request)
@@ -231,6 +306,7 @@ class CeilometerV1Events(Resource):
 
         # An empty response is fine.
         return b""
+
 
 class WebServer(object):
     site = None
