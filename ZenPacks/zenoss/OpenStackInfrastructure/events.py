@@ -22,62 +22,6 @@ import logging
 LOG = logging.getLogger('zen.OpenStack.events')
 
 
-# Sets of traits we can expect to get (see event_definitions.yaml on the
-# openstack side) and what objmap properties they map to.
-NEUTRON_TRAITMAPS = {
-    'floatingip': {
-        'fixed_ip_address':          ['fixed_ip_address'],
-        'floating_ip_address':       ['floating_ip_address'],
-        'id':                        ['floatingipId'],
-        'status':                    ['status'],
-        # See: _apply_neutron_traits: set_tenant
-        # _apply_trait_rel:  set_network, set_port, set_router,
-        # set_network(floating_network_id)
-    },
-    'network': {
-        'admin_state_up':            ['admin_state_up'],
-        'id':                        ['netId'],
-        'name':                      ['title'],
-        'provider_network_type':     ['netType'],
-        'router_external':           ['netExternal'],
-        'status':                    ['netStatus'],
-        # See: _apply_neutron_traits: set_tenant
-    },
-    'port': {
-        'admin_state_up':            ['admin_state_up'],
-        'binding:vif_type':          ['vif_type'],
-        'device_owner':              ['device_owner'],
-        'id':                        ['portId'],
-        'mac_address':               ['mac_address'],
-        'name':                      ['title'],
-        'status':                    ['status'],
-        # See: _apply_neutron_traits: set_tenant, set_network
-    },
-    'router': {
-        'admin_state_up':            ['admin_state_up'],
-        'id':                        ['routerId'],
-        'routes':                    ['routes'],
-        'status':                    ['status'],
-        'name':                      ['title'],
-        # See: _apply_router_gateway_info:
-        # (gateways, set_subnets, set_network)
-    },
-    'security_group': {
-        'id':                        ['sgId'],
-        'name':                      ['title'],
-    },
-    'subnet': {
-        'cidr':                      ['cidr'],
-        'gateway_ip':                ['gateway_ip'],
-        'id':                        ['subnetId'],
-        'name':                      ['title'],
-        'network_id':                ['subnetId'],
-        # See: _apply_dns_info(): dns_nameservers
-        # _apply_neutron_traits: set_tenant, set_network,
-    },
-}
-
-
 # -----------------------------------------------------------------------------
 # ID Functions
 # -----------------------------------------------------------------------------
@@ -121,7 +65,7 @@ def port_id(evt):
 
 
 def port_name(evt):
-    return port_id(evt)
+    return getattr(evt, "trait_name", port_id(evt))
 
 
 def router_id(evt):
@@ -129,7 +73,7 @@ def router_id(evt):
 
 
 def router_name(evt):
-    return router_id(evt)
+    return getattr(evt, "trait_name", router_id(evt))
 
 
 def securitygroup_id(evt):
@@ -145,7 +89,7 @@ def subnet_id(evt):
 
 
 def subnet_name(evt):
-    return subnet_id(evt)
+    return getattr(evt, "trait_name", subnet_id(evt))
 
 
 def tenant_id(evt):
@@ -171,9 +115,7 @@ def volsnapshot_name(evt):
 # -----------------------------------------------------------------------------
 # Traitmap Functions
 # -----------------------------------------------------------------------------
-def _apply_neutron_traits(evt, objmap, traitset):
-    traitmap = NEUTRON_TRAITMAPS[traitset]
-
+def _apply_neutron_traits(evt, objmap, traitmap):
     for trait in traitmap:
         for prop_name in traitmap[trait]:
             trait_field = 'trait_' + trait
@@ -256,6 +198,9 @@ def _apply_instance_traits(evt, objmap):
 
                 setattr(objmap, prop_name, value)
 
+    for prop_name in ['title', 'hostName']:
+        setattr(objmap, prop_name, instance_name(evt))
+
     # special case for publicIps / privateIps
     if hasattr(evt, 'trait_fixed_ips'):
         try:
@@ -277,19 +222,24 @@ def _apply_instance_traits(evt, objmap):
 
 def _apply_cinder_traits(evt, objmap):
     traitmap = {
-                'status':        ['status'],
-                'display_name': ['title'],
-                'availability_zone':   ['avzone'],
-                'created_at':   ['created_at'],
-                'volume_id':  ['volumeId'],
-                'host':    ['host'],
-                'type':  ['volume_type'],
-                'size':  ['size'],
-               }
+        'status': ['status'],
+        'display_name': ['title'],
+        'availability_zone': ['avzone'],
+        'created_at': ['created_at'],
+        'volume_id': ['volumeId'],
+        'resource_id': ['volumeId'],
+        'host': ['host'],
+        'type': ['volume_type'],
+        'size': ['size'],
+    }
     if 'VolSnapshot' in objmap.modname:
-        # volume snapshot does not have volume_id or availability_zone, only volume does
+        # volume snapshot events do not not have these, so don't try to apply them even
+        # if they are found.
         traitmap.pop('volume_id', None)
         traitmap.pop('availability_zone', None)
+        traitmap.pop('host', None)
+        traitmap.pop('type', None)
+
     for trait in traitmap:
         for prop_name in traitmap[trait]:
             trait_field = 'trait_' + trait
@@ -629,8 +579,19 @@ def floatingip_update(device, dmd, evt):
         LOG.info("Unable to identify floatingip component from event: %s" % evt)
         return []
 
+    traitmap = {
+        'fixed_ip_address': ['fixed_ip_address'],
+        'floating_ip_address': ['floating_ip_address'],
+        'id': ['floatingipId'],
+        'resource_id': ['floatingipId'],
+        'status': ['status'],
+        # See: _apply_neutron_traits: set_tenant
+        # _apply_trait_rel:  set_network, set_port, set_router,
+        # set_network(floating_network_id)
+    }
+
     objmap = neutron_objmap(evt, "FloatingIp")
-    _apply_neutron_traits(evt, objmap, 'floatingip')
+    _apply_neutron_traits(evt, objmap, traitmap)
 
     _apply_trait_rel(evt, objmap, 'trait_floating_network_id', 'network')
     _apply_trait_rel(evt, objmap, 'trait_router_id', 'router')
@@ -675,8 +636,19 @@ def network_update(device, dmd, evt):
         LOG.info("Unable to identify network component from event: %s" % evt)
         return []
 
+    traitmap = {
+        'admin_state_up': ['admin_state_up'],
+        'id': ['netId'],
+        'resource_id': ['netId'],
+        'name': ['title'],
+        'provider_network_type': ['netType'],
+        'router_external': ['netExternal'],
+        'status': ['netStatus'],
+        # See: _apply_neutron_traits: set_tenant
+    }
+
     objmap = neutron_objmap(evt, "Network")
-    _apply_neutron_traits(evt, objmap, 'network')
+    _apply_neutron_traits(evt, objmap, traitmap)
     return [objmap]
 
 
@@ -725,8 +697,20 @@ def port_update(device, dmd, evt):
         LOG.info("Unable to identify port component from event: %s" % evt)
         return []
 
+    traitmap = {
+        'admin_state_up': ['admin_state_up'],
+        'binding_vif_type': ['vif_type'],
+        'device_owner': ['device_owner'],
+        'id': ['portId'],
+        'resource_id': ['portId'],
+        'mac_address': ['mac_address'],
+        'name': ['title'],
+        'status': ['status'],
+        # See: _apply_neutron_traits: set_tenant, set_network
+    }
+
     objmap = neutron_objmap(evt, "Port")
-    _apply_neutron_traits(evt, objmap, 'port')
+    _apply_neutron_traits(evt, objmap, traitmap)
     _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
 
     if hasattr(evt, 'trait_device_id') and hasattr(evt, 'trait_device_owner'):
@@ -779,8 +763,19 @@ def router_update(device, dmd, evt):
         LOG.info("Unable to identify router component from event: %s" % evt)
         return []
 
+    traitmap = {
+        'admin_state_up': ['admin_state_up'],
+        'id': ['routerId'],
+        'resource_id': ['routerId'],
+        'routes': ['routes'],
+        'status': ['status'],
+        'name': ['title'],
+        # See: _apply_router_gateway_info:
+        # (gateways, set_subnets, set_network)
+    }
+
     objmap = neutron_objmap(evt, "Router")
-    _apply_neutron_traits(evt, objmap, 'router')
+    _apply_neutron_traits(evt, objmap, traitmap)
     _apply_router_gateway_info(evt, objmap)
     return [objmap]
 
@@ -817,9 +812,12 @@ def securityGroup_update(device, dmd, evt):
     if not securitygroup_id(evt):
         LOG.info("Unable to identify securitygroup component from event: %s" % evt)
         return []
-
+    traitmap = {
+        'id': ['sgId'],
+        'name': ['title'],
+    }
     objmap = neutron_objmap(evt, "SecurityGroup")
-    _apply_neutron_traits(evt, objmap, 'security_group')
+    _apply_neutron_traits(evt, objmap, traitmap)
     return [objmap]
 
 
@@ -856,9 +854,19 @@ def subnet_update(device, dmd, evt):
         LOG.info("Unable to identify subnet component from event: %s" % evt)
         return []
 
+    traitmap = {
+        'cidr': ['cidr'],
+        'gateway_ip': ['gateway_ip'],
+        'id': ['subnetId'],
+        'name': ['title'],
+        'network_id': ['subnetId'],
+        # See: _apply_dns_info(): dns_nameservers
+        # _apply_neutron_traits: set_tenant, set_network,
+    }
+
     objmap = neutron_objmap(evt, "Subnet")
     _apply_dns_info(evt, objmap)
-    _apply_neutron_traits(evt, objmap, 'subnet')
+    _apply_neutron_traits(evt, objmap, traitmap)
     _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
     return [objmap]
 
@@ -905,9 +913,13 @@ def volume_update(device, dmd, evt):
         return []
 
     objmap = cinder_objmap(evt, "Volume")
-    _apply_dns_info(evt, objmap)
     _apply_cinder_traits(evt, objmap)
-    _apply_trait_rel(evt, objmap, 'trait_tenant_id', 'tenant')
+
+    if hasattr(evt, 'trait_tenant_id'):
+        _apply_trait_rel(evt, objmap, 'trait_tenant_id', 'tenant')
+    elif hasattr(evt, 'trait_project_id'):
+        _apply_trait_rel(evt, objmap, 'trait_project_id', 'tenant')
+
     if hasattr(objmap, 'instanceId') and len(objmap.instanceId) > 0:
         # the volume is being attached to an instance
         _apply_trait_rel(evt, objmap, 'trait_instance_id', 'server')
@@ -971,9 +983,13 @@ def volsnapshot_update(device, dmd, evt):
         return []
 
     objmap = cinder_objmap(evt, "VolSnapshot")
-    _apply_dns_info(evt, objmap)
     _apply_cinder_traits(evt, objmap)
-    _apply_trait_rel(evt, objmap, 'trait_tenant_id', 'tenant')
+
+    if hasattr(evt, 'trait_tenant_id'):
+        _apply_trait_rel(evt, objmap, 'trait_tenant_id', 'tenant')
+    elif hasattr(evt, 'trait_project_id'):
+        _apply_trait_rel(evt, objmap, 'trait_project_id', 'tenant')
+
     _apply_trait_rel(evt, objmap, 'trait_volume_id', 'volume')
     return [objmap]
 
