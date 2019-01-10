@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2014-2017, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2014-2019, all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -20,62 +20,6 @@ import ast
 
 import logging
 LOG = logging.getLogger('zen.OpenStack.events')
-
-
-# Sets of traits we can expect to get (see event_definitions.yaml on the
-# openstack side) and what objmap properties they map to.
-NEUTRON_TRAITMAPS = {
-    'floatingip': {
-        'fixed_ip_address':          ['fixed_ip_address'],
-        'floating_ip_address':       ['floating_ip_address'],
-        'id':                        ['floatingipId'],
-        'status':                    ['status'],
-        # See: _apply_neutron_traits: set_tenant
-        # _apply_trait_rel:  set_network, set_port, set_router,
-        # set_network(floating_network_id)
-    },
-    'network': {
-        'admin_state_up':            ['admin_state_up'],
-        'id':                        ['netId'],
-        'name':                      ['title'],
-        'provider_network_type':     ['netType'],
-        'router_external':           ['netExternal'],
-        'status':                    ['netStatus'],
-        # See: _apply_neutron_traits: set_tenant
-    },
-    'port': {
-        'admin_state_up':            ['admin_state_up'],
-        'binding:vif_type':          ['vif_type'],
-        'device_owner':              ['device_owner'],
-        'id':                        ['portId'],
-        'mac_address':               ['mac_address'],
-        'name':                      ['title'],
-        'status':                    ['status'],
-        # See: _apply_neutron_traits: set_tenant, set_network
-    },
-    'router': {
-        'admin_state_up':            ['admin_state_up'],
-        'id':                        ['routerId'],
-        'routes':                    ['routes'],
-        'status':                    ['status'],
-        'name':                      ['title'],
-        # See: _apply_router_gateway_info:
-        # (gateways, set_subnets, set_network)
-    },
-    'security_group': {
-        'id':                        ['sgId'],
-        'name':                      ['title'],
-    },
-    'subnet': {
-        'cidr':                      ['cidr'],
-        'gateway_ip':                ['gateway_ip'],
-        'id':                        ['subnetId'],
-        'name':                      ['title'],
-        'network_id':                ['subnetId'],
-        # See: _apply_dns_info(): dns_nameservers
-        # _apply_neutron_traits: set_tenant, set_network,
-    },
-}
 
 
 # -----------------------------------------------------------------------------
@@ -121,7 +65,7 @@ def port_id(evt):
 
 
 def port_name(evt):
-    return port_id(evt)
+    return getattr(evt, "trait_name", port_id(evt))
 
 
 def router_id(evt):
@@ -129,7 +73,7 @@ def router_id(evt):
 
 
 def router_name(evt):
-    return router_id(evt)
+    return getattr(evt, "trait_name", router_id(evt))
 
 
 def securitygroup_id(evt):
@@ -145,7 +89,7 @@ def subnet_id(evt):
 
 
 def subnet_name(evt):
-    return subnet_id(evt)
+    return getattr(evt, "trait_name", subnet_id(evt))
 
 
 def tenant_id(evt):
@@ -171,9 +115,7 @@ def volsnapshot_name(evt):
 # -----------------------------------------------------------------------------
 # Traitmap Functions
 # -----------------------------------------------------------------------------
-def _apply_neutron_traits(evt, objmap, traitset):
-    traitmap = NEUTRON_TRAITMAPS[traitset]
-
+def _apply_neutron_traits(evt, objmap, traitmap):
     for trait in traitmap:
         for prop_name in traitmap[trait]:
             trait_field = 'trait_' + trait
@@ -189,6 +131,7 @@ def _apply_neutron_traits(evt, objmap, traitset):
     if hasattr(evt, 'trait_tenant_id'):
         setattr(objmap, 'set_tenant', tenant_id(evt))
 
+
 def _apply_trait_rel(evt, objmap, trait_name, class_rel):
     ''' Generic: Set the class relation's set_* attribute: (ex: set_network)
         Ex: _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
@@ -203,6 +146,7 @@ def _apply_trait_rel(evt, objmap, trait_name, class_rel):
         else:
             set_name = 'set_' + class_rel
             setattr(objmap, set_name, attrib_id)
+
 
 def _apply_router_gateway_info(evt, objmap):
     ''' Get the router gateways, network, and subnets'''
@@ -221,6 +165,7 @@ def _apply_router_gateway_info(evt, objmap):
             setattr(objmap, 'set_network', net_id)
             setattr(objmap, 'set_subnets', subnet_ids)
 
+
 def _apply_dns_info(evt, objmap):
     ''' Get the dns servers for subnets as a string'''
     if hasattr(evt, 'trait_dns_nameservers'):
@@ -228,16 +173,18 @@ def _apply_dns_info(evt, objmap):
         servers = ", ".join(dns_info)
         setattr(objmap, 'dns_nameservers', servers)
 
+
 def _apply_instance_traits(evt, objmap):
     traitmap = {
-                'display_name': ['title', 'hostName'],
-                'instance_id':  ['resourceId', 'serverId'],
-                'state':        ['serverStatus'],
-                'flavor_name':  ['set_flavor_name'],
-                'host_name':    ['set_host_name'],
-                'image_name':   ['set_image_name'],
-                'tenant_id':    ['set_tenant_id']
-               }
+        'instance_id': ['resourceId', 'serverId'],
+        'state': ['serverStatus'],
+        'flavor_name': ['set_flavor_name'],
+        'instance_type': ['set_flavor_name'],
+        'host_name': ['set_host_name'],
+        'host': ['set_host_name'],
+        'image_name': ['set_image_name'],
+        'tenant_id': ['set_tenant_id']
+    }
     for trait in traitmap:
         for prop_name in traitmap[trait]:
             trait_field = 'trait_' + trait
@@ -250,6 +197,9 @@ def _apply_instance_traits(evt, objmap):
                     value = value.upper()
 
                 setattr(objmap, prop_name, value)
+
+    for prop_name in ['title', 'hostName']:
+        setattr(objmap, prop_name, instance_name(evt))
 
     # special case for publicIps / privateIps
     if hasattr(evt, 'trait_fixed_ips'):
@@ -272,19 +222,24 @@ def _apply_instance_traits(evt, objmap):
 
 def _apply_cinder_traits(evt, objmap):
     traitmap = {
-                'status':        ['status'],
-                'display_name': ['title'],
-                'availability_zone':   ['avzone'],
-                'created_at':   ['created_at'],
-                'volume_id':  ['volumeId'],
-                'host':    ['host'],
-                'type':  ['volume_type'],
-                'size':  ['size'],
-               }
+        'status': ['status'],
+        'display_name': ['title'],
+        'availability_zone': ['avzone'],
+        'created_at': ['created_at'],
+        'volume_id': ['volumeId'],
+        'resource_id': ['volumeId'],
+        'host': ['host'],
+        'type': ['volume_type'],
+        'size': ['size'],
+    }
     if 'VolSnapshot' in objmap.modname:
-        # volume snapshot does not have volume_id or availability_zone, only volume does
+        # volume snapshot events do not not have these, so don't try to apply them even
+        # if they are found.
         traitmap.pop('volume_id', None)
         traitmap.pop('availability_zone', None)
+        traitmap.pop('host', None)
+        traitmap.pop('type', None)
+
     for trait in traitmap:
         for prop_name in traitmap[trait]:
             trait_field = 'trait_' + trait
@@ -306,6 +261,7 @@ def instance_objmap(evt):
         },
     )
 
+
 def neutron_objmap(evt, Name):
     """ Create an object map of type Name. Name must be proper module name.
         WARNING: All Neutron events have a 'trait_id' attribute.
@@ -324,6 +280,7 @@ def neutron_objmap(evt, Name):
               },
     )
 
+
 def cinder_objmap(evt, Name):
     """ Create an object map of type Name. Name must be proper module name.
     """
@@ -339,6 +296,7 @@ def cinder_objmap(evt, Name):
               },
     )
 
+
 def event_summary(component_type, component_name, evt):
     """ Gives correct summary for Create/Update event messages
     """
@@ -348,10 +306,10 @@ def event_summary(component_type, component_name, evt):
         action = "Updated"
     return "%s %s %s" % (action, component_type, component_name)
 
+
 # -----------------------------------------------------------------------------
 # Event Functions
 # -----------------------------------------------------------------------------
-
 def instance_create(device, dmd, evt):
     evt.summary = "Instance %s created" % (instance_name(evt))
 
@@ -362,6 +320,7 @@ def instance_create(device, dmd, evt):
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
+
 
 def instance_update(device, dmd, evt):
     evt.summary = "Instance %s updated" % (instance_name(evt))
@@ -374,6 +333,7 @@ def instance_update(device, dmd, evt):
     _apply_instance_traits(evt, objmap)
     return [objmap]
 
+
 def instance_delete(device, dmd, evt):
     evt.summary = "Instance %s deleted" % (instance_name(evt))
 
@@ -384,6 +344,7 @@ def instance_delete(device, dmd, evt):
     objmap = instance_objmap(evt)
     objmap.remove = True
     return [objmap]
+
 
 def instance_update_status(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
@@ -399,6 +360,7 @@ def instance_update_status(device, dmd, evt):
     _apply_instance_traits(evt, objmap)
     return [objmap]
 
+
 def add_statuschange_to_msg(evt, msg):
     descr = ''
     if hasattr(evt, 'trait_state_description') and evt.trait_state_description:
@@ -413,15 +375,16 @@ def add_statuschange_to_msg(evt, msg):
 
     return msg
 
+
 def instance_powering_on(device, dmd, evt):
     evt.summary = "Instance %s powering on" % (instance_name(evt))
     return []
 
+
 def instance_powered_on(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
-            evt,
-            "Instance %s powered on" % (instance_name(evt))
-            )
+        evt,
+        "Instance %s powered on" % (instance_name(evt)))
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
@@ -430,16 +393,17 @@ def instance_powered_on(device, dmd, evt):
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
+
 
 def instance_powering_off(device, dmd, evt):
     evt.summary = "Instance %s powering off" % (instance_name(evt))
     return []
 
+
 def instance_powered_off(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
-            evt,
-            "Instance %s powered off" % (instance_name(evt))
-            )
+        evt,
+        "Instance %s powered off" % (instance_name(evt)))
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
@@ -448,12 +412,12 @@ def instance_powered_off(device, dmd, evt):
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
+
 
 def instance_shutting_down(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
-            evt,
-            "Instance %s shutting down" % (instance_name(evt))
-            )
+        evt,
+        "Instance %s shutting down" % (instance_name(evt)))
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
@@ -462,12 +426,12 @@ def instance_shutting_down(device, dmd, evt):
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
+
 
 def instance_shut_down(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
-            evt,
-            "Instance %s shut down" % (instance_name(evt))
-            )
+        evt,
+        "Instance %s shut down" % (instance_name(evt)))
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
@@ -476,12 +440,12 @@ def instance_shut_down(device, dmd, evt):
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
+
 
 def instance_rebooting(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
-            evt,
-            "Instance %s rebooting" % (instance_name(evt))
-            )
+        evt,
+        "Instance %s rebooting" % (instance_name(evt)))
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
@@ -490,12 +454,12 @@ def instance_rebooting(device, dmd, evt):
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
+
 
 def instance_rebooted(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
-            evt,
-            "Instance %s rebooted" % (instance_name(evt))
-            )
+        evt,
+        "Instance %s rebooted" % (instance_name(evt)))
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
@@ -504,26 +468,27 @@ def instance_rebooted(device, dmd, evt):
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
+
 
 def instance_rebuilding(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
-            evt,
-            "Instance %s rebuilding" % (instance_name(evt))
-            )
+        evt,
+        "Instance %s rebuilding" % (instance_name(evt)))
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
-        return []    
+        return []
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
+
     return [objmap]
+
 
 def instance_rebuilt(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
-            evt,
-            "Instance %s rebuilt" % (instance_name(evt))
-            )
+        evt,
+        "Instance %s rebuilt" % (instance_name(evt)))
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
@@ -532,6 +497,7 @@ def instance_rebuilt(device, dmd, evt):
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
+
 
 def instance_suspended(device, dmd, evt):
     evt.summary = "Instance %s suspended" % (instance_name(evt))
@@ -544,6 +510,7 @@ def instance_suspended(device, dmd, evt):
     _apply_instance_traits(evt, objmap)
     return [objmap]
 
+
 def instance_resumed(device, dmd, evt):
     evt.summary = "Instance %s resumed" % (instance_name(evt))
 
@@ -554,6 +521,7 @@ def instance_resumed(device, dmd, evt):
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
+
 
 def instance_rescue(device, dmd, evt):
     evt.summary = "Instance %s placed in rescue mode" % (instance_name(evt))
@@ -566,6 +534,7 @@ def instance_rescue(device, dmd, evt):
     _apply_instance_traits(evt, objmap)
     return [objmap]
 
+
 def instance_unrescue(device, dmd, evt):
     evt.summary = "Instance %s removed from rescue mode" % (instance_name(evt))
 
@@ -573,20 +542,22 @@ def instance_unrescue(device, dmd, evt):
     _apply_instance_traits(evt, objmap)
     return [objmap]
 
+
 def instance_volume_attach(device, dmd, evt):
     evt.summary = "Instance %s being attached to a volume %s" % \
         (instance_name(evt), volume_id(evt))
 
     # volume_update() for volume.attach.end will take care of it.
     return []
-    
+
+
 def instance_volume_detach(device, dmd, evt):
     evt.summary = "Instance %s being detached from a volume %s" % \
         (instance_name(evt), volume_name(evt))
 
     # volume_update() for volume.detach.end will take care of it.
     return []
-    
+
 
 # -----------------------------------------------------------------------------
 # FloatingIp
@@ -595,9 +566,11 @@ def floatingip_create_start(device, dmd, evt):
     evt.summary = "Creating FloatingIp %s" % (floatingip_name(evt))
     return []
 
+
 def floatingip_update_start(device, dmd, evt):
     evt.summary = "Updating FloatingIp %s" % (floatingip_name(evt))
     return []
+
 
 def floatingip_update(device, dmd, evt):
     evt.summary = event_summary("FloatingIp", floatingip_name(evt), evt)
@@ -606,17 +579,30 @@ def floatingip_update(device, dmd, evt):
         LOG.info("Unable to identify floatingip component from event: %s" % evt)
         return []
 
+    traitmap = {
+        'fixed_ip_address': ['fixed_ip_address'],
+        'floating_ip_address': ['floating_ip_address'],
+        'id': ['floatingipId'],
+        'resource_id': ['floatingipId'],
+        'status': ['status'],
+        # See: _apply_neutron_traits: set_tenant
+        # _apply_trait_rel:  set_network, set_port, set_router,
+        # set_network(floating_network_id)
+    }
+
     objmap = neutron_objmap(evt, "FloatingIp")
-    _apply_neutron_traits(evt, objmap, 'floatingip')
+    _apply_neutron_traits(evt, objmap, traitmap)
 
     _apply_trait_rel(evt, objmap, 'trait_floating_network_id', 'network')
     _apply_trait_rel(evt, objmap, 'trait_router_id', 'router')
     _apply_trait_rel(evt, objmap, 'trait_port_id', 'port')
     return [objmap]
 
+
 def floatingip_delete_start(device, dmd, evt):
     evt.summary = "Deleting FloatingIp %s " % (floatingip_name(evt))
     return []
+
 
 def floatingip_delete_end(device, dmd, evt):
     evt.summary = "FloatingIp %s deleted" % (floatingip_name(evt))
@@ -629,6 +615,7 @@ def floatingip_delete_end(device, dmd, evt):
     objmap.remove = True
     return [objmap]
 
+
 # -----------------------------------------------------------------------------
 # Network Event Functions
 # -----------------------------------------------------------------------------
@@ -636,9 +623,11 @@ def network_create_start(device, dmd, evt):
     evt.summary = "Creating Network %s" % (network_name(evt))
     return []
 
+
 def network_update_start(device, dmd, evt):
     evt.summary = "Updating Network %s" % (network_name(evt))
     return []
+
 
 def network_update(device, dmd, evt):
     evt.summary = event_summary("Network", network_name(evt), evt)
@@ -647,13 +636,26 @@ def network_update(device, dmd, evt):
         LOG.info("Unable to identify network component from event: %s" % evt)
         return []
 
+    traitmap = {
+        'admin_state_up': ['admin_state_up'],
+        'id': ['netId'],
+        'resource_id': ['netId'],
+        'name': ['title'],
+        'provider_network_type': ['netType'],
+        'router_external': ['netExternal'],
+        'status': ['netStatus'],
+        # See: _apply_neutron_traits: set_tenant
+    }
+
     objmap = neutron_objmap(evt, "Network")
-    _apply_neutron_traits(evt, objmap, 'network')
+    _apply_neutron_traits(evt, objmap, traitmap)
     return [objmap]
+
 
 def network_delete_start(device, dmd, evt):
     evt.summary = "Deleting Network %s " % (network_name(evt))
     return []
+
 
 def network_delete_end(device, dmd, evt):
     evt.summary = "Network %s deleted" % (network_name(evt))
@@ -666,12 +668,14 @@ def network_delete_end(device, dmd, evt):
     objmap.remove = True
     return [objmap]
 
+
 # -----------------------------------------------------------------------------
 # Port Event Functions
 # -----------------------------------------------------------------------------
 def port_create_start(device, dmd, evt):
     evt.summary = "Creating Port %s" % (port_name(evt))
     return []
+
 
 def port_update_start(device, dmd, evt):
     if not port_id(evt):
@@ -685,6 +689,7 @@ def port_update_start(device, dmd, evt):
     evt.summary = "Updating Port %s" % (port_name(evt))
     return []
 
+
 def port_update(device, dmd, evt):
     evt.summary = event_summary("Port", port_name(evt), evt)
 
@@ -692,8 +697,20 @@ def port_update(device, dmd, evt):
         LOG.info("Unable to identify port component from event: %s" % evt)
         return []
 
+    traitmap = {
+        'admin_state_up': ['admin_state_up'],
+        'binding_vif_type': ['vif_type'],
+        'device_owner': ['device_owner'],
+        'id': ['portId'],
+        'resource_id': ['portId'],
+        'mac_address': ['mac_address'],
+        'name': ['title'],
+        'status': ['status'],
+        # See: _apply_neutron_traits: set_tenant, set_network
+    }
+
     objmap = neutron_objmap(evt, "Port")
-    _apply_neutron_traits(evt, objmap, 'port')
+    _apply_neutron_traits(evt, objmap, traitmap)
     _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
 
     if hasattr(evt, 'trait_device_id') and hasattr(evt, 'trait_device_owner'):
@@ -712,9 +729,11 @@ def port_update(device, dmd, evt):
 
     return [objmap]
 
+
 def port_delete_start(device, dmd, evt):
     evt.summary = "Deleting Port %s " % (port_name(evt))
     return []
+
 
 def port_delete_end(device, dmd, evt):
     evt.summary = "Port %s deleted" % (port_name(evt))
@@ -723,6 +742,7 @@ def port_delete_end(device, dmd, evt):
     objmap.remove = True
     return [objmap]
 
+
 # -----------------------------------------------------------------------------
 # Router Event Functions
 # -----------------------------------------------------------------------------
@@ -730,9 +750,11 @@ def router_create_start(device, dmd, evt):
     evt.summary = "Creating Router %s" % (router_name(evt))
     return []
 
+
 def router_update_start(device, dmd, evt):
     evt.summary = "Updating Router %s" % (router_name(evt))
     return []
+
 
 def router_update(device, dmd, evt):
     evt.summary = event_summary("Router", router_name(evt), evt)
@@ -741,14 +763,27 @@ def router_update(device, dmd, evt):
         LOG.info("Unable to identify router component from event: %s" % evt)
         return []
 
+    traitmap = {
+        'admin_state_up': ['admin_state_up'],
+        'id': ['routerId'],
+        'resource_id': ['routerId'],
+        'routes': ['routes'],
+        'status': ['status'],
+        'name': ['title'],
+        # See: _apply_router_gateway_info:
+        # (gateways, set_subnets, set_network)
+    }
+
     objmap = neutron_objmap(evt, "Router")
-    _apply_neutron_traits(evt, objmap, 'router')
+    _apply_neutron_traits(evt, objmap, traitmap)
     _apply_router_gateway_info(evt, objmap)
     return [objmap]
+
 
 def router_delete_start(device, dmd, evt):
     evt.summary = "Deleting Router %s " % (router_name(evt))
     return []
+
 
 def router_delete_end(device, dmd, evt):
     evt.summary = "Router %s deleted" % (router_name(evt))
@@ -757,6 +792,7 @@ def router_delete_end(device, dmd, evt):
     objmap.remove = True
     return [objmap]
 
+
 # -----------------------------------------------------------------------------
 # SecurityGroup Event Functions: Carefull with the underscore differences
 # -----------------------------------------------------------------------------
@@ -764,9 +800,11 @@ def securityGroup_create_start(device, dmd, evt):
     evt.summary = "Creating SecurityGroup %s" % (securitygroup_name(evt))
     return []
 
+
 def securityGroup_update_start(device, dmd, evt):
     evt.summary = "Updating SecurityGroup %s" % (securitygroup_name(evt))
     return []
+
 
 def securityGroup_update(device, dmd, evt):
     evt.summary = event_summary("SecurityGroup", securitygroup_name(evt), evt)
@@ -774,14 +812,19 @@ def securityGroup_update(device, dmd, evt):
     if not securitygroup_id(evt):
         LOG.info("Unable to identify securitygroup component from event: %s" % evt)
         return []
-
+    traitmap = {
+        'id': ['sgId'],
+        'name': ['title'],
+    }
     objmap = neutron_objmap(evt, "SecurityGroup")
-    _apply_neutron_traits(evt, objmap, 'security_group')
+    _apply_neutron_traits(evt, objmap, traitmap)
     return [objmap]
+
 
 def securityGroup_delete_start(device, dmd, evt):
     evt.summary = "Deleting SecurityGroup %s " % (securitygroup_name(evt))
     return []
+
 
 def securityGroup_delete_end(device, dmd, evt):
     evt.summary = "SecurityGroup %s deleted" % (securitygroup_name(evt))
@@ -790,6 +833,7 @@ def securityGroup_delete_end(device, dmd, evt):
     objmap.remove = True
     return [objmap]
 
+
 # -----------------------------------------------------------------------------
 # Subnet Event Functions
 # -----------------------------------------------------------------------------
@@ -797,9 +841,11 @@ def subnet_create_start(device, dmd, evt):
     evt.summary = "Creating Subnet %s" % (subnet_name(evt))
     return []
 
+
 def subnet_update_start(device, dmd, evt):
     evt.summary = "Updating Subnet %s" % (subnet_name(evt))
     return []
+
 
 def subnet_update(device, dmd, evt):
     evt.summary = event_summary("Subnet", subnet_name(evt), evt)
@@ -808,9 +854,19 @@ def subnet_update(device, dmd, evt):
         LOG.info("Unable to identify subnet component from event: %s" % evt)
         return []
 
+    traitmap = {
+        'cidr': ['cidr'],
+        'gateway_ip': ['gateway_ip'],
+        'id': ['subnetId'],
+        'name': ['title'],
+        'network_id': ['subnetId'],
+        # See: _apply_dns_info(): dns_nameservers
+        # _apply_neutron_traits: set_tenant, set_network,
+    }
+
     objmap = neutron_objmap(evt, "Subnet")
     _apply_dns_info(evt, objmap)
-    _apply_neutron_traits(evt, objmap, 'subnet')
+    _apply_neutron_traits(evt, objmap, traitmap)
     _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
     return [objmap]
 
@@ -833,9 +889,11 @@ def volume_create_start(device, dmd, evt):
     evt.summary = "Creating Volume %s" % (volume_name(evt))
     return []
 
+
 def volume_update_start(device, dmd, evt):
     evt.summary = "Updating Volume %s" % (volume_name(evt))
     return []
+
 
 def volume_update(device, dmd, evt):
     if 'create.end' in evt.eventClassKey:
@@ -855,9 +913,13 @@ def volume_update(device, dmd, evt):
         return []
 
     objmap = cinder_objmap(evt, "Volume")
-    _apply_dns_info(evt, objmap)
     _apply_cinder_traits(evt, objmap)
-    _apply_trait_rel(evt, objmap, 'trait_tenant_id', 'tenant')
+
+    if hasattr(evt, 'trait_tenant_id'):
+        _apply_trait_rel(evt, objmap, 'trait_tenant_id', 'tenant')
+    elif hasattr(evt, 'trait_project_id'):
+        _apply_trait_rel(evt, objmap, 'trait_project_id', 'tenant')
+
     if hasattr(objmap, 'instanceId') and len(objmap.instanceId) > 0:
         # the volume is being attached to an instance
         _apply_trait_rel(evt, objmap, 'trait_instance_id', 'server')
@@ -868,12 +930,14 @@ def volume_update(device, dmd, evt):
     if hasattr(objmap, 'volume_type') and is_uuid(objmap.volume_type):
         # set volume type
         _apply_trait_rel(evt, objmap, 'trait_type', 'volType')
-        
+
     return [objmap]
+
 
 def volume_delete_start(device, dmd, evt):
     evt.summary = "Deleting Volume %s " % (volume_name(evt))
     return []
+
 
 def volume_delete_end(device, dmd, evt):
     evt.summary = "Volume %s deleted" % (volume_name(evt))
@@ -886,18 +950,19 @@ def volume_delete_end(device, dmd, evt):
     objmap.remove = True
     return [objmap]
 
+
 def volume_attach_start(device, dmd, evt):
     evt.summary = "Attaching Volume %s to instance %s" % \
         (volume_name(evt),
          getattr(evt, "trait_instance_id", "[unknown]"))
     return []
 
+
 def volume_detach_start(device, dmd, evt):
     evt.summary = "Detaching Volume %s from instance %s" % \
         (volume_name(evt),
          getattr(evt, "trait_instance_id", "[unknown]"))
     return []
-
 
 
 # -----------------------------------------------------------------------------
@@ -908,6 +973,7 @@ def volsnapshot_create_start(device, dmd, evt):
         (volsnapshot_name(evt), volume_name(evt))
     return []
 
+
 def volsnapshot_update(device, dmd, evt):
     evt.summary = "Created Volume Snapshot %s for volume %s" % \
         (volsnapshot_name(evt), volume_name(evt))
@@ -917,16 +983,22 @@ def volsnapshot_update(device, dmd, evt):
         return []
 
     objmap = cinder_objmap(evt, "VolSnapshot")
-    _apply_dns_info(evt, objmap)
     _apply_cinder_traits(evt, objmap)
-    _apply_trait_rel(evt, objmap, 'trait_tenant_id', 'tenant')
+
+    if hasattr(evt, 'trait_tenant_id'):
+        _apply_trait_rel(evt, objmap, 'trait_tenant_id', 'tenant')
+    elif hasattr(evt, 'trait_project_id'):
+        _apply_trait_rel(evt, objmap, 'trait_project_id', 'tenant')
+
     _apply_trait_rel(evt, objmap, 'trait_volume_id', 'volume')
     return [objmap]
+
 
 def volsnapshot_delete_start(device, dmd, evt):
     evt.summary = "Deleting Snapshot %s for volume %s" % \
         (volsnapshot_name(evt), volume_name(evt))
     return []
+
 
 def volsnapshot_delete_end(device, dmd, evt):
     evt.summary = "Volume Snapshot %s deleted for volume %s" % \
