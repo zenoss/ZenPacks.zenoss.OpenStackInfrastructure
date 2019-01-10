@@ -36,8 +36,7 @@ instance_create_traits = instance_update_traits = instance_update_status_traits 
     instance_rebuilt_traits = instance_suspended_traits = \
     instance_resumed_traits = instance_rescue_traits = instance_unrescue_traits = instance_traits
 
-instance_delete_traits = instance_powering_off_traits = instance_powering_on_traits =\
-    instance_volume_attach_traits = instance_volume_detach_traits = []
+instance_delete_traits = []
 
 dns_info_traits = ['dns_nameservers']
 cinder_traits = ['status', 'display_name', 'availability_zone', 'created_at', ['volume_id', 'resource_id'], 'host', 'type', 'size']
@@ -50,47 +49,26 @@ router_traits = ['admin_state_up', ['id', 'resource_id'], 'routes', 'status', 'n
 subnet_traits = ['cidr', 'gateway_ip', ['id', 'resource_id'], 'name', 'network_id']
 router_gateway_info_traits = ['external_gateway_info']
 
-floatingip_create_start_traits = floatingip_name_traits
 floatingip_update_start_traits = floatingip_name_traits
 floatingip_update_traits = floatingip_id_traits + floatingip_name_traits + floatingip_traits + ['floating_network_id', 'router_id', 'port_id']
-floatingip_delete_start_traits = floatingip_name_traits
 floatingip_delete_end_traits = floatingip_id_traits + floatingip_name_traits
 
-network_create_start_traits = network_name_traits
-network_update_start_traits = network_name_traits
 network_update_traits = network_id_traits + network_name_traits + network_traits
-network_delete_start_traits = network_name_traits
 network_delete_end_traits = network_id_traits + network_name_traits
 
-port_create_start_traits = port_name_traits
-port_update_start_traits = port_id_traits + port_name_traits
 port_update_traits = port_id_traits + port_name_traits + port_traits + ['network_id', 'device_id', 'device_owner', 'fixed_ips']
-port_delete_start_traits = port_name_traits
 port_delete_end_traits = port_id_traits + port_name_traits
 
-router_create_start_traits = router_name_traits
-router_update_start_traits = router_name_traits
 router_update_traits = router_id_traits + router_name_traits + router_traits + router_gateway_info_traits
-router_delete_start_traits = router_name_traits
 router_delete_end_traits = router_id_traits + router_name_traits
 
-subnet_create_start_traits = subnet_name_traits
-subnet_update_start_traits = subnet_name_traits
 subnet_update_traits = subnet_id_traits + subnet_name_traits + subnet_traits + dns_info_traits + ['network_id']
-subnet_delete_start_traits = subnet_name_traits
 subnet_delete_end_traits = subnet_id_traits + subnet_name_traits
 
-volume_create_start_traits = volume_name_traits
-volume_update_start_traits = volume_name_traits
 volume_update_traits = volume_id_traits + volume_name_traits + cinder_traits + [['tenant_id', 'project_id'], 'instance_id', 'type']
-volume_delete_start_traits = volume_name_traits
 volume_delete_end_traits = volume_id_traits + volume_name_traits
-volume_attach_start_traits = volume_name_traits + ['instance_id']
-volume_detach_start_traits = volume_name_traits + ['instance_id']
 
-volsnapshot_create_start_traits = volsnapshot_name_traits + volume_name_traits
 volsnapshot_update_traits = volsnapshot_id_traits + volsnapshot_name_traits + volume_name_traits + cinder_traits_snapshot + [['tenant_id', 'project_id'], 'volume_id']
-volsnapshot_delete_start_traits = volsnapshot_name_traits + volume_name_traits
 volsnapshot_delete_end_traits = volsnapshot_id_traits + volsnapshot_name_traits + volume_name_traits
 
 # These are the only events that our event transform does anything with.
@@ -101,10 +79,8 @@ zenoss_required_events = {
     'compute.instance.update': instance_id_traits + instance_name_traits + instance_update_status_traits,
     'compute.instance.delete.end': instance_id_traits + instance_name_traits + instance_delete_traits,
     'compute.instance.live_migration._post.end': instance_id_traits + instance_name_traits + instance_update_traits,
-    'compute.instance.power_off.start': instance_id_traits + instance_name_traits + instance_powering_off_traits,
-    'compute.instance.power_off.end': instance_id_traits + instance_name_traits + instance_powered_off_traits,
-    'compute.instance.power_on.start': instance_id_traits + instance_name_traits + instance_powering_on_traits,
     'compute.instance.power_on.end': instance_id_traits + instance_name_traits + instance_powered_on_traits,
+    'compute.instance.power_off.end': instance_id_traits + instance_name_traits + instance_powered_off_traits,
     'compute.instance.reboot.start': instance_id_traits + instance_name_traits + instance_rebooting_traits,
     'compute.instance.reboot.end': instance_id_traits + instance_name_traits + instance_rebooted_traits,
     'compute.instance.shutdown.start': instance_id_traits + instance_name_traits + instance_shutting_down_traits,
@@ -118,51 +94,28 @@ zenoss_required_events = {
     'compute.instance.resize.end': instance_id_traits + instance_name_traits + instance_update_traits,
     'compute.instance.suspend': instance_id_traits + instance_name_traits + instance_suspended_traits,
     'compute.instance.resume': instance_id_traits + instance_name_traits + instance_resumed_traits,
-    'compute.instance.volume.attach': instance_id_traits + instance_name_traits + instance_volume_attach_traits,
-    'compute.instance.volume.detach': instance_id_traits + instance_name_traits + instance_volume_detach_traits,
-    'floatingip.create.start': floatingip_id_traits + floatingip_name_traits + floatingip_create_start_traits,
     'floatingip.create.end': floatingip_id_traits + floatingip_name_traits + floatingip_update_traits,
     'floatingip.update.start': floatingip_id_traits + floatingip_name_traits + floatingip_update_traits,
     'floatingip.update.end': floatingip_id_traits + floatingip_name_traits + floatingip_update_traits,
-    'floatingip.delete.start': floatingip_id_traits + floatingip_name_traits + floatingip_delete_start_traits,
     'floatingip.delete.end': floatingip_id_traits + floatingip_name_traits + floatingip_delete_end_traits,
-    'network.create.start': network_create_start_traits,
     'network.create.end': network_id_traits + network_name_traits + network_update_traits,
-    'network.update.start': network_id_traits + network_name_traits + network_update_start_traits,
     'network.update.end': network_id_traits + network_name_traits + network_update_traits,
-    'network.delete.start': network_id_traits + network_name_traits + network_delete_start_traits,
     'network.delete.end': network_id_traits + network_name_traits + network_delete_end_traits,
-    'port.create.start': port_id_traits + port_name_traits + port_create_start_traits,
     'port.create.end': port_id_traits + port_name_traits + port_update_traits,
-    'port.update.start': port_update_start_traits,
     'port.update.end': port_id_traits + port_name_traits + port_update_traits,
-    'port.delete.start': port_id_traits + port_name_traits + port_delete_start_traits,
     'port.delete.end': port_id_traits + port_name_traits + port_delete_end_traits,
-    'router.create.start': router_id_traits + router_name_traits + router_create_start_traits,
     'router.create.end': router_id_traits + router_name_traits + router_update_traits,
-    'router.update.start': router_id_traits + router_name_traits + router_update_start_traits,
     'router.update.end': router_id_traits + router_name_traits + router_update_traits,
-    'router.delete.start': router_id_traits + router_name_traits + router_delete_start_traits,
     'router.delete.end': router_id_traits + router_name_traits + router_delete_end_traits,
-    'subnet.create.start': subnet_id_traits + subnet_name_traits + subnet_create_start_traits,
     'subnet.create.end': subnet_id_traits + subnet_name_traits + subnet_update_traits,
-    'subnet.update.start': subnet_id_traits + subnet_name_traits + subnet_update_start_traits,
     'subnet.update.end': subnet_id_traits + subnet_name_traits + subnet_update_traits,
-    'subnet.delete.start': subnet_id_traits + subnet_name_traits + subnet_delete_start_traits,
     'subnet.delete.end': subnet_id_traits + subnet_name_traits + subnet_delete_end_traits,
-    'volume.create.start': volume_id_traits + volume_name_traits + volume_create_start_traits,
     'volume.create.end': volume_id_traits + volume_name_traits + volume_update_traits,
-    'volume.update.start': volume_id_traits + volume_name_traits + volume_update_start_traits,
     'volume.update.end': volume_id_traits + volume_name_traits + volume_update_traits,
-    'volume.delete.start': volume_id_traits + volume_name_traits + volume_delete_start_traits,
     'volume.delete.end': volume_id_traits + volume_name_traits + volume_delete_end_traits,
-    'volume.attach.start': volume_id_traits + volume_name_traits + volume_attach_start_traits,
     'volume.attach.end': volume_id_traits + volume_name_traits + volume_update_traits,
-    'volume.detach.start': volume_id_traits + volume_name_traits + volume_detach_start_traits,
     'volume.detach.end': volume_id_traits + volume_name_traits + volume_update_traits,
-    'snapshot.create.start': volsnapshot_id_traits + volsnapshot_name_traits + volsnapshot_create_start_traits,
     'snapshot.create.end': volsnapshot_id_traits + volsnapshot_name_traits + volsnapshot_update_traits,
-    'snapshot.delete.start': volsnapshot_id_traits + volsnapshot_name_traits + volsnapshot_delete_start_traits,
     'snapshot.delete.end': volsnapshot_id_traits + volsnapshot_name_traits + volsnapshot_delete_end_traits
 }
 

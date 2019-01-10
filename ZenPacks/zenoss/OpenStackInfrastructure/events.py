@@ -75,15 +75,6 @@ def router_id(evt):
 def router_name(evt):
     return getattr(evt, "trait_name", router_id(evt))
 
-
-def securitygroup_id(evt):
-    return make_id(evt, 'securitygroup', ['trait_id', 'trait_resource_id'])
-
-
-def securitygroup_name(evt):
-    return securitygroup_id(evt)
-
-
 def subnet_id(evt):
     return make_id(evt, 'subnet', ['trait_id', 'trait_resource_id'])
 
@@ -266,7 +257,7 @@ def neutron_objmap(evt, Name):
     """ Create an object map of type Name. Name must be proper module name.
         WARNING: All Neutron events have a 'trait_id' attribute.
                  Make sure that Name.lower() corresponds to a well defined
-                 id_function. Especially SecurityGroups!
+                 id_function.
     """
     module = 'ZenPacks.zenoss.OpenStackInfrastructure.' + Name
     id_func = eval(Name.lower() + '_id')
@@ -348,9 +339,8 @@ def instance_delete(device, dmd, evt):
 
 def instance_update_status(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
-            evt,
-            "Instance %s updated" % (instance_name(evt))
-            )
+        evt,
+        "Instance %s updated" % (instance_name(evt)))
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
@@ -376,11 +366,6 @@ def add_statuschange_to_msg(evt, msg):
     return msg
 
 
-def instance_powering_on(device, dmd, evt):
-    evt.summary = "Instance %s powering on" % (instance_name(evt))
-    return []
-
-
 def instance_powered_on(device, dmd, evt):
     evt.summary = add_statuschange_to_msg(
         evt,
@@ -393,11 +378,6 @@ def instance_powered_on(device, dmd, evt):
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return [objmap]
-
-
-def instance_powering_off(device, dmd, evt):
-    evt.summary = "Instance %s powering off" % (instance_name(evt))
-    return []
 
 
 def instance_powered_off(device, dmd, evt):
@@ -543,34 +523,9 @@ def instance_unrescue(device, dmd, evt):
     return [objmap]
 
 
-def instance_volume_attach(device, dmd, evt):
-    evt.summary = "Instance %s being attached to a volume %s" % \
-        (instance_name(evt), volume_id(evt))
-
-    # volume_update() for volume.attach.end will take care of it.
-    return []
-
-
-def instance_volume_detach(device, dmd, evt):
-    evt.summary = "Instance %s being detached from a volume %s" % \
-        (instance_name(evt), volume_name(evt))
-
-    # volume_update() for volume.detach.end will take care of it.
-    return []
-
-
 # -----------------------------------------------------------------------------
 # FloatingIp
 # -----------------------------------------------------------------------------
-def floatingip_create_start(device, dmd, evt):
-    evt.summary = "Creating FloatingIp %s" % (floatingip_name(evt))
-    return []
-
-
-def floatingip_update_start(device, dmd, evt):
-    evt.summary = "Updating FloatingIp %s" % (floatingip_name(evt))
-    return []
-
 
 def floatingip_update(device, dmd, evt):
     evt.summary = event_summary("FloatingIp", floatingip_name(evt), evt)
@@ -599,11 +554,6 @@ def floatingip_update(device, dmd, evt):
     return [objmap]
 
 
-def floatingip_delete_start(device, dmd, evt):
-    evt.summary = "Deleting FloatingIp %s " % (floatingip_name(evt))
-    return []
-
-
 def floatingip_delete_end(device, dmd, evt):
     evt.summary = "FloatingIp %s deleted" % (floatingip_name(evt))
 
@@ -619,16 +569,6 @@ def floatingip_delete_end(device, dmd, evt):
 # -----------------------------------------------------------------------------
 # Network Event Functions
 # -----------------------------------------------------------------------------
-def network_create_start(device, dmd, evt):
-    evt.summary = "Creating Network %s" % (network_name(evt))
-    return []
-
-
-def network_update_start(device, dmd, evt):
-    evt.summary = "Updating Network %s" % (network_name(evt))
-    return []
-
-
 def network_update(device, dmd, evt):
     evt.summary = event_summary("Network", network_name(evt), evt)
 
@@ -652,11 +592,6 @@ def network_update(device, dmd, evt):
     return [objmap]
 
 
-def network_delete_start(device, dmd, evt):
-    evt.summary = "Deleting Network %s " % (network_name(evt))
-    return []
-
-
 def network_delete_end(device, dmd, evt):
     evt.summary = "Network %s deleted" % (network_name(evt))
 
@@ -672,23 +607,6 @@ def network_delete_end(device, dmd, evt):
 # -----------------------------------------------------------------------------
 # Port Event Functions
 # -----------------------------------------------------------------------------
-def port_create_start(device, dmd, evt):
-    evt.summary = "Creating Port %s" % (port_name(evt))
-    return []
-
-
-def port_update_start(device, dmd, evt):
-    if not port_id(evt):
-        # It appears to be typical that port.update.start events are
-        # missing their ID and name attributes, so we can't do anything
-        # useful with them if that is the case.   The port.update.end
-        # event will be complete, so those are the ones we care about.
-        return []
-
-    evt.component = port_id(evt)
-    evt.summary = "Updating Port %s" % (port_name(evt))
-    return []
-
 
 def port_update(device, dmd, evt):
     evt.summary = event_summary("Port", port_name(evt), evt)
@@ -729,12 +647,6 @@ def port_update(device, dmd, evt):
 
     return [objmap]
 
-
-def port_delete_start(device, dmd, evt):
-    evt.summary = "Deleting Port %s " % (port_name(evt))
-    return []
-
-
 def port_delete_end(device, dmd, evt):
     evt.summary = "Port %s deleted" % (port_name(evt))
 
@@ -746,15 +658,6 @@ def port_delete_end(device, dmd, evt):
 # -----------------------------------------------------------------------------
 # Router Event Functions
 # -----------------------------------------------------------------------------
-def router_create_start(device, dmd, evt):
-    evt.summary = "Creating Router %s" % (router_name(evt))
-    return []
-
-
-def router_update_start(device, dmd, evt):
-    evt.summary = "Updating Router %s" % (router_name(evt))
-    return []
-
 
 def router_update(device, dmd, evt):
     evt.summary = event_summary("Router", router_name(evt), evt)
@@ -780,11 +683,6 @@ def router_update(device, dmd, evt):
     return [objmap]
 
 
-def router_delete_start(device, dmd, evt):
-    evt.summary = "Deleting Router %s " % (router_name(evt))
-    return []
-
-
 def router_delete_end(device, dmd, evt):
     evt.summary = "Router %s deleted" % (router_name(evt))
 
@@ -794,59 +692,8 @@ def router_delete_end(device, dmd, evt):
 
 
 # -----------------------------------------------------------------------------
-# SecurityGroup Event Functions: Carefull with the underscore differences
-# -----------------------------------------------------------------------------
-def securityGroup_create_start(device, dmd, evt):
-    evt.summary = "Creating SecurityGroup %s" % (securitygroup_name(evt))
-    return []
-
-
-def securityGroup_update_start(device, dmd, evt):
-    evt.summary = "Updating SecurityGroup %s" % (securitygroup_name(evt))
-    return []
-
-
-def securityGroup_update(device, dmd, evt):
-    evt.summary = event_summary("SecurityGroup", securitygroup_name(evt), evt)
-
-    if not securitygroup_id(evt):
-        LOG.info("Unable to identify securitygroup component from event: %s" % evt)
-        return []
-    traitmap = {
-        'id': ['sgId'],
-        'name': ['title'],
-    }
-    objmap = neutron_objmap(evt, "SecurityGroup")
-    _apply_neutron_traits(evt, objmap, traitmap)
-    return [objmap]
-
-
-def securityGroup_delete_start(device, dmd, evt):
-    evt.summary = "Deleting SecurityGroup %s " % (securitygroup_name(evt))
-    return []
-
-
-def securityGroup_delete_end(device, dmd, evt):
-    evt.summary = "SecurityGroup %s deleted" % (securitygroup_name(evt))
-
-    objmap = neutron_objmap(evt, 'SecurityGroup')
-    objmap.remove = True
-    return [objmap]
-
-
-# -----------------------------------------------------------------------------
 # Subnet Event Functions
 # -----------------------------------------------------------------------------
-def subnet_create_start(device, dmd, evt):
-    evt.summary = "Creating Subnet %s" % (subnet_name(evt))
-    return []
-
-
-def subnet_update_start(device, dmd, evt):
-    evt.summary = "Updating Subnet %s" % (subnet_name(evt))
-    return []
-
-
 def subnet_update(device, dmd, evt):
     evt.summary = event_summary("Subnet", subnet_name(evt), evt)
 
@@ -870,9 +717,6 @@ def subnet_update(device, dmd, evt):
     _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
     return [objmap]
 
-def subnet_delete_start(device, dmd, evt):
-    evt.summary = "Deleting Subnet %s " % (subnet_name(evt))
-    return []
 
 def subnet_delete_end(device, dmd, evt):
     evt.summary = "Subnet %s deleted" % (subnet_name(evt))
@@ -885,15 +729,6 @@ def subnet_delete_end(device, dmd, evt):
 # -----------------------------------------------------------------------------
 # Volume Event Functions
 # -----------------------------------------------------------------------------
-def volume_create_start(device, dmd, evt):
-    evt.summary = "Creating Volume %s" % (volume_name(evt))
-    return []
-
-
-def volume_update_start(device, dmd, evt):
-    evt.summary = "Updating Volume %s" % (volume_name(evt))
-    return []
-
 
 def volume_update(device, dmd, evt):
     if 'create.end' in evt.eventClassKey:
@@ -934,11 +769,6 @@ def volume_update(device, dmd, evt):
     return [objmap]
 
 
-def volume_delete_start(device, dmd, evt):
-    evt.summary = "Deleting Volume %s " % (volume_name(evt))
-    return []
-
-
 def volume_delete_end(device, dmd, evt):
     evt.summary = "Volume %s deleted" % (volume_name(evt))
 
@@ -951,29 +781,9 @@ def volume_delete_end(device, dmd, evt):
     return [objmap]
 
 
-def volume_attach_start(device, dmd, evt):
-    evt.summary = "Attaching Volume %s to instance %s" % \
-        (volume_name(evt),
-         getattr(evt, "trait_instance_id", "[unknown]"))
-    return []
-
-
-def volume_detach_start(device, dmd, evt):
-    evt.summary = "Detaching Volume %s from instance %s" % \
-        (volume_name(evt),
-         getattr(evt, "trait_instance_id", "[unknown]"))
-    return []
-
-
 # -----------------------------------------------------------------------------
 # Snapshot Event Functions
 # -----------------------------------------------------------------------------
-def volsnapshot_create_start(device, dmd, evt):
-    evt.summary = "Creating Volume Snapshot %s for volume %s" % \
-        (volsnapshot_name(evt), volume_name(evt))
-    return []
-
-
 def volsnapshot_update(device, dmd, evt):
     evt.summary = "Created Volume Snapshot %s for volume %s" % \
         (volsnapshot_name(evt), volume_name(evt))
@@ -992,12 +802,6 @@ def volsnapshot_update(device, dmd, evt):
 
     _apply_trait_rel(evt, objmap, 'trait_volume_id', 'volume')
     return [objmap]
-
-
-def volsnapshot_delete_start(device, dmd, evt):
-    evt.summary = "Deleting Snapshot %s for volume %s" % \
-        (volsnapshot_name(evt), volume_name(evt))
-    return []
 
 
 def volsnapshot_delete_end(device, dmd, evt):
@@ -1019,180 +823,72 @@ def volsnapshot_delete_end(device, dmd, evt):
 # such as a summary.
 
 MAPPERS = {
-    'openstack|compute.instance.create.start':     (instance_id, instance_create),
-    'openstack|compute.instance.create.end':       (instance_id, instance_update),
-    'openstack|compute.instance.create.error':     (instance_id, instance_update),
-    'openstack|compute.instance.update':           (instance_id, instance_update_status),
-    'openstack|compute.instance.delete.start':     (instance_id, None),
-    'openstack|compute.instance.delete.end':       (instance_id, instance_delete),
-
-    'openstack|compute.instance.create_ip.start':  (instance_id, None),
-    'openstack|compute.instance.create_ip.end':    (instance_id, None),
-    'openstack|compute.instance.delete_ip.start':  (instance_id, None),
-    'openstack|compute.instance.delete_ip.end':    (instance_id, None),
-
-    'openstack|compute.instance.exists':              (instance_id, None),
-    'openstack|compute.instance.exists.verified.old': (instance_id, None),
+    'openstack|compute.instance.create.start': (instance_id, instance_create),
+    'openstack|compute.instance.create.end': (instance_id, instance_update),
+    'openstack|compute.instance.create.error': (instance_id, instance_update),
+    'openstack|compute.instance.update': (instance_id, instance_update_status),
+    'openstack|compute.instance.delete.end': (instance_id, instance_delete),
 
     # Note: I do not currently have good test data for what a real
     # live migration looks like.  I am assuming that the new host will be
     # carried in the last event, and only processing that one.
-    'openstack|compute.instance.live_migration.pre.start': (instance_id, None),
-    'openstack|compute.instance.live_migration.pre.end': (instance_id, None),
-    'openstack|compute.instance.live_migration.post.dest.start': (instance_id, None),
-    'openstack|compute.instance.live_migration.post.dest.end':  (instance_id, None),
-    'openstack|compute.instance.live_migration._post.start':  (instance_id, None),
     'openstack|compute.instance.live_migration._post.end': (instance_id, instance_update),
 
-    'openstack|compute.instance.power_off.start':  (instance_id, instance_powering_off),
-    'openstack|compute.instance.power_off.end':    (instance_id, instance_powered_off),
-    'openstack|compute.instance.power_on.start':   (instance_id, instance_powering_on),
-    'openstack|compute.instance.power_on.end':     (instance_id, instance_powered_on),
-    'openstack|compute.instance.reboot.start':     (instance_id, instance_rebooting),
-    'openstack|compute.instance.reboot.end':       (instance_id, instance_rebooted),
-    'openstack|compute.instance.shutdown.start':   (instance_id, instance_shutting_down),
-    'openstack|compute.instance.shutdown.end':     (instance_id, instance_shut_down),
-    'openstack|compute.instance.rebuild.start':    (instance_id, instance_rebuilding),
-    'openstack|compute.instance.rebuild.end':      (instance_id, instance_rebuilt),
+    'openstack|compute.instance.power_off.end': (instance_id, instance_powered_off),
+    'openstack|compute.instance.power_on.end': (instance_id, instance_powered_on),
+    'openstack|compute.instance.reboot.start': (instance_id, instance_rebooting),
+    'openstack|compute.instance.reboot.end': (instance_id, instance_rebooted),
+    'openstack|compute.instance.shutdown.start': (instance_id, instance_shutting_down),
+    'openstack|compute.instance.shutdown.end': (instance_id, instance_shut_down),
+    'openstack|compute.instance.rebuild.start': (instance_id, instance_rebuilding),
+    'openstack|compute.instance.rebuild.end': (instance_id, instance_rebuilt),
 
-    'openstack|compute.instance.rescue.start':     (instance_id, None),
-    'openstack|compute.instance.rescue.end':       (instance_id, instance_rescue),
-    'openstack|compute.instance.unrescue.start':   (instance_id, None),
-    'openstack|compute.instance.unrescue.end':     (instance_id, instance_unrescue),
+    'openstack|compute.instance.rescue.end': (instance_id, instance_rescue),
+    'openstack|compute.instance.unrescue.end': (instance_id, instance_unrescue),
 
-    'openstack|compute.instance.finish_resize.start':  (instance_id, None),
-    'openstack|compute.instance.finish_resize.end':    (instance_id, instance_update),
-    'openstack|compute.instance.resize.start':         (instance_id, None),
-    'openstack|compute.instance.resize.confirm.start': (instance_id, None),
-    'openstack|compute.instance.resize.confirm.end':   (instance_id, None),
-    'openstack|compute.instance.resize.prep.end':      (instance_id, None),
-    'openstack|compute.instance.resize.prep.start':    (instance_id, None),
-    'openstack|compute.instance.resize.revert.end':    (instance_id, instance_update),
-    'openstack|compute.instance.resize.revert.start':  (instance_id, None),
-    'openstack|compute.instance.resize.end':           (instance_id, instance_update),
+    'openstack|compute.instance.finish_resize.end': (instance_id, instance_update),
+    'openstack|compute.instance.resize.revert.end': (instance_id, instance_update),
+    'openstack|compute.instance.resize.end': (instance_id, instance_update),
 
-    'openstack|compute.instance.snapshot.end':    (instance_id, None),
-    'openstack|compute.instance.snapshot.start':  (instance_id, None),
 
-    'openstack|compute.instance.suspend':         (instance_id, instance_suspended),
-    'openstack|compute.instance.resume':          (instance_id, instance_resumed),
-
-    'openstack|compute.instance.volume.attach':   (instance_id, instance_volume_attach),
-    'openstack|compute.instance.volume.detach':   (instance_id, instance_volume_detach),
-
-    # -------------------------------------------------------------------------
-    # DHCP Agent
-    # -------------------------------------------------------------------------
-    'openstack|dhcp_agent.network.add':       (None, None),
-    'openstack|dhcp_agent.network.remove':    (None, None),
-
-    # -------------------------------------------------------------------------
-    #  Firewalls --------------------------------------------------------------
-    # -------------------------------------------------------------------------
-    # Firewall
-    'openstack|firewall.create.start':        (None, None),
-    'openstack|firewall.create.end':          (None, None),
-    'openstack|firewall.update.start':        (None, None),
-    'openstack|firewall.update.end':          (None, None),
-    'openstack|firewall.delete.start':        (None, None),
-    'openstack|firewall.delete.end':          (None, None),
-
-    # firewall_policy
-    'openstack|firewall_policy.create.start': (None, None),
-    'openstack|firewall_policy.create.end':   (None, None),
-    'openstack|firewall_policy.update.start': (None, None),
-    'openstack|firewall_policy.update.end':   (None, None),
-    'openstack|firewall_policy.delete.start': (None, None),
-    'openstack|firewall_policy.delete.end':   (None, None),
-
-    # firewall_rule
-    'openstack|firewall_rule.create.start':   (None, None),
-    'openstack|firewall_rule.create.end':     (None, None),
-    'openstack|firewall_rule.update.start':   (None, None),
-    'openstack|firewall_rule.update.end':     (None, None),
-    'openstack|firewall_rule.delete.start':   (None, None),
-    'openstack|firewall_rule.delete.end':     (None, None),
+    'openstack|compute.instance.suspend': (instance_id, instance_suspended),
+    'openstack|compute.instance.resume': (instance_id, instance_resumed),
 
     # -------------------------------------------------------------------------
     #  Floating IP's
     # -------------------------------------------------------------------------
-    'openstack|floatingip.create.start':     (floatingip_id, floatingip_create_start),
-    'openstack|floatingip.create.end':       (floatingip_id, floatingip_update),
-    'openstack|floatingip.update.start':     (floatingip_id, floatingip_update),
-    'openstack|floatingip.update.end':       (floatingip_id, floatingip_update),
-    'openstack|floatingip.delete.start':     (floatingip_id, floatingip_delete_start),
-    'openstack|floatingip.delete.end':       (floatingip_id, floatingip_delete_end),
+    'openstack|floatingip.create.end': (floatingip_id, floatingip_update),
+    'openstack|floatingip.update.start': (floatingip_id, floatingip_update),
+    'openstack|floatingip.update.end': (floatingip_id, floatingip_update),
+    'openstack|floatingip.delete.end': (floatingip_id, floatingip_delete_end),
 
     # -------------------------------------------------------------------------
     #  Network
     # -------------------------------------------------------------------------
-    'openstack|network.create.start':        (None, network_create_start),
-    'openstack|network.create.end':          (network_id, network_update),
-    'openstack|network.update.start':        (network_id, network_update_start),
-    'openstack|network.update.end':          (network_id, network_update),
-    'openstack|network.delete.start':        (network_id, network_delete_start),
-    'openstack|network.delete.end':          (network_id, network_delete_end),
+    'openstack|network.create.end': (network_id, network_update),
+    'openstack|network.update.end': (network_id, network_update),
+    'openstack|network.delete.end': (network_id, network_delete_end),
 
     # -------------------------------------------------------------------------
     #  Port
     # -------------------------------------------------------------------------
-    'openstack|port.create.start':           (port_id, port_create_start),
-    'openstack|port.create.end':             (port_id, port_update),
-    'openstack|port.update.start':           (None, port_update_start),
-    'openstack|port.update.end':             (port_id, port_update),
-    'openstack|port.delete.start':           (port_id, port_delete_start),
-    'openstack|port.delete.end':             (port_id, port_delete_end),
+    'openstack|port.create.end': (port_id, port_update),
+    'openstack|port.update.end': (port_id, port_update),
+    'openstack|port.delete.end': (port_id, port_delete_end),
 
     # -------------------------------------------------------------------------
     #  Routers
     # -------------------------------------------------------------------------
-    'openstack|router.create.start':         (router_id, router_create_start),
-    'openstack|router.create.end':           (router_id, router_update),
-    'openstack|router.update.start':         (router_id, router_update_start),
-    'openstack|router.update.end':           (router_id, router_update),
-    'openstack|router.delete.start':         (router_id, router_delete_start),
-    'openstack|router.delete.end':           (router_id, router_delete_end),
-
-    'openstack|router.interface.create':        (None, None),
-    'openstack|router.interface.update':        (None, None),
-    'openstack|router.interface.delete':        (None, None),
-
-    # -------------------------------------------------------------------------
-    #  Security_group
-    # -------------------------------------------------------------------------
-    # 'openstack|security_group.create.start': (securitygroup_id, securityGroup_create_start),
-    # 'openstack|security_group.create.end':   (securitygroup_id, securityGroup_update),
-    # 'openstack|security_group.update.start': (securitygroup_id, securityGroup_update_start),
-    # 'openstack|security_group.update.end':   (securitygroup_id, securityGroup_update),
-    # 'openstack|security_group.delete.start': (securitygroup_id, securityGroup_delete_start),
-    # 'openstack|security_group.delete.end':   (securitygroup_id, securityGroup_delete_end),
-
-    'openstack|security_group.create.start':     (None, None),
-    'openstack|security_group.create.end':       (None, None),
-    'openstack|security_group.update.start':     (None, None),
-    'openstack|security_group.update.end':       (None, None),
-    'openstack|security_group.delete.start':     (None, None),
-    'openstack|security_group.delete.end':       (None, None),
-
-    # -------------------------------------------------------------------------
-    #  Security_group_rule
-    # -------------------------------------------------------------------------
-    'openstack|security_group_rule.create.start': (None, None),
-    'openstack|security_group_rule.create.end':   (None, None),
-    'openstack|security_group_rule.update.start': (None, None),
-    'openstack|security_group_rule.update.end':   (None, None),
-    'openstack|security_group_rule.delete.start': (None, None),
-    'openstack|security_group_rule.delete.end':   (None, None),
+    'openstack|router.create.end': (router_id, router_update),
+    'openstack|router.update.end': (router_id, router_update),
+    'openstack|router.delete.end': (router_id, router_delete_end),
 
     # -------------------------------------------------------------------------
     #  Subnet
     # -------------------------------------------------------------------------
-    'openstack|subnet.create.start':         (subnet_id, subnet_create_start),
-    'openstack|subnet.create.end':           (subnet_id, subnet_update),
-    'openstack|subnet.update.start':         (subnet_id, subnet_update_start),
-    'openstack|subnet.update.end':           (subnet_id, subnet_update),
-    'openstack|subnet.delete.start':         (subnet_id, subnet_delete_start),
-    'openstack|subnet.delete.end':           (subnet_id, subnet_delete_end),
+    'openstack|subnet.create.end': (subnet_id, subnet_update),
+    'openstack|subnet.update.end': (subnet_id, subnet_update),
+    'openstack|subnet.delete.end': (subnet_id, subnet_delete_end),
 
     # -------------------------------------------------------------------------
     #  Volume
@@ -1206,24 +902,17 @@ MAPPERS = {
     # 2. volume.detach.start
     # 3. volume.detach.end
     # -------------------------------------------------------------------------
-    'openstack|volume.create.start':         (volume_id, volume_create_start),
-    'openstack|volume.create.end':           (volume_id, volume_update),
-    'openstack|volume.update.start':         (volume_id, volume_update_start),
-    'openstack|volume.update.end':           (volume_id, volume_update),
-    'openstack|volume.delete.start':         (volume_id, volume_delete_start),
-    'openstack|volume.delete.end':           (volume_id, volume_delete_end),
-    'openstack|volume.attach.start':         (volume_id, volume_attach_start),
-    'openstack|volume.attach.end':           (volume_id, volume_update),
-    'openstack|volume.detach.start':         (volume_id, volume_detach_start),
-    'openstack|volume.detach.end':           (volume_id, volume_update),
+    'openstack|volume.create.end': (volume_id, volume_update),
+    'openstack|volume.update.end': (volume_id, volume_update),
+    'openstack|volume.delete.end': (volume_id, volume_delete_end),
+    'openstack|volume.attach.end': (volume_id, volume_update),
+    'openstack|volume.detach.end': (volume_id, volume_update),
 
     # -------------------------------------------------------------------------
     #  Snapshot
     # -------------------------------------------------------------------------
-    'openstack|snapshot.create.start':         (volsnapshot_id, volsnapshot_create_start),
-    'openstack|snapshot.create.end':           (volsnapshot_id, volsnapshot_update),
-    'openstack|snapshot.delete.start':         (volsnapshot_id, volsnapshot_delete_start),
-    'openstack|snapshot.delete.end':           (volsnapshot_id, volsnapshot_delete_end),
+    'openstack|snapshot.create.end': (volsnapshot_id, volsnapshot_update),
+    'openstack|snapshot.delete.end': (volsnapshot_id, volsnapshot_delete_end),
 
 }
 
