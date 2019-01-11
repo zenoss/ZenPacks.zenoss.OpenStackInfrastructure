@@ -811,6 +811,7 @@ Changes
 
 2.5.0
 
+- Allow non-admin users limited modeling ability (ZPS-3851)
 - Fix KeyError in PerfAMQPDataSource vNIC discovery (ZPS-4661)
 - Guard against missing tenant quota. (ZPS-4627)
 
