@@ -14,24 +14,16 @@
 
 import json
 import sys
-import logging
-log = logging.getLogger('zen.OpenStack.poll_openstack')
-logging.basicConfig(level=logging.ERROR)
-
-import Globals
-from Products.ZenUtils.Utils import unused
-unused(Globals)
 
 from twisted.internet.defer import inlineCallbacks, returnValue
 
-from utils import add_local_lib_path
-add_local_lib_path()
-
+from apiclients.exceptions import APIClientError
 from apiclients.session import SessionManager
 from apiclients.txapiclient import NovaClient, NeutronClient, CinderClient
 
 
 class OpenStackPoller(object):
+
     def __init__(self, username, api_key, project_id, auth_url, region_name):
         self._username = username
         self._api_key = api_key
@@ -39,14 +31,42 @@ class OpenStackPoller(object):
         self._auth_url = auth_url
         self._api_version = 2
         self._region_name = region_name
+        self.api_error_messages = None
+
+    def api_event_to_data(self, exception):
+        """Append an event to existing data dictionary"""
+
+        if not self.api_error_messages:
+            self.api_error_messages = set()
+
+        self.api_error_messages.add(exception.message)
 
     @inlineCallbacks
     def _populateFlavorData(self, nova, data):
-        result = yield nova.flavors(detailed=True, is_public=None)
+
+        try:
+            result = yield nova.flavors(detailed=True, is_public=None)
+        except APIClientError as ex:
+            if '403 Forbidden' in ex.message:
+                return
+            else:
+                self.api_event_to_data(ex)
+                return
+
         data['flavorTotalCount'] = len(result['flavors'])
 
     @inlineCallbacks
     def _populateImageData(self, nova, data):
+
+        try:
+            result = yield nova.images(limit=0)
+        except APIClientError as ex:
+            if '403 Forbidden' in ex.message:
+                return
+            else:
+                self.api_event_to_data(ex)
+                return
+
         data['imageTotalCount'] = 0
         data['imageSavingCount'] = 0
         data['imageUnknownCount'] = 0
@@ -56,47 +76,37 @@ class OpenStackPoller(object):
         data['imageFailedCount'] = 0
         data['imageOtherCount'] = 0
 
-        result = yield nova.images(limit=0)
-
-        for image in result['images']:
+        for image in result.get('images'):
             data['imageTotalCount'] += 1
-            severity = None
-            unused(severity)
 
             if image['status'] == 'SAVING':
                 data['imageSavingCount'] += 1
-                severity = 2
             elif image['status'] == 'UNKNOWN':
                 data['imageUnknownCount'] += 1
-                severity = 5
             elif image['status'] == 'PREPARING':
                 data['imagePreparingCount'] += 1
-                severity = 2
             elif image['status'] == 'ACTIVE':
                 data['imageActiveCount'] += 1
-                severity = 0
             elif image['status'] == 'QUEUED':
                 data['imageQueuedCount'] += 1
-                severity = 2
             elif image['status'] == 'FAILED':
                 data['imageFailedCount'] += 1
-                severity = 5
             else:
                 # As of Cactus (v1.1) there shouldn't be any other statuses.
                 data['imageOtherCount'] += 1
-                severity = 1
-
-            # data['events'].append(dict(
-            #     severity=severity,
-            #     summary='image status is {0}'.format(image['status']),
-            #     component='image{0}'.format(image['id']),
-            #     eventKey='imageStatus',
-            #     eventClassKey='openstackImageStatus',
-            #     imageStatus=image['status'],
-            # ))
 
     @inlineCallbacks
     def _populateServerData(self, nova, data):
+
+        try:
+            result = yield nova.servers(detailed=True, search_opts={'all_tenants': 1})
+        except APIClientError as ex:
+            if '403 Forbidden' in ex.message:
+                result = yield nova.servers_single(detailed=True)
+            else:
+                self.api_event_to_data(ex)
+                return
+
         data['serverTotalCount'] = 0
         data['serverActiveCount'] = 0
         data['serverBuildCount'] = 0
@@ -114,62 +124,53 @@ class OpenStackPoller(object):
         data['serverUnknownCount'] = 0
         data['serverOtherCount'] = 0
 
-        result = yield nova.servers(detailed=True, search_opts={'all_tenants': 1})
-
         for server in result['servers']:
             data['serverTotalCount'] += 1
-            severity = None
-            unused(severity)
 
             if server['status'] == 'ACTIVE':
                 data['serverActiveCount'] += 1
-                severity = 0
             elif server['status'] == 'BUILD':
                 data['serverBuildCount'] += 1
-                severity = 5
             elif server['status'] == 'REBUILD':
                 data['serverRebuildCount'] += 1
-                severity = 5
             elif server['status'] == 'SUSPENDED':
                 data['serverSuspendedCount'] += 1
-                severity = 2
             elif server['status'] == 'QUEUE_RESIZE':
                 data['serverQueueResizeCount'] += 1
-                severity = 2
             elif server['status'] == 'PREP_RESIZE':
                 data['serverPrepResizeCount'] += 1
-                severity = 3
             elif server['status'] == 'RESIZE':
                 data['serverResizeCount'] += 1
-                severity = 4
             elif server['status'] == 'VERIFY_RESIZE':
                 data['serverVerifyResizeCount'] += 1
-                severity = 2
             elif server['status'] == 'PASSWORD':
                 data['serverPasswordCount'] += 1
-                severity = 2
             elif server['status'] == 'RESCUE':
                 data['serverRescueCount'] += 1
-                severity = 5
             elif server['status'] == 'REBOOT':
                 data['serverRebootCount'] += 1
-                severity = 5
             elif server['status'] == 'HARD_REBOOT':
                 data['serverHardRebootCount'] += 1
-                severity = 5
             elif server['status'] == 'DELETE_IP':
                 data['serverDeleteIpCount'] += 1
-                severity = 3
             elif server['status'] == 'UNKNOWN':
                 data['serverUnknownCount'] += 1
-                severity = 5
             else:
                 # As of Cactus (v1.1) there shouldn't be any other statuses.
                 data['serverOtherCount'] += 1
-                severity = 1
 
     @inlineCallbacks
     def _populateAgentData(self, neutron, data):
+
+        try:
+            result = yield neutron.agents()
+        except APIClientError as ex:
+            if '403 Forbidden' in ex.message:
+                return
+            else:
+                self.api_event_to_data(ex)
+                return
+
         data['agentTotalCount'] = 0
         data['agentDHCPCount'] = 0
         data['agentOVSCount'] = 0
@@ -189,61 +190,52 @@ class OpenStackPoller(object):
         data['agentMLNXCount'] = 0
         data['agentMeteringCount'] = 0
 
-        result = yield neutron.agents()
-
-        for agent in result['agents']:
+        for agent in result.get('agents', {}):
             data['agentTotalCount'] += 1
-            severity = None
-            unused(severity)
 
             if agent['agent_type'] == 'DHCP agent':
                 data['agentDHCPCount'] += 1
-                severity = 0
             elif agent['agent_type'] == 'Open vSwitch agent':
                 data['agentOVSCount'] += 1
-                severity = 0
             elif agent['agent_type'] == 'Linux bridge agent':
                 data['agentLinuxBridgeCount'] += 1
-                severity = 0
             elif agent['agent_type'] == 'HyperV agent':
                 data['agentHyperVCount'] += 1
-                severity = 0
             elif agent['agent_type'] == 'NEC plugin agent':
                 data['agentNECCount'] += 1
-                severity = 0
             elif agent['agent_type'] == 'OFA driver agent':
                 data['agentOFACount'] += 1
-                severity = 0
             elif agent['agent_type'] == 'L3 agent':
                 data['agentL3Count'] += 1
-                severity = 0
             elif agent['agent_type'] == 'Loadbalancer agent':
                 data['agentLBCount'] += 1
-                severity = 0
             elif agent['agent_type'] == 'Mellanox plugin agent':
                 data['agentMLNXCount'] += 1
-                severity = 0
             elif agent['agent_type'] == 'Metering agent':
                 data['agentMeteringCount'] += 1
-                severity = 0
             elif agent['agent_type'] == 'Metadata agent':
                 data['agentMetadataCount'] += 1
-                severity = 0
             elif agent['agent_type'] == 'IBM SDN-VE agent':
                 data['agentSDNVECount'] += 1
-                severity = 0
             elif agent['agent_type'] == 'NIC Switch agent':
                 data['agentNICSCount'] += 1
-                severity = 0
             if agent['alive'] is True:
                 data['agentAliveCount'] += 1
-                severity = 0
             else:
                 data['agentDeadCount'] += 1
-                severity = 5
 
     @inlineCallbacks
     def _populateNetworkData(self, neutron, data):
+
+        try:
+            result = yield neutron.networks()
+        except APIClientError as ex:
+            if '403 Forbidden' in ex.message:
+                return
+            else:
+                self.api_event_to_data(ex)
+                return
+
         data['networkTotalCount'] = 0
         data['networkActiveCount'] = 0
         data['networkBuildCount'] = 0
@@ -253,78 +245,77 @@ class OpenStackPoller(object):
         data['networkExternalCount'] = 0
         data['networkInternalCount'] = 0
 
-        result = yield neutron.networks()
-
-        for net in result['networks']:
+        for net in result.get('networks', {}):
             data['networkTotalCount'] += 1
-            severity = None
-            unused(severity)
 
             if net['status'] == 'ACTIVE':
                 data['networkActiveCount'] += 1
-                severity = 0
             elif net['status'] == 'BUILD':
                 data['networkBuildCount'] += 1
-                severity = 5
             elif net['status'] == 'DOWN':
                 data['networkDownCount'] += 1
-                severity = 5
             elif net['status'] == 'ERROR':
                 data['networkErrorCount'] += 1
-                severity = 5
             if net['shared'] is True:
                 data['networkSharedCount'] += 1
-                severity = None
             if net['router:external'] is True:
                 data['networkExternalCount'] += 1
-                severity = None
             else:
                 data['networkInternalCount'] += 1
-                severity = None
 
     @inlineCallbacks
     def _populateRouterData(self, neutron, data):
+
+        try:
+            result = yield neutron.routers()
+        except APIClientError as ex:
+            if '403 Forbidden' in ex.message:
+                return
+            else:
+                self.api_event_to_data(ex)
+                return
+
         data['routerTotalCount'] = 0
         data['routerActiveCount'] = 0
         data['routerBuildCount'] = 0
         data['routerDownCount'] = 0
         data['routerErrorCount'] = 0
 
-        result = yield neutron.routers()
-
-        for router in result['routers']:
+        for router in result.get('routers', {}):
             data['routerTotalCount'] += 1
-            severity = None
-            unused(severity)
 
             if router['status'] == 'ACTIVE':
                 data['routerActiveCount'] += 1
-                severity = 0
             elif router['status'] == 'BUILD':
                 data['routerBuildCount'] += 1
-                severity = 5
             elif router['status'] == 'DOWN':
                 data['routerDownCount'] += 1
-                severity = 5
             elif router['status'] == 'ERROR':
                 data['routerErrorCount'] += 1
-                severity = 5
 
     @inlineCallbacks
     def _populatePoolData(self, cinder, data):
+
+        try:
+            result = yield cinder.pools()
+        except APIClientError as ex:
+            if '403 Forbidden' in ex.message:
+                return
+            else:
+                self.api_event_to_data(ex)
+                return
+
         data['poolTotalCount'] = 0
         data['poolThinProvisioningSupportCount'] = 0
         data['poolThickProvisioningSupportCount'] = 0
         data['poolQoSSupportCount'] = 0
-
-        result = yield cinder.pools()
 
         def pool_has_data(pool, key1, key2):
             if pool.get(key1, {}).get(key2, False):
                 return 1
             return 0
 
-        for pool in result['pools']:
+        for pool in result.get('pools', {}):
             data['poolTotalCount'] += 1
 
             data['poolThinProvisioningSupportCount'] += \
@@ -336,6 +327,16 @@ class OpenStackPoller(object):
 
     @inlineCallbacks
     def _populateVolumeData(self, cinder, data):
+
+        try:
+            result = yield cinder.volumes()
+        except APIClientError as ex:
+            if '403 Forbidden' in ex.message:
+                return
+            else:
+                self.api_event_to_data(ex)
+                return
+
         data['volumeTotalCount'] = 0
         data['volumeActiveCount'] = 0
         data['volumeBootableCount'] = 0
@@ -344,40 +345,39 @@ class OpenStackPoller(object):
         data['volumeInUseCount'] = 0
         data['volumeUnknownCount'] = 0
 
-        result = yield cinder.volumes()
-
-        for volume in result['volumes']:
+        for volume in result.get('volumes', {}):
             data['volumeTotalCount'] += 1
-            severity = None
-            unused(severity)
 
             if volume['status'] == 'ACTIVE':
                 data['volumeActiveCount'] += 1
                 data['volumeAvailableCount'] += 1
-                severity = 0
             if volume['status'] == 'in-use':
                 data['volumeActiveCount'] += 1
                 data['volumeInUseCount'] += 1
-                severity = 0
             if volume['bootable'] == 'true':
                 data['volumeBootableCount'] += 1
-                severity = 0
             if len(volume['attachments']) > 0:
                 data['volumeAttachedCount'] += 1
-                severity = 0
             if volume['status'] == 'ERROR':
                 data['volumeErrorCount'] += 1
-                severity = 5
 
     @inlineCallbacks
     def _populateSnapshotData(self, cinder, data):
+
+        try:
+            result = yield cinder.volumesnapshots()
+        except APIClientError as ex:
+            if '403 Forbidden' in ex.message:
+                return
+            else:
+                self.api_event_to_data(ex)
+                return
+
         data['snapshotTotalCount'] = 0
         data['snapshotAvailableCount'] = 0
         data['snapshotInProgressCount'] = 0
 
-        result = yield cinder.volumesnapshots()
-
-        for snapshot in result['snapshots']:
+        for snapshot in result.get('snapshots', {}):
             data['snapshotTotalCount'] += 1
 
             if snapshot['status'] == 'available':
@@ -416,6 +416,10 @@ class OpenStackPoller(object):
         except Exception:
             raise
 
+        # Raise any non-forbidded API access errors we caught above.
+        if self.api_error_messages:
+            raise Exception("APIClientError")
+
         returnValue(data)
 
     @inlineCallbacks
@@ -423,6 +427,7 @@ class OpenStackPoller(object):
         data = None
         try:
             data = yield self.getData()
+
             data['events'].append(dict(
                 severity=0,
                 summary='OpenStack connectivity restored',
@@ -430,10 +435,16 @@ class OpenStackPoller(object):
                 eventClassKey='openStackRestored',
             ))
         except Exception, ex:
+
+            summary = 'OpenStack failure: {}. '.format(ex)
+            if self.api_error_messages:
+                summary += 'APIClient Errors: '
+                summary += '. '.join(self.api_error_messages)
+
             data = dict(
                 events=[dict(
                     severity=5,
-                    summary='OpenStack failure: %s' % ex,
+                    summary=summary,
                     eventKey='openStackFailure',
                     eventClassKey='openStackFailure',
                 )]
@@ -444,6 +455,7 @@ class OpenStackPoller(object):
         # Shut down, we're done.
         if reactor.running:
             reactor.stop()
+
 
 if __name__ == '__main__':
     from twisted.internet import reactor

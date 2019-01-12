@@ -412,6 +412,22 @@ exposed via the Zenoss Event Console, and all metrics collected by Ceilometer
 may be collected and graphed in Zenoss through the use of custom monitoring 
 templates.
 
+Restricted Users
+---------------------
+
+Restricted (non-administrator) users can also model and monitor OpenStack
+devices, with access to those devices consistent with that user's privileges.
+In other words, you should expect reduced visiblity for restricted users.
+
+In particular, a restricted user will see:
+
+* Fewer modeled components
+* Reduced monitored metrics
+* Absent events for missing components
+
+If you believe a user should have more access to data, it is your responsibity
+to adjust the user's access level on OpenStack.
+
 Daemons
 -------
 
@@ -812,7 +828,8 @@ Changes
 
 2.5.0
 
-- Allow non-admin users limited modeling ability (ZPS-3851)
+- Allow restricted (non-administrator) users limited monitoring ability (ZPS-5043)
+- Allow restricted (non-administrator) users limited modeling ability (ZPS-3851)
 - Fix KeyError in PerfAMQPDataSource vNIC discovery (ZPS-4661)
 - Guard against missing tenant quota. (ZPS-4627)
 
