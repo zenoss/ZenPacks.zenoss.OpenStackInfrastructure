@@ -75,6 +75,7 @@ def router_id(evt):
 def router_name(evt):
     return getattr(evt, "trait_name", router_id(evt))
 
+
 def subnet_id(evt):
     return make_id(evt, 'subnet', ['trait_id', 'trait_resource_id'])
 
@@ -301,7 +302,7 @@ def event_summary(component_type, component_name, evt):
 # -----------------------------------------------------------------------------
 # Event Functions
 # -----------------------------------------------------------------------------
-def instance_create(device, dmd, evt):
+def instance_create(evt):
     evt.summary = "Instance %s created" % (instance_name(evt))
 
     if not instance_id(evt):
@@ -313,7 +314,7 @@ def instance_create(device, dmd, evt):
     return [objmap]
 
 
-def instance_update(device, dmd, evt):
+def instance_update(evt):
     evt.summary = "Instance %s updated" % (instance_name(evt))
 
     if not instance_id(evt):
@@ -325,7 +326,7 @@ def instance_update(device, dmd, evt):
     return [objmap]
 
 
-def instance_delete(device, dmd, evt):
+def instance_delete(evt):
     evt.summary = "Instance %s deleted" % (instance_name(evt))
 
     if not instance_id(evt):
@@ -337,7 +338,7 @@ def instance_delete(device, dmd, evt):
     return [objmap]
 
 
-def instance_update_status(device, dmd, evt):
+def instance_update_status(evt):
     evt.summary = add_statuschange_to_msg(
         evt,
         "Instance %s updated" % (instance_name(evt)))
@@ -366,7 +367,7 @@ def add_statuschange_to_msg(evt, msg):
     return msg
 
 
-def instance_powered_on(device, dmd, evt):
+def instance_powered_on(evt):
     evt.summary = add_statuschange_to_msg(
         evt,
         "Instance %s powered on" % (instance_name(evt)))
@@ -380,7 +381,7 @@ def instance_powered_on(device, dmd, evt):
     return [objmap]
 
 
-def instance_powered_off(device, dmd, evt):
+def instance_powered_off(evt):
     evt.summary = add_statuschange_to_msg(
         evt,
         "Instance %s powered off" % (instance_name(evt)))
@@ -394,7 +395,7 @@ def instance_powered_off(device, dmd, evt):
     return [objmap]
 
 
-def instance_shutting_down(device, dmd, evt):
+def instance_shutting_down(evt):
     evt.summary = add_statuschange_to_msg(
         evt,
         "Instance %s shutting down" % (instance_name(evt)))
@@ -408,7 +409,7 @@ def instance_shutting_down(device, dmd, evt):
     return [objmap]
 
 
-def instance_shut_down(device, dmd, evt):
+def instance_shut_down(evt):
     evt.summary = add_statuschange_to_msg(
         evt,
         "Instance %s shut down" % (instance_name(evt)))
@@ -422,7 +423,7 @@ def instance_shut_down(device, dmd, evt):
     return [objmap]
 
 
-def instance_rebooting(device, dmd, evt):
+def instance_rebooting(evt):
     evt.summary = add_statuschange_to_msg(
         evt,
         "Instance %s rebooting" % (instance_name(evt)))
@@ -436,7 +437,7 @@ def instance_rebooting(device, dmd, evt):
     return [objmap]
 
 
-def instance_rebooted(device, dmd, evt):
+def instance_rebooted(evt):
     evt.summary = add_statuschange_to_msg(
         evt,
         "Instance %s rebooted" % (instance_name(evt)))
@@ -450,7 +451,7 @@ def instance_rebooted(device, dmd, evt):
     return [objmap]
 
 
-def instance_rebuilding(device, dmd, evt):
+def instance_rebuilding(evt):
     evt.summary = add_statuschange_to_msg(
         evt,
         "Instance %s rebuilding" % (instance_name(evt)))
@@ -465,7 +466,7 @@ def instance_rebuilding(device, dmd, evt):
     return [objmap]
 
 
-def instance_rebuilt(device, dmd, evt):
+def instance_rebuilt(evt):
     evt.summary = add_statuschange_to_msg(
         evt,
         "Instance %s rebuilt" % (instance_name(evt)))
@@ -479,7 +480,7 @@ def instance_rebuilt(device, dmd, evt):
     return [objmap]
 
 
-def instance_suspended(device, dmd, evt):
+def instance_suspended(evt):
     evt.summary = "Instance %s suspended" % (instance_name(evt))
 
     if not instance_id(evt):
@@ -491,7 +492,7 @@ def instance_suspended(device, dmd, evt):
     return [objmap]
 
 
-def instance_resumed(device, dmd, evt):
+def instance_resumed(evt):
     evt.summary = "Instance %s resumed" % (instance_name(evt))
 
     if not instance_id(evt):
@@ -503,7 +504,7 @@ def instance_resumed(device, dmd, evt):
     return [objmap]
 
 
-def instance_rescue(device, dmd, evt):
+def instance_rescue(evt):
     evt.summary = "Instance %s placed in rescue mode" % (instance_name(evt))
 
     if not instance_id(evt):
@@ -515,7 +516,7 @@ def instance_rescue(device, dmd, evt):
     return [objmap]
 
 
-def instance_unrescue(device, dmd, evt):
+def instance_unrescue(evt):
     evt.summary = "Instance %s removed from rescue mode" % (instance_name(evt))
 
     objmap = instance_objmap(evt)
@@ -527,7 +528,7 @@ def instance_unrescue(device, dmd, evt):
 # FloatingIp
 # -----------------------------------------------------------------------------
 
-def floatingip_update(device, dmd, evt):
+def floatingip_update(evt):
     evt.summary = event_summary("FloatingIp", floatingip_name(evt), evt)
 
     if not floatingip_id(evt):
@@ -554,7 +555,7 @@ def floatingip_update(device, dmd, evt):
     return [objmap]
 
 
-def floatingip_delete_end(device, dmd, evt):
+def floatingip_delete_end(evt):
     evt.summary = "FloatingIp %s deleted" % (floatingip_name(evt))
 
     if not floatingip_id(evt):
@@ -569,7 +570,7 @@ def floatingip_delete_end(device, dmd, evt):
 # -----------------------------------------------------------------------------
 # Network Event Functions
 # -----------------------------------------------------------------------------
-def network_update(device, dmd, evt):
+def network_update(evt):
     evt.summary = event_summary("Network", network_name(evt), evt)
 
     if not network_id(evt):
@@ -592,7 +593,7 @@ def network_update(device, dmd, evt):
     return [objmap]
 
 
-def network_delete_end(device, dmd, evt):
+def network_delete_end(evt):
     evt.summary = "Network %s deleted" % (network_name(evt))
 
     if not network_id(evt):
@@ -608,7 +609,7 @@ def network_delete_end(device, dmd, evt):
 # Port Event Functions
 # -----------------------------------------------------------------------------
 
-def port_update(device, dmd, evt):
+def port_update(evt):
     evt.summary = event_summary("Port", port_name(evt), evt)
 
     if not port_id(evt):
@@ -647,7 +648,7 @@ def port_update(device, dmd, evt):
 
     return [objmap]
 
-def port_delete_end(device, dmd, evt):
+def port_delete_end(evt):
     evt.summary = "Port %s deleted" % (port_name(evt))
 
     objmap = neutron_objmap(evt, 'Port')
@@ -659,7 +660,7 @@ def port_delete_end(device, dmd, evt):
 # Router Event Functions
 # -----------------------------------------------------------------------------
 
-def router_update(device, dmd, evt):
+def router_update(evt):
     evt.summary = event_summary("Router", router_name(evt), evt)
 
     if not router_id(evt):
@@ -683,7 +684,7 @@ def router_update(device, dmd, evt):
     return [objmap]
 
 
-def router_delete_end(device, dmd, evt):
+def router_delete_end(evt):
     evt.summary = "Router %s deleted" % (router_name(evt))
 
     objmap = neutron_objmap(evt, 'Router')
@@ -694,7 +695,7 @@ def router_delete_end(device, dmd, evt):
 # -----------------------------------------------------------------------------
 # Subnet Event Functions
 # -----------------------------------------------------------------------------
-def subnet_update(device, dmd, evt):
+def subnet_update(evt):
     evt.summary = event_summary("Subnet", subnet_name(evt), evt)
 
     if not subnet_id(evt):
@@ -718,7 +719,7 @@ def subnet_update(device, dmd, evt):
     return [objmap]
 
 
-def subnet_delete_end(device, dmd, evt):
+def subnet_delete_end(evt):
     evt.summary = "Subnet %s deleted" % (subnet_name(evt))
 
     objmap = neutron_objmap(evt, 'Subnet')
@@ -730,7 +731,7 @@ def subnet_delete_end(device, dmd, evt):
 # Volume Event Functions
 # -----------------------------------------------------------------------------
 
-def volume_update(device, dmd, evt):
+def volume_update(evt):
     if 'create.end' in evt.eventClassKey:
         # the volume is being created
         evt.summary = "Created Volume %s" % (volume_name(evt))
@@ -769,7 +770,7 @@ def volume_update(device, dmd, evt):
     return [objmap]
 
 
-def volume_delete_end(device, dmd, evt):
+def volume_delete_end(evt):
     evt.summary = "Volume %s deleted" % (volume_name(evt))
 
     if not volume_id(evt):
@@ -784,7 +785,7 @@ def volume_delete_end(device, dmd, evt):
 # -----------------------------------------------------------------------------
 # Snapshot Event Functions
 # -----------------------------------------------------------------------------
-def volsnapshot_update(device, dmd, evt):
+def volsnapshot_update(evt):
     evt.summary = "Created Volume Snapshot %s for volume %s" % \
         (volsnapshot_name(evt), volume_name(evt))
 
@@ -804,7 +805,7 @@ def volsnapshot_update(device, dmd, evt):
     return [objmap]
 
 
-def volsnapshot_delete_end(device, dmd, evt):
+def volsnapshot_delete_end(evt):
     evt.summary = "Volume Snapshot %s deleted for volume %s" % \
         (volsnapshot_name(evt), volume_name(evt))
 
@@ -926,7 +927,7 @@ def event_is_mapped(evt):
 #  subsystem. See objects.xml for further detail.
 # ==============================================================================
 
-def process(evt, device, dmd, txnCommit):
+def process(evt, device, dmd, txnCommit):    
     try:
         (idfunc, mapper) = MAPPERS.get(evt.eventClassKey, (None, None))
 
@@ -939,7 +940,7 @@ def process(evt, device, dmd, txnCommit):
             evt.component = idfunc(evt)
 
         if mapper:
-            datamaps = mapper(device, dmd, evt)
+            datamaps = mapper(evt)
             if datamaps:
                 adm = ApplyDataMap(device)
                 for datamap in datamaps:
