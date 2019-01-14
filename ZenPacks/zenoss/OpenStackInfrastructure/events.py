@@ -307,11 +307,11 @@ def instance_create(evt):
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
-        return []
+        return None
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
-    return [objmap]
+    return objmap
 
 
 def instance_update(evt):
@@ -319,11 +319,11 @@ def instance_update(evt):
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
-        return []
+        return None
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
-    return [objmap]
+    return objmap
 
 
 def instance_delete(evt):
@@ -331,11 +331,11 @@ def instance_delete(evt):
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
-        return []
+        return None
 
     objmap = instance_objmap(evt)
     objmap.remove = True
-    return [objmap]
+    return objmap
 
 
 def instance_update_status(evt):
@@ -345,11 +345,11 @@ def instance_update_status(evt):
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
-        return []
+        return None
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
-    return [objmap]
+    return objmap
 
 
 def add_statuschange_to_msg(evt, msg):
@@ -374,11 +374,11 @@ def instance_powered_on(evt):
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
-        return []
+        return None
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
-    return [objmap]
+    return objmap
 
 
 def instance_powered_off(evt):
@@ -388,11 +388,11 @@ def instance_powered_off(evt):
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
-        return []
+        return None
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
-    return [objmap]
+    return objmap
 
 
 def instance_shutting_down(evt):
@@ -402,11 +402,11 @@ def instance_shutting_down(evt):
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
-        return []
+        return None
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
-    return [objmap]
+    return objmap
 
 
 def instance_shut_down(evt):
@@ -416,11 +416,11 @@ def instance_shut_down(evt):
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
-        return []
+        return None
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
-    return [objmap]
+    return objmap
 
 
 def instance_rebooting(evt):
@@ -430,11 +430,11 @@ def instance_rebooting(evt):
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
-        return []
+        return None
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
-    return [objmap]
+    return objmap
 
 
 def instance_rebooted(evt):
@@ -444,11 +444,11 @@ def instance_rebooted(evt):
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
-        return []
+        return None
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
-    return [objmap]
+    return objmap
 
 
 def instance_rebuilding(evt):
@@ -458,12 +458,12 @@ def instance_rebuilding(evt):
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
-        return []
+        return None
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
 
-    return [objmap]
+    return objmap
 
 
 def instance_rebuilt(evt):
@@ -473,11 +473,11 @@ def instance_rebuilt(evt):
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
-        return []
+        return None
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
-    return [objmap]
+    return objmap
 
 
 def instance_suspended(evt):
@@ -485,11 +485,11 @@ def instance_suspended(evt):
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
-        return []
+        return None
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
-    return [objmap]
+    return objmap
 
 
 def instance_resumed(evt):
@@ -497,11 +497,11 @@ def instance_resumed(evt):
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
-        return []
+        return None
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
-    return [objmap]
+    return objmap
 
 
 def instance_rescue(evt):
@@ -509,11 +509,11 @@ def instance_rescue(evt):
 
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
-        return []
+        return None
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
-    return [objmap]
+    return objmap
 
 
 def instance_unrescue(evt):
@@ -521,7 +521,7 @@ def instance_unrescue(evt):
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
-    return [objmap]
+    return objmap
 
 
 # -----------------------------------------------------------------------------
@@ -533,7 +533,7 @@ def floatingip_update(evt):
 
     if not floatingip_id(evt):
         LOG.info("Unable to identify floatingip component from event: %s" % evt)
-        return []
+        return None
 
     traitmap = {
         'fixed_ip_address': ['fixed_ip_address'],
@@ -552,7 +552,7 @@ def floatingip_update(evt):
     _apply_trait_rel(evt, objmap, 'trait_floating_network_id', 'network')
     _apply_trait_rel(evt, objmap, 'trait_router_id', 'router')
     _apply_trait_rel(evt, objmap, 'trait_port_id', 'port')
-    return [objmap]
+    return objmap
 
 
 def floatingip_delete_end(evt):
@@ -560,11 +560,11 @@ def floatingip_delete_end(evt):
 
     if not floatingip_id(evt):
         LOG.info("Unable to identify floatingip component from event: %s" % evt)
-        return []
+        return None
 
     objmap = neutron_objmap(evt, 'FloatingIp')
     objmap.remove = True
-    return [objmap]
+    return objmap
 
 
 # -----------------------------------------------------------------------------
@@ -575,7 +575,7 @@ def network_update(evt):
 
     if not network_id(evt):
         LOG.info("Unable to identify network component from event: %s" % evt)
-        return []
+        return None
 
     traitmap = {
         'admin_state_up': ['admin_state_up'],
@@ -590,7 +590,7 @@ def network_update(evt):
 
     objmap = neutron_objmap(evt, "Network")
     _apply_neutron_traits(evt, objmap, traitmap)
-    return [objmap]
+    return objmap
 
 
 def network_delete_end(evt):
@@ -598,11 +598,11 @@ def network_delete_end(evt):
 
     if not network_id(evt):
         LOG.info("Unable to identify network component from event: %s" % evt)
-        return []
+        return None
 
     objmap = neutron_objmap(evt, 'Network')
     objmap.remove = True
-    return [objmap]
+    return objmap
 
 
 # -----------------------------------------------------------------------------
@@ -614,7 +614,7 @@ def port_update(evt):
 
     if not port_id(evt):
         LOG.info("Unable to identify port component from event: %s" % evt)
-        return []
+        return None
 
     traitmap = {
         'admin_state_up': ['admin_state_up'],
@@ -646,14 +646,14 @@ def port_update(evt):
         setattr(objmap, 'set_subnets', port_subnets)
         setattr(objmap, 'fixed_ip_list', port_fixedips)
 
-    return [objmap]
+    return objmap
 
 def port_delete_end(evt):
     evt.summary = "Port %s deleted" % (port_name(evt))
 
     objmap = neutron_objmap(evt, 'Port')
     objmap.remove = True
-    return [objmap]
+    return objmap
 
 
 # -----------------------------------------------------------------------------
@@ -665,7 +665,7 @@ def router_update(evt):
 
     if not router_id(evt):
         LOG.info("Unable to identify router component from event: %s" % evt)
-        return []
+        return None
 
     traitmap = {
         'admin_state_up': ['admin_state_up'],
@@ -681,7 +681,7 @@ def router_update(evt):
     objmap = neutron_objmap(evt, "Router")
     _apply_neutron_traits(evt, objmap, traitmap)
     _apply_router_gateway_info(evt, objmap)
-    return [objmap]
+    return objmap
 
 
 def router_delete_end(evt):
@@ -689,7 +689,7 @@ def router_delete_end(evt):
 
     objmap = neutron_objmap(evt, 'Router')
     objmap.remove = True
-    return [objmap]
+    return objmap
 
 
 # -----------------------------------------------------------------------------
@@ -700,7 +700,7 @@ def subnet_update(evt):
 
     if not subnet_id(evt):
         LOG.info("Unable to identify subnet component from event: %s" % evt)
-        return []
+        return None
 
     traitmap = {
         'cidr': ['cidr'],
@@ -716,7 +716,7 @@ def subnet_update(evt):
     _apply_dns_info(evt, objmap)
     _apply_neutron_traits(evt, objmap, traitmap)
     _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
-    return [objmap]
+    return objmap
 
 
 def subnet_delete_end(evt):
@@ -724,7 +724,7 @@ def subnet_delete_end(evt):
 
     objmap = neutron_objmap(evt, 'Subnet')
     objmap.remove = True
-    return [objmap]
+    return objmap
 
 
 # -----------------------------------------------------------------------------
@@ -746,7 +746,7 @@ def volume_update(evt):
 
     if not volume_id(evt):
         LOG.info("Unable to identify volume component from event: %s" % evt)
-        return []
+        return None
 
     objmap = cinder_objmap(evt, "Volume")
     _apply_cinder_traits(evt, objmap)
@@ -767,7 +767,7 @@ def volume_update(evt):
         # set volume type
         _apply_trait_rel(evt, objmap, 'trait_type', 'volType')
 
-    return [objmap]
+    return objmap
 
 
 def volume_delete_end(evt):
@@ -775,11 +775,11 @@ def volume_delete_end(evt):
 
     if not volume_id(evt):
         LOG.info("Unable to identify volume component from event: %s" % evt)
-        return []
+        return None
 
     objmap = cinder_objmap(evt, 'Volume')
     objmap.remove = True
-    return [objmap]
+    return objmap
 
 
 # -----------------------------------------------------------------------------
@@ -791,7 +791,7 @@ def volsnapshot_update(evt):
 
     if not volsnapshot_id(evt):
         LOG.info("Unable to identify volsnapshot component from event: %s" % evt)
-        return []
+        return None
 
     objmap = cinder_objmap(evt, "VolSnapshot")
     _apply_cinder_traits(evt, objmap)
@@ -802,7 +802,7 @@ def volsnapshot_update(evt):
         _apply_trait_rel(evt, objmap, 'trait_project_id', 'tenant')
 
     _apply_trait_rel(evt, objmap, 'trait_volume_id', 'volume')
-    return [objmap]
+    return objmap
 
 
 def volsnapshot_delete_end(evt):
@@ -811,11 +811,11 @@ def volsnapshot_delete_end(evt):
 
     if not volsnapshot_id(evt):
         LOG.info("Unable to identify volsnapshotcomponent from event: %s" % evt)
-        return []
+        return None
 
     objmap = cinder_objmap(evt, 'VolSnapshot')
     objmap.remove = True
-    return [objmap]
+    return objmap
 
 
 # For each eventClassKey, associate it with the appropriate mapper function.
@@ -922,34 +922,39 @@ def event_is_mapped(evt):
     return evt.eventClassKey in MAPPERS
 
 
+def map_event(evt):
+    # given an event, return an ObjectMap, or None.
+
+    (idfunc, mapper) = MAPPERS.get(evt.eventClassKey, (None, None))
+
+    if idfunc:
+        component_id = idfunc(evt)
+        if component_id is None:
+            LOG.error("Unable to identify component ID for %s event: %s",
+                      evt.eventClassKey, evt.getStateToCopy())
+            return None
+        evt.component = idfunc(evt)
+
+    if mapper:
+        return mapper(evt)
+
+
 # ==============================================================================
 #  This is the main process() function that is called by the Events Transform
 #  subsystem. See objects.xml for further detail.
 # ==============================================================================
-
 def process(evt, device, dmd, txnCommit):    
     try:
-        (idfunc, mapper) = MAPPERS.get(evt.eventClassKey, (None, None))
+        objectmap = map_event(evt)
 
-        if idfunc:
-            component_id = idfunc(evt)
-            if component_id is None:
-                LOG.error("Unable to identify component ID for %s event: %s",
-                          evt.eventClassKey, evt.getStateToCopy())
-                return 0
-            evt.component = idfunc(evt)
-
-        if mapper:
-            datamaps = mapper(evt)
-            if datamaps:
-                adm = ApplyDataMap(device)
-                for datamap in datamaps:
-                    # LOG.debug("Applying %s" % datamap)
-                    adm._applyDataMap(device, datamap)
-
-            return len(datamaps)
+        if objectmap:
+            adm = ApplyDataMap(device)
+            # LOG.debug("Applying %s" % objectmap)
+            adm._applyDataMap(device, objectmap)
+            return 1
         else:
             return 0
+
     except Exception:
         # We don't want any exceptions to make it back to zeneventd, as
         # this will cause it to disable the transform, which will most likely
