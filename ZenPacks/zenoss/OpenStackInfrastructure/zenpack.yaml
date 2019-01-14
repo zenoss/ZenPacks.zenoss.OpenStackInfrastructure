@@ -126,7 +126,7 @@ device_classes:
           maintenance:
             type: Python
             plugin_classname: ZenPacks.zenoss.OpenStackInfrastructure.dsplugins.MaintenanceDataSourcePlugin
-            cycletime: 600
+            cycletime: 7200
           rabbitmq-credentials:
             type: Python
             plugin_classname: ZenPacks.zenoss.OpenStackInfrastructure.dsplugins.RabbitMQCeilometerCredentialsDataSourcePlugin
@@ -2051,35 +2051,183 @@ classes:
 event_classes:
   /OpenStack:
     remove: true
-    mappings:
-      OpenStack Events Default:
-        remove: true
-        transform: |-
-          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
-          process(evt, device, dmd, txnCommit)
-        eventClassKey: defaultmapping
-        sequence: 999
-        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|')
-        example: openstack|compute.instance.create.start
-        explanation: Default event transform for all OpenStack Ceilometer notifications.  Maps to /OpenStack, history.
-        zProperties:
-          zEventAction: history
+
   /OpenStack/compute:
     remove: true
   /OpenStack/compute/instance:
     remove: true
     mappings:
-      compute.instance default mapping:
-        remove: true
+      compute.instance.create.start:
+        remove: True
         transform: |-
           from ZenPacks.zenoss.OpenStackInfrastructure.events import process
           process(evt, device, dmd, txnCommit)
-        eventClassKey: defaultmapping
-        sequence: 59
-        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|compute.instance.')
-        explanation: All compute.instance events not otherwise mapped will be placed in the /OpenStackInfrastructure/compute/instance class history.
+        eventClassKey: openstack|compute.instance.create.start
+        explanation: Update model based upon compute.instance.create.start events
         zProperties:
-          zEventAction: history
+          zEventAction: drop
+      compute.instance.create.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|compute.instance.create.end
+        explanation: Update model based upon compute.instance.create.end events
+        zProperties:
+          zEventAction: drop
+      compute.instance.update:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|compute.instance.update
+        explanation: Update model based upon compute.instance.update events
+        zProperties:
+          zEventAction: drop
+      compute.instance.rescue.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|compute.instance.rescue.end
+        explanation: Update model based upon compute.instance.rescue.end events
+        zProperties:
+          zEventAction: drop
+      compute.instance.unrescue.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|compute.instance.unrescue.end
+        explanation: Update model based upon compute.instance.unrescue.end events
+        zProperties:
+          zEventAction: drop
+      compute.instance.rebuild.start:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|compute.instance.rebuild.start
+        explanation: Update model based upon compute.instance.rebuild.start events
+        zProperties:
+          zEventAction: drop
+      compute.instance.rebuild.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|compute.instance.rebuild.end
+        explanation: Update model based upon compute.instance.rebuild.end events
+        zProperties:
+          zEventAction: drop
+      compute.instance.shutdown.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|compute.instance.shutdown.end
+        explanation: Update model based upon compute.instance.shutdown.end events
+        zProperties:
+          zEventAction: drop
+      compute.instance.shutdown.start:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|compute.instance.shutdown.start
+        explanation: Update model based upon compute.instance.shutdown.start events
+        zProperties:
+          zEventAction: drop
+      compute.instance.reboot.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|compute.instance.reboot.end
+        explanation: Update model based upon compute.instance.reboot.end events
+        zProperties:
+          zEventAction: drop
+      compute.instance.reboot.start:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|compute.instance.reboot.start
+        explanation: Update model based upon compute.instance.reboot.start events
+        zProperties:
+          zEventAction: drop
+      compute.instance.power_on.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|compute.instance.power_on.end
+        explanation: Update model based upon compute.instance.power_on.end events
+        zProperties:
+          zEventAction: drop
+      compute.instance.live_migration._post.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|compute.instance.live_migration._post.end
+        explanation: Update model based upon compute.instance.live_migration._post.end events
+        zProperties:
+          zEventAction: drop
+      compute.instance.suspend:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|compute.instance.suspend
+        explanation: Update model based upon compute.instance.suspend events
+        zProperties:
+          zEventAction: drop
+      compute.instance.resume:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|compute.instance.resume
+        explanation: Update model based upon compute.instance.resume events
+        zProperties:
+          zEventAction: drop
+      compute.instance.resize.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|compute.instance.resize.end
+        explanation: Update model based upon compute.instance.resize.end events
+        zProperties:
+          zEventAction: drop
+      compute.instance.resize.revert.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|compute.instance.resize.revert.end
+        explanation: Update model based upon compute.instance.resize.revert.end events
+        zProperties:
+          zEventAction: drop
+      compute.instance.finish_resize.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|compute.instance.finish_resize.end
+        explanation: Update model based upon compute.instance.finish_resize.end events
+        zProperties:
+          zEventAction: drop
+      compute.instance.delete.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|compute.instance.delete.end
+        explanation: Update model based upon compute.instance.delete.end events
+        zProperties:
+          zEventAction: drop
       compute.instance.create.error:
         remove: true
         eventClassKey: openstack|compute.instance.create.error
@@ -2103,190 +2251,250 @@ event_classes:
           zEventAction: drop
   /OpenStack/dhcp_agent:
     remove: true
-    mappings:
-      dhcp_agent defaultmapping:
-        remove: true
-        transform: |-
-          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
-          process(evt, device, dmd, txnCommit)
-        eventClassKey: defaultmapping
-        sequence: 100
-        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|dhcp_agent.')
-        zProperties:
-          zEventAction: history
   /OpenStack/firewall:
     remove: true
-    mappings:
-      firewall defaultmapping:
-        remove: true
-        transform: |-
-          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
-          process(evt, device, dmd, txnCommit)
-        eventClassKey: defaultmapping
-        sequence: 200
-        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|firewall.')
-        zProperties:
-          zEventAction: history
   /OpenStack/firewall_policy:
     remove: true
-    mappings:
-      firewall_policy defaultmapping:
-        remove: true
-        transform: |-
-          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
-          process(evt, device, dmd, txnCommit)
-        eventClassKey: defaultmapping
-        sequence: 210
-        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|firewall_policy.')
-        zProperties:
-          zEventAction: history
   /OpenStack/firewall_rule:
     remove: true
-    mappings:
-      firewall_rule defaultmapping:
-        remove: true
-        transform: |-
-          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
-          process(evt, device, dmd, txnCommit)
-        eventClassKey: defaultmapping
-        sequence: 220
-        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|firewall_rule.')
-        zProperties:
-          zEventAction: history
   /OpenStack/floatingip:
     remove: true
     mappings:
-      floatingip defaultmapping:
-        remove: true
+      floatingip.create.end:
+        remove: True
         transform: |-
           from ZenPacks.zenoss.OpenStackInfrastructure.events import process
           process(evt, device, dmd, txnCommit)
-        eventClassKey: defaultmapping
-        sequence: 300
-        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|floatingip.')
+        eventClassKey: openstack|floatingip.create.end
+        explanation: Update model based upon floatingip.create.end events
         zProperties:
-          zEventAction: history
+          zEventAction: drop
+      floatingip.update.start:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|floatingip.update.start
+        explanation: Update model based upon floatingip.update.start events
+        zProperties:
+          zEventAction: drop
+      floatingip.update.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|floatingip.update.end
+        explanation: Update model based upon floatingip.update.end events
+        zProperties:
+          zEventAction: drop
+      floatingip.delete.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|floatingip.delete.end
+        explanation: Update model based upon floatingip.delete.end events
+        zProperties:
+          zEventAction: drop
+
   /OpenStack/network:
     remove: true
     mappings:
-      network defaultmapping:
-        remove: true
+      network.create.end:
+        remove: True
         transform: |-
           from ZenPacks.zenoss.OpenStackInfrastructure.events import process
           process(evt, device, dmd, txnCommit)
-        eventClassKey: defaultmapping
-        sequence: 400
-        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|network.')
+        eventClassKey: openstack|network.create.end
+        explanation: Update model based upon network.create.end events
         zProperties:
-          zEventAction: history
+          zEventAction: drop
+      network.update.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|network.update.end
+        explanation: Update model based upon network.update.end events
+        zProperties:
+          zEventAction: drop
+      network.delete.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|network.delete.end
+        explanation: Update model based upon network.delete.end events
+        zProperties:
+          zEventAction: drop
+
   /OpenStack/port:
     remove: true
     mappings:
-      port defaultmapping:
-        remove: true
+      port.create.end:
+        remove: True
         transform: |-
           from ZenPacks.zenoss.OpenStackInfrastructure.events import process
           process(evt, device, dmd, txnCommit)
-        eventClassKey: defaultmapping
-        sequence: 500
-        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|port.')
+        eventClassKey: openstack|port.create.end
+        explanation: Update model based upon port.create.end events
         zProperties:
-          zEventAction: history
+          zEventAction: drop
+      port.update.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|port.update.end
+        explanation: Update model based upon port.update.end events
+        zProperties:
+          zEventAction: drop
+      port.delete.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|port.delete.end
+        explanation: Update model based upon port.delete.end events
+        zProperties:
+          zEventAction: drop
   /OpenStack/router:
     remove: true
     mappings:
-      router defaultmapping:
-        remove: true
+      router.create.end:
+        remove: True
         transform: |-
           from ZenPacks.zenoss.OpenStackInfrastructure.events import process
           process(evt, device, dmd, txnCommit)
-        eventClassKey: defaultmapping
-        sequence: 600
-        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|router')
+        eventClassKey: openstack|router.create.end
+        explanation: Update model based upon router.create.end events
         zProperties:
-          zEventAction: history
+          zEventAction: drop
+      router.update.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|router.update.end
+        explanation: Update model based upon router.update.end events
+        zProperties:
+          zEventAction: drop
+      router.delete.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|router.delete.end
+        explanation: Update model based upon router.delete.end events
+        zProperties:
+          zEventAction: drop
   /OpenStack/security_group:
     remove: true
-    mappings:
-      security_group defaultmapping:
-        remove: true
-        transform: |-
-          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
-          process(evt, device, dmd, txnCommit)
-        eventClassKey: defaultmapping
-        sequence: 700
-        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|security_group.')
-        zProperties:
-          zEventAction: history
   /OpenStack/security_group_rule:
     remove: true
-    mappings:
-      security_group_rule defaultmapping:
-        remove: true
-        transform: |-
-          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
-          process(evt, device, dmd, txnCommit)
-        eventClassKey: defaultmapping
-        sequence: 710
-        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|security_group_rule.')
-        zProperties:
-          zEventAction: history
   /OpenStack/subnet:
     remove: true
     mappings:
-      subnet defaultmapping:
-        remove: true
+      subnet.create.end:
+        remove: True
         transform: |-
           from ZenPacks.zenoss.OpenStackInfrastructure.events import process
           process(evt, device, dmd, txnCommit)
-        eventClassKey: defaultmapping
-        sequence: 800
-        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|subnet.')
+        eventClassKey: openstack|subnet.create.end
+        explanation: Update model based upon subnet.create.end events
         zProperties:
-          zEventAction: history
+          zEventAction: drop
+      subnet.update.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|subnet.update.end
+        explanation: Update model based upon subnet.update.end events
+        zProperties:
+          zEventAction: drop
+      subnet.delete.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|subnet.delete.end
+        explanation: Update model based upon subnet.delete.end events
+        zProperties:
+          zEventAction: drop
   /OpenStack/Cinder:
     remove: true
   /OpenStack/Cinder/Volume:
     remove: true    
     mappings:
-      cinder.volume default mapping:
-        remove: true
+      volume.create.end:
+        remove: True
         transform: |-
           from ZenPacks.zenoss.OpenStackInfrastructure.events import process
           process(evt, device, dmd, txnCommit)
-        eventClassKey: defaultmapping
-        sequence: 900
-        rule: getattr(evt, 'eventClassKey', '') or '').startswith('openstack|volume')
-        explanation: All volume events not otherwise mapped will be placed in the /OpenStackInfrastructure/Cinder/Volume class history.
+        eventClassKey: openstack|volume.create.end
+        explanation: Update model based upon volume.create.end events
         zProperties:
-          zEventAction: history
+          zEventAction: drop
+      volume.update.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|volume.update.end
+        explanation: Update model based upon volume.update.end events
+        zProperties:
+          zEventAction: drop
+      volume.attach.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|volume.attach.end
+        explanation: Update model based upon volume.attach.end events
+        zProperties:
+          zEventAction: drop
+      volume.detach.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|volume.detach.end
+        explanation: Update model based upon volume.detach.end events
+        zProperties:
+          zEventAction: drop
+      volume.delete.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|volume.delete.end
+        explanation: Update model based upon volume.delete.end events
+        zProperties:
+          zEventAction: drop
   /OpenStack/Cinder/Snapshot:
     remove: true
     mappings:
-      Cinder Snapshot default mapping:
-        remove: true
+      snapshot.create.end:
+        remove: True
         transform: |-
           from ZenPacks.zenoss.OpenStackInfrastructure.events import process
           process(evt, device, dmd, txnCommit)
-        eventClassKey: defaultmapping
-        sequence: 900
-        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|snapshot')
-        explanation: All snapshot events not otherwise mapped will be placed in the /OpenStackInfrastructure/Cinder/Snapshot class history.
+        eventClassKey: openstack|snapshot.create.end
+        explanation: Update model based upon snapshot.create.end events
         zProperties:
-          zEventAction: history
+          zEventAction: drop
+      snapshot.delete.end:
+        remove: True
+        transform: |-
+          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
+          process(evt, device, dmd, txnCommit)
+        eventClassKey: openstack|snapshot.delete.end
+        explanation: Update model based upon snapshot.delete.end events
+        zProperties:
+          zEventAction: drop
   /OpenStack/image:
     remove: true
-    mappings:
-      Image defaultmapping:
-        remove: true
-        transform: |-
-          from ZenPacks.zenoss.OpenStackInfrastructure.events import process
-          process(evt, device, dmd, txnCommit)
-        eventClassKey: defaultmapping
-        sequence: 910
-        rule: (getattr(evt, 'eventClassKey', '') or '').startswith('openstack|image.')
-        zProperties:
-          zEventAction: history
   /Status:
     remove: true
   /Status/Heartbeat:

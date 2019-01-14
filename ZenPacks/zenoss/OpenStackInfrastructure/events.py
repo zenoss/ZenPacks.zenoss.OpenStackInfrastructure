@@ -917,6 +917,10 @@ MAPPERS = {
 }
 
 
+def event_is_mapped(evt):
+    return evt.eventClassKey in MAPPERS
+
+
 # ==============================================================================
 #  This is the main process() function that is called by the Events Transform
 #  subsystem. See objects.xml for further detail.

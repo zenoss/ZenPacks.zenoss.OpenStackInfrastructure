@@ -28,6 +28,7 @@ from ZenPacks.zenoss.OpenStackInfrastructure.datasources.AMQPDataSource import (
     IAMQPDataSourceInfo)
 
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import ExpiringFIFO, amqp_timestamp_to_int
+from ZenPacks.zenoss.OpenStackInfrastructure.events import event_is_mapped
 
 # How long to cache data in memory before discarding it (data that
 # is coming from ceilometer, but not consumed by any monitoring templates).
@@ -142,7 +143,9 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
             from pprint import pformat
             log.debug(pformat(evt))
 
-            data['events'].append(evt)
+            # only pass on events that we actually have mappings for.
+            if event_is_mapped(evt):
+                data['events'].append(evt)
 
         if len(data['events']):
             data['events'].append({
