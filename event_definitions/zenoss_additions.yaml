@@ -1,0 +1,224 @@
+
+################################################################################
+# Zenoss Additions Below
+################################################################################
+#
+# Add additional traits to certain event types to provide Zenoss with more
+# information for incremental model updates.
+#
+# (Suitable for OpenStack Pike, Queens, Rocky  (Red Hat OSP 12-13)
+
+
+# Add display_name (for pike, ignored on later versions), fixed_ips, image_name
+- event_type: 
+    - compute.instance.create.end
+    - compute.instance.create.error
+    - compute.instance.create.start
+    - compute.instance.finish_resize.end
+    - compute.instance.live_migration._post.end
+    - compute.instance.power_off.end
+    - compute.instance.power_on.end
+    - compute.instance.reboot.end
+    - compute.instance.reboot.start
+    - compute.instance.rebuild.end
+    - compute.instance.rebuild.start
+    - compute.instance.rescue.end
+    - compute.instance.resize.end
+    - compute.instance.resize.revert.end
+    - compute.instance.resume
+    - compute.instance.shutdown.end
+    - compute.instance.shutdown.start
+    - compute.instance.suspend
+    - compute.instance.unrescue.end
+  traits:
+    <<: *instance_traits
+    display_name:
+      # not needed past pike
+      fields: payload.display_name
+    fixed_ips:
+      fields: payload.fixed_ips
+    image_name:
+      fields: payload.image_name
+
+# Add display_name (for pike, ignored on later versions), fixed_ips, image_name
+- event_type: compute.instance.update
+  traits:
+    <<: *instance_traits
+    old_state:
+      fields: payload.old_state
+    display_name:
+      # not needed past pike      
+      fields: payload.display_name
+    fixed_ips:
+      fields: payload.fixed_ips
+    image_name:
+      fields: payload.image_name
+
+# Add display_name.  This is not needed past pike (later versions include
+# it already)
+- event_type: 
+    - compute.instance.delete.end
+    - compute.instance.power_off.start
+    - compute.instance.power_on.start
+    - compute.instance.volume.attach
+    - compute.instance.volume.detach
+  traits:
+    <<: *instance_traits
+    display_name:
+      fields: payload.display_name
+
+# Add fixed_ip_address, floating_ip_address, floating_network_id, status,
+# port_id, router_id
+- event_type: 
+    - 'floatingip.create.end'
+    - 'floatingip.update.end'
+    - 'floatingip.update.start'
+  traits:
+    <<: *network_traits
+    resource_id:
+      fields: ['payload.floatingip.id', 'payload.id']
+    fixed_ip_address:
+      fields: payload.floatingip.fixed_ip_address
+    floating_ip_address:
+      fields: payload.floatingip.floating_ip_address
+    floating_network_id:
+      fields: payload.floatingip.floating_network_id
+    status:
+      fields: payload.floatingip.status
+    port_id:
+      fields: payload.floatingip.port_id
+    router_id:
+      fields: payload.floatingip.router_id
+
+# Add name, admin_state_up, provider_network_type, router_external, status
+- event_type: 
+    - network.create.end
+    - network.update.end
+  traits:
+    <<: *network_traits
+    resource_id:
+      fields: ['payload.network.id', 'payload.id']
+    name:
+      fields: payload.network.name
+    admin_state_up:
+      fields: payload.network.admin_state_up      
+    provider_network_type:
+      fields: payload.network.'provider:network_type'
+    router_external:
+      fields: payload.network.'router:external'
+    status:
+      fields: payload.network.status
+
+# Add name
+- event_type: 
+    - network.create.start
+    - network.delete.end
+    - network.delete.start
+    - network.update.start
+  traits:
+    <<: *network_traits
+    resource_id:
+      fields: ['payload.network.id', 'payload.id']
+    name:
+      fields: payload.network.name
+
+# Add admin_state_up, binding_vif_type, device_owner, mac_address, name, status,
+# network_id, device_id, fixed_ips
+- event_type: 
+    - port.create.end
+    - port.update.end
+  traits:
+    <<: *network_traits
+    resource_id:
+      fields: ['payload.port.id', 'payload.id']
+    admin_state_up:
+      fields: payload.port.admin_state_up
+    binding_vif_type:
+      fields: payload.port.'binding:vif_type'
+    device_owner:
+      fields: payload.port.device_owner
+    mac_address:
+      fields: payload.port.mac_address
+    name:
+      fields: payload.port.name
+    status:
+      fields: payload.port.status
+    network_id:
+      fields: payload.port.network_id
+    device_id:
+      fields: payload.port.device_id
+    fixed_ips:
+      fields: payload.port.fixed_ips
+
+# Add admin_state_up, routes, status, name, external_gateway_info
+- event_type: 
+    - router.create.end
+    - router.update.end
+  traits:
+    <<: *network_traits
+    resource_id:
+      fields: ['payload.router.id', 'payload.id']
+    admin_state_up:
+      fields: payload.router.admin_state_up
+    routes:
+      fields: payload.router.routes
+    status:
+      fields: payload.router.status
+    name:
+      fields: payload.router.name
+    external_gateway_info:
+      fields: payload.router.external_gateway_info
+
+# Add cidr, gateway_ip, name, network_id, dns_nameservers
+- event_type: 
+    - subnet.create.end
+    - subnet.update.end
+  traits:
+    <<: *network_traits
+    resource_id:
+      fields: ['payload.subnet.id', 'payload.id']
+    cidr:
+      fields: payload.subnet.cidr
+    gateway_ip:
+      fields: payload.subnet.gateway_ip
+    name:
+      fields: payload.subnet.name
+    network_id:
+      fields: payload.subnet.network_id
+    dns_nameservers:
+      fields: payload.subnet.dns_nameservers
+
+# Add instance_id (for pike and queens, not needed in later versions)
+- event_type: 
+    - volume.attach.end
+    - volume.attach.start
+    - volume.create.end
+    - volume.detach.end
+    - volume.detach.start
+    - volume.update.end
+  traits:
+    <<: *cinder_traits
+    resource_id:
+      fields: payload.volume_id
+    host:
+      fields: payload.host
+    size:
+      fields: payload.size
+    type:
+      fields: payload.volume_type
+    replication_status:
+      fields: payload.replication_status
+    instance_id:
+      fields: payload.instance_uuid
+
+# add size
+- event_type: snapshot.create.end
+  traits:
+    <<: *cinder_traits
+    resource_id:
+      fields: payload.snapshot_id
+    volume_id:
+      fields: payload.volume_id
+    size:
+      fields: payload.volume_size
+
