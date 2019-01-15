@@ -949,7 +949,6 @@ def process(evt, device, dmd, txnCommit):
 
         if objectmap:
             adm = ApplyDataMap(device)
-            # LOG.debug("Applying %s" % objectmap)
             adm._applyDataMap(device, objectmap)
             return 1
         else:

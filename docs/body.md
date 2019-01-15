@@ -126,6 +126,7 @@ Used when openstack processes are running inside of docker containers. Provide t
 - zOpenStackHostLocalDomain: When openstack hosts report names ending in .localdomain, replace domain with this value.
 - zOpenStackAMQPUsername: Username for ceilometer AMQP integration
 - zOpenStackAMQPPassword: Password for ceilometer AMQP integration
+- zOpenStackProcessEventTypes: List of openstack event types to pass to Zenoss event system.  (Other event types may be processed for model changes, but will not be stored as events in Zenoss)
 
 ### Device Classes 
 - /OpenStack: Root OpenStack device class. Typically, devices should not be put in this device class. 

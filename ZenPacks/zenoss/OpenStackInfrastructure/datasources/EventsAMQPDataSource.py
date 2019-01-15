@@ -101,7 +101,9 @@ cache = defaultdict(CeilometerEventCache)
 
 
 class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
-    proxy_attributes = ()
+    proxy_attributes = (
+        'zOpenStackProcessEventTypes'
+    )
     queue_name = "$OpenStackInboundEvent"
     failure_eventClassKey = 'EventsFailure'
 
@@ -111,16 +113,18 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
 
         data = yield super(EventsAMQPDataSourcePlugin, self).collect(config)
         device_id = config.configId
+        ds0 = config.datasources[0]
 
         for entry in cache[device_id].get():
             c_event = entry.value
+            event_type = c_event['event_type']
 
             evt = {
                 'device': device_id,
                 'severity': ZenEventClasses.Info,
                 'eventKey': '',
-                'summary': 'OpenStackInfrastructure: ' + c_event['event_type'],
-                'eventClassKey': 'openstack|' + c_event['event_type'],
+                'summary': 'OpenStackInfrastructure: ' + event_type,
+                'eventClassKey': 'openstack|' + event_type,
             }
 
             traits = {}
@@ -144,7 +148,7 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
             log.debug(pformat(evt))
 
             # only pass on events that we actually have mappings for.
-            if event_is_mapped(evt):
+            if event_is_mapped(evt) or event_type in ds0.zOpenStackProcessEventTypes:
                 data['events'].append(evt)
 
         if len(data['events']):

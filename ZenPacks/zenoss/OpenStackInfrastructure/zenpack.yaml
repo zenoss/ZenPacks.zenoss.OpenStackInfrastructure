@@ -33,6 +33,8 @@ zProperties:
     type: password
   zOpenStackHostLocalDomain:
     default: ''
+  zOpenStackProcessEventTypes:
+    type: lines
 
 class_relationships:
 # Containing Relations
@@ -101,6 +103,7 @@ device_classes:
   /OpenStack: {}
   /OpenStack/Infrastructure:
     remove: true
+    reset: true
     zProperties:
       zCollectorPlugins:
         - zenoss.OpenStackInfrastructure
@@ -109,6 +112,9 @@ device_classes:
         - Endpoint
       zPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Endpoint
       zSnmpMonitorIgnore: true
+      zOpenStackProcessEventTypes:
+        - compute.instance.create.error
+
     templates:
       Endpoint:
         description: 'OpenStackInfrastructure: Endpoint Monitoring'
