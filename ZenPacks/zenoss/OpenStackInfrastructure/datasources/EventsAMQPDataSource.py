@@ -28,7 +28,7 @@ from ZenPacks.zenoss.OpenStackInfrastructure.datasources.AMQPDataSource import (
     IAMQPDataSourceInfo)
 
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import ExpiringFIFO, amqp_timestamp_to_int
-from ZenPacks.zenoss.OpenStackInfrastructure.events import event_is_mapped
+from ZenPacks.zenoss.OpenStackInfrastructure.events import event_type_is_mapped
 
 # How long to cache data in memory before discarding it (data that
 # is coming from ceilometer, but not consumed by any monitoring templates).
@@ -102,7 +102,7 @@ cache = defaultdict(CeilometerEventCache)
 
 class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
     proxy_attributes = (
-        'zOpenStackProcessEventTypes'
+        'zOpenStackProcessEventTypes',
     )
     queue_name = "$OpenStackInboundEvent"
     failure_eventClassKey = 'EventsFailure'
@@ -129,9 +129,17 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
 
             traits = {}
             for trait in c_event['traits']:
-                # liberty: [[name, dtype, value] ...]
-                # [[u'display_name', 1, u'demo-volume1-snap'], ...]
-                traits[trait[0]] = trait[2]
+                if isinstance(trait, list) and len(trait) == 3:
+                    # [[u'display_name', 1, u'demo-volume1-snap'], ...]
+                    traits[trait[0]] = trait[2]
+                elif isinstance(trait, dict) and "name" in trait and "value" in trait:
+                    # I'm not sure that this format is actually used by ceilometer,
+                    # but we're using it in sim_events.py currently.
+                    #
+                    # [{'name': 'display_name', 'value': 'demo-volume1-snap'}, ...]
+                    traits[trait['name']] = trait['value']
+                else:
+                    log.warning("Unrecognized trait format: %s" % c_event['traits'])
 
             if 'priority' in traits:
                 if traits['priority'] == 'WARN':
@@ -148,7 +156,7 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
             log.debug(pformat(evt))
 
             # only pass on events that we actually have mappings for.
-            if event_is_mapped(evt) or event_type in ds0.zOpenStackProcessEventTypes:
+            if event_type_is_mapped(event_type) or event_type in ds0.zOpenStackProcessEventTypes:
                 data['events'].append(evt)
 
         if len(data['events']):

@@ -918,8 +918,8 @@ MAPPERS = {
 }
 
 
-def event_is_mapped(evt):
-    return evt.eventClassKey in MAPPERS
+def event_type_is_mapped(event_type):
+    return 'openstack|' + event_type in MAPPERS
 
 
 def map_event(evt):
