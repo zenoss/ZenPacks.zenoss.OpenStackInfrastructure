@@ -9,8 +9,8 @@ instance_creation:
         summary: ''
         traits:
             request_id: ${request_id}
-            service: 'python: "scheduler." + instance.host().id'
-            tenant_id: ${instance/tenant/id}
+            service: 'python: "scheduler." + instance.host().hostname'
+            tenant_id: 'python: instance.tenant().id.replace("tenant-", "")'
     -
         device: 'endpoint'
         event_type: 'compute.instance.create.start'
@@ -21,16 +21,16 @@ instance_creation:
             disk_gb: 1
             display_name: ${instance/title}
             ephemeral_gb: 0
-            flavor_name: ${instance/flavor/title}
-            host_name: "python: instance.host().id"
-            image_name: ${instance/image/id}
-            instance_id: ${instance/id}
+            flavor_name: 'python: instance.flavor().title'
+            host_name: 'python: instance.host().hostname'
+            image_name: 'python: instance.image().title'
+            instance_id: ${instance/serverId}
             memory_mb: 512
             request_id: ${request_id}
             root_gb: 1
             service: 'compute'
             state: 'building'
-            tenant_id: ${instance/tenant/id}
+            tenant_id: 'python: instance.tenant().id.replace("tenant-", "")'
             user_id: 'user1'
             vcpus: 1
     -
@@ -44,17 +44,17 @@ instance_creation:
             display_name: ${instance/title}
             ephemeral_gb: 0
             fixed_ips: "[{'floating_ips': [], 'label': 'public', 'version': 4, 'meta': {}, 'address': '172.24.4.229', 'type': 'fixed'}]"
-            flavor_name: ${instance/flavor/title}
-            host_name: "python: instance.host().id"
-            image_name: ${instance/image/id}
-            instance_id: ${instance/id}
+            flavor_name: 'python: instance.flavor().title'
+            host_name: 'python: instance.host().hostname'
+            image_name: 'python: instance.image().title'
+            instance_id: ${instance/serverId}
             launched_at: '2014-09-02T20:20:24.933700'
             memory_mb: 512
             request_id: ${request_id}
             root_gb: 1
             service: 'compute'
             state: 'active'
-            tenant_id: ${instance/tenant/id}
+            tenant_id: 'python: instance.tenant().id.replace("tenant-", "")'
             user_id: 'user1'
             vcpus: 1
         
@@ -70,9 +70,9 @@ instance_power_off:
             disk_gb: 1
             display_name: ${instance/title}
             ephemeral_gb: 0
-            flavor_name: ${instance/flavor/title}
-            host_name: "python: instance.host().id"
-            instance_id: ${instance/id}
+            flavor_name: 'python: instance.flavor().title'
+            host_name: 'python: instance.host().hostname'
+            instance_id: ${instance/serverId}
             launched_at: '2014-08-05T01:01:02.000000'
             memory_mb: 512
             request_id: ${request_id}
@@ -80,7 +80,7 @@ instance_power_off:
             service: 'compute'
             state: 'active'
             state_description: 'powering-off'
-            tenant_id: ${instance/tenant/id}
+            tenant_id: 'python: instance.tenant().id.replace("tenant-", "")'
             user_id: 'user1'
             vcpus: 1
     -
@@ -93,9 +93,9 @@ instance_power_off:
             disk_gb: 1
             display_name: ${instance/title}
             ephemeral_gb: 0
-            flavor_name: ${instance/flavor/title}
-            host_name: "python: instance.host().id"
-            instance_id: ${instance/id}
+            flavor_name: 'python: instance.flavor().title'
+            host_name: 'python: instance.host().hostname'
+            instance_id: ${instance/serverId}
             launched_at: '2014-08-05T01:01:02.000000'
             memory_mb: 512
             request_id: ${request_id}
@@ -103,7 +103,7 @@ instance_power_off:
             service: 'compute'
             state: 'stopped'
             state_description: ''
-            tenant_id: ${instance/tenant/id}
+            tenant_id: 'python: instance.tenant().id.replace("tenant-", "")'
             user_id: 'user1'
             vcpus: 1
         
@@ -119,16 +119,16 @@ instance_power_on:
             disk_gb: 1
             display_name: ${instance/title}
             ephemeral_gb: 0
-            flavor_name: ${instance/flavor/title}
-            host_name: "python: instance.host().id"
-            instance_id: ${instance/id}
+            flavor_name: 'python: instance.flavor().title'
+            host_name: 'python: instance.host().hostname'
+            instance_id: ${instance/serverId}
             launched_at: '2014-09-05T01:48:54.000000'
             memory_mb: 512
             request_id: ${request_id}
             root_gb: 1
             service: 'compute'
             state: 'stopped'
-            tenant_id: ${instance/tenant/id}
+            tenant_id: 'python: instance.tenant().id.replace("tenant-", "")'
             user_id: 'user1'
             vcpus: 1
     -
@@ -141,16 +141,16 @@ instance_power_on:
             disk_gb: 1
             display_name: ${instance/title}
             ephemeral_gb: 0
-            flavor_name: ${instance/flavor/title}
-            host_name: "python: instance.host().id"
-            instance_id: ${instance/id}
+            flavor_name: 'python: instance.flavor().title'
+            host_name: 'python: instance.host().hostname'
+            instance_id: ${instance/serverId}
             launched_at: '2014-09-05T01:48:54.000000'
             memory_mb: 512
             request_id: ${request_id}
             root_gb: 1
             service: 'compute'
             state: 'active'
-            tenant_id: ${instance/tenant/id}
+            tenant_id: 'python: instance.tenant().id.replace("tenant-", "")'
             user_id: 'user1'
             vcpus: 1
 
@@ -165,9 +165,9 @@ instance_reboot:
             disk_gb: 1
             display_name: ${instance/title}
             ephemeral_gb: 0
-            flavor_name: ${instance/flavor/title}
-            host_name: "python: instance.host().id"
-            instance_id: ${instance/id}
+            flavor_name: 'python: instance.flavor().title'
+            host_name: 'python: instance.host().hostname'
+            instance_id: ${instance/serverId}
             launched_at: '2014-09-05T01:48:54.000000'
             memory_mb: 512
             request_id: ${request_id}
@@ -175,7 +175,7 @@ instance_reboot:
             service: 'compute'
             state: 'active'
             state_description: 'reboot_pending'
-            tenant_id: ${instance/tenant/id}
+            tenant_id: 'python: instance.tenant().id.replace("tenant-", "")'
             user_id: 'user1'
             vcpus: 1
     -
@@ -188,9 +188,9 @@ instance_reboot:
             disk_gb: 1
             display_name: ${instance/title}
             ephemeral_gb: 0
-            flavor_name: ${instance/flavor/title}
-            host_name: "python: instance.host().id"
-            instance_id: ${instance/id}
+            flavor_name: 'python: instance.flavor().title'
+            host_name: 'python: instance.host().hostname'
+            instance_id: ${instance/serverId}
             launched_at: '2014-09-05T01:48:54.000000'
             memory_mb: 512
             request_id: ${request_id}
@@ -198,7 +198,7 @@ instance_reboot:
             service: 'compute'
             state: 'active'
             state_description: ''
-            tenant_id: ${instance/tenant/id}
+            tenant_id: 'python: instance.tenant().id.replace("tenant-", "")'
             user_id: 'user1'
             vcpus: 1
 
@@ -214,9 +214,9 @@ instance_suspend_resume:
             disk_gb: 1
             display_name: ${instance/title}
             ephemeral_gb: 0
-            flavor_name: ${instance/flavor/title}
-            host_name: "python: instance.host().id"
-            instance_id: ${instance/id}
+            flavor_name: 'python: instance.flavor().title'
+            host_name: 'python: instance.host().hostname'
+            instance_id: ${instance/serverId}
             launched_at: '2014-09-05T19:50:11.000000'
             memory_mb: 512
             request_id: ${request_id}
@@ -224,7 +224,7 @@ instance_suspend_resume:
             service: 'compute'
             state: 'suspended'
             state_description: ''
-            tenant_id: ${instance/tenant/id}
+            tenant_id: 'python: instance.tenant().id.replace("tenant-", "")'
             user_id: 'user1'
             vcpus: 1
     -
@@ -237,9 +237,9 @@ instance_suspend_resume:
             disk_gb: 1
             display_name: ${instance/title}
             ephemeral_gb: 0
-            flavor_name: ${instance/flavor/title}
-            host_name: "python: instance.host().id"
-            instance_id: ${instance/id}
+            flavor_name: 'python: instance.flavor().title'
+            host_name: 'python: instance.host().hostname'
+            instance_id: ${instance/serverId}
             launched_at: '2014-09-05T19:50:11.000000'
             memory_mb: 512
             request_id: ${request_id}
@@ -247,7 +247,7 @@ instance_suspend_resume:
             service: 'compute'
             state: 'active'
             state_description: ''
-            tenant_id: ${instance/tenant/id}
+            tenant_id: 'python: instance.tenant().id.replace("tenant-", "")'
             user_id: 'user1'
             vcpus: 1
 
@@ -262,9 +262,9 @@ instance_delete:
             disk_gb: 1
             display_name: ${instance/title}
             ephemeral_gb: 0
-            flavor_name: ${instance/flavor/title}
-            host_name: "python: instance.host().id"
-            instance_id: ${instance/id}
+            flavor_name: 'python: instance.flavor().title'
+            host_name: 'python: instance.host().hostname'
+            instance_id: ${instance/serverId}
             launched_at: '2014-09-05T19:50:11.000000'
             memory_mb: 512
             priority: 'INFO'
@@ -273,7 +273,7 @@ instance_delete:
             service: 'compute'
             state: 'active'
             state_description: 'deleting'
-            tenant_id: ${instance/tenant/id}
+            tenant_id: 'python: instance.tenant().id.replace("tenant-", "")'
             user_id: 'user1'
             vcpus: 1
     -
@@ -286,9 +286,9 @@ instance_delete:
             disk_gb: 1
             display_name: ${instance/title}
             ephemeral_gb: 0
-            flavor_name: ${instance/flavor/title}
-            host_name: "python: instance.host().id"
-            instance_id: ${instance/id}
+            flavor_name: 'python: instance.flavor().title'
+            host_name: 'python: instance.host().hostname'
+            instance_id: ${instance/serverId}
             launched_at: '2014-09-05T19:50:11.000000'
             memory_mb: 512
             priority: 'INFO'
@@ -297,7 +297,7 @@ instance_delete:
             service: 'compute'
             state: 'active'
             state_description: 'deleting'
-            tenant_id: ${instance/tenant/id}
+            tenant_id: 'python: instance.tenant().id.replace("tenant-", "")'
             user_id: 'user1'
             vcpus: 1
     -
@@ -310,9 +310,9 @@ instance_delete:
             disk_gb: 1
             display_name: ${instance/title}
             ephemeral_gb: 0
-            flavor_name: ${instance/flavor/title}
-            host_name: "python: instance.host().id"
-            instance_id: ${instance/id}
+            flavor_name: 'python: instance.flavor().title'
+            host_name: 'python: instance.host().hostname'
+            instance_id: ${instance/serverId}
             launched_at: '2014-09-05T19:50:11.000000'
             memory_mb: 512
             priority: 'INFO'
@@ -321,7 +321,7 @@ instance_delete:
             service: 'compute'
             state: 'active'
             state_description: 'deleting'
-            tenant_id: ${instance/tenant/id}
+            tenant_id: 'python: instance.tenant().id.replace("tenant-", "")'
             user_id: 'user1'
             vcpus: 1
     -
@@ -335,9 +335,9 @@ instance_delete:
             disk_gb: 1
             display_name: ${instance/title}
             ephemeral_gb: 0
-            flavor_name: ${instance/flavor/title}
-            host_name: "python: instance.host().id"
-            instance_id: ${instance/id}
+            flavor_name: 'python: instance.flavor().title'
+            host_name: 'python: instance.host().hostname'
+            instance_id: ${instance/serverId}
             launched_at: '2014-09-05T19:50:11.000000'
             memory_mb: 512
             priority: 'INFO'
@@ -346,7 +346,7 @@ instance_delete:
             service: 'compute'
             state: 'deleted'
             state_description: ''
-            tenant_id: ${instance/tenant/id}
+            tenant_id: 'python: instance.tenant().id.replace("tenant-", "")'
             user_id: 'user1'
             vcpus: 1
 

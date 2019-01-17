@@ -61,21 +61,25 @@ class SimEvents(ZenScriptBase):
         self.parser.add_option(
             '--delete_create_every', dest='delete_create_every',
             help='Delete and re-create a random instance every x seconds',
+            type='int',
             default=60)
 
         self.parser.add_option(
             '--powercycle_every', dest='powercycle_every',
             help='Power Cycle (off/on) a random instance every x seconds',
+            type='int',
             default=60)
 
         self.parser.add_option(
             '--suspend_every', dest='suspend_every',
             help='Suspend, then resume a random instance every x seconds',
+            type='int',
             default=60)
 
         self.parser.add_option(
             '--reboot_every', dest='reboot_every',
             help='Reboot a random instance every x seconds',
+            type='int',
             default=60)
 
     @defer.inlineCallbacks
@@ -108,9 +112,7 @@ class SimEvents(ZenScriptBase):
         deferreds.append(
             loop.start(self.options.reboot_every, now=True))
 
-
         yield defer.DeferredList(deferreds)
-
 
     @defer.inlineCallbacks
     def send_instance_delete_create(self):

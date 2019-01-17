@@ -2,7 +2,7 @@
 
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2014, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2014-2019, all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -14,6 +14,7 @@ Unit test for event
 '''
 import os
 import json
+import re
 
 import Globals
 
@@ -22,21 +23,21 @@ logging.basicConfig(level=logging.ERROR)
 log = logging.getLogger('zen.OpenStack')
 
 from zExceptions import NotFound
-from Products.ZenEvents.Event import buildEventFromDict
 from Products.ZenUtils.Utils import monkeypatch
+from Products.DataCollector.ApplyDataMap import ApplyDataMap
 
 from ZenPacks.zenoss.OpenStackInfrastructure.tests.utils import create_model_data
 
 from Products.ZenUtils.Utils import unused
 unused(Globals)
 
-from ZenPacks.zenoss.OpenStackInfrastructure.events import process as process_event
+from ZenPacks.zenoss.OpenStackInfrastructure.events import map_event
 from ZenPacks.zenoss.ZenPackLib import zenpacklib
 # Required before zenpacklib.TestCase can be used.
 zenpacklib.enableTesting()
 
 
-class TestEventTransforms(zenpacklib.TestCase):
+class TestEventMappings(zenpacklib.TestCase):
 
     disableLogging = False
     _eventData = None
@@ -47,12 +48,14 @@ class TestEventTransforms(zenpacklib.TestCase):
         # since otherwise it will be __main__, and ZPL's afterSetup
         # will get confused.
         self.__module__ = 'ZenPacks.zenoss.OpenStackInfrastructure.tests.test_impact'
-        super(TestEventTransforms, self).afterSetUp()
+        super(TestEventMappings, self).afterSetUp()
 
         # Quiet down some noisy logging.
         # logging.getLogger('zen.OpenStackDeviceProxyComponent').setLevel(logging.ERROR)
 
         self._loadEventsData()
+
+        self.adm = ApplyDataMap()
 
     def _loadEventsData(self):
         if self._eventsloaded:
@@ -62,6 +65,10 @@ class TestEventTransforms(zenpacklib.TestCase):
                                'data',
                                'eventdata.json')) as json_file:
             self._eventData = json.load(json_file)
+
+            for event in self._eventData.values():
+                event['openstack_event_type'] = \
+                    re.sub(r'^openstack\|', '', event.get('eventClassKey', ''))
 
         if self._eventData:
             self._eventsloaded = True
@@ -85,30 +92,27 @@ class TestEventTransforms(zenpacklib.TestCase):
             return None
 
     def process_event(self, evt):
-        changes = process_event(evt, self.endpoint(), self.dmd, None)
-        log.info("Processed event (eventClassKey=%s, summary=%s, %d objmaps, component=%s)" %
-                 (evt.eventClassKey, evt.summary, changes, evt.component))
+        objmap = map_event(evt)
+        if objmap:
+            self.adm._applyDataMap(self.endpoint(), objmap)
 
     def test_instance_creation(self):
         self.assertTrue(self._eventsloaded)
 
-        evt = buildEventFromDict(self._eventData['scheduler.run_instance.end'])
-        self.process_event(evt)
-
-        evt = buildEventFromDict(self._eventData['compute.instance.create.start'])
-        self.process_event(evt)
+        self.process_event(self._eventData['scheduler.run_instance.end'])
+        self.process_event(self._eventData['compute.instance.create.start'])
+        self.process_event(self._eventData['compute.instance.create.end'])
 
         instance5 = self.getObjByPath('components/server-instance5')
-
         self.assertIsNotNone(instance5, msg="Incremental model created instance 'instance5'")
 
         self.assertTrue(instance5.publicIps is None or instance5.publicIps == [])
         self.assertTrue(instance5.privateIps is None or instance5.privateIps == [])
 
-        evt = buildEventFromDict(self._eventData['compute.instance.create.end'])
+        evt = self._eventData['compute.instance.create.end']
         # json would not allow evt.trait_fixed_ips to be a string
         # but events.py requires it to be a string
-        evt.trait_fixed_ips = str(evt.trait_fixed_ips)
+        evt['trait_fixed_ips'] = str(evt['trait_fixed_ips'])
         self.process_event(evt)
 
         self.assertTrue(instance5.privateIps == [u'172.24.4.229'])
@@ -138,6 +142,8 @@ class TestEventTransforms(zenpacklib.TestCase):
         addNonContained(instance5, "hypervisor", instance1.hypervisor())
         addNonContained(instance5, "tenant", instance1.tenant())
 
+        return instance5
+
     def test_instance_power_off(self):
         self.assertTrue(self._eventsloaded)
 
@@ -147,16 +153,10 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         self.assertTrue(instance5.serverStatus.lower() == 'active')
 
-        evt = buildEventFromDict(self._eventData['compute.instance.power_off.start'])
-        self.process_event(evt)
-
-        self.assertTrue(instance5.serverStatus.lower() == 'active')
-
-        evt = buildEventFromDict(self._eventData['compute.instance.power_off.end'])
-        self.process_event(evt)
+        self.process_event(self._eventData['compute.instance.power_off.start'])
+        self.process_event(self._eventData['compute.instance.power_off.end'])
 
         self.assertTrue(instance5.serverStatus.lower() == 'stopped')
-        self.assertTrue(evt.summary == 'Instance instance5 powered off (status changed to stopped)')
 
     def test_instance_power_on(self):
         self.assertTrue(self._eventsloaded)
@@ -168,16 +168,10 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         self.assertTrue(instance5.serverStatus.lower() == 'stopped')
 
-        evt = buildEventFromDict(self._eventData['compute.instance.power_on.start'])
-        self.process_event(evt)
-
-        self.assertTrue(instance5.serverStatus.lower() == 'stopped')
-
-        evt = buildEventFromDict(self._eventData['compute.instance.power_on.end'])
-        self.process_event(evt)
+        self.process_event(self._eventData['compute.instance.power_on.start'])
+        self.process_event(self._eventData['compute.instance.power_on.end'])
 
         self.assertTrue(instance5.serverStatus.lower() == 'active')
-        self.assertTrue(evt.summary == 'Instance instance5 powered on (status changed to active)')
 
     def test_instance_reboot(self):
         self.assertTrue(self._eventsloaded)
@@ -188,12 +182,9 @@ class TestEventTransforms(zenpacklib.TestCase):
 
         self.assertTrue(instance5.serverStatus.lower() == 'active')
 
-        evt = buildEventFromDict(self._eventData['compute.instance.reboot.start'])
-        self.process_event(evt)
-
-        evt = buildEventFromDict(self._eventData['compute.instance.reboot.end'])
-        self.process_event(evt)
-        self.assertTrue(evt.summary == 'Instance instance5 rebooted (status changed to active)')
+        self.process_event(self._eventData['compute.instance.reboot.start'])
+        self.process_event(self._eventData['compute.instance.reboot.end'])
+        self.assertTrue(instance5.serverStatus.lower() == 'active')
 
     def test_instance_rebuild(self):
         self.assertTrue(self._eventsloaded)
@@ -202,17 +193,10 @@ class TestEventTransforms(zenpacklib.TestCase):
         instance5 = self.getObjByPath('components/server-instance5')
         self.assertIsNotNone(instance5)
 
-        evt = buildEventFromDict(self._eventData['compute.instance.rebuild.start'])
-        self.process_event(evt)
-
-        evt = buildEventFromDict(self._eventData['compute.instance.power_off.start'])
-        self.process_event(evt)
-
-        evt = buildEventFromDict(self._eventData['compute.instance.power_off.end'])
-        self.process_event(evt)
-
-        evt = buildEventFromDict(self._eventData['compute.instance.rebuild.end'])
-        self.process_event(evt)
+        self.process_event(self._eventData['compute.instance.rebuild.start'])
+        self.process_event(self._eventData['compute.instance.power_off.start'])
+        self.process_event(self._eventData['compute.instance.power_off.end'])
+        self.process_event(self._eventData['compute.instance.rebuild.end'])
 
     def test_instance_suspend_resume(self):
         self.assertTrue(self._eventsloaded)
@@ -221,15 +205,11 @@ class TestEventTransforms(zenpacklib.TestCase):
         instance5 = self.getObjByPath('components/server-instance5')
         self.assertIsNotNone(instance5)
 
-        evt = buildEventFromDict(self._eventData['compute.instance.suspend'])
-        self.process_event(evt)
+        self.process_event(self._eventData['compute.instance.suspend'])
         self.assertTrue(instance5.serverStatus.lower() == 'suspended')
-        self.assertTrue(evt.summary == 'Instance instance5 suspended')
 
-        evt = buildEventFromDict(self._eventData['compute.instance.resume'])
-        self.process_event(evt)
+        self.process_event(self._eventData['compute.instance.resume'])
         self.assertTrue(instance5.serverStatus.lower() == 'active')
-        self.assertTrue(evt.summary == 'Instance instance5 resumed')
 
     def test_instance_delete(self):
         self.assertTrue(self._eventsloaded)
@@ -238,17 +218,10 @@ class TestEventTransforms(zenpacklib.TestCase):
         instance5 = self.getObjByPath('components/server-instance5')
         self.assertIsNotNone(instance5)
 
-        evt = buildEventFromDict(self._eventData['compute.instance.delete.start'])
-        self.process_event(evt)
-
-        evt = buildEventFromDict(self._eventData['compute.instance.shutdown.start'])
-        self.process_event(evt)
-
-        evt = buildEventFromDict(self._eventData['compute.instance.shutdown.end'])
-        self.process_event(evt)
-
-        evt = buildEventFromDict(self._eventData['compute.instance.delete.end'])
-        self.process_event(evt)
+        self.process_event(self._eventData['compute.instance.delete.start'])
+        self.process_event(self._eventData['compute.instance.shutdown.start'])
+        self.process_event(self._eventData['compute.instance.shutdown.end'])
+        self.process_event(self._eventData['compute.instance.delete.end'])
 
         instance5 = self.getObjByPath('components/server-instance5')
         self.assertIsNone(instance5)
@@ -260,24 +233,14 @@ class TestEventTransforms(zenpacklib.TestCase):
         instance5 = self.getObjByPath('components/server-instance5')
         self.assertIsNotNone(instance5)
 
-        evt = buildEventFromDict(self._eventData['compute.instance.rescue.start'])
-        self.process_event(evt)
-
-        evt = buildEventFromDict(self._eventData['compute.instance.exists'])
-        self.process_event(evt)
-
-        evt = buildEventFromDict(self._eventData['compute.instance.rescue.end'])
-        self.process_event(evt)
+        self.process_event(self._eventData['compute.instance.rescue.start'])
+        self.process_event(self._eventData['compute.instance.exists'])
+        self.process_event(self._eventData['compute.instance.rescue.end'])
         self.assertTrue(instance5.serverStatus.lower() == 'rescued')
-        self.assertTrue(evt.summary == 'Instance instance5 placed in rescue mode')
 
-        evt = buildEventFromDict(self._eventData['compute.instance.unrescue.start'])
-
-        evt = buildEventFromDict(self._eventData['compute.instance.unrescue.end'])
-
-        self.process_event(evt)
+        self.process_event(self._eventData['compute.instance.unrescue.start'])
+        self.process_event(self._eventData['compute.instance.unrescue.end'])
         self.assertTrue(instance5.serverStatus.lower() == 'active')
-        self.assertTrue(evt.summary == 'Instance instance5 removed from rescue mode')
 
     def _create_network(self, network_id):
         self.assertTrue(self._eventsloaded)
@@ -285,9 +248,8 @@ class TestEventTransforms(zenpacklib.TestCase):
         ''' Build network using events and network_id'''
 
         log.info("Create network '%s'" % network_id)
-        evt = buildEventFromDict(self._eventData['network.create.end'])
+        self.process_event(self._eventData['network.create.end'])
 
-        self.process_event(evt)
         network = self.getObjByPath('components/network-' + network_id)
         return network
 
@@ -297,9 +259,8 @@ class TestEventTransforms(zenpacklib.TestCase):
         ''' Delete network using events and network_id'''
         log.info("Delete network '%s'" % network_id)
 
-        evt = buildEventFromDict(self._eventData['network.delete.end'])
+        self.process_event(self._eventData['network.delete.end'])
 
-        self.process_event(evt)
         network = self.getObjByPath('components/network-' + network_id)
         return network
 
@@ -311,9 +272,8 @@ class TestEventTransforms(zenpacklib.TestCase):
         '''
         log.info("Create Subnet '%s'" % subnet_id)
 
-        evt = buildEventFromDict(self._eventData['subnet.create.end'])
+        self.process_event(self._eventData['subnet.create.end'])
 
-        self.process_event(evt)
         subnet = self.getObjByPath('components/subnet-' + subnet_id)
         return subnet
 
@@ -323,9 +283,8 @@ class TestEventTransforms(zenpacklib.TestCase):
         ''' Delete subnet using events and subnet_id'''
         log.info("Delete Subnet '%s'" % subnet_id)
 
-        evt = buildEventFromDict(self._eventData['subnet.delete.end'])
+        self.process_event(self._eventData['subnet.delete.end'])
 
-        self.process_event(evt)
         subnet = self.getObjByPath('components/subnet-' + subnet_id)
         return subnet
 
@@ -337,9 +296,8 @@ class TestEventTransforms(zenpacklib.TestCase):
         '''
         log.info("Create port '%s'" % port_id)
 
-        evt = buildEventFromDict(self._eventData['port.create.end'])
+        self.process_event(self._eventData['port.create.end'])
 
-        self.process_event(evt)
         port = self.getObjByPath('components/port-' + port_id)
         return port
 
@@ -349,9 +307,8 @@ class TestEventTransforms(zenpacklib.TestCase):
         ''' Delete port using events and port_id'''
         log.info("Delete port '%s'" % port_id)
 
-        evt = buildEventFromDict(self._eventData['port.delete.end'])
+        self.process_event(self._eventData['port.delete.end'])
 
-        self.process_event(evt)
         port = self.getObjByPath('components/port-' + port_id)
         return port
 
@@ -368,9 +325,8 @@ class TestEventTransforms(zenpacklib.TestCase):
                "u'ip_address': u'192.168.117.226'}]}" \
                % (network_id, subnet_id)
 
-        evt = buildEventFromDict(self._eventData['router.create.end'])
+        self.process_event(self._eventData['router.create.end'])
 
-        self.process_event(evt)
         router = self.getObjByPath('components/router-' + router_id)
         return router
 
@@ -380,9 +336,8 @@ class TestEventTransforms(zenpacklib.TestCase):
         ''' Delete router using events and router_id'''
         log.info("Delete router '%s'" % router_id)
 
-        evt = buildEventFromDict(self._eventData['router.delete.end'])
+        self.process_event(self._eventData['router.delete.end'])
 
-        self.process_event(evt)
         router = self.getObjByPath('components/router-' + router_id)
         return router
 
@@ -394,9 +349,8 @@ class TestEventTransforms(zenpacklib.TestCase):
         '''
         log.info("Create floatingip '%s'" % floatingip_id)
 
-        evt = buildEventFromDict(self._eventData['floatingip.create.end'])
+        self.process_event(self._eventData['floatingip.create.end'])
 
-        self.process_event(evt)
         floatingip = self.getObjByPath('components/floatingip-' + floatingip_id)
         return floatingip
 
@@ -406,41 +360,15 @@ class TestEventTransforms(zenpacklib.TestCase):
         ''' Delete floatingip using events and floatingip_id'''
         log.info("Delete floatingip '%s'" % floatingip_id)
 
-        evt = buildEventFromDict(self._eventData['floatingip.delete.end'])
+        self.process_event(self._eventData['floatingip.delete.end'])
 
-        self.process_event(evt)
         floatingip = self.getObjByPath('components/floatingip-' + floatingip_id)
         return floatingip
-
-    def _create_securitygroup(self, securitygroup_id):
-        self.assertTrue(self._eventsloaded)
-
-        ''' Build securitygroup_id using events.
-        '''
-        log.info("Create securityGroup '%s'" % securitygroup_id)
-
-        evt = buildEventFromDict(self._eventData['security_group.create.end'])
-
-        self.process_event(evt)
-        securitygroup = self.getObjByPath('components/securitygroup-' + securitygroup_id)
-        return securitygroup
-
-    def _delete_securitygroup(self, securitygroup_id):
-        self.assertTrue(self._eventsloaded)
-
-        ''' Delete securitygroup using events and securitygroup_id'''
-        log.info("Delete securityGroup '%s'" % securitygroup_id)
-
-        evt = buildEventFromDict(self._eventData['security_group.delete.end'])
-
-        self.process_event(evt)
-        securitygroup = self.getObjByPath('components/securitygroup-' + securitygroup_id)
-        return securitygroup
 
     def test_network(self):
         ''' Test Creation/Deletion of network '''
         net = self._create_network("test")
-        self.assertIsNotNone(net, msg="Failure: nework doesn't exist!")
+        self.assertIsNotNone(net, msg="Failure: network doesn't exist!")
 
         net = self._delete_network(net.netId)
         self.assertIsNone(net, msg="Failure: network exists!")
@@ -492,22 +420,6 @@ class TestEventTransforms(zenpacklib.TestCase):
         f_ip = self._delete_floatingip(f_ip.floatingipId)
         self.assertIsNone(f_ip, msg="Failure: floatingip exists!")
 
-    def test_security_group(self):
-        '''
-            Test Creation/Deletion of SecurityGroup
-            Currently we do not process security group events, which causes
-            securitygroup object to be None.
-            Update this test once we decide to process security group
-            events
-        '''
-
-        securitygroup = self._create_securitygroup('test')
-        self.assertIsNone(securitygroup)
-
-        securitygroup = self._delete_securitygroup('test')
-        self.assertIsNone(securitygroup)
-
-
     def _create_volume_start(self, volume_id):
         self.assertTrue(self._eventsloaded)
 
@@ -515,12 +427,10 @@ class TestEventTransforms(zenpacklib.TestCase):
         '''
         log.info("Create volume '%s'" % volume_id)
 
-        evt = buildEventFromDict(self._eventData['volume.create.start'])
+        self.process_event(self._eventData['volume.create.start'])
 
-        self.process_event(evt)
         volume = self.getObjByPath('components/volume-' + volume_id)
         return volume
-
 
     def _create_volume_end(self, volume_id):
         self.assertTrue(self._eventsloaded)
@@ -529,12 +439,10 @@ class TestEventTransforms(zenpacklib.TestCase):
         '''
         log.info("Create volume '%s'" % volume_id)
 
-        evt = buildEventFromDict(self._eventData['volume.create.end'])
+        self.process_event(self._eventData['volume.create.end'])
 
-        self.process_event(evt)
         volume = self.getObjByPath('components/volume-' + volume_id)
         return volume
-
 
     def _update_volume_start(self, volume_id):
         self.assertTrue(self._eventsloaded)
@@ -543,12 +451,10 @@ class TestEventTransforms(zenpacklib.TestCase):
         '''
         log.info("Update volume '%s'" % volume_id)
 
-        evt = buildEventFromDict(self._eventData['volume.update.start'])
+        self.process_event(self._eventData['volume.update.start'])
 
-        self.process_event(evt)
         volume = self.getObjByPath('components/volume-' + volume_id)
         return volume
-
 
     def _update_volume_end(self, volume_id):
         self.assertTrue(self._eventsloaded)
@@ -557,12 +463,10 @@ class TestEventTransforms(zenpacklib.TestCase):
         '''
         log.info("Update volume '%s'" % volume_id)
 
-        evt = buildEventFromDict(self._eventData['volume.update.end'])
+        self.process_event(self._eventData['volume.update.end'])
 
-        self.process_event(evt)
         volume = self.getObjByPath('components/volume-' + volume_id)
         return volume
-
 
     def _attach_volume_start(self, volume_id):
         self.assertTrue(self._eventsloaded)
@@ -571,12 +475,10 @@ class TestEventTransforms(zenpacklib.TestCase):
         '''
         log.info("Attach volume '%s'" % volume_id)
 
-        evt = buildEventFromDict(self._eventData['volume.attach.start'])
+        self.process_event(self._eventData['volume.attach.start'])
 
-        self.process_event(evt)
         volume = self.getObjByPath('components/volume-' + volume_id)
         return volume
-
 
     def _attach_volume_end(self, volume_id):
         self.assertTrue(self._eventsloaded)
@@ -585,12 +487,10 @@ class TestEventTransforms(zenpacklib.TestCase):
         '''
         log.info("Attach volume '%s'" % volume_id)
 
-        evt = buildEventFromDict(self._eventData['volume.attach.end'])
+        self.process_event(self._eventData['volume.attach.end'])
 
-        self.process_event(evt)
         volume = self.getObjByPath('components/volume-' + volume_id)
         return volume
-
 
     def _detach_volume_start(self, volume_id):
         self.assertTrue(self._eventsloaded)
@@ -599,12 +499,10 @@ class TestEventTransforms(zenpacklib.TestCase):
         '''
         log.info("Detach volume '%s'" % volume_id)
 
-        evt = buildEventFromDict(self._eventData['volume.detach.start'])
+        self.process_event(self._eventData['volume.detach.start'])
 
-        self.process_event(evt)
         volume = self.getObjByPath('components/volume-' + volume_id)
         return volume
-
 
     def _detach_volume_end(self, volume_id):
         self.assertTrue(self._eventsloaded)
@@ -613,12 +511,10 @@ class TestEventTransforms(zenpacklib.TestCase):
         '''
         log.info("Detach volume '%s'" % volume_id)
 
-        evt = buildEventFromDict(self._eventData['volume.detach.end'])
+        self.process_event(self._eventData['volume.detach.end'])
 
-        self.process_event(evt)
         volume = self.getObjByPath('components/volume-' + volume_id)
         return volume
-
 
     def _delete_volume_start(self, volume_id):
         self.assertTrue(self._eventsloaded)
@@ -627,12 +523,10 @@ class TestEventTransforms(zenpacklib.TestCase):
         '''
         log.info("Delete volume '%s'" % volume_id)
 
-        evt = buildEventFromDict(self._eventData['volume.delete.start'])
+        self.process_event(self._eventData['volume.delete.start'])
 
-        self.process_event(evt)
         volume = self.getObjByPath('components/volume-' + volume_id)
         return volume
-
 
     def _delete_volume_end(self, volume_id):
         self.assertTrue(self._eventsloaded)
@@ -641,12 +535,10 @@ class TestEventTransforms(zenpacklib.TestCase):
         '''
         log.info("Delete volume '%s'" % volume_id)
 
-        evt = buildEventFromDict(self._eventData['volume.delete.end'])
+        self.process_event(self._eventData['volume.delete.end'])
 
-        self.process_event(evt)
         volume = self.getObjByPath('components/volume-' + volume_id)
         return volume
-
 
     def _create_volsnapshot_start(self, volsnapshot_id):
         self.assertTrue(self._eventsloaded)
@@ -655,12 +547,10 @@ class TestEventTransforms(zenpacklib.TestCase):
         '''
         log.info("Create volume snapshot '%s'" % volsnapshot_id)
 
-        evt = buildEventFromDict(self._eventData['volsnapshot.create.start'])
+        self.process_event(self._eventData['volsnapshot.create.start'])
 
-        self.process_event(evt)
         volsnapshot = self.getObjByPath('components/volsnapshot-' + volsnapshot_id)
         return volsnapshot
-
 
     def _create_volsnapshot_end(self, volsnapshot_id):
         self.assertTrue(self._eventsloaded)
@@ -669,12 +559,10 @@ class TestEventTransforms(zenpacklib.TestCase):
         '''
         log.info("Create volume snapshot '%s'" % volsnapshot_id)
 
-        evt = buildEventFromDict(self._eventData['volsnapshot.create.end'])
+        self.process_event(self._eventData['volsnapshot.create.end'])
 
-        self.process_event(evt)
         volsnapshot = self.getObjByPath('components/volsnapshot-' + volsnapshot_id)
         return volsnapshot
-
 
     def _delete_volsnapshot_start(self, volsnapshot_id):
         self.assertTrue(self._eventsloaded)
@@ -683,12 +571,10 @@ class TestEventTransforms(zenpacklib.TestCase):
         '''
         log.info("Delete volume snapshot '%s'" % volsnapshot_id)
 
-        evt = buildEventFromDict(self._eventData['volsnapshot.delete.start'])
+        self.process_event(self._eventData['volsnapshot.delete.start'])
 
-        self.process_event(evt)
         volsnapshot = self.getObjByPath('components/volsnapshot-' + volsnapshot_id)
         return volsnapshot
-
 
     def _delete_volsnapshot_end(self, volsnapshot_id):
         self.assertTrue(self._eventsloaded)
@@ -697,22 +583,10 @@ class TestEventTransforms(zenpacklib.TestCase):
         '''
         log.info("Delete volume snapshot '%s'" % volsnapshot_id)
 
-        evt = buildEventFromDict(self._eventData['volsnapshot.delete.end'])
+        self.process_event(self._eventData['volsnapshot.delete.end'])
 
-        self.process_event(evt)
         volsnapshot = self.getObjByPath('components/volsnapshot-' + volsnapshot_id)
         return volsnapshot
-
-
-    def test_volume_create_start(self):
-        '''
-            volume create start
-            This event does not return a volume object
-        '''
-
-        volume = self._create_volume_start('test')
-        self.assertIsNone(volume)
-
 
     def test_volume_create_end(self):
         '''
@@ -726,7 +600,6 @@ class TestEventTransforms(zenpacklib.TestCase):
         self.assertEquals(volume.id, 'volume-test')
         self.assertEquals(volume.size, 1)
 
-
     def test_volume_update_start(self):
         '''
             volume update start
@@ -737,7 +610,6 @@ class TestEventTransforms(zenpacklib.TestCase):
         self.assertIsNotNone(volume)
         volume = self._update_volume_start('test')
         self.assertIsNotNone(volume)
-
 
     def test_volume_update_end(self):
         '''
@@ -753,45 +625,26 @@ class TestEventTransforms(zenpacklib.TestCase):
         self.assertEquals(volume.id, 'volume-test')
         self.assertEquals(volume.size, 2)
 
-
-    def test_volume_attach_start(self):
-        '''
-            volume attach start
-            This event does not return a volume object
-        '''
-
-        self._create_instance5()
-        volume = self._attach_volume_start('test')
-        self.assertIsNone(volume)
-
-
     def test_volume_attach_end(self):
         '''
             volume attach end
             This event does return a volume object
         '''
 
-        self._create_instance5()
-        volume = self._attach_volume_end('test')
+        instance5 = self._create_instance5()
+        volume = self._create_volume_end('test')
         self.assertIsNotNone(volume)
+
+        self._attach_volume_start('test')
+        self._attach_volume_end('test')
+
+        self.assertIsNotNone(volume.instance())
+        self.assertEquals(volume.instance().id, instance5.id)
+
         self.assertEquals(volume.tenant.id, 'tenant')
         self.assertEquals(volume.id, 'volume-test')
         self.assertEquals(volume.size, 1)
         self.assertEquals(volume.title, 'test volume')
-
-
-    def test_volume_detach_start(self):
-        '''
-            volume detach start
-            This event does not return a volume object
-        '''
-
-        self._create_instance5()
-        volume = self._attach_volume_end('test')
-        self.assertIsNotNone(volume)
-        volume = self._detach_volume_start('test')
-        self.assertIsNotNone(volume)
-
 
     def test_volume_detach_end(self):
         '''
@@ -800,27 +653,23 @@ class TestEventTransforms(zenpacklib.TestCase):
         '''
 
         self._create_instance5()
-        volume = self._attach_volume_end('test')
+        volume = self._create_volume_end('test')
         self.assertIsNotNone(volume)
-        volume = self._detach_volume_end('test')
-        self.assertIsNotNone(volume)
+
+        self._attach_volume_start('test')
+        self._attach_volume_end('test')
+        self.assertIsNotNone(volume.instance())
+
+        self._detach_volume_start('test')
+        self._detach_volume_end('test')
+        self.assertIsNone(volume.instance())
+
         self.assertEquals(volume.tenant.id, 'tenant')
         self.assertEquals(volume.id, 'volume-test')
         self.assertEquals(volume.size, 1)
         self.assertEquals(volume.title, 'test volume')
 
-
-    def test_volume_delete_start(self):
-        '''
-            volume delete start
-            This event does not return a volume object
-        '''
-
-        volume = self._create_volume_end('test')
-        self.assertIsNotNone(volume)
-        volume = self._delete_volume_start('test')
-        self.assertIsNotNone(volume)
-
+        self.assertIsNone(volume.instance())
 
     def test_volume_delete_end(self):
         '''
@@ -832,19 +681,6 @@ class TestEventTransforms(zenpacklib.TestCase):
         self.assertIsNotNone(volume)
         volume = self._delete_volume_end('test')
         self.assertIsNone(volume)
-
-
-    def test_volsnapshot_create_start(self):
-        '''
-            volume snapshot create start
-            This event does not return a volume snapshot object
-        '''
-
-        volume = self._create_volume_end('test')
-        self.assertIsNotNone(volume)
-        volsnapshot = self._create_volsnapshot_start('test')
-        self.assertIsNone(volsnapshot)
-
 
     def test_volsnapshot_create_end(self):
         '''
@@ -859,21 +695,6 @@ class TestEventTransforms(zenpacklib.TestCase):
         self.assertEquals(volsnapshot.tenant.id, 'tenant')
         self.assertEquals(volsnapshot.id, 'volsnapshot-test')
 
-
-    def test_volsnapshot_delete_start(self):
-        '''
-            volsnapshot delete start
-            This event does not return a volsnapshot object
-        '''
-
-        volume = self._create_volume_end('test')
-        self.assertIsNotNone(volume)
-        volsnapshot = self._create_volsnapshot_end('test')
-        self.assertIsNotNone(volsnapshot)
-        volsnapshot = self._delete_volsnapshot_start('test')
-        self.assertIsNotNone(volsnapshot)
-
-
     def test_volsnapshot_delete_end(self):
         '''
             volsnapshot delete end
@@ -887,31 +708,16 @@ class TestEventTransforms(zenpacklib.TestCase):
         volsnapshot = self._delete_volsnapshot_end('test')
         self.assertIsNone(volsnapshot)
 
-    def test_ZPS1750(self):
-        self.assertTrue(self._eventsloaded)
-
-        # These events are deliberately wrong- they are the result of
-        # a misconfigured openstack (missing our event_definitions.yaml).
-        #
-        # We should process them as well as we can.
-
-        evt = buildEventFromDict(self._eventData['ZPS1750_port.update.start'])
-        self.process_event(evt)
-
-        evt = buildEventFromDict(self._eventData['ZPS1750_volume.detach.start'])
-        self.process_event(evt)
-
-        evt = buildEventFromDict(self._eventData['ZPS1750_snapshot.create.end'])
-        self.process_event(evt)
 
 @monkeypatch('Products.DataCollector.ApplyDataMap.ApplyDataMap')
 def logChange(self, device, compname, eventClass, msg):
     logging.getLogger('zen.ApplyDataMap').info(msg)
 
+
 def test_suite():
     from unittest import TestSuite, makeSuite
     suite = TestSuite()
-    suite.addTest(makeSuite(TestEventTransforms))
+    suite.addTest(makeSuite(TestEventMappings))
     return suite
 
 
