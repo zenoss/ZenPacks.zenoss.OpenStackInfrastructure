@@ -35,7 +35,7 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import ExpiringFIFO, amqp_tim
 # How long to cache data in memory before discarding it (data that
 # is coming from ceilometer, but not consumed by any monitoring templates).
 # Should be at least the cycle interval.
-CACHE_EXPIRE_TIME = 25*60
+CACHE_EXPIRE_TIME = 25 * 60
 
 
 class PerfAMQPDataSource(AMQPDataSource):
@@ -62,7 +62,7 @@ class PerfAMQPDataSource(AMQPDataSource):
 
     _properties = AMQPDataSource._properties + (
         {'id': 'meter', 'type': 'string'},
-        )
+    )
 
 
 class IPerfAMQPDataSourceInfo(IAMQPDataSourceInfo):
@@ -74,6 +74,10 @@ class IPerfAMQPDataSourceInfo(IAMQPDataSourceInfo):
         group=_t('OpenStack Ceilometer'),
         title=_t('meter Name'))
 
+    cycletime = schema.TextLine(
+        group=_t('OpenStack Ceilometer'),
+        title=_t('Cycletime')
+    )
 
 class PerfAMQPDataSourceInfo(AMQPDataSourceInfo):
     '''
@@ -82,6 +86,8 @@ class PerfAMQPDataSourceInfo(AMQPDataSourceInfo):
 
     implements(IPerfAMQPDataSourceInfo)
     adapts(PerfAMQPDataSource)
+
+    cycletime = ProxyProperty('cycletime')
 
     testable = False
 
@@ -128,12 +134,14 @@ class CeilometerPerfCache(object):
             yield entry
 
     def clear_new_key(self, key):
-        self.new_keys.remove(key)
+        if key in self.new_keys:
+            self.new_keys.remove(key)
 
     def get_new_keys(self):
         # return a list of new keys (tuples of (resourceId, meter)) that have
         # been seen but not acknowledged with clear_new_key()
         return list(self.new_keys)
+
 
 # Persistent state
 cache = defaultdict(CeilometerPerfCache)
@@ -147,7 +155,7 @@ class PerfAMQPDataSourcePlugin(AMQPDataSourcePlugin):
     @classmethod
     def params(cls, datasource, context):
         return {
-            'meter':    datasource.talesEval(datasource.meter, context),
+            'meter': datasource.talesEval(datasource.meter, context),
             'resourceId': context.resourceId,
             'component_meta_type': context.meta_type
         }
@@ -160,7 +168,10 @@ class PerfAMQPDataSourcePlugin(AMQPDataSourcePlugin):
         device_id = config.configId
 
         for ds in config.datasources:
-            for entry in cache[device_id].get_perf(ds.params['resourceId'], ds.params['meter']):
+            if 'meter' not in ds.params or 'resourceId' not in ds.params:
+                log.warn('Skipping collection for bad datasource %s', ds)
+                continue
+            for entry in cache[device_id].get_perf(ds.params.get('resourceId'), ds.params.get('meter')):
                 log.debug("perf %s/%s=%s @ %s" % (ds.params['resourceId'], ds.params['meter'], entry.value, entry.timestamp))
                 data['values'][ds.component].setdefault(ds.datasource, [])
                 data['values'][ds.component][ds.datasource].append((entry.value, entry.timestamp))
@@ -171,6 +182,9 @@ class PerfAMQPDataSourcePlugin(AMQPDataSourcePlugin):
         known_instances = dict()
         known_vnics = dict()
         for ds in config.datasources:
+            if 'resourceId' not in ds.params:
+                log.warn('Skipping identification for bad datasource %s', ds)
+                continue
             if ds.params['component_meta_type'] == 'OpenStackInfrastructureInstance':
                 known_instances[ds.params['resourceId']] = ds.component
             elif ds.params['component_meta_type'] == 'OpenStackInfrastructureVnic':
@@ -226,7 +240,10 @@ class PerfAMQPDataSourcePlugin(AMQPDataSourcePlugin):
                     # datasource names, etc, until we get a config from zenhub.
                     # That should happen by the next cycle (10 minutes)
 
-                    cache[device_id].clear_new_key(key)
+                    for key in cache[device_id].get_new_keys():
+                        newResourceId, _ = key
+                        if resourceId == newResourceId:
+                            cache[device_id].clear_new_key(key)
                     break
 
             if not match:
@@ -240,7 +257,7 @@ class PerfAMQPDataSourcePlugin(AMQPDataSourcePlugin):
                 'severity': ZenEventClasses.Clear,
                 'eventKey': 'openstackCeilometerAMQPCollection',
                 'eventClassKey': 'PerfSuccess',
-                })
+            })
 
         defer.returnValue(data)
 
@@ -265,7 +282,7 @@ class PerfAMQPDataSourcePlugin(AMQPDataSourcePlugin):
                 log.debug("[%s/%s] Timestamp (%s) appears to be in the future.  Using now instead." % (resourceId, meter, value['data']['timestamp']))
 
             if timestamp < now - CACHE_EXPIRE_TIME:
-                log.debug("[%s/%s] Timestamp (%s) is already %d seconds old- discarding message." % (resourceId, meter, value['data']['timestamp'], now-timestamp))
+                log.debug("[%s/%s] Timestamp (%s) is already %d seconds old- discarding message." % (resourceId, meter, value['data']['timestamp'], now - timestamp))
             else:
                 cache[device_id].add_perf(resourceId, meter, meter_value, timestamp)
 

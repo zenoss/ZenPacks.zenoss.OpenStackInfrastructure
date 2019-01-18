@@ -177,7 +177,11 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
                 device = brain.getObject()
 
                 if device.openstack_hostComponent() is None:
-                    possible_devices.append(device)
+                    if hasattr(device, 'getIpRealm'):
+                        if self.getIpRealm() is device.getIpRealm():
+                            possible_devices.append(device)
+                    else:
+                        possible_devices.append(device)
                 else:
                     LOG.info("%s component %s unable to claim device %s, because it is already linked to %s",
                              self.meta_type, self.name(), device.id, device.openstack_hostComponent().id)

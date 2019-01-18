@@ -1,12 +1,21 @@
 #!/usr/bin/env python
 
+##############################################################################
+#
+# Copyright (C) Zenoss, Inc. 2019, all rights reserved.
+#
+# This content is made available according to terms specified in
+# License.zenoss under the directory where your Zenoss product is installed.
+#
+##############################################################################
+
 import argparse
 from required_traits import zenoss_required_events
 from event_definitions import get_event_definitions
 
 
 # Compares the out of the box versions of event_definitions.yaml with
-# the requirements of this zenpack, to see what traits are missing.not
+# the requirements of this zenpack, to see what traits are missing.
 #
 # Optionally (--with-additions) include the zenoss_additions.yaml file, to
 # see if that fixes what is missing.

@@ -22,7 +22,7 @@ from Products.ZenUtils.Utils import unused
 unused(Globals)
 
 from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.session import SessionManager
-from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.exceptions import *
+from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.exceptions import APIClientError
 from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.base import BaseClient, api
 
 from twisted.internet import reactor
@@ -100,6 +100,7 @@ class NovaClient(BaseClient):
     hypervisor_detail_id = api('/os-hypervisors/{param[hypervisor_id]}')
     images = api('/images/detail')
     servers = api('/servers/detail?all_tenants=1')
+    servers_single = api('/servers/detail')
     services = api('/os-services')
 
 
@@ -121,9 +122,12 @@ class CinderClient(BaseClient):
     keystone_service_type = 'volumev2'
 
     volumes = api('/volumes/detail?all_tenants=1')
+    volumes_single = api('/volumes/detail')
     volumetypes = api('/types')
     volumebackups = api('/backups/detail?all_tenants=1')
+    volumebackups_single = api('/backups/detail')
     volumesnapshots = api('/snapshots/detail?all_tenants=1')
+    volumesnapshots_single = api('/snapshots/detail')
     pools = api('/scheduler-stats/get_pools?detail=True')
     quotas = api('/os-quota-sets/{param[tenant]}')
     services = api('/os-services')
@@ -243,6 +247,7 @@ def main():
 
     if reactor.running:
         reactor.stop()
+
 
 if __name__ == '__main__':
     main()

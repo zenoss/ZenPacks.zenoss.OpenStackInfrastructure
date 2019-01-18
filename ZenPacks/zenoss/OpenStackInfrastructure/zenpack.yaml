@@ -33,6 +33,8 @@ zProperties:
     type: password
   zOpenStackHostLocalDomain:
     default: ''
+  zOpenStackProcessEventTypes:
+    type: lines
 
 class_relationships:
 # Containing Relations
@@ -101,6 +103,7 @@ device_classes:
   /OpenStack: {}
   /OpenStack/Infrastructure:
     remove: true
+    reset: true
     zProperties:
       zCollectorPlugins:
         - zenoss.OpenStackInfrastructure
@@ -109,6 +112,9 @@ device_classes:
         - Endpoint
       zPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Endpoint
       zSnmpMonitorIgnore: true
+      zOpenStackProcessEventTypes:
+        - compute.instance.create.error
+
     templates:
       Endpoint:
         description: 'OpenStackInfrastructure: Endpoint Monitoring'
@@ -126,7 +132,7 @@ device_classes:
           maintenance:
             type: Python
             plugin_classname: ZenPacks.zenoss.OpenStackInfrastructure.dsplugins.MaintenanceDataSourcePlugin
-            cycletime: 600
+            cycletime: 7200
           rabbitmq-credentials:
             type: Python
             plugin_classname: ZenPacks.zenoss.OpenStackInfrastructure.dsplugins.RabbitMQCeilometerCredentialsDataSourcePlugin
@@ -781,7 +787,7 @@ classes:
         default: []
         grid_display: false
     dynamicview_views: [service_view, openstack_view]
-    dynamicview_group: OpenStack Clusters
+    dynamicview_group: OpenStack Endpoints
     dynamicview_weight: 280
     dynamicview_relations:
       impacts: [hosts]
@@ -1036,7 +1042,7 @@ classes:
         grid_display: false
       serverId:
         label: Server ID
-        grid_display: false
+        label_width: 200
       powerState:
         label: Power State
         label_width: 50
@@ -1286,7 +1292,7 @@ classes:
         # a zprop name, for instance
         label: Source
     dynamicview_views: [service_view, openstack_view]
-    dynamicview_group: OpenStack Clusters
+    dynamicview_group: OpenStack Endpoints
     dynamicview_relations:
       impacts: [region_if_public_keystone]
       openstack_link: [region_if_public_keystone]
@@ -1807,9 +1813,14 @@ classes:
         order: 21.1
       host:
         label: Host
+        type: entity
         label_width: 100
         content_width: 100
         order: 21.2
+        api_only: true
+        api_backendtype: method
+      backend:
+        label: Back End
       status:
         label: Status
         label_width: 60
@@ -2043,4 +2054,205 @@ classes:
         label_width: 80
         content_width: 80
 
-#
+event_classes:
+  /OpenStack:
+    remove: true
+
+  /OpenStack/compute:
+    remove: true
+  /OpenStack/compute/instance:
+    remove: true
+    mappings:
+      compute.instance.create.error:
+        remove: true
+        eventClassKey: openstack|compute.instance.create.error
+        sequence: 51
+        explanation: An error has occurred while creating an instance
+        zProperties:
+          zEventSeverity: 4
+  /OpenStack/dhcp_agent:
+    remove: true
+  /OpenStack/firewall:
+    remove: true
+  /OpenStack/firewall_policy:
+    remove: true
+  /OpenStack/firewall_rule:
+    remove: true
+  /OpenStack/floatingip:
+    remove: true
+  /OpenStack/network:
+    remove: true
+  /OpenStack/port:
+    remove: true
+  /OpenStack/router:
+    remove: true
+  /OpenStack/security_group:
+    remove: true
+  /OpenStack/security_group_rule:
+    remove: true
+  /OpenStack/subnet:
+    remove: true
+  /OpenStack/Cinder:
+    remove: true
+  /OpenStack/Cinder/Volume:
+    remove: true    
+  /OpenStack/Cinder/Snapshot:
+    remove: true
+  /OpenStack/image:
+    remove: true
+  /Status:
+    remove: true
+  /Status/Heartbeat:
+    remove: true
+  /Status/Heartbeat/instances:
+    remove: true
+    mappings:
+      openStackCeilometerHeartbeat:
+        remove: true
+        eventClassKey: openStackCeilometerHeartbeat
+        sequence: 10
+  /Status/instances:
+    remove: true
+    mappings:
+      openStackIniFileAccess:
+        remove: true
+        eventClassKey: openStackIniFileAccess
+        sequence: 12
+        explanation: An openstack configuration file could not be accessed.
+        resolution: Correct the permissions so that the file is accessible.
+      openStackIniFileOptionParsing:
+        remove: true
+        eventClassKey: openStackIniFileOptionParsing
+        sequence: 12
+        explanation: A required option was not found in an ini file on the openstack host.
+        resolution: Add the required option to the file.
+      openStackCinderServiceStatus:
+        remove: true
+        eventClassKey: openStackNeutronAgentStatus
+        sequence: 12
+        explanation: A neutron agent is not running properly
+        resolution: Restart the offending agent.
+      openStackCinderServiceStatus:
+        remove: true
+        eventClassKey: openStackNeutronAgentStatus
+        sequence: 12
+        explanation: A cinder agent is not running properly
+        resolution: Restart the offending agent.
+      openStackApiEndpointStatus:
+        remove: true
+        sequence: 12
+        explanation: An openstack API endpoint is not responding to http queries.
+        resolution: Troubleshoot or restart the responsible process.
+      openStackNovaServiceStatus:
+        remove: true
+        sequence: 12
+        explanation: A nova service is not running properly
+        resolution: Restart the offending service.
+
+process_class_organizers:
+  /OpenStack:
+    zProperties:
+      zModelerLock: 1
+    process_classes:
+      ceilometer-agent-central:
+          includeRegex: 'ceilometer-agent-central'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      ceilometer-agent-compute:
+          includeRegex: 'ceilometer-agent-compute'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      ceilometer-agent-notification:
+          includeRegex: 'ceilometer-agent-notification'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      ceilometer-alarm-evaluator:
+          includeRegex: 'ceilometer-alarm-evaluator'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      ceilometer-alarm-notifier:
+          includeRegex: 'ceilometer-alarm-notifier'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      ceilometer-api:
+          includeRegex: 'ceilometer-api'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      ceilometer-collector:
+          includeRegex: 'ceilometer-collector'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      ceilometer-polling:
+          includeRegex: 'ceilometer-polling'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      neutron-dhcp-agent:
+          includeRegex: 'neutron-dhcp-agent'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      neutron-l3-agent:
+          includeRegex: 'neutron-l3-agent'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      neutron-metadata-agent:
+          includeRegex: 'neutron-metadata-agent'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      neutron-openvswitch-agent:
+          includeRegex: 'neutron-openvswitch-agent'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      neutron-server:
+          includeRegex: 'neutron-server'
+          excludeRegex: '\b(vim|tail|grep|pgrep|tar|cat|bash)\b'
+      nova-api:
+          includeRegex: 'nova-api'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      nova-cert:
+          includeRegex: 'nova-cert'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      nova-compute:
+          includeRegex: 'nova-compute'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      nova-conductor:
+          includeRegex: 'nova-conductor'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      nova-consoleauth:
+          includeRegex: 'nova-consoleauth'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      nova-network:
+          includeRegex: 'nova-network'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      nova-scheduler:
+          includeRegex: 'nova-scheduler'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      cinder-api:
+          includeRegex: 'cinder-api'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      cinder-scheduler:
+          includeRegex: 'cinder-scheduler'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      cinder-volume:
+          includeRegex: 'cinder-volume'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      cinder-backup:
+          includeRegex: 'cinder-backup'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      glance-api:
+          includeRegex: 'glance-api'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      glance-registry:
+          includeRegex: 'glance-registry'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      gnocchi-metricd:
+          includeRegex: 'gnocchi-metricd'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      gnocchi-statsd:
+          includeRegex: 'gnocchi-statsd'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      keystone-all:
+          includeRegex: 'keystone-all'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      keystone-admin:
+          includeRegex: 'keystone-admin'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      keystone-main:
+          includeRegex: 'keystone-main'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      rabbitmq-server:
+          includeRegex: 'rabbitmq-server'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      neutron-lbaas-agent:
+          includeRegex: 'neutron-lbaas-agent'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'
+      neutron-metering-agent:
+          includeRegex: 'neutron-metering-agent'
+          excludeRegex: '\b(vim|tail|grep|tar|cat|bash)\b'

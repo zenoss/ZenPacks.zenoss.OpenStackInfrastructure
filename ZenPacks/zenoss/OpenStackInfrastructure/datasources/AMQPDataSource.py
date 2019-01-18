@@ -25,13 +25,15 @@ from Products.ZenEvents import ZenEventClasses
 import Products.ZenMessaging.queuemessaging
 
 from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import (
-    PythonDataSource, PythonDataSourcePlugin, PythonDataSourceInfo,
-    IPythonDataSourceInfo)
+    PythonDataSource, PythonDataSourcePlugin )
 
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import result_errmsg, sleep
 from zenoss.protocols.amqpconfig import AMQPConfig
 from zenoss.protocols.interfaces import IAMQPConnectionInfo, IQueueSchema
 from zenoss.protocols.twisted.amqp import AMQPFactory
+
+from Products.Zuul.infos.template import RRDDataSourceInfo
+from Products.Zuul.interfaces import IRRDDataSourceInfo
 
 # How long to cache data in memory before discarding it (data that
 # is coming from ceilometer, but not consumed by any monitoring templates).
@@ -63,13 +65,13 @@ class AMQPDataSource(PythonDataSource):
         'AMQPDataSource.AMQPDataSourcePlugin'
 
 
-class IAMQPDataSourceInfo(IPythonDataSourceInfo):
+class IAMQPDataSourceInfo(IRRDDataSourceInfo):
     '''
     API Info interface for IAMQPDataSource.
     '''
 
 
-class AMQPDataSourceInfo(PythonDataSourceInfo):
+class AMQPDataSourceInfo(RRDDataSourceInfo):
     '''
     API Info adapter factory for AMQPDataSource.
     '''

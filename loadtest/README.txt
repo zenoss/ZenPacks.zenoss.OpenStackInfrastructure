@@ -11,7 +11,7 @@ To use:
         --instances=INSTANCES      Number of Instances to create        (2250)
 
 2) Start zenpython (for data collection)
-    Run zenpython -c -d <device name specified above>
+    Run zenpython run -c -d <device name specified above> -v10
 
 3) Generate simulated perf messages (over amqp)
     Run sim_perf.py -d <same device name> --nottl
@@ -22,7 +22,7 @@ To use:
     consuming messages fast enough, as it will allow the queue to get backed up.
 
 4)  Generate simulated model change events (over amqp)
-    Run sim_events.py -d <same device name>
+    Run sim_events.py -d <same device name> -v10
 
     By default, this will perform 4 operations every 60 seconds (staggered):
         delete and re-create a random instance

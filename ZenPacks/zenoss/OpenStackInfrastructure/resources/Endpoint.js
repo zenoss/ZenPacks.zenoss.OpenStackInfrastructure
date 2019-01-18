@@ -26,13 +26,7 @@ Ext.onReady(function() {
 
     var DEVICE_OVERVIEW_SNMP = 'deviceoverviewpanel_snmpsummary';
     Ext.ComponentMgr.onAvailable(DEVICE_OVERVIEW_SNMP, function(){
-        var box = Ext.getCmp(DEVICE_OVERVIEW_SNMP);
-        box.removeField('snmpSysName');
-        box.removeField('snmpLocation');
-        box.removeField('snmpContact');
-        box.removeField('snmpDescr');
-        box.removeField('snmpCommunity');
-        box.removeField('snmpVersion');
+      this.hide();
     });
 
     /* Hide Software component, as it always empty */
