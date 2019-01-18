@@ -25,7 +25,7 @@ import re
 from urlparse import urlparse
 
 from twisted.internet.defer import inlineCallbacks, returnValue
-from twisted.internet.error import ConnectionRefusedError
+from twisted.internet.error import ConnectionRefusedError, TimeoutError
 
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
@@ -1327,7 +1327,7 @@ class OpenStackInfrastructure(PythonPlugin):
 
         """
         if self.api_client_logs is None:
-            self.api_client_logs = []
+            self.api_client_logs = set()
 
         method_class = '{}'.format(method.__self__.__class__.__name__)
         debug_string = "{}".format(method_class)
@@ -1348,39 +1348,48 @@ class OpenStackInfrastructure(PythonPlugin):
 
         except ConnectionRefusedError as ex:
             LOG.error("Connection refused for '%s': %s. "
-                      "Check the OpenStack service configuration.", debug_string, ex)
-            returnValue([])
+                      "Check the OpenStack service and network configuration.",
+                      debug_string, ex)
+            raise ConnectionRefusedError
+
+        except TimeoutError as ex:
+            LOG.error("Connection timed out for '%s': %s. "
+                      "Check the OpenStack service configuration.",
+                      debug_string, ex)
+            raise TimeoutError
 
         except APIClientError as ex:
-            messages = ''
+            messages = set()
+            error = re.sub('403 Forbidden:.*"message":\s+"','', ex.message)
+            error = error = re.sub('",.+$','', error)
+            messages.add("API client error for '{}': {}".format(debug_string, error))
 
             # Add a single authorization error message to top of list.
             if "401 Unauthorized" in ex.message:
-                if not any('Check zCommandUsername' in m
-                           for m in
-                           self.api_client_logs):
-                    messages += "Authorization Errors: Check zCommandUsername and zCommandPassword!\n  "
+                messages.add("Authorization Errors: Check zCommandUsername and zCommandPassword!")
 
-            ex_message = ex.message.replace(' (check username and password)', '')
-            messages += "API client error for '{}': {}".format(debug_string, ex_message)
+            elif "403 Forbidden" in ex.message:
+                messages.add("OpenStack user lacks access to call: {}"
+                             " Partial Modeling will proceed regardless."
+                             .format(debug_string))
 
-            if "403 Forbidden" in ex.message:
-                messages += (" OpenStack user lacks access to this call."
-                             " Partial Modeling will proceed regardless.")
+            elif "500 Internal Server Error" in ex.message:
+                LOG.error("Internal Server Error for '%s': %s. "
+                          "Check the OpenStack connectivity.", debug_string, ex)
+                raise APIClientError
 
-            if "503 Service Unavailable" in ex.message:
-                messages += "Check Openstack services setup."
+            elif "503 Service Unavailable" in ex.message:
+                LOG.error("Service Unavailable for '%s': %s. "
+                          "Check the OpenStack connectivity.", debug_string, ex)
+                raise APIClientError
 
-            self.api_client_logs.append(messages)
+            else:
+                raise
+
+            self.api_client_logs.update(messages)
             returnValue([])
 
         except Exception as ex:
-            # Probably mainly 4xx/5xx exceptions we want to handle nicely.
-            # Anything else we could allow to fall through, as it's probably
-            # not an API error, but something broken on our side (DNS error, etc)
-
-            # * TODO: What is meant by "handle nicely" for 4x/5x?
-
             LOG.warning("API call failure for '%s': %s", debug_string, ex)
             returnValue([])
 
@@ -1417,7 +1426,6 @@ class OpenStackInfrastructure(PythonPlugin):
         cinder = CinderClient(session_manager=sm)
 
         results = {}
-
         results['nova_url'] = yield self.api_call(nova.get_url, None)
         results['tenants'] = yield self.api_call(keystone.tenants, 'tenants')
         results['flavors'] = yield self.api_call(nova.flavors, 'flavors', is_public=True)
@@ -1529,7 +1537,9 @@ class OpenStackInfrastructure(PythonPlugin):
             quota_set = yield self.api_call(cinder.quotas, 'quota_set',
                                             tenant=tenant['id'],
                                             usage=False)
-            results['quotas'].append(quota_set)
+            # Skip quota_sets that are empty (and possibly [] instead of {})
+            if quota_set:
+                results['quotas'].append(quota_set)
 
         results['zOpenStackNovaApiHosts'], host_errors = filter_FQDNs(device.zOpenStackNovaApiHosts)
         if host_errors:
