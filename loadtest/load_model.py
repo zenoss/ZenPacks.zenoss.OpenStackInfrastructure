@@ -14,7 +14,7 @@ import logging
 log = logging.getLogger('zen.load_model')
 
 from collections import defaultdict
-from itertools import count, chain
+from itertools import chain
 import yaml
 import transaction
 
@@ -40,26 +40,30 @@ class LoadModel(ZenScriptBase):
         self.parser.add_option(
             '--controllers', dest='controllers',
             help='Number of Controller Nodes to create',
+            type=int,
             default=3
-            )
+        )
 
         self.parser.add_option(
             '--computes', dest='computes',
             help='Number of Compute Nodes to create',
+            type=int,
             default=30
-            )
+        )
 
         self.parser.add_option(
             '--tenants', dest='tenants',
             help='Number of tenants to create',
+            type=int,
             default=50
-            )
+        )
 
         self.parser.add_option(
             '--instances', dest='instances',
             help='Number of Instances to create',
+            type=int,
             default=2250
-            )
+        )
 
     def get_model_template(self, template_name):
         result = []
@@ -85,7 +89,6 @@ class LoadModel(ZenScriptBase):
             self.model_config = yaml.load(f)
 
         self.connect()
-        int_id = count(1)
 
         objmaps = []
         for modname, obj_attrs in self.get_model_template("Global"):
@@ -96,8 +99,7 @@ class LoadModel(ZenScriptBase):
                 self.talesEvalAttrs(
                     obj_attrs,
                     num=controller_num,
-                    device_name=self.options.device,
-                    next_int_id=int_id.next
+                    device_name=self.options.device
                 )
                 objmaps.append(ObjectMap(modname=modname, data=obj_attrs))
 
@@ -106,8 +108,7 @@ class LoadModel(ZenScriptBase):
                 self.talesEvalAttrs(
                     obj_attrs,
                     num=compute_num,
-                    device_name=self.options.device,
-                    next_int_id=int_id.next
+                    device_name=self.options.device
                 )
                 objmaps.append(ObjectMap(modname=modname, data=obj_attrs))
 
@@ -116,8 +117,7 @@ class LoadModel(ZenScriptBase):
                 self.talesEvalAttrs(
                     obj_attrs,
                     num=tenant_num,
-                    device_name=self.options.device,
-                    next_int_id=int_id.next
+                    device_name=self.options.device
                 )
                 objmaps.append(ObjectMap(modname=modname, data=obj_attrs))
 
@@ -133,7 +133,6 @@ class LoadModel(ZenScriptBase):
                     obj_attrs,
                     num=instance_num,
                     device_name=self.options.device,
-                    next_int_id=int_id.next,
                     tenant_num=tenant_num,
                     compute_num=compute_num
                 )
@@ -239,6 +238,7 @@ class LoadModel(ZenScriptBase):
 def main():
     script = LoadModel()
     script.run()
+
 
 if __name__ == '__main__':
     main()

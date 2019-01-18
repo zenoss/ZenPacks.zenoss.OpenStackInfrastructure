@@ -28,12 +28,12 @@ from ZenPacks.zenoss.OpenStackInfrastructure.datasources.AMQPDataSource import (
     IAMQPDataSourceInfo)
 
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import ExpiringFIFO, amqp_timestamp_to_int
-from ZenPacks.zenoss.OpenStackInfrastructure.events import event_type_is_mapped
+from ZenPacks.zenoss.OpenStackInfrastructure.events import event_is_mapped, map_event
 
 # How long to cache data in memory before discarding it (data that
 # is coming from ceilometer, but not consumed by any monitoring templates).
 # Should be at least the cycle interval.
-CACHE_EXPIRE_TIME = 15*60
+CACHE_EXPIRE_TIME = 15 * 60
 
 
 class EventsAMQPDataSource(AMQPDataSource):
@@ -125,6 +125,7 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
                 'eventKey': '',
                 'summary': 'OpenStackInfrastructure: ' + event_type,
                 'eventClassKey': 'openstack|' + event_type,
+                'openstack_event_type': event_type
             }
 
             traits = {}
@@ -156,17 +157,26 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
             log.debug(pformat(evt))
 
             # only pass on events that we actually have mappings for.
-            if event_type_is_mapped(event_type) or event_type in ds0.zOpenStackProcessEventTypes:
+            if event_type in ds0.zOpenStackProcessEventTypes:
                 data['events'].append(evt)
 
-        if len(data['events']):
+            if event_is_mapped(evt):
+                # Try to turn the event into an objmap.
+                try:
+                    objmap = map_event(evt)
+                    if objmap:
+                        data['maps'].append(objmap)
+                except Exception:
+                    log.exception("Unable to process event: %s", evt)
+
+        if len(data['maps']) + len(data['events']):
             data['events'].append({
                 'device': config.id,
                 'summary': 'OpenStack Ceilometer AMQP: successful collection',
                 'severity': ZenEventClasses.Clear,
                 'eventKey': 'openstackCeilometerAMQPCollection',
                 'eventClassKey': 'EventsSuccess',
-                })
+            })
 
         defer.returnValue(data)
 

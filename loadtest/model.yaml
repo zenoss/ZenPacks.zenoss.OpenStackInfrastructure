@@ -110,7 +110,7 @@ Controller:
 
     - ZenPacks.zenoss.OpenStackInfrastructure.NeutronAgent:
         agent-controller${num}-1:
-            agentId: ${next_int_id}
+            agentId: controller${num}-1
             binary: neutron-l3-agent
             enabled: true
             operStatus: DOWN
@@ -119,7 +119,7 @@ Controller:
             title: L3 agent
             type: L3 agent    
         agent-controller${num}-2:
-            agentId: ${next_int_id}
+            agentId: controller${num}-2
             binary: neutron-dhcp-agent
             enabled: true
             operStatus: DOWN
@@ -128,7 +128,7 @@ Controller:
             title: DHCP agent
             type: DHCP agent
         agent-controller${num}-3:
-            agentId: ${next_int_id}
+            agentId: controller${num}-3
             binary: neutron-metadata-agent
             enabled: true
             operStatus: DOWN
@@ -268,7 +268,7 @@ Tenant:
         network-${num}-2:
             admin_state_up: true
             netExternal: false
-            netId: ${next_int_id}
+            netId: ${num}-2
             netStatus: ACTIVE
             netType: LOCAL
             set_tenant: tenant-${num}
@@ -281,7 +281,7 @@ Tenant:
             gateway_ip: 10.0.0.1
             set_network: network-${num}-2
             set_tenant: tenant-${num}
-            subnetId: ${next_int_id}
+            subnetId: ${num}-2
             title: private_subnet
 
     - ZenPacks.zenoss.OpenStackInfrastructure.Router:
@@ -290,7 +290,7 @@ Tenant:
             gateways:
             - 172.24.4.226
             modname: 
-            routerId: ${next_int_id}
+            routerId: ${num}-1
             routes: []
             set_network: network-1
             set_subnets:
@@ -306,7 +306,7 @@ Tenant:
             device_owner: network:dhcp
             fixed_ip_list: 10.0.0.2
             mac_address: FA:16:3E:A1:80:33
-            portId: ${next_int_id}
+            portId: ${num}-1
             set_network: network-${num}-2
             set_subnets:
             - subnet-${num}-2 
@@ -319,7 +319,7 @@ Tenant:
             device_owner: network:router_interface
             fixed_ip_list: 10.0.0.1
             mac_address: FA:16:3E:10:B3:CA
-            portId: ${next_int_id}
+            portId: ${num}-2
             set_network: network-${num}-2
             set_subnets:
             - subnet-${num}-2
@@ -332,7 +332,7 @@ Tenant:
             device_owner: network:router_gateway
             fixed_ip_list: 172.24.4.226
             mac_address: FA:16:3E:C1:F7:42
-            portId: ${next_int_id}
+            portId: ${num}-4
             set_network: network-1
             set_subnets:
             - subnet-1
@@ -363,7 +363,7 @@ Instance:
             serverBackupDaily: DISABLED
             serverBackupEnabled: false
             serverBackupWeekly: DISABLED
-            serverId: {$next_int_id}
+            serverId: ${num}
             serverStatus: SHUTOFF
             set_flavor: flavor-1
             set_image: image-1
@@ -376,7 +376,7 @@ Instance:
             device_owner: compute:nova
             fixed_ip_list: 172.24.4.227
             mac_address: FA:16:3E:D1:79:F9
-            portId: ${next_int_id}
+            portId: ${num}-3
             set_instance: server-${num}
             set_network: network-${tenant_num}-2
             set_subnets:

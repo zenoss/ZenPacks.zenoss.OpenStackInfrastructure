@@ -823,59 +823,5 @@
         "summary": "",
         "trait_volume_id": "test",
         "trait_snapshot_id": "test"
-    },
-
-    "ZPS1750_port.update.start": {
-        "device": "endpoint",
-        "eventClassKey": "openstack|port.update.start",
-        "eventKey": "07158dbb-c80b-42b3-b51a-f3802af63736",
-        "severity": 2,
-        "summary": "OpenStackInfrastructure: port.update.start",
-        "trait_service": "network.Skuzmych-Newton.zenoss.lab",
-        "trait_project_id": "81085bda253e4c3a9e433777e7190aec", 
-        "trait_priority": "info",
-        "trait_request_id": "req-9508ff57-3252-4a66-9abd-6ff0958bf418",
-        "trait_user_id": "4cef3adb12ed4c71833bf43c9fb3bcb9", 
-        "trait_event_type": "port.update.start"
-    },
-
-    "ZPS1750_volume.detach.start": {
-        "device": "endpoint",
-        "eventClassKey": "openstack|volume.detach.start",
-        "eventKey": "67f44c77-5e95-462e-bf96-2908ee23d1ed",
-        "severity": 2,        
-        "summary": "OpenStackInfrastructure: volume.detach.start",
-        "trait_availability_zone": "nova",
-        "trait_tenant_id": "bf3882ec083d451a9c5290a513e40ee7",
-        "trait_resource_id": "90dbb214-41a5-4901-999b-3f2c455853c2",
-        "trait_service": "volume.ocata.zenoss.lab@lvm",
-        "trait_type": "9b4e0fa7-2fe2-4f84-bcab-0d37c776b847",
-        "trait_host": "ocata.zenoss.lab@lvm#lvm",
-        "trait_project_id": "bf3882ec083d451a9c5290a513e40ee7",
-        "trait_display_name": "",
-        "trait_request_id": "req-e8a5b00b-2cdd-428b-8bbe-92e5ef8bab9e",
-        "trait_user_id": "ca5f328dcab9472fbd4d8bf5396f1063",
-        "trait_size": "1",
-        "trait_created_at": "2017-08-07T11:38:16+00:00",
-        "trait_status": "in-use"
-    },
-
-    "ZPS1750_snapshot.create.end": {
-        "device": "endpoint",
-        "eventClassKey": "openstack|snapshot.create.end",
-        "eventKey": "442208cf-0a86-4cf1-a9e5-b895c99a336a",
-        "severity": 2,        
-        "summary": "OpenStackInfrastructure: snapshot.create.end",
-        "trait_availability_zone": "nova",
-        "trait_tenant_id": "bf3882ec083d451a9c5290a513e40ee7",
-        "trait_resource_id": "5b29a167-7d05-41a9-9271-00367d20fc4a",
-        "trait_service": "snapshot.ocata.zenoss.lab@lvm",
-        "trait_volume_id": "a76db4e7-3695-4855-aee1-1b67cd31b939",
-        "trait_project_id": "bf3882ec083d451a9c5290a513e40ee7",
-        "trait_display_name": "snapshot for Snpsh for tb3",
-        "trait_request_id": "req-50257604-212a-4351-a19b-40e2257ae933",
-        "trait_user_id": "ca5f328dcab9472fbd4d8bf5396f1063",
-        "trait_created_at": "2017-08-08 10:15:31+00:00",
-        "trait_status": "available"
     }
 }

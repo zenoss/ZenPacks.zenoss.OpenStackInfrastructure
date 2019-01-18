@@ -7,8 +7,11 @@
 #
 ##############################################################################
 
+# These functions process openstack events (as received from ceilometer) into
+# ObjectMaps.
+
+
 from Products.DataCollector.plugins.DataMaps import ObjectMap
-from Products.DataCollector.ApplyDataMap import ApplyDataMap
 from Products.ZenUtils.Utils import prepId
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import (get_subnets_from_fixedips,
                                                            get_port_instance,
@@ -28,7 +31,7 @@ LOG = logging.getLogger('zen.OpenStack.events')
 def make_id(evt, prefix, try_traits=[]):
     """Return a valid id in "<prefix>-<raw_id>" format"""
     for traitname in try_traits:
-        raw_id = getattr(evt, traitname, None)
+        raw_id = evt.get(traitname, None)
         if raw_id is not None:
             return prepId("{0}-{1}".format(prefix, raw_id))
 
@@ -41,7 +44,7 @@ def instance_id(evt):
 
 
 def instance_name(evt):
-    return getattr(evt, "trait_display_name", instance_id(evt))
+    return evt.get("trait_display_name", instance_id(evt))
 
 
 def floatingip_id(evt):
@@ -57,7 +60,7 @@ def network_id(evt):
 
 
 def network_name(evt):
-    return getattr(evt, "trait_name", network_id(evt))
+    return evt.get("trait_name", network_id(evt))
 
 
 def port_id(evt):
@@ -65,7 +68,7 @@ def port_id(evt):
 
 
 def port_name(evt):
-    return getattr(evt, "trait_name", port_id(evt))
+    return evt.get("trait_name", port_id(evt))
 
 
 def router_id(evt):
@@ -73,7 +76,7 @@ def router_id(evt):
 
 
 def router_name(evt):
-    return getattr(evt, "trait_name", router_id(evt))
+    return evt.get("trait_name", router_id(evt))
 
 
 def subnet_id(evt):
@@ -81,7 +84,7 @@ def subnet_id(evt):
 
 
 def subnet_name(evt):
-    return getattr(evt, "trait_name", subnet_id(evt))
+    return evt.get("trait_name", subnet_id(evt))
 
 
 def tenant_id(evt):
@@ -111,16 +114,16 @@ def _apply_neutron_traits(evt, objmap, traitmap):
     for trait in traitmap:
         for prop_name in traitmap[trait]:
             trait_field = 'trait_' + trait
-            if hasattr(evt, trait_field):
+            if trait_field in evt:
                 # Cast trait_admin_state_up to boolean for renderers
                 if trait_field == 'trait_admin_state_up':
-                    value = str(getattr(evt, 'trait_admin_state_up')).lower() == 'true'
+                    value = str(evt.get('trait_admin_state_up')).lower() == 'true'
                 else:
-                    value = getattr(evt, trait_field)
+                    value = evt.get(trait_field)
                 setattr(objmap, prop_name, value)
 
     # Set the Tenant ID
-    if hasattr(evt, 'trait_tenant_id'):
+    if 'trait_tenant_id' in evt:
         setattr(objmap, 'set_tenant', tenant_id(evt))
 
 
@@ -128,8 +131,9 @@ def _apply_trait_rel(evt, objmap, trait_name, class_rel):
     ''' Generic: Set the class relation's set_* attribute: (ex: set_network)
         Ex: _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
     '''
-    if hasattr(evt, trait_name):
-        attrib_id = make_id(class_rel, getattr(evt, trait_name))
+
+    if trait_name in evt:
+        attrib_id = make_id(evt, class_rel, [trait_name])
         # for volume attaching to an instance, we do:
         # volume['set_instance'] = 'server-<instance id>'
         if 'instance' in trait_name and 'server' in class_rel:
@@ -142,9 +146,9 @@ def _apply_trait_rel(evt, objmap, trait_name, class_rel):
 
 def _apply_router_gateway_info(evt, objmap):
     ''' Get the router gateways, network, and subnets'''
-    if hasattr(evt, 'trait_external_gateway_info'):
+    if 'trait_external_gateway_info' in evt:
 
-        ext_gw_info = ast.literal_eval(evt.trait_external_gateway_info)
+        ext_gw_info = ast.literal_eval(evt['trait_external_gateway_info'])
         if ext_gw_info:
             gateways = set()
             subnets = set()
@@ -160,8 +164,8 @@ def _apply_router_gateway_info(evt, objmap):
 
 def _apply_dns_info(evt, objmap):
     ''' Get the dns servers for subnets as a string'''
-    if hasattr(evt, 'trait_dns_nameservers'):
-        dns_info = ast.literal_eval(evt.trait_dns_nameservers)
+    if 'trait_dns_nameservers' in evt:
+        dns_info = ast.literal_eval(evt['trait_dns_nameservers'])
         servers = ", ".join(dns_info)
         setattr(objmap, 'dns_nameservers', servers)
 
@@ -180,8 +184,8 @@ def _apply_instance_traits(evt, objmap):
     for trait in traitmap:
         for prop_name in traitmap[trait]:
             trait_field = 'trait_' + trait
-            if hasattr(evt, trait_field):
-                value = getattr(evt, trait_field)
+            if trait_field in evt:
+                value = evt.get(trait_field)
 
                 # Store server status in uppercase, to match how the nova-api
                 # shows it.
@@ -194,9 +198,9 @@ def _apply_instance_traits(evt, objmap):
         setattr(objmap, prop_name, instance_name(evt))
 
     # special case for publicIps / privateIps
-    if hasattr(evt, 'trait_fixed_ips'):
+    if 'trait_fixed_ips' in evt:
         try:
-            fixed_ips = ast.literal_eval(evt.trait_fixed_ips)
+            fixed_ips = ast.literal_eval(evt['trait_fixed_ips'])
             public_ips = set()
             private_ips = set()
             # Assume: Fixed_ips are private, floating_ips are external/public:
@@ -209,7 +213,7 @@ def _apply_instance_traits(evt, objmap):
             if public_ips:
                 setattr(objmap, 'publicIps', list(public_ips))
         except Exception, e:
-            LOG.debug("Unable to parse trait_fixed_ips=%s (%s)" % (evt.trait_fixed_ips, e))
+            LOG.debug("Unable to parse trait_fixed_ips=%s (%s)" % (evt['trait_fixed_ips'], e))
 
 
 def _apply_cinder_traits(evt, objmap):
@@ -235,8 +239,8 @@ def _apply_cinder_traits(evt, objmap):
     for trait in traitmap:
         for prop_name in traitmap[trait]:
             trait_field = 'trait_' + trait
-            if hasattr(evt, trait_field):
-                value = getattr(evt, trait_field)
+            if trait_field in evt:
+                value = evt.get(trait_field)
                 # awkward!
                 if prop_name == 'status':
                     value = value.upper()
@@ -249,7 +253,8 @@ def instance_objmap(evt):
         compname='',
         data={
             'id': instance_id(evt),
-            'relname': 'components'
+            'relname': 'components',
+            '_add': False
         },
     )
 
@@ -267,9 +272,11 @@ def neutron_objmap(evt, Name):
     return ObjectMap(
         modname=module,
         compname='',
-        data={'id': _id,
-              'relname': 'components'
-              },
+        data={
+            'id': _id,
+            'relname': 'components',
+            '_add': False
+        },
     )
 
 
@@ -283,40 +290,29 @@ def cinder_objmap(evt, Name):
     return ObjectMap(
         modname=module,
         compname='',
-        data={'id': _id,
-              'relname': 'components'
-              },
+        data={
+            'id': _id,
+            'relname': 'components',
+            '_add': False
+        }
     )
-
-
-def event_summary(component_type, component_name, evt):
-    """ Gives correct summary for Create/Update event messages
-    """
-    if '.create' in evt.eventClassKey:
-        action = "Created"
-    else:
-        action = "Updated"
-    return "%s %s %s" % (action, component_type, component_name)
 
 
 # -----------------------------------------------------------------------------
 # Event Functions
 # -----------------------------------------------------------------------------
 def instance_create(evt):
-    evt.summary = "Instance %s created" % (instance_name(evt))
-
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
         return None
 
     objmap = instance_objmap(evt)
+    objmap._add = True
     _apply_instance_traits(evt, objmap)
     return objmap
 
 
 def instance_update(evt):
-    evt.summary = "Instance %s updated" % (instance_name(evt))
-
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
         return None
@@ -327,8 +323,6 @@ def instance_update(evt):
 
 
 def instance_delete(evt):
-    evt.summary = "Instance %s deleted" % (instance_name(evt))
-
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
         return None
@@ -339,10 +333,6 @@ def instance_delete(evt):
 
 
 def instance_update_status(evt):
-    evt.summary = add_statuschange_to_msg(
-        evt,
-        "Instance %s updated" % (instance_name(evt)))
-
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
         return None
@@ -352,26 +342,7 @@ def instance_update_status(evt):
     return objmap
 
 
-def add_statuschange_to_msg(evt, msg):
-    descr = ''
-    if hasattr(evt, 'trait_state_description') and evt.trait_state_description:
-        descr = ' [%s]' % evt.trait_state_description
-
-    if hasattr(evt, 'trait_old_state'):
-        msg = msg + " (status changed from %s to %s%s)" % (
-            evt.trait_old_state, evt.trait_state, descr)
-    elif hasattr(evt, 'trait_state'):
-        msg = msg + " (status changed to %s%s)" % (
-            evt.trait_state, descr)
-
-    return msg
-
-
 def instance_powered_on(evt):
-    evt.summary = add_statuschange_to_msg(
-        evt,
-        "Instance %s powered on" % (instance_name(evt)))
-
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
         return None
@@ -382,10 +353,6 @@ def instance_powered_on(evt):
 
 
 def instance_powered_off(evt):
-    evt.summary = add_statuschange_to_msg(
-        evt,
-        "Instance %s powered off" % (instance_name(evt)))
-
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
         return None
@@ -396,10 +363,6 @@ def instance_powered_off(evt):
 
 
 def instance_shutting_down(evt):
-    evt.summary = add_statuschange_to_msg(
-        evt,
-        "Instance %s shutting down" % (instance_name(evt)))
-
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
         return None
@@ -410,10 +373,6 @@ def instance_shutting_down(evt):
 
 
 def instance_shut_down(evt):
-    evt.summary = add_statuschange_to_msg(
-        evt,
-        "Instance %s shut down" % (instance_name(evt)))
-
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
         return None
@@ -424,10 +383,6 @@ def instance_shut_down(evt):
 
 
 def instance_rebooting(evt):
-    evt.summary = add_statuschange_to_msg(
-        evt,
-        "Instance %s rebooting" % (instance_name(evt)))
-
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
         return None
@@ -438,10 +393,6 @@ def instance_rebooting(evt):
 
 
 def instance_rebooted(evt):
-    evt.summary = add_statuschange_to_msg(
-        evt,
-        "Instance %s rebooted" % (instance_name(evt)))
-
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
         return None
@@ -452,10 +403,6 @@ def instance_rebooted(evt):
 
 
 def instance_rebuilding(evt):
-    evt.summary = add_statuschange_to_msg(
-        evt,
-        "Instance %s rebuilding" % (instance_name(evt)))
-
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
         return None
@@ -467,10 +414,6 @@ def instance_rebuilding(evt):
 
 
 def instance_rebuilt(evt):
-    evt.summary = add_statuschange_to_msg(
-        evt,
-        "Instance %s rebuilt" % (instance_name(evt)))
-
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
         return None
@@ -481,8 +424,6 @@ def instance_rebuilt(evt):
 
 
 def instance_suspended(evt):
-    evt.summary = "Instance %s suspended" % (instance_name(evt))
-
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
         return None
@@ -493,8 +434,6 @@ def instance_suspended(evt):
 
 
 def instance_resumed(evt):
-    evt.summary = "Instance %s resumed" % (instance_name(evt))
-
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
         return None
@@ -505,8 +444,6 @@ def instance_resumed(evt):
 
 
 def instance_rescue(evt):
-    evt.summary = "Instance %s placed in rescue mode" % (instance_name(evt))
-
     if not instance_id(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
         return None
@@ -517,8 +454,6 @@ def instance_rescue(evt):
 
 
 def instance_unrescue(evt):
-    evt.summary = "Instance %s removed from rescue mode" % (instance_name(evt))
-
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
     return objmap
@@ -528,9 +463,15 @@ def instance_unrescue(evt):
 # FloatingIp
 # -----------------------------------------------------------------------------
 
-def floatingip_update(evt):
-    evt.summary = event_summary("FloatingIp", floatingip_name(evt), evt)
+def floatingip_create(evt):
+    objmap = floatingip_update(evt)
+    if objmap:
+        objmap._add = True
 
+    return objmap
+
+
+def floatingip_update(evt):
     if not floatingip_id(evt):
         LOG.info("Unable to identify floatingip component from event: %s" % evt)
         return None
@@ -556,8 +497,6 @@ def floatingip_update(evt):
 
 
 def floatingip_delete_end(evt):
-    evt.summary = "FloatingIp %s deleted" % (floatingip_name(evt))
-
     if not floatingip_id(evt):
         LOG.info("Unable to identify floatingip component from event: %s" % evt)
         return None
@@ -570,9 +509,16 @@ def floatingip_delete_end(evt):
 # -----------------------------------------------------------------------------
 # Network Event Functions
 # -----------------------------------------------------------------------------
-def network_update(evt):
-    evt.summary = event_summary("Network", network_name(evt), evt)
 
+def network_create(evt):
+    objmap = network_update(evt)
+    if objmap:
+        objmap._add = True
+
+    return objmap
+
+
+def network_update(evt):
     if not network_id(evt):
         LOG.info("Unable to identify network component from event: %s" % evt)
         return None
@@ -594,8 +540,6 @@ def network_update(evt):
 
 
 def network_delete_end(evt):
-    evt.summary = "Network %s deleted" % (network_name(evt))
-
     if not network_id(evt):
         LOG.info("Unable to identify network component from event: %s" % evt)
         return None
@@ -609,9 +553,15 @@ def network_delete_end(evt):
 # Port Event Functions
 # -----------------------------------------------------------------------------
 
-def port_update(evt):
-    evt.summary = event_summary("Port", port_name(evt), evt)
+def port_create(evt):
+    objmap = port_update(evt)
+    if objmap:
+        objmap._add = True
 
+    return objmap
+
+
+def port_update(evt):
     if not port_id(evt):
         LOG.info("Unable to identify port component from event: %s" % evt)
         return None
@@ -632,14 +582,14 @@ def port_update(evt):
     _apply_neutron_traits(evt, objmap, traitmap)
     _apply_trait_rel(evt, objmap, 'trait_network_id', 'network')
 
-    if hasattr(evt, 'trait_device_id') and hasattr(evt, 'trait_device_owner'):
-        port_instance = get_port_instance(evt.trait_device_owner,
-                                          evt.trait_device_id)
+    if 'trait_device_id' in evt and 'trait_device_owner' in evt:
+        port_instance = get_port_instance(evt['trait_device_owner'],
+                                          evt['trait_device_id'])
         setattr(objmap, 'set_instance', port_instance)
 
     # get subnets and fixed_ips
-    if hasattr(evt, 'trait_fixed_ips'):
-        port_fips = ast.literal_eval(evt.trait_fixed_ips)
+    if 'trait_fixed_ips' in evt:
+        port_fips = ast.literal_eval(evt['trait_fixed_ips'])
         _subnets = get_subnets_from_fixedips(port_fips)
         port_subnets = [prepId('subnet-{}'.format(x)) for x in _subnets]
         port_fixedips = get_port_fixedips(port_fips)
@@ -648,9 +598,8 @@ def port_update(evt):
 
     return objmap
 
-def port_delete_end(evt):
-    evt.summary = "Port %s deleted" % (port_name(evt))
 
+def port_delete_end(evt):
     objmap = neutron_objmap(evt, 'Port')
     objmap.remove = True
     return objmap
@@ -660,9 +609,15 @@ def port_delete_end(evt):
 # Router Event Functions
 # -----------------------------------------------------------------------------
 
-def router_update(evt):
-    evt.summary = event_summary("Router", router_name(evt), evt)
+def router_create(evt):
+    objmap = router_update(evt)
+    if objmap:
+        objmap._add = True
 
+    return objmap
+
+
+def router_update(evt):
     if not router_id(evt):
         LOG.info("Unable to identify router component from event: %s" % evt)
         return None
@@ -685,8 +640,6 @@ def router_update(evt):
 
 
 def router_delete_end(evt):
-    evt.summary = "Router %s deleted" % (router_name(evt))
-
     objmap = neutron_objmap(evt, 'Router')
     objmap.remove = True
     return objmap
@@ -695,9 +648,16 @@ def router_delete_end(evt):
 # -----------------------------------------------------------------------------
 # Subnet Event Functions
 # -----------------------------------------------------------------------------
-def subnet_update(evt):
-    evt.summary = event_summary("Subnet", subnet_name(evt), evt)
 
+def subnet_create(evt):
+    objmap = subnet_update(evt)
+    if objmap:
+        objmap._add = True
+
+    return objmap
+
+
+def subnet_update(evt):
     if not subnet_id(evt):
         LOG.info("Unable to identify subnet component from event: %s" % evt)
         return None
@@ -720,8 +680,6 @@ def subnet_update(evt):
 
 
 def subnet_delete_end(evt):
-    evt.summary = "Subnet %s deleted" % (subnet_name(evt))
-
     objmap = neutron_objmap(evt, 'Subnet')
     objmap.remove = True
     return objmap
@@ -730,20 +688,15 @@ def subnet_delete_end(evt):
 # -----------------------------------------------------------------------------
 # Volume Event Functions
 # -----------------------------------------------------------------------------
+def volume_create(evt):
+    objmap = volume_update(evt)
+    if objmap:
+        objmap._add = True
+
+    return objmap
+
 
 def volume_update(evt):
-    if 'create.end' in evt.eventClassKey:
-        # the volume is being created
-        evt.summary = "Created Volume %s" % (volume_name(evt))
-    elif 'attach.end' in evt.eventClassKey:
-        # the volume is being attached to an instance
-        evt.summary = "Attach Volume %s to instance %s " % \
-            (volume_name(evt), getattr(evt, "trait_instance_id", "[unknown]"))
-    elif 'detach.end' in evt.eventClassKey:
-        # the volume is being detached from an instance
-        evt.summary = "Detach Volume %s from instance" % \
-            (volume_name(evt))
-
     if not volume_id(evt):
         LOG.info("Unable to identify volume component from event: %s" % evt)
         return None
@@ -751,17 +704,19 @@ def volume_update(evt):
     objmap = cinder_objmap(evt, "Volume")
     _apply_cinder_traits(evt, objmap)
 
-    if hasattr(evt, 'trait_tenant_id'):
+    if 'trait_tenant_id' in evt:
         _apply_trait_rel(evt, objmap, 'trait_tenant_id', 'tenant')
-    elif hasattr(evt, 'trait_project_id'):
+    elif 'trait_project_id' in evt:
         _apply_trait_rel(evt, objmap, 'trait_project_id', 'tenant')
 
-    if hasattr(objmap, 'instanceId') and len(objmap.instanceId) > 0:
+    if 'trait_instance_id' in evt and len(evt['trait_instance_id']):
         # the volume is being attached to an instance
         _apply_trait_rel(evt, objmap, 'trait_instance_id', 'server')
-    elif 'detach.end' in evt.eventClassKey:
+
+    if 'detach.end' in evt['openstack_event_type']:
         # the volume is being detached from an instance
-        setattr(objmap, 'set_instance', '')
+        setattr(objmap, 'set_instance', None)
+
     # make sure objmap has volume_type and volume_type is uuid
     if hasattr(objmap, 'volume_type') and is_uuid(objmap.volume_type):
         # set volume type
@@ -771,8 +726,6 @@ def volume_update(evt):
 
 
 def volume_delete_end(evt):
-    evt.summary = "Volume %s deleted" % (volume_name(evt))
-
     if not volume_id(evt):
         LOG.info("Unable to identify volume component from event: %s" % evt)
         return None
@@ -785,20 +738,18 @@ def volume_delete_end(evt):
 # -----------------------------------------------------------------------------
 # Snapshot Event Functions
 # -----------------------------------------------------------------------------
-def volsnapshot_update(evt):
-    evt.summary = "Created Volume Snapshot %s for volume %s" % \
-        (volsnapshot_name(evt), volume_name(evt))
-
+def volsnapshot_create(evt):
     if not volsnapshot_id(evt):
         LOG.info("Unable to identify volsnapshot component from event: %s" % evt)
         return None
 
     objmap = cinder_objmap(evt, "VolSnapshot")
+    objmap._add = True
     _apply_cinder_traits(evt, objmap)
 
-    if hasattr(evt, 'trait_tenant_id'):
+    if 'trait_tenant_id' in evt:
         _apply_trait_rel(evt, objmap, 'trait_tenant_id', 'tenant')
-    elif hasattr(evt, 'trait_project_id'):
+    elif 'trait_project_id' in evt:
         _apply_trait_rel(evt, objmap, 'trait_project_id', 'tenant')
 
     _apply_trait_rel(evt, objmap, 'trait_volume_id', 'volume')
@@ -806,9 +757,6 @@ def volsnapshot_update(evt):
 
 
 def volsnapshot_delete_end(evt):
-    evt.summary = "Volume Snapshot %s deleted for volume %s" % \
-        (volsnapshot_name(evt), volume_name(evt))
-
     if not volsnapshot_id(evt):
         LOG.info("Unable to identify volsnapshotcomponent from event: %s" % evt)
         return None
@@ -818,78 +766,78 @@ def volsnapshot_delete_end(evt):
     return objmap
 
 
-# For each eventClassKey, associate it with the appropriate mapper function.
+# For each event type, associate it with the appropriate mapper function.
 # A mapper function is expected to take an event and return one or more objmaps.
 # it may also modify the event, for instance by add missing information
 # such as a summary.
 
 MAPPERS = {
-    'openstack|compute.instance.create.start': (instance_id, instance_create),
-    'openstack|compute.instance.create.end': (instance_id, instance_update),
-    'openstack|compute.instance.create.error': (instance_id, instance_update),
-    'openstack|compute.instance.update': (instance_id, instance_update_status),
-    'openstack|compute.instance.delete.end': (instance_id, instance_delete),
+    'compute.instance.create.start': instance_create,
+    'compute.instance.create.end': instance_update,
+    'compute.instance.create.error': instance_update,
+    'compute.instance.update': instance_update_status,
+    'compute.instance.delete.end': instance_delete,
 
     # Note: I do not currently have good test data for what a real
     # live migration looks like.  I am assuming that the new host will be
     # carried in the last event, and only processing that one.
-    'openstack|compute.instance.live_migration._post.end': (instance_id, instance_update),
+    'compute.instance.live_migration._post.end': instance_update,
 
-    'openstack|compute.instance.power_off.end': (instance_id, instance_powered_off),
-    'openstack|compute.instance.power_on.end': (instance_id, instance_powered_on),
-    'openstack|compute.instance.reboot.start': (instance_id, instance_rebooting),
-    'openstack|compute.instance.reboot.end': (instance_id, instance_rebooted),
-    'openstack|compute.instance.shutdown.start': (instance_id, instance_shutting_down),
-    'openstack|compute.instance.shutdown.end': (instance_id, instance_shut_down),
-    'openstack|compute.instance.rebuild.start': (instance_id, instance_rebuilding),
-    'openstack|compute.instance.rebuild.end': (instance_id, instance_rebuilt),
+    'compute.instance.power_off.end': instance_powered_off,
+    'compute.instance.power_on.end': instance_powered_on,
+    'compute.instance.reboot.start': instance_rebooting,
+    'compute.instance.reboot.end': instance_rebooted,
+    'compute.instance.shutdown.start': instance_shutting_down,
+    'compute.instance.shutdown.end': instance_shut_down,
+    'compute.instance.rebuild.start': instance_rebuilding,
+    'compute.instance.rebuild.end': instance_rebuilt,
 
-    'openstack|compute.instance.rescue.end': (instance_id, instance_rescue),
-    'openstack|compute.instance.unrescue.end': (instance_id, instance_unrescue),
+    'compute.instance.rescue.end': instance_rescue,
+    'compute.instance.unrescue.end': instance_unrescue,
 
-    'openstack|compute.instance.finish_resize.end': (instance_id, instance_update),
-    'openstack|compute.instance.resize.revert.end': (instance_id, instance_update),
-    'openstack|compute.instance.resize.end': (instance_id, instance_update),
+    'compute.instance.finish_resize.end': instance_update,
+    'compute.instance.resize.revert.end': instance_update,
+    'compute.instance.resize.end': instance_update,
 
 
-    'openstack|compute.instance.suspend': (instance_id, instance_suspended),
-    'openstack|compute.instance.resume': (instance_id, instance_resumed),
+    'compute.instance.suspend': instance_suspended,
+    'compute.instance.resume': instance_resumed,
 
     # -------------------------------------------------------------------------
     #  Floating IP's
     # -------------------------------------------------------------------------
-    'openstack|floatingip.create.end': (floatingip_id, floatingip_update),
-    'openstack|floatingip.update.start': (floatingip_id, floatingip_update),
-    'openstack|floatingip.update.end': (floatingip_id, floatingip_update),
-    'openstack|floatingip.delete.end': (floatingip_id, floatingip_delete_end),
+    'floatingip.create.end': floatingip_create,
+    'floatingip.update.start': floatingip_update,
+    'floatingip.update.end': floatingip_update,
+    'floatingip.delete.end': floatingip_delete_end,
 
     # -------------------------------------------------------------------------
     #  Network
     # -------------------------------------------------------------------------
-    'openstack|network.create.end': (network_id, network_update),
-    'openstack|network.update.end': (network_id, network_update),
-    'openstack|network.delete.end': (network_id, network_delete_end),
+    'network.create.end': network_create,
+    'network.update.end': network_update,
+    'network.delete.end': network_delete_end,
 
     # -------------------------------------------------------------------------
     #  Port
     # -------------------------------------------------------------------------
-    'openstack|port.create.end': (port_id, port_update),
-    'openstack|port.update.end': (port_id, port_update),
-    'openstack|port.delete.end': (port_id, port_delete_end),
+    'port.create.end': port_create,
+    'port.update.end': port_update,
+    'port.delete.end': port_delete_end,
 
     # -------------------------------------------------------------------------
     #  Routers
     # -------------------------------------------------------------------------
-    'openstack|router.create.end': (router_id, router_update),
-    'openstack|router.update.end': (router_id, router_update),
-    'openstack|router.delete.end': (router_id, router_delete_end),
+    'router.create.end': router_create,
+    'router.update.end': router_update,
+    'router.delete.end': router_delete_end,
 
     # -------------------------------------------------------------------------
     #  Subnet
     # -------------------------------------------------------------------------
-    'openstack|subnet.create.end': (subnet_id, subnet_update),
-    'openstack|subnet.update.end': (subnet_id, subnet_update),
-    'openstack|subnet.delete.end': (subnet_id, subnet_delete_end),
+    'subnet.create.end': subnet_create,
+    'subnet.update.end': subnet_update,
+    'subnet.delete.end': subnet_delete_end,
 
     # -------------------------------------------------------------------------
     #  Volume
@@ -903,63 +851,33 @@ MAPPERS = {
     # 2. volume.detach.start
     # 3. volume.detach.end
     # -------------------------------------------------------------------------
-    'openstack|volume.create.end': (volume_id, volume_update),
-    'openstack|volume.update.end': (volume_id, volume_update),
-    'openstack|volume.delete.end': (volume_id, volume_delete_end),
-    'openstack|volume.attach.end': (volume_id, volume_update),
-    'openstack|volume.detach.end': (volume_id, volume_update),
+    'volume.create.end': volume_create,
+    'volume.update.end': volume_update,
+    'volume.delete.end': volume_delete_end,
+    'volume.attach.end': volume_update,
+    'volume.detach.end': volume_update,
 
     # -------------------------------------------------------------------------
     #  Snapshot
     # -------------------------------------------------------------------------
-    'openstack|snapshot.create.end': (volsnapshot_id, volsnapshot_update),
-    'openstack|snapshot.delete.end': (volsnapshot_id, volsnapshot_delete_end),
-
+    'snapshot.create.end': volsnapshot_create,
+    'snapshot.delete.end': volsnapshot_delete_end,
 }
 
 
-def event_type_is_mapped(event_type):
-    return 'openstack|' + event_type in MAPPERS
+def event_is_mapped(evt):
+    return evt.get('openstack_event_type') in MAPPERS
 
 
 def map_event(evt):
-    # given an event, return an ObjectMap, or None.
+    # given an event dictionary, return an ObjectMap, or None.
 
-    (idfunc, mapper) = MAPPERS.get(evt.eventClassKey, (None, None))
+    # The evt dictionary is expected to contain the keys 'openstack_event_type'
+    # and one "trait_<trait name>" for all each of the traits in the ceilometer
+    # event.
 
-    if idfunc:
-        component_id = idfunc(evt)
-        if component_id is None:
-            LOG.error("Unable to identify component ID for %s event: %s",
-                      evt.eventClassKey, evt.getStateToCopy())
-            return None
-        evt.component = idfunc(evt)
+    event_type = evt.get('openstack_event_type')
 
-    if mapper:
-        return mapper(evt)
+    if event_type and event_type in MAPPERS:
+        return MAPPERS[event_type](evt)
 
-
-# ==============================================================================
-#  This is the main process() function that is called by the Events Transform
-#  subsystem. See objects.xml for further detail.
-# ==============================================================================
-def process(evt, device, dmd, txnCommit):    
-    try:
-        objectmap = map_event(evt)
-
-        if objectmap:
-            adm = ApplyDataMap(device)
-            adm._applyDataMap(device, objectmap)
-            return 1
-        else:
-            return 0
-
-    except Exception:
-        # We don't want any exceptions to make it back to zeneventd, as
-        # this will cause it to disable the transform, which will most likely
-        # cause more problems than it solves.  Exceptions are most likely
-        # to occur if we receive any event that is not formatted as we
-        # expect, and that could cause us to lose all event processing if
-        # the transform gets disabled.
-        LOG.exception("An exception occurred while processing an openstack event")
-        return 0
