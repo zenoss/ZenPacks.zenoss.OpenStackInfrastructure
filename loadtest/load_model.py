@@ -14,7 +14,7 @@ import logging
 log = logging.getLogger('zen.load_model')
 
 from collections import defaultdict
-from itertools import count, chain
+from itertools import chain
 import yaml
 import transaction
 

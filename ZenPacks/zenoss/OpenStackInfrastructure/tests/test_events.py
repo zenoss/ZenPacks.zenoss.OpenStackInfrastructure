@@ -320,11 +320,6 @@ class TestEventMappings(zenpacklib.TestCase):
         '''
         log.info("Create router '%s'" % router_id)
 
-        gateway_info = "{u'network_id': u'%s', u'enable_snat': True, " \
-               "u'external_fixed_ips': [{u'subnet_id':  u'%s', " \
-               "u'ip_address': u'192.168.117.226'}]}" \
-               % (network_id, subnet_id)
-
         self.process_event(self._eventData['router.create.end'])
 
         router = self.getObjByPath('components/router-' + router_id)
