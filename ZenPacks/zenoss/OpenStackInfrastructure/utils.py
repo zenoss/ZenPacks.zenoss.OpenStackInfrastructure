@@ -193,7 +193,7 @@ def amqp_timestamp_to_int(timestamp_string):
     # dateutil.parser.parse() figure them out.
     dt = dateutil.parser.parse(timestamp_string)
     if dt.tzinfo is None:
-        # LOG.debug("Timestamp string (%s) does not contain a timezone- assuming it is UTC." % timestamp_string)
+        # Does not contain a timezone- assume it is UTC.
         dt = pytz.utc.localize(dt)
 
     return (dt - _EPOCH).total_seconds()
