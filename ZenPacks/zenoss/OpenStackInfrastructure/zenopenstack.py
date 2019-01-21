@@ -219,6 +219,8 @@ class Root(Resource):
 
 
 class Health(Resource):
+    """ /health: expose health of zenopenstack daemon (metrics, logs) """
+
     isLeaf = True
 
     def render_GET(self, request):
@@ -346,6 +348,7 @@ class Health(Resource):
 
 
 class CeilometerRoot(Resource):
+    """ /ceilometer """
 
     def getChild(self, path, request):
         if path == '':
@@ -375,10 +378,13 @@ class CeilometerRoot(Resource):
 
 
 class CeilometerV1(Resource):
+    """ /ceilometer/v1 """
     pass
 
 
 class CeilometerV1Samples(Resource):
+    """ /ceilometer/v1/samples/<device id> : accept metrics from ceilometer """
+
     isLeaf = True
     future_warning = set()
 
@@ -438,6 +444,8 @@ class CeilometerV1Samples(Resource):
 
 
 class CeilometerV1Events(Resource):
+    """ /ceilometer/v1/events/<device id> : accept events from ceilomter """
+
     isLeaf = True
 
     def render_POST(self, request):
