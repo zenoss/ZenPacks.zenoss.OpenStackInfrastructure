@@ -94,7 +94,7 @@ class RemoveOldEventClassInstances(ZenPackMigration):
                 continue
             if mapping:
                 eventClass = mapping.eventClass()
-                LOG.info("Removing obsolete event class mapping: %s", mapping_path)
+                LOG.debug("Removing obsolete event class mapping: %s", mapping_path)
                 try:
                     eventClass.removeInstances(mapping.id)
                     count += 1

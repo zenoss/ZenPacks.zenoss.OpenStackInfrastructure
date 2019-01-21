@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2016-2017, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2016-2019, all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -20,7 +20,7 @@ except ImportError:
     VERSION5 = False
 
 import copy
-
+import os
 
 def fix_service_healthcheck_path():
     # When the zenpack is installed or upgraded, the path to the healthcheck
@@ -44,6 +44,35 @@ def fix_service_healthcheck_path():
                 log.info("Enabling %s healthcheck for %s", check.name, ctx.getServicePath(svc))
                 script_path = zenpack_path('libexec/init_rabbitmq-ceil.sh')
                 check.script = script_path + ' {{(getContext . "global.conf.amqpuser")}} {{(getContext . "global.conf.amqppassword")}}'
+    ctx.commit()
+
+
+def force_update_configs(zenpack, service_name, config_filenames):
+    # update the specified config filenames to match those provided in the
+    # zenpack.  Any local changes to them will be overwritten.
+
+    if not VERSION5:
+        return
+
+    try:
+        ctx = sm.ServiceContext()
+    except sm.ServiceMigrationError:
+        log.info("Couldn't generate service context, skipping.")
+        return
+
+    for svc in ctx.services:
+        if svc.name != service_name:
+            continue
+
+        for cfile in svc.configFiles:
+            if cfile.filename.lstrip('/') in config_filenames:
+                with open(os.path.join(zenpack.path('service_definition/-CONFIGS-/'), cfile.filename.lstrip('/'))) as f:
+                    content = f.read()
+
+                if cfile.content != content:
+                    log.info("Updating %s", cfile.filename)
+                    cfile.content = content
+
     ctx.commit()
 
 
