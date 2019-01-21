@@ -20,18 +20,21 @@ log = logging.getLogger('zen.OpenStack.zenopenstack')
 import Globals
 
 from collections import defaultdict, deque
+import datetime
 from functools import partial
 import json
 from metrology import Metrology
-from metrology.registry import registry
+from metrology.registry import registry as metrology_registry
+from metrology.instruments import Meter
 import time
 
 from twisted.internet import reactor, defer
 from twisted.spread import pb
-from twisted.web.resource import Resource, NoResource, ErrorPage
-from twisted.web.server import Site
+from twisted.web.resource import Resource as TwistedResource, NoResource, ErrorPage
+from twisted.web.server import Site as TwistedSite
 
 import zope.interface
+import zope.component
 
 from Products.ZenCollector.daemon import CollectorDaemon
 
@@ -48,25 +51,27 @@ from Products.ZenCollector.tasks import (
     TaskStates
 )
 
+from Products.ZenEvents import ZenEventClasses
 from Products.ZenUtils.Utils import unused
 
 unused(Globals)
 
+from ZenPacks.zenoss.OpenStackInfrastructure.events import event_is_mapped, map_event
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import amqp_timestamp_to_int
 from ZenPacks.zenoss.OpenStackInfrastructure.services.OpenStackConfig import OpenStackDataSourceConfig
+
 pb.setUnjellyableForClass(OpenStackDataSourceConfig, OpenStackDataSourceConfig)
 
 
-class CeilometerMessageCache(object):
+class HTTPDebugLogBuffer(object):
     """Process payload data from ceilometer.publisher.http."""
 
-    def __init__(self, preferences):
+    def __init__(self, cache_size=100):
         # Create a dict cache that consists of deques of size self.cache_size
-        self.cache_size = preferences.options.messagecachesize
+        self.cache_size = cache_size
         self.cache = defaultdict(partial(deque, maxlen=self.cache_size))
-        self.registry = registry
 
-    def store_message(self, request):
+    def store_request(self, request, result):
         """Store events in the cache, update statistics.
 
         Allow for separate samples/events/URI cache data.
@@ -77,8 +82,12 @@ class CeilometerMessageCache(object):
         client_id = (client_address, request.uri)
 
         # Add the client's message to the cache
-        message = request.content.getvalue()
-        self.cache[client_id].append(message)
+        self.cache[client_id].append({
+            'timestamp': datetime.datetime.now(),
+            'response_code': request.code,
+            'response_code_message': request.code_message,
+            'request_body': request.content.getvalue()
+        })
 
         # --------------------------------------------------------------------
         # Use Metrology to record the event
@@ -95,12 +104,19 @@ class CeilometerMessageCache(object):
 
     def get_metrology_keys(self):
         """Return list of Metrology IDs."""
-        return self.registry.metrics.keys()
+        return metrology_registry.metrics.keys()
 
-    def get_messages(self, client_id):
+    def get_requests(self, client_id):
         """Return list of events for client_id."""
         if client_id in self.cache:
-            return self.cache.get(client_id, [])
+            return self.cache[client_id]
+        return []
+
+    def get_most_recent_request(self, client_id):
+        if client_id in self.cache:
+            if self.cache[client_id]:
+                return self.cache[client_id][-1]
+        return None
 
 
 class Registry(object):
@@ -109,6 +125,7 @@ class Registry(object):
 
     def __init__(self):
         self.configs = {}
+        self.event_types = {}
 
     def all_devices(self):
         return self.configs.keys()
@@ -119,12 +136,21 @@ class Registry(object):
     def remove_device(self, device_id):
         if device_id in self.configs:
             del self.configs[device_id]
+        if device_id in self.event_types:
+            del self.event_types[device_id]
 
-    def set_datasources(self, device_id, datasources):
+    def device_event_types(self, device_id):
+        if device_id in self.event_types:
+            return self.event_types[device_id]
+        return []
+
+    def set_config(self, device_id, cfg):
         # (list of OpenStackDataSourceConfig as returned by OpenStackConfig service)
 
         self.configs[device_id] = {}
-        for datasource in datasources:
+        self.event_types[device_id] = cfg.zOpenStackProcessEventTypes
+
+        for datasource in cfg.datasources:
             self.configs.setdefault(device_id, {})
             self.configs[device_id].setdefault(datasource.resourceId, {})
             self.configs[device_id][datasource.resourceId][datasource.meter] = datasource.points
@@ -139,6 +165,35 @@ REGISTRY = Registry()
 METRIC_QUEUE = deque()
 EVENT_QUEUE = deque()
 MAP_QUEUE = deque()
+
+
+class Site(TwistedSite):
+    request_buffer = None
+
+    def __init__(self, resource, requestFactory=None, *args, **kwargs):
+        preferences = zope.component.queryUtility(
+            ICollectorPreferences, 'zenopenstack')
+
+        self.request_buffer = HTTPDebugLogBuffer(preferences.options.httpdebugbuffersize)
+
+        return TwistedSite.__init__(self, resource, requestFactory, *args, **kwargs)
+
+
+class Resource(TwistedResource):
+    site = None
+
+    # give all resources access to the site that contains them
+    def putChild(self, path, child):
+        child.site = self.site
+        return TwistedResource.putChild(self, path, child)
+
+    def render(self, request):
+        result = TwistedResource.render(self, request)
+
+        if not request.uri.startswith("/health"):
+            self.site.request_buffer.store_request(request, result)
+
+        return result
 
 
 class Root(Resource):
@@ -161,6 +216,133 @@ class Root(Resource):
                 }
             ]
         })
+
+
+class Health(Resource):
+    isLeaf = True
+
+    def render_GET(self, request):
+        request.setResponseCode(200)
+        request.setHeader(b"content-type", b"text/html")
+
+        if len(request.postpath):
+            if len(request.postpath) == 1 and request.postpath[0] == "metrics":
+                body = "<html><body>"
+                body += "<table border=\"1\">"
+                body += "<tr>"
+                body += "  <th>Metric</th>"
+                body += "  <th>Count</th>"
+                body += "  <th>1M Rate</th>"
+                body += "  <th>5M Rate</th>"
+                body += "  <th>15M Rate</th>"
+                body += "  <th>Mean Rate</th>"
+                body += "</tr>"
+
+                for name, metric in sorted(metrology_registry):
+                    if isinstance(metric, Meter):
+                        body += "<tr>"
+                        body += "  <td>%s</td>" % name
+                        body += "  <td>%d</td>" % metric.count
+                        body += "  <td>%f</td>" % metric.one_minute_rate
+                        body += "  <td>%f</td>" % metric.five_minute_rate
+                        body += "  <td>%f</td>" % metric.fifteen_minute_rate
+                        body += "  <td>%f</td>" % metric.mean_rate
+                        body += "</tr>"
+                    else:
+                        log.error("Unhandled metric type: %s", metric)
+                body += "</body></html>"
+                return body
+
+            if len(request.postpath) < 3 or request.postpath[0] != "logs":
+                return NoResource().render(request)
+
+            ip = request.postpath[1]
+            uri = "/".join(request.postpath[2:])
+            body = "<html><body>"
+            records = self.site.request_buffer.get_requests((ip, '/' + uri))
+            body += "<b>Last %d requests from /%s to %s</b> (of %d max)<p>" % (
+                len(records),
+                ip,
+                uri,
+                self.site.request_buffer.cache_size
+            )
+
+            for record in records:
+                request_body = record['request_body']
+                try:
+                    # if the payload is JSON data, reindent it for readability
+                    request_body = json.dumps(json.loads(request_body), indent=5)
+                except Exception:
+                    pass
+
+                body += "<li>%s (%d %s)<br><pre>%s</pre>" % (
+                    record['timestamp'].isoformat(),
+                    record['response_code'],
+                    record['response_code_message'],
+                    request_body)
+
+            body += "</body></html>"
+            return body
+
+        body = """
+<html>
+  <body>
+    <table border="1">
+      <tr>
+        <th rowspan="2">URI</th>
+        <th rowspan="2">IP</th>
+        <th colspan="3">Request Rate</th>
+        <th colspan="3">2xx Rate</th>
+        <th colspan="3">4xx Rate</th>
+        <th rowspan="2">Last Request</th>
+        <th rowspan="2">Details</th>
+     </tr>
+     <tr>
+        <th>5m</th>
+        <th>15m</th>
+        <th>mean</th>
+        <th>5m</th>
+        <th>15m</th>
+        <th>mean</th>
+        <th>5m</th>
+        <th>15m</th>
+        <th>mean</th>
+     </tr>
+
+        """
+
+        for client_ip, uri in sorted(self.site.request_buffer.get_client_keys()):
+            requests = Metrology.meter('http.%s.requests' % client_ip)
+            most_recent_request = self.site.request_buffer.get_most_recent_request((client_ip, uri))
+
+            body += "<tr>"
+            body += "  <td>%s</td>" % uri
+            body += "  <td>%s</td>" % client_ip
+            body += "  <td>%.2f</td>" % requests.five_minute_rate
+            body += "  <td>%.2f</td>" % requests.fifteen_minute_rate
+            body += "  <td>%.2f</td>" % requests.mean_rate
+            body += "  <td></td>"  # not yet implemented
+            body += "  <td></td>"
+            body += "  <td></td>"
+            body += "  <td></td>"
+            body += "  <td></td>"
+            body += "  <td></td>"
+            if most_recent_request:
+                body += "  <td>%s ago (%d)</td>" % (
+                    (datetime.datetime.now() - most_recent_request['timestamp']),
+                    most_recent_request['response_code'])
+            else:
+                body += "  <td>None</td>"
+            body += "  <td><a href=\"/health/logs/%s%s\">logs</a></td>" % (client_ip, uri)
+            body += "</tr>"
+
+        return body + """
+    </table>
+
+    <p><a href="/health/metrics">All Metrics</a></p>
+  </body>
+</html>
+        """
 
 
 class CeilometerRoot(Resource):
@@ -198,13 +380,9 @@ class CeilometerV1(Resource):
 
 class CeilometerV1Samples(Resource):
     isLeaf = True
-
-    def __init__(self, message_cache):
-        self.message_cache = message_cache
+    future_warning = set()
 
     def render_POST(self, request):
-        self.message_cache.store_message(request)
-
         if len(request.postpath) != 1:
             return NoResource().render(request)
 
@@ -232,7 +410,11 @@ class CeilometerV1Samples(Resource):
                 timestamp = amqp_timestamp_to_int(sample['timestamp'])
 
                 if timestamp > now:
-                    log.debug("[%s/%s] Timestamp (%s) appears to be in the future.  Using now instead." % (resourceId, meter, value['data']['timestamp']))
+                    if device_id not in self.future_warning:
+                        log.debug("[%s/%s] Timestamp (%s) appears to be in the future.  Using now instead." % (
+                            resourceId, meter, timestamp))
+                        self.future_warning.add(device_id)
+                    timestamp = now
 
                 samples.append((resourceId, meter, value, timestamp))
 
@@ -258,11 +440,7 @@ class CeilometerV1Samples(Resource):
 class CeilometerV1Events(Resource):
     isLeaf = True
 
-    def __init__(self, message_cache):
-        self.message_cache = message_cache
-
     def render_POST(self, request):
-        self.message_cache.store_message(request)
 
         if len(request.postpath) != 1:
             return NoResource().render(request)
@@ -280,11 +458,57 @@ class CeilometerV1Events(Resource):
             log.exception("Error parsing JSON data")
             return ErrorPage(400, "Bad Request", "Error parsing JSON data: %s" % e).render(request)
 
-        log.info("NOT IMPLEMENTED event update: %s" % str(request.content))
-        # Todo: implement event support- we can use the code in events.py for this-
-        # all the code to generate objmaps exists.. so we can call that, and invoke
-        # applydatamaps before passing on the events to zenoss.  This would take
-        # load off zeneventd and move the datamap processing to zenhub.
+        for c_event in payload:
+            event_type = c_event['event_type']
+
+            evt = {
+                'device': device_id,
+                'severity': ZenEventClasses.Info,
+                'eventKey': '',
+                'summary': 'OpenStackInfrastructure: ' + event_type,
+                'eventClassKey': 'openstack|' + event_type,
+                'openstack_event_type': event_type
+            }
+
+            traits = {}
+            for trait in c_event['traits']:
+                if isinstance(trait, list) and len(trait) == 3:
+                    # [[u'display_name', 1, u'demo-volume1-snap'], ...]
+                    traits[trait[0]] = trait[2]
+                elif isinstance(trait, dict) and "name" in trait and "value" in trait:
+                    # I'm not sure that this format is actually used by ceilometer,
+                    # but we're using it in sim_events.py currently.
+                    #
+                    # [{'name': 'display_name', 'value': 'demo-volume1-snap'}, ...]
+                    traits[trait['name']] = trait['value']
+                else:
+                    log.warning("Unrecognized trait format: %s" % c_event['traits'])
+
+            if 'priority' in traits:
+                if traits['priority'] == 'WARN':
+                    evt['severity'] = ZenEventClasses.Warning
+                elif traits['priority'] == 'ERROR':
+                    evt['severity'] = ZenEventClasses.Error
+
+            evt['eventKey'] = c_event['message_id']
+
+            for trait in traits:
+                evt['trait_' + trait] = traits[trait]
+
+            # only pass on events that we actually have mappings for.
+            if event_type in REGISTRY.device_event_types(device_id):
+                log.debug("Propagated %s event", event_type)
+                EVENT_QUEUE.append(evt)
+
+            if event_is_mapped(evt):
+                # Try to turn the event into an objmap.
+                try:
+                    objmap = map_event(evt)
+                    if objmap:
+                        log.debug("Mapped %s event to %s", event_type, objmap)
+                        MAP_QUEUE.append((device_id, objmap))
+                except Exception:
+                    log.exception("Unable to process event: %s", evt)
 
         # An empty response is fine.
         return b""
@@ -293,26 +517,30 @@ class CeilometerV1Events(Resource):
 class WebServer(object):
     site = None
 
-    def __init__(self, preferences):
-        self.preferences = preferences
-
     def initialize(self):
-        port = self.preferences.options.listenport
+        preferences = zope.component.queryUtility(
+            ICollectorPreferences, 'zenopenstack')
+
+        port = preferences.options.listenport
 
         root = Root()
+        self.site = Site(root)
+        root.site = self.site
+
+        health = Health()
+        root.putChild('health', health)
+
         ceilometer_root = CeilometerRoot()
         root.putChild('ceilometer', ceilometer_root)
 
         ceilometer_v1 = CeilometerV1()
-        self.message_cache = CeilometerMessageCache(self.preferences)
-        ceilometer_v1samples = CeilometerV1Samples(self.message_cache)
-        ceilometer_v1events = CeilometerV1Events(self.message_cache)
+        ceilometer_v1samples = CeilometerV1Samples()
+        ceilometer_v1events = CeilometerV1Events()
 
         ceilometer_root.putChild('v1', ceilometer_v1)
         ceilometer_v1.putChild('samples', ceilometer_v1samples)
         ceilometer_v1.putChild('events', ceilometer_v1events)
 
-        self.site = Site(root)
         log.info("Starting http listener on port %d", port)
         reactor.listenTCP(port, self.site)
 
@@ -324,7 +552,7 @@ class OpenStackCollectorDaemon(CollectorDaemon):
         configId = cfg.configId
         self.log.debug("Processing configuration for %s", configId)
 
-        REGISTRY.set_datasources(configId, cfg.datasources)
+        REGISTRY.set_config(configId, cfg)
 
         return True
 
@@ -486,11 +714,11 @@ class Preferences(object):
             help="Port to listen on for HTTP requests")
 
         parser.add_option(
-            '--messagecachesize',
-            dest='messagecachesize',
+            '--httpdebugbuffersize',
+            dest='httpdebugbuffersize',
             type='int',
             default=100,
-            help="Size of message cache for debugging")
+            help="Size of HTTP request debug log buffer")
 
     def postStartup(self):
         pass
@@ -507,7 +735,7 @@ class Preferences(object):
 def main():
     preferences = Preferences()
     task_splitter = TaskSplitter()
-    webserver = WebServer(preferences)
+    webserver = WebServer()
 
     collectordaemon = OpenStackCollectorDaemon(
         preferences,

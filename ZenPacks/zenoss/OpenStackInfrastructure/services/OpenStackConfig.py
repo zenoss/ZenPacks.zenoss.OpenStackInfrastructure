@@ -46,6 +46,7 @@ class OpenStackConfig(CollectorConfigService):
         proxy = CollectorConfigService._createDeviceProxy(self, device)
         proxy.datasources = []
         proxy.thresholds = []
+        proxy.zOpenStackProcessEventTypes = device.zOpenStackProcessEventTypes
 
         for component in device.getMonitoredComponents():
             proxy.datasources += list(
@@ -54,10 +55,7 @@ class OpenStackConfig(CollectorConfigService):
             proxy.thresholds += component.getThresholdInstances(
                 PerfAMQPDataSource.sourcetype)
 
-        if len(proxy.datasources) > 0:
-            return proxy
-
-        return None
+        return proxy
 
     def component_datasources(self, component, collector):
         for template in component.getRRDTemplates():

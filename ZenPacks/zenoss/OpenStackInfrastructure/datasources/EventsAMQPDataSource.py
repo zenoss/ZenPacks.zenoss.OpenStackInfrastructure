@@ -165,6 +165,7 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
                 try:
                     objmap = map_event(evt)
                     if objmap:
+                        log.debug("Mapped %d event to %s", event_type, objmap)
                         data['maps'].append(objmap)
                 except Exception:
                     log.exception("Unable to process event: %s", evt)
