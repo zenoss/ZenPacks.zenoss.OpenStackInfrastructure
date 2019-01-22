@@ -38,8 +38,6 @@ OPENSTACK_DEVICE_PATH = "/Devices/OpenStack/Infrastructure"
 
 _helper = zenpack_path('openstack_helper.py')
 
-class KeystoneError(Exception):
-    pass
 
 
 def _runcommand(cmd):
@@ -54,7 +52,6 @@ def _runcommand(cmd):
             message = stderr
 
         log.exception(subprocess.CalledProcessError(p.returncode, cmd=cmd, output=message))
-        raise KeystoneError(message)
 
 
 class IOpenStackInfrastructureFacade(IFacade):
