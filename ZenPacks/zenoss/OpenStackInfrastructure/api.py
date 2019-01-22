@@ -52,7 +52,7 @@ def _runcommand(cmd):
             message = stderr
 
         log.exception(subprocess.CalledProcessError(p.returncode, cmd=cmd, output=message))
-
+        log.error('Keystone Error Occured: ' + message)
 
 class IOpenStackInfrastructureFacade(IFacade):
     def addOpenStack(self, device_name, username, api_key, project_id, auth_url,
