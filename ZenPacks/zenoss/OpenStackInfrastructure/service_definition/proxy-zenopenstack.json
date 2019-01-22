@@ -41,6 +41,16 @@
             "Max": 1
         },
         "Launch": "auto",
+        "LogConfigs": [
+            {
+                "path": "/opt/zenoss/zproxy/logs/access.log",
+                "type": "zproxy"
+            },
+            {
+                "path": "/opt/zenoss/zproxy/logs/error.log",
+                "type": "zproxy"
+            }
+        ],
         "ConfigFiles": {
             "/opt/zenoss/etc/proxy-zenopenstack.conf": {
                 "####": "Contents will be loaded from ./-CONFIGS-/opt/zenoss/etc/proxy-zenopenstack.conf",
