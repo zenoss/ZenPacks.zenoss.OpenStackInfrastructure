@@ -398,13 +398,13 @@ class CeilometerV1Samples(Resource):
         if not REGISTRY.has_device(device_id):
             return NoResource(message="Unrecognized device '%s'" % device_id).render(request)
 
-        content_type = next(iter(request.requestHeaders.getRawHeaders('content-type') or []), None)
+        content_type = request.requestHeaders.getRawHeaders('content-type', [None])[0]
         if content_type != 'application/json':
             return ErrorPage(415, "Unsupported Media Type", "Unsupported Media Type").render(request)
         try:
             payload = json.loads(request.content.getvalue())
         except Exception, e:
-            log.exception("Error parsing JSON data")
+            log.error("Error [%s] while parsing JSON data: %s", e, request.content.getvalue())
             return ErrorPage(400, "Bad Request", "Error parsing JSON data: %s" % e).render(request)
 
         samples = []
@@ -463,13 +463,13 @@ class CeilometerV1Events(Resource):
         if not REGISTRY.has_device(device_id):
             return NoResource(message="Unrecognized device '%s'" % device_id).render(request)
 
-        content_type = next(iter(request.requestHeaders.getRawHeaders('content-type') or []), None)
+        content_type = request.requestHeaders.getRawHeaders('content-type', [None])[0]
         if content_type != 'application/json':
             return ErrorPage(415, "Unsupported Media Type", "Unsupported Media Type").render(request)
         try:
             payload = json.loads(request.content.getvalue())
         except Exception, e:
-            log.exception("Error parsing JSON data")
+            log.error("Error [%s] while parsing JSON data: %s", e, request.content.getvalue())
             return ErrorPage(400, "Bad Request", "Error parsing JSON data: %s" % e).render(request)
 
         for c_event in payload:
