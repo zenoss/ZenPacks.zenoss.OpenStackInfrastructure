@@ -29,6 +29,7 @@ from metrology.instruments import Meter
 import time
 
 from twisted.internet import reactor, defer
+from twisted.python import log as twisted_log
 from twisted.spread import pb
 from twisted.web.resource import Resource as TwistedResource, NoResource, ErrorPage
 from twisted.web.server import Site as TwistedSite
@@ -397,12 +398,13 @@ class CeilometerV1Samples(Resource):
         if not REGISTRY.has_device(device_id):
             return NoResource(message="Unrecognized device '%s'" % device_id).render(request)
 
-        if request.received_headers.get('content-type') != 'application/json':
+        content_type = request.requestHeaders.getRawHeaders('content-type', [None])[0]
+        if content_type != 'application/json':
             return ErrorPage(415, "Unsupported Media Type", "Unsupported Media Type").render(request)
         try:
             payload = json.loads(request.content.getvalue())
         except Exception, e:
-            log.exception("Error parsing JSON data")
+            log.error("Error [%s] while parsing JSON data: %s", e, request.content.getvalue())
             return ErrorPage(400, "Bad Request", "Error parsing JSON data: %s" % e).render(request)
 
         samples = []
@@ -410,6 +412,9 @@ class CeilometerV1Samples(Resource):
 
         try:
             for sample in payload:
+                if 'event_type' in sample and 'volume' not in sample:
+                    return ErrorPage(422, "Unprocessable Entity", "Misconfigured- sending event data to metric URL")
+
                 resourceId = sample['resource_id']
                 meter = sample['name']
                 value = sample['volume']
@@ -458,15 +463,22 @@ class CeilometerV1Events(Resource):
         if not REGISTRY.has_device(device_id):
             return NoResource(message="Unrecognized device '%s'" % device_id).render(request)
 
-        if request.received_headers.get('content-type') != 'application/json':
+        content_type = request.requestHeaders.getRawHeaders('content-type', [None])[0]
+        if content_type != 'application/json':
             return ErrorPage(415, "Unsupported Media Type", "Unsupported Media Type").render(request)
         try:
-            payload = json.loads(request.content.getvalue())  # noqa : Remove comment once method is complete.
+            payload = json.loads(request.content.getvalue())
         except Exception, e:
-            log.exception("Error parsing JSON data")
+            log.error("Error [%s] while parsing JSON data: %s", e, request.content.getvalue())
             return ErrorPage(400, "Bad Request", "Error parsing JSON data: %s" % e).render(request)
 
         for c_event in payload:
+            if 'event_type' not in c_event:
+                if 'name' in c_event and 'volume' in c_event:
+                    return ErrorPage(422, "Unprocessable Entity", "Misconfigured- sending metric data to event URL")
+                log.error("%s: Ignoring unrecognized event payload: %s" % (request.getClient(), c_event))
+                continue
+
             event_type = c_event['event_type']
 
             evt = {
@@ -550,6 +562,14 @@ class WebServer(object):
         ceilometer_v1.putChild('events', ceilometer_v1events)
 
         log.info("Starting http listener on port %d", port)
+
+        # Enable twisted logging
+        loggerName = "zen.zenopenstack.twisted"
+        logging.getLogger(loggerName).setLevel(logging.ERROR)
+        self.logobserver = twisted_log.PythonLoggingObserver(
+            loggerName=loggerName)
+        self.logobserver.start()
+
         reactor.listenTCP(port, self.site)
 
 

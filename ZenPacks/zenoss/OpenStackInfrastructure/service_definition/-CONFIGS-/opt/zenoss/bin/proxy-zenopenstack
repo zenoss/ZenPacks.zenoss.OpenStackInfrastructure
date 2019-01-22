@@ -43,7 +43,7 @@ update_upstreams() {
         /opt/zenoss/zproxy/scripts/update_upstreams 8242 /opt/zenoss/etc/zenopenstack-upstreams.conf
         if [ $? -eq 2 ]; then
             echo "$(date) Reloading nginx config due to upstream Zope servers change"
-            /opt/zenoss/bin/zproxy start -s reload
+            /opt/zenoss/bin/zproxy start -s reload -c /opt/zenoss/etc/proxy-zenopenstack.conf
         fi
         sleep 30
     done
