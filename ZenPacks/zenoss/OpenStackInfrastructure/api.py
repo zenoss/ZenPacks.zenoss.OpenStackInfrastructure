@@ -15,7 +15,6 @@ import logging
 log = logging.getLogger('zen.OpenStack.api')
 
 import json
-import os.path
 from urlparse import urlparse
 import subprocess
 
@@ -29,7 +28,6 @@ from Products.Zuul.catalog.events import IndexingEvent
 from Products.Zuul.facades import ZuulFacade
 from Products.Zuul.interfaces import IFacade
 from Products.Zuul.utils import ZuulMessageFactory as _t
-from Products.ZenUtils.Utils import zenPath
 
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path, zenpack_path
 add_local_lib_path()
@@ -37,7 +35,6 @@ add_local_lib_path()
 OPENSTACK_DEVICE_PATH = "/Devices/OpenStack/Infrastructure"
 
 _helper = zenpack_path('openstack_helper.py')
-
 
 
 def _runcommand(cmd):
@@ -53,6 +50,7 @@ def _runcommand(cmd):
 
         log.exception(subprocess.CalledProcessError(p.returncode, cmd=cmd, output=message))
         log.error('Keystone Error Occured: ' + message)
+
 
 class IOpenStackInfrastructureFacade(IFacade):
     def addOpenStack(self, device_name, username, api_key, project_id, auth_url,
