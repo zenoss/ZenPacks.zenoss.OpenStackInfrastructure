@@ -630,7 +630,6 @@ class OpenStackInfrastructure(PythonPlugin):
         # in the nova-service list (which we ignored earlier). It should not
         # be, under icehouse, at least, but just in case this changes..)
         nova_api_hosts = set(results['zOpenStackNovaApiHosts'])
-        cinder_api_hosts = []
         for service in results['services']:
             if service.get('binary') == 'nova-api':
                 if service['host'] not in nova_api_hosts:
@@ -769,6 +768,7 @@ class OpenStackInfrastructure(PythonPlugin):
 
     def map_cinder_services(self, device, results):
         services = []
+        hostmap = results.get('hostmap')
 
         # Find all hosts which have a cinder service on them
         # where cinder services are: cinder-backup, cinder-scheduler, cinder-volume
@@ -778,7 +778,6 @@ class OpenStackInfrastructure(PythonPlugin):
             host_id = service['host']
             zone_name, zone_id = getServiceZoneNameId(device.zOpenStackRegionName, service)
             binary_name = service.get('binary')
-            hostmap = results.get('hostmap')
 
             if host_id is None:
                 title = '{0} ({1})'.format(
@@ -1369,8 +1368,8 @@ class OpenStackInfrastructure(PythonPlugin):
                 messages.add("Authorization Errors: Check zCommandUsername and zCommandPassword!")
 
             elif "403 Forbidden" in ex.message:
-                messages.add("OpenStack user lacks access to call: {}"
-                             " Partial Modeling will proceed regardless."
+                messages.add("OpenStack user lacks access to call: {}. "
+                             "Partial Modeling will proceed regardless."
                              .format(debug_string))
 
             elif "500 Internal Server Error" in ex.message:
