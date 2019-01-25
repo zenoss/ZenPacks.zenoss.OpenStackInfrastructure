@@ -70,9 +70,13 @@ class BaseClient(object):
                             full_url, key, result[key], data[key])
                     else:
                         result[key] = data[key]
-
-
-            full_url = data.get('links', {}).get('next')
+                        
+            full_url = None
+            for key in data.keys():
+                if '_links' in key:
+                    for link in data[key]:
+                        if link['rel'] == 'next':
+                            full_url = str(link['href'])
             if full_url is None:
                 break
 
