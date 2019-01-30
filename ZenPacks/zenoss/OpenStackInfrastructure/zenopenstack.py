@@ -433,7 +433,7 @@ class CeilometerV1Samples(Resource):
             log.exception("Error processing sample data")
             return ErrorPage(422, "Unprocessable Entity", "Error processing data: %s" % e).render(request)
 
-        for sample in samples:
+        for resourceId, meter, value, timestamp in samples:
             datapoints = REGISTRY.get_datapoints(device_id, resourceId, meter)
 
             if datapoints:
@@ -442,7 +442,7 @@ class CeilometerV1Samples(Resource):
                     METRIC_QUEUE.append((dp, value, timestamp))
 
             else:
-                log.debug("Ignoring unmonitored sample: %s" % str(sample))
+                log.debug("Ignoring unmonitored sample: %s / %s / %s", device_id, resourceId, meter)
 
         # An empty response is fine.
         return b""
@@ -536,8 +536,12 @@ class CeilometerV1Events(Resource):
 
 class WebServer(object):
     site = None
+    initialized = False
 
     def initialize(self):
+        if self.initialized:
+            return
+
         preferences = zope.component.queryUtility(
             ICollectorPreferences, 'zenopenstack')
 
@@ -571,6 +575,8 @@ class WebServer(object):
         self.logobserver.start()
 
         reactor.listenTCP(port, self.site)
+
+        self.initialized = True
 
 
 class OpenStackCollectorDaemon(CollectorDaemon):
@@ -715,6 +721,7 @@ class OpenStackMapTask(BaseTask):
         self.state = 'SEND_DATAMAPS'
 
         for device_id in maps:
+            log.debug("Sending datamaps for %s: %s", device_id, maps[device_id])
             yield remoteProxy.callRemote(
                 'applyDataMaps', device_id, maps[device_id])
 
