@@ -105,21 +105,21 @@ zProperties:
   zOpenStackIncrementalShortLivedSeconds:
     type: int
     default: 40
-    label: OpenStack Incremental Modeling - Short-lived object time (seconds)
+    label: Incremental Modeling - Short-lived object time (seconds)
     description: >
        Defer processing of incremental updates creating new components for
        this long in case they are immediately deleted.
   zOpenStackIncrementalBlackListSeconds:
     type: int
     default: 600
-    label: OpenStack Incremental Modeling - Deleted Object Blacklist time (seconds)
+    label: Incremental Modeling - Deleted Object Blacklist time (seconds)
     description: >
       After a component is deleted, discard any updates to the same component 
       ID for this long
   zOpenStackIncrementalConsolidateSeconds:
     type: int
     default: 40
-    label: OpenStack Incremental Modeling - Consolidate time (seconds)
+    label: Incremental Modeling - Consolidate time (seconds)
     description: >
       Hold any update for at most this long before processing.  Any other
       updates to the same object during this time window will be combined
