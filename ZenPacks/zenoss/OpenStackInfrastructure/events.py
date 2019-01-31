@@ -328,7 +328,7 @@ def instance_delete(evt):
         return None
 
     objmap = instance_objmap(evt)
-    objmap.remove = True
+    objmap._remove = True
     return objmap
 
 
@@ -502,7 +502,7 @@ def floatingip_delete_end(evt):
         return None
 
     objmap = neutron_objmap(evt, 'FloatingIp')
-    objmap.remove = True
+    objmap._remove = True
     return objmap
 
 
@@ -545,7 +545,7 @@ def network_delete_end(evt):
         return None
 
     objmap = neutron_objmap(evt, 'Network')
-    objmap.remove = True
+    objmap._remove = True
     return objmap
 
 
@@ -601,7 +601,7 @@ def port_update(evt):
 
 def port_delete_end(evt):
     objmap = neutron_objmap(evt, 'Port')
-    objmap.remove = True
+    objmap._remove = True
     return objmap
 
 
@@ -641,7 +641,7 @@ def router_update(evt):
 
 def router_delete_end(evt):
     objmap = neutron_objmap(evt, 'Router')
-    objmap.remove = True
+    objmap._remove = True
     return objmap
 
 
@@ -681,7 +681,7 @@ def subnet_update(evt):
 
 def subnet_delete_end(evt):
     objmap = neutron_objmap(evt, 'Subnet')
-    objmap.remove = True
+    objmap._remove = True
     return objmap
 
 
@@ -731,7 +731,7 @@ def volume_delete_end(evt):
         return None
 
     objmap = cinder_objmap(evt, 'Volume')
-    objmap.remove = True
+    objmap._remove = True
     return objmap
 
 
@@ -762,7 +762,7 @@ def volsnapshot_delete_end(evt):
         return None
 
     objmap = cinder_objmap(evt, 'VolSnapshot')
-    objmap.remove = True
+    objmap._remove = True
     return objmap
 
 

@@ -58,6 +58,7 @@ from Products.ZenUtils.Utils import unused
 unused(Globals)
 
 from ZenPacks.zenoss.OpenStackInfrastructure.events import event_is_mapped, map_event
+from ZenPacks.zenoss.OpenStackInfrastructure.datamaps import ConsolidatingObjectMapQueue
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import amqp_timestamp_to_int
 from ZenPacks.zenoss.OpenStackInfrastructure.services.OpenStackConfig import OpenStackDataSourceConfig
 
@@ -165,7 +166,7 @@ class Registry(object):
 REGISTRY = Registry()
 METRIC_QUEUE = deque()
 EVENT_QUEUE = deque()
-MAP_QUEUE = deque()
+MAP_QUEUE = defaultdict(ConsolidatingObjectMapQueue)
 
 
 class Site(TwistedSite):
@@ -526,7 +527,7 @@ class CeilometerV1Events(Resource):
                     objmap = map_event(evt)
                     if objmap:
                         log.debug("Mapped %s event to %s", event_type, objmap)
-                        MAP_QUEUE.append((device_id, objmap))
+                        MAP_QUEUE[device_id].append(objmap)
                 except Exception:
                     log.exception("Unable to process event: %s", evt)
 
@@ -587,6 +588,11 @@ class OpenStackCollectorDaemon(CollectorDaemon):
         self.log.debug("Processing configuration for %s", configId)
 
         REGISTRY.set_config(configId, cfg)
+
+        # update queue settings
+        MAP_QUEUE[configId].shortlived_seconds = cfg.zOpenStackIncrementalShortLivedSeconds
+        MAP_QUEUE[configId].delete_blacklist_seconds = cfg.zOpenStackIncrementalBlackListSeconds
+        MAP_QUEUE[configId].update_consolidate_seconds = cfg.zOpenStackIncrementalConsolidateSeconds
 
         return True
 
@@ -713,10 +719,15 @@ class OpenStackMapTask(BaseTask):
         remoteProxy = self._collector.getServiceNow('ModelerService')
 
         maps = {}
-        for device_id, datamap in MAP_QUEUE:
-            maps.setdefault(device_id, [])
-            maps[device_id].append(datamap)
-        MAP_QUEUE.clear()
+        for device_id, queue in MAP_QUEUE.iteritems():
+            for datamap in queue.drain():
+                maps.setdefault(device_id, [])
+                maps[device_id].append(datamap)
+
+        obsolete_devices = set(MAP_QUEUE.keys()) - set(REGISTRY.all_devices())
+        for device_id in obsolete_devices:
+            log.info("Removing datamap queue for deleted device %s", device_id)
+            del MAP_QUEUE[device_id]
 
         self.state = 'SEND_DATAMAPS'
 
