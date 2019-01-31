@@ -127,6 +127,9 @@ Used when openstack processes are running inside of docker containers. Provide t
 - zOpenStackAMQPUsername: Username for ceilometer AMQP integration
 - zOpenStackAMQPPassword: Password for ceilometer AMQP integration
 - zOpenStackProcessEventTypes: List of openstack event types to pass to Zenoss event system.  (Other event types may be processed for model changes, but will not be stored as events in Zenoss)
+- zOpenStackIncrementalShortLivedSeconds: Incremental Modeling - Short-lived object time (seconds)
+- zOpenStackIncrementalBlackListSeconds: Incremental Modeling - Deleted Object Blacklist time (seconds)
+- zOpenStackIncrementalConsolidateSeconds: Incremental Modeling - Consolidate time (seconds)
 
 ### Device Classes 
 - /OpenStack: Root OpenStack device class. Typically, devices should not be put in this device class. 

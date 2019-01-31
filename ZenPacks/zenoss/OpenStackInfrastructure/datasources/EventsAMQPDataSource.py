@@ -106,6 +106,9 @@ cache = defaultdict(CeilometerEventCache)
 class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
     proxy_attributes = (
         'zOpenStackProcessEventTypes',
+        'zOpenStackIncrementalShortLivedSeconds',
+        'zOpenStackIncrementalBlackListSeconds',
+        'zOpenStackIncrementalConsolidateSeconds',
     )
     queue_name = "$OpenStackInboundEvent"
     failure_eventClassKey = 'EventsFailure'
@@ -117,6 +120,11 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
         data = yield super(EventsAMQPDataSourcePlugin, self).collect(config)
         device_id = config.configId
         ds0 = config.datasources[0]
+
+        # Update queue settings
+        MAP_QUEUE[device_id].shortlived_seconds = ds0.zOpenStackIncrementalShortLivedSeconds
+        MAP_QUEUE[device_id].delete_blacklist_seconds = ds0.zOpenStackIncrementalBlackListSeconds
+        MAP_QUEUE[device_id].update_consolidate_seconds = ds0.zOpenStackIncrementalConsolidateSeconds
 
         for entry in cache[device_id].get():
             c_event = entry.value

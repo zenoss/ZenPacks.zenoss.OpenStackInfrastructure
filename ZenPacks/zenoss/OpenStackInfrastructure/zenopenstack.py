@@ -583,6 +583,11 @@ class OpenStackCollectorDaemon(CollectorDaemon):
 
         REGISTRY.set_config(configId, cfg)
 
+        # update queue settings
+        MAP_QUEUE[configId].shortlived_seconds = cfg.zOpenStackIncrementalShortLivedSeconds
+        MAP_QUEUE[configId].delete_blacklist_seconds = cfg.zOpenStackIncrementalBlackListSeconds
+        MAP_QUEUE[configId].update_consolidate_seconds = cfg.zOpenStackIncrementalConsolidateSeconds
+
         return True
 
     def _deleteDevice(self, deviceId):
