@@ -783,7 +783,7 @@ class TestEventMappings(zenpacklib.TestCase):
         datamaps.extend(self.queue.drain())
 
         self.assertTrue(
-            (len(datamaps) == 2 and datamaps[1].remove),
+            (len(datamaps) == 2 and datamaps[1]._remove),
             msg="Instance deleted as expected")
 
 

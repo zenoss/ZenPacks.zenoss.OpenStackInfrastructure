@@ -133,7 +133,7 @@ class TestConsolidatingObjectMapQueue(zenpacklib.TestCase):
 
     def test_delete_component(self):
         objmap = self.new_objmap("c1")
-        objmap.remove = True
+        objmap._remove = True
         self.queue.append(objmap)
 
         objmaps = self.queue.drain()
@@ -146,7 +146,7 @@ class TestConsolidatingObjectMapQueue(zenpacklib.TestCase):
 
     def test_update_after_delete_component(self):
         objmap = self.new_objmap("c1")
-        objmap.remove = True
+        objmap._remove = True
         self.queue.append(objmap)
 
         objmaps = self.queue.drain()
@@ -175,7 +175,7 @@ class TestConsolidatingObjectMapQueue(zenpacklib.TestCase):
         self.assertEquals(len(objmaps), 0, msg="Should hold inserts for 40 seconds")
 
         objmap = self.new_objmap("c1")
-        objmap.remove = True
+        objmap._remove = True
         self.queue.append(objmap)
 
         objmaps = self.queue.drain()
@@ -208,12 +208,12 @@ class TestConsolidatingObjectMapQueue(zenpacklib.TestCase):
 
         # remove it.
         objmap = self.new_objmap("c1")
-        objmap.remove = True
+        objmap._remove = True
         self.queue.append(objmap)
 
         objmaps = self.queue.drain()
         self.assertEquals(len(objmaps), 1, msg="Component should be removed")
-        self.assertTrue(objmaps[0].remove, msg="Component removed as expected")
+        self.assertTrue(objmaps[0]._remove, msg="Component removed as expected")
 
         # much time passes..
         self.clock += 4000

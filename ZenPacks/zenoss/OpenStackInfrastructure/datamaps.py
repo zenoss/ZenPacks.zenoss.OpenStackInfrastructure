@@ -24,7 +24,7 @@ class ConsolidatingObjectMapQueue(object):
       map comes in during that time to delete that same component, discard
       all maps for it and don't waste zenhub's time.
 
-    * If a component is deleted (.remove=True), discard any other pending
+    * If a component is deleted (_remove=True), discard any other pending
       object maps for this component, and release the remove datamap immediately.
       In addition, store the component ID in a blacklist for
       (delete_blacklist_seconds) seconds.
@@ -64,15 +64,15 @@ class ConsolidatingObjectMapQueue(object):
         else:
             _, stored_objmap = self.held_objmaps[component_id]
 
-            # Only overwrite _add and remove if the value is True.
+            # Only overwrite _add and _remove if the value is True.
             if getattr(objmap, '_add', False):
                 stored_objmap._add = objmap._add
-            if getattr(objmap, 'remove', False):
-                stored_objmap.remove = objmap.remove
+            if getattr(objmap, '_remove', False):
+                stored_objmap._remove = objmap._remove
 
             # update the existing objmap's other values
             for p in objmap.__dict__:
-                if p not in ('_attrs', 'id', 'modname', 'relname', '_add', 'remove'):
+                if p not in ('_attrs', 'id', 'modname', 'relname', '_add', '_remove'):
                     setattr(stored_objmap, p, getattr(objmap, p))
 
     def _expire_blacklisted_components(self):
@@ -88,7 +88,7 @@ class ConsolidatingObjectMapQueue(object):
     def _new_objmap(self, objmap):
         # Create a new empty objmap based on the suppied one, with all
         # structural properties carried over, but no data, no _add, and no
-        # remove.
+        # _remove.
         new_objmap = ObjectMap()
 
         if objmap.modname:
@@ -116,7 +116,7 @@ class ConsolidatingObjectMapQueue(object):
         # while in this queue- no need to send such updates to zodb, after all.
         for component_id in self.held_objmaps:
             first_update, objmap = self.held_objmaps[component_id]
-            if getattr(objmap, 'remove', False) and getattr(objmap, '_add', False):
+            if getattr(objmap, '_remove', False) and getattr(objmap, '_add', False):
                 self.blacklisted_components[component_id] = now
 
         # Remove any updates pertaining to components which are
@@ -132,7 +132,7 @@ class ConsolidatingObjectMapQueue(object):
             if getattr(objmap, '_add', False):
                 # newly added components get held for "shortlived_seconds"
                 release_time = first_update + self.shortlived_seconds
-            elif getattr(objmap, 'remove', False):
+            elif getattr(objmap, '_remove', False):
                 # deleted components can be released immediately- there's
                 # no benefit in holding a delete.
                 release_time = now
