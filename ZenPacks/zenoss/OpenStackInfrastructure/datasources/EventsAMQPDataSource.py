@@ -179,6 +179,8 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
                 'eventClassKey': 'EventsSuccess',
             })
 
+        log.debug("Sending datamaps for %s: %s", config.id, data['maps'])
+
         defer.returnValue(data)
 
     def processMessage(self, device_id, message, value):
