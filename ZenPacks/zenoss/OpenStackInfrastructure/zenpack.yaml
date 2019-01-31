@@ -35,6 +35,8 @@ zProperties:
     default: ''
   zOpenStackProcessEventTypes:
     type: lines
+  zOpenStackDomainId:
+    default: ''
 
 class_relationships:
 # Containing Relations
@@ -141,7 +143,7 @@ device_classes:
             type: COMMAND
             commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/poll_openstack.py
               '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}'
-              '${here/zOpenStackAuthUrl}' '${here/zOpenStackRegionName}'
+              '${here/zOpenStackDomainId}' '${here/zOpenStackAuthUrl}' '${here/zOpenStackRegionName}'
             datapoints:
               agentAliveCount:
                 aliases: {agent_alive__count: null}
@@ -2095,7 +2097,7 @@ event_classes:
   /OpenStack/Cinder:
     remove: true
   /OpenStack/Cinder/Volume:
-    remove: true    
+    remove: true
   /OpenStack/Cinder/Snapshot:
     remove: true
   /OpenStack/image:

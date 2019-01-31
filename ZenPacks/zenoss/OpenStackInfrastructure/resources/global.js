@@ -133,6 +133,27 @@ var addOpenStack = new Zenoss.Action({
                     xtype: 'container',
                     layout: 'hbox',
                     items: [{
+                        xtype: 'textfield',
+                        name: 'domain_id',
+                        fieldLabel: _t('Domain Id'),
+                        labelWidth: 120,
+                        id: "openstack_domain_id",
+                        width: 350,
+                        allowBlank: false,
+                        listeners: {
+                            blur: this.updateRegions,
+                            scope: this
+                        }
+                    },{
+                        xtype: 'label',
+                        style: 'font-style: italic',
+                        text: '(OS_PROJECT/USER_DOMAIN_NAME)',
+                        margin: '0 0 0 10'
+                    }]
+                },{
+                    xtype: 'container',
+                    layout: 'hbox',
+                    items: [{
                         xtype: 'combo',
                         width: 350,
                         name: 'region_name',
@@ -222,13 +243,14 @@ var addOpenStack = new Zenoss.Action({
         combo = Ext.getCmp('region_name');
         store = combo.getStore();
 
-        if (formvalues.username && formvalues.api_key && formvalues.project_id && formvalues.auth_url) {
+        if (formvalues.username && formvalues.api_key && formvalues.project_id && formvalues.domain_id && formvalues.auth_url) {
             store.load({
                params: {
                    username: formvalues.username,
                    api_key: formvalues.api_key,
                    project_id: formvalues.project_id,
-                   auth_url: formvalues.auth_url
+                   auth_url: formvalues.auth_url,
+                   domain_id: formvalues.domain_id
                },
                callback: function(records, operation, success) {
                     combo.select(store.getAt(0));
@@ -249,4 +271,3 @@ Zenoss.extensions.adddevice = Zenoss.extensions.adddevice instanceof Array ?
 Zenoss.extensions.adddevice.push(addOpenStack);
 
 })();
-

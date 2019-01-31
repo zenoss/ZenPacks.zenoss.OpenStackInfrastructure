@@ -26,18 +26,18 @@ class OpenStackInfrastructureLoader(object):
 
     Sample usage:
 
-    /Devices/OpenStack/Infrastructure loader='openstackinfrastructure', loader_arg_keys=['deviceName', 'username', 'api_key', 'project_id', 'auth_url', 'region_name', 'collector']
-        ostack_test username='admin', api_key='admin_password', project_id='admin', auth_url='http://10.1.2.3:5000/v2.0/', region_name='RegionOne'
+    /Devices/OpenStack/Infrastructure loader='openstackinfrastructure', loader_arg_keys=['deviceName', 'username', 'api_key', 'project_id', 'domain_id', 'auth_url', 'region_name', 'collector']
+        ostack_test username='admin', api_key='admin_password', project_id='admin', domain_id = 'default', auth_url='http://10.1.2.3:5000/v2.0/', region_name='RegionOne'
 
     """
     implements(IDeviceLoader)
 
-    def load_device(self, dmd, deviceName, username, api_key, project_id, auth_url,
+    def load_device(self, dmd, deviceName, username, api_key, project_id, domain_id, auth_url,
                     ceilometer_url=None, region_name=None, collector='localhost'):
 
         # we accept, but do not use, the ceilometer_url parameter for backwards
         # compatability reasons.
 
         return getFacade('openstackinfrastructure', dmd).addOpenStack(
-            deviceName, username, api_key, project_id, auth_url,
+            deviceName, username, api_key, project_id, domain_id, auth_url,
             region_name=region_name, collector=collector)
