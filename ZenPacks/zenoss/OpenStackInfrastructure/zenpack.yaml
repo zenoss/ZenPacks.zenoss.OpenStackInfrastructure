@@ -102,6 +102,11 @@ zProperties:
       When openstack hosts report names ending in .localdomain, replace domain with this value.
   zOpenStackProcessEventTypes:
     type: lines
+    label: OpenStack event types to store
+    description: >
+      List of openstack event types to pass to Zenoss event system. 
+      (Other event types may be processed for model changes, but will not be
+      stored as events in Zenoss)
   zOpenStackIncrementalShortLivedSeconds:
     type: int
     default: 40
