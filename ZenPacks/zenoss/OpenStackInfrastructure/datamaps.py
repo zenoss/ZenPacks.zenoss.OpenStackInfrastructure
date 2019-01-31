@@ -122,7 +122,8 @@ class ConsolidatingObjectMapQueue(object):
         # Remove any updates pertaining to components which are
         # blacklisted.
         for component_id in self.blacklisted_components:
-            del self.held_objmaps[component_id]
+            if component_id in self.held_objmaps:
+                del self.held_objmaps[component_id]
 
         # release updates after an appropriate amount of time:
         for component_id in self.held_objmaps:
@@ -182,15 +183,21 @@ class ConsolidatingObjectMapQueue(object):
                 C.append(objmap)
 
         # look for references in group A that need to go to group B.
-        A_ids = [x.id for x in A]
+        A_ids = set([x.id for x in A])
         for objmap in A:
             moved = {}
             for k, v in objmap.__dict__.iteritems():
-                if k.startswith('set_') and v in A_ids:
-                    # take it out of the original objmap
-                    moved[k] = v
-                    delattr(objmap, k)
-                    objmap._attrs.remove(k)
+                if k.startswith('set_'):
+                    # take it out of the original objmap if it refers
+                    # to something in group A
+                    if isinstance(v, list):
+                        if any([x in A_ids for x in v]):
+                            moved[k] = v
+                    elif v in A_ids:
+                        moved[k] = v
+            for k in moved:
+                delattr(objmap, k)
+                objmap._attrs.remove(k)
             if moved:
                 # create a new objmap for this component, with just
                 # the set_ properties we removed from the original in it.

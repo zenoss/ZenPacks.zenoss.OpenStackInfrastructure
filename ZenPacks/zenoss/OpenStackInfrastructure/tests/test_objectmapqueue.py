@@ -47,6 +47,15 @@ class TestConsolidatingObjectMapQueue(zenpacklib.TestCase):
             }
         )
 
+    def depends_on_ids(self, om):
+        for k, v in om.__dict__.iteritems():
+            if k.startswith('set_'):
+                if isinstance(v, list):
+                    for x in v:
+                        yield x
+                else:
+                    yield v
+
     def test_single_update(self):
         objmap = self.new_objmap("c1")
         objmap.prop1 = 'value1'
@@ -210,6 +219,93 @@ class TestConsolidatingObjectMapQueue(zenpacklib.TestCase):
         self.clock += 4000
         objmaps = self.queue.drain()
         self.assertEquals(len(objmaps), 0, msg="Queue should still be empty")
+
+    def test_interrelated_toOne(self):
+        objmap1 = self.new_objmap("c1")
+        objmap1._add = True
+        objmap2 = self.new_objmap("c2")
+        objmap2._add = True
+        objmap2.set_foo = "c4"
+        objmap3 = self.new_objmap("c3")
+        objmap3._add = True
+        objmap3.set_foo = "c1"
+
+        self.queue.append(objmap3)
+        self.queue.append(objmap2)
+        self.queue.append(objmap1)
+
+        objmaps = self.queue.drain()
+        self.assertEquals(len(objmaps), 0, msg="Should hold inserts for 40 seconds")
+
+        # time passes..
+        self.clock += 60
+
+        objmaps = self.queue.drain()
+        self.assertEquals(len(objmaps), 4, msg="Should have released all 3+1")
+
+        # are all dependencies met?
+        existing = set(['c4'])
+        for objmap in objmaps:
+            existing.add(objmap.id)
+            self.assertTrue(
+                existing.issuperset(self.depends_on_ids(objmap)),
+                msg="All IDs referred to by %s are known (known=%s)" % (objmap, existing))
+
+        # Try it again, flipped around.
+        objmap1 = self.new_objmap("c1")
+        objmap1._add = True
+        objmap2 = self.new_objmap("c2")
+        objmap2._add = True
+        objmap2.set_foo = "c4"
+        objmap3 = self.new_objmap("c3")
+        objmap3._add = True
+        objmap3.set_foo = "c1"
+
+        self.queue.reset()
+        self.queue.append(objmap1)
+        self.queue.append(objmap2)
+        self.queue.append(objmap3)
+        self.clock += 60
+        objmaps = self.queue.drain()
+        self.assertEquals(len(objmaps), 4, msg="Should have released all 3+1")
+
+        existing = set(['c4'])
+        for objmap in objmaps:
+            existing.add(objmap.id)
+            self.assertTrue(
+                existing.issuperset(self.depends_on_ids(objmap)),
+                msg="All IDs referred to by %s are known (known=%s)" % (objmap, existing))
+
+    def test_interrelated_toMany(self):
+        objmap1 = self.new_objmap("c1")
+        objmap1._add = True
+        objmap2 = self.new_objmap("c2")
+        objmap2._add = True
+        objmap2.set_foos = ["c4", "c3"]
+        objmap3 = self.new_objmap("c3")
+        objmap3._add = True
+        objmap3.set_foos = ["c1"]
+
+        self.queue.append(objmap3)
+        self.queue.append(objmap2)
+        self.queue.append(objmap1)
+
+        objmaps = self.queue.drain()
+        self.assertEquals(len(objmaps), 0, msg="Should hold inserts for 40 seconds")
+
+        # time passes..
+        self.clock += 60
+
+        objmaps = self.queue.drain()
+        self.assertEquals(len(objmaps), 5, msg="Should have released all 3+2")
+
+        # are all dependencies met?
+        existing = set(['c4'])
+        for objmap in objmaps:
+            existing.add(objmap.id)
+            self.assertTrue(
+                existing.issuperset(self.depends_on_ids(objmap)),
+                msg="All IDs referred to by %s are known (known=%s)" % (objmap, existing))
 
 
 def test_suite():

@@ -116,7 +116,7 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
 
         data = yield super(EventsAMQPDataSourcePlugin, self).collect(config)
         device_id = config.configId
-        ds0 = config.daatasources[0]
+        ds0 = config.datasources[0]
 
         for entry in cache[device_id].get():
             c_event = entry.value
