@@ -27,6 +27,7 @@ from Products.ZenUtils.Utils import monkeypatch
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
 
 from ZenPacks.zenoss.OpenStackInfrastructure.tests.utils import create_model_data
+from ZenPacks.zenoss.OpenStackInfrastructure.datamaps import ConsolidatingObjectMapQueue
 
 from Products.ZenUtils.Utils import unused
 unused(Globals)
@@ -56,6 +57,13 @@ class TestEventMappings(zenpacklib.TestCase):
         self._loadEventsData()
 
         self.adm = ApplyDataMap()
+
+        self.queue = ConsolidatingObjectMapQueue()
+        self.clock = 1000.0
+
+        def _now():
+            return self.clock
+        self.queue.now = _now
 
     def _loadEventsData(self):
         if self._eventsloaded:
@@ -702,6 +710,81 @@ class TestEventMappings(zenpacklib.TestCase):
         self.assertIsNotNone(volsnapshot)
         volsnapshot = self._delete_volsnapshot_end('test')
         self.assertIsNone(volsnapshot)
+
+    def test_instance_shortlived(self):
+        self.assertTrue(self._eventsloaded)
+        datamaps = []
+
+        self.queue.append(map_event(self._eventData['scheduler.run_instance.end']))
+        datamaps.extend(self.queue.drain())
+
+        self.queue.append(map_event(self._eventData['compute.instance.create.start']))
+        datamaps.extend(self.queue.drain())
+
+        self.clock += 1.0
+        self.queue.append(map_event(self._eventData['compute.instance.create.end']))
+        datamaps.extend(self.queue.drain())
+
+        self.clock += 1.0
+        datamaps.extend(self.queue.drain())
+
+        self.assertEquals(len(datamaps), 0, "No instances were created early")
+
+        self.clock += 5.0
+        self.queue.append(map_event(self._eventData['compute.instance.delete.start']))
+        datamaps.extend(self.queue.drain())
+        self.queue.append(map_event(self._eventData['compute.instance.shutdown.start']))
+        datamaps.extend(self.queue.drain())
+
+        self.clock += 1.0
+        self.queue.append(map_event(self._eventData['compute.instance.shutdown.end']))
+        datamaps.extend(self.queue.drain())
+        self.queue.append(map_event(self._eventData['compute.instance.delete.end']))
+        datamaps.extend(self.queue.drain())
+
+        # indeed, there should be no objmaps at all.
+        self.assertEquals(len(datamaps), 0, "No model changes were made")
+
+    def test_instance_longerlived(self):
+        self.assertTrue(self._eventsloaded)
+        datamaps = []
+
+        self.queue.append(map_event(self._eventData['scheduler.run_instance.end']))
+        datamaps.extend(self.queue.drain())
+
+        self.queue.append(map_event(self._eventData['compute.instance.create.start']))
+        datamaps.extend(self.queue.drain())
+
+        self.clock += 1.0
+        self.queue.append(map_event(self._eventData['compute.instance.create.end']))
+        datamaps.extend(self.queue.drain())
+
+        instance5 = self.getObjByPath('components/server-instance5')
+        self.assertIsNone(instance5, msg="Incremental model deferred creation of instance 'instance5'")
+
+        self.assertEquals(len(datamaps), 0, "No instances were created early")
+
+        # allow time for the events to be released
+        self.clock += 120.0
+        datamaps.extend(self.queue.drain())
+
+        self.assertEquals(len(datamaps), 1, "Instance created after sufficient time has passed")
+
+        self.clock += 5.0
+        self.queue.append(map_event(self._eventData['compute.instance.delete.start']))
+        datamaps.extend(self.queue.drain())
+        self.queue.append(map_event(self._eventData['compute.instance.shutdown.start']))
+        datamaps.extend(self.queue.drain())
+
+        self.clock += 1.0
+        self.queue.append(map_event(self._eventData['compute.instance.shutdown.end']))
+        datamaps.extend(self.queue.drain())
+        self.queue.append(map_event(self._eventData['compute.instance.delete.end']))
+        datamaps.extend(self.queue.drain())
+
+        self.assertTrue(
+            (len(datamaps) == 2 and datamaps[1]._remove),
+            msg="Instance deleted as expected")
 
 
 @monkeypatch('Products.DataCollector.ApplyDataMap.ApplyDataMap')

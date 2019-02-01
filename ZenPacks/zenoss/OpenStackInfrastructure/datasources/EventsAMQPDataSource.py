@@ -29,11 +29,14 @@ from ZenPacks.zenoss.OpenStackInfrastructure.datasources.AMQPDataSource import (
 
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import ExpiringFIFO, amqp_timestamp_to_int
 from ZenPacks.zenoss.OpenStackInfrastructure.events import event_is_mapped, map_event
+from ZenPacks.zenoss.OpenStackInfrastructure.datamaps import ConsolidatingObjectMapQueue
 
 # How long to cache data in memory before discarding it (data that
 # is coming from ceilometer, but not consumed by any monitoring templates).
 # Should be at least the cycle interval.
 CACHE_EXPIRE_TIME = 15 * 60
+
+MAP_QUEUE = defaultdict(ConsolidatingObjectMapQueue)
 
 
 class EventsAMQPDataSource(AMQPDataSource):
@@ -103,6 +106,9 @@ cache = defaultdict(CeilometerEventCache)
 class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
     proxy_attributes = (
         'zOpenStackProcessEventTypes',
+        'zOpenStackIncrementalShortLivedSeconds',
+        'zOpenStackIncrementalBlackListSeconds',
+        'zOpenStackIncrementalConsolidateSeconds',
     )
     queue_name = "$OpenStackInboundEvent"
     failure_eventClassKey = 'EventsFailure'
@@ -114,6 +120,11 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
         data = yield super(EventsAMQPDataSourcePlugin, self).collect(config)
         device_id = config.configId
         ds0 = config.datasources[0]
+
+        # Update queue settings
+        MAP_QUEUE[device_id].shortlived_seconds = ds0.zOpenStackIncrementalShortLivedSeconds
+        MAP_QUEUE[device_id].delete_blacklist_seconds = ds0.zOpenStackIncrementalBlackListSeconds
+        MAP_QUEUE[device_id].update_consolidate_seconds = ds0.zOpenStackIncrementalConsolidateSeconds
 
         for entry in cache[device_id].get():
             c_event = entry.value
@@ -166,18 +177,22 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
                     objmap = map_event(evt)
                     if objmap:
                         log.debug("Mapped %d event to %s", event_type, objmap)
-                        data['maps'].append(objmap)
+                        MAP_QUEUE[config.id].append(objmap)
                 except Exception:
                     log.exception("Unable to process event: %s", evt)
 
-        if len(data['maps']) + len(data['events']):
-            data['events'].append({
-                'device': config.id,
-                'summary': 'OpenStack Ceilometer AMQP: successful collection',
-                'severity': ZenEventClasses.Clear,
-                'eventKey': 'openstackCeilometerAMQPCollection',
-                'eventClassKey': 'EventsSuccess',
-            })
+        # Apply any maps that are ready to be applied.
+        data['maps'].extend(MAP_QUEUE[config.id].drain())
+
+        data['events'].append({
+            'device': config.id,
+            'summary': 'OpenStack Ceilometer AMQP: successful collection',
+            'severity': ZenEventClasses.Clear,
+            'eventKey': 'openstackCeilometerAMQPCollection',
+            'eventClassKey': 'EventsSuccess',
+        })
+
+        log.debug("Sending datamaps for %s: %s", config.id, data['maps'])
 
         defer.returnValue(data)
 

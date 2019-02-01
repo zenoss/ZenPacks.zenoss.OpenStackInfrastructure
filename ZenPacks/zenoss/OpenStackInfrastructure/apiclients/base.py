@@ -39,25 +39,10 @@ class BaseClient(object):
 
     @inlineCallbacks
     def get_json(self, url_path, interface="public", **kwargs):
-        base_url = yield self.session_manager.get_service_url(self.keystone_service_type, interface)
-        full_url = base_url + url_path
-
-        body, headers = yield self.session_manager.authenticated_GET_request(full_url, params=kwargs)
-        # will raise an exception if there was an error, so we can assume
-        # that the result is normal json.
-
-        try:
-            data = json.loads(body)
-        except ValueError:
-            raise APIClientError("Unable to parse JSON response from %s: %s" % (full_url, body))
-
-        returnValue(data)
-
-    @inlineCallbacks
-    def get_json_collection(self, url_path, interface="public", **kwargs):
         """
-        Collections are represented as one or more pages, linked by next/previous
-        urls.  We just spin through all the nexts, building up the result, and
+        Any list operation can potentially return a collection, where pages
+        of results are linked by next/previous links.  If found, we will
+        follow the 'next' links, building up a merged result, and
         then return the whole thing.
         """
 
@@ -75,13 +60,23 @@ class BaseClient(object):
             except ValueError:
                 raise APIClientError("Unable to parse JSON response from %s: %s" % (full_url, body))
 
+            full_url = None
             for key in data.keys():
                 if key != 'links':
-                    if key not in 'result':
-                        result[key] = []
-                    result[key].extend(data[key])
+                    if isinstance(data[key], list):
+                        result.setdefault(key, [])
+                        result[key].extend(data[key])
+                    elif key in result:
+                        log.error("While parsing response to %s, ignoring overwritten key in subsequent page: %s (%s -> %s)",
+                            full_url, key, result[key], data[key])
+                    else:
+                        result[key] = data[key]
 
-            full_url = data['links']['next']
+                if '_links' in key:
+                    for link in data[key]:
+                        if link['rel'] == 'next':
+                            full_url = str(link['href'])
+
             if full_url is None:
                 break
 
@@ -97,12 +92,3 @@ def api(url_path):
 
     return api_caller
 
-
-def api_collection(url_path, **kwargs):
-
-    @inlineCallbacks
-    def api_caller(self):
-        result = yield self.get_json_collection(url_path, **kwargs)
-        returnValue(result)
-
-    return api_caller

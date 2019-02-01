@@ -47,6 +47,9 @@ class OpenStackConfig(CollectorConfigService):
         proxy.datasources = []
         proxy.thresholds = []
         proxy.zOpenStackProcessEventTypes = device.zOpenStackProcessEventTypes
+        proxy.zOpenStackIncrementalShortLivedSeconds = device.zOpenStackIncrementalShortLivedSeconds
+        proxy.zOpenStackIncrementalBlackListSeconds = device.zOpenStackIncrementalBlackListSeconds
+        proxy.zOpenStackIncrementalConsolidateSeconds = device.zOpenStackIncrementalConsolidateSeconds
 
         for component in device.getMonitoredComponents():
             proxy.datasources += list(
