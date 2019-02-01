@@ -134,10 +134,10 @@ var addOpenStack = new Zenoss.Action({
                     layout: 'hbox',
                     items: [{
                         xtype: 'textfield',
-                        name: 'domain_id',
-                        fieldLabel: _t('Domain Id'),
+                        name: 'user_domain_name',
+                        fieldLabel: _t('User Domain Name'),
                         labelWidth: 120,
-                        id: "openstack_domain_id",
+                        id: "openstack_user_domain_name",
                         width: 350,
                         allowBlank: false,
                         listeners: {
@@ -147,7 +147,28 @@ var addOpenStack = new Zenoss.Action({
                     },{
                         xtype: 'label',
                         style: 'font-style: italic',
-                        text: '(OS_PROJECT/USER_DOMAIN_NAME)',
+                        text: '(OS_USER_DOMAIN_NAME)',
+                        margin: '0 0 0 10'
+                    }]
+                }, {
+                    xtype: 'container',
+                    layout: 'hbox',
+                    items: [{
+                        xtype: 'textfield',
+                        name: 'project_domain_name',
+                        fieldLabel: _t('Project Domain Name'),
+                        labelWidth: 120,
+                        id: "openstack_project_domain_name",
+                        width: 350,
+                        allowBlank: false,
+                        listeners: {
+                            blur: this.updateRegions,
+                            scope: this
+                        }
+                    },{
+                        xtype: 'label',
+                        style: 'font-style: italic',
+                        text: '(OS_PROJECT_DOMAIN_NAME)',
                         margin: '0 0 0 10'
                     }]
                 },{
@@ -243,14 +264,15 @@ var addOpenStack = new Zenoss.Action({
         combo = Ext.getCmp('region_name');
         store = combo.getStore();
 
-        if (formvalues.username && formvalues.api_key && formvalues.project_id && formvalues.domain_id && formvalues.auth_url) {
+        if (formvalues.username && formvalues.api_key && formvalues.project_id && formvalues.user_domain_name && formvalues.project_domain_name && formvalues.auth_url) {
             store.load({
                params: {
                    username: formvalues.username,
                    api_key: formvalues.api_key,
                    project_id: formvalues.project_id,
                    auth_url: formvalues.auth_url,
-                   domain_id: formvalues.domain_id
+                   user_domain_name: formvalues.user_domain_name,
+                   project_domain_name: formvalues.project_domain_name
                },
                callback: function(records, operation, success) {
                     combo.select(store.getAt(0));

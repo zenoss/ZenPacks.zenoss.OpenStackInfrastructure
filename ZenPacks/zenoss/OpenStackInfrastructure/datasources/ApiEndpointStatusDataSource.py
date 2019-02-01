@@ -45,8 +45,8 @@ class APIClient(object):
 
     session_manager = None
 
-    def __init__(self, username, password, auth_url, project_id, domain_id, region_name):
-        self.session_manager = SessionManager(username, password, auth_url, project_id, domain_id, region_name)
+    def __init__(self, username, password, auth_url, project_id, user_domain_name, project_domain_name, region_name):
+        self.session_manager = SessionManager(username, password, auth_url, project_id, user_domain_name, project_domain_name, region_name)
 
     @inlineCallbacks
     def authenticated_get(self, url):
@@ -209,7 +209,8 @@ class ApiEndpointStatusDataSourcePlugin(PythonDataSourcePlugin):
             'password': context.zCommandPassword,
             'project_id': context.zOpenStackProjectId,
             'auth_url': context.zOpenStackAuthUrl,
-            'domain_id': content.zOpenStackDomainId,
+            'user_domain_name': content.zOpenStackUserDomainName,
+            'project_domain_name': content.zOpenStackProjectDomainName,
             'region_name': context.zOpenStackRegionName,
             'auth_required': datasource.auth_required,
             'ok_result': datasource.ok_result
@@ -245,7 +246,8 @@ class ApiEndpointStatusDataSourcePlugin(PythonDataSourcePlugin):
             ds0.params['password'],
             ds0.params['auth_url'],
             ds0.params['project_id'],
-            ds0.params['domain_id'],
+            ds0.params['user_domain_name'],
+            ds0.params['project_domain_name'],
             ds0.params['region_name']
         )
 

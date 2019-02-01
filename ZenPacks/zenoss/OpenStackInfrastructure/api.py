@@ -53,18 +53,18 @@ def _runcommand(cmd):
 
 
 class IOpenStackInfrastructureFacade(IFacade):
-    def addOpenStack(self, device_name, username, api_key, project_id, domain_id, auth_url,
+    def addOpenStack(self, device_name, username, api_key, project_id, user_domain_name, project_domain_name, auth_url,
                      region_name=None, collector='localhost'):
         """Add OpenStack Endpoint."""
 
-    def getRegions(self, username, api_key, project_id, domain_id, auth_url):
+    def getRegions(self, username, api_key, project_id, user_domain_name, project_domain_name, auth_url):
         """Get a list of available regions, given a keystone endpoint and credentials."""
 
 
 class OpenStackInfrastructureFacade(ZuulFacade):
     implements(IOpenStackInfrastructureFacade)
 
-    def addOpenStack(self, device_name, username, api_key, project_id, domain_id, auth_url,
+    def addOpenStack(self, device_name, username, api_key, project_id, user_domain_name, project_domain_name, auth_url,
                      region_name, collector='localhost'):
         """Add a new OpenStack endpoint to the system."""
         parsed_url = urlparse(auth_url.strip())
@@ -82,7 +82,8 @@ class OpenStackInfrastructureFacade(ZuulFacade):
             'zCommandUsername': username,
             'zCommandPassword': api_key,
             'zOpenStackProjectId': project_id,
-            'zOpenStackDomainId' : domain_id,
+            'zOpenStackUserDomainName' : user_domain_name,
+            'zOpenStackProjectDomainName' : project_domain_name,
             'zOpenStackAuthUrl': auth_url.strip(),
             'zOpenStackRegionName': region_name,
             }
@@ -120,7 +121,8 @@ class OpenStackInfrastructureFacade(ZuulFacade):
         cmd.append("--username=%s" % username)
         cmd.append("--api_key=%s" % api_key)
         cmd.append("--project_id=%s" % project_id)
-        cmd.append("--domain_id=%s" % domain_id)
+        cmd.append("--user_domain_name=%s" % user_domain_name)
+        cmd.append("--project_domain_name=%s" % project_domain_name)
         cmd.append("--auth_url=%s" % auth_url)
 
         return _runcommand(cmd)
@@ -130,12 +132,12 @@ class OpenStackInfrastructureRouter(DirectRouter):
     def _getFacade(self):
         return Zuul.getFacade('openstackinfrastructure', self.context)
 
-    def addOpenStack(self, device_name, username, api_key, project_id, domain_id, auth_url,
+    def addOpenStack(self, device_name, username, api_key, project_id, user_domain_name, project_domain_name, auth_url,
                      region_name, collector='localhost'):
 
         facade = self._getFacade()
         success, message = facade.addOpenStack(
-            device_name, username, api_key, project_id, domain_id, auth_url,
+            device_name, username, api_key, project_id, user_domain_name, project_domain_name, auth_url,
             region_name=region_name, collector=collector)
 
         if success:
@@ -143,8 +145,8 @@ class OpenStackInfrastructureRouter(DirectRouter):
         else:
             return DirectResponse.fail(message)
 
-    def getRegions(self, username, api_key, project_id, domain_id, auth_url):
+    def getRegions(self, username, api_key, project_id, user_domain_name, project_domain_name, auth_url):
         facade = self._getFacade()
 
-        data = facade.getRegions(username, api_key, project_id, domain_id, auth_url)
+        data = facade.getRegions(username, api_key, project_id, user_domain_name, project_domain_name, auth_url)
         return DirectResponse(success=True, data=data)

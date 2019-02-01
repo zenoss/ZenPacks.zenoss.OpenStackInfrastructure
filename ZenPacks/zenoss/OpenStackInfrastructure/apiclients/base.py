@@ -26,11 +26,11 @@ class BaseClient(object):
     session_manager = None
     keystone_service_type = None  # override in subclasses
 
-    def __init__(self, username=None, password=None, auth_url=None, project_id=None, domain_id=None, region_name=None, session_manager=None):
+    def __init__(self, username=None, password=None, auth_url=None, project_id=None, user_domain_name=None, project_domain_name=None, region_name=None, session_manager=None):
         if session_manager:
             self.session_manager = session_manager
         else:
-            self.session_manager = SessionManager(username, password, auth_url, project_id, domain_id, region_name)
+            self.session_manager = SessionManager(username, password, auth_url, project_id, user_domain_name, project_domain_name,  region_name)
 
     @inlineCallbacks
     def get_url(self, interface="public"):
