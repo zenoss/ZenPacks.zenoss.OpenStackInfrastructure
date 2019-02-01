@@ -65,7 +65,7 @@ class KeystoneClient(BaseClient):
             returnValue(result)
 
         elif api_version.startswith('v3'):
-            result = yield self.get_json_collection('/projects')
+            result = yield self.get_json('/projects')
             # Convert into the familiar v2 format expected by our modeler.
             v2_result = {'tenants': [], 'tenants_links': []}
             for project in result['projects']:
