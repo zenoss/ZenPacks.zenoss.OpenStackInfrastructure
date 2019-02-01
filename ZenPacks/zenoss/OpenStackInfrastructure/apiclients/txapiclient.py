@@ -141,7 +141,7 @@ def main():
     # sm = SessionManager('admin', '0ed3ab06fb234024', 'http://192.168.2.12:5000/v2.0/', 'admin', 'RegionOne')
     # sm = SessionManager('admin', '0ed3ab06fb234024', 'http://192.168.2.12:5000/v3/', 'admin', 'RegionOne')
     # sm = SessionManager('admin', '0ed3ab06fb234024', 'http://192.168.2.12:5000/', 'admin', 'RegionOne')
-    sm = SessionManager('admin', '354f6fc8937c47f7', 'http://192.168.2.15:5000/v3/', 'admin', 'RegionOne')
+    sm = SessionManager('admin', '354f6fc8937c47f7', 'http://192.168.2.15:5000/v3/', 'admin', 'default', 'default', 'RegionOne')
     version = yield sm.get_api_version()
     print "Identity API %s" % version
 

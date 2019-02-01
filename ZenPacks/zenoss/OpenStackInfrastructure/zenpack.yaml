@@ -36,9 +36,9 @@ zProperties:
   zOpenStackProcessEventTypes:
     type: lines
   zOpenStackUserDomainName:
-    default: ''
+    default: 'default'
   zOpenStackProjectDomainName:
-    default: ''
+    default: 'default'
 
 class_relationships:
 # Containing Relations

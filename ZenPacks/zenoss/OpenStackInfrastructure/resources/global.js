@@ -17,7 +17,7 @@ var addOpenStack = new Zenoss.Action({
         });
 
         var win = new Zenoss.dialog.CloseDialog({
-            width: 640,
+            width: 650,
             title: _t('Add OpenStack Endpoint (Infrastructure)'),
             items: [{
                 xtype: 'form',
@@ -34,7 +34,7 @@ var addOpenStack = new Zenoss.Action({
                         xtype: 'textfield',
                         name: 'device_name',
                         fieldLabel: _t('Device to Create'),
-                        labelWidth: 120,
+                        labelWidth: 130,
                         id: "openstack_device_name",
                         width: 350,
                         allowBlank: false,
@@ -43,7 +43,7 @@ var addOpenStack = new Zenoss.Action({
                         xtype: 'label',
                         style: 'font-style: italic',
                         text: '(Do not use an actual hostname)',
-                        margin: '0 0 0 10'
+                        margin: '15 0 0 10'
                     }]
                 }, {
                     xtype: 'container',
@@ -52,7 +52,7 @@ var addOpenStack = new Zenoss.Action({
                         xtype: 'textfield',
                         name: 'auth_url',
                         fieldLabel: _t('Auth URL'),
-                        labelWidth: 120,
+                        labelWidth: 130,
                         id: "openstack_auth_url",
                         width: 350,
                         allowBlank: false,
@@ -64,7 +64,7 @@ var addOpenStack = new Zenoss.Action({
                         xtype: 'label',
                         style: 'font-style: italic',
                         text: '(OS_AUTH_URL)',
-                        margin: '0 0 0 10'
+                        margin: '15 0 0 10'
                     }]
                 }, {
                     xtype: 'container',
@@ -73,7 +73,7 @@ var addOpenStack = new Zenoss.Action({
                         xtype: 'textfield',
                         name: 'username',
                         fieldLabel: _t('Username'),
-                        labelWidth: 120,
+                        labelWidth: 130,
                         id: "openstack_username",
                         width: 350,
                         allowBlank: false,
@@ -85,7 +85,7 @@ var addOpenStack = new Zenoss.Action({
                         xtype: 'label',
                         style: 'font-style: italic',
                         text: '(OS_USERNAME)',
-                        margin: '0 0 0 10'
+                        margin: '15 0 0 10'
                     }]
                 }, {
                     xtype: 'container',
@@ -94,7 +94,7 @@ var addOpenStack = new Zenoss.Action({
                         xtype: 'password',
                         name: 'api_key',
                         fieldLabel: _t('Password / API Key'),
-                        labelWidth: 120,
+                        labelWidth: 130,
                         id: "openstack_api_key",
                         width: 350,
                         allowBlank: false,
@@ -106,7 +106,7 @@ var addOpenStack = new Zenoss.Action({
                         xtype: 'label',
                         style: 'font-style: italic',
                         text: '(OS_PASSWORD)',
-                        margin: '0 0 0 10'
+                        margin: '15 0 0 10'
                     }]
                 }, {
                     xtype: 'container',
@@ -115,7 +115,7 @@ var addOpenStack = new Zenoss.Action({
                         xtype: 'textfield',
                         name: 'project_id',
                         fieldLabel: _t('Project/Tenant Name'),
-                        labelWidth: 120,
+                        labelWidth: 130,
                         id: "openstack_project_id",
                         width: 350,
                         allowBlank: false,
@@ -127,7 +127,7 @@ var addOpenStack = new Zenoss.Action({
                         xtype: 'label',
                         style: 'font-style: italic',
                         text: '(NOVA_PROJECT_ID or OS_TENANT_NAME)',
-                        margin: '0 0 0 10'
+                        margin: '15 0 0 10'
                     }]
                 }, {
                     xtype: 'container',
@@ -136,7 +136,7 @@ var addOpenStack = new Zenoss.Action({
                         xtype: 'textfield',
                         name: 'user_domain_name',
                         fieldLabel: _t('User Domain Name'),
-                        labelWidth: 120,
+                        labelWidth: 130,
                         id: "openstack_user_domain_name",
                         width: 350,
                         allowBlank: false,
@@ -148,7 +148,7 @@ var addOpenStack = new Zenoss.Action({
                         xtype: 'label',
                         style: 'font-style: italic',
                         text: '(OS_USER_DOMAIN_NAME)',
-                        margin: '0 0 0 10'
+                        margin: '15 0 0 10'
                     }]
                 }, {
                     xtype: 'container',
@@ -157,7 +157,7 @@ var addOpenStack = new Zenoss.Action({
                         xtype: 'textfield',
                         name: 'project_domain_name',
                         fieldLabel: _t('Project Domain Name'),
-                        labelWidth: 120,
+                        labelWidth: 130,
                         id: "openstack_project_domain_name",
                         width: 350,
                         allowBlank: false,
@@ -169,7 +169,7 @@ var addOpenStack = new Zenoss.Action({
                         xtype: 'label',
                         style: 'font-style: italic',
                         text: '(OS_PROJECT_DOMAIN_NAME)',
-                        margin: '0 0 0 10'
+                        margin: '15 0 0 10'
                     }]
                 },{
                     xtype: 'container',
@@ -179,7 +179,7 @@ var addOpenStack = new Zenoss.Action({
                         width: 350,
                         name: 'region_name',
                         fieldLabel: _t('Region Name'),
-                        labelWidth: 120,
+                        labelWidth: 130,
                         id: 'region_name',
                         triggerAction: 'all',
                         queryMode: 'local',
@@ -195,14 +195,14 @@ var addOpenStack = new Zenoss.Action({
                         xtype: 'label',
                         style: 'font-style: italic',
                         text: '(OS_REGION_NAME)',
-                        margin: '0 0 0 10'
+                        margin: '15 0 0 10'
                     }]
                 }, {
                     xtype: 'combo',
                     width: 350,
                     name: 'collector',
                     fieldLabel: _t('Collector'),
-                        labelWidth: 120,
+                        labelWidth: 130,
                     id: 'openstack_collector',
                     mode: 'local',
                     store: new Ext.data.ArrayStore({

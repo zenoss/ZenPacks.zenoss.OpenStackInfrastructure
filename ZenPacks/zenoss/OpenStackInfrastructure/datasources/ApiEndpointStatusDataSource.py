@@ -298,7 +298,7 @@ class ApiEndpointStatusDataSourcePlugin(PythonDataSourcePlugin):
 
 @inlineCallbacks
 def main():
-    client = APIClient('admin', 'adminpassword', 'http://192.168.2.15:5000/v2.0', 'admin', 'RegionOne')
+    client = APIClient('admin', 'adminpassword', 'http://192.168.2.15:5000/v2.0', 'admin', 'default', 'default', 'RegionOne')
 
     @inlineCallbacks
     def _check_unauthenticated(name, url):
