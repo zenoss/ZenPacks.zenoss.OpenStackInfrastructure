@@ -300,9 +300,43 @@ class Health(Resource):
                         body += "  <td>%f</td>" % metric.mean_rate
                         body += "</tr>"
                     else:
-                        log.error("Unhandled metric type: %s", metric)
+                        log.debug("Ignorning unhandled metric type: %s", metric)
                 body += "</body></html>"
                 return body
+
+            if len(request.postpath) == 1 and request.postpath[0] == "queue":
+                body = "<html><body>"
+                body = "The following devices have received model updates:<ul>"
+                for device_id in MAP_QUEUE:
+                    body += '<li><a href="/health/queue/%s">%s</a></li>' % (device_id, device_id)
+                body += "</ul></body></html>"
+                return body
+
+            if len(request.postpath) == 2 and request.postpath[0] == "queue":
+                device_id = request.postpath[1]
+
+                if device_id not in MAP_QUEUE:
+                    return NoResource().render(request)
+
+                body = "<html><body>"
+
+                body += "<b>Currently-Held Object Maps</b><p>"
+                for component_id, objmap in MAP_QUEUE[device_id].held_objmaps.iteritems():
+                    body += "<hr>"
+                    body += component_id + ":<br>"
+                    body += "<pre>" + cgi.escape(pformat(objmap[1])) + "</pre>"
+
+                body += "<b>Most Recently Released Object Maps</b>"
+                for timestamp, objmap in reversed(MAP_QUEUE[device_id].released_objmaps):
+                    body += "<hr>%s (%s ago)" % (
+                        timestamp.isoformat(),
+                        (datetime.datetime.now() - timestamp)
+                    )
+                    body += "<pre>" + cgi.escape(pformat(objmap)) + "</pre>"
+
+                body += "</body></html>"
+                return body
+
 
             if len(request.postpath) < 3 or request.postpath[0] != "logs":
                 return NoResource().render(request)
@@ -311,7 +345,7 @@ class Health(Resource):
             uri = "/".join(request.postpath[2:])
             body = "<html><body>"
             records = self.site.request_buffer.get_requests((ip, '/' + uri))
-            body += "<b>Last %d requests from /%s to %s</b> (of %d max)<p>" % (
+            body += "<b>Most recent %d requests from /%s to %s</b> (of %d max)<p>" % (
                 len(records),
                 ip,
                 uri,
@@ -444,6 +478,7 @@ class Health(Resource):
     </table>
 
     <p><a href="/health/metrics">All Metrics</a></p>
+    <p><a href="/health/queue">Model Update Queue</a></p>
   </body>
 </html>
         """
