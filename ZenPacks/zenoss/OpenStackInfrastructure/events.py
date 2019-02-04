@@ -187,10 +187,9 @@ def _apply_instance_traits(evt, objmap):
             if trait_field in evt:
                 value = evt.get(trait_field)
 
-                # Store server status in uppercase, to match how the nova-api
-                # shows it.
+                # Store server status in lowercase
                 if prop_name == 'serverStatus':
-                    value = value.upper()
+                    value = value.lower()
 
                 setattr(objmap, prop_name, value)
 
@@ -214,6 +213,34 @@ def _apply_instance_traits(evt, objmap):
                 setattr(objmap, 'publicIps', list(public_ips))
         except Exception, e:
             LOG.debug("Unable to parse trait_fixed_ips=%s (%s)" % (evt['trait_fixed_ips'], e))
+
+    if 'trait_state' in evt:
+        # This mapping from state to vmState is based upon
+        # https://developer.rackspace.com/docs/cloud-servers/v2/extensions/ext-extended-status/#server-statuses
+        # If the state can't be determined unambiguously, it is not set.
+
+        vmState = {
+            'ACTIVE': 'active',
+            'HARD_REBOOT': 'active',
+            'MIGRATING': 'active',
+            'PASSWORD': 'active',
+            'REBOOT': 'active',
+            'REBUILD': 'active',
+            'RESIZE': 'active',
+            'BUILD': 'building',
+            'DELETED': 'deleted',
+            'ERROR': 'error',
+            'PAUSED': 'paused',
+            'RESCUE': 'rescued',
+            'VERIFY_RESIZE': 'resized',
+            'REVERT_RESIZE': 'resized',
+            'DELETED': 'soft_deleted',
+            'SHUTOFF': 'stopped',
+            'SUSPENDED': 'suspended'
+        }.get(evt['trait_state'], None)
+
+        if vmState:
+            objmap.vmState = vmState
 
 
 def _apply_cinder_traits(evt, objmap):
@@ -349,6 +376,8 @@ def instance_powered_on(evt):
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
+    objmap.powerState = 'running'
+
     return objmap
 
 
@@ -359,6 +388,8 @@ def instance_powered_off(evt):
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
+    objmap.powerState = 'shutoff'
+
     return objmap
 
 
