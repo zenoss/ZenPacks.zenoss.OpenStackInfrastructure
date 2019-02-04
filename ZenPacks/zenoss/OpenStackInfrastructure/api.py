@@ -114,7 +114,7 @@ class OpenStackInfrastructureFacade(ZuulFacade):
 
         return True, 'Device addition scheduled'
 
-    def getRegions(self, username, api_key, project_id, auth_url):
+    def getRegions(self, username, api_key, project_id, user_domain_name, project_domain_name, auth_url):
         """Get a list of available regions, given a keystone endpoint and credentials."""
 
         cmd = [_helper, "getRegions"]
