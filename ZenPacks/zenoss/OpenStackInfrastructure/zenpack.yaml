@@ -131,9 +131,11 @@ zProperties:
       into a single zenoss model update.
   zOpenStackUserDomainName:
     default: 'default'
+    label: OpenStack User Domain Name
   zOpenStackProjectDomainName:
     default: 'default'
-    
+    label: OpenStack Project Domain Name    
+
 class_relationships:
 # Containing Relations
 - Endpoint(components) 1:MC OpenstackComponent
