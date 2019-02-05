@@ -47,8 +47,9 @@ def _runcommand(cmd):
             message = json.loads(stdout)['error']
         except Exception:
             message = stderr
-            
-        cmd[3] = '--api_key=***'
+
+        cmd = ['--api_key=***' if x.startswith('--api_key=') else x for x in cmd]
+
         log.exception(subprocess.CalledProcessError(p.returncode, cmd=cmd, output=message))
         log.error('Keystone Error Occured: ' + message)
 
