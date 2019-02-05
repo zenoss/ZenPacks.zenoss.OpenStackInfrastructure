@@ -368,9 +368,9 @@ device_classes:
               poolTotalCount:
                 aliases: {pool_total__count: null}
               poolThinProvisioningSupportCount:
-                aliases: {pool_thin_provisioning_support__count: null}
+                aliases: {pool_thin_prov_support__count: null}
               poolThickProvisioningSupportCount:
-                aliases: {pool_thick_provisioning_support__count: null}
+                aliases: {pool_thick_prov_support__count: null}
               poolQoSSupportCount:
                 aliases: {pool_qos_support__count: null}
             parser: ZenPacks.zenoss.OpenStackInfrastructure.parsers.endpoint
