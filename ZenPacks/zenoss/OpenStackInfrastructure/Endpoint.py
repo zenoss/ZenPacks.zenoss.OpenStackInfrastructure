@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2013-2014, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2013-2019, all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -20,12 +20,11 @@ from zenoss.protocols.queueschema import substitute_replacements
 from zenoss.protocols.interfaces import IAMQPConnectionInfo, IQueueSchema
 from zenoss.protocols.amqp import Publisher as BlockingPublisher
 from zenoss.protocols.protobufs.zep_pb2 import (
-        STATUS_NEW, STATUS_ACKNOWLEDGED,
-        SEVERITY_CRITICAL,
-        )
+    STATUS_NEW, STATUS_ACKNOWLEDGED, SEVERITY_CRITICAL)
 from amqplib.client_0_8.exceptions import AMQPChannelException
 from OFS.interfaces import IObjectWillBeAddedEvent
 from BTrees.OOBTree import OOBTree
+from ZenPacks.zenoss.OpenStackInfrastructure.utils import addVirtualRoot
 
 
 class Endpoint(schema.Endpoint):
@@ -155,7 +154,7 @@ class Endpoint(schema.Endpoint):
         except Exception:
             return None
 
-        return int(result['total'])# Clean up any AMQP queues we may have created for this device.
+        return int(result['total'])
 
     def public_keystone_apiendpoint(self):
         # Return the public keystone API endpoint (from zOpenStackAuthUrl)
@@ -164,8 +163,39 @@ class Endpoint(schema.Endpoint):
         except AttributeError:
             return None
 
+    def zenopenstack_url(self, https=False):
+        try:
+            from Products.ZenUtils.controlplane.application import getConnectionSettings
+            from Products.ZenUtils.controlplane import ControlPlaneClient
+        except ImportError:
+            return
+
+        if https:
+            protocol = "https"
+            endpoint_name = "proxy-zenopenstack_https"
+        else:
+            protocol = "http"
+            endpoint_name = "proxy-zenopenstack_http"
+
+        collector = self.perfServer().id
+        client = ControlPlaneClient(**getConnectionSettings())
+        for svc_id in [x.id for x in client.queryServices() if x.name == 'proxy-zenopenstack']:
+            svc = client.getService(svc_id)
+            for endpoint in filter(lambda s: s['Name'] == endpoint_name, svc.getRawData()['Endpoints']):
+                try:
+                    if client.getService(svc.parentId).name == collector:
+                        return "{protocol}://{ip}:{port}".format(
+                            protocol=protocol,
+                            ip=endpoint['AddressAssignment']['IPAddr'],
+                            port=endpoint['AddressAssignment']['Port'])
+                except Exception:
+                    # no ip assignment or error determining what collector this is.
+                    pass
+
 
 def onDeviceDeleted(object, event):
+    # Clean up any AMQP queues we may have created for this device.
+
     if not IObjectWillBeAddedEvent.providedBy(event):
         connectionInfo = getUtility(IAMQPConnectionInfo)
         queueSchema = getUtility(IQueueSchema)
@@ -191,3 +221,24 @@ def onDeviceDeleted(object, event):
                     LOG.exception(e)
 
             amqpClient.close()
+
+
+class DeviceLinkProvider(object):
+    '''
+Provides a link on the openstack device overview page to its zenopenstack
+collector daemon's "health" diagnostic page.
+'''
+    def __init__(self, device):
+        self._device = device
+
+    def getExpandedLinks(self):
+        links = []
+
+        url = self._device.zenopenstack_url()
+        if url:
+            links.append('<a href="%s/health">zenopenstack diagnostics</a>' % url)
+
+        url = addVirtualRoot(self._device.getPrimaryUrlPath())
+        links.append('<a href="%s/health">modeling diagnostics</a>' % url)
+
+        return links

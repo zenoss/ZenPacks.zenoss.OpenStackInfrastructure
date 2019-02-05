@@ -401,3 +401,13 @@ def filter_FQDNs(dnlist):
             goodlist.append(dn)
 
     return goodlist, host_errors
+
+
+def addVirtualRoot(path):
+    try:
+        # If our RM supports IVirtualRoot, use that.
+        from zope.component import getUtility
+        from Products.ZenUtils.virtual_root import IVirtualRoot
+        return getUtility(IVirtualRoot).ensure_virtual_root(path)
+    except Exception:
+        return path

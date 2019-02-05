@@ -52,6 +52,13 @@
 
     <!-- Device Links -->
     <configure zcml:condition="have zenoss:IExpandedLinkProvider">
+        <!-- endpoints -->
+        <subscriber
+            provides='Products.ZenModel.interfaces.IExpandedLinkProvider'
+            for='ZenPacks.zenoss.OpenStackInfrastructure.Endpoint.Endpoint'
+            factory='.Endpoint.DeviceLinkProvider'
+            />
+
         <!-- hosts -->
         <subscriber
             provides='Products.ZenModel.interfaces.IExpandedLinkProvider'

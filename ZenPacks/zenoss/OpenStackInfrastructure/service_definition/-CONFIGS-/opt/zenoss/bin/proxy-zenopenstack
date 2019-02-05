@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source /opt/zenoss/etc/proxy-zenopenstack-env
+. /opt/zenoss/etc/proxy-zenopenstack-env
 
 CERT_FILE=/home/zenoss/.zenopenstack-certs/${COLLECTOR_LOCATION}_nginx.crt
 KEY_FILE=/home/zenoss/.zenopenstack-certs/${COLLECTOR_LOCATION}_nginx.key

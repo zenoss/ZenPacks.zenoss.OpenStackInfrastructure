@@ -7,7 +7,11 @@
 #
 ##############################################################################
 
+from collections import deque
+import datetime
 from time import time
+import logging
+log = logging.getLogger('zen.OpenStack.zenopenstack')
 
 from Products.DataCollector.plugins.DataMaps import ObjectMap
 
@@ -42,6 +46,10 @@ class ConsolidatingObjectMapQueue(object):
         self.update_consolidate_seconds = update_consolidate_seconds
         self.held_objmaps = {}
         self.blacklisted_components = {}
+
+        # Retain the most recent 25 object maps that are released (drained)
+        # for debugging purposes
+        self.released_objmaps = deque(maxlen=25)
 
     def reset(self):
         self.held_objmaps = {}
@@ -204,5 +212,11 @@ class ConsolidatingObjectMapQueue(object):
                 new_om = self._new_objmap(objmap)
                 new_om.updateFromDict(moved)
                 B.append(new_om)
+
+        # Store these object maps for debugging purposes.
+        timestamp = datetime.datetime.utcfromtimestamp(now)
+        for objmap in A + B + C:
+            log.debug("Released objectmap: %s" % objmap)
+            self.released_objmaps.append((timestamp, objmap))
 
         return A + B + C

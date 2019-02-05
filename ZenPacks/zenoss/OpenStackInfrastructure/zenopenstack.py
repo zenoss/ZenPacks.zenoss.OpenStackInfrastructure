@@ -19,6 +19,7 @@ log = logging.getLogger('zen.OpenStack.zenopenstack')
 
 import Globals
 
+import cgi
 from collections import defaultdict, deque
 import datetime
 from functools import partial
@@ -27,10 +28,14 @@ from metrology import Metrology
 from metrology.registry import registry as metrology_registry
 from metrology.instruments import Meter
 import time
+from pprint import pformat
+import socket
 
 from twisted.internet import reactor, defer
+import twisted.manhole.telnet
 from twisted.python import log as twisted_log
 from twisted.spread import pb
+from twisted.web.http import combinedLogFormatter, datetimeToLogString
 from twisted.web.resource import Resource as TwistedResource, NoResource, ErrorPage
 from twisted.web.server import Site as TwistedSite
 
@@ -73,32 +78,51 @@ class HTTPDebugLogBuffer(object):
         self.cache_size = cache_size
         self.cache = defaultdict(partial(deque, maxlen=self.cache_size))
 
-    def store_request(self, request, result):
+    def store_request(self, request, response):
         """Store events in the cache, update statistics.
 
         Allow for separate samples/events/URI cache data.
         """
 
         # Create a unique client_id that has: host/uri
-        client_address = request.getClient()
-        client_id = (client_address, request.uri)
+        client_ip = request.getClientIP()
+        client_id = (client_ip, request.uri)
 
         # Add the client's message to the cache
         self.cache[client_id].append({
             'timestamp': datetime.datetime.now(),
             'response_code': request.code,
             'response_code_message': request.code_message,
-            'request_body': request.content.getvalue()
+            'request_body': request.content.getvalue(),
+            'response_body': response,
+            'zenoss_actions': request._zaction
         })
 
         # --------------------------------------------------------------------
         # Use Metrology to record the event
         # --------------------------------------------------------------------
-        url_id = "http.post" + request.uri.replace('/', '.')
-        Metrology.meter(url_id).mark()              # URI totals
-        client_metric_id = "http.{}.requests".format(client_address)
-        Metrology.meter(client_metric_id).mark()    # Client totals
-        Metrology.meter('http.requests').mark()     # All Totals
+        v = dict(
+            dotted_uri=request.uri.replace('/', '.').strip('.'),
+            client_ip=client_ip,
+            method=request.method.lower()
+        )
+
+        Metrology.meter('http.requests').mark()
+        Metrology.meter('http.{method}.requests'.format(**v)).mark()
+        Metrology.meter("http.{method}.{dotted_uri}.requests".format(**v)).mark()
+        Metrology.meter("http.{method}.{dotted_uri}.{client_ip}.requests".format(**v)).mark()
+
+        if (request.code >= 400):
+            Metrology.meter("http.{method}.{dotted_uri}.{client_ip}.errors".format(**v)).mark()
+
+        for _ in request._zaction['maps']:
+            Metrology.meter("zenopenstack.{dotted_uri}.{client_ip}.datamaps".format(**v)).mark()
+
+        for _ in request._zaction['events']:
+            Metrology.meter("zenopenstack.{dotted_uri}.{client_ip}.events".format(**v)).mark()
+
+        for _ in request._zaction['metrics']:
+            Metrology.meter("zenopenstack.{dotted_uri}.{client_ip}.metrics".format(**v)).mark()
 
     def get_client_keys(self):
         """Return list of client IDs monitored."""
@@ -190,7 +214,30 @@ class Resource(TwistedResource):
         return TwistedResource.putChild(self, path, child)
 
     def render(self, request):
+        # For proxied requests, we have to override getClientIP to return
+        # the proper IP address.
+        if request.requestHeaders.hasHeader(b'x-forwarded-for'):
+            client_ip = request.requestHeaders.getRawHeaders(
+                b"x-forwarded-for", [b"-"])[0].split(b",")[0].strip()
+            request.getClientIP = lambda: client_ip
+
+        # Add a few properties to the request object that are used to
+        # return additional information for the request_buffer debugging
+        # tool
+        request._zaction = {
+            "metrics": [],
+            "maps": [],
+            "events": []
+        }
+
         result = TwistedResource.render(self, request)
+
+        # log any requests that generated error responses
+        # this will only get us the code, but the detailed response bodies
+        # will be in the /health logs.
+        if request.code >= 400:
+            timestamp = datetimeToLogString(reactor.seconds())
+            log.error(combinedLogFormatter(timestamp, request))
 
         if not request.uri.startswith("/health"):
             self.site.request_buffer.store_request(request, result)
@@ -253,7 +300,40 @@ class Health(Resource):
                         body += "  <td>%f</td>" % metric.mean_rate
                         body += "</tr>"
                     else:
-                        log.error("Unhandled metric type: %s", metric)
+                        log.debug("Ignoring unhandled metric type: %s", metric)
+                body += "</body></html>"
+                return body
+
+            if len(request.postpath) == 1 and request.postpath[0] == "queue":
+                body = "<html><body>"
+                body = "The following devices have received model updates:<ul>"
+                for device_id in MAP_QUEUE:
+                    body += '<li><a href="/health/queue/%s">%s</a></li>' % (device_id, device_id)
+                body += "</ul></body></html>"
+                return body
+
+            if len(request.postpath) == 2 and request.postpath[0] == "queue":
+                device_id = request.postpath[1]
+
+                if device_id not in MAP_QUEUE:
+                    return NoResource().render(request)
+
+                body = "<html><body>"
+
+                body += "<b>Currently-Held Object Maps</b><p>"
+                for component_id, objmap in MAP_QUEUE[device_id].held_objmaps.iteritems():
+                    body += "<hr>"
+                    body += component_id + ":<br>"
+                    body += "<pre>" + cgi.escape(pformat(objmap[1])) + "</pre>"
+
+                body += "<b>Most Recently Released Object Maps</b>"
+                for timestamp, objmap in reversed(MAP_QUEUE[device_id].released_objmaps):
+                    body += "<hr>%s (%s ago)" % (
+                        timestamp.isoformat(),
+                        (datetime.datetime.now() - timestamp)
+                    )
+                    body += "<pre>" + cgi.escape(pformat(objmap)) + "</pre>"
+
                 body += "</body></html>"
                 return body
 
@@ -264,26 +344,38 @@ class Health(Resource):
             uri = "/".join(request.postpath[2:])
             body = "<html><body>"
             records = self.site.request_buffer.get_requests((ip, '/' + uri))
-            body += "<b>Last %d requests from /%s to %s</b> (of %d max)<p>" % (
+            body += "<b>Most recent %d requests from /%s to %s</b> (of %d max)<p>" % (
                 len(records),
                 ip,
                 uri,
                 self.site.request_buffer.cache_size
             )
 
-            for record in records:
-                request_body = record['request_body']
+            for record in reversed(records):
                 try:
-                    # if the payload is JSON data, reindent it for readability
-                    request_body = json.dumps(json.loads(request_body), indent=5)
-                except Exception:
-                    pass
+                    request_body = record['request_body']
+                    try:
+                        # if the payload is JSON data, reindent it for readability
+                        request_body = json.dumps(json.loads(request_body), indent=5)
+                    except Exception:
+                        pass
+                    response_body = cgi.escape(record['response_body'])
+                    zenoss_actions = cgi.escape(pformat(record['zenoss_actions']))
 
-                body += "<li>%s (%d %s)<br><pre>%s</pre>" % (
-                    record['timestamp'].isoformat(),
-                    record['response_code'],
-                    record['response_code_message'],
-                    request_body)
+                    body += "<hr>%s (%s ago)" % (
+                        record['timestamp'].isoformat(),
+                        (datetime.datetime.now() - record['timestamp'])
+                    )
+                    body += '<table border="1" style="font-size: 80%"><tr><th>Request</th><th>Response</th><th>Zenoss Action</th></tr>'
+                    body += "<tr valign=\"top\"><td><pre>" + request_body + "</pre></td>"
+                    body += "<td><b>%d %s</b><pre>%s</pre></td>" % (
+                        record['response_code'],
+                        record['response_code_message'],
+                        response_body)
+                    body += "<td><pre>" + zenoss_actions + "</pre></td>"
+                    body += "</tr></table>"
+                except Exception, e:
+                    body += "<hr>Error displaying log record: %s<hr>" % str(e)
 
             body += "</body></html>"
             return body
@@ -294,21 +386,37 @@ class Health(Resource):
     <table border="1">
       <tr>
         <th rowspan="2">URI</th>
-        <th rowspan="2">IP</th>
-        <th colspan="3">Request Rate</th>
-        <th colspan="3">2xx Rate</th>
-        <th colspan="3">4xx Rate</th>
+        <th rowspan="2">Client IP</th>
+        <th colspan="3">POST</th>
+        <th colspan="3">GET</th>
+        <th colspan="3">POST Errors</th>
+        <th colspan="3">GET Errors</th>
+        <th colspan="3">Datamaps</th>
+        <th colspan="3">Events</th>
+        <th colspan="3">Metrics</th>
         <th rowspan="2">Last Request</th>
         <th rowspan="2">Details</th>
      </tr>
      <tr>
-        <th>5m</th>
+        <th>count</th>
         <th>15m</th>
         <th>mean</th>
-        <th>5m</th>
+        <th>count</th>
         <th>15m</th>
         <th>mean</th>
-        <th>5m</th>
+        <th>count</th>
+        <th>15m</th>
+        <th>mean</th>
+        <th>count</th>
+        <th>15m</th>
+        <th>mean</th>
+        <th>count</th>
+        <th>15m</th>
+        <th>mean</th>
+        <th>count</th>
+        <th>15m</th>
+        <th>mean</th>
+        <th>count</th>
         <th>15m</th>
         <th>mean</th>
      </tr>
@@ -316,34 +424,60 @@ class Health(Resource):
         """
 
         for client_ip, uri in sorted(self.site.request_buffer.get_client_keys()):
-            requests = Metrology.meter('http.%s.requests' % client_ip)
+            v = dict(
+                dotted_uri=uri.replace('/', '.').strip('.'),
+                client_ip=client_ip
+            )
+
+            posts = Metrology.meter("http.post.{dotted_uri}.{client_ip}.requests".format(**v))
+            gets = Metrology.meter("http.get.{dotted_uri}.{client_ip}.requests".format(**v))
+            post_errors = Metrology.meter("http.post.{dotted_uri}.{client_ip}.errors".format(**v))
+            get_errors = Metrology.meter("http.get.{dotted_uri}.{client_ip}.errors".format(**v))
+            datamaps = Metrology.meter("zenopenstack.{dotted_uri}.{client_ip}.datamaps".format(**v))
+            events = Metrology.meter("zenopenstack.{dotted_uri}.{client_ip}.events".format(**v))
+            metrics = Metrology.meter("zenopenstack.{dotted_uri}.{client_ip}.metrics".format(**v))
+
             most_recent_request = self.site.request_buffer.get_most_recent_request((client_ip, uri))
 
             body += "<tr>"
             body += "  <td>%s</td>" % uri
             body += "  <td>%s</td>" % client_ip
-            body += "  <td>%.2f</td>" % requests.five_minute_rate
-            body += "  <td>%.2f</td>" % requests.fifteen_minute_rate
-            body += "  <td>%.2f</td>" % requests.mean_rate
-            body += "  <td></td>"  # not yet implemented
-            body += "  <td></td>"
-            body += "  <td></td>"
-            body += "  <td></td>"
-            body += "  <td></td>"
-            body += "  <td></td>"
+            body += "  <td>%d</td>" % posts.count
+            body += "  <td>%.2f</td>" % posts.fifteen_minute_rate
+            body += "  <td>%.2f</td>" % posts.mean_rate
+            body += "  <td>%d</td>" % gets.count
+            body += "  <td>%.2f</td>" % gets.fifteen_minute_rate
+            body += "  <td>%.2f</td>" % gets.mean_rate
+            body += "  <td>%d</td>" % post_errors.count
+            body += "  <td>%.2f</td>" % post_errors.fifteen_minute_rate
+            body += "  <td>%.2f</td>" % post_errors.mean_rate
+            body += "  <td>%d</td>" % get_errors.count
+            body += "  <td>%.2f</td>" % get_errors.fifteen_minute_rate
+            body += "  <td>%.2f</td>" % get_errors.mean_rate
+            body += "  <td>%d</td>" % datamaps.count
+            body += "  <td>%.2f</td>" % datamaps.fifteen_minute_rate
+            body += "  <td>%.2f</td>" % datamaps.mean_rate
+            body += "  <td>%d</td>" % events.count
+            body += "  <td>%.2f</td>" % events.fifteen_minute_rate
+            body += "  <td>%.2f</td>" % events.mean_rate
+            body += "  <td>%d</td>" % metrics.count
+            body += "  <td>%.2f</td>" % metrics.fifteen_minute_rate
+            body += "  <td>%.2f</td>" % metrics.mean_rate
+
             if most_recent_request:
                 body += "  <td>%s ago (%d)</td>" % (
                     (datetime.datetime.now() - most_recent_request['timestamp']),
                     most_recent_request['response_code'])
             else:
                 body += "  <td>None</td>"
-            body += "  <td><a href=\"/health/logs/%s%s\">logs</a></td>" % (client_ip, uri)
+            body += "  <td><a href=\"/health/logs/%s%s\">request log</a></td>" % (client_ip, uri)
             body += "</tr>"
 
         return body + """
     </table>
 
     <p><a href="/health/metrics">All Metrics</a></p>
+    <p><a href="/health/queue">Model Update Queue</a></p>
   </body>
 </html>
         """
@@ -414,7 +548,7 @@ class CeilometerV1Samples(Resource):
         try:
             for sample in payload:
                 if 'event_type' in sample and 'volume' not in sample:
-                    return ErrorPage(422, "Unprocessable Entity", "Misconfigured- sending event data to metric URL")
+                    return ErrorPage(422, "Unprocessable Entity", "Misconfigured- sending event data to metric URL").render(request)
 
                 resourceId = sample['resource_id']
                 meter = sample['name']
@@ -441,6 +575,7 @@ class CeilometerV1Samples(Resource):
                 for dp in datapoints:
                     log.debug("Storing datapoint %s / %s value %d @ %d", device_id, dp.rrdPath, value, timestamp)
                     METRIC_QUEUE.append((dp, value, timestamp))
+                    request._zaction['metrics'].append((device_id, dp.rrdPath, value, timestamp))
 
             else:
                 log.debug("Ignoring unmonitored sample: %s / %s / %s", device_id, resourceId, meter)
@@ -476,8 +611,8 @@ class CeilometerV1Events(Resource):
         for c_event in payload:
             if 'event_type' not in c_event:
                 if 'name' in c_event and 'volume' in c_event:
-                    return ErrorPage(422, "Unprocessable Entity", "Misconfigured- sending metric data to event URL")
-                log.error("%s: Ignoring unrecognized event payload: %s" % (request.getClient(), c_event))
+                    return ErrorPage(422, "Unprocessable Entity", "Misconfigured- sending metric data to event URL").render(request)
+                log.error("%s: Ignoring unrecognized event payload: %s" % (request.getClientIP(), c_event))
                 continue
 
             event_type = c_event['event_type']
@@ -520,6 +655,7 @@ class CeilometerV1Events(Resource):
             if event_type in REGISTRY.device_event_types(device_id):
                 log.debug("Propagated %s event", event_type)
                 EVENT_QUEUE.append(evt)
+                request._zaction['events'].append(evt)
 
             if event_is_mapped(evt):
                 # Try to turn the event into an objmap.
@@ -528,6 +664,7 @@ class CeilometerV1Events(Resource):
                     if objmap:
                         log.debug("Mapped %s event to %s", event_type, objmap)
                         MAP_QUEUE[device_id].append(objmap)
+                        request._zaction['maps'].append((device_id, objmap))
                 except Exception:
                     log.exception("Unable to process event: %s", evt)
 
@@ -613,6 +750,30 @@ class OpenStackCollectorDaemon(CollectorDaemon):
 
         return super(OpenStackCollectorDaemon, self).getInitialServices()
 
+    def sighandler_USR1(self, signum, frame):
+        super(OpenStackCollectorDaemon, self).sighandler_USR1(signum, frame)
+
+        loggerName = "zen.zenopenstack.twisted"
+        twisted_log = logging.getLogger(loggerName)
+        if twisted_log.getEffectiveLevel() == logging.DEBUG:
+            twisted_log.setLevel(logging.ERROR)
+        else:
+            twisted_log.setLevel(logging.DEBUG)
+
+    def _displayStatistics(self, verbose=False):
+
+        if hasattr(self, 'metricWriter') and self.metricWriter():
+            self.log.info("%d devices processed (%d datapoints)",
+                          len(REGISTRY.all_devices()), self.metricWriter().dataPoints)
+        elif hasattr(self, '_rrd') and self._rrd:
+            self.log.info("%d devices processed (%d datapoints)",
+                          len(REGISTRY.all_devices()), self._rrd.dataPoints)
+        else:
+            self.log.info("%d devices processed (0 datapoints)",
+                          len(REGISTRY.all_devices()))
+
+        self._scheduler.displayStatistics(verbose)
+
 
 class TaskSplitter(NullTaskSplitter):
     def splitConfiguration(self, configs):
@@ -635,9 +796,8 @@ class OpenStackEventTask(BaseTask):
         self._collector = zope.component.queryUtility(ICollector)
 
     def doTask(self):
-        log.debug("Draining event queue")
-
         if len(EVENT_QUEUE):
+            log.debug("Draining event queue")
             self.state = 'SEND_EVENTS'
 
             while len(EVENT_QUEUE):
@@ -665,9 +825,8 @@ class OpenStackPerfTask(BaseTask):
 
     @defer.inlineCallbacks
     def doTask(self):
-        log.debug("Draining metric queue")
-
         if len(METRIC_QUEUE):
+            log.debug("Draining metric queue")
             self.state = 'STORE_PERF_DATA'
 
             while len(METRIC_QUEUE):
@@ -714,9 +873,6 @@ class OpenStackMapTask(BaseTask):
 
     @defer.inlineCallbacks
     def doTask(self):
-        log.debug("Draining datamap queue")
-
-        remoteProxy = self._collector.getServiceNow('ModelerService')
 
         maps = {}
         for device_id, queue in MAP_QUEUE.iteritems():
@@ -729,14 +885,16 @@ class OpenStackMapTask(BaseTask):
             log.info("Removing datamap queue for deleted device %s", device_id)
             del MAP_QUEUE[device_id]
 
-        self.state = 'SEND_DATAMAPS'
+        if maps:
+            log.debug("Draining datamap queue")
+            self.state = 'SEND_DATAMAPS'
+            remoteProxy = self._collector.getServiceNow('ModelerService')
 
-        for device_id in maps:
-            log.debug("Sending datamaps for %s: %s", device_id, maps[device_id])
-            yield remoteProxy.callRemote(
-                'applyDataMaps', device_id, maps[device_id])
+            for device_id in maps:
+                yield remoteProxy.callRemote(
+                    'applyDataMaps', device_id, maps[device_id])
 
-        self.state = TaskStates.STATE_IDLE
+            self.state = TaskStates.STATE_IDLE
 
 
 class Preferences(object):
@@ -778,6 +936,26 @@ class Preferences(object):
         yield OpenStackMapTask('zenopenstack-map', configId='zenopenstack-map', scheduleIntervalSeconds=60)
 
 
+def get_manhole_port(base_port_number):
+    """
+    Returns an unused port number by starting with base_port_number
+    and incrementing until an unbound port is found.
+    """
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+    port_number = base_port_number
+    while True:
+        try:
+            s.bind(('', port_number))
+        except socket.error:
+            port_number += 1
+            continue
+
+        return port_number
+
+
 def main():
     preferences = Preferences()
     task_splitter = TaskSplitter()
@@ -788,6 +966,21 @@ def main():
         task_splitter,
         initializationCallback=webserver.initialize)
 
+    port = get_manhole_port(7777)
+    log.debug("Starting manhole on port %d", port)
+
+    f = twisted.manhole.telnet.ShellFactory()
+    f.username, f.password = ('zenoss', 'zenoss')
+    reactor.listenTCP(port, f)
+    f.namespace.update(
+        preferences=preferences,
+        webserver=webserver,
+        collectordaemon=collectordaemon,
+        REGISTRY=REGISTRY,
+        METRIC_QUEUE=METRIC_QUEUE,
+        EVENT_QUEUE=EVENT_QUEUE,
+        MAP_QUEUE=MAP_QUEUE
+    )
     collectordaemon.run()
 
 
