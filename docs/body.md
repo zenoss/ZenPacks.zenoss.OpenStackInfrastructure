@@ -130,6 +130,8 @@ Used when openstack processes are running inside of docker containers. Provide t
 - zOpenStackIncrementalShortLivedSeconds: Incremental Modeling - Short-lived object time (seconds)
 - zOpenStackIncrementalBlackListSeconds: Incremental Modeling - Deleted Object Blacklist time (seconds)
 - zOpenStackIncrementalConsolidateSeconds: Incremental Modeling - Consolidate time (seconds)
+- zOpenStackUserDomainName: User’s domain name for authorization scope.
+- zOpenStackProjectDomainName: OpenStack Project Domain Name
 
 ### Device Classes 
 - /OpenStack: Root OpenStack device class. Typically, devices should not be put in this device class. 
@@ -293,9 +295,9 @@ where <filename> should have the form:
 
 ```
 /Devices/OpenStack/Infrastructure loader='openstackinfrastructure',\
-    loader_arg_keys=['deviceName', 'username', 'api_key', 'project_id', 'auth_url', 'region_name', 'collector']
-<devicename> username='<username>', api_key='<password>', project_id='<tenant ID>', \
-    auth_url='http://<ip address>:5000/v2.0/', region_name='RegionOne'
+    loader_arg_keys=['deviceName', 'username', 'api_key', 'project_id, 'user_domain_name', 'project_domain_name', 'auth_url', 'region_name', 'collector']
+<devicename> username='<username>', api_key='<password>', project_id='<tenant ID>', user_domain_name='default',  \
+    project_domain_name='default', auth_url='http://<ip address>:5000/v2.0/', region_name='RegionOne'
 
 /Devices/Server/SSH/Linux/NovaHost zCommandUsername='username',
 zCommandPassword='password'

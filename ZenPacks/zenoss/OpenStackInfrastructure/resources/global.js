@@ -139,6 +139,7 @@ var addOpenStack = new Zenoss.Action({
                         labelWidth: 130,
                         id: "openstack_user_domain_name",
                         width: 350,
+                        value: 'default',                        
                         allowBlank: false,
                         listeners: {
                             blur: this.updateRegions,
@@ -160,6 +161,7 @@ var addOpenStack = new Zenoss.Action({
                         labelWidth: 130,
                         id: "openstack_project_domain_name",
                         width: 350,
+                        value: 'default',
                         allowBlank: false,
                         listeners: {
                             blur: this.updateRegions,
