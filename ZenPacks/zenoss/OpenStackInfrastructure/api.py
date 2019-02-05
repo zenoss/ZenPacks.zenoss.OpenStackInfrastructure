@@ -14,6 +14,7 @@ API interfaces and default implementations.
 import logging
 log = logging.getLogger('zen.OpenStack.api')
 
+import re
 import json
 from urlparse import urlparse
 import subprocess
@@ -36,6 +37,13 @@ OPENSTACK_DEVICE_PATH = "/Devices/OpenStack/Infrastructure"
 
 _helper = zenpack_path('openstack_helper.py')
 
+cmd_regex = re.compile('(--api_key=)(?P<password>[\wa-zA-Z0-9_.-]+)')
+
+def mask_arg(arg):
+    match = cmd_regex.match(arg)
+    if match:
+        return match.group().replace(match.group('password'),'******')
+    return arg
 
 def _runcommand(cmd):
     p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -48,7 +56,7 @@ def _runcommand(cmd):
         except Exception:
             message = stderr
 
-        cmd = ['--api_key=***' if x.startswith('--api_key=') else x for x in cmd]
+        cmd = [ mask_arg(x) for x in cmd]
 
         log.exception(subprocess.CalledProcessError(p.returncode, cmd=cmd, output=message))
         log.error('Keystone Error Occured: ' + message)
