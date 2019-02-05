@@ -40,6 +40,8 @@
             "Min": 1,
             "Max": 1
         },
+        "RAMCommitment": "1G",
+        "CPUCommitment": 1,
         "Launch": "auto",
         "LogConfigs": [
             {
