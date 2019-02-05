@@ -133,12 +133,12 @@ zProperties:
     default: 'default'
     label: OpenStack User Domain Name
     description: >
-      User’s domain name for authorization scope.
+      Domain name containg the opentstack user for authorization scope.
   zOpenStackProjectDomainName:
     default: 'default'
     label: OpenStack Project Domain Name
     description: >
-      Domain name containing project for authorization scope.
+      Domain name containing the openstack project for authorization scope.
 class_relationships:
 # Containing Relations
 - Endpoint(components) 1:MC OpenstackComponent
