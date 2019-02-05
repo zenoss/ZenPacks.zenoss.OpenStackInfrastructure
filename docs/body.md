@@ -433,6 +433,15 @@ In particular, a restricted user will see:
 If you believe a user should have more access to data, it is your responsibity
 to adjust the user's access level on OpenStack.
 
+Domain Support
+---------------------
+
+As of version 3.0.0 support for domains was added. Before the only domain supported
+was the default domain. To use domain specify the domain of your user in the
+zOpenStackProjectDomainName property and the domain of your chosen project in
+zOpenStackProjectDomainName. The domain does not limit the components modeled. If
+the user has access to the resource it will be modeled. 
+
 Daemons
 -------
 
