@@ -337,7 +337,6 @@ class Health(Resource):
                 body += "</body></html>"
                 return body
 
-
             if len(request.postpath) < 3 or request.postpath[0] != "logs":
                 return NoResource().render(request)
 
