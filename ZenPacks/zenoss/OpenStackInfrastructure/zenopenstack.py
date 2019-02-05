@@ -300,7 +300,7 @@ class Health(Resource):
                         body += "  <td>%f</td>" % metric.mean_rate
                         body += "</tr>"
                     else:
-                        log.debug("Ignorning unhandled metric type: %s", metric)
+                        log.debug("Ignoring unhandled metric type: %s", metric)
                 body += "</body></html>"
                 return body
 
