@@ -106,17 +106,19 @@ class SessionManager(object):
 
     _agents = {}
 
-    def __init__(self, username=None, password=None, auth_url=None, project_id=None, region_name=None):
+    def __init__(self, username=None, password=None, auth_url=None, project_id=None, user_domain_name=None, project_domain_name=None, region_name=None):
         self.username = username
         self.password = password
         self.auth_url = auth_url
         self.auth_api_version = None
         self.project_id = project_id
+        self.user_domain_name = user_domain_name
+        self.project_domain_name = project_domain_name
         self.region_name = region_name
         # Note, region_name is optional, but if it is not specified here,
         # it will need to be passed in to get_service_url()
 
-        for required in ('username', 'password', 'auth_url', 'project_id'):
+        for required in ('username', 'password', 'auth_url', 'project_id', 'user_domain_name', 'project_domain_name'):
             if getattr(self, required, None) is None:
                 raise APIClientError("Required parameter '%s' not specified" % required)
 
@@ -448,7 +450,7 @@ class SessionManager(object):
                     "scope": {
                         "project": {
                             "domain": {
-                                "id": "default"
+                                "name": self.project_domain_name
                             },
                             "name": self.project_id
                         }
@@ -457,7 +459,7 @@ class SessionManager(object):
                         "password": {
                             "user": {
                                 "domain": {
-                                    "id": "default"
+                                    "name": self.user_domain_name
                                 },
                                 "password": self.password,
                                 "name": self.username

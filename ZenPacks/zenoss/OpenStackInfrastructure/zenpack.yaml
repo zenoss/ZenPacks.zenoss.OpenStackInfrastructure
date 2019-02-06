@@ -13,21 +13,21 @@ zProperties:
     default: /Server/SSH/Linux/NovaHost
     label: Device Class For OpenStack Linux Hosts
     description: >
-      Used as a default device class for defined hosts in 
+      Used as a default device class for defined hosts in
       zOpenStackExtraHosts and zOpenStackNovaApiHosts properties.
   zOpenStackNovaApiHosts:
     type: lines
     label: Hosts where nova-api is running
     description: >
-      List of hosts upon which nova-api runs. This is required 
-      when the IP address in the nova API url does not match any 
-      known host.  
+      List of hosts upon which nova-api runs. This is required
+      when the IP address in the nova API url does not match any
+      known host.
   zOpenStackCinderApiHosts:
     type: lines
     label: Hosts where cinder-api is running
     description: >
-      List of hosts upon which cinder-api runs. This is required 
-      when the IP address in the cinder API url does not match any 
+      List of hosts upon which cinder-api runs. This is required
+      when the IP address in the cinder API url does not match any
       known host.
   zOpenStackExtraApiEndpoints:
     # changes to this property will not affect monitoring until the device
@@ -35,22 +35,22 @@ zProperties:
     type: lines
     label: Additional OpenStack API endpoints to monitor
     description: >
-      List of additional API endpoints to monitor. The format 
-      of each line is [service type]:[url]    
+      List of additional API endpoints to monitor. The format
+      of each line is [service type]:[url]
   zOpenStackHostMapToId:
     type: lines
     label: Hostname to ID Mapping Override
     description: >
-      List of <name>=<id>, used to force a host referred to by 
-      openstack with the given name to be represented in Zenoss 
-      as a host component with the given ID. (this is not commonly 
+      List of <name>=<id>, used to force a host referred to by
+      openstack with the given name to be represented in Zenoss
+      as a host component with the given ID. (this is not commonly
       used)
   zOpenStackHostMapSame:
     type: lines
     label: Hostname to Hostname Mapping
     description: >
-      A list of <name1>=<name2>, used to inform the modeler 
-      that the same host may be referred to with an alternate 
+      A list of <name1>=<name2>, used to inform the modeler
+      that the same host may be referred to with an alternate
       name by some part of openstack. (this is not commonly used)
   zOpenStackNeutronConfigDir:
     type: string
@@ -63,39 +63,39 @@ zProperties:
     default: ''
     label: Nova-Manage Docker Container Pattern
     description: >
-      Used when openstack processes are running inside of docker 
-      containers. Provide the container names (or a pattern to match 
-      them) here, or leave blank in a non-containerized openstack 
-      environment.    
+      Used when openstack processes are running inside of docker
+      containers. Provide the container names (or a pattern to match
+      them) here, or leave blank in a non-containerized openstack
+      environment.
   zOpenStackRunVirshQemuInContainer:
     type: string
     default: ''
     label: Libvirt Docker Container Pattern
     description: >
-      Used when openstack processes are running inside of docker 
-      containers. Provide the container names (or a pattern to match 
-      them) here, or leave blank in a non-containerized openstack 
-      environment.    
+      Used when openstack processes are running inside of docker
+      containers. Provide the container names (or a pattern to match
+      them) here, or leave blank in a non-containerized openstack
+      environment.
   zOpenStackRunNeutronCommonInContainer:
-    type: string    
+    type: string
     default: ''
     label: Neutron Common Docker Container Pattern
     description: >
-      Used when openstack processes are running inside of docker 
-      containers. Provide the container names (or a pattern to match 
-      them) here, or leave blank in a non-containerized openstack 
+      Used when openstack processes are running inside of docker
+      containers. Provide the container names (or a pattern to match
+      them) here, or leave blank in a non-containerized openstack
       environment.
   zOpenStackAMQPUsername:
     type: string
     default: openstack
     label: Username for ceilometer AMQP integration
-    description: See documentation for details.   
+    description: See documentation for details.
   zOpenStackAMQPPassword:
     type: password
     label: Password for ceilometer AMQP integration
-    description: See documentation for details.    
+    description: See documentation for details.
   zOpenStackHostLocalDomain:
-    type: string    
+    type: string
     default: ''
     label: Replacement for .localdomain in hostnames
     description: >
@@ -104,7 +104,7 @@ zProperties:
     type: lines
     label: OpenStack event types to store
     description: >
-      List of openstack event types to pass to Zenoss event system. 
+      List of openstack event types to pass to Zenoss event system.
       (Other event types may be processed for model changes, but will not be
       stored as events in Zenoss)
   zOpenStackIncrementalShortLivedSeconds:
@@ -119,7 +119,7 @@ zProperties:
     default: 600
     label: Incremental Modeling - Deleted Object Blacklist time (seconds)
     description: >
-      After a component is deleted, discard any updates to the same component 
+      After a component is deleted, discard any updates to the same component
       ID for this long
   zOpenStackIncrementalConsolidateSeconds:
     type: int
@@ -129,7 +129,16 @@ zProperties:
       Hold any update for at most this long before processing.  Any other
       updates to the same object during this time window will be combined
       into a single zenoss model update.
-
+  zOpenStackUserDomainName:
+    default: 'default'
+    label: OpenStack User Domain Name
+    description: >
+      Domain name containing the opentstack user for authorization scope.
+  zOpenStackProjectDomainName:
+    default: 'default'
+    label: OpenStack Project Domain Name
+    description: >
+      Domain name containing the openstack project for authorization scope.
 class_relationships:
 # Containing Relations
 - Endpoint(components) 1:MC OpenstackComponent
@@ -235,7 +244,7 @@ device_classes:
             type: COMMAND
             commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/poll_openstack.py
               '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}'
-              '${here/zOpenStackAuthUrl}' '${here/zOpenStackRegionName}'
+              '${here/zOpenStackUserDomainName}' '${here/zOpenStackProjectDomainName}' '${here/zOpenStackAuthUrl}' '${here/zOpenStackRegionName}'
             datapoints:
               agentAliveCount:
                 aliases: {agent_alive__count: null}
@@ -2189,7 +2198,7 @@ event_classes:
   /OpenStack/Cinder:
     remove: true
   /OpenStack/Cinder/Volume:
-    remove: true    
+    remove: true
   /OpenStack/Cinder/Snapshot:
     remove: true
   /OpenStack/image:

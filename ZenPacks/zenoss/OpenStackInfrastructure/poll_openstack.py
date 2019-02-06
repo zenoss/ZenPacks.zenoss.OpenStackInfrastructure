@@ -24,10 +24,12 @@ from apiclients.txapiclient import NovaClient, NeutronClient, CinderClient
 
 class OpenStackPoller(object):
 
-    def __init__(self, username, api_key, project_id, auth_url, region_name):
+    def __init__(self, username, api_key, project_id, user_domain_name, project_domain_name, auth_url, region_name):
         self._username = username
         self._api_key = api_key
         self._project_id = project_id
+        self._user_domain_name = user_domain_name
+        self._project_domain_name = project_domain_name
         self._auth_url = auth_url
         self._api_version = 2
         self._region_name = region_name
@@ -392,6 +394,8 @@ class OpenStackPoller(object):
             self._api_key,
             self._auth_url,
             self._project_id,
+            self._user_domain_name,
+            self._project_domain_name,
             self._region_name)
         nova = NovaClient(session_manager=sm)
         neutron = NeutronClient(session_manager=sm)
@@ -460,18 +464,18 @@ class OpenStackPoller(object):
 if __name__ == '__main__':
     from twisted.internet import reactor
 
-    username = api_key = project_id = auth_url = api_version = region_name = None
+    username = api_key = project_id = user_domain_name = project_domain_name = auth_url = api_version = region_name = None
     try:
-        username, api_key, project_id, auth_url, region_name = sys.argv[1:7]
+        username, api_key, project_id, user_domain_name, project_domain_name, auth_url, region_name = sys.argv[1:8]
     except ValueError:
         print >> sys.stderr, (
-            "Usage: %s <username> <api_key> <project_id> <auth_url> <region_name>"
+            "Usage: %s <username> <api_key> <project_id> <user_domain_name> <project_domain_name> <auth_url> <region_name>"
             ) % sys.argv[0]
 
         sys.exit(1)
 
     poller = OpenStackPoller(
-        username, api_key, project_id, auth_url, region_name)
+        username, api_key, project_id, user_domain_name, project_domain_name, auth_url, region_name)
 
     poller.printJSON()
     reactor.run()

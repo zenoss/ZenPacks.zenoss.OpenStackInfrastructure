@@ -111,6 +111,8 @@ class OpenStackInfrastructure(PythonPlugin):
         'zCommandUsername',
         'zCommandPassword',
         'zOpenStackProjectId',
+        'zOpenStackUserDomainName',
+        'zOpenStackProjectDomainName',
         'zOpenStackAuthUrl',
         'zOpenStackRegionName',
         'zOpenStackNovaApiHosts',
@@ -1408,8 +1410,8 @@ class OpenStackInfrastructure(PythonPlugin):
             LOG.error("Password/Username should be set to proper values. Check your Openstack credentials.")
             returnValue({})
 
-        if not device.zOpenStackAuthUrl or not device.zOpenStackProjectId or not device.zOpenStackRegionName:
-            LOG.error("Openstack credentials should be set to proper values. Check your OpenStackAuthUrl, OpenStackProjectId and OpenStackRegionName")
+        if not device.zOpenStackAuthUrl or not device.zOpenStackProjectId or not device.zOpenStackRegionName or not device.zOpenStackUserDomainName or not device.zOpenStackProjectDomainName:
+            LOG.error("Openstack credentials should be set to proper values. Check your OpenStackAuthUrl, OpenStackProjectId, zOpenStackUserDomainName, zOpenStackProjectDomainName and OpenStackRegionName")
             returnValue({})
 
         sm = SessionManager(
@@ -1417,6 +1419,8 @@ class OpenStackInfrastructure(PythonPlugin):
             device.zCommandPassword,
             device.zOpenStackAuthUrl,
             device.zOpenStackProjectId,
+            device.zOpenStackUserDomainName,
+            device.zOpenStackProjectDomainName,
             device.zOpenStackRegionName
         )
         keystone = KeystoneClient(session_manager=sm)

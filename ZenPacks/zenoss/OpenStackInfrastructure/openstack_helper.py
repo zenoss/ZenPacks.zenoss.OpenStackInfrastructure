@@ -27,13 +27,15 @@ from apiclients.session import SessionManager
 class OpenstackHelper(object):
 
     @inlineCallbacks
-    def getRegions(self, username, api_key, project_id, auth_url):
+    def getRegions(self, username, api_key, project_id, user_domain_name, project_domain_name, auth_url):
         """Get a list of available regions, given a keystone endpoint and credentials."""
 
         sm = SessionManager(
             username=username,
             password=api_key,
             project_id=project_id,
+            user_domain_name=user_domain_name,
+            project_domain_name=project_domain_name,
             auth_url=auth_url,
         )
 
@@ -52,7 +54,7 @@ if __name__ == '__main__':
         pass
 
     supported_methods = {
-        'getRegions': ('username', 'api_key', 'project_id', 'auth_url',),
+        'getRegions': ('username', 'api_key', 'project_id', 'user_domain_name', 'project_domain_name', 'auth_url',),
     }
 
     if methodname in supported_methods:
