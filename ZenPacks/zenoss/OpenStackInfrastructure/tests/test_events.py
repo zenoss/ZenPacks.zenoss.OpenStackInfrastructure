@@ -164,7 +164,8 @@ class TestEventMappings(zenpacklib.TestCase):
         self.process_event(self._eventData['compute.instance.power_off.start'])
         self.process_event(self._eventData['compute.instance.power_off.end'])
 
-        self.assertTrue(instance5.serverStatus.lower() == 'stopped')
+        self.assertTrue(instance5.serverStatus.lower() == 'shutoff')
+        self.assertTrue(instance5.vmState.lower() == 'stopped')
 
     def test_instance_power_on(self):
         self.assertTrue(self._eventsloaded)
@@ -172,9 +173,9 @@ class TestEventMappings(zenpacklib.TestCase):
         self._create_instance5()
         instance5 = self.getObjByPath('components/server-instance5')
         self.assertIsNotNone(instance5)
-        instance5.serverStatus = 'stopped'
+        instance5.serverStatus = 'shutoff'
 
-        self.assertTrue(instance5.serverStatus.lower() == 'stopped')
+        self.assertTrue(instance5.serverStatus.lower() == 'shutoff')
 
         self.process_event(self._eventData['compute.instance.power_on.start'])
         self.process_event(self._eventData['compute.instance.power_on.end'])
@@ -244,7 +245,8 @@ class TestEventMappings(zenpacklib.TestCase):
         self.process_event(self._eventData['compute.instance.rescue.start'])
         self.process_event(self._eventData['compute.instance.exists'])
         self.process_event(self._eventData['compute.instance.rescue.end'])
-        self.assertTrue(instance5.serverStatus.lower() == 'rescued')
+        self.assertTrue(instance5.vmState.lower() == 'rescued')
+        self.assertTrue(instance5.serverStatus.lower() == 'rescue')
 
         self.process_event(self._eventData['compute.instance.unrescue.start'])
         self.process_event(self._eventData['compute.instance.unrescue.end'])

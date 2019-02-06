@@ -171,6 +171,9 @@ def _apply_dns_info(evt, objmap):
 
 
 def _apply_instance_traits(evt, objmap):
+    # Note: The payload is currently (queens) built by
+    # openstack.nova.nova.notifications.base.info_from_instance
+
     traitmap = {
         'instance_id': ['resourceId', 'serverId'],
         'state': ['serverStatus'],
@@ -215,32 +218,35 @@ def _apply_instance_traits(evt, objmap):
             LOG.debug("Unable to parse trait_fixed_ips=%s (%s)" % (evt['trait_fixed_ips'], e))
 
     if 'trait_state' in evt:
-        # This mapping from state to vmState is based upon
-        # https://developer.rackspace.com/docs/cloud-servers/v2/extensions/ext-extended-status/#server-statuses
-        # If the state can't be determined unambiguously, it is not set.
+        # Note: 'state' is actually the VM state, not the server's status.
+        objmap.vmState = evt['trait_state'].lower()
 
-        vmState = {
-            'ACTIVE': 'active',
-            'HARD_REBOOT': 'active',
-            'MIGRATING': 'active',
-            'PASSWORD': 'active',
-            'REBOOT': 'active',
-            'REBUILD': 'active',
-            'RESIZE': 'active',
-            'BUILD': 'building',
-            'DELETED': 'deleted',
-            'ERROR': 'error',
-            'PAUSED': 'paused',
-            'RESCUE': 'rescued',
-            'VERIFY_RESIZE': 'resized',
-            'REVERT_RESIZE': 'resized',
-            'DELETED': 'soft_deleted',
-            'SHUTOFF': 'stopped',
-            'SUSPENDED': 'suspended'
-        }.get(evt['trait_state'], None)
+        # Possible vm state (vmState) values can be found in
+        # nova.objects.fields.InstanceState
 
-        if vmState:
-            objmap.vmState = vmState
+        # The vm state, in combination with the task state
+        # (which unfortunately is not exposed as a trait by the default
+        # event_definitions.yaml), is used to compute the vm's status (serverStatus
+        # in our model) by nova.api.openstack.common.status_from_state()
+
+        # Because the task state is unknown, we use the default state value
+        # for each VM state value, which is what would be used if there
+        # was no recognized task state.
+
+        objmap.serverStatus = {
+            'active': 'active',
+            'building': 'build',
+            'stopped': 'shutoff',
+            'resized': 'verify_resize',
+            'paused': 'paused',
+            'suspended': 'suspended',
+            'rescued': 'rescue',
+            'error': 'error',
+            'deleted': 'deleted',
+            'soft-delete': 'soft_deleted',
+            'shelved': 'shelved',
+            'shelved_offloaded': 'shelved_offloaded',
+        }.get(evt['trait_state'].lower(), 'unknown')
 
 
 def _apply_cinder_traits(evt, objmap):
