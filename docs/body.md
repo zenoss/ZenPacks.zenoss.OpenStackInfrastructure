@@ -130,8 +130,8 @@ Used when openstack processes are running inside of docker containers. Provide t
 - zOpenStackIncrementalShortLivedSeconds: Incremental Modeling - Short-lived object time (seconds)
 - zOpenStackIncrementalBlackListSeconds: Incremental Modeling - Deleted Object Blacklist time (seconds)
 - zOpenStackIncrementalConsolidateSeconds: Incremental Modeling - Consolidate time (seconds)
-- zOpenStackUserDomainName: Domain name containg opentstack user for authorization scope
-- zOpenStackProjectDomainName: Domain name containg opentstack project for authorization scope
+- zOpenStackUserDomainName: Domain name containing opentstack user for authorization scope
+- zOpenStackProjectDomainName: Domain name containing opentstack project for authorization scope
 
 ### Device Classes 
 - /OpenStack: Root OpenStack device class. Typically, devices should not be put in this device class. 
