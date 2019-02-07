@@ -1,3 +1,0 @@
-#! /bin/bash
-/usr/sbin/ntpdate {{ hardware.if.ntpd }} &> /dev/null
-/sbin/hwclock --systohc --utc  &> /dev/null
