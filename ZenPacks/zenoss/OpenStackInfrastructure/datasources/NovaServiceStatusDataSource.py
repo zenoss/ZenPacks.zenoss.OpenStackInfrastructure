@@ -20,12 +20,13 @@ from zope.interface import implements
 
 from Products.DataCollector.plugins.DataMaps import ObjectMap
 from Products.ZenEvents import ZenEventClasses
+from Products.ZenUtils.Utils import prepId
 
 from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import (
     PythonDataSource, PythonDataSourcePlugin, PythonDataSourceInfo,
     IPythonDataSourceInfo)
 
-from Products.ZenUtils.Utils import prepId
+from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.exceptions import APIClientError
 from ZenPacks.zenoss.OpenStackInfrastructure.hostmap import HostMap
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import result_errmsg, add_local_lib_path
 add_local_lib_path()
@@ -125,12 +126,26 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
         results = {}
 
         log.debug('Requesting services')
-        result = yield nova.services()
-        results['services'] = result['services']
-
-        yield self.preprocess_hosts(config, results)
-
-        defer.returnValue(results)
+        # ---------------------------------------------------------------------
+        # ZPS-5043
+        # Skip over API errors if user has restricted access, else raise.
+        # ---------------------------------------------------------------------
+        try:
+            result = yield nova.services()
+        except APIClientError as ex:
+            if "403 Forbidden" in ex.message:
+                log.debug("OpenStack API: user lacks access to call: nova.services.")
+                defer.returnValue(results)
+            else:
+                log.warning("OpenStack API: access issue: {}".format(ex))
+                raise
+        except Exception as ex:
+            log.error("OpenStack API Error: {}".format(ex))
+            raise
+        else:
+            results['services'] = result['services']
+            yield self.preprocess_hosts(config, results)
+            defer.returnValue(results)
 
     @inlineCallbacks
     def preprocess_hosts(self, config, results):
@@ -181,11 +196,10 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
         # so their IDs don't especially matter.  The new full model run
         # will establish and store their proper IDs.
 
-
     def onSuccess(self, result, config):
         data = self.new_data()
 
-        for service in result['services']:
+        for service in result.get('services', {}):
             host_id = service['host']
             hostname = result['hostmap'].get_hostname_for_hostid(host_id)
             host_base_id = re.sub(r'^host-', '', host_id)

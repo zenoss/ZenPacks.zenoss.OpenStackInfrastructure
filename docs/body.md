@@ -424,14 +424,26 @@ Restricted (non-administrator) users can also model and monitor OpenStack
 devices, with access to those devices consistent with that user's privileges.
 In other words, you should expect reduced visiblity for restricted users.
 
-In particular, a restricted user will see:
+A restricted should expect to see:
 
 * Fewer modeled components
 * Reduced monitored metrics
 * Absent events for missing components
 
+In particular, restricted users can see diminished components and metrics for:
+
+* Cinder Pools
+* Cinder Services
+* Cinder Volumes
+* Hypervisors
+* Neutron Agents
+* Nova Services 
+* Tenants
+* Any API item that requires administrator access
+
 If you believe a user should have more access to data, it is your responsibity
 to adjust the user's access level on OpenStack.
+
 
 Domain Support
 ---------------------

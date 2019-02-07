@@ -18,12 +18,13 @@ from zope.interface import implements
 
 from Products.DataCollector.plugins.DataMaps import ObjectMap
 from Products.ZenEvents import ZenEventClasses
+from Products.ZenUtils.Utils import prepId
 
 from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import (
     PythonDataSource, PythonDataSourcePlugin, PythonDataSourceInfo,
     IPythonDataSourceInfo)
 
-from Products.ZenUtils.Utils import prepId
+from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.exceptions import APIClientError
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import result_errmsg, add_local_lib_path
 add_local_lib_path()
 
@@ -118,15 +119,30 @@ class NeutronAgentStatusDataSourcePlugin(PythonDataSourcePlugin):
         results = {}
 
         log.debug('Requesting agent-list')
-        result = yield neutron.agents()
-        results['agents'] = result['agents']
-
-        defer.returnValue(results)
+        # ---------------------------------------------------------------------
+        # ZPS-5043
+        # Skip over API errors if user has restricted access, else raise.
+        # ---------------------------------------------------------------------
+        try:
+            result = yield neutron.agents()
+        except APIClientError as ex:
+            if "403 Forbidden" in ex.message:
+                log.debug("OpenStack API: user lacks access to call: neutron.agents.")
+                defer.returnValue(results)
+            else:
+                log.warning("OpenStack API: access issue: {}".format(ex))
+                raise
+        except Exception as ex:
+            log.error("OpenStack API Error: {}".format(ex))
+            raise
+        else:
+            results['agents'] = result['agents']
+            defer.returnValue(results)
 
     def onSuccess(self, result, config):
         data = self.new_data()
 
-        for agent in result['agents']:
+        for agent in result.get('agents', {}):
             agent_id = prepId('agent-{0}'.format(agent['id']))
 
             data['maps'].append(ObjectMap(
