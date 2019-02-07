@@ -1,3 +1,0 @@
-NETWORKING=yes
-HOSTNAME={{ ansible_fqdn }}
-NOZEROCONF=yes

@@ -1,7 +1,0 @@
-DEVICE={{ hardware.if.name }}
-TYPE="OVSPort"
-DEVICETYPE="ovs"
-OVS_BRIDGE="br-ex"
-HWADDR={{ hardware.if.macaddress }}
-ONBOOT="yes"
-NOZEROCONF=yes
