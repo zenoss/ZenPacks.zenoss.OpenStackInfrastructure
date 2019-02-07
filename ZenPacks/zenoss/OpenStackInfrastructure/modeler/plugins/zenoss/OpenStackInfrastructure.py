@@ -1658,18 +1658,19 @@ class OpenStackInfrastructure(PythonPlugin):
         results['host_mappings'] = hostmap.freeze_mappings()
 
     def replace_hosts_with_ids(self, hostmap, results):
-        # replace all references to hosts in results with their host IDs,
-        # using the information in the hostmap object.
+        # Replace all references to hosts in results with their host IDs,
+        #  using the information in the hostmap object.
+        # ZPS-5043: Guard against missing items due to restricted users.
 
-        for service in results['services']:
+        for service in results.get('services', {}):
             if 'host' in service:
                 service['host'] = hostmap.get_hostid(service['host'])
 
-        for agent in results['agents']:
+        for agent in results.get('agents', {}):
             if 'host' in agent:
                 agent['host'] = hostmap.get_hostid(agent['host'])
 
-        for service in results['cinder_services']:
+        for service in results.get('cinder_services', {}):
             if 'host' in service:
                 if hostmap.has_hostref(service['host']):
                     service['host'] = hostmap.get_hostid(service['host'])
