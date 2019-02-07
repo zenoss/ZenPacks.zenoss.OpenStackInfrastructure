@@ -209,8 +209,8 @@ class ApiEndpointStatusDataSourcePlugin(PythonDataSourcePlugin):
             'password': context.zCommandPassword,
             'project_id': context.zOpenStackProjectId,
             'auth_url': context.zOpenStackAuthUrl,
-            'user_domain_name': content.zOpenStackUserDomainName,
-            'project_domain_name': content.zOpenStackProjectDomainName,
+            'user_domain_name': context.zOpenStackUserDomainName,
+            'project_domain_name': context.zOpenStackProjectDomainName,
             'region_name': context.zOpenStackRegionName,
             'auth_required': datasource.auth_required,
             'ok_result': datasource.ok_result
