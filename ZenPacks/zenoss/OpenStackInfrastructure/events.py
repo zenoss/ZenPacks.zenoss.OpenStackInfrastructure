@@ -248,6 +248,17 @@ def _apply_instance_traits(evt, objmap):
             'shelved_offloaded': 'shelved_offloaded',
         }.get(evt['trait_state'].lower(), 'unknown')
 
+        powerState = {
+            'active': 'running',
+            'building': 'running',
+            'paused': 'paused',
+            'suspended': 'suspended',
+            'stopped': 'shutdown',
+            'deleted': 'shutdown'
+        }.get(evt['trait_state'].lower(), None)
+        if powerState:
+            objmap.powerState = powerState
+
 
 def _apply_cinder_traits(evt, objmap):
     traitmap = {
@@ -394,7 +405,7 @@ def instance_powered_off(evt):
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
-    objmap.powerState = 'shutoff'
+    objmap.powerState = 'shutdown'
 
     return objmap
 
@@ -416,6 +427,7 @@ def instance_shut_down(evt):
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
+    objmap.powerState = 'shutdown'
     return objmap
 
 
@@ -467,6 +479,7 @@ def instance_suspended(evt):
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
+    objmap.powerState = 'suspended'
     return objmap
 
 
@@ -477,6 +490,7 @@ def instance_resumed(evt):
 
     objmap = instance_objmap(evt)
     _apply_instance_traits(evt, objmap)
+    objmap.powerState = 'running'
     return objmap
 
 
