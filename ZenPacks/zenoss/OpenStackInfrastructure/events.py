@@ -254,7 +254,9 @@ def _apply_instance_traits(evt, objmap):
             'paused': 'paused',
             'suspended': 'suspended',
             'stopped': 'shutdown',
-            'deleted': 'shutdown'
+            'deleted': 'shutdown',
+            'shelved': 'shutdown',
+            'shelved_offloaded': 'shutdown',
         }.get(evt['trait_state'].lower(), None)
         if powerState:
             objmap.powerState = powerState
