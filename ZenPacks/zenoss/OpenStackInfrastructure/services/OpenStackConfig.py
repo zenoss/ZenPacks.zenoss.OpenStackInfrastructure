@@ -93,6 +93,7 @@ class OpenStackConfig(CollectorConfigService):
                 ds_config = OpenStackDataSourceConfig()
                 ds_config.device = device.id
                 ds_config.component = component.id
+                ds_config.component_meta_type = component.meta_type
                 ds_config.template = template.id
                 ds_config.datasource = ds.titleOrId()
                 ds_config.points = datapoints
