@@ -195,7 +195,7 @@ class Registry(object):
     def get_component_id(self, device_id, resourceId):
         # Given a resource ID, return the corresponding component ID,
         # or None if it is unrecognized.
-        return self.component_id.get(device_id, {}).get(resourceId, None)
+        return self.component_id.get(device_id, {}).get(resourceId)
 
     def device_resource_ids(self, device_id, meta_type):
         # Given a device and meta_type, return all monitored resource IDs.
