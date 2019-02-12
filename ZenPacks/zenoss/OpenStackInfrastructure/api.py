@@ -49,7 +49,7 @@ def _runcommand(cmd):
     p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     (stdout, stderr) = p.communicate()
     if p.returncode == 0:
-        return json.loads(stdout)
+        return True, json.loads(stdout)
     else:
         try:
             message = json.loads(stdout)['error']
@@ -59,8 +59,9 @@ def _runcommand(cmd):
         cmd = [ mask_arg(x) for x in cmd]
 
         log.exception(subprocess.CalledProcessError(p.returncode, cmd=cmd, output=message))
-        log.error('Keystone Error Occured: ' + message)
-
+        message = 'Keystone Error Occured: ' +  message.replace('\r', '').replace('\n', '')
+        log.error(message)
+        return False, message
 
 class IOpenStackInfrastructureFacade(IFacade):
     def addOpenStack(self, device_name, username, api_key, project_id, user_domain_name, project_domain_name, auth_url,
@@ -158,5 +159,8 @@ class OpenStackInfrastructureRouter(DirectRouter):
     def getRegions(self, username, api_key, project_id, user_domain_name, project_domain_name, auth_url):
         facade = self._getFacade()
 
-        data = facade.getRegions(username, api_key, project_id, user_domain_name, project_domain_name, auth_url)
-        return DirectResponse(success=True, data=data)
+        success, data = facade.getRegions(username, api_key, project_id, user_domain_name, project_domain_name, auth_url)
+        if success:
+            return DirectResponse.succeed(data=data)
+        else:
+            return DirectResponse.fail(data)
