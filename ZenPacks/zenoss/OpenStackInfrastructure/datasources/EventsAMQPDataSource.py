@@ -135,7 +135,8 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
                 'severity': ZenEventClasses.Info,
                 'eventKey': '',
                 'summary': 'OpenStackInfrastructure: ' + event_type,
-                'eventClassKey': 'openstack|' + event_type,
+                'eventClassKey': 'openstack-' + event_type,
+                'eventClass': '/OpenStack',                
                 'openstack_event_type': event_type
             }
 
