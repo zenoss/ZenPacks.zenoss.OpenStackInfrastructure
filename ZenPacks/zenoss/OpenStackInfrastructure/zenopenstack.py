@@ -27,11 +27,12 @@ import json
 from metrology import Metrology
 from metrology.registry import registry as metrology_registry
 from metrology.instruments import Meter
+import re
 import time
 from pprint import pformat
 import socket
 
-from twisted.internet import reactor, defer
+from twisted.internet import reactor, defer, task
 import twisted.manhole.telnet
 from twisted.python import log as twisted_log
 from twisted.spread import pb
@@ -42,6 +43,7 @@ from twisted.web.server import Site as TwistedSite
 import zope.interface
 import zope.component
 
+from Products.DataCollector.plugins.DataMaps import ObjectMap
 from Products.ZenCollector.daemon import CollectorDaemon
 
 from Products.ZenCollector.interfaces import (
@@ -58,7 +60,7 @@ from Products.ZenCollector.tasks import (
 )
 
 from Products.ZenEvents import ZenEventClasses
-from Products.ZenUtils.Utils import unused
+from Products.ZenUtils.Utils import unused, prepId
 
 unused(Globals)
 
@@ -151,6 +153,8 @@ class Registry(object):
 
     def __init__(self):
         self.configs = {}
+        self.component_id = {}
+        self.resource_bytype = {}
         self.event_types = {}
 
     def all_devices(self):
@@ -174,12 +178,28 @@ class Registry(object):
         # (list of OpenStackDataSourceConfig as returned by OpenStackConfig service)
 
         self.configs[device_id] = {}
+        self.component_id[device_id] = {}
+        self.resource_bytype[device_id] = defaultdict(set)
         self.event_types[device_id] = cfg.zOpenStackProcessEventTypes
 
         for datasource in cfg.datasources:
             self.configs.setdefault(device_id, {})
             self.configs[device_id].setdefault(datasource.resourceId, {})
             self.configs[device_id][datasource.resourceId][datasource.meter] = datasource.points
+            self.component_id[device_id][datasource.resourceId] = datasource.component
+            self.resource_bytype[device_id][datasource.component_meta_type].add(datasource.resourceId)
+
+    def has_resource(self, device_id, resourceId):
+        return resourceId in self.component_id.get(device_id, {})
+
+    def get_component_id(self, device_id, resourceId):
+        # Given a resource ID, return the corresponding component ID,
+        # or None if it is unrecognized.
+        return self.component_id.get(device_id, {}).get(resourceId)
+
+    def device_resource_ids(self, device_id, meta_type):
+        # Given a device and meta_type, return all monitored resource IDs.
+        return self.resource_bytype.get(device_id, {}).get(meta_type, [])
 
     def get_datapoints(self, device_id, resourceId, metric_name):
         if device_id not in self.configs:
@@ -191,6 +211,10 @@ REGISTRY = Registry()
 METRIC_QUEUE = deque()
 EVENT_QUEUE = deque()
 MAP_QUEUE = defaultdict(ConsolidatingObjectMapQueue)
+VNICS = defaultdict(lambda: dict(
+    potential=dict(),
+    modeled=set()
+))
 
 
 class Site(TwistedSite):
@@ -580,6 +604,12 @@ class CeilometerV1Samples(Resource):
             else:
                 log.debug("Ignoring unmonitored sample: %s / %s / %s", device_id, resourceId, meter)
 
+            if meter.startswith("network") and not REGISTRY.has_resource(device_id, resourceId):
+                # potentially, a new vnic.   Store the resource ID
+                # so that we can investigate further in the VnicTask
+                if resourceId not in VNICS[device_id]['potential']:
+                    VNICS[device_id]['potential'][resourceId] = now
+
         # An empty response is fine.
         return b""
 
@@ -897,6 +927,79 @@ class OpenStackMapTask(BaseTask):
             self.state = TaskStates.STATE_IDLE
 
 
+class OpenStackVnicTask(BaseTask):
+    zope.interface.implements(IScheduledTask)
+
+    def __init__(self, taskName, configId, scheduleIntervalSeconds=60, taskConfig=None):
+        super(OpenStackVnicTask, self).__init__(
+            taskName, configId, scheduleIntervalSeconds, taskConfig)
+
+        self.name = taskName
+        self.configId = configId
+        self.state = TaskStates.STATE_IDLE
+        self.interval = scheduleIntervalSeconds
+
+    @defer.inlineCallbacks
+    def doTask(self):
+        # Periodically look for new vnics, and if found, build ObjectMaps
+        # for them, which will be picked up by the map task.
+
+        now = time.time()
+        i = 0
+        for device_id, vnics in VNICS.iteritems():
+            if not vnics['potential']:
+                continue
+
+            for resourceId, first_seen in vnics['potential'].iteritems():
+                # We only attempt to model a vnic for 20 minutes, then give up.
+                # this is to allow time for a new instance to be modeled, but
+                # also to save processing time, because for every potential
+                # vnic, we need to loop over every possible instance.
+                # 20 minutes lets us try this many times, and if it
+                # isn't working by then, it presumably never will.
+                if now - first_seen > 20 * 60:
+                    continue
+
+                # We only ever model each vnic once.
+                if resourceId in vnics['modeled']:
+                    continue
+
+                # Loop over every known instance to see if it is the parent
+                # of this potential vnic.
+                for instanceUUID in REGISTRY.device_resource_ids(device_id, 'OpenStackInfrastructureInstance'):
+                    # give time back to the reactor occasionally
+                    i += 1
+                    if i % 500:
+                        yield task.deferLater(reactor, 0, lambda: None)
+
+                    # Vnic resourceIds are of the form:
+                    #  [instanceName]-[instanceUUID]-[vnicName]
+                    #  instance-00000001-95223d22-d3af-4b06-a91c-81114d557bd1-tap908bc571-0d
+
+                    log.debug("Searching for instance %s in %s" % (instanceUUID, resourceId))
+                    match = re.search("-%s-(.*)$" % instanceUUID, resourceId)
+                    if match:
+                        vnicName = match.group(1)
+                        instance_id = REGISTRY.get_component_id(device_id, instanceUUID)
+                        vnic_id = prepId(str('vnic-%s-%s' % (instanceUUID, vnicName)))
+
+                        log.info("Discovered new vNIC (%s) on instance %s", vnic_id, instance_id)
+                        vnics['modeled'].add(resourceId)
+
+                        MAP_QUEUE[device_id].append(ObjectMap({
+                            'modname': 'ZenPacks.zenoss.OpenStackInfrastructure.Vnic',
+                            'id': vnic_id,
+                            'compname': 'components/%s' % instance_id,
+                            'relname': 'vnics',
+                            'title': vnicName,
+                            'resourceId': resourceId
+                        }))
+                    break
+
+                if resourceId in vnics['modeled']:
+                    continue
+
+
 class Preferences(object):
     zope.interface.implements(ICollectorPreferences)
 
@@ -934,6 +1037,7 @@ class Preferences(object):
         yield OpenStackPerfTask('zenopenstack-perf', configId='zenopenstack-perf', scheduleIntervalSeconds=60)
         yield OpenStackEventTask('zenopenstack-event', configId='zenopenstack-event', scheduleIntervalSeconds=60)
         yield OpenStackMapTask('zenopenstack-map', configId='zenopenstack-map', scheduleIntervalSeconds=60)
+        yield OpenStackVnicTask('zenopenstack-vnic', configId='zenopenstack-vnic', scheduleIntervalSeconds=60)
 
 
 def get_manhole_port(base_port_number):
@@ -979,7 +1083,8 @@ def main():
         REGISTRY=REGISTRY,
         METRIC_QUEUE=METRIC_QUEUE,
         EVENT_QUEUE=EVENT_QUEUE,
-        MAP_QUEUE=MAP_QUEUE
+        MAP_QUEUE=MAP_QUEUE,
+        VNICS=VNICS
     )
     collectordaemon.run()
 
