@@ -256,7 +256,7 @@ class PerfAMQPDataSourcePlugin(AMQPDataSourcePlugin):
                 'summary': 'OpenStack Ceilometer AMQP: successful collection',
                 'severity': ZenEventClasses.Clear,
                 'eventKey': 'openstackCeilometerAMQPCollection',
-                'eventClassKey': 'openstack-PerfSuccess',
+                'eventClassKey': 'openstack-Perf',
             })
 
         defer.returnValue(data)

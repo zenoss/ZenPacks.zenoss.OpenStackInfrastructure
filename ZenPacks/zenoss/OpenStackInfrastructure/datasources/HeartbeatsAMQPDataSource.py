@@ -179,7 +179,7 @@ class HeartbeatsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
                 'summary': 'OpenStack Ceilometer AMQP Heartbeat: successful collection',
                 'severity': ZenEventClasses.Clear,
                 'eventKey': 'openstackCeilometerAMQPHeartbeatCollection',
-                'eventClassKey': 'openstack-EventsSuccess',
+                'eventClassKey': 'openstack-Heartbeats',
                 })
 
         defer.returnValue(data)

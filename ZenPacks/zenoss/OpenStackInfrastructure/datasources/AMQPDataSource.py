@@ -85,7 +85,6 @@ class AMQPDataSourceInfo(RRDDataSourceInfo):
 class AMQPDataSourcePlugin(PythonDataSourcePlugin):
     exchange_name = '$OpenStackInbound'
     queue_name = None  # override in subclass
-    failure_eventClassKey = 'AMQPFailure'
 
     @classmethod
     def config_key(cls, datasource, context):
@@ -168,7 +167,7 @@ class AMQPDataSourcePlugin(PythonDataSourcePlugin):
             'summary': errmsg,
             'severity': ZenEventClasses.Error,
             'eventKey': 'openstackCeilometerAMQPCollection',
-            'eventClassKey': self.failure_eventClassKey
+            'eventClassKey': 'openstack-AMQP'
             })
 
         return data
