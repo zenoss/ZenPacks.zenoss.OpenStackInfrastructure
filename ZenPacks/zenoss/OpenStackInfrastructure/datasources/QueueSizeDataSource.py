@@ -168,7 +168,7 @@ class QueueSizeDataSourcePlugin(PythonDataSourcePlugin):
                 'summary': 'OpenStack AMQP QueueSize: successful collection',
                 'severity': ZenEventClasses.Clear,
                 'eventKey': 'openstackCeilometerAMQPCollection',
-                'eventClassKey': 'QueueSizeSuccess',
+                'eventClassKey': 'openstack-QueueSizeSuccess',
                 })
 
         return data
@@ -187,7 +187,7 @@ class QueueSizeDataSourcePlugin(PythonDataSourcePlugin):
             'summary': errmsg,
             'severity': ZenEventClasses.Error,
             'eventKey': 'openstackCeilometerAMQPCollection',
-            'eventClassKey': 'QueueSizeFailure',
+            'eventClassKey': 'openstack-QueueSizeFailure',
             })
 
         return data

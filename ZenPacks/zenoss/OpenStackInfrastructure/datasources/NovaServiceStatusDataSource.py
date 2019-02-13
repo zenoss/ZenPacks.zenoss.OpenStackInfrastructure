@@ -263,7 +263,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
             'summary': 'Nova Status Collector: successful collection',
             'severity': ZenEventClasses.Clear,
             'eventKey': 'openStackNovaServiceCollectionError',
-            'eventClassKey': 'openStackFailure',
+            'eventClassKey': 'openstack-Failure',
             })
 
         return data
@@ -281,7 +281,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
             'summary': errmsg,
             'severity': ZenEventClasses.Error,
             'eventKey': 'openStackNovaServiceCollectionError',
-            'eventClassKey': 'openStackFailure',
+            'eventClassKey': 'openstack-Failure',
             })
 
         return data

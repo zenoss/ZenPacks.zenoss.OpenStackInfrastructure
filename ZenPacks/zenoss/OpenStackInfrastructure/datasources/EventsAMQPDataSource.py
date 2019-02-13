@@ -189,7 +189,7 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
             'summary': 'OpenStack Ceilometer AMQP: successful collection',
             'severity': ZenEventClasses.Clear,
             'eventKey': 'openstackCeilometerAMQPCollection',
-            'eventClassKey': 'EventsSuccess',
+            'eventClassKey': 'openstack-EventsSuccess',
         })
 
         log.debug("Sending datamaps for %s: %s", config.id, data['maps'])
