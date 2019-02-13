@@ -1454,7 +1454,7 @@ class OpenStackInfrastructure(PythonPlugin):
         results['servers'] = yield self.api_call(nova.servers, 'servers')
         # Retry as single in case where we don't use administrator account.
         if not results['servers']:
-            LOG.info("API failed for 'servers': Re-trying as single tenant.")
+            LOG.debug("API returned no data for 'servers': Re-trying as single tenant.")
             results['servers'] = yield self.api_call(nova.servers_single, 'servers')
         results['services'] = yield self.api_call(nova.services, 'services')
         results['agents'] = yield self.api_call(neutron.agents, 'agents')
@@ -1523,14 +1523,14 @@ class OpenStackInfrastructure(PythonPlugin):
         results['volumes'] = yield self.api_call(cinder.volumes, 'volumes')
         # Retry as single in case where we don't use administrator account.
         if not results['volumes']:
-            LOG.info("API failed for 'volumes': Re-trying as single tenant.")
+            LOG.debug("API returned no data for 'volumes': Re-trying as single tenant.")
             results['volumes'] = yield self.api_call(cinder.volumes_single, 'volumes')
 
         results['volumetypes'] = yield self.api_call(cinder.volumetypes, 'volume_types')
         results['volsnapshots'] = yield self.api_call(cinder.volumesnapshots, 'snapshots')
         # Retry as single in case where we don't use administrator account.
         if not results['volsnapshots']:
-            LOG.info("API failed for 'volsnapshots': Re-trying as single tenant.")
+            LOG.debug("API returned no data for Volume Snapshots: Re-trying as single tenant.")
             results['volsnapshots'] = yield self.api_call(cinder.volumesnapshots_single, 'snapshots')
         results['cinder_services'] = yield self.api_call(cinder.services, 'services')
         results['volume_pools'] = yield self.api_call(cinder.pools, 'pools')
