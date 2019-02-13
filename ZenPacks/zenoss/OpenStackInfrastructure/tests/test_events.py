@@ -76,7 +76,7 @@ class TestEventMappings(zenpacklib.TestCase):
 
             for event in self._eventData.values():
                 event['openstack_event_type'] = \
-                    re.sub(r'^openstack\|', '', event.get('eventClassKey', ''))
+                    re.sub(r'^openstack-', '', event.get('eventClassKey', ''))
 
         if self._eventData:
             self._eventsloaded = True
