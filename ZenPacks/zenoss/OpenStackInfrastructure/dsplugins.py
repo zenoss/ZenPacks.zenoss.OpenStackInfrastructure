@@ -166,6 +166,7 @@ class RabbitMQCeilometerCredentialsDataSourcePlugin(PythonDataSourcePlugin):
                 'summary': 'RabbitMQ-Ceilometer: successful completion',
                 'eventKey': 'RabbitMQCeilometerResult',
                 'severity': ZenEventClasses.Clear,
+                'eventClassKey': 'openstack-RabbitMQ'
                 }],
             }
 
@@ -175,6 +176,7 @@ class RabbitMQCeilometerCredentialsDataSourcePlugin(PythonDataSourcePlugin):
                 'summary': 'Error configuring RabbitMQ-Ceilometer: %s' % result,
                 'eventKey': 'RabbitMQCeilometerResult',
                 'severity': ZenEventClasses.Error,
+                'eventClassKey': 'openstack-RabbitMQ'
                 }],
             }
 
