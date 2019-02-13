@@ -136,7 +136,6 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
                 'eventKey': '',
                 'summary': 'OpenStackInfrastructure: ' + event_type,
                 'eventClassKey': 'openstack-' + event_type,
-                'eventClass': '/OpenStack',                
                 'openstack_event_type': event_type
             }
 

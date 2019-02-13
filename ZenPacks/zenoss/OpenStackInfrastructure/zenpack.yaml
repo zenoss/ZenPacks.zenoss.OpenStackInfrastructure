@@ -2160,7 +2160,12 @@ classes:
 event_classes:
   /OpenStack:
     remove: true
-
+    mappings:
+      OpenStack Default:
+        remove: true
+        eventClassKey: defaultmapping
+        sequence: 900
+        rule: "(getattr(evt, 'eventClassKey', '') or '').startswith('openstack-')"
   /OpenStack/compute:
     remove: true
   /OpenStack/compute/instance:
