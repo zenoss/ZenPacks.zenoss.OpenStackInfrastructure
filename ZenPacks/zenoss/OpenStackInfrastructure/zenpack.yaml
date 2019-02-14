@@ -2160,7 +2160,12 @@ classes:
 event_classes:
   /OpenStack:
     remove: true
-
+    mappings:
+      OpenStack Default:
+        remove: true
+        eventClassKey: defaultmapping
+        sequence: 900
+        rule: "(getattr(evt, 'eventClassKey', '') or '').startswith('openstack-')"
   /OpenStack/compute:
     remove: true
   /OpenStack/compute/instance:
@@ -2168,7 +2173,7 @@ event_classes:
     mappings:
       compute.instance.create.error:
         remove: true
-        eventClassKey: openstack|compute.instance.create.error
+        eventClassKey: openstack-compute.instance.create.error
         sequence: 51
         explanation: An error has occurred while creating an instance
         zProperties:
@@ -2231,11 +2236,11 @@ event_classes:
         resolution: Add the required option to the file.
       openStackCinderServiceStatus:
         remove: true
-        eventClassKey: openStackNeutronAgentStatus
+        eventClassKey: openStackCinderServiceStatus
         sequence: 12
         explanation: A neutron agent is not running properly
         resolution: Restart the offending agent.
-      openStackCinderServiceStatus:
+      openStackNeutronAgentStatus:
         remove: true
         eventClassKey: openStackNeutronAgentStatus
         sequence: 12

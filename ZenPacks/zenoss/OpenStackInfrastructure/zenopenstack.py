@@ -652,7 +652,7 @@ class CeilometerV1Events(Resource):
                 'severity': ZenEventClasses.Info,
                 'eventKey': '',
                 'summary': 'OpenStackInfrastructure: ' + event_type,
-                'eventClassKey': 'openstack|' + event_type,
+                'eventClassKey': 'openstack-' + event_type,
                 'openstack_event_type': event_type
             }
 
@@ -825,6 +825,7 @@ class OpenStackEventTask(BaseTask):
         self.interval = scheduleIntervalSeconds
         self._collector = zope.component.queryUtility(ICollector)
 
+    @defer.inlineCallbacks
     def doTask(self):
         if len(EVENT_QUEUE):
             log.debug("Draining event queue")
