@@ -14,10 +14,12 @@ API interfaces and default implementations.
 import logging
 log = logging.getLogger('zen.OpenStack.api')
 
+import os
 import re
 import json
 from urlparse import urlparse
 import subprocess
+from pipes import quote as shellquote
 
 from zope.event import notify
 from zope.interface import implements
@@ -29,6 +31,7 @@ from Products.Zuul.catalog.events import IndexingEvent
 from Products.Zuul.facades import ZuulFacade
 from Products.Zuul.interfaces import IFacade
 from Products.Zuul.utils import ZuulMessageFactory as _t
+from Products.ZenUtils.Utils import zenPath
 
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import add_local_lib_path, zenpack_path
 add_local_lib_path()
@@ -59,6 +62,7 @@ def _runcommand(cmd):
         cmd = [ mask_arg(x) for x in cmd]
 
         log.exception(subprocess.CalledProcessError(p.returncode, cmd=cmd, output=message))
+        message = "\n".join([x for x in stderr.split("\n") if "zminion-return" not in x])
         message = 'Keystone Error Occured: ' +  message.replace('\r', '').replace('\n', '')
         log.error(message)
         return False, message
@@ -68,7 +72,7 @@ class IOpenStackInfrastructureFacade(IFacade):
                      region_name=None, collector='localhost'):
         """Add OpenStack Endpoint."""
 
-    def getRegions(self, username, api_key, project_id, user_domain_name, project_domain_name, auth_url):
+    def getRegions(self, username, api_key, project_id, user_domain_name, project_domain_name, auth_url, collector):
         """Get a list of available regions, given a keystone endpoint and credentials."""
 
 
@@ -125,7 +129,7 @@ class OpenStackInfrastructureFacade(ZuulFacade):
 
         return True, 'Device addition scheduled'
 
-    def getRegions(self, username, api_key, project_id, user_domain_name, project_domain_name, auth_url):
+    def getRegions(self, username, api_key, project_id, user_domain_name, project_domain_name, auth_url, collector):
         """Get a list of available regions, given a keystone endpoint and credentials."""
 
         cmd = [_helper, "getRegions"]
@@ -135,6 +139,14 @@ class OpenStackInfrastructureFacade(ZuulFacade):
         cmd.append("--user_domain_name=%s" % user_domain_name)
         cmd.append("--project_domain_name=%s" % project_domain_name)
         cmd.append("--auth_url=%s" % auth_url)
+
+        if os.path.exists(zenPath("bin", "zminion")):
+            # Escape shell characters in command
+            cmd = [shellquote(x) for x in cmd]
+            cmd = [
+                'zminion',
+                '--minion-name', 'zminion_%s' % collector,
+                'run', '--'] + cmd
 
         return _runcommand(cmd)
 
@@ -156,10 +168,10 @@ class OpenStackInfrastructureRouter(DirectRouter):
         else:
             return DirectResponse.fail(message)
 
-    def getRegions(self, username, api_key, project_id, user_domain_name, project_domain_name, auth_url):
+    def getRegions(self, username, api_key, project_id, user_domain_name, project_domain_name, auth_url, collector):
         facade = self._getFacade()
 
-        success, data = facade.getRegions(username, api_key, project_id, user_domain_name, project_domain_name, auth_url)
+        success, data = facade.getRegions(username, api_key, project_id, user_domain_name, project_domain_name, auth_url, collector)
         if success:
             return DirectResponse.succeed(data=data)
         else:

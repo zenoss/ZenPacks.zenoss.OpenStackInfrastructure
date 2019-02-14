@@ -38,7 +38,8 @@ var addOpenStack = new Zenoss.Action({
                         id: "openstack_device_name",
                         width: 350,
                         allowBlank: false,
-                        vtype: 'hostnameorIP'
+                        vtype: 'hostnameorIP',
+                        margin: '15 0 0 0',
                     },{
                         xtype: 'label',
                         style: 'font-style: italic',
@@ -56,6 +57,7 @@ var addOpenStack = new Zenoss.Action({
                         id: "openstack_auth_url",
                         width: 350,
                         allowBlank: false,
+                        margin: '15 0 0 0',
                         listeners: {
                             blur: this.updateRegions,
                             scope: this
@@ -77,6 +79,7 @@ var addOpenStack = new Zenoss.Action({
                         id: "openstack_username",
                         width: 350,
                         allowBlank: false,
+                        margin: '15 0 0 0',
                         listeners: {
                             blur: this.updateRegions,
                             scope: this
@@ -98,6 +101,7 @@ var addOpenStack = new Zenoss.Action({
                         id: "openstack_api_key",
                         width: 350,
                         allowBlank: false,
+                        margin: '15 0 0 0',
                         listeners: {
                             blur: this.updateRegions,
                             scope: this
@@ -119,6 +123,7 @@ var addOpenStack = new Zenoss.Action({
                         id: "openstack_project_id",
                         width: 350,
                         allowBlank: false,
+                        margin: '15 0 0 0',
                         listeners: {
                             blur: this.updateRegions,
                             scope: this
@@ -139,8 +144,9 @@ var addOpenStack = new Zenoss.Action({
                         labelWidth: 130,
                         id: "openstack_user_domain_name",
                         width: 350,
-                        value: 'default',                        
+                        value: 'default',
                         allowBlank: false,
+                        margin: '15 0 0 0',
                         listeners: {
                             blur: this.updateRegions,
                             scope: this
@@ -163,6 +169,7 @@ var addOpenStack = new Zenoss.Action({
                         width: 350,
                         value: 'default',
                         allowBlank: false,
+                        margin: '15 0 0 0',
                         listeners: {
                             blur: this.updateRegions,
                             scope: this
@@ -191,6 +198,7 @@ var addOpenStack = new Zenoss.Action({
                         forceSelection: true,
                         editable: false,
                         allowBlank: false,
+                        margin: '15 0 0 0',
                         triggerAction: 'all',
                         selectOnFocus: false
                     },{
@@ -218,6 +226,7 @@ var addOpenStack = new Zenoss.Action({
                     allowBlank: false,
                     triggerAction: 'all',
                     selectOnFocus: false,
+                    margin: '15 0 0 0',
                     listeners: {
                         'afterrender': function(component) {
                             var index = component.store.find('name', 'localhost');
@@ -266,7 +275,7 @@ var addOpenStack = new Zenoss.Action({
         combo = Ext.getCmp('region_name');
         store = combo.getStore();
 
-        if (formvalues.username && formvalues.api_key && formvalues.project_id && formvalues.user_domain_name && formvalues.project_domain_name && formvalues.auth_url) {
+        if (formvalues.username && formvalues.api_key && formvalues.project_id && formvalues.user_domain_name && formvalues.project_domain_name && formvalues.auth_url && formvalues.collector) {
             store.load({
                params: {
                    username: formvalues.username,
@@ -274,7 +283,9 @@ var addOpenStack = new Zenoss.Action({
                    project_id: formvalues.project_id,
                    auth_url: formvalues.auth_url,
                    user_domain_name: formvalues.user_domain_name,
-                   project_domain_name: formvalues.project_domain_name
+                   project_domain_name: formvalues.project_domain_name,
+                   collector: formvalues.collector,
+
                },
                callback: function(records, operation, success) {
                     combo.select(store.getAt(0));
