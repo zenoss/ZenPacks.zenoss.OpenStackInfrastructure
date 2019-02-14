@@ -246,8 +246,8 @@ class ApiEndpointStatusDataSourcePlugin(PythonDataSourcePlugin):
             ds0.params['password'],
             ds0.params['auth_url'],
             ds0.params['project_id'],
-            ds0.params['user_domain_name'],
-            ds0.params['project_domain_name'],
+            ds0.params.get('user_domain_name', 'default'),
+            ds0.params.get('project_domain_name', 'default'),
             ds0.params['region_name']
         )
 

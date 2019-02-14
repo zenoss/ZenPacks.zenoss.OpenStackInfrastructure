@@ -112,8 +112,8 @@ class NeutronAgentStatusDataSourcePlugin(PythonDataSourcePlugin):
             ds0.zCommandPassword,
             ds0.zOpenStackAuthUrl,
             ds0.zOpenStackProjectId,
-            ds0.zOpenStackUserDomainName,
-            ds0.zOpenStackProjectDomainName,
+            getattr(ds0, 'zOpenStackUserDomainName', 'default'),
+            getattr(ds0, 'zOpenStackProjectDomainName', 'default'),
             ds0.zOpenStackRegionName)
 
         results = {}
