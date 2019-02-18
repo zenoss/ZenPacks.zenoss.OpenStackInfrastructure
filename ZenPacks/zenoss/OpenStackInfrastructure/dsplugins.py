@@ -196,7 +196,7 @@ class RabbitMQCeilometerCredentialsDataSourcePlugin(PythonDataSourcePlugin):
                 raise Exception("Unable to create vhost %s, cannot complete setup" % vhost)
 
         log.info("Verifying exchanges...")
-        for exchange in ('zenoss.openstack.ceilometer', 'zenoss.openstack.heartbeats'):
+        for exchange in ('zenoss.openstack.ceilometer', ):
             success = yield client.does_exchange_exist_on_vhost(exchange, vhost)
             if not success:
                 success = yield client.add_exchange_to_vhost(exchange, vhost)

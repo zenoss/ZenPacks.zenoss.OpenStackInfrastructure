@@ -226,9 +226,6 @@ device_classes:
           events:
             type: OpenStack Ceilometer Events AMQP
             cycletime: 30
-          heartbearts:
-            type: OpenStack Ceilometer Heartbeats AMQP
-            cycletime: 30
           neutronAgentStatus:
             type: OpenStack Neutron Agent Status
             cycletime: 30
@@ -2209,18 +2206,6 @@ event_classes:
   /OpenStack/image:
     remove: true
   /Status:
-    remove: true
-  /Status/Heartbeat:
-    remove: true
-  /Status/Heartbeat/instances:
-    remove: true
-    mappings:
-      openStackCeilometerHeartbeat:
-        remove: true
-        eventClassKey: openStackCeilometerHeartbeat
-        sequence: 10
-  /Status/instances:
-    remove: true
     mappings:
       openStackIniFileAccess:
         remove: true

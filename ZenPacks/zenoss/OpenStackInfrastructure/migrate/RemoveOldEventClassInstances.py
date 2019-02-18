@@ -23,7 +23,7 @@ class RemoveOldEventClassInstances(ZenPackMigration):
     def migrate(self, dmd):
         mappings_to_remove = [
             '/Status/openStackCeilometerHeartbeat',
-
+            '/Status/Heartbeat/instances/openStackCeilometerHeartbeat',
             '/OpenStack/instances/OpenStack Events Default',
             '/OpenStack/compute/instance/instances/compute.instance default mapping',
             '/OpenStack/dhcp_agent/instances/dhcp_agent defaultmapping',

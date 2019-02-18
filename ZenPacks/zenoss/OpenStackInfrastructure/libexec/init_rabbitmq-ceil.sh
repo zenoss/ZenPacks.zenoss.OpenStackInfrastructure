@@ -13,7 +13,6 @@ if [ ! -e $SENTINEL ] ; then
     rabbitmqctl clear_permissions -p /zenoss $USER
     rabbitmqctl set_permissions -p /zenoss $USER '.*' '.*' '.*'
     rabbitmqadmin --port=45672 --vhost=/zenoss --username=$USER --password=$PASSWORD declare exchange name=zenoss.openstack.ceilometer type=topic
-    rabbitmqadmin --port=45672 --vhost=/zenoss --username=$USER --password=$PASSWORD declare exchange name=zenoss.openstack.heartbeats type=topic
     rabbitmqctl delete_user guest || true
     touch $SENTINEL
 fi
