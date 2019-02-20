@@ -470,9 +470,9 @@ class TestModelProcess(BaseTestCase):
             'title': u'public'})
 
         self.assertEquals(obj_map['pool-liberty.zenoss.local_lvm_lvm'], {
-            'allocated_capacity': ('2 GB',),
+            'allocated_capacity': '2 GB',
             'driver_version': u'3.0.0',
-            'free_capacity': ('17.6 GB',),
+            'free_capacity': '17.6 GB',
             'id': 'pool-liberty.zenoss.local_lvm_lvm',
             'location': u'LVMVolumeDriver:liberty.zenoss.local:cinder-volumes:default:0',
             'modname': 'ZenPacks.zenoss.OpenStackInfrastructure.Pool',
@@ -480,7 +480,7 @@ class TestModelProcess(BaseTestCase):
             'reserved_percentage': '0%',
             'storage_protocol': u'iSCSI',
             'title': u'liberty.zenoss.local@lvm#lvm',
-            'total_capacity': ('20.6 GB',),
+            'total_capacity': '20.6 GB',
             'vendor_name': u'Open Source',
             'volume_backend': 0})
 
