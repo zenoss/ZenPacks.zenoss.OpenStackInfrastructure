@@ -1209,17 +1209,17 @@ class OpenStackInfrastructure(PythonPlugin):
             if not allocated_capacity:
                 allocated_capacity = ''
             else:
-                allocated_capacity = str(allocated_capacity) + ' GB',
+                allocated_capacity = str(allocated_capacity) + ' GB'
             free_capacity = pool.get('capabilities', {}).get('free_capacity_gb', False)
             if not free_capacity:
                 free_capacity = ''
             else:
-                free_capacity = str(free_capacity) + ' GB',
+                free_capacity = str(free_capacity) + ' GB'
             total_capacity = pool.get('capabilities', {}).get('total_capacity_gb', False)
             if not total_capacity:
                 total_capacity = ''
             else:
-                total_capacity = str(total_capacity) + ' GB',
+                total_capacity = str(total_capacity) + ' GB'
 
             pools.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Pool',
