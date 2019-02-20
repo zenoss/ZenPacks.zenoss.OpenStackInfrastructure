@@ -62,7 +62,7 @@ def _runcommand(cmd):
         cmd = [ mask_arg(x) for x in cmd]
 
         log.exception(subprocess.CalledProcessError(p.returncode, cmd=cmd, output=message))
-        message = "\n".join([x for x in stderr.split("\n") if "zminion-return" not in x])
+        message = "\n".join([x for x in message.split("\n") if "zminion-return" not in x])
         message = 'Keystone Error Occured: ' +  message.replace('\r', '').replace('\n', '')
         log.error(message)
         return False, message
