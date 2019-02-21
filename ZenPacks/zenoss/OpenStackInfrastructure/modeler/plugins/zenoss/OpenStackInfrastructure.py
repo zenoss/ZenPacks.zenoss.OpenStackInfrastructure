@@ -1616,6 +1616,9 @@ class OpenStackInfrastructure(PythonPlugin):
         for hostname in results['zOpenStackNovaApiHosts']:
             hostmap.add_hostref(hostname, source="zOpenStackNovaApiHosts")
 
+        for hostname in results['zOpenStackCinderApiHosts']:
+            hostmap.add_hostref(hostname, source="zOpenStackCinderApiHosts")
+
         for hostname in results['zOpenStackExtraHosts']:
             hostmap.add_hostref(hostname, source="zOpenStackExtraHosts")
 
@@ -1679,6 +1682,9 @@ class OpenStackInfrastructure(PythonPlugin):
 
         results['zOpenStackNovaApiHosts'] = \
             [hostmap.get_hostid(x) for x in results['zOpenStackNovaApiHosts']]
+
+        results['zOpenStackCinderApiHosts'] = \
+            [hostmap.get_hostid(x) for x in results['zOpenStackCinderApiHosts']]
 
         results['zOpenStackExtraHosts'] = \
             [hostmap.get_hostid(x) for x in results['zOpenStackExtraHosts']]
