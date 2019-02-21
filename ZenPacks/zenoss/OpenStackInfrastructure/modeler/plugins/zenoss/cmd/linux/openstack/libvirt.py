@@ -26,7 +26,7 @@ import logging
 from ZenPacks.zenoss.OpenStackInfrastructure.ssh import SSHClient
 
 ssh_logger = logging.getLogger('txsshclient')
-ssh_logger.setLevel(logging.DEBUG)
+ssh_logger.setLevel(logging.INFO)
 
 log = logging.getLogger('zen.OpenStack.libvirt')
 
