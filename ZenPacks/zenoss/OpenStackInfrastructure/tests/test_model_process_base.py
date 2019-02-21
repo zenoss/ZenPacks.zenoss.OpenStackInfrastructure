@@ -13,7 +13,7 @@
 #
 ###########################################################################
 
-from collections import Counter
+from collections import Counter, defaultdict
 import os
 import json
 import logging
@@ -830,6 +830,38 @@ class TestModelProcess(BaseTestCase):
         for objmap in all_objmaps(self._processTestData(data)):
             if getattr(objmap, 'id', None) == server_id:
                 self.assertFalse(hasattr(objmap, 'set_image'))
+
+    def test_zOpenStackNovaApiHosts(self):
+        data = self.data.copy()
+        data['zOpenStackNovaApiHosts'] = ['novaapi1.myhost.com', 'novaapi2.myhost.com']
+
+        objects = defaultdict(dict)
+        for om in all_objmaps(self._processTestData(data)):
+            object_type = om.modname.replace("ZenPacks.zenoss.OpenStackInfrastructure.", "")
+            object_id = getattr(om, 'id', None)
+            om_dict = {k: v for k, v in om.__dict__.iteritems() if k != '_attrs'}
+            objects[object_type][object_id] = om_dict
+
+        self.assertEquals(len(objects['NovaApi']), 3)
+        self.assertEquals(len(objects['CinderApi']), 1)
+        self.assertIn('host-novaapi1.myhost.com', objects['Host'].keys())
+        self.assertIn('host-novaapi2.myhost.com', objects['Host'].keys())
+
+    def test_zOpenStackCinderApiHosts(self):
+        data = self.data.copy()
+        data['zOpenStackCinderApiHosts'] = ['cinderapi1.myhost.com', 'cinderapi2.myhost.com']
+
+        objects = defaultdict(dict)
+        for om in all_objmaps(self._processTestData(data)):
+            object_type = om.modname.replace("ZenPacks.zenoss.OpenStackInfrastructure.", "")
+            object_id = getattr(om, 'id', None)
+            om_dict = {k: v for k, v in om.__dict__.iteritems() if k != '_attrs'}
+            objects[object_type][object_id] = om_dict
+
+        self.assertEquals(len(objects['NovaApi']), 1)
+        self.assertEquals(len(objects['CinderApi']), 3)
+        self.assertIn('host-cinderapi1.myhost.com', objects['Host'].keys())
+        self.assertIn('host-cinderapi2.myhost.com', objects['Host'].keys())
 
 
 def test_suite():
