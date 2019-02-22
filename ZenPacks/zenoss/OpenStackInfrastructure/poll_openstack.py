@@ -209,7 +209,7 @@ class OpenStackPoller(object):
                 data['agentOFACount'] += 1
             elif agent['agent_type'] == 'L3 agent':
                 data['agentL3Count'] += 1
-            elif agent['agent_type'] == 'Loadbalancer agent':
+            elif agent['agent_type'].startswith('Loadbalancer'):
                 data['agentLBCount'] += 1
             elif agent['agent_type'] == 'Mellanox plugin agent':
                 data['agentMLNXCount'] += 1
