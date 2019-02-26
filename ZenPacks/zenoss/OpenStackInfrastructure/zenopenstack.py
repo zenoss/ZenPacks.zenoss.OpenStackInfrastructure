@@ -217,6 +217,7 @@ VNICS = defaultdict(lambda: dict(
 ))
 
 
+
 class Site(TwistedSite):
     request_buffer = None
 
@@ -563,7 +564,8 @@ class CeilometerV1Samples(Resource):
         try:
             payload = json.loads(request.content.getvalue())
         except Exception, e:
-            log.error("Error [%s] while parsing JSON data: %s", e, request.content.getvalue())
+            log.error("%s: Error [%s] while parsing JSON data: %s",
+                      device_id, e, request.content.getvalue())
             return ErrorPage(400, "Bad Request", "Error parsing JSON data: %s" % e).render(request)
 
         samples = []
@@ -581,15 +583,15 @@ class CeilometerV1Samples(Resource):
 
                 if timestamp > now:
                     if device_id not in self.future_warning:
-                        log.debug("[%s/%s] Timestamp (%s) appears to be in the future.  Using now instead." % (
-                            resourceId, meter, timestamp))
+                        log.debug("%s: [%s/%s] Timestamp (%s) appears to be in the future. Using now instead.",
+                                  device_id, resourceId, meter, timestamp)
                         self.future_warning.add(device_id)
                     timestamp = now
 
                 samples.append((resourceId, meter, value, timestamp))
 
         except Exception, e:
-            log.exception("Error processing sample data")
+            log.exception("%s: Error processing sample data", device_id)
             return ErrorPage(422, "Unprocessable Entity", "Error processing data: %s" % e).render(request)
 
         for resourceId, meter, value, timestamp in samples:
@@ -635,14 +637,16 @@ class CeilometerV1Events(Resource):
         try:
             payload = json.loads(request.content.getvalue())
         except Exception, e:
-            log.error("Error [%s] while parsing JSON data: %s", e, request.content.getvalue())
+            log.error("%s: Error [%s] while parsing JSON data: %s",
+                      device_id, e, request.content.getvalue())
             return ErrorPage(400, "Bad Request", "Error parsing JSON data: %s" % e).render(request)
 
         for c_event in payload:
             if 'event_type' not in c_event:
                 if 'name' in c_event and 'volume' in c_event:
                     return ErrorPage(422, "Unprocessable Entity", "Misconfigured- sending metric data to event URL").render(request)
-                log.error("%s: Ignoring unrecognized event payload: %s" % (request.getClientIP(), c_event))
+                log.error("%s / %s: Ignoring unrecognized event payload: %s",
+                          device_id, request.getClientIP(), c_event)
                 continue
 
             event_type = c_event['event_type']
@@ -668,7 +672,8 @@ class CeilometerV1Events(Resource):
                     # [{'name': 'display_name', 'value': 'demo-volume1-snap'}, ...]
                     traits[trait['name']] = trait['value']
                 else:
-                    log.warning("Unrecognized trait format: %s" % c_event['traits'])
+                    log.warning("%s: Unrecognized trait format: %s",
+                                device_id, c_event['traits'])
 
             if 'priority' in traits:
                 if traits['priority'] == 'WARN':
@@ -683,7 +688,7 @@ class CeilometerV1Events(Resource):
 
             # only pass on events that we actually have mappings for.
             if event_type in REGISTRY.device_event_types(device_id):
-                log.debug("Propagated %s event", event_type)
+                log.debug("%s: Propagated %s event", device_id, event_type)
                 EVENT_QUEUE.append(evt)
                 request._zaction['events'].append(evt)
 
@@ -692,11 +697,12 @@ class CeilometerV1Events(Resource):
                 try:
                     objmap = map_event(evt)
                     if objmap:
-                        log.debug("Mapped %s event to %s", event_type, objmap)
+                        log.debug("%s: Mapped %s event to %s",
+                                  device_id, event_type, objmap)
                         MAP_QUEUE[device_id].append(objmap)
                         request._zaction['maps'].append((device_id, objmap))
                 except Exception:
-                    log.exception("Unable to process event: %s", evt)
+                    log.exception("%s: Unable to process event: %s", device_id, evt)
 
         # An empty response is fine.
         return b""
@@ -995,10 +1001,7 @@ class OpenStackVnicTask(BaseTask):
                             'title': vnicName,
                             'resourceId': resourceId
                         }))
-                    break
-
-                if resourceId in vnics['modeled']:
-                    continue
+                        break
 
 
 class Preferences(object):
