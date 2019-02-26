@@ -148,12 +148,23 @@ Used when openstack processes are running inside of docker containers. Provide t
 ### Datasources 
 - CinderServiceStatusDataSource: Checks the status of Cinder services via the Cinder API. 
 - EventsAMQPDataSource: Stores events received from OpenStack Ceilometer via AMQP.
-- HeartbeatsAMQPDataSource: Checks that heartbeats are received from OpenStack Ceilometer via AMQP. 
 - NeutronAgentStatusDataSource: Checks the status of Neutron agents via the Neutron API. 
 - NovaServiceStatusDataSource: Checks the status of Nova services via the Nova API. 
 - PerfAMQPDataSource: Stores performance data received from OpenStack Ceilometer via AMQP. 
-- PerfCeilometerAPIDataSource: Used to capture datapoints from OpenStack Ceilometer. 
+- PerfCeilometerAPIDataSource: Used to capture datapoints from OpenStack Ceilometer.
 - QueueSizeDataSource: Checks the number of unprocessed messages in Ceilometer AMQP queues.
+
+#### Notes
+
+-     As of the Pike (Late 2017) OpenStack release, the dispatcher mechanism
+      previously used by this zenpack is no longer supported by ceilometer. Because
+      of this, the "heartbeat" mechanism that was previously used to verify
+      connectivity between ceilometer and Zenoss is no longer possible, and
+      /Status/Heartbeat events will not be created if Zenoss stops receiving data
+      from ceilometer.
+
+      Connectivity problems between ceilometer and Zenoss will still be reported in
+      the ceilometer agent-notification.log file on the OpenStack hosts.
 
 ### Monitoring Templates 
 - /OpenStack/Infrastructure/ 
@@ -197,8 +208,6 @@ Used when openstack processes are running inside of docker containers. Provide t
     - security_group_rule default mapping 
 - /OpenStack/subnet 
     - subnet default mapping 
-- /Status/Heartbeat/ 
-    - openStackCeilometerHeartbeat 
 - /Status 
     - openStackCinderServiceStatus 
     - openStackIniFileAccess 
@@ -458,27 +467,28 @@ The following device level metrics are collected:
 
 #### Notes:
 
-* All events processed through Ceilometer are automatically 
-  exposed via the Zenoss Event Console, and all metrics collected by Ceilometer
-  may be collected and graphed in Zenoss through the use of custom monitoring 
-  templates.
+*     Events exposed by Ceilometer are listed in zOpenStackProcessEventTypes.
+      By default, this is set to the single *compute.instance.create.error* .
 
-* The Instance metrics for *Disk IO Rate* are deprecated in OpenStack version
-  Queens and later. Collection for those metrics will be missing.
-  Future OpenStack releases will remove these metrics and graphs completely.
+*     The Instance metrics for *Disk IO Rate* are deprecated in OpenStack version
+      Queens and later. Collection for those metrics will be missing.
+      Future OpenStack releases will remove these metrics and graphs completely.
 
-  In the meantime, if you still require these metrics, you can edit the
-  OpenStack Ceilometer configuration /etc/ceilometer/polling.yaml and add the
-  following to the *meters* section:
+      In the meantime, if you still require these metrics, you can edit the
+      OpenStack Ceilometer configuration /etc/ceilometer/polling.yaml and add the
+      following to the *meters* section:
 
         - disk.read.bytes
         - disk.read.requests
         - disk.write.bytes
         - disk.write.requests
 
-  Make sure you follow the YAML syntax requirements when editing that file.
-  Note that these metrics ARE deprecated and will be removed in future releases
-  of OpenStack itself.
+      Make sure you follow the YAML syntax requirements when editing that file
+      and ensure you restart ceilometer-polling without errors.
+
+      Finally note that these metrics ARE deprecated and will be removed in
+      future releases of OpenStack itself.
+
 
 Restricted Users
 ---------------------
@@ -876,9 +886,9 @@ External Impact Relationships
 ### Examples
 
 +:-----------------------------------------------:+:-------------------------------------------------------------------------------:+
-| [![][impact_instance.png]][impact_instance.png] | [![][impact_ports.png]][impact_ports.png] |
+| [![][impact_instance.png]][impact_instance.png] | [![][impact_ports.png]][impact_ports.png]                                       |
 |                                                 |                                                                                 |
-| Impact (Instance)                               | Impact (Network)                                                            |
+| Impact (Instance)                               | Impact (Network)                                                                |
 +-------------------------------------------------+---------------------------------------------------------------------------------+
 | [![][impact_region.png]][impact_region.png]     | [![][impact_tenant.png]][impact_tenant.png]                                     |
 |                                                 |                                                                                 |
@@ -921,6 +931,7 @@ Changes
 - Allow restricted (non-administrator) users limited modeling ability (ZPS-3851)
 - Fix KeyError in PerfAMQPDataSource vNIC discovery (ZPS-4661)
 - Guard against missing tenant quota. (ZPS-4627)
+- The HeartBeat datasource was removed as heartbeats are no longer supported by OpenStack (ZPS-1984)
 
 2.4.2
 

@@ -66,7 +66,7 @@ def create_exchanges():
     amqpClient = BlockingPublisher(connectionInfo, queueSchema)
     channel = amqpClient.getChannel()
 
-    for exchange in ('$OpenStackInbound', '$OpenStackInboundHeartbeats',):
+    for exchange in ('$OpenStackInbound', ):
         exchangeConfig = queueSchema.getExchange(exchange)
         print "Verifying configuration of exchange '%s' (%s)" % (exchange, exchangeConfig.name)
 
