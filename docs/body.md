@@ -348,30 +348,45 @@ The following block storage elements are discovered:
 
 The following component level metrics are collected:
 
-Instances
+#### Instances
 
 * CPU Utilization (percent)
 * Disk Requests (requests/sec)
-* Disk IO Rate (bytes/sec) vNICs
+* Disk IO Rate (bytes/sec)
+
+#### vNICs
+
 * Network Packet Rate (packets/sec)
-* Network Throughput (bytes/sec) Hosts
+* Network Throughput (bytes/sec)
+
+#### Hosts
+
 * Load Average (processes)
 * CPU Utilization (percent)
 * Free Memory (bytes)
 * Free Swap (bytes)
-* IO (sectors/sec) Nova Services
+* IO (sectors/sec)
+
+#### Nova Services
+
 * CPU Utilization (percent)
-* Memory
-* Utilization (bytes)
-* Process Count (processes) Neutron Agents
-* CPU
-* Utilization (percent)
 * Memory Utilization (bytes)
 * Process Count (processes)
-* Cinder Services
+
+#### Neutron Agents
+
 * CPU Utilization (percent)
 * Memory Utilization (bytes)
-* Process Count (processes) Volumes (requires LinuxMonitor ZenPack \>= 2.0.0)
+* Process Count (processes)
+
+#### Cinder Services
+
+* CPU Utilization (percent)
+* Memory Utilization (bytes)
+* Process Count (processes)
+
+#### Volumes
+
 * Storage Utilization (percent)
 * Operation Throughput (operations/sec)
 * Merge Rate (merged/sec)
@@ -379,7 +394,9 @@ Instances
 * IO Operations (operations)
 * IO Utilization (percent)
 * Weighted IO Utilization (weighted percent)
-* Volume Snapshots (requires LinuxMonitor ZenPack \>= 2.0.0)
+
+#### Volume Snapshots
+
 * Storage Utilization (percent)
 * Operation Throughput (operations/sec)
 * Merge Rate (merged/sec)
@@ -390,32 +407,78 @@ Instances
 
 The following device level metrics are collected:
 
-* Flavors
-* Total (count) Images
+#### Flavors
+
 * Total (count)
-* Total count per image state Servers
+
+#### Images
+
+* Total (count)
+* Total count per image state
+
+#### Servers
+
 * Total (count)
 * Total count per server state
-* Queues
+
+#### Queues
+
 * Event (count)
-* Performance (count) Agents
+* Performance (count)
+
+#### Agents
+
 * Total (count)
-* Total count per agent type Networks
+* Total count per agent type
+
+#### Networks
+
 * Total (count)
-* Total count per network state Routers
+* Total count per network state
+
+#### Routers
+
 * Total (count)
-* Total count per router state Volumes
+* Total count per router state
+
+#### Volumes
+
 * Total (count)
-* Total count per volume state Volume Snapshots
+* Total count per volume state
+
+#### Volume Snapshots
+
 * Total (count)
-* Total count per volume snapshot state Volume Pool
+* Total count per volume snapshot state
+
+#### Volume Pool
+
 * Total (count)
 * Total count per volume pool state
 
-Note: All events processed through Ceilometer are automatically 
-exposed via the Zenoss Event Console, and all metrics collected by Ceilometer
-may be collected and graphed in Zenoss through the use of custom monitoring 
-templates.
+#### Notes:
+
+* All events processed through Ceilometer are automatically 
+  exposed via the Zenoss Event Console, and all metrics collected by Ceilometer
+  may be collected and graphed in Zenoss through the use of custom monitoring 
+  templates.
+
+* The Instance metrics for *Disk IO Rate* are deprecated in OpenStack version
+  Queens and later. Collection for those metrics will be missing.
+  Future OpenStack releases will remove these metrics and graphs completely.
+
+  In the meantime, if you still require these metrics, you can edit the
+  OpenStack Ceilometer configuration /etc/ceilometer/polling.yaml and add the
+  following to the *meters* section:
+
+        - disk.read.bytes
+        - disk.read.requests
+        - disk.write.bytes
+        - disk.write.requests
+
+  Make sure you follow the YAML syntax requirements when editing that file.
+  Note that these metrics ARE deprecated and will be removed in future releases
+  of OpenStack itself.
 
 Restricted Users
 ---------------------
