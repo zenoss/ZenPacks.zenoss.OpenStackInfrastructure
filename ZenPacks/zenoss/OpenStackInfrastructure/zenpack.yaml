@@ -908,7 +908,7 @@ classes:
     base: [OpenstackComponent]
     properties:
       proxy_device:
-        label: Proxy Device
+        label: Linux Device
         type: entity
         content_width: 175
         api_only: true
