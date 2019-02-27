@@ -1,6 +1,7 @@
 #!/bin/sh
 
 . /opt/zenoss/etc/proxy-zenopenstack-env
+ZPROXY_HOME=/opt/zenoss/zproxy
 
 CERT_FILE=/home/zenoss/.zenopenstack-certs/${COLLECTOR_LOCATION}_nginx.crt
 KEY_FILE=/home/zenoss/.zenopenstack-certs/${COLLECTOR_LOCATION}_nginx.key
@@ -34,16 +35,28 @@ verify_cert_loop() {
         # check the cert for expiration once a day.
         verify_cert
         sleep 86400
-    done    
+    done
+}
+
+rotate_logs() {
+    while true; do
+	if [ -s ${ZPROXY_HOME}/logs/access.log ]; then
+	    if [ $(du -m ${ZPROXY_HOME}/logs/access.log | cut -f 1) -ge 30 ]; then
+		mv ${ZPROXY_HOME}/logs/access.log ${ZPROXY_HOME}/logs/access.log.0
+		kill -USR1 $(cat ${ZPROXY_HOME}/logs/nginx.pid)
+	    fi
+	fi
+	sleep 3600
+    done
 }
 
 
 update_upstreams() {
     while true; do
-        /opt/zenoss/zproxy/scripts/update_upstreams 8242 /opt/zenoss/etc/zenopenstack-upstreams.conf
+        ${ZPROXY_HOME}/scripts/update_upstreams 8242 /opt/zenoss/etc/zenopenstack-upstreams.conf
         if [ $? -eq 2 ]; then
             echo "$(date) Reloading nginx config due to upstream Zope servers change"
-            /opt/zenoss/bin/zproxy start -s reload -c /opt/zenoss/etc/proxy-zenopenstack.conf
+            LD_LIBRARY_PATH=${ZPROXY_HOME}/lib ${ZPROXY_HOME}/sbin/nginx -s reload -c /opt/zenoss/etc/proxy-zenopenstack.conf
         fi
         sleep 30
     done
@@ -53,7 +66,8 @@ update_upstreams() {
 
 verify_cert
 
+rotate_logs &
 update_upstreams &
 verify_cert_loop &
 
-/opt/zenoss/bin/zproxy start -c /opt/zenoss/etc/proxy-zenopenstack.conf
+LD_LIBRARY_PATH=${ZPROXY_HOME}/lib ${ZPROXY_HOME}/sbin/nginx -c /opt/zenoss/etc/proxy-zenopenstack.conf
