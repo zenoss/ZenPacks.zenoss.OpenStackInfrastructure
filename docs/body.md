@@ -932,6 +932,7 @@ Changes
 - Fix KeyError in PerfAMQPDataSource vNIC discovery (ZPS-4661)
 - Guard against missing tenant quota. (ZPS-4627)
 - The HeartBeat datasource was removed as heartbeats are no longer supported by OpenStack (ZPS-1984)
+- Exclude erroneous 'hostgroup' host components (ZPS-4914)
 
 2.4.2
 

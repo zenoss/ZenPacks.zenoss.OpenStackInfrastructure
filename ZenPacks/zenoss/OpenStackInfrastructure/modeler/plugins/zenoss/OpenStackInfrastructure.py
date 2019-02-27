@@ -1584,6 +1584,7 @@ class OpenStackInfrastructure(PythonPlugin):
         # mapping at all.
 
         hostmap = HostMap()
+        host_ignore_pattern = re.compile('@ceph$|^hostgroup@')
 
         # load in previous mappings..
         if callable(device.get_host_mappings):
@@ -1603,12 +1604,27 @@ class OpenStackInfrastructure(PythonPlugin):
 
         for service in results['cinder_services']:
             if 'host' in service:
-
-                # with the ceph backend, it seems like the cinder-volume
-                # hostname may not be relevant.  (At least on the test servers,
-                # I see 'ceph@ceph' here, which is meaningless)  (ZPS-3751)
-                if service['binary'] == 'cinder-volume' and service['host'] is not None and service['host'].endswith('@ceph'):
-                    LOG.debug("Ignoring host '%s' from cinder-volume service", service['host'])
+                # ------------------------------------------------------------------
+                # NOTE: (ZPS-3751) This is not the ultimate fix, but we need to
+                #       find some elegance before we continue. Perhaps a
+                #       zProperty that filters out these bad hosts will work.
+                #       Supressing arbitrary hosts is the ultimate goal.
+                #       This happens when we have:
+                #         1. Ceph Backend which create ceph@ceph hosts
+                #         2. hostgroups with TripleO which create 'hostgroup'
+                #
+                # See host value config options:
+                #   https://github.com/openstack/cinder/blob/219961bff62e2b507737ff11a82e18686bdd2c0a/cinder/cmd/volume.py#L95
+                # See hostgroup setup:
+                #   https://github.com/openstack/tripleo-heat-templates/blob/master/deployment/cinder/cinder-volume-pacemaker-puppet.yaml#L112
+                # ------------------------------------------------------------------
+                if (service['host'] is not None
+                        and host_ignore_pattern.search(service['host'])
+                        and service['binary'] == 'cinder-volume'
+                   ):
+                    message = ("Ignoring host '{}' from cinder-volume service "
+                               "matching ignore pattern.").format(service['host'])
+                    LOG.debug(message)
                     continue
 
                 hostmap.add_hostref(service['host'], source="cinder services")
