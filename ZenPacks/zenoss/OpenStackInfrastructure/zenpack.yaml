@@ -1652,6 +1652,7 @@ classes:
     order: 15
     properties:
       admin_state_up:
+        type: boolean
         label: Admin State
         renderer: Zenoss.render.openstack_ServiceEnabledStatus
         details_display: false
