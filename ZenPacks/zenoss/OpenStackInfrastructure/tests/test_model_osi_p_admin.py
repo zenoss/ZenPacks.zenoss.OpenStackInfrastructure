@@ -502,7 +502,7 @@ class TestModelOSIPAdmin(SharedModelTestCase):
     def test_Port(self):
         component = self.device.getObjByPath('components/port-486e57cb-2ba3-4c4f-acb8-a21ea7739f03')
         self.assertEquals(component.title, '')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'network:router_interface')
         self.assertEquals(component.fixed_ip_list, '10.0.0.1')
         self.assertEquals(component.mac_address, 'FA:16:3E:92:D3:AB')
@@ -519,7 +519,7 @@ class TestModelOSIPAdmin(SharedModelTestCase):
 
         component = self.device.getObjByPath('components/port-507e8f3e-426f-40fb-8abf-f342f724a077')
         self.assertEquals(component.title, '')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'network:floatingip')
         self.assertEquals(component.fixed_ip_list, '172.24.4.5')
         self.assertEquals(component.mac_address, 'FA:16:3E:56:AE:85')
@@ -536,7 +536,7 @@ class TestModelOSIPAdmin(SharedModelTestCase):
 
         component = self.device.getObjByPath('components/port-66297e0e-5f7f-4be2-9708-f8d6a8540574')
         self.assertEquals(component.title, '')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'network:floatingip')
         self.assertEquals(component.fixed_ip_list, '172.24.4.4')
         self.assertEquals(component.mac_address, 'FA:16:3E:B5:50:E9')
@@ -553,7 +553,7 @@ class TestModelOSIPAdmin(SharedModelTestCase):
 
         component = self.device.getObjByPath('components/port-6ccfce1e-e37a-42db-9a94-65f50ec18060')
         self.assertEquals(component.title, '')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'compute:nova')
         self.assertEquals(component.fixed_ip_list, '10.0.0.4')
         self.assertEquals(component.mac_address, 'FA:16:3E:E6:D7:3B')
@@ -571,7 +571,7 @@ class TestModelOSIPAdmin(SharedModelTestCase):
 
         component = self.device.getObjByPath('components/port-c0961651-9946-4ef3-8a12-289e8f9d390a')
         self.assertEquals(component.title, 'junk')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, '')
         self.assertEquals(component.fixed_ip_list, '10.0.0.6')
         self.assertEquals(component.mac_address, 'FA:16:3E:4F:BC:2D')
@@ -588,7 +588,7 @@ class TestModelOSIPAdmin(SharedModelTestCase):
 
         component = self.device.getObjByPath('components/port-cbdde5df-9e03-4f7d-97df-152763870f0e')
         self.assertEquals(component.title, '')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'network:dhcp')
         self.assertEquals(component.fixed_ip_list, '10.0.0.2')
         self.assertEquals(component.mac_address, 'FA:16:3E:1A:A2:FE')
@@ -605,7 +605,7 @@ class TestModelOSIPAdmin(SharedModelTestCase):
 
         component = self.device.getObjByPath('components/port-cc513990-11ce-4278-8821-da30227da290')
         self.assertEquals(component.title, '')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'network:router_gateway')
         self.assertEquals(component.fixed_ip_list, '172.24.4.8')
         self.assertEquals(component.mac_address, 'FA:16:3E:B4:6D:9B')
@@ -622,7 +622,7 @@ class TestModelOSIPAdmin(SharedModelTestCase):
 
         component = self.device.getObjByPath('components/port-dfe1738e-265a-4815-ac6f-5f4bfa81b642')
         self.assertEquals(component.title, '')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'network:floatingip')
         self.assertEquals(component.fixed_ip_list, '172.24.4.6')
         self.assertEquals(component.mac_address, 'FA:16:3E:9B:97:49')
@@ -680,7 +680,7 @@ class TestModelOSIPAdmin(SharedModelTestCase):
     def test_Router(self):
         component = self.device.getObjByPath('components/router-3dfb6205-861c-416c-ac3d-81912abc0335')
         self.assertEquals(component.title, 'router1')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.gateways, ['172.24.4.8'])
         self.assertEquals(component.resourceId, None)
         self.assertEquals(component.routerId, '3dfb6205-861c-416c-ac3d-81912abc0335')

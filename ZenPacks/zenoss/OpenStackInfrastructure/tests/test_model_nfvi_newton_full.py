@@ -729,7 +729,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
     def test_Port(self):
         component = self.device.getObjByPath('components/port-0b5bed0d-635a-4257-b804-497295264385')
         self.assertEquals(component.title, 'HA port tenant a11e16faa31e4b698be8bc3af0a7ae57')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'network:router_ha_interface')
         self.assertEquals(component.fixed_ip_list, '169.254.192.7')
         self.assertEquals(component.mac_address, 'FA:16:3E:F4:77:8E')
@@ -746,7 +746,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
 
         component = self.device.getObjByPath('components/port-0f5985d2-7310-45e0-a484-661660a13851')
         self.assertEquals(component.title, '')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'network:ha_router_replicated_interface')
         self.assertEquals(component.fixed_ip_list, '20.20.20.1')
         self.assertEquals(component.mac_address, 'FA:16:3E:36:A7:14')
@@ -763,7 +763,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
 
         component = self.device.getObjByPath('components/port-1fd0be5c-c5a7-45b9-afbc-72e951b01015')
         self.assertEquals(component.title, '')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'network:ha_router_replicated_interface')
         self.assertEquals(component.fixed_ip_list, '30.30.30.1')
         self.assertEquals(component.mac_address, 'FA:16:3E:7C:48:B8')
@@ -780,7 +780,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
 
         component = self.device.getObjByPath('components/port-21de332b-53f4-4a4a-a07a-0be3f409abfa')
         self.assertEquals(component.title, 'HA port tenant a11e16faa31e4b698be8bc3af0a7ae57')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'network:router_ha_interface')
         self.assertEquals(component.fixed_ip_list, '169.254.192.5')
         self.assertEquals(component.mac_address, 'FA:16:3E:E7:EF:F0')
@@ -797,7 +797,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
 
         component = self.device.getObjByPath('components/port-3cd674d5-c842-4fee-93bb-bafd71e09e44')
         self.assertEquals(component.title, '')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'network:router_gateway')
         self.assertEquals(component.fixed_ip_list, '172.23.105.151')
         self.assertEquals(component.mac_address, 'FA:16:3E:71:F1:34')
@@ -814,7 +814,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
 
         component = self.device.getObjByPath('components/port-6ab91201-50fd-4e7c-86df-2617d26cc02e')
         self.assertEquals(component.title, '')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'network:dhcp')
         self.assertEquals(component.fixed_ip_list, '30.30.30.2')
         self.assertEquals(component.mac_address, 'FA:16:3E:10:DD:7F')
@@ -831,7 +831,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
 
         component = self.device.getObjByPath('components/port-8bc346b2-d6c4-4111-a30a-5aaf6ae44ae0')
         self.assertEquals(component.title, 'HA port tenant a11e16faa31e4b698be8bc3af0a7ae57')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'network:router_ha_interface')
         self.assertEquals(component.fixed_ip_list, '169.254.192.3')
         self.assertEquals(component.mac_address, 'FA:16:3E:18:08:F0')
@@ -848,7 +848,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
 
         component = self.device.getObjByPath('components/port-a133cb5f-cb44-4e48-8225-e5da6ac65f44')
         self.assertEquals(component.title, '')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'network:dhcp')
         self.assertEquals(component.fixed_ip_list, '20.20.20.3')
         self.assertEquals(component.mac_address, 'FA:16:3E:23:EF:4B')
@@ -865,7 +865,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
 
         component = self.device.getObjByPath('components/port-a2148f2f-e523-4578-afa8-8088bc6b5395')
         self.assertEquals(component.title, '')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'network:floatingip')
         self.assertEquals(component.fixed_ip_list, '172.23.105.157')
         self.assertEquals(component.mac_address, 'FA:16:3E:92:B3:D8')
@@ -882,7 +882,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
 
         component = self.device.getObjByPath('components/port-b32542d6-4b24-483d-b92b-d055c96ec75e')
         self.assertEquals(component.title, '')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'network:dhcp')
         self.assertEquals(component.fixed_ip_list, '20.20.20.2')
         self.assertEquals(component.mac_address, 'FA:16:3E:AB:81:7F')
@@ -899,7 +899,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
 
         component = self.device.getObjByPath('components/port-c8c2114b-0bee-420b-a522-7849537574a6')
         self.assertEquals(component.title, '')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'compute:nova')
         self.assertEquals(component.fixed_ip_list, '20.20.20.7')
         self.assertEquals(component.mac_address, 'FA:16:3E:1C:A6:3E')
@@ -917,7 +917,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
 
         component = self.device.getObjByPath('components/port-cbf10c2a-726e-4f25-a64f-59306ae76994')
         self.assertEquals(component.title, '')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.device_owner, 'network:dhcp')
         self.assertEquals(component.fixed_ip_list, '30.30.30.3')
         self.assertEquals(component.mac_address, 'FA:16:3E:DB:41:29')
@@ -944,7 +944,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
     def test_Router(self):
         component = self.device.getObjByPath('components/router-13e87314-0c1d-487b-b21d-1e1c745ef3f9')
         self.assertEquals(component.title, 'Router1')
-        self.assertEquals(component.admin_state_up, 'True')
+        self.assertEquals(component.admin_state_up, True)
         self.assertEquals(component.gateways, ['172.23.105.151'])
         self.assertEquals(component.resourceId, None)
         self.assertEquals(component.routerId, '13e87314-0c1d-487b-b21d-1e1c745ef3f9')

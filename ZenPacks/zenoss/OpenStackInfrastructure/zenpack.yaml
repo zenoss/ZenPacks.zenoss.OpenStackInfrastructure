@@ -959,7 +959,6 @@ classes:
         details_display: false
         order: 2
       operStatus:
-        type: boolean
         label: State
         label_width: 20
         renderer: Zenoss.render.openstack_ServiceOperStatus
