@@ -1255,10 +1255,12 @@ class OpenStackInfrastructure(PythonPlugin):
             if not q_tenant:
                 continue
 
+            title = 'quota-' + q_tenant.get('name')
             quotas.append(ObjectMap(
                 modname='ZenPacks.zenoss.OpenStackInfrastructure.Quota',
                 data=dict(
                     id=prepId('quota-{0}'.format(quota_key)),
+                    title=title,
                     tenant_name=q_tenant['name'],
                     volumes=quota.get('volumes', 0),
                     snapshots=quota.get('snapshots', 0),

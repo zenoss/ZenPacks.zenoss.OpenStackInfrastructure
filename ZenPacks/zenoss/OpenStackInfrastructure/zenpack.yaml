@@ -2124,6 +2124,7 @@ classes:
         label: Tenant Name
         label_width: 100
         content_width: 100
+        grid_display: false
       backup_bytes:
         label: Backup (GB)
         type: int
