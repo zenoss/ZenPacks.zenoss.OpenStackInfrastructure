@@ -28,7 +28,7 @@ from ZenPacks.zenoss.OpenStackInfrastructure.datasources.AMQPDataSource import (
     IAMQPDataSourceInfo)
 
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import ExpiringFIFO, amqp_timestamp_to_int
-from ZenPacks.zenoss.OpenStackInfrastructure.events import event_is_mapped, map_event
+from ZenPacks.zenoss.OpenStackInfrastructure.events import event_is_mapped, map_event, event_component_id
 from ZenPacks.zenoss.OpenStackInfrastructure.datamaps import ConsolidatingObjectMapQueue
 
 # How long to cache data in memory before discarding it (data that
@@ -169,6 +169,9 @@ class EventsAMQPDataSourcePlugin(AMQPDataSourcePlugin):
 
             # only pass on events that we actually have mappings for.
             if event_type in ds0.zOpenStackProcessEventTypes:
+                component = event_component_id(evt)
+                if component:
+                    evt['component'] = component
                 data['events'].append(evt)
 
             if event_is_mapped(evt):
