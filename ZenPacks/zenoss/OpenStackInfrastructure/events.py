@@ -922,6 +922,26 @@ def event_is_mapped(evt):
     return evt.get('openstack_event_type') in MAPPERS
 
 
+def event_component_id(evt):
+    # given an event (evt), return the affected zenoss component,
+    # if possible, or None if it can not be identified.
+
+    identifiers = {
+        'compute.instance': instance_id,
+        'floatingip': floatingip_id,
+        'network': network_id,
+        'port': port_id,
+        'router': router_id,
+        'subnet': subnet_id,
+        'volume': volume_id,
+        'snapshot': volsnapshot_id
+    }
+
+    for prefix, idfunc in identifiers.iteritems():
+        if evt['openstack_event_type'].startswith(prefix):
+            return idfunc(evt)
+
+
 def map_event(evt):
     # given an event dictionary, return an ObjectMap, or None.
 

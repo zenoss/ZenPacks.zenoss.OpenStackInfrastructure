@@ -32,7 +32,7 @@ from ZenPacks.zenoss.OpenStackInfrastructure.datamaps import ConsolidatingObject
 from Products.ZenUtils.Utils import unused
 unused(Globals)
 
-from ZenPacks.zenoss.OpenStackInfrastructure.events import map_event
+from ZenPacks.zenoss.OpenStackInfrastructure.events import map_event, event_component_id
 from ZenPacks.zenoss.ZenPackLib import zenpacklib
 # Required before zenpacklib.TestCase can be used.
 zenpacklib.enableTesting()
@@ -787,6 +787,64 @@ class TestEventMappings(zenpacklib.TestCase):
         self.assertTrue(
             (len(datamaps) == 2 and datamaps[1]._remove),
             msg="Instance deleted as expected")
+
+    def test_component_ids(self):
+        self.assertTrue(self._eventsloaded)
+
+        # When using zOpenStackProcessEventTypes, the event_component_id method
+        # is used to assign a component to the events that we pass on to zenoss.
+        # This test verifies that it can successfully identify these component IDs.component
+        component_id = {}
+        for event_type, evt in self._eventData.iteritems():
+            component_id[event_type] = event_component_id(evt)
+
+        self.assertEquals(component_id['compute.instance.create.start'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.delete.end'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.delete.start'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.exists'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.power_off.end'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.power_off.start'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.power_on.end'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.power_on.start'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.reboot.end'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.reboot.start'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.rebuild.end'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.rebuild.start'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.rescue.end'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.rescue.start'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.resume'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.shutdown.end'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.shutdown.start'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.suspend'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.unrescue.end'], 'server-instance5')
+        self.assertEquals(component_id['compute.instance.unrescue.start'], 'server-instance5')
+        self.assertEquals(component_id['floatingip.create.end'], 'floatingip-test')
+        self.assertEquals(component_id['floatingip.delete.end'], 'floatingip-test')
+        self.assertEquals(component_id['network.create.end'], 'network-test')
+        self.assertEquals(component_id['network.delete.end'], 'network-test')
+        self.assertEquals(component_id['port.create.end'], 'port-test')
+        self.assertEquals(component_id['port.delete.end'], 'port-test')
+        self.assertEquals(component_id['router.create.end'], 'router-test')
+        self.assertEquals(component_id['router.delete.end'], 'router-test')
+        self.assertEquals(component_id['scheduler.run_instance.end'], None)
+        self.assertEquals(component_id['security_group.create.end'], None)
+        self.assertEquals(component_id['security_group.delete.end'], None)
+        self.assertEquals(component_id['subnet.create.end'], 'subnet-test')
+        self.assertEquals(component_id['subnet.delete.end'], 'subnet-test')
+        self.assertEquals(component_id['volsnapshot.create.end'], 'volsnapshot-test')
+        self.assertEquals(component_id['volsnapshot.create.start'], 'volsnapshot-test')
+        self.assertEquals(component_id['volsnapshot.delete.end'], 'volsnapshot-test')
+        self.assertEquals(component_id['volsnapshot.delete.start'], 'volsnapshot-test')
+        self.assertEquals(component_id['volume.attach.end'], 'volume-test')
+        self.assertEquals(component_id['volume.attach.start'], 'volume-test')
+        self.assertEquals(component_id['volume.create.end'], 'volume-test')
+        self.assertEquals(component_id['volume.create.start'], 'volume-test')
+        self.assertEquals(component_id['volume.delete.end'], 'volume-test')
+        self.assertEquals(component_id['volume.delete.start'], 'volume-test')
+        self.assertEquals(component_id['volume.detach.end'], 'volume-test')
+        self.assertEquals(component_id['volume.detach.start'], 'volume-test')
+        self.assertEquals(component_id['volume.update.end'], 'volume-test')
+        self.assertEquals(component_id['volume.update.start'], 'volume-test')
 
 
 @monkeypatch('Products.DataCollector.ApplyDataMap.ApplyDataMap')

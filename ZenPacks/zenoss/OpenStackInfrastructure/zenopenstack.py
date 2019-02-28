@@ -64,7 +64,7 @@ from Products.ZenUtils.Utils import unused, prepId
 
 unused(Globals)
 
-from ZenPacks.zenoss.OpenStackInfrastructure.events import event_is_mapped, map_event
+from ZenPacks.zenoss.OpenStackInfrastructure.events import event_is_mapped, map_event, event_component_id
 from ZenPacks.zenoss.OpenStackInfrastructure.datamaps import ConsolidatingObjectMapQueue
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import amqp_timestamp_to_int
 from ZenPacks.zenoss.OpenStackInfrastructure.services.OpenStackConfig import OpenStackDataSourceConfig
@@ -689,6 +689,9 @@ class CeilometerV1Events(Resource):
             # only pass on events that we actually have mappings for.
             if event_type in REGISTRY.device_event_types(device_id):
                 log.debug("%s: Propagated %s event", device_id, event_type)
+                component = event_component_id(evt)
+                if component:
+                    evt['component'] = component
                 EVENT_QUEUE.append(evt)
                 request._zaction['events'].append(evt)
 
