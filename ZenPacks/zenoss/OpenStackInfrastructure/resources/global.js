@@ -227,14 +227,6 @@ var addOpenStack = new Zenoss.Action({
                     triggerAction: 'all',
                     selectOnFocus: false,
                     margin: '15 0 0 0',
-                    listeners: {
-                        'afterrender': function(component) {
-                            var index = component.store.find('name', 'localhost');
-                            if (index >= 0) {
-                                component.setValue('localhost');
-                            }
-                        }
-                    }
                 }],
                 buttons: [{
                     xtype: 'DialogButton',
