@@ -221,7 +221,6 @@ var addOpenStack = new Zenoss.Action({
                     }),
                     valueField: 'name',
                     displayField: 'name',
-                    forceSelection: true,
                     editable: false,
                     allowBlank: false,
                     triggerAction: 'all',
