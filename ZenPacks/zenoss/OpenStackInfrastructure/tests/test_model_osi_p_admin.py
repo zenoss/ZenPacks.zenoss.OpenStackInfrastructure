@@ -639,7 +639,7 @@ class TestModelOSIPAdmin(SharedModelTestCase):
 
     def test_Quota(self):
         component = self.device.getObjByPath('components/quota-313da8e3ab19478e82be9c50e6b1a04b')
-        self.assertEquals(component.title, '')
+        self.assertEquals(component.title, 'quota-admin')
         self.assertEquals(component.backup_bytes, 1000)
         self.assertEquals(component.backups, 10)
         self.assertEquals(component.bytes, 1000)
@@ -649,7 +649,7 @@ class TestModelOSIPAdmin(SharedModelTestCase):
         self.assertEquals(component.volumes, 10)
 
         component = self.device.getObjByPath('components/quota-9afe0a3dc0414bff8c69a4f3474fafba')
-        self.assertEquals(component.title, '')
+        self.assertEquals(component.title, 'quota-services')
         self.assertEquals(component.backup_bytes, 1000)
         self.assertEquals(component.backups, 10)
         self.assertEquals(component.bytes, 1000)
@@ -659,7 +659,7 @@ class TestModelOSIPAdmin(SharedModelTestCase):
         self.assertEquals(component.volumes, 10)
 
         component = self.device.getObjByPath('components/quota-d6a14c911aed48cfa9edc383ff85587f')
-        self.assertEquals(component.title, '')
+        self.assertEquals(component.title, 'quota-demo')
         self.assertEquals(component.backup_bytes, 1000)
         self.assertEquals(component.backups, 10)
         self.assertEquals(component.bytes, 1000)

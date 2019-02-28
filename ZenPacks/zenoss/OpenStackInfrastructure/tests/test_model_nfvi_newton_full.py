@@ -1027,7 +1027,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
 
     def test_Quota(self):
         component = self.device.getObjByPath('components/quota-a11e16faa31e4b698be8bc3af0a7ae57')
-        self.assertEquals(component.title, '')
+        self.assertEquals(component.title, 'quota-admin')
         self.assertEquals(component.backup_bytes, 1000)
         self.assertEquals(component.backups, 10)
         self.assertEquals(component.bytes, 1000)
@@ -1037,7 +1037,7 @@ class TestModelNFVINewtonFull(SharedModelTestCase):
         self.assertEquals(component.volumes, 10)
 
         component = self.device.getObjByPath('components/quota-b2b1a48714a641fcaa82c4d48aa444c9')
-        self.assertEquals(component.title, '')
+        self.assertEquals(component.title, 'quota-service')
         self.assertEquals(component.backup_bytes, 1000)
         self.assertEquals(component.backups, 10)
         self.assertEquals(component.bytes, 1000)
