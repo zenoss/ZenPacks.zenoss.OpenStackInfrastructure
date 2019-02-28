@@ -908,7 +908,7 @@ classes:
     base: [OpenstackComponent]
     properties:
       proxy_device:
-        label: Device
+        label: Linux Device
         type: entity
         content_width: 175
         api_only: true
@@ -956,11 +956,13 @@ classes:
         type: boolean
         label_width: 35
         renderer: Zenoss.render.openstack_ServiceEnabledStatus
+        details_display: false
         order: 2
       operStatus:
         label: State
         label_width: 20
         renderer: Zenoss.render.openstack_ServiceOperStatus
+        details_display: false
         order: 3
     relationships:
       hostedOn:
@@ -1064,7 +1066,7 @@ classes:
         label: Image ID
         grid_display: false
       imageStatus:
-        label: Status
+        label: Image Status
         label_width: 40
         order: 3.5
       imageUpdated:
@@ -1196,7 +1198,7 @@ classes:
   Vnic:
     base: [LogicalComponent]
     meta_type: OpenStackInfrastructureVnic
-    label: Vnic
+    label: VNIC
     order: 100
     properties:
       instance:
@@ -1488,6 +1490,7 @@ classes:
         label: Status
         label_width: 40
         renderer: Zenoss.render.openstack_ServiceOperStatus
+        details_display: false
         order: 11.1
       type:
         label: Type
@@ -1528,6 +1531,7 @@ classes:
         type: boolean
         label_width: 54
         renderer: Zenoss.render.openstack_ServiceEnabledStatus
+        details_display: false
         order: 2.2
       implementation_components:
         type: entity
@@ -1647,9 +1651,10 @@ classes:
     order: 15
     properties:
       admin_state_up:
+        type: boolean
         label: Admin State
-        grid_display: false
         renderer: Zenoss.render.openstack_ServiceEnabledStatus
+        details_display: false
         order: 1.1
       gateways:
         type: lines
@@ -1724,10 +1729,12 @@ classes:
         label: Title
         grid_display: false
       admin_state_up:
+        type: boolean
         label: Admin State
         label_width: 60
         content_width: 50
         renderer: Zenoss.render.openstack_ServiceEnabledStatus
+        details_display: false
         order: 1.2
       device_owner:
         label: Device Owner
