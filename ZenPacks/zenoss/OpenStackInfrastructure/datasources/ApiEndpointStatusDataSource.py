@@ -121,6 +121,9 @@ class ApiEndpointStatusDataSource(PythonDataSource):
         'ApiEndpointStatusDataSource.ApiEndpointStatusDataSourcePlugin'
 
     # ApiEndpointStatusDataSource
+    auth_required = False
+    ok_result = ''
+    sample_url = ''
 
     _properties = PythonDataSource._properties + (
         {'id': 'auth_required', 'type': 'boolean'},
