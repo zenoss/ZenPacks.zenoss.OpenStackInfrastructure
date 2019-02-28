@@ -767,6 +767,12 @@ class OpenStackCollectorDaemon(CollectorDaemon):
         MAP_QUEUE[configId].delete_blacklist_seconds = cfg.zOpenStackIncrementalBlackListSeconds
         MAP_QUEUE[configId].update_consolidate_seconds = cfg.zOpenStackIncrementalConsolidateSeconds
 
+        # update thresholds
+        if hasattr(self, 'getThresholds'):
+            self.getThresholds().updateForDevice(configId, cfg.thresholds)
+        else:
+            self._thresholds.updateForDevice(configId, cfg.thresholds)
+
         return True
 
     def _deleteDevice(self, deviceId):
