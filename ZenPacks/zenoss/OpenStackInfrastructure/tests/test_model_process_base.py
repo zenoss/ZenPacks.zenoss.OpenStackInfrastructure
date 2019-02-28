@@ -554,6 +554,7 @@ class TestModelProcess(BaseTestCase):
             'set_tenant': 'tenant-28a2787a215a4187b22f800f51e58665',
             'snapshots': 10,
             'tenant_name': u'demo',
+            'title': u'quota-demo',
             'volumes': 10})
 
         self.assertEquals(obj_map['quota-5b79c3f4df73447a9850887b2ea17372'], {
@@ -565,6 +566,7 @@ class TestModelProcess(BaseTestCase):
             'set_tenant': 'tenant-5b79c3f4df73447a9850887b2ea17372',
             'snapshots': 10,
             'tenant_name': u'services',
+            'title': u'quota-services',
             'volumes': 10})
 
         self.assertEquals(obj_map['quota-e6bae7721b8745ce8b14f3908de17b8c'], {
@@ -576,6 +578,7 @@ class TestModelProcess(BaseTestCase):
             'set_tenant': 'tenant-e6bae7721b8745ce8b14f3908de17b8c',
             'snapshots': 10,
             'tenant_name': u'admin',
+            'title': u'quota-admin',
             'volumes': 10})
 
         self.assertEquals(obj_map['region-RegionOne'], {
