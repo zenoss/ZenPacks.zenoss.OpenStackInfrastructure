@@ -22,7 +22,7 @@
                     "Port": 45672,
                     "Protocol": "tcp"
                 },
-                "Application": "rabbitmq_{{(parent .).Name}}_admin",
+                "Application": "openstack_rabbitmq_{{(parent .).Name}}_admin",
                 "Name": "rabbitmq_ceil admin",
                 "PortNumber": 45672,
                 "Protocol": "tcp",
@@ -33,28 +33,28 @@
                     "Port": 55672,
                     "Protocol": "tcp"
                 },
-                "Application": "rabbitmq_{{(parent .).Name}}",
+                "Application": "openstack_rabbitmq_{{(parent .).Name}}",
                 "Name": "rabbitmq_ceil",
                 "PortNumber": 55672,
                 "Protocol": "tcp",
                 "Purpose": "export"
             },
             {
-                "Application": "rabbitmq_{{(parent .).Name}}_epmd",
+                "Application": "openstack_rabbitmq_{{(parent .).Name}}_epmd",
                 "Name": "rabbitmq_ceil_epmd",
                 "PortNumber": 54369,
                 "Protocol": "tcp",
                 "Purpose": "export"
             },
             {
-                "Application": "rabbitmq_{{(parent .).Name}}_inet_dist",
+                "Application": "openstack_rabbitmq_{{(parent .).Name}}_inet_dist",
                 "Name": "rabbitmq_ceil_inet_dist",
                 "PortNumber": 54001,
                 "Protocol": "tcp",
                 "Purpose": "export"
             },
             {
-                "Application": "rabbitmq_{{(parent .).Name}}_epmd",
+                "Application": "openstack_rabbitmq_{{(parent .).Name}}_epmd",
                 "Name": "rabbitmq_ceil_epmds",
                 "PortNumber": 54369,
                 "PortTemplate": "{{plus .InstanceID 24369}}",
@@ -63,7 +63,7 @@
                 "VirtualAddress": "rbtc{{.InstanceID}}:54369"
             },
             {
-                "Application": "rabbitmq_{{(parent .).Name}}_inet_dist",
+                "Application": "openstack_rabbitmq_{{(parent .).Name}}_inet_dist",
                 "Name": "rabbitmq_ceil_inet_dists",
                 "PortNumber": 54001,
                 "PortTemplate": "{{plus .InstanceID 49001}}",
@@ -72,7 +72,7 @@
                 "VirtualAddress": "rbtc{{.InstanceID}}:54001"
             },
             {
-                "Application": "rabbitmq_{{(parent .).Name}}",
+                "Application": "openstack_rabbitmq_{{(parent .).Name}}",
                 "Name": "rabbitmqs_ceil",
                 "PortNumber": 55672,
                 "PortTemplate": "{{plus .InstanceID 35672}}",
