@@ -1198,7 +1198,7 @@ classes:
   Vnic:
     base: [LogicalComponent]
     meta_type: OpenStackInfrastructureVnic
-    label: VNIC
+    label: Vnic
     order: 100
     properties:
       instance:
