@@ -64,10 +64,16 @@ update_upstreams() {
 
 # mkdir -p /var/run
 
+# Update the certificate and upstream configuration once
 verify_cert
+${ZPROXY_HOME}/scripts/update_upstreams 8242 /opt/zenoss/etc/zenopenstack-upstreams.conf
 
+# And start background loops to keep them up to date.
 rotate_logs &
 update_upstreams &
 verify_cert_loop &
 
 LD_LIBRARY_PATH=${ZPROXY_HOME}/lib ${ZPROXY_HOME}/sbin/nginx -c /opt/zenoss/etc/proxy-zenopenstack.conf
+
+# clean up the background jobs
+kill %1 %2 %3
