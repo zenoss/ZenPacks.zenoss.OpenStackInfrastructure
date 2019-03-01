@@ -183,6 +183,12 @@ class Endpoint(schema.Endpoint):
             svc = client.getService(svc_id)
             for endpoint in filter(lambda s: s['Name'] == endpoint_name, svc.getRawData()['Endpoints']):
                 try:
+                    if endpoint['AddressAssignment']['IPAddr'] is None or endpoint['AddressAssignment']['IPAddr'] == "":
+                        continue
+
+                    if endpoint['AddressAssignment']['Port'] is None or int(endpoint['AddressAssignment']['Port']) == 0:
+                        continue
+
                     if client.getService(svc.parentId).name == collector:
                         return "{protocol}://{ip}:{port}".format(
                             protocol=protocol,
@@ -191,6 +197,26 @@ class Endpoint(schema.Endpoint):
                 except Exception:
                     # no ip assignment or error determining what collector this is.
                     pass
+
+    def ceilometer_url_samples(self):
+        zenopenstack_url = self.zenopenstack_url(https=True)
+        if zenopenstack_url:
+            return "%s/ceilometer/v1/samples/%s?verify_ssl=False" % (
+                zenopenstack_url,
+                self.id
+            )
+        else:
+            return "n/a"
+
+    def ceilometer_url_events(self):
+        zenopenstack_url = self.zenopenstack_url(https=True)
+        if zenopenstack_url:
+            return "%s/ceilometer/v1/events/%s?verify_ssl=False" % (
+                zenopenstack_url,
+                self.id
+            )
+        else:
+            return "n/a"
 
 
 def onDeviceDeleted(object, event):

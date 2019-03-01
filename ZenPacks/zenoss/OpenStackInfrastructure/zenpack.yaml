@@ -886,6 +886,12 @@ classes:
         label: Neutron ML2 Type Drivers
         default: []
         grid_display: false
+      ceilometer_url_samples:
+        api_only: true
+        api_backendtype: method
+      ceilometer_url_events:
+        api_only: true
+        api_backendtype: method
     dynamicview_views: [service_view, openstack_view]
     dynamicview_group: OpenStack Endpoints
     dynamicview_weight: 280
