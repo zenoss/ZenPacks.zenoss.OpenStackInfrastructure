@@ -436,7 +436,7 @@ class OpenStackPoller(object):
                 severity=0,
                 summary='OpenStack connectivity restored',
                 eventKey='openStackPoll',
-                eventClassKey='openStack-poll',
+                eventClassKey='openStackPollStatus',
             ))
         except Exception, ex:
 
@@ -447,10 +447,10 @@ class OpenStackPoller(object):
 
             data = dict(
                 events=[dict(
-                    severity=5,
+                    severity=4,
                     summary=summary,
                     eventKey='openStackPoll',
-                    eventClassKey='openstack-poll',
+                    eventClassKey='openStackPollStatus',
                 )]
             )
 
