@@ -6,7 +6,10 @@ Applies To
 * OpenStackInfrastructure ZenPack
 * OpenStack Ceilometer
 
+**(Note: This document is deprecated and applies only to the OpenStackInfrastructure 2.4.2 ZenPack and prior versions.)**
+
 Summary
 -------
 
-This KB concerns troubleshooting OpenStack Ceilometer integration with Zenoss. It includes the following sections:
+This KB concerns troubleshooting OpenStack Ceilometer integration with Zenoss. 
+It includes the following sections:
