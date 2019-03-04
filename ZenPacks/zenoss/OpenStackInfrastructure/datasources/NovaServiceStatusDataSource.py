@@ -240,7 +240,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
                 data['events'].append({
                     'device': config.id,
                     'component': service_id,
-                    'summary': 'Service %s on host %s (AvailaopenStackNovaServiceStatusbilty Zone %s) is now UP' %
+                    'summary': 'Service %s on host %s (Availability Zone %s) is now UP' %
                                (service['binary'], hostname, service['zone']),
                     'severity': ZenEventClasses.Clear,
                     'eventClassKey': 'openStackNovaServiceStatus',
