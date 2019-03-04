@@ -2255,6 +2255,11 @@ event_classes:
         sequence: 12
         explanation: A nova service is not running properly
         resolution: Restart the offending service.
+      openStackPollStatus:
+        remove: true
+        sequence: 12
+        explanation: Unable to poll openstack overview data successfully.
+        resolution: Troubleshoot or restart the responsible process.
 
 process_class_organizers:
   /OpenStack:
