@@ -92,6 +92,10 @@
                     "ContainerPath": "/var/zenoss",
                     "Permission": "0775"
                 }
-            ]
+            ],
+        "Tags": [
+            "daemon",
+            "collector"
+        ]
     }
 }
