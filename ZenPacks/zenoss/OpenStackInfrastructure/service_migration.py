@@ -119,52 +119,42 @@ def install_migrate_zenpython():
     log.info("Found %i services named 'zenpython'" % len(zpythons))
     for zpython in zpythons:
         collector = ctx.getServiceParent(zpython).name
-        rabbit_application_name = "openstack_rabbitmq_{}".format(collector)
-        admin_application_name = "openstack_rabbitmq_{}_admin".format(collector)
-
         rbtamqp_imports = filter(lambda ep: ep.name == "rabbitmqs_ceil" and ep.purpose == "import_all", zpython.endpoints)
         if len(rbtamqp_imports) > 0:
-            if rabbit_amqp.application != rabbit_application_name:
-                log.info("Service %s already has a rabbitmqs_ceil endpoint (updating)" % ctx.getServicePath(zpython))
-                rabbit_amqp.application = rabbit_application_name
-            else:
-                log.info("Service %s already has a rabbitmqs_ceil endpoint." % ctx.getServicePath(zpython))
+            log.info("Service %s already has a rabbitmqs_ceil endpoint." % ctx.getServicePath(zpython))
         else:
             log.info("Adding a rabbitmqs_ceil import endpoint to service '%s'." % ctx.getServicePath(zpython))
             rabbit_amqp = sm.Endpoint(**amqp_endpoint_lc)
             rabbit_amqp.__data = copy.deepcopy(amqp_endpoint)
-            rabbit_amqp.application = rabbit_application_name
+            rabbit_amqp.application = "openstack_rabbitmq_{}".format(collector)
             zpython.endpoints.append(rabbit_amqp)
             commit = True
         rbtmgmt_imports = filter(lambda ep: ep.name == "rabbitmqadmins_ceil" and ep.purpose == "import_all", zpython.endpoints)
         if len(rbtmgmt_imports) > 0:
-            if rabbit_mgmt.application != admin_application_name:
-                log.info("Service %s already has a rabbitmqadmins_ceil endpoint (updating)" % ctx.getServicePath(zpython))
-                rabbit_mgmt.application = admin_application_name
-            else:
-                log.info("Service %s already has a rabbitmqadmins_ceil endpoint" % ctx.getServicePath(zpython))
+            log.info("Service %s already has a rabbitmqadmins_ceil endpoint." % ctx.getServicePath(zpython))
         else:
             log.info("Adding a rabbitmqadmins_ceil import endpoint to service '%s'." % ctx.getServicePath(zpython))
             rabbit_mgmt = sm.Endpoint(**mgmt_endpoint_lc)
             rabbit_mgmt.__data = copy.deepcopy(mgmt_endpoint)
-            rabbit_mgmt.application = admin_application_name
+            rabbit_mgmt.application = "openstack_rabbitmq_{}_admin".format(collector)
             zpython.endpoints.append(rabbit_mgmt)
             commit = True
 
-    # Fix application names for rabbitmq-ceilometer exports to match the new
-    # naming convention as well.
-    rabbitmqs = filter(lambda s: s.name == "RabbitMQ-Ceilometer", ctx.services)
-    for rabbitmq in rabbitmqs:
-        collector = ctx.getServiceParent(rabbitmq).name
-        rabbit_application_name = "openstack_rabbitmq_{}".format(collector)
-        admin_application_name = "openstack_rabbitmq_{}_admin".format(collector)
-
-        for endpoint in rabbitmq.endpoints:
-            if endpoint.application.startswith("rabbitmq"):
-                endpoint.application = endpoint.application.replace("rabbitmq", "openstack_rabbitmq")
+    # Fix application names for existing rabbitmq-ceilometer and zenpython endpoints
+    # naming convention.
+    services = filter(lambda s: s.name == "zenpython" or s.name == "RabbitMQ-Ceilometer", ctx.services)
+    for service in services:
+        collector = ctx.getServiceParent(service).name
+        for endpoint in service.endpoints:
+            if endpoint.application.startswith("rabbitmq_"):
+                new_application_name = endpoint.application.replace("rabbitmq_", "openstack_rabbitmq_")
+                endpoint.application = new_application_name
+                log.info("%s/%s: Changing endpoint from %s to %s", collector, service.name, endpoint.application, new_application_name)
                 commit = True
-            if endpoint.applicationtemplate.startswith("rabbitmq"):
-                endpoint.applicationtemplate = endpoint.applicationtemplate.replace("rabbitmq", "openstack_rabbitmq")
+            if endpoint.applicationtemplate.startswith("rabbitmq_"):
+                new_application_template = endpoint.applicationtemplate.replace("rabbitmq_", "openstack_rabbitmq_")
+                log.info("%s/%s: Changing endpoint template from %s to %s", collector, service.name, endpoint.applicationtemplate, new_application_template)
+                endpoint.applicationtemplate = new_application_template
                 commit = True
 
     if commit:
