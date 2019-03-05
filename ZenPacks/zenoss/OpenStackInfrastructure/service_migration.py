@@ -140,20 +140,21 @@ def install_migrate_zenpython():
             zpython.endpoints.append(rabbit_mgmt)
             commit = True
 
-    # Fix application names for rabbitmq-ceilometer exports to match the new
-    # naming convention as well.
-    rabbitmqs = filter(lambda s: s.name == "RabbitMQ-Ceilometer", ctx.services)
-    for rabbitmq in rabbitmqs:
-        collector = ctx.getServiceParent(rabbitmq).name
-        rabbit_application_name = "openstack_rabbitmq_{}".format(collector)
-        admin_application_name = "openstack_rabbitmq_{}_admin".format(collector)
-
-        for endpoint in rabbitmq.endpoints:
-            if endpoint.application.startswith("rabbitmq"):
-                endpoint.application = endpoint.application.replace("rabbitmq", "openstack_rabbitmq")
+    # Fix application names for existing rabbitmq-ceilometer and zenpython endpoints
+    # naming convention.
+    services = filter(lambda s: s.name == "zenpython" or s.name == "RabbitMQ-Ceilometer", ctx.services)
+    for service in services:
+        collector = ctx.getServiceParent(service).name
+        for endpoint in service.endpoints:
+            if endpoint.application.startswith("rabbitmq_"):
+                new_application_name = endpoint.application.replace("rabbitmq_", "openstack_rabbitmq_")
+                endpoint.application = new_application_name
+                log.info("%s/%s: Changing endpoint from %s to %s", collector, service.name, endpoint.application, new_application_name)
                 commit = True
-            if endpoint.applicationtemplate.startswith("rabbitmq"):
-                endpoint.applicationtemplate = endpoint.applicationtemplate.replace("rabbitmq", "openstack_rabbitmq")
+            if endpoint.applicationtemplate.startswith("rabbitmq_"):
+                new_application_template = endpoint.applicationtemplate.replace("rabbitmq_", "openstack_rabbitmq_")
+                log.info("%s/%s: Changing endpoint template from %s to %s", collector, service.name, endpoint.applicationtemplate, new_application_template)
+                endpoint.applicationtemplate = new_application_template
                 commit = True
 
     if commit:
