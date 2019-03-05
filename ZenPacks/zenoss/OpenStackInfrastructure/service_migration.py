@@ -119,35 +119,24 @@ def install_migrate_zenpython():
     log.info("Found %i services named 'zenpython'" % len(zpythons))
     for zpython in zpythons:
         collector = ctx.getServiceParent(zpython).name
-        rabbit_application_name = "openstack_rabbitmq_{}".format(collector)
-        admin_application_name = "openstack_rabbitmq_{}_admin".format(collector)
-
         rbtamqp_imports = filter(lambda ep: ep.name == "rabbitmqs_ceil" and ep.purpose == "import_all", zpython.endpoints)
         if len(rbtamqp_imports) > 0:
-            if rabbit_amqp.application != rabbit_application_name:
-                log.info("Service %s already has a rabbitmqs_ceil endpoint (updating)" % ctx.getServicePath(zpython))
-                rabbit_amqp.application = rabbit_application_name
-            else:
-                log.info("Service %s already has a rabbitmqs_ceil endpoint." % ctx.getServicePath(zpython))
+            log.info("Service %s already has a rabbitmqs_ceil endpoint." % ctx.getServicePath(zpython))
         else:
             log.info("Adding a rabbitmqs_ceil import endpoint to service '%s'." % ctx.getServicePath(zpython))
             rabbit_amqp = sm.Endpoint(**amqp_endpoint_lc)
             rabbit_amqp.__data = copy.deepcopy(amqp_endpoint)
-            rabbit_amqp.application = rabbit_application_name
+            rabbit_amqp.application = "openstack_rabbitmq_{}".format(collector)
             zpython.endpoints.append(rabbit_amqp)
             commit = True
         rbtmgmt_imports = filter(lambda ep: ep.name == "rabbitmqadmins_ceil" and ep.purpose == "import_all", zpython.endpoints)
         if len(rbtmgmt_imports) > 0:
-            if rabbit_mgmt.application != admin_application_name:
-                log.info("Service %s already has a rabbitmqadmins_ceil endpoint (updating)" % ctx.getServicePath(zpython))
-                rabbit_mgmt.application = admin_application_name
-            else:
-                log.info("Service %s already has a rabbitmqadmins_ceil endpoint" % ctx.getServicePath(zpython))
+            log.info("Service %s already has a rabbitmqadmins_ceil endpoint." % ctx.getServicePath(zpython))
         else:
             log.info("Adding a rabbitmqadmins_ceil import endpoint to service '%s'." % ctx.getServicePath(zpython))
             rabbit_mgmt = sm.Endpoint(**mgmt_endpoint_lc)
             rabbit_mgmt.__data = copy.deepcopy(mgmt_endpoint)
-            rabbit_mgmt.application = admin_application_name
+            rabbit_mgmt.application = "openstack_rabbitmq_{}_admin".format(collector)
             zpython.endpoints.append(rabbit_mgmt)
             commit = True
 
