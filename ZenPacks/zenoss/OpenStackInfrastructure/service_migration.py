@@ -143,19 +143,25 @@ def install_migrate_zenpython():
     # Fix application names for existing rabbitmq-ceilometer and zenpython endpoints
     # naming convention.
     services = filter(lambda s: s.name == "zenpython" or s.name == "RabbitMQ-Ceilometer", ctx.services)
+    change_count = 0
     for service in services:
         collector = ctx.getServiceParent(service).name
         for endpoint in service.endpoints:
             if endpoint.application.startswith("rabbitmq_"):
                 new_application_name = endpoint.application.replace("rabbitmq_", "openstack_rabbitmq_")
+                log.debug("%s/%s: Changing endpoint from %s to %s", collector, service.name, endpoint.application, new_application_name)
                 endpoint.application = new_application_name
-                log.info("%s/%s: Changing endpoint from %s to %s", collector, service.name, endpoint.application, new_application_name)
                 commit = True
+                change_count += 1
             if endpoint.applicationtemplate.startswith("rabbitmq_"):
                 new_application_template = endpoint.applicationtemplate.replace("rabbitmq_", "openstack_rabbitmq_")
-                log.info("%s/%s: Changing endpoint template from %s to %s", collector, service.name, endpoint.applicationtemplate, new_application_template)
+                log.debug("%s/%s: Changing endpoint template from %s to %s", collector, service.name, endpoint.applicationtemplate, new_application_template)
                 endpoint.applicationtemplate = new_application_template
                 commit = True
+                change_count += 1
+
+    if change_count:
+        log.info("Upgraded %d endpoint names and templates to new naming convention.", change_count)
 
     if commit:
         ctx.commit()
