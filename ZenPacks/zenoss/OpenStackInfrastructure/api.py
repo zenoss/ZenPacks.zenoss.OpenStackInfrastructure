@@ -14,10 +14,12 @@ API interfaces and default implementations.
 import logging
 log = logging.getLogger('zen.OpenStack.api')
 
+import os
+import re
 import json
-import os.path
 from urlparse import urlparse
 import subprocess
+from pipes import quote as shellquote
 
 from zope.event import notify
 from zope.interface import implements
@@ -38,38 +40,46 @@ OPENSTACK_DEVICE_PATH = "/Devices/OpenStack/Infrastructure"
 
 _helper = zenpack_path('openstack_helper.py')
 
-class KeystoneError(Exception):
-    pass
+cmd_regex = re.compile('(--api_key=)(?P<password>[\wa-zA-Z0-9_.-]+)')
 
+def mask_arg(arg):
+    match = cmd_regex.match(arg)
+    if match:
+        return match.group().replace(match.group('password'),'******')
+    return arg
 
 def _runcommand(cmd):
     p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     (stdout, stderr) = p.communicate()
     if p.returncode == 0:
-        return json.loads(stdout)
+        return True, json.loads(stdout)
     else:
         try:
             message = json.loads(stdout)['error']
         except Exception:
             message = stderr
 
-        log.exception(subprocess.CalledProcessError(p.returncode, cmd=cmd, output=message))
-        raise KeystoneError(message)
+        cmd = [ mask_arg(x) for x in cmd]
 
+        log.exception(subprocess.CalledProcessError(p.returncode, cmd=cmd, output=message))
+        message = "\n".join([x for x in message.split("\n") if "zminion-return" not in x])
+        message = 'Keystone Error Occured: ' +  message.replace('\r', '').replace('\n', '')
+        log.error(message)
+        return False, message
 
 class IOpenStackInfrastructureFacade(IFacade):
-    def addOpenStack(self, device_name, username, api_key, project_id, auth_url,
+    def addOpenStack(self, device_name, username, api_key, project_id, user_domain_name, project_domain_name, auth_url,
                      region_name=None, collector='localhost'):
         """Add OpenStack Endpoint."""
 
-    def getRegions(self, username, api_key, project_id, auth_url):
+    def getRegions(self, username, api_key, project_id, user_domain_name, project_domain_name, auth_url, collector):
         """Get a list of available regions, given a keystone endpoint and credentials."""
 
 
 class OpenStackInfrastructureFacade(ZuulFacade):
     implements(IOpenStackInfrastructureFacade)
 
-    def addOpenStack(self, device_name, username, api_key, project_id, auth_url,
+    def addOpenStack(self, device_name, username, api_key, project_id, user_domain_name, project_domain_name, auth_url,
                      region_name, collector='localhost'):
         """Add a new OpenStack endpoint to the system."""
         parsed_url = urlparse(auth_url.strip())
@@ -87,6 +97,8 @@ class OpenStackInfrastructureFacade(ZuulFacade):
             'zCommandUsername': username,
             'zCommandPassword': api_key,
             'zOpenStackProjectId': project_id,
+            'zOpenStackUserDomainName' : user_domain_name,
+            'zOpenStackProjectDomainName' : project_domain_name,
             'zOpenStackAuthUrl': auth_url.strip(),
             'zOpenStackRegionName': region_name,
             }
@@ -117,14 +129,24 @@ class OpenStackInfrastructureFacade(ZuulFacade):
 
         return True, 'Device addition scheduled'
 
-    def getRegions(self, username, api_key, project_id, auth_url):
+    def getRegions(self, username, api_key, project_id, user_domain_name, project_domain_name, auth_url, collector):
         """Get a list of available regions, given a keystone endpoint and credentials."""
 
         cmd = [_helper, "getRegions"]
         cmd.append("--username=%s" % username)
         cmd.append("--api_key=%s" % api_key)
         cmd.append("--project_id=%s" % project_id)
+        cmd.append("--user_domain_name=%s" % user_domain_name)
+        cmd.append("--project_domain_name=%s" % project_domain_name)
         cmd.append("--auth_url=%s" % auth_url)
+
+        if os.path.exists(zenPath("bin", "zminion")):
+            # Escape shell characters in command
+            cmd = [shellquote(x) for x in cmd]
+            cmd = [
+                'zminion',
+                '--minion-name', 'zminion_%s' % collector,
+                'run', '--'] + cmd
 
         return _runcommand(cmd)
 
@@ -133,12 +155,12 @@ class OpenStackInfrastructureRouter(DirectRouter):
     def _getFacade(self):
         return Zuul.getFacade('openstackinfrastructure', self.context)
 
-    def addOpenStack(self, device_name, username, api_key, project_id, auth_url,
+    def addOpenStack(self, device_name, username, api_key, project_id, user_domain_name, project_domain_name, auth_url,
                      region_name, collector='localhost'):
 
         facade = self._getFacade()
         success, message = facade.addOpenStack(
-            device_name, username, api_key, project_id, auth_url,
+            device_name, username, api_key, project_id, user_domain_name, project_domain_name, auth_url,
             region_name=region_name, collector=collector)
 
         if success:
@@ -146,8 +168,11 @@ class OpenStackInfrastructureRouter(DirectRouter):
         else:
             return DirectResponse.fail(message)
 
-    def getRegions(self, username, api_key, project_id, auth_url):
+    def getRegions(self, username, api_key, project_id, user_domain_name, project_domain_name, auth_url, collector):
         facade = self._getFacade()
 
-        data = facade.getRegions(username, api_key, project_id, auth_url)
-        return DirectResponse(success=True, data=data)
+        success, data = facade.getRegions(username, api_key, project_id, user_domain_name, project_domain_name, auth_url, collector)
+        if success:
+            return DirectResponse.succeed(data=data)
+        else:
+            return DirectResponse.fail(data)

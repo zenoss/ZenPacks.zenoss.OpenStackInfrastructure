@@ -1,0 +1,1321 @@
+{
+    "cinder_url_host": "10.87.209.165", 
+    "hostmap_dns": {
+        "osi-p": "10.0.0.14", 
+        "10.87.209.165": "10.0.0.13"
+    }, 
+    "servers": [
+        {
+            "OS-EXT-STS:task_state": null, 
+            "addresses": {}, 
+            "links": [
+                {
+                    "href": "http://10.87.209.165:8774/v2.1/313da8e3ab19478e82be9c50e6b1a04b/servers/29132ff8-5048-4c63-a4c7-ba56c13d0895", 
+                    "rel": "self"
+                }, 
+                {
+                    "href": "http://10.87.209.165:8774/313da8e3ab19478e82be9c50e6b1a04b/servers/29132ff8-5048-4c63-a4c7-ba56c13d0895", 
+                    "rel": "bookmark"
+                }
+            ], 
+            "image": {
+                "id": "fc6607b7-ccbf-4834-be6c-0a09faef19ec", 
+                "links": [
+                    {
+                        "href": "http://10.87.209.165:8774/313da8e3ab19478e82be9c50e6b1a04b/images/fc6607b7-ccbf-4834-be6c-0a09faef19ec", 
+                        "rel": "bookmark"
+                    }
+                ]
+            }, 
+            "OS-EXT-STS:vm_state": "error", 
+            "OS-EXT-SRV-ATTR:instance_name": "instance-00000003", 
+            "OS-SRV-USG:launched_at": null, 
+            "flavor": {
+                "id": "1", 
+                "links": [
+                    {
+                        "href": "http://10.87.209.165:8774/313da8e3ab19478e82be9c50e6b1a04b/flavors/1", 
+                        "rel": "bookmark"
+                    }
+                ]
+            }, 
+            "id": "29132ff8-5048-4c63-a4c7-ba56c13d0895", 
+            "security_groups": [
+                {
+                    "name": "default"
+                }
+            ], 
+            "user_id": "4b3448a3057c411d827de9bfb77a5599", 
+            "OS-DCF:diskConfig": "MANUAL", 
+            "accessIPv4": "", 
+            "accessIPv6": "", 
+            "OS-EXT-STS:power_state": 0, 
+            "OS-EXT-AZ:availability_zone": "nova", 
+            "config_drive": "", 
+            "status": "ERROR", 
+            "updated": "2018-11-30T18:13:15Z", 
+            "hostId": "", 
+            "OS-EXT-SRV-ATTR:host": null, 
+            "OS-SRV-USG:terminated_at": null, 
+            "key_name": "zenoss_key", 
+            "OS-EXT-SRV-ATTR:hypervisor_hostname": null, 
+            "name": "test2", 
+            "created": "2018-11-30T18:13:03Z", 
+            "tenant_id": "313da8e3ab19478e82be9c50e6b1a04b", 
+            "os-extended-volumes:volumes_attached": [], 
+            "fault": {
+                "message": "No valid host was found. There are not enough hosts available.", 
+                "code": 500, 
+                "details": "  File \"/usr/lib/python2.7/site-packages/nova/conductor/manager.py\", line 555, in build_instances\n    context, spec_obj, instance_uuids)\n  File \"/usr/lib/python2.7/site-packages/nova/conductor/manager.py\", line 636, in _schedule_instances\n    request_spec, instance_uuids)\n  File \"/usr/lib/python2.7/site-packages/nova/scheduler/utils.py\", line 586, in wrapped\n    return func(*args, **kwargs)\n  File \"/usr/lib/python2.7/site-packages/nova/scheduler/client/__init__.py\", line 52, in select_destinations\n    instance_uuids)\n  File \"/usr/lib/python2.7/site-packages/nova/scheduler/client/__init__.py\", line 37, in __run_method\n    return getattr(self.instance, __name)(*args, **kwargs)\n  File \"/usr/lib/python2.7/site-packages/nova/scheduler/client/query.py\", line 33, in select_destinations\n    instance_uuids)\n  File \"/usr/lib/python2.7/site-packages/nova/scheduler/rpcapi.py\", line 137, in select_destinations\n    return cctxt.call(ctxt, 'select_destinations', **msg_args)\n  File \"/usr/lib/python2.7/site-packages/oslo_messaging/rpc/client.py\", line 169, in call\n    retry=self.retry)\n  File \"/usr/lib/python2.7/site-packages/oslo_messaging/transport.py\", line 123, in _send\n    timeout=timeout, retry=retry)\n  File \"/usr/lib/python2.7/site-packages/oslo_messaging/_drivers/amqpdriver.py\", line 566, in send\n    retry=retry)\n  File \"/usr/lib/python2.7/site-packages/oslo_messaging/_drivers/amqpdriver.py\", line 557, in _send\n    raise result\n", 
+                "created": "2018-11-30T18:13:15Z"
+            }, 
+            "metadata": {}
+        }, 
+        {
+            "OS-EXT-STS:task_state": null, 
+            "addresses": {}, 
+            "links": [
+                {
+                    "href": "http://10.87.209.165:8774/v2.1/313da8e3ab19478e82be9c50e6b1a04b/servers/4170a29a-4ed6-4391-babc-a82982d73dbe", 
+                    "rel": "self"
+                }, 
+                {
+                    "href": "http://10.87.209.165:8774/313da8e3ab19478e82be9c50e6b1a04b/servers/4170a29a-4ed6-4391-babc-a82982d73dbe", 
+                    "rel": "bookmark"
+                }
+            ], 
+            "image": {
+                "id": "fc6607b7-ccbf-4834-be6c-0a09faef19ec", 
+                "links": [
+                    {
+                        "href": "http://10.87.209.165:8774/313da8e3ab19478e82be9c50e6b1a04b/images/fc6607b7-ccbf-4834-be6c-0a09faef19ec", 
+                        "rel": "bookmark"
+                    }
+                ]
+            }, 
+            "OS-EXT-STS:vm_state": "error", 
+            "OS-EXT-SRV-ATTR:instance_name": "instance-00000002", 
+            "OS-SRV-USG:launched_at": null, 
+            "flavor": {
+                "id": "1", 
+                "links": [
+                    {
+                        "href": "http://10.87.209.165:8774/313da8e3ab19478e82be9c50e6b1a04b/flavors/1", 
+                        "rel": "bookmark"
+                    }
+                ]
+            }, 
+            "id": "4170a29a-4ed6-4391-babc-a82982d73dbe", 
+            "user_id": "4b3448a3057c411d827de9bfb77a5599", 
+            "OS-DCF:diskConfig": "MANUAL", 
+            "accessIPv4": "", 
+            "accessIPv6": "", 
+            "OS-EXT-STS:power_state": 0, 
+            "OS-EXT-AZ:availability_zone": "nova", 
+            "config_drive": "", 
+            "status": "ERROR", 
+            "updated": "2018-11-30T18:09:32Z", 
+            "hostId": "", 
+            "OS-EXT-SRV-ATTR:host": null, 
+            "OS-SRV-USG:terminated_at": null, 
+            "key_name": "zenoss_key", 
+            "OS-EXT-SRV-ATTR:hypervisor_hostname": null, 
+            "name": "provider-instance", 
+            "created": "2018-11-30T18:09:18Z", 
+            "tenant_id": "313da8e3ab19478e82be9c50e6b1a04b", 
+            "os-extended-volumes:volumes_attached": [], 
+            "fault": {
+                "message": "No valid host was found. There are not enough hosts available.", 
+                "code": 500, 
+                "details": "  File \"/usr/lib/python2.7/site-packages/nova/conductor/manager.py\", line 555, in build_instances\n    context, spec_obj, instance_uuids)\n  File \"/usr/lib/python2.7/site-packages/nova/conductor/manager.py\", line 636, in _schedule_instances\n    request_spec, instance_uuids)\n  File \"/usr/lib/python2.7/site-packages/nova/scheduler/utils.py\", line 586, in wrapped\n    return func(*args, **kwargs)\n  File \"/usr/lib/python2.7/site-packages/nova/scheduler/client/__init__.py\", line 52, in select_destinations\n    instance_uuids)\n  File \"/usr/lib/python2.7/site-packages/nova/scheduler/client/__init__.py\", line 37, in __run_method\n    return getattr(self.instance, __name)(*args, **kwargs)\n  File \"/usr/lib/python2.7/site-packages/nova/scheduler/client/query.py\", line 33, in select_destinations\n    instance_uuids)\n  File \"/usr/lib/python2.7/site-packages/nova/scheduler/rpcapi.py\", line 137, in select_destinations\n    return cctxt.call(ctxt, 'select_destinations', **msg_args)\n  File \"/usr/lib/python2.7/site-packages/oslo_messaging/rpc/client.py\", line 169, in call\n    retry=self.retry)\n  File \"/usr/lib/python2.7/site-packages/oslo_messaging/transport.py\", line 123, in _send\n    timeout=timeout, retry=retry)\n  File \"/usr/lib/python2.7/site-packages/oslo_messaging/_drivers/amqpdriver.py\", line 566, in send\n    retry=retry)\n  File \"/usr/lib/python2.7/site-packages/oslo_messaging/_drivers/amqpdriver.py\", line 557, in _send\n    raise result\n", 
+                "created": "2018-11-30T18:09:32Z"
+            }, 
+            "metadata": {}
+        }, 
+        {
+            "OS-EXT-STS:task_state": null, 
+            "addresses": {
+                "private": [
+                    {
+                        "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:e6:d7:3b", 
+                        "version": 4, 
+                        "addr": "10.0.0.4", 
+                        "OS-EXT-IPS:type": "fixed"
+                    }, 
+                    {
+                        "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:e6:d7:3b", 
+                        "version": 4, 
+                        "addr": "172.24.4.5", 
+                        "OS-EXT-IPS:type": "floating"
+                    }
+                ]
+            }, 
+            "links": [
+                {
+                    "href": "http://10.87.209.165:8774/v2.1/313da8e3ab19478e82be9c50e6b1a04b/servers/b116be08-dfd0-4ef8-b58b-8ea46e1ffd87", 
+                    "rel": "self"
+                }, 
+                {
+                    "href": "http://10.87.209.165:8774/313da8e3ab19478e82be9c50e6b1a04b/servers/b116be08-dfd0-4ef8-b58b-8ea46e1ffd87", 
+                    "rel": "bookmark"
+                }
+            ], 
+            "image": {
+                "id": "fc6607b7-ccbf-4834-be6c-0a09faef19ec", 
+                "links": [
+                    {
+                        "href": "http://10.87.209.165:8774/313da8e3ab19478e82be9c50e6b1a04b/images/fc6607b7-ccbf-4834-be6c-0a09faef19ec", 
+                        "rel": "bookmark"
+                    }
+                ]
+            }, 
+            "OS-EXT-STS:vm_state": "active", 
+            "OS-EXT-SRV-ATTR:instance_name": "instance-00000001", 
+            "OS-SRV-USG:launched_at": "2018-11-13T23:00:33.000000", 
+            "flavor": {
+                "id": "1", 
+                "links": [
+                    {
+                        "href": "http://10.87.209.165:8774/313da8e3ab19478e82be9c50e6b1a04b/flavors/1", 
+                        "rel": "bookmark"
+                    }
+                ]
+            }, 
+            "id": "b116be08-dfd0-4ef8-b58b-8ea46e1ffd87", 
+            "security_groups": [
+                {
+                    "name": "default"
+                }
+            ], 
+            "user_id": "db0932691a6b4672aa5c5f84b33e8566", 
+            "OS-DCF:diskConfig": "MANUAL", 
+            "accessIPv4": "", 
+            "accessIPv6": "", 
+            "progress": 0, 
+            "OS-EXT-STS:power_state": 1, 
+            "OS-EXT-AZ:availability_zone": "nova", 
+            "config_drive": "", 
+            "status": "ACTIVE", 
+            "updated": "2018-11-30T20:07:24Z", 
+            "hostId": "f8e45c1bf050e413651989180961ed3d875de4c750749f8182d94ec7", 
+            "OS-EXT-SRV-ATTR:host": "osi-p", 
+            "OS-SRV-USG:terminated_at": null, 
+            "key_name": "mykey", 
+            "OS-EXT-SRV-ATTR:hypervisor_hostname": "osi-p", 
+            "name": "provider-instance", 
+            "created": "2018-11-13T23:00:07Z", 
+            "tenant_id": "d6a14c911aed48cfa9edc383ff85587f", 
+            "os-extended-volumes:volumes_attached": [], 
+            "metadata": {}
+        }
+    ], 
+    "hypervisors": [
+        {
+            "status": "enabled", 
+            "state": "up", 
+            "id": 1, 
+            "hypervisor_hostname": "osi-p", 
+            "servers": [
+                {
+                    "uuid": "b116be08-dfd0-4ef8-b58b-8ea46e1ffd87", 
+                    "name": "instance-00000001"
+                }
+            ]
+        }
+    ], 
+    "volume_pools": [
+        {
+            "name": "osi-p@lvm#lvm", 
+            "capabilities": {
+                "pool_name": "lvm", 
+                "filter_function": null, 
+                "allocated_capacity_gb": 0, 
+                "goodness_function": null, 
+                "multiattach": false, 
+                "provisioned_capacity_gb": 0.0, 
+                "timestamp": "2018-11-30T21:43:36.956767", 
+                "total_volumes": 1, 
+                "volume_backend_name": "lvm", 
+                "thin_provisioning_support": true, 
+                "free_capacity_gb": 19.57, 
+                "driver_version": "3.0.0", 
+                "location_info": "LVMVolumeDriver:osi-p:cinder-volumes:thin:0", 
+                "total_capacity_gb": "19.57", 
+                "thick_provisioning_support": false, 
+                "reserved_percentage": 0, 
+                "QoS_support": false, 
+                "max_over_subscription_ratio": 1.0, 
+                "vendor_name": "Open Source", 
+                "storage_protocol": "iSCSI"
+            }
+        }
+    ], 
+    "agents": [
+        {
+            "binary": "neutron-openvswitch-agent", 
+            "description": null, 
+            "availability_zone": null, 
+            "dhcp_agent_subnets": [], 
+            "admin_state_up": true, 
+            "alive": true, 
+            "id": "552a05c5-2454-49d2-9fbe-c27434532d67", 
+            "topic": "N/A", 
+            "host": "osi-p", 
+            "agent_type": "Open vSwitch agent", 
+            "l3_agent_routers": [], 
+            "created_at": "2018-10-31 19:57:33", 
+            "started_at": "2018-11-16 22:34:43", 
+            "heartbeat_timestamp": "2018-11-30 21:44:02", 
+            "configurations": {
+                "ovs_hybrid_plug": true, 
+                "in_distributed_mode": false, 
+                "datapath_type": "system", 
+                "vhostuser_socket_dir": "/var/run/openvswitch", 
+                "tunneling_ip": "10.87.209.165", 
+                "arp_responder_enabled": false, 
+                "devices": 1, 
+                "ovs_capabilities": {
+                    "datapath_types": [
+                        "netdev", 
+                        "system"
+                    ], 
+                    "iface_types": [
+                        "geneve", 
+                        "gre", 
+                        "internal", 
+                        "lisp", 
+                        "patch", 
+                        "stt", 
+                        "system", 
+                        "tap", 
+                        "vxlan"
+                    ]
+                }, 
+                "log_agent_heartbeats": false, 
+                "l2_population": false, 
+                "tunnel_types": [
+                    "vxlan"
+                ], 
+                "extensions": [], 
+                "enable_distributed_routing": false, 
+                "bridge_mappings": {
+                    "extnet": "br-ex"
+                }
+            }
+        }, 
+        {
+            "binary": "neutron-dhcp-agent", 
+            "description": null, 
+            "availability_zone": "nova", 
+            "dhcp_agent_subnets": [
+                "0e56f3ac-2289-4422-b3a8-e5a930dcec47", 
+                "25fca2dd-953a-4663-a640-10e0f04d9543"
+            ], 
+            "admin_state_up": true, 
+            "alive": true, 
+            "id": "5b14f0a0-1856-416e-8513-b343abb1379a", 
+            "topic": "dhcp_agent", 
+            "dhcp_agent_networks": [
+                "0ccbb5ec-9737-4107-96ab-5fca0e5974fe", 
+                "f82afbca-d429-4dc7-b3c0-3ead28855f2e"
+            ], 
+            "host": "osi-p", 
+            "agent_type": "DHCP agent", 
+            "l3_agent_routers": [], 
+            "created_at": "2018-10-31 19:57:36", 
+            "started_at": "2018-11-16 22:35:33", 
+            "heartbeat_timestamp": "2018-11-30 21:44:17", 
+            "configurations": {
+                "subnets": 1, 
+                "dhcp_lease_duration": 86400, 
+                "dhcp_driver": "neutron.agent.linux.dhcp.Dnsmasq", 
+                "networks": 1, 
+                "log_agent_heartbeats": false, 
+                "ports": 4
+            }
+        }, 
+        {
+            "binary": "neutron-metering-agent", 
+            "description": null, 
+            "availability_zone": null, 
+            "dhcp_agent_subnets": [], 
+            "admin_state_up": true, 
+            "alive": true, 
+            "id": "70f5cf23-f76a-46a6-959d-8eb2cc70be7b", 
+            "topic": "metering_agent", 
+            "host": "osi-p", 
+            "agent_type": "Metering agent", 
+            "l3_agent_routers": [], 
+            "created_at": "2018-10-31 19:57:37", 
+            "started_at": "2018-11-16 22:35:32", 
+            "heartbeat_timestamp": "2018-11-30 21:43:58", 
+            "configurations": {
+                "measure_interval": 30, 
+                "metering_driver": "neutron.services.metering.drivers.noop.noop_driver.NoopMeteringDriver", 
+                "report_interval": 300
+            }
+        }, 
+        {
+            "binary": "neutron-metadata-agent", 
+            "description": null, 
+            "availability_zone": null, 
+            "dhcp_agent_subnets": [], 
+            "admin_state_up": true, 
+            "alive": true, 
+            "id": "aca99d33-7d7c-4e19-9693-24ce78fcd0fc", 
+            "topic": "N/A", 
+            "host": "osi-p", 
+            "agent_type": "Metadata agent", 
+            "l3_agent_routers": [], 
+            "created_at": "2018-10-31 19:57:36", 
+            "started_at": "2018-11-16 22:35:32", 
+            "heartbeat_timestamp": "2018-11-30 21:44:04", 
+            "configurations": {
+                "log_agent_heartbeats": false, 
+                "nova_metadata_host": "10.87.209.165", 
+                "nova_metadata_port": 8775, 
+                "metadata_proxy_socket": "/var/lib/neutron/metadata_proxy"
+            }
+        }, 
+        {
+            "l3_agent_networks": [
+                "0ccbb5ec-9737-4107-96ab-5fca0e5974fe"
+            ], 
+            "binary": "neutron-l3-agent", 
+            "created_at": "2018-10-31 19:57:32", 
+            "description": null, 
+            "admin_state_up": true, 
+            "dhcp_agent_subnets": [], 
+            "availability_zone": "nova", 
+            "host": "osi-p", 
+            "alive": true, 
+            "id": "d5dc68ba-9dcc-45cd-b4a7-95a4ba39e68c", 
+            "l3_agent_gateways": [
+                "172.24.4.8"
+            ], 
+            "l3_agent_subnets": [
+                "0e56f3ac-2289-4422-b3a8-e5a930dcec47"
+            ], 
+            "agent_type": "L3 agent", 
+            "l3_agent_routers": [
+                "3dfb6205-861c-416c-ac3d-81912abc0335"
+            ], 
+            "topic": "l3_agent", 
+            "started_at": "2018-11-16 22:36:34", 
+            "heartbeat_timestamp": "2018-11-30 21:44:17", 
+            "configurations": {
+                "agent_mode": "legacy", 
+                "gateway_external_network_id": "", 
+                "handle_internal_only_routers": true, 
+                "routers": 1, 
+                "interfaces": 1, 
+                "floating_ips": 1, 
+                "interface_driver": "neutron.agent.linux.interface.OVSInterfaceDriver", 
+                "log_agent_heartbeats": false, 
+                "external_network_bridge": "", 
+                "ex_gw_ports": 1
+            }
+        }
+    ], 
+    "images": [
+        {
+            "status": "ACTIVE", 
+            "updated": "2018-10-31T19:52:53Z", 
+            "name": "cirros", 
+            "links": [
+                {
+                    "href": "http://10.87.209.165:8774/v2.1/313da8e3ab19478e82be9c50e6b1a04b/images/fc6607b7-ccbf-4834-be6c-0a09faef19ec", 
+                    "rel": "self"
+                }, 
+                {
+                    "href": "http://10.87.209.165:8774/313da8e3ab19478e82be9c50e6b1a04b/images/fc6607b7-ccbf-4834-be6c-0a09faef19ec", 
+                    "rel": "bookmark"
+                }, 
+                {
+                    "href": "http://10.87.209.165:9292/images/fc6607b7-ccbf-4834-be6c-0a09faef19ec", 
+                    "type": "application/vnd.openstack.image", 
+                    "rel": "alternate"
+                }
+            ], 
+            "created": "2018-10-31T19:52:53Z", 
+            "minDisk": 0, 
+            "progress": 100, 
+            "minRam": 0, 
+            "OS-EXT-IMG-SIZE:size": 13267968, 
+            "id": "fc6607b7-ccbf-4834-be6c-0a09faef19ec", 
+            "metadata": {}
+        }
+    ], 
+    "networks": [
+        {
+            "provider:physical_network": "extnet", 
+            "ipv6_address_scope": null, 
+            "revision_number": 4, 
+            "port_security_enabled": true, 
+            "mtu": 1500, 
+            "id": "0ccbb5ec-9737-4107-96ab-5fca0e5974fe", 
+            "router:external": true, 
+            "availability_zone_hints": [], 
+            "availability_zones": [
+                "nova"
+            ], 
+            "ipv4_address_scope": null, 
+            "shared": false, 
+            "project_id": "313da8e3ab19478e82be9c50e6b1a04b", 
+            "status": "ACTIVE", 
+            "subnets": [
+                "0e56f3ac-2289-4422-b3a8-e5a930dcec47"
+            ], 
+            "description": "", 
+            "tags": [], 
+            "updated_at": "2018-10-31T19:55:01Z", 
+            "is_default": false, 
+            "provider:segmentation_id": null, 
+            "name": "public", 
+            "admin_state_up": true, 
+            "tenant_id": "313da8e3ab19478e82be9c50e6b1a04b", 
+            "created_at": "2018-10-31T19:54:56Z", 
+            "provider:network_type": "flat"
+        }, 
+        {
+            "provider:physical_network": null, 
+            "ipv6_address_scope": null, 
+            "revision_number": 5, 
+            "port_security_enabled": true, 
+            "mtu": 1450, 
+            "id": "f82afbca-d429-4dc7-b3c0-3ead28855f2e", 
+            "router:external": false, 
+            "availability_zone_hints": [], 
+            "availability_zones": [
+                "nova"
+            ], 
+            "ipv4_address_scope": null, 
+            "shared": true, 
+            "project_id": "d6a14c911aed48cfa9edc383ff85587f", 
+            "status": "ACTIVE", 
+            "subnets": [
+                "25fca2dd-953a-4663-a640-10e0f04d9543"
+            ], 
+            "description": "", 
+            "tags": [], 
+            "updated_at": "2018-11-30T19:49:33Z", 
+            "provider:segmentation_id": 100, 
+            "name": "private", 
+            "admin_state_up": true, 
+            "tenant_id": "d6a14c911aed48cfa9edc383ff85587f", 
+            "created_at": "2018-10-31T19:55:03Z", 
+            "provider:network_type": "vxlan"
+        }
+    ], 
+    "flavors": [
+        {
+            "name": "m1.nano", 
+            "links": [
+                {
+                    "href": "http://10.87.209.165:8774/v2.1/313da8e3ab19478e82be9c50e6b1a04b/flavors/0", 
+                    "rel": "self"
+                }, 
+                {
+                    "href": "http://10.87.209.165:8774/313da8e3ab19478e82be9c50e6b1a04b/flavors/0", 
+                    "rel": "bookmark"
+                }
+            ], 
+            "ram": 64, 
+            "OS-FLV-DISABLED:disabled": false, 
+            "vcpus": 1, 
+            "swap": "", 
+            "os-flavor-access:is_public": true, 
+            "rxtx_factor": 1.0, 
+            "OS-FLV-EXT-DATA:ephemeral": 0, 
+            "disk": 1, 
+            "id": "0"
+        }, 
+        {
+            "name": "m1.tiny", 
+            "links": [
+                {
+                    "href": "http://10.87.209.165:8774/v2.1/313da8e3ab19478e82be9c50e6b1a04b/flavors/1", 
+                    "rel": "self"
+                }, 
+                {
+                    "href": "http://10.87.209.165:8774/313da8e3ab19478e82be9c50e6b1a04b/flavors/1", 
+                    "rel": "bookmark"
+                }
+            ], 
+            "ram": 512, 
+            "OS-FLV-DISABLED:disabled": false, 
+            "vcpus": 1, 
+            "swap": "", 
+            "os-flavor-access:is_public": true, 
+            "rxtx_factor": 1.0, 
+            "OS-FLV-EXT-DATA:ephemeral": 0, 
+            "disk": 1, 
+            "id": "1"
+        }, 
+        {
+            "name": "m1.small", 
+            "links": [
+                {
+                    "href": "http://10.87.209.165:8774/v2.1/313da8e3ab19478e82be9c50e6b1a04b/flavors/2", 
+                    "rel": "self"
+                }, 
+                {
+                    "href": "http://10.87.209.165:8774/313da8e3ab19478e82be9c50e6b1a04b/flavors/2", 
+                    "rel": "bookmark"
+                }
+            ], 
+            "ram": 2048, 
+            "OS-FLV-DISABLED:disabled": false, 
+            "vcpus": 1, 
+            "swap": "", 
+            "os-flavor-access:is_public": true, 
+            "rxtx_factor": 1.0, 
+            "OS-FLV-EXT-DATA:ephemeral": 0, 
+            "disk": 20, 
+            "id": "2"
+        }, 
+        {
+            "name": "m1.medium", 
+            "links": [
+                {
+                    "href": "http://10.87.209.165:8774/v2.1/313da8e3ab19478e82be9c50e6b1a04b/flavors/3", 
+                    "rel": "self"
+                }, 
+                {
+                    "href": "http://10.87.209.165:8774/313da8e3ab19478e82be9c50e6b1a04b/flavors/3", 
+                    "rel": "bookmark"
+                }
+            ], 
+            "ram": 4096, 
+            "OS-FLV-DISABLED:disabled": false, 
+            "vcpus": 2, 
+            "swap": "", 
+            "os-flavor-access:is_public": true, 
+            "rxtx_factor": 1.0, 
+            "OS-FLV-EXT-DATA:ephemeral": 0, 
+            "disk": 40, 
+            "id": "3"
+        }, 
+        {
+            "name": "m1.large", 
+            "links": [
+                {
+                    "href": "http://10.87.209.165:8774/v2.1/313da8e3ab19478e82be9c50e6b1a04b/flavors/4", 
+                    "rel": "self"
+                }, 
+                {
+                    "href": "http://10.87.209.165:8774/313da8e3ab19478e82be9c50e6b1a04b/flavors/4", 
+                    "rel": "bookmark"
+                }
+            ], 
+            "ram": 8192, 
+            "OS-FLV-DISABLED:disabled": false, 
+            "vcpus": 4, 
+            "swap": "", 
+            "os-flavor-access:is_public": true, 
+            "rxtx_factor": 1.0, 
+            "OS-FLV-EXT-DATA:ephemeral": 0, 
+            "disk": 80, 
+            "id": "4"
+        }, 
+        {
+            "name": "m1.xlarge", 
+            "links": [
+                {
+                    "href": "http://10.87.209.165:8774/v2.1/313da8e3ab19478e82be9c50e6b1a04b/flavors/5", 
+                    "rel": "self"
+                }, 
+                {
+                    "href": "http://10.87.209.165:8774/313da8e3ab19478e82be9c50e6b1a04b/flavors/5", 
+                    "rel": "bookmark"
+                }
+            ], 
+            "ram": 16384, 
+            "OS-FLV-DISABLED:disabled": false, 
+            "vcpus": 8, 
+            "swap": "", 
+            "os-flavor-access:is_public": true, 
+            "rxtx_factor": 1.0, 
+            "OS-FLV-EXT-DATA:ephemeral": 0, 
+            "disk": 160, 
+            "id": "5"
+        }
+    ], 
+    "zOpenStackCinderApiHosts": [], 
+    "host_mappings": {
+        "osi-p": "osi-p", 
+        "10.87.209.165": "10.87.209.165", 
+        "osi-p@lvm": "osi-p"
+    }, 
+    "zOpenStackNovaApiHosts": [], 
+    "hostmap_mappings": {
+        "osi-p": "host-osi-p", 
+        "10.87.209.165": "host-10.87.209.165"
+    }, 
+    "quotas": [
+        {
+            "per_volume_gigabytes": -1, 
+            "snapshots_iscsi": -1, 
+            "gigabytes": 1000, 
+            "backup_gigabytes": 1000, 
+            "snapshots": 10, 
+            "volumes_iscsi": -1, 
+            "groups": 10, 
+            "volumes": 10, 
+            "backups": 10, 
+            "gigabytes_iscsi": -1, 
+            "id": "313da8e3ab19478e82be9c50e6b1a04b"
+        }, 
+        {
+            "per_volume_gigabytes": -1, 
+            "snapshots_iscsi": -1, 
+            "gigabytes": 1000, 
+            "backup_gigabytes": 1000, 
+            "snapshots": 10, 
+            "volumes_iscsi": -1, 
+            "groups": 10, 
+            "volumes": 10, 
+            "backups": 10, 
+            "gigabytes_iscsi": -1, 
+            "id": "9afe0a3dc0414bff8c69a4f3474fafba"
+        }, 
+        {
+            "per_volume_gigabytes": -1, 
+            "snapshots_iscsi": -1, 
+            "gigabytes": 1000, 
+            "backup_gigabytes": 1000, 
+            "snapshots": 10, 
+            "volumes_iscsi": -1, 
+            "groups": 10, 
+            "volumes": 10, 
+            "backups": 10, 
+            "gigabytes_iscsi": -1, 
+            "id": "d6a14c911aed48cfa9edc383ff85587f"
+        }
+    ], 
+    "cinder_services": [
+        {
+            "status": "enabled", 
+            "binary": "cinder-scheduler", 
+            "zone": "nova", 
+            "state": "up", 
+            "updated_at": "2018-11-30T21:44:16.000000", 
+            "host": "osi-p", 
+            "disabled_reason": null
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "cinder-backup", 
+            "zone": "nova", 
+            "state": "up", 
+            "updated_at": "2018-11-30T21:44:15.000000", 
+            "host": "osi-p", 
+            "disabled_reason": null
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "cinder-volume", 
+            "zone": "nova", 
+            "frozen": false, 
+            "updated_at": "2018-11-30T21:44:20.000000", 
+            "host": "osi-p", 
+            "state": "up", 
+            "replication_status": "disabled", 
+            "active_backend_id": null, 
+            "disabled_reason": null
+        }
+    ], 
+    "hypervisor_details": {
+        "hypervisor-1": {
+            "status": "enabled", 
+            "vcpus": 7, 
+            "service": {
+                "host": "osi-p", 
+                "disabled_reason": null, 
+                "id": 6
+            }, 
+            "vcpus_used": 1, 
+            "hypervisor_type": "QEMU", 
+            "local_gb_used": 1, 
+            "host_ip": "10.87.209.165", 
+            "hypervisor_hostname": "osi-p", 
+            "memory_mb_used": 1024, 
+            "memory_mb": 8191, 
+            "current_workload": 0, 
+            "state": "up", 
+            "cpu_info": "{\"vendor\": \"Intel\", \"model\": \"Broadwell-IBRS\", \"arch\": \"x86_64\", \"features\": [\"pge\", \"avx\", \"clflush\", \"sep\", \"rtm\", \"tsc_adjust\", \"tsc-deadline\", \"stibp\", \"invpcid\", \"tsc\", \"fsgsbase\", \"xsave\", \"smap\", \"xsaveopt\", \"erms\", \"hle\", \"cmov\", \"smep\", \"ssse3\", \"pat\", \"arat\", \"lm\", \"msr\", \"adx\", \"3dnowprefetch\", \"nx\", \"fxsr\", \"syscall\", \"sse4.1\", \"pae\", \"sse4.2\", \"pclmuldq\", \"cx16\", \"pcid\", \"fma\", \"vme\", \"mmx\", \"osxsave\", \"cx8\", \"mce\", \"de\", \"aes\", \"mca\", \"pse\", \"lahf_lm\", \"abm\", \"rdseed\", \"popcnt\", \"pdpe1gb\", \"apic\", \"sse\", \"f16c\", \"ds\", \"invtsc\", \"pni\", \"rdtscp\", \"avx2\", \"sse2\", \"ss\", \"hypervisor\", \"bmi1\", \"bmi2\", \"spec-ctrl\", \"fpu\", \"ssbd\", \"pse36\", \"mtrr\", \"movbe\", \"rdrand\", \"arch-facilities\", \"x2apic\"], \"topology\": {\"cores\": 1, \"cells\": 1, \"threads\": 1, \"sockets\": 7}}", 
+            "running_vms": 1, 
+            "free_disk_gb": 48, 
+            "hypervisor_version": 2010000, 
+            "disk_available_least": 45, 
+            "local_gb": 49, 
+            "free_ram_mb": 7167, 
+            "id": 1
+        }
+    }, 
+    "nova_url": "http://10.87.209.165:8774/v2.1/313da8e3ab19478e82be9c50e6b1a04b", 
+    "floatingips": [
+        {
+            "router_id": null, 
+            "status": "DOWN", 
+            "description": "", 
+            "tags": [], 
+            "tenant_id": "313da8e3ab19478e82be9c50e6b1a04b", 
+            "created_at": "2018-11-30T19:57:54Z", 
+            "updated_at": "2018-11-30T19:57:54Z", 
+            "floating_network_id": "0ccbb5ec-9737-4107-96ab-5fca0e5974fe", 
+            "fixed_ip_address": null, 
+            "floating_ip_address": "172.24.4.4", 
+            "revision_number": 0, 
+            "project_id": "313da8e3ab19478e82be9c50e6b1a04b", 
+            "port_id": null, 
+            "id": "733d3d80-3a29-4035-a333-577f1b60267c"
+        }, 
+        {
+            "router_id": "3dfb6205-861c-416c-ac3d-81912abc0335", 
+            "status": "ACTIVE", 
+            "description": "", 
+            "tags": [], 
+            "tenant_id": "d6a14c911aed48cfa9edc383ff85587f", 
+            "created_at": "2018-11-30T20:07:53Z", 
+            "updated_at": "2018-11-30T20:08:13Z", 
+            "floating_network_id": "0ccbb5ec-9737-4107-96ab-5fca0e5974fe", 
+            "fixed_ip_address": "10.0.0.4", 
+            "floating_ip_address": "172.24.4.5", 
+            "revision_number": 1, 
+            "project_id": "d6a14c911aed48cfa9edc383ff85587f", 
+            "port_id": "6ccfce1e-e37a-42db-9a94-65f50ec18060", 
+            "id": "d20b1cb0-4b52-4110-a784-cc73c913551e"
+        }, 
+        {
+            "router_id": null, 
+            "status": "DOWN", 
+            "description": "", 
+            "tags": [], 
+            "tenant_id": "313da8e3ab19478e82be9c50e6b1a04b", 
+            "created_at": "2018-11-30T17:58:07Z", 
+            "updated_at": "2018-11-30T17:58:07Z", 
+            "floating_network_id": "0ccbb5ec-9737-4107-96ab-5fca0e5974fe", 
+            "fixed_ip_address": null, 
+            "floating_ip_address": "172.24.4.6", 
+            "revision_number": 0, 
+            "project_id": "313da8e3ab19478e82be9c50e6b1a04b", 
+            "port_id": null, 
+            "id": "f18c2356-6373-4d94-b27c-aeff9532cbdb"
+        }
+    ], 
+    "subnets": [
+        {
+            "service_types": [], 
+            "description": "", 
+            "enable_dhcp": false, 
+            "tags": [], 
+            "network_id": "0ccbb5ec-9737-4107-96ab-5fca0e5974fe", 
+            "tenant_id": "313da8e3ab19478e82be9c50e6b1a04b", 
+            "created_at": "2018-10-31T19:55:01Z", 
+            "dns_nameservers": [], 
+            "updated_at": "2018-10-31T19:55:01Z", 
+            "ipv6_ra_mode": null, 
+            "allocation_pools": [
+                {
+                    "start": "172.24.4.2", 
+                    "end": "172.24.4.254"
+                }
+            ], 
+            "host_routes": [], 
+            "revision_number": 0, 
+            "ipv6_address_mode": null, 
+            "ip_version": 4, 
+            "gateway_ip": "172.24.4.1", 
+            "cidr": "172.24.4.0/24", 
+            "project_id": "313da8e3ab19478e82be9c50e6b1a04b", 
+            "id": "0e56f3ac-2289-4422-b3a8-e5a930dcec47", 
+            "subnetpool_id": null, 
+            "name": "public_subnet"
+        }, 
+        {
+            "service_types": [], 
+            "description": "", 
+            "enable_dhcp": true, 
+            "tags": [], 
+            "network_id": "f82afbca-d429-4dc7-b3c0-3ead28855f2e", 
+            "tenant_id": "d6a14c911aed48cfa9edc383ff85587f", 
+            "created_at": "2018-10-31T19:55:06Z", 
+            "dns_nameservers": [], 
+            "updated_at": "2018-10-31T19:55:06Z", 
+            "ipv6_ra_mode": null, 
+            "allocation_pools": [
+                {
+                    "start": "10.0.0.2", 
+                    "end": "10.0.0.254"
+                }
+            ], 
+            "host_routes": [], 
+            "revision_number": 0, 
+            "ipv6_address_mode": null, 
+            "ip_version": 4, 
+            "gateway_ip": "10.0.0.1", 
+            "cidr": "10.0.0.0/24", 
+            "project_id": "d6a14c911aed48cfa9edc383ff85587f", 
+            "id": "25fca2dd-953a-4663-a640-10e0f04d9543", 
+            "subnetpool_id": null, 
+            "name": "private_subnet"
+        }
+    ], 
+    "hypervisors_detailed": [
+        {
+            "status": "enabled", 
+            "vcpus": 7, 
+            "service": {
+                "host": "osi-p", 
+                "disabled_reason": null, 
+                "id": 6
+            }, 
+            "vcpus_used": 1, 
+            "hypervisor_type": "QEMU", 
+            "local_gb_used": 1, 
+            "host_ip": "10.87.209.165", 
+            "hypervisor_hostname": "osi-p", 
+            "memory_mb_used": 1024, 
+            "memory_mb": 8191, 
+            "current_workload": 0, 
+            "state": "up", 
+            "cpu_info": "{\"vendor\": \"Intel\", \"model\": \"Broadwell-IBRS\", \"arch\": \"x86_64\", \"features\": [\"pge\", \"avx\", \"clflush\", \"sep\", \"rtm\", \"tsc_adjust\", \"tsc-deadline\", \"stibp\", \"invpcid\", \"tsc\", \"fsgsbase\", \"xsave\", \"smap\", \"xsaveopt\", \"erms\", \"hle\", \"cmov\", \"smep\", \"ssse3\", \"pat\", \"arat\", \"lm\", \"msr\", \"adx\", \"3dnowprefetch\", \"nx\", \"fxsr\", \"syscall\", \"sse4.1\", \"pae\", \"sse4.2\", \"pclmuldq\", \"cx16\", \"pcid\", \"fma\", \"vme\", \"mmx\", \"osxsave\", \"cx8\", \"mce\", \"de\", \"aes\", \"mca\", \"pse\", \"lahf_lm\", \"abm\", \"rdseed\", \"popcnt\", \"pdpe1gb\", \"apic\", \"sse\", \"f16c\", \"ds\", \"invtsc\", \"pni\", \"rdtscp\", \"avx2\", \"sse2\", \"ss\", \"hypervisor\", \"bmi1\", \"bmi2\", \"spec-ctrl\", \"fpu\", \"ssbd\", \"pse36\", \"mtrr\", \"movbe\", \"rdrand\", \"arch-facilities\", \"x2apic\"], \"topology\": {\"cores\": 1, \"cells\": 1, \"threads\": 1, \"sockets\": 7}}", 
+            "running_vms": 1, 
+            "free_disk_gb": 48, 
+            "hypervisor_version": 2010000, 
+            "disk_available_least": 45, 
+            "local_gb": 49, 
+            "free_ram_mb": 7167, 
+            "id": 1
+        }
+    ], 
+    "cinder_url": "http://10.87.209.165:8776/v2/313da8e3ab19478e82be9c50e6b1a04b", 
+    "routers": [
+        {
+            "status": "ACTIVE", 
+            "external_gateway_info": {
+                "network_id": "0ccbb5ec-9737-4107-96ab-5fca0e5974fe", 
+                "enable_snat": true, 
+                "external_fixed_ips": [
+                    {
+                        "subnet_id": "0e56f3ac-2289-4422-b3a8-e5a930dcec47", 
+                        "ip_address": "172.24.4.8"
+                    }
+                ]
+            }, 
+            "availability_zone_hints": [], 
+            "availability_zones": [
+                "nova"
+            ], 
+            "description": "", 
+            "tags": [], 
+            "tenant_id": "d6a14c911aed48cfa9edc383ff85587f", 
+            "created_at": "2018-10-31T19:55:10Z", 
+            "admin_state_up": true, 
+            "distributed": false, 
+            "updated_at": "2018-11-02T17:22:05Z", 
+            "project_id": "d6a14c911aed48cfa9edc383ff85587f", 
+            "flavor_id": null, 
+            "revision_number": 4, 
+            "routes": [], 
+            "ha": false, 
+            "id": "3dfb6205-861c-416c-ac3d-81912abc0335", 
+            "name": "router1"
+        }
+    ], 
+    "nova_url_host": "10.87.209.165", 
+    "services": [
+        {
+            "status": "enabled", 
+            "binary": "nova-conductor", 
+            "zone": "internal", 
+            "host": "osi-p", 
+            "updated_at": "2018-11-30T21:44:20.000000", 
+            "state": "up", 
+            "disabled_reason": null, 
+            "id": 3
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "nova-scheduler", 
+            "zone": "internal", 
+            "host": "osi-p", 
+            "updated_at": "2018-11-30T21:44:10.000000", 
+            "state": "up", 
+            "disabled_reason": null, 
+            "id": 4
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "nova-consoleauth", 
+            "zone": "internal", 
+            "host": "osi-p", 
+            "updated_at": "2018-11-30T21:44:16.000000", 
+            "state": "up", 
+            "disabled_reason": null, 
+            "id": 5
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "nova-compute", 
+            "zone": "nova", 
+            "host": "osi-p", 
+            "updated_at": "2018-11-30T21:44:12.000000", 
+            "state": "up", 
+            "disabled_reason": null, 
+            "id": 6
+        }
+    ], 
+    "zOpenStackExtraHosts": [], 
+    "volumetypes": [
+        {
+            "name": "iscsi", 
+            "qos_specs_id": null, 
+            "extra_specs": {
+                "volume_backend_name": "lvm"
+            }, 
+            "os-volume-type-access:is_public": true, 
+            "is_public": true, 
+            "id": "45bbf67b-c222-4bc6-a3a1-97804d9b1d53", 
+            "description": null
+        }
+    ], 
+    "volumes": [
+        {
+            "migration_status": null, 
+            "attachments": [], 
+            "links": [
+                {
+                    "href": "http://10.87.209.165:8776/v2/313da8e3ab19478e82be9c50e6b1a04b/volumes/285fa789-ab57-4bd7-9a61-6b26684b4eb6", 
+                    "rel": "self"
+                }, 
+                {
+                    "href": "http://10.87.209.165:8776/313da8e3ab19478e82be9c50e6b1a04b/volumes/285fa789-ab57-4bd7-9a61-6b26684b4eb6", 
+                    "rel": "bookmark"
+                }
+            ], 
+            "availability_zone": "nova", 
+            "os-vol-host-attr:host": null, 
+            "encrypted": false, 
+            "updated_at": "2018-11-12T16:14:17.000000", 
+            "replication_status": null, 
+            "snapshot_id": null, 
+            "id": "285fa789-ab57-4bd7-9a61-6b26684b4eb6", 
+            "size": 100, 
+            "user_id": "4b3448a3057c411d827de9bfb77a5599", 
+            "os-vol-tenant-attr:tenant_id": "313da8e3ab19478e82be9c50e6b1a04b", 
+            "os-vol-mig-status-attr:migstat": null, 
+            "metadata": {}, 
+            "status": "error", 
+            "description": null, 
+            "multiattach": false, 
+            "source_volid": null, 
+            "consistencygroup_id": null, 
+            "os-vol-mig-status-attr:name_id": null, 
+            "name": "blueVolume", 
+            "bootable": "false", 
+            "created_at": "2018-11-12T16:14:15.000000", 
+            "volume_type": "iscsi"
+        }
+    ], 
+    "tenants": [
+        {
+            "id": "313da8e3ab19478e82be9c50e6b1a04b", 
+            "enabled": true, 
+            "description": "admin tenant", 
+            "name": "admin"
+        }, 
+        {
+            "id": "9afe0a3dc0414bff8c69a4f3474fafba", 
+            "enabled": true, 
+            "description": "Tenant for the openstack services", 
+            "name": "services"
+        }, 
+        {
+            "id": "d6a14c911aed48cfa9edc383ff85587f", 
+            "enabled": true, 
+            "description": "default tenant", 
+            "name": "demo"
+        }
+    ], 
+    "ports": [
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-10-31T19:57:38Z", 
+            "device_owner": "network:router_interface", 
+            "revision_number": 7, 
+            "port_security_enabled": false, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "25fca2dd-953a-4663-a640-10e0f04d9543", 
+                    "ip_address": "10.0.0.1"
+                }
+            ], 
+            "id": "486e57cb-2ba3-4c4f-acb8-a21ea7739f03", 
+            "security_groups": [], 
+            "binding:vif_details": {
+                "port_filter": true, 
+                "datapath_type": "system", 
+                "ovs_hybrid_plug": true
+            }, 
+            "binding:vif_type": "ovs", 
+            "mac_address": "fa:16:3e:92:d3:ab", 
+            "project_id": "d6a14c911aed48cfa9edc383ff85587f", 
+            "status": "ACTIVE", 
+            "binding:host_id": "osi-p", 
+            "description": "", 
+            "tags": [], 
+            "device_id": "3dfb6205-861c-416c-ac3d-81912abc0335", 
+            "name": "", 
+            "admin_state_up": true, 
+            "network_id": "f82afbca-d429-4dc7-b3c0-3ead28855f2e", 
+            "tenant_id": "d6a14c911aed48cfa9edc383ff85587f", 
+            "created_at": "2018-10-31T19:55:28Z", 
+            "binding:vnic_type": "normal"
+        }, 
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-11-30T20:07:53Z", 
+            "device_owner": "network:floatingip", 
+            "revision_number": 4, 
+            "port_security_enabled": false, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "0e56f3ac-2289-4422-b3a8-e5a930dcec47", 
+                    "ip_address": "172.24.4.5"
+                }
+            ], 
+            "id": "507e8f3e-426f-40fb-8abf-f342f724a077", 
+            "security_groups": [], 
+            "binding:vif_details": {}, 
+            "binding:vif_type": "unbound", 
+            "mac_address": "fa:16:3e:56:ae:85", 
+            "project_id": "", 
+            "status": "N/A", 
+            "binding:host_id": "", 
+            "description": "", 
+            "tags": [], 
+            "device_id": "d20b1cb0-4b52-4110-a784-cc73c913551e", 
+            "name": "", 
+            "admin_state_up": true, 
+            "network_id": "0ccbb5ec-9737-4107-96ab-5fca0e5974fe", 
+            "tenant_id": "", 
+            "created_at": "2018-11-30T20:07:52Z", 
+            "binding:vnic_type": "normal"
+        }, 
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-11-30T19:57:54Z", 
+            "device_owner": "network:floatingip", 
+            "revision_number": 4, 
+            "port_security_enabled": false, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "0e56f3ac-2289-4422-b3a8-e5a930dcec47", 
+                    "ip_address": "172.24.4.4"
+                }
+            ], 
+            "id": "66297e0e-5f7f-4be2-9708-f8d6a8540574", 
+            "security_groups": [], 
+            "binding:vif_details": {}, 
+            "binding:vif_type": "unbound", 
+            "mac_address": "fa:16:3e:b5:50:e9", 
+            "project_id": "", 
+            "status": "N/A", 
+            "binding:host_id": "", 
+            "description": "", 
+            "tags": [], 
+            "device_id": "733d3d80-3a29-4035-a333-577f1b60267c", 
+            "name": "", 
+            "admin_state_up": true, 
+            "network_id": "0ccbb5ec-9737-4107-96ab-5fca0e5974fe", 
+            "tenant_id": "", 
+            "created_at": "2018-11-30T19:57:53Z", 
+            "binding:vnic_type": "normal"
+        }, 
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-11-30T20:07:25Z", 
+            "device_owner": "compute:nova", 
+            "revision_number": 8, 
+            "port_security_enabled": true, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "25fca2dd-953a-4663-a640-10e0f04d9543", 
+                    "ip_address": "10.0.0.4"
+                }
+            ], 
+            "id": "6ccfce1e-e37a-42db-9a94-65f50ec18060", 
+            "security_groups": [
+                "a1fb17f1-df33-40cb-8d4f-7fdae0a01162"
+            ], 
+            "binding:vif_details": {
+                "port_filter": true, 
+                "datapath_type": "system", 
+                "ovs_hybrid_plug": true
+            }, 
+            "binding:vif_type": "ovs", 
+            "mac_address": "fa:16:3e:e6:d7:3b", 
+            "project_id": "d6a14c911aed48cfa9edc383ff85587f", 
+            "status": "ACTIVE", 
+            "binding:host_id": "osi-p", 
+            "description": "", 
+            "tags": [], 
+            "device_id": "b116be08-dfd0-4ef8-b58b-8ea46e1ffd87", 
+            "name": "", 
+            "admin_state_up": true, 
+            "network_id": "f82afbca-d429-4dc7-b3c0-3ead28855f2e", 
+            "tenant_id": "d6a14c911aed48cfa9edc383ff85587f", 
+            "created_at": "2018-11-13T23:00:15Z", 
+            "binding:vnic_type": "normal"
+        }, 
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-11-30T19:56:42Z", 
+            "device_owner": "", 
+            "revision_number": 3, 
+            "port_security_enabled": true, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "25fca2dd-953a-4663-a640-10e0f04d9543", 
+                    "ip_address": "10.0.0.6"
+                }
+            ], 
+            "id": "c0961651-9946-4ef3-8a12-289e8f9d390a", 
+            "security_groups": [
+                "91e9cd9a-9cc5-4ad2-8bc2-67186c3f5372"
+            ], 
+            "binding:vif_details": {}, 
+            "binding:vif_type": "unbound", 
+            "mac_address": "fa:16:3e:4f:bc:2d", 
+            "project_id": "313da8e3ab19478e82be9c50e6b1a04b", 
+            "status": "DOWN", 
+            "binding:host_id": "", 
+            "description": "", 
+            "tags": [], 
+            "device_id": "29132ff8-5048-4c63-a4c7-ba56c13d0895", 
+            "name": "junk", 
+            "admin_state_up": true, 
+            "network_id": "f82afbca-d429-4dc7-b3c0-3ead28855f2e", 
+            "tenant_id": "313da8e3ab19478e82be9c50e6b1a04b", 
+            "created_at": "2018-11-30T19:56:42Z", 
+            "binding:vnic_type": "normal"
+        }, 
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-11-02T14:53:56Z", 
+            "device_owner": "network:dhcp", 
+            "revision_number": 5, 
+            "port_security_enabled": false, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "25fca2dd-953a-4663-a640-10e0f04d9543", 
+                    "ip_address": "10.0.0.2"
+                }
+            ], 
+            "id": "cbdde5df-9e03-4f7d-97df-152763870f0e", 
+            "security_groups": [], 
+            "binding:vif_details": {
+                "port_filter": true, 
+                "datapath_type": "system", 
+                "ovs_hybrid_plug": true
+            }, 
+            "binding:vif_type": "ovs", 
+            "mac_address": "fa:16:3e:1a:a2:fe", 
+            "project_id": "d6a14c911aed48cfa9edc383ff85587f", 
+            "status": "ACTIVE", 
+            "binding:host_id": "osi-p", 
+            "description": "", 
+            "tags": [], 
+            "device_id": "dhcpcf4ed10d-3084-5bf5-94d4-6cba37198447-f82afbca-d429-4dc7-b3c0-3ead28855f2e", 
+            "name": "", 
+            "admin_state_up": true, 
+            "network_id": "f82afbca-d429-4dc7-b3c0-3ead28855f2e", 
+            "tenant_id": "d6a14c911aed48cfa9edc383ff85587f", 
+            "created_at": "2018-11-02T14:53:53Z", 
+            "binding:vnic_type": "normal"
+        }, 
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-10-31T19:57:38Z", 
+            "device_owner": "network:router_gateway", 
+            "revision_number": 6, 
+            "port_security_enabled": false, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "0e56f3ac-2289-4422-b3a8-e5a930dcec47", 
+                    "ip_address": "172.24.4.8"
+                }
+            ], 
+            "id": "cc513990-11ce-4278-8821-da30227da290", 
+            "security_groups": [], 
+            "binding:vif_details": {
+                "port_filter": true, 
+                "datapath_type": "system", 
+                "ovs_hybrid_plug": true
+            }, 
+            "binding:vif_type": "ovs", 
+            "mac_address": "fa:16:3e:b4:6d:9b", 
+            "project_id": "", 
+            "status": "ACTIVE", 
+            "binding:host_id": "osi-p", 
+            "description": "", 
+            "tags": [], 
+            "device_id": "3dfb6205-861c-416c-ac3d-81912abc0335", 
+            "name": "", 
+            "admin_state_up": true, 
+            "network_id": "0ccbb5ec-9737-4107-96ab-5fca0e5974fe", 
+            "tenant_id": "", 
+            "created_at": "2018-10-31T19:55:12Z", 
+            "binding:vnic_type": "normal"
+        }, 
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-11-30T17:58:08Z", 
+            "device_owner": "network:floatingip", 
+            "revision_number": 4, 
+            "port_security_enabled": false, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "0e56f3ac-2289-4422-b3a8-e5a930dcec47", 
+                    "ip_address": "172.24.4.6"
+                }
+            ], 
+            "id": "dfe1738e-265a-4815-ac6f-5f4bfa81b642", 
+            "security_groups": [], 
+            "binding:vif_details": {}, 
+            "binding:vif_type": "unbound", 
+            "mac_address": "fa:16:3e:9b:97:49", 
+            "project_id": "", 
+            "status": "N/A", 
+            "binding:host_id": "", 
+            "description": "", 
+            "tags": [], 
+            "device_id": "f18c2356-6373-4d94-b27c-aeff9532cbdb", 
+            "name": "", 
+            "admin_state_up": true, 
+            "network_id": "0ccbb5ec-9737-4107-96ab-5fca0e5974fe", 
+            "tenant_id": "", 
+            "created_at": "2018-11-30T17:58:06Z", 
+            "binding:vnic_type": "normal"
+        }
+    ], 
+    "volsnapshots": []
+}

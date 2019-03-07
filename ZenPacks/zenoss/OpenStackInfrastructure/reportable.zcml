@@ -7,22 +7,22 @@
 
   <!-- Default behavior using BaseReportable: -->
   <adapter factory=".reportable.BaseReportable"
-           for=".zenpacklib.Device"
+           for=".Endpoint.Endpoint"
            provides="Products.Zuul.interfaces.IReportable"
            />
 
   <adapter factory=".reportable.BaseReportableFactory"
-           for=".zenpacklib.Device"
+           for=".Endpoint.Endpoint"
            provides="Products.Zuul.interfaces.IReportableFactory"
            />
 
   <adapter factory=".reportable.BaseReportable"
-           for=".zenpacklib.Component"
+           for=".OpenstackComponent.OpenstackComponent"
            provides="Products.Zuul.interfaces.IReportable"
            />
 
   <adapter factory=".reportable.BaseReportableFactory"
-           for=".zenpacklib.Component"
+           for=".OpenstackComponent.OpenstackComponent"
            provides="Products.Zuul.interfaces.IReportableFactory"
            />
 

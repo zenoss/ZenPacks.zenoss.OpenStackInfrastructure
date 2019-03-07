@@ -1,0 +1,1761 @@
+{
+    "cinder_url_host": "172.25.34.89", 
+    "hostmap_dns": {
+        "linux-4fda16f9-0396-4e2d-93ed-948ec37b4179": null, 
+        "linux-878d52df-664a-494f-b4c1-15682d0e6088": null, 
+        "172.25.34.89": "172.25.34.89", 
+        "linux-75e2a25e-f362-4f95-b25b-bf158cb707a1": null, 
+        "linux-af87f135-2026-4f09-a693-bb1ab0107221": null, 
+        "linux-0c016fc0-6184-409d-89f6-8e20d680f12a": null
+    }, 
+    "servers": [
+        {
+            "OS-EXT-STS:task_state": null, 
+            "addresses": {
+                "network1": [
+                    {
+                        "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:1c:a6:3e", 
+                        "version": 4, 
+                        "addr": "20.20.20.7", 
+                        "OS-EXT-IPS:type": "fixed"
+                    }, 
+                    {
+                        "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:1c:a6:3e", 
+                        "version": 4, 
+                        "addr": "172.23.105.157", 
+                        "OS-EXT-IPS:type": "floating"
+                    }
+                ]
+            }, 
+            "links": [
+                {
+                    "href": "http://172.25.34.89:8774/v2/a11e16faa31e4b698be8bc3af0a7ae57/servers/5228f94a-75c8-4dec-9024-47fabca12af0", 
+                    "rel": "self"
+                }, 
+                {
+                    "href": "http://172.25.34.89:8774/a11e16faa31e4b698be8bc3af0a7ae57/servers/5228f94a-75c8-4dec-9024-47fabca12af0", 
+                    "rel": "bookmark"
+                }
+            ], 
+            "image": {
+                "id": "ae1f15e6-c577-449f-9902-87a2f08883a5", 
+                "links": [
+                    {
+                        "href": "http://172.25.34.89:8774/a11e16faa31e4b698be8bc3af0a7ae57/images/ae1f15e6-c577-449f-9902-87a2f08883a5", 
+                        "rel": "bookmark"
+                    }
+                ]
+            }, 
+            "OS-EXT-STS:vm_state": "active", 
+            "OS-EXT-SRV-ATTR:instance_name": "instance-0000000f", 
+            "OS-SRV-USG:launched_at": "2018-11-19T16:25:34.000000", 
+            "flavor": {
+                "id": "1578682c-f2e5-4b67-b6ef-bc1fb5348775", 
+                "links": [
+                    {
+                        "href": "http://172.25.34.89:8774/a11e16faa31e4b698be8bc3af0a7ae57/flavors/1578682c-f2e5-4b67-b6ef-bc1fb5348775", 
+                        "rel": "bookmark"
+                    }
+                ]
+            }, 
+            "id": "5228f94a-75c8-4dec-9024-47fabca12af0", 
+            "security_groups": [
+                {
+                    "name": "default"
+                }
+            ], 
+            "user_id": "170316590b6e4a019149a68250e9f8e0", 
+            "OS-DCF:diskConfig": "AUTO", 
+            "accessIPv4": "", 
+            "accessIPv6": "", 
+            "progress": 0, 
+            "OS-EXT-STS:power_state": 1, 
+            "OS-EXT-AZ:availability_zone": "nova", 
+            "metadata": {}, 
+            "status": "ACTIVE", 
+            "updated": "2018-11-29T17:55:44Z", 
+            "hostId": "ddd88491e2ce37c3a3110659ec0223262e97e2188310913806bbb538", 
+            "OS-EXT-SRV-ATTR:host": "NFVI-MICROPOD-New-compute-2", 
+            "OS-SRV-USG:terminated_at": null, 
+            "key_name": null, 
+            "OS-EXT-SRV-ATTR:hypervisor_hostname": "NFVI-MICROPOD-New-compute-2", 
+            "name": "test-vm1", 
+            "created": "2018-11-19T16:24:56Z", 
+            "tenant_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "os-extended-volumes:volumes_attached": [], 
+            "config_drive": "True"
+        }
+    ], 
+    "hypervisors": [
+        {
+            "status": "enabled", 
+            "state": "up", 
+            "id": 3, 
+            "hypervisor_hostname": "NFVI-MICROPOD-New-compute-2", 
+            "servers": [
+                {
+                    "uuid": "5228f94a-75c8-4dec-9024-47fabca12af0", 
+                    "name": "instance-0000000f"
+                }
+            ]
+        }, 
+        {
+            "status": "enabled", 
+            "state": "up", 
+            "id": 6, 
+            "hypervisor_hostname": "NFVI-MICROPOD-New-compute-1"
+        }, 
+        {
+            "status": "enabled", 
+            "state": "up", 
+            "id": 9, 
+            "hypervisor_hostname": "NFVI-MICROPOD-node-2"
+        }, 
+        {
+            "status": "enabled", 
+            "state": "up", 
+            "id": 12, 
+            "hypervisor_hostname": "NFVI-MICROPOD-node-3"
+        }, 
+        {
+            "status": "enabled", 
+            "state": "up", 
+            "id": 15, 
+            "hypervisor_hostname": "NFVI-MICROPOD-node-1"
+        }
+    ], 
+    "volume_pools": [
+        {
+            "name": "ceph@ceph#ceph", 
+            "capabilities": {
+                "filter_function": null, 
+                "goodness_function": null, 
+                "multiattach": false, 
+                "timestamp": "2018-11-30T20:22:45.758641", 
+                "volume_backend_name": "ceph", 
+                "free_capacity_gb": 5304.33, 
+                "driver_version": "1.2.0", 
+                "total_capacity_gb": 5304.33, 
+                "reserved_percentage": 0, 
+                "vendor_name": "Open Source", 
+                "storage_protocol": "ceph"
+            }
+        }
+    ], 
+    "agents": [
+        {
+            "binary": "neutron-metadata-agent", 
+            "description": null, 
+            "availability_zone": null, 
+            "dhcp_agent_subnets": [], 
+            "admin_state_up": true, 
+            "alive": true, 
+            "id": "30f65c69-120d-4287-bf0c-b2d259134d2b", 
+            "topic": "N/A", 
+            "host": "nfvi-micropod-node-1", 
+            "agent_type": "Metadata agent", 
+            "l3_agent_routers": [], 
+            "created_at": "2018-11-10 19:09:47", 
+            "started_at": "2018-11-20 02:08:30", 
+            "heartbeat_timestamp": "2018-11-30 20:22:53", 
+            "configurations": {
+                "log_agent_heartbeats": false, 
+                "nova_metadata_port": 8775, 
+                "nova_metadata_ip": "192.168.202.3", 
+                "metadata_proxy_socket": "/tmp/proxy_sockets/proxy.sock"
+            }
+        }, 
+        {
+            "l3_agent_networks": [
+                "a7d05a2d-2cab-4b4b-8cd1-ff5089860e27"
+            ], 
+            "binary": "neutron-l3-agent", 
+            "created_at": "2018-11-10 19:09:23", 
+            "description": null, 
+            "admin_state_up": true, 
+            "dhcp_agent_subnets": [], 
+            "availability_zone": "nova", 
+            "host": "nfvi-micropod-node-1", 
+            "alive": true, 
+            "id": "4bd61243-710a-4b2c-8b05-bdbbeb52e901", 
+            "l3_agent_gateways": [
+                "172.23.105.151"
+            ], 
+            "l3_agent_subnets": [
+                "7b2dff09-dcde-4cb5-b34a-f588c234c36b"
+            ], 
+            "agent_type": "L3 agent", 
+            "l3_agent_routers": [
+                "13e87314-0c1d-487b-b21d-1e1c745ef3f9"
+            ], 
+            "topic": "l3_agent", 
+            "started_at": "2018-11-20 02:07:02", 
+            "heartbeat_timestamp": "2018-11-30 20:22:50", 
+            "configurations": {
+                "agent_mode": "legacy", 
+                "gateway_external_network_id": "", 
+                "handle_internal_only_routers": true, 
+                "routers": 1, 
+                "interfaces": 2, 
+                "floating_ips": 1, 
+                "interface_driver": "neutron.agent.linux.interface.BridgeInterfaceDriver", 
+                "log_agent_heartbeats": false, 
+                "external_network_bridge": "", 
+                "ex_gw_ports": 1
+            }
+        }, 
+        {
+            "l3_agent_networks": [
+                "a7d05a2d-2cab-4b4b-8cd1-ff5089860e27"
+            ], 
+            "binary": "neutron-l3-agent", 
+            "created_at": "2018-11-10 19:09:12", 
+            "description": null, 
+            "admin_state_up": true, 
+            "dhcp_agent_subnets": [], 
+            "availability_zone": "nova", 
+            "host": "nfvi-micropod-node-2", 
+            "alive": true, 
+            "id": "7aae7414-4161-4ee1-a7dd-575338f072d1", 
+            "l3_agent_gateways": [
+                "172.23.105.151"
+            ], 
+            "l3_agent_subnets": [
+                "7b2dff09-dcde-4cb5-b34a-f588c234c36b"
+            ], 
+            "agent_type": "L3 agent", 
+            "l3_agent_routers": [
+                "13e87314-0c1d-487b-b21d-1e1c745ef3f9"
+            ], 
+            "topic": "l3_agent", 
+            "started_at": "2018-11-20 02:07:33", 
+            "heartbeat_timestamp": "2018-11-30 20:22:51", 
+            "configurations": {
+                "agent_mode": "legacy", 
+                "gateway_external_network_id": "", 
+                "handle_internal_only_routers": true, 
+                "routers": 1, 
+                "interfaces": 2, 
+                "floating_ips": 1, 
+                "interface_driver": "neutron.agent.linux.interface.BridgeInterfaceDriver", 
+                "log_agent_heartbeats": false, 
+                "external_network_bridge": "", 
+                "ex_gw_ports": 1
+            }
+        }, 
+        {
+            "l3_agent_networks": [
+                "a7d05a2d-2cab-4b4b-8cd1-ff5089860e27"
+            ], 
+            "binary": "neutron-l3-agent", 
+            "created_at": "2018-11-10 19:09:12", 
+            "description": null, 
+            "admin_state_up": true, 
+            "dhcp_agent_subnets": [], 
+            "availability_zone": "nova", 
+            "host": "nfvi-micropod-node-3", 
+            "alive": true, 
+            "id": "7d3c0f7e-f38b-4a47-8f1b-711461f26101", 
+            "l3_agent_gateways": [
+                "172.23.105.151"
+            ], 
+            "l3_agent_subnets": [
+                "7b2dff09-dcde-4cb5-b34a-f588c234c36b"
+            ], 
+            "agent_type": "L3 agent", 
+            "l3_agent_routers": [
+                "13e87314-0c1d-487b-b21d-1e1c745ef3f9"
+            ], 
+            "topic": "l3_agent", 
+            "started_at": "2018-11-20 02:08:02", 
+            "heartbeat_timestamp": "2018-11-30 20:22:50", 
+            "configurations": {
+                "agent_mode": "legacy", 
+                "gateway_external_network_id": "", 
+                "handle_internal_only_routers": true, 
+                "routers": 1, 
+                "interfaces": 2, 
+                "floating_ips": 1, 
+                "interface_driver": "neutron.agent.linux.interface.BridgeInterfaceDriver", 
+                "log_agent_heartbeats": false, 
+                "external_network_bridge": "", 
+                "ex_gw_ports": 1
+            }
+        }, 
+        {
+            "binary": "neutron-metadata-agent", 
+            "description": null, 
+            "availability_zone": null, 
+            "dhcp_agent_subnets": [], 
+            "admin_state_up": true, 
+            "alive": true, 
+            "id": "86d17ce3-a8f8-4174-9389-d23118afbd42", 
+            "topic": "N/A", 
+            "host": "nfvi-micropod-node-3", 
+            "agent_type": "Metadata agent", 
+            "l3_agent_routers": [], 
+            "created_at": "2018-11-10 19:09:38", 
+            "started_at": "2018-11-20 02:09:05", 
+            "heartbeat_timestamp": "2018-11-30 20:23:00", 
+            "configurations": {
+                "log_agent_heartbeats": false, 
+                "nova_metadata_port": 8775, 
+                "nova_metadata_ip": "192.168.202.3", 
+                "metadata_proxy_socket": "/tmp/proxy_sockets/proxy.sock"
+            }
+        }, 
+        {
+            "binary": "neutron-dhcp-agent", 
+            "description": null, 
+            "availability_zone": "nova", 
+            "dhcp_agent_subnets": [
+                "d6d88a19-e836-4773-8b17-678aa738a05c", 
+                "f1bd3abd-a64a-4626-b1e2-c5ecf770ebf0", 
+                "7b2dff09-dcde-4cb5-b34a-f588c234c36b"
+            ], 
+            "admin_state_up": true, 
+            "alive": true, 
+            "id": "9541c0ed-3fe4-4409-8f2f-8ac95998ab2f", 
+            "topic": "dhcp_agent", 
+            "dhcp_agent_networks": [
+                "18ed9913-25ba-453a-a798-db1b1d0d2db8", 
+                "8d14cd44-145c-4e39-ad55-d44afe95d3c8", 
+                "a7d05a2d-2cab-4b4b-8cd1-ff5089860e27"
+            ], 
+            "host": "nfvi-micropod-node-1", 
+            "agent_type": "DHCP agent", 
+            "l3_agent_routers": [], 
+            "created_at": "2018-11-10 19:08:52", 
+            "started_at": "2018-11-20 02:05:31", 
+            "heartbeat_timestamp": "2018-11-30 20:23:01", 
+            "configurations": {
+                "notifies_port_ready": true, 
+                "subnets": 2, 
+                "dhcp_lease_duration": 86400, 
+                "dhcp_driver": "neutron.agent.linux.dhcp.Dnsmasq", 
+                "networks": 2, 
+                "log_agent_heartbeats": false, 
+                "ports": 7
+            }
+        }, 
+        {
+            "binary": "neutron-metadata-agent", 
+            "description": null, 
+            "availability_zone": null, 
+            "dhcp_agent_subnets": [], 
+            "admin_state_up": true, 
+            "alive": true, 
+            "id": "d7ad6926-236c-4cbd-ae14-8f1cfc18de77", 
+            "topic": "N/A", 
+            "host": "nfvi-micropod-node-2", 
+            "agent_type": "Metadata agent", 
+            "l3_agent_routers": [], 
+            "created_at": "2018-11-10 19:09:38", 
+            "started_at": "2018-11-20 02:08:46", 
+            "heartbeat_timestamp": "2018-11-30 20:22:45", 
+            "configurations": {
+                "log_agent_heartbeats": false, 
+                "nova_metadata_port": 8775, 
+                "nova_metadata_ip": "192.168.202.3", 
+                "metadata_proxy_socket": "/tmp/proxy_sockets/proxy.sock"
+            }
+        }, 
+        {
+            "binary": "neutron-dhcp-agent", 
+            "description": null, 
+            "availability_zone": "nova", 
+            "dhcp_agent_subnets": [
+                "d6d88a19-e836-4773-8b17-678aa738a05c", 
+                "5afbf92c-b723-4401-9df8-df1cd2c9ce18"
+            ], 
+            "admin_state_up": true, 
+            "alive": true, 
+            "id": "da329350-83f6-4cc7-b4e4-36ad9b0292d3", 
+            "topic": "dhcp_agent", 
+            "dhcp_agent_networks": [
+                "18ed9913-25ba-453a-a798-db1b1d0d2db8", 
+                "1fe866ac-45f4-4549-a2fd-0fc468c00b1d"
+            ], 
+            "host": "nfvi-micropod-node-3", 
+            "agent_type": "DHCP agent", 
+            "l3_agent_routers": [], 
+            "created_at": "2018-11-10 19:08:44", 
+            "started_at": "2018-11-20 02:06:30", 
+            "heartbeat_timestamp": "2018-11-30 20:22:56", 
+            "configurations": {
+                "notifies_port_ready": true, 
+                "subnets": 1, 
+                "dhcp_lease_duration": 86400, 
+                "dhcp_driver": "neutron.agent.linux.dhcp.Dnsmasq", 
+                "networks": 1, 
+                "log_agent_heartbeats": false, 
+                "ports": 4
+            }
+        }, 
+        {
+            "binary": "neutron-dhcp-agent", 
+            "description": null, 
+            "availability_zone": "nova", 
+            "dhcp_agent_subnets": [
+                "5afbf92c-b723-4401-9df8-df1cd2c9ce18", 
+                "f1bd3abd-a64a-4626-b1e2-c5ecf770ebf0", 
+                "7b2dff09-dcde-4cb5-b34a-f588c234c36b"
+            ], 
+            "admin_state_up": true, 
+            "alive": true, 
+            "id": "f06fc5e8-a7ed-4c83-8018-05fa250c998a", 
+            "topic": "dhcp_agent", 
+            "dhcp_agent_networks": [
+                "1fe866ac-45f4-4549-a2fd-0fc468c00b1d", 
+                "8d14cd44-145c-4e39-ad55-d44afe95d3c8", 
+                "a7d05a2d-2cab-4b4b-8cd1-ff5089860e27"
+            ], 
+            "host": "nfvi-micropod-node-2", 
+            "agent_type": "DHCP agent", 
+            "l3_agent_routers": [], 
+            "created_at": "2018-11-10 19:08:44", 
+            "started_at": "2018-11-20 02:06:02", 
+            "heartbeat_timestamp": "2018-11-30 20:23:01", 
+            "configurations": {
+                "notifies_port_ready": true, 
+                "subnets": 1, 
+                "dhcp_lease_duration": 86400, 
+                "dhcp_driver": "neutron.agent.linux.dhcp.Dnsmasq", 
+                "networks": 1, 
+                "log_agent_heartbeats": false, 
+                "ports": 3
+            }
+        }
+    ], 
+    "images": [
+        {
+            "status": "ACTIVE", 
+            "updated": "2018-11-29T17:55:44Z", 
+            "name": "test-vm1_snap", 
+            "links": [
+                {
+                    "href": "http://172.25.34.89:8774/v2/a11e16faa31e4b698be8bc3af0a7ae57/images/2506822e-98fa-44dd-a7e9-18cd4bb374f0", 
+                    "rel": "self"
+                }, 
+                {
+                    "href": "http://172.25.34.89:8774/a11e16faa31e4b698be8bc3af0a7ae57/images/2506822e-98fa-44dd-a7e9-18cd4bb374f0", 
+                    "rel": "bookmark"
+                }, 
+                {
+                    "href": "http://192.168.202.3:9292/images/2506822e-98fa-44dd-a7e9-18cd4bb374f0", 
+                    "type": "application/vnd.openstack.image", 
+                    "rel": "alternate"
+                }
+            ], 
+            "created": "2018-11-29T17:55:04Z", 
+            "minDisk": 12, 
+            "server": {
+                "id": "5228f94a-75c8-4dec-9024-47fabca12af0", 
+                "links": [
+                    {
+                        "href": "http://172.25.34.89:8774/v2/a11e16faa31e4b698be8bc3af0a7ae57/servers/5228f94a-75c8-4dec-9024-47fabca12af0", 
+                        "rel": "self"
+                    }, 
+                    {
+                        "href": "http://172.25.34.89:8774/a11e16faa31e4b698be8bc3af0a7ae57/servers/5228f94a-75c8-4dec-9024-47fabca12af0", 
+                        "rel": "bookmark"
+                    }
+                ]
+            }, 
+            "progress": 100, 
+            "minRam": 0, 
+            "OS-EXT-IMG-SIZE:size": 1233715200, 
+            "id": "2506822e-98fa-44dd-a7e9-18cd4bb374f0", 
+            "metadata": {
+                "instance_uuid": "5228f94a-75c8-4dec-9024-47fabca12af0", 
+                "image_location": "snapshot", 
+                "image_state": "available", 
+                "user_id": "170316590b6e4a019149a68250e9f8e0", 
+                "image_type": "snapshot", 
+                "base_image_ref": "ae1f15e6-c577-449f-9902-87a2f08883a5", 
+                "owner_id": "a11e16faa31e4b698be8bc3af0a7ae57"
+            }
+        }, 
+        {
+            "status": "ACTIVE", 
+            "updated": "2018-11-10T19:35:19Z", 
+            "name": "RHEL-guest-image", 
+            "links": [
+                {
+                    "href": "http://172.25.34.89:8774/v2/a11e16faa31e4b698be8bc3af0a7ae57/images/ae1f15e6-c577-449f-9902-87a2f08883a5", 
+                    "rel": "self"
+                }, 
+                {
+                    "href": "http://172.25.34.89:8774/a11e16faa31e4b698be8bc3af0a7ae57/images/ae1f15e6-c577-449f-9902-87a2f08883a5", 
+                    "rel": "bookmark"
+                }, 
+                {
+                    "href": "http://192.168.202.3:9292/images/ae1f15e6-c577-449f-9902-87a2f08883a5", 
+                    "type": "application/vnd.openstack.image", 
+                    "rel": "alternate"
+                }
+            ], 
+            "created": "2018-11-10T19:35:08Z", 
+            "minDisk": 0, 
+            "progress": 100, 
+            "minRam": 0, 
+            "OS-EXT-IMG-SIZE:size": 556247552, 
+            "id": "ae1f15e6-c577-449f-9902-87a2f08883a5", 
+            "metadata": {}
+        }
+    ], 
+    "networks": [
+        {
+            "provider:physical_network": "physnet1", 
+            "ipv6_address_scope": null, 
+            "revision_number": 5, 
+            "port_security_enabled": true, 
+            "mtu": 1500, 
+            "id": "18ed9913-25ba-453a-a798-db1b1d0d2db8", 
+            "router:external": false, 
+            "availability_zone_hints": [], 
+            "availability_zones": [
+                "nova"
+            ], 
+            "ipv4_address_scope": null, 
+            "shared": false, 
+            "project_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "status": "ACTIVE", 
+            "subnets": [
+                "d6d88a19-e836-4773-8b17-678aa738a05c"
+            ], 
+            "description": "", 
+            "tags": [], 
+            "updated_at": "2018-11-19T16:10:19Z", 
+            "provider:segmentation_id": 687, 
+            "name": "network1", 
+            "admin_state_up": true, 
+            "tenant_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "created_at": "2018-11-19T16:10:19Z", 
+            "provider:network_type": "vlan"
+        }, 
+        {
+            "provider:physical_network": "physnet1", 
+            "ipv6_address_scope": null, 
+            "revision_number": 5, 
+            "port_security_enabled": true, 
+            "mtu": 1500, 
+            "id": "1fe866ac-45f4-4549-a2fd-0fc468c00b1d", 
+            "router:external": false, 
+            "availability_zone_hints": [], 
+            "availability_zones": [
+                "nova"
+            ], 
+            "ipv4_address_scope": null, 
+            "shared": false, 
+            "project_id": "", 
+            "status": "ACTIVE", 
+            "subnets": [
+                "5afbf92c-b723-4401-9df8-df1cd2c9ce18"
+            ], 
+            "description": "", 
+            "tags": [], 
+            "updated_at": "2018-11-19T16:11:10Z", 
+            "provider:segmentation_id": 686, 
+            "name": "HA network tenant a11e16faa31e4b698be8bc3af0a7ae57", 
+            "admin_state_up": true, 
+            "tenant_id": "", 
+            "created_at": "2018-11-19T16:11:09Z", 
+            "provider:network_type": "vlan"
+        }, 
+        {
+            "provider:physical_network": "physnet1", 
+            "ipv6_address_scope": null, 
+            "revision_number": 5, 
+            "port_security_enabled": true, 
+            "mtu": 1500, 
+            "id": "8d14cd44-145c-4e39-ad55-d44afe95d3c8", 
+            "router:external": false, 
+            "availability_zone_hints": [], 
+            "availability_zones": [
+                "nova"
+            ], 
+            "ipv4_address_scope": null, 
+            "shared": false, 
+            "project_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "status": "ACTIVE", 
+            "subnets": [
+                "f1bd3abd-a64a-4626-b1e2-c5ecf770ebf0"
+            ], 
+            "description": "", 
+            "tags": [], 
+            "updated_at": "2018-11-19T16:10:44Z", 
+            "provider:segmentation_id": 683, 
+            "name": "network2", 
+            "admin_state_up": true, 
+            "tenant_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "created_at": "2018-11-19T16:10:44Z", 
+            "provider:network_type": "vlan"
+        }, 
+        {
+            "provider:physical_network": "phys_ext", 
+            "ipv6_address_scope": null, 
+            "revision_number": 6, 
+            "port_security_enabled": true, 
+            "mtu": 1500, 
+            "id": "a7d05a2d-2cab-4b4b-8cd1-ff5089860e27", 
+            "router:external": true, 
+            "availability_zone_hints": [], 
+            "availability_zones": [
+                "nova"
+            ], 
+            "ipv4_address_scope": null, 
+            "shared": true, 
+            "project_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "status": "ACTIVE", 
+            "subnets": [
+                "7b2dff09-dcde-4cb5-b34a-f588c234c36b"
+            ], 
+            "description": "", 
+            "tags": [], 
+            "updated_at": "2018-11-10T19:35:02Z", 
+            "is_default": false, 
+            "provider:segmentation_id": null, 
+            "name": "ext-net", 
+            "admin_state_up": true, 
+            "tenant_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "created_at": "2018-11-10T19:35:02Z", 
+            "provider:network_type": "flat"
+        }
+    ], 
+    "flavors": [
+        {
+            "name": "test-flavor1", 
+            "links": [
+                {
+                    "href": "http://172.25.34.89:8774/v2/a11e16faa31e4b698be8bc3af0a7ae57/flavors/1578682c-f2e5-4b67-b6ef-bc1fb5348775", 
+                    "rel": "self"
+                }, 
+                {
+                    "href": "http://172.25.34.89:8774/a11e16faa31e4b698be8bc3af0a7ae57/flavors/1578682c-f2e5-4b67-b6ef-bc1fb5348775", 
+                    "rel": "bookmark"
+                }
+            ], 
+            "ram": 8096, 
+            "OS-FLV-DISABLED:disabled": false, 
+            "vcpus": 12, 
+            "swap": "", 
+            "os-flavor-access:is_public": false, 
+            "rxtx_factor": 1.0, 
+            "OS-FLV-EXT-DATA:ephemeral": 0, 
+            "disk": 12, 
+            "id": "1578682c-f2e5-4b67-b6ef-bc1fb5348775"
+        }, 
+        {
+            "name": "test-flavor2", 
+            "links": [
+                {
+                    "href": "http://172.25.34.89:8774/v2/a11e16faa31e4b698be8bc3af0a7ae57/flavors/748db4bc-d171-457d-9e9d-1b4b42507de6", 
+                    "rel": "self"
+                }, 
+                {
+                    "href": "http://172.25.34.89:8774/a11e16faa31e4b698be8bc3af0a7ae57/flavors/748db4bc-d171-457d-9e9d-1b4b42507de6", 
+                    "rel": "bookmark"
+                }
+            ], 
+            "ram": 8096, 
+            "OS-FLV-DISABLED:disabled": false, 
+            "vcpus": 12, 
+            "swap": "", 
+            "os-flavor-access:is_public": false, 
+            "rxtx_factor": 1.0, 
+            "OS-FLV-EXT-DATA:ephemeral": 0, 
+            "disk": 12, 
+            "id": "748db4bc-d171-457d-9e9d-1b4b42507de6"
+        }
+    ], 
+    "zOpenStackCinderApiHosts": [],
+    "zOpenStackNovaApiHosts": [], 
+    "hostmap_mappings": {
+        "nfvi-micropod-node-1": "host-linux-0c016fc0-6184-409d-89f6-8e20d680f12a", 
+        "nfvi-micropod-node-3": "host-linux-4fda16f9-0396-4e2d-93ed-948ec37b4179", 
+        "nfvi-micropod-node-2": "host-linux-75e2a25e-f362-4f95-b25b-bf158cb707a1", 
+        "172.25.34.89": "host-172.25.34.89", 
+        "nfvi-micropod-new-compute-1": "host-linux-878d52df-664a-494f-b4c1-15682d0e6088", 
+        "nfvi-micropod-new-compute-2": "host-linux-af87f135-2026-4f09-a693-bb1ab0107221"
+    }, 
+    "quotas": [
+        {
+            "per_volume_gigabytes": -1, 
+            "gigabytes": 1000, 
+            "backup_gigabytes": 1000, 
+            "snapshots": 10, 
+            "volumes": 10, 
+            "backups": 10, 
+            "id": "a11e16faa31e4b698be8bc3af0a7ae57"
+        },
+        {
+            "per_volume_gigabytes": -1, 
+            "gigabytes": 1000, 
+            "backup_gigabytes": 1000, 
+            "snapshots": 10, 
+            "volumes": 10, 
+            "backups": 10, 
+            "id": "b2b1a48714a641fcaa82c4d48aa444c9"
+        }
+    ], 
+    "cinder_services": [
+        {
+            "status": "enabled", 
+            "binary": "cinder-scheduler", 
+            "zone": "nova", 
+            "state": "up", 
+            "updated_at": "2018-11-30T20:22:58.000000", 
+            "host": "nfvi-micropod-node-2", 
+            "disabled_reason": null
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "cinder-scheduler", 
+            "zone": "nova", 
+            "state": "up", 
+            "updated_at": "2018-11-30T20:23:07.000000", 
+            "host": "nfvi-micropod-node-3", 
+            "disabled_reason": null
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "cinder-scheduler", 
+            "zone": "nova", 
+            "state": "up", 
+            "updated_at": "2018-11-30T20:22:59.000000", 
+            "host": "nfvi-micropod-node-1", 
+            "disabled_reason": null
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "cinder-volume", 
+            "zone": "nova", 
+            "frozen": false, 
+            "updated_at": "2018-11-30T20:23:06.000000", 
+            "host": null, 
+            "state": "up", 
+            "replication_status": "disabled", 
+            "active_backend_id": null, 
+            "disabled_reason": null
+        }
+    ], 
+    "hypervisor_details": {
+        "hypervisor-12": {
+            "status": "enabled", 
+            "vcpus": 44, 
+            "service": {
+                "host": "NFVI-MICROPOD-node-3", 
+                "disabled_reason": null, 
+                "id": 60
+            }, 
+            "vcpus_used": 0, 
+            "hypervisor_type": "QEMU", 
+            "local_gb_used": 0, 
+            "host_ip": "192.168.202.11", 
+            "hypervisor_hostname": "NFVI-MICROPOD-node-3", 
+            "memory_mb_used": 41984, 
+            "memory_mb": 262032, 
+            "current_workload": 0, 
+            "state": "up", 
+            "cpu_info": "{\"vendor\": \"Intel\", \"model\": \"Broadwell\", \"arch\": \"x86_64\", \"features\": [\"pge\", \"avx\", \"xsaveopt\", \"clflush\", \"sep\", \"rtm\", \"tsc_adjust\", \"vme\", \"dtes64\", \"invpcid\", \"tsc\", \"fsgsbase\", \"xsave\", \"smap\", \"bmi2\", \"vmx\", \"erms\", \"xtpr\", \"cmov\", \"hle\", \"smep\", \"pcid\", \"est\", \"pat\", \"monitor\", \"smx\", \"pbe\", \"lm\", \"msr\", \"adx\", \"3dnowprefetch\", \"nx\", \"fxsr\", \"syscall\", \"tm\", \"sse4.1\", \"pae\", \"sse4.2\", \"pclmuldq\", \"acpi\", \"fma\", \"pni\", \"tsc-deadline\", \"popcnt\", \"mmx\", \"osxsave\", \"cx8\", \"mce\", \"de\", \"rdtscp\", \"ht\", \"dca\", \"lahf_lm\", \"abm\", \"rdseed\", \"pdcm\", \"mca\", \"pdpe1gb\", \"mbm_local\", \"sse\", \"f16c\", \"pse\", \"ds\", \"invtsc\", \"mbm_total\", \"tm2\", \"avx2\", \"aes\", \"sse2\", \"ss\", \"ds_cpl\", \"arat\", \"bmi1\", \"apic\", \"ssse3\", \"fpu\", \"cx16\", \"pse36\", \"mtrr\", \"movbe\", \"rdrand\", \"cmt\", \"x2apic\"], \"topology\": {\"cores\": 14, \"cells\": 2, \"threads\": 2, \"sockets\": 1}}", 
+            "running_vms": 0, 
+            "free_disk_gb": 796, 
+            "hypervisor_version": 2010000, 
+            "disk_available_least": 795, 
+            "local_gb": 796, 
+            "free_ram_mb": 220048, 
+            "id": 12
+        }, 
+        "hypervisor-9": {
+            "status": "enabled", 
+            "vcpus": 44, 
+            "service": {
+                "host": "NFVI-MICROPOD-node-2", 
+                "disabled_reason": null, 
+                "id": 57
+            }, 
+            "vcpus_used": 0, 
+            "hypervisor_type": "QEMU", 
+            "local_gb_used": 0, 
+            "host_ip": "192.168.202.12", 
+            "hypervisor_hostname": "NFVI-MICROPOD-node-2", 
+            "memory_mb_used": 41984, 
+            "memory_mb": 262032, 
+            "current_workload": 0, 
+            "state": "up", 
+            "cpu_info": "{\"vendor\": \"Intel\", \"model\": \"Broadwell\", \"arch\": \"x86_64\", \"features\": [\"pge\", \"avx\", \"xsaveopt\", \"clflush\", \"sep\", \"rtm\", \"tsc_adjust\", \"vme\", \"dtes64\", \"invpcid\", \"tsc\", \"fsgsbase\", \"xsave\", \"smap\", \"bmi2\", \"vmx\", \"erms\", \"xtpr\", \"cmov\", \"hle\", \"smep\", \"pcid\", \"est\", \"pat\", \"monitor\", \"smx\", \"pbe\", \"lm\", \"msr\", \"adx\", \"3dnowprefetch\", \"nx\", \"fxsr\", \"syscall\", \"tm\", \"sse4.1\", \"pae\", \"sse4.2\", \"pclmuldq\", \"acpi\", \"fma\", \"pni\", \"tsc-deadline\", \"popcnt\", \"mmx\", \"osxsave\", \"cx8\", \"mce\", \"de\", \"rdtscp\", \"ht\", \"dca\", \"lahf_lm\", \"abm\", \"rdseed\", \"pdcm\", \"mca\", \"pdpe1gb\", \"mbm_local\", \"sse\", \"f16c\", \"pse\", \"ds\", \"invtsc\", \"mbm_total\", \"tm2\", \"avx2\", \"aes\", \"sse2\", \"ss\", \"ds_cpl\", \"arat\", \"bmi1\", \"apic\", \"ssse3\", \"fpu\", \"cx16\", \"pse36\", \"mtrr\", \"movbe\", \"rdrand\", \"cmt\", \"x2apic\"], \"topology\": {\"cores\": 14, \"cells\": 2, \"threads\": 2, \"sockets\": 1}}", 
+            "running_vms": 0, 
+            "free_disk_gb": 796, 
+            "hypervisor_version": 2010000, 
+            "disk_available_least": 795, 
+            "local_gb": 796, 
+            "free_ram_mb": 220048, 
+            "id": 9
+        }, 
+        "hypervisor-3": {
+            "status": "enabled", 
+            "vcpus": 48, 
+            "service": {
+                "host": "NFVI-MICROPOD-New-compute-2", 
+                "disabled_reason": null, 
+                "id": 54
+            }, 
+            "vcpus_used": 12, 
+            "hypervisor_type": "QEMU", 
+            "local_gb_used": 12, 
+            "host_ip": "192.168.202.14", 
+            "hypervisor_hostname": "NFVI-MICROPOD-New-compute-2", 
+            "memory_mb_used": 33696, 
+            "memory_mb": 261872, 
+            "current_workload": 0, 
+            "state": "up", 
+            "cpu_info": "{\"vendor\": \"Intel\", \"model\": \"Broadwell\", \"arch\": \"x86_64\", \"features\": [\"pge\", \"avx\", \"xsaveopt\", \"clflush\", \"sep\", \"rtm\", \"tsc_adjust\", \"vme\", \"dtes64\", \"invpcid\", \"tsc\", \"fsgsbase\", \"xsave\", \"smap\", \"bmi2\", \"vmx\", \"erms\", \"xtpr\", \"cmov\", \"hle\", \"smep\", \"pcid\", \"est\", \"pat\", \"monitor\", \"smx\", \"pbe\", \"lm\", \"msr\", \"adx\", \"3dnowprefetch\", \"nx\", \"fxsr\", \"syscall\", \"tm\", \"sse4.1\", \"pae\", \"sse4.2\", \"pclmuldq\", \"acpi\", \"fma\", \"pni\", \"tsc-deadline\", \"popcnt\", \"mmx\", \"osxsave\", \"cx8\", \"mce\", \"de\", \"rdtscp\", \"ht\", \"dca\", \"lahf_lm\", \"abm\", \"rdseed\", \"pdcm\", \"mca\", \"pdpe1gb\", \"mbm_local\", \"sse\", \"f16c\", \"pse\", \"ds\", \"invtsc\", \"mbm_total\", \"tm2\", \"avx2\", \"aes\", \"sse2\", \"ss\", \"ds_cpl\", \"arat\", \"bmi1\", \"apic\", \"ssse3\", \"fpu\", \"cx16\", \"pse36\", \"mtrr\", \"movbe\", \"rdrand\", \"cmt\", \"x2apic\"], \"topology\": {\"cores\": 14, \"cells\": 2, \"threads\": 2, \"sockets\": 1}}", 
+            "running_vms": 1, 
+            "free_disk_gb": 811, 
+            "hypervisor_version": 2010000, 
+            "disk_available_least": 810, 
+            "local_gb": 823, 
+            "free_ram_mb": 228176, 
+            "id": 3
+        }, 
+        "hypervisor-6": {
+            "status": "enabled", 
+            "vcpus": 48, 
+            "service": {
+                "host": "NFVI-MICROPOD-New-compute-1", 
+                "disabled_reason": null, 
+                "id": 51
+            }, 
+            "vcpus_used": 0, 
+            "hypervisor_type": "QEMU", 
+            "local_gb_used": 0, 
+            "host_ip": "192.168.202.13", 
+            "hypervisor_hostname": "NFVI-MICROPOD-New-compute-1", 
+            "memory_mb_used": 25600, 
+            "memory_mb": 262032, 
+            "current_workload": 0, 
+            "state": "up", 
+            "cpu_info": "{\"vendor\": \"Intel\", \"model\": \"Broadwell\", \"arch\": \"x86_64\", \"features\": [\"pge\", \"avx\", \"xsaveopt\", \"clflush\", \"sep\", \"rtm\", \"tsc_adjust\", \"vme\", \"dtes64\", \"invpcid\", \"tsc\", \"fsgsbase\", \"xsave\", \"smap\", \"bmi2\", \"vmx\", \"erms\", \"xtpr\", \"cmov\", \"hle\", \"smep\", \"pcid\", \"est\", \"pat\", \"monitor\", \"smx\", \"pbe\", \"lm\", \"msr\", \"adx\", \"3dnowprefetch\", \"nx\", \"fxsr\", \"syscall\", \"tm\", \"sse4.1\", \"pae\", \"sse4.2\", \"pclmuldq\", \"acpi\", \"fma\", \"pni\", \"tsc-deadline\", \"popcnt\", \"mmx\", \"osxsave\", \"cx8\", \"mce\", \"de\", \"rdtscp\", \"ht\", \"dca\", \"lahf_lm\", \"abm\", \"rdseed\", \"pdcm\", \"mca\", \"pdpe1gb\", \"mbm_local\", \"sse\", \"f16c\", \"pse\", \"ds\", \"invtsc\", \"mbm_total\", \"tm2\", \"avx2\", \"aes\", \"sse2\", \"ss\", \"ds_cpl\", \"arat\", \"bmi1\", \"apic\", \"ssse3\", \"fpu\", \"cx16\", \"pse36\", \"mtrr\", \"movbe\", \"rdrand\", \"cmt\", \"x2apic\"], \"topology\": {\"cores\": 14, \"cells\": 2, \"threads\": 2, \"sockets\": 1}}", 
+            "running_vms": 0, 
+            "free_disk_gb": 823, 
+            "hypervisor_version": 2010000, 
+            "disk_available_least": 823, 
+            "local_gb": 823, 
+            "free_ram_mb": 236432, 
+            "id": 6
+        }, 
+        "hypervisor-15": {
+            "status": "enabled", 
+            "vcpus": 44, 
+            "service": {
+                "host": "NFVI-MICROPOD-node-1", 
+                "disabled_reason": null, 
+                "id": 63
+            }, 
+            "vcpus_used": 0, 
+            "hypervisor_type": "QEMU", 
+            "local_gb_used": 0, 
+            "host_ip": "192.168.202.10", 
+            "hypervisor_hostname": "NFVI-MICROPOD-node-1", 
+            "memory_mb_used": 41984, 
+            "memory_mb": 130961, 
+            "current_workload": 0, 
+            "state": "up", 
+            "cpu_info": "{\"vendor\": \"Intel\", \"model\": \"Broadwell\", \"arch\": \"x86_64\", \"features\": [\"pge\", \"avx\", \"xsaveopt\", \"clflush\", \"sep\", \"rtm\", \"tsc_adjust\", \"vme\", \"dtes64\", \"invpcid\", \"tsc\", \"fsgsbase\", \"xsave\", \"smap\", \"bmi2\", \"vmx\", \"erms\", \"xtpr\", \"cmov\", \"hle\", \"smep\", \"pcid\", \"est\", \"pat\", \"monitor\", \"smx\", \"pbe\", \"lm\", \"msr\", \"adx\", \"3dnowprefetch\", \"nx\", \"fxsr\", \"syscall\", \"tm\", \"sse4.1\", \"pae\", \"sse4.2\", \"pclmuldq\", \"acpi\", \"fma\", \"pni\", \"tsc-deadline\", \"popcnt\", \"mmx\", \"osxsave\", \"cx8\", \"mce\", \"de\", \"rdtscp\", \"ht\", \"dca\", \"lahf_lm\", \"abm\", \"rdseed\", \"pdcm\", \"mca\", \"pdpe1gb\", \"mbm_local\", \"sse\", \"f16c\", \"pse\", \"ds\", \"invtsc\", \"mbm_total\", \"tm2\", \"avx2\", \"aes\", \"sse2\", \"ss\", \"ds_cpl\", \"arat\", \"bmi1\", \"apic\", \"ssse3\", \"fpu\", \"cx16\", \"pse36\", \"mtrr\", \"movbe\", \"rdrand\", \"cmt\", \"x2apic\"], \"topology\": {\"cores\": 14, \"cells\": 2, \"threads\": 2, \"sockets\": 1}}", 
+            "running_vms": 0, 
+            "free_disk_gb": 797, 
+            "hypervisor_version": 2010000, 
+            "disk_available_least": 796, 
+            "local_gb": 797, 
+            "free_ram_mb": 88977, 
+            "id": 15
+        }
+    }, 
+    "nova_url": "http://172.25.34.89:8774/v2/a11e16faa31e4b698be8bc3af0a7ae57", 
+    "floatingips": [
+        {
+            "router_id": "13e87314-0c1d-487b-b21d-1e1c745ef3f9", 
+            "status": "ACTIVE", 
+            "description": "", 
+            "tenant_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "created_at": "2018-11-29T18:24:31Z", 
+            "updated_at": "2018-11-29T18:24:36Z", 
+            "floating_network_id": "a7d05a2d-2cab-4b4b-8cd1-ff5089860e27", 
+            "fixed_ip_address": "20.20.20.7", 
+            "floating_ip_address": "172.23.105.157", 
+            "revision_number": 2, 
+            "project_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "port_id": "c8c2114b-0bee-420b-a522-7849537574a6", 
+            "id": "1d7020d1-2377-48ba-ab6c-8ba90cd6564b"
+        }
+    ], 
+    "subnets": [
+        {
+            "host_routes": [], 
+            "service_types": [], 
+            "description": "", 
+            "enable_dhcp": false, 
+            "network_id": "1fe866ac-45f4-4549-a2fd-0fc468c00b1d", 
+            "tenant_id": "", 
+            "created_at": "2018-11-19T16:11:10Z", 
+            "dns_nameservers": [], 
+            "updated_at": "2018-11-19T16:11:10Z", 
+            "ipv6_ra_mode": null, 
+            "allocation_pools": [
+                {
+                    "start": "169.254.192.1", 
+                    "end": "169.254.255.254"
+                }
+            ], 
+            "gateway_ip": null, 
+            "revision_number": 2, 
+            "ip_version": 4, 
+            "ipv6_address_mode": null, 
+            "cidr": "169.254.192.0/18", 
+            "project_id": "", 
+            "id": "5afbf92c-b723-4401-9df8-df1cd2c9ce18", 
+            "subnetpool_id": null, 
+            "name": "HA subnet tenant a11e16faa31e4b698be8bc3af0a7ae57"
+        }, 
+        {
+            "host_routes": [], 
+            "service_types": [], 
+            "description": "", 
+            "enable_dhcp": false, 
+            "network_id": "a7d05a2d-2cab-4b4b-8cd1-ff5089860e27", 
+            "tenant_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "created_at": "2018-11-10T19:35:02Z", 
+            "dns_nameservers": [
+                "10.84.70.6"
+            ], 
+            "updated_at": "2018-11-10T19:35:02Z", 
+            "ipv6_ra_mode": null, 
+            "allocation_pools": [
+                {
+                    "start": "172.23.105.148", 
+                    "end": "172.23.105.158"
+                }
+            ], 
+            "gateway_ip": "172.23.105.145", 
+            "revision_number": 2, 
+            "ip_version": 4, 
+            "ipv6_address_mode": null, 
+            "cidr": "172.23.105.144/28", 
+            "project_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "id": "7b2dff09-dcde-4cb5-b34a-f588c234c36b", 
+            "subnetpool_id": null, 
+            "name": "subnet-ext"
+        }, 
+        {
+            "host_routes": [], 
+            "service_types": [], 
+            "description": "", 
+            "enable_dhcp": true, 
+            "network_id": "18ed9913-25ba-453a-a798-db1b1d0d2db8", 
+            "tenant_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "created_at": "2018-11-19T16:10:19Z", 
+            "dns_nameservers": [], 
+            "updated_at": "2018-11-19T16:10:19Z", 
+            "ipv6_ra_mode": null, 
+            "allocation_pools": [
+                {
+                    "start": "20.20.20.2", 
+                    "end": "20.20.20.254"
+                }
+            ], 
+            "gateway_ip": "20.20.20.1", 
+            "revision_number": 2, 
+            "ip_version": 4, 
+            "ipv6_address_mode": null, 
+            "cidr": "20.20.20.0/24", 
+            "project_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "id": "d6d88a19-e836-4773-8b17-678aa738a05c", 
+            "subnetpool_id": null, 
+            "name": "subnet1"
+        }, 
+        {
+            "host_routes": [], 
+            "service_types": [], 
+            "description": "", 
+            "enable_dhcp": true, 
+            "network_id": "8d14cd44-145c-4e39-ad55-d44afe95d3c8", 
+            "tenant_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "created_at": "2018-11-19T16:10:44Z", 
+            "dns_nameservers": [], 
+            "updated_at": "2018-11-19T16:10:44Z", 
+            "ipv6_ra_mode": null, 
+            "allocation_pools": [
+                {
+                    "start": "30.30.30.2", 
+                    "end": "30.30.30.254"
+                }
+            ], 
+            "gateway_ip": "30.30.30.1", 
+            "revision_number": 2, 
+            "ip_version": 4, 
+            "ipv6_address_mode": null, 
+            "cidr": "30.30.30.0/24", 
+            "project_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "id": "f1bd3abd-a64a-4626-b1e2-c5ecf770ebf0", 
+            "subnetpool_id": null, 
+            "name": "subnet2"
+        }
+    ], 
+    "hypervisors_detailed": [
+        {
+            "status": "enabled", 
+            "vcpus": 48, 
+            "service": {
+                "host": "NFVI-MICROPOD-New-compute-2", 
+                "disabled_reason": null, 
+                "id": 54
+            }, 
+            "vcpus_used": 12, 
+            "hypervisor_type": "QEMU", 
+            "local_gb_used": 12, 
+            "host_ip": "192.168.202.14", 
+            "hypervisor_hostname": "NFVI-MICROPOD-New-compute-2", 
+            "memory_mb_used": 33696, 
+            "memory_mb": 261872, 
+            "current_workload": 0, 
+            "state": "up", 
+            "cpu_info": "{\"vendor\": \"Intel\", \"model\": \"Broadwell\", \"arch\": \"x86_64\", \"features\": [\"pge\", \"avx\", \"xsaveopt\", \"clflush\", \"sep\", \"rtm\", \"tsc_adjust\", \"vme\", \"dtes64\", \"invpcid\", \"tsc\", \"fsgsbase\", \"xsave\", \"smap\", \"bmi2\", \"vmx\", \"erms\", \"xtpr\", \"cmov\", \"hle\", \"smep\", \"pcid\", \"est\", \"pat\", \"monitor\", \"smx\", \"pbe\", \"lm\", \"msr\", \"adx\", \"3dnowprefetch\", \"nx\", \"fxsr\", \"syscall\", \"tm\", \"sse4.1\", \"pae\", \"sse4.2\", \"pclmuldq\", \"acpi\", \"fma\", \"pni\", \"tsc-deadline\", \"popcnt\", \"mmx\", \"osxsave\", \"cx8\", \"mce\", \"de\", \"rdtscp\", \"ht\", \"dca\", \"lahf_lm\", \"abm\", \"rdseed\", \"pdcm\", \"mca\", \"pdpe1gb\", \"mbm_local\", \"sse\", \"f16c\", \"pse\", \"ds\", \"invtsc\", \"mbm_total\", \"tm2\", \"avx2\", \"aes\", \"sse2\", \"ss\", \"ds_cpl\", \"arat\", \"bmi1\", \"apic\", \"ssse3\", \"fpu\", \"cx16\", \"pse36\", \"mtrr\", \"movbe\", \"rdrand\", \"cmt\", \"x2apic\"], \"topology\": {\"cores\": 14, \"cells\": 2, \"threads\": 2, \"sockets\": 1}}", 
+            "running_vms": 1, 
+            "free_disk_gb": 811, 
+            "hypervisor_version": 2010000, 
+            "disk_available_least": 810, 
+            "local_gb": 823, 
+            "free_ram_mb": 228176, 
+            "id": 3
+        }, 
+        {
+            "status": "enabled", 
+            "vcpus": 48, 
+            "service": {
+                "host": "NFVI-MICROPOD-New-compute-1", 
+                "disabled_reason": null, 
+                "id": 51
+            }, 
+            "vcpus_used": 0, 
+            "hypervisor_type": "QEMU", 
+            "local_gb_used": 0, 
+            "host_ip": "192.168.202.13", 
+            "hypervisor_hostname": "NFVI-MICROPOD-New-compute-1", 
+            "memory_mb_used": 25600, 
+            "memory_mb": 262032, 
+            "current_workload": 0, 
+            "state": "up", 
+            "cpu_info": "{\"vendor\": \"Intel\", \"model\": \"Broadwell\", \"arch\": \"x86_64\", \"features\": [\"pge\", \"avx\", \"xsaveopt\", \"clflush\", \"sep\", \"rtm\", \"tsc_adjust\", \"vme\", \"dtes64\", \"invpcid\", \"tsc\", \"fsgsbase\", \"xsave\", \"smap\", \"bmi2\", \"vmx\", \"erms\", \"xtpr\", \"cmov\", \"hle\", \"smep\", \"pcid\", \"est\", \"pat\", \"monitor\", \"smx\", \"pbe\", \"lm\", \"msr\", \"adx\", \"3dnowprefetch\", \"nx\", \"fxsr\", \"syscall\", \"tm\", \"sse4.1\", \"pae\", \"sse4.2\", \"pclmuldq\", \"acpi\", \"fma\", \"pni\", \"tsc-deadline\", \"popcnt\", \"mmx\", \"osxsave\", \"cx8\", \"mce\", \"de\", \"rdtscp\", \"ht\", \"dca\", \"lahf_lm\", \"abm\", \"rdseed\", \"pdcm\", \"mca\", \"pdpe1gb\", \"mbm_local\", \"sse\", \"f16c\", \"pse\", \"ds\", \"invtsc\", \"mbm_total\", \"tm2\", \"avx2\", \"aes\", \"sse2\", \"ss\", \"ds_cpl\", \"arat\", \"bmi1\", \"apic\", \"ssse3\", \"fpu\", \"cx16\", \"pse36\", \"mtrr\", \"movbe\", \"rdrand\", \"cmt\", \"x2apic\"], \"topology\": {\"cores\": 14, \"cells\": 2, \"threads\": 2, \"sockets\": 1}}", 
+            "running_vms": 0, 
+            "free_disk_gb": 823, 
+            "hypervisor_version": 2010000, 
+            "disk_available_least": 823, 
+            "local_gb": 823, 
+            "free_ram_mb": 236432, 
+            "id": 6
+        }, 
+        {
+            "status": "enabled", 
+            "vcpus": 44, 
+            "service": {
+                "host": "NFVI-MICROPOD-node-2", 
+                "disabled_reason": null, 
+                "id": 57
+            }, 
+            "vcpus_used": 0, 
+            "hypervisor_type": "QEMU", 
+            "local_gb_used": 0, 
+            "host_ip": "192.168.202.12", 
+            "hypervisor_hostname": "NFVI-MICROPOD-node-2", 
+            "memory_mb_used": 41984, 
+            "memory_mb": 262032, 
+            "current_workload": 0, 
+            "state": "up", 
+            "cpu_info": "{\"vendor\": \"Intel\", \"model\": \"Broadwell\", \"arch\": \"x86_64\", \"features\": [\"pge\", \"avx\", \"xsaveopt\", \"clflush\", \"sep\", \"rtm\", \"tsc_adjust\", \"vme\", \"dtes64\", \"invpcid\", \"tsc\", \"fsgsbase\", \"xsave\", \"smap\", \"bmi2\", \"vmx\", \"erms\", \"xtpr\", \"cmov\", \"hle\", \"smep\", \"pcid\", \"est\", \"pat\", \"monitor\", \"smx\", \"pbe\", \"lm\", \"msr\", \"adx\", \"3dnowprefetch\", \"nx\", \"fxsr\", \"syscall\", \"tm\", \"sse4.1\", \"pae\", \"sse4.2\", \"pclmuldq\", \"acpi\", \"fma\", \"pni\", \"tsc-deadline\", \"popcnt\", \"mmx\", \"osxsave\", \"cx8\", \"mce\", \"de\", \"rdtscp\", \"ht\", \"dca\", \"lahf_lm\", \"abm\", \"rdseed\", \"pdcm\", \"mca\", \"pdpe1gb\", \"mbm_local\", \"sse\", \"f16c\", \"pse\", \"ds\", \"invtsc\", \"mbm_total\", \"tm2\", \"avx2\", \"aes\", \"sse2\", \"ss\", \"ds_cpl\", \"arat\", \"bmi1\", \"apic\", \"ssse3\", \"fpu\", \"cx16\", \"pse36\", \"mtrr\", \"movbe\", \"rdrand\", \"cmt\", \"x2apic\"], \"topology\": {\"cores\": 14, \"cells\": 2, \"threads\": 2, \"sockets\": 1}}", 
+            "running_vms": 0, 
+            "free_disk_gb": 796, 
+            "hypervisor_version": 2010000, 
+            "disk_available_least": 795, 
+            "local_gb": 796, 
+            "free_ram_mb": 220048, 
+            "id": 9
+        }, 
+        {
+            "status": "enabled", 
+            "vcpus": 44, 
+            "service": {
+                "host": "NFVI-MICROPOD-node-3", 
+                "disabled_reason": null, 
+                "id": 60
+            }, 
+            "vcpus_used": 0, 
+            "hypervisor_type": "QEMU", 
+            "local_gb_used": 0, 
+            "host_ip": "192.168.202.11", 
+            "hypervisor_hostname": "NFVI-MICROPOD-node-3", 
+            "memory_mb_used": 41984, 
+            "memory_mb": 262032, 
+            "current_workload": 0, 
+            "state": "up", 
+            "cpu_info": "{\"vendor\": \"Intel\", \"model\": \"Broadwell\", \"arch\": \"x86_64\", \"features\": [\"pge\", \"avx\", \"xsaveopt\", \"clflush\", \"sep\", \"rtm\", \"tsc_adjust\", \"vme\", \"dtes64\", \"invpcid\", \"tsc\", \"fsgsbase\", \"xsave\", \"smap\", \"bmi2\", \"vmx\", \"erms\", \"xtpr\", \"cmov\", \"hle\", \"smep\", \"pcid\", \"est\", \"pat\", \"monitor\", \"smx\", \"pbe\", \"lm\", \"msr\", \"adx\", \"3dnowprefetch\", \"nx\", \"fxsr\", \"syscall\", \"tm\", \"sse4.1\", \"pae\", \"sse4.2\", \"pclmuldq\", \"acpi\", \"fma\", \"pni\", \"tsc-deadline\", \"popcnt\", \"mmx\", \"osxsave\", \"cx8\", \"mce\", \"de\", \"rdtscp\", \"ht\", \"dca\", \"lahf_lm\", \"abm\", \"rdseed\", \"pdcm\", \"mca\", \"pdpe1gb\", \"mbm_local\", \"sse\", \"f16c\", \"pse\", \"ds\", \"invtsc\", \"mbm_total\", \"tm2\", \"avx2\", \"aes\", \"sse2\", \"ss\", \"ds_cpl\", \"arat\", \"bmi1\", \"apic\", \"ssse3\", \"fpu\", \"cx16\", \"pse36\", \"mtrr\", \"movbe\", \"rdrand\", \"cmt\", \"x2apic\"], \"topology\": {\"cores\": 14, \"cells\": 2, \"threads\": 2, \"sockets\": 1}}", 
+            "running_vms": 0, 
+            "free_disk_gb": 796, 
+            "hypervisor_version": 2010000, 
+            "disk_available_least": 795, 
+            "local_gb": 796, 
+            "free_ram_mb": 220048, 
+            "id": 12
+        }, 
+        {
+            "status": "enabled", 
+            "vcpus": 44, 
+            "service": {
+                "host": "NFVI-MICROPOD-node-1", 
+                "disabled_reason": null, 
+                "id": 63
+            }, 
+            "vcpus_used": 0, 
+            "hypervisor_type": "QEMU", 
+            "local_gb_used": 0, 
+            "host_ip": "192.168.202.10", 
+            "hypervisor_hostname": "NFVI-MICROPOD-node-1", 
+            "memory_mb_used": 41984, 
+            "memory_mb": 130961, 
+            "current_workload": 0, 
+            "state": "up", 
+            "cpu_info": "{\"vendor\": \"Intel\", \"model\": \"Broadwell\", \"arch\": \"x86_64\", \"features\": [\"pge\", \"avx\", \"xsaveopt\", \"clflush\", \"sep\", \"rtm\", \"tsc_adjust\", \"vme\", \"dtes64\", \"invpcid\", \"tsc\", \"fsgsbase\", \"xsave\", \"smap\", \"bmi2\", \"vmx\", \"erms\", \"xtpr\", \"cmov\", \"hle\", \"smep\", \"pcid\", \"est\", \"pat\", \"monitor\", \"smx\", \"pbe\", \"lm\", \"msr\", \"adx\", \"3dnowprefetch\", \"nx\", \"fxsr\", \"syscall\", \"tm\", \"sse4.1\", \"pae\", \"sse4.2\", \"pclmuldq\", \"acpi\", \"fma\", \"pni\", \"tsc-deadline\", \"popcnt\", \"mmx\", \"osxsave\", \"cx8\", \"mce\", \"de\", \"rdtscp\", \"ht\", \"dca\", \"lahf_lm\", \"abm\", \"rdseed\", \"pdcm\", \"mca\", \"pdpe1gb\", \"mbm_local\", \"sse\", \"f16c\", \"pse\", \"ds\", \"invtsc\", \"mbm_total\", \"tm2\", \"avx2\", \"aes\", \"sse2\", \"ss\", \"ds_cpl\", \"arat\", \"bmi1\", \"apic\", \"ssse3\", \"fpu\", \"cx16\", \"pse36\", \"mtrr\", \"movbe\", \"rdrand\", \"cmt\", \"x2apic\"], \"topology\": {\"cores\": 14, \"cells\": 2, \"threads\": 2, \"sockets\": 1}}", 
+            "running_vms": 0, 
+            "free_disk_gb": 797, 
+            "hypervisor_version": 2010000, 
+            "disk_available_least": 796, 
+            "local_gb": 797, 
+            "free_ram_mb": 88977, 
+            "id": 15
+        }
+    ], 
+    "cinder_url": "http://172.25.34.89:8776/v2/a11e16faa31e4b698be8bc3af0a7ae57", 
+    "routers": [
+        {
+            "status": "ACTIVE", 
+            "external_gateway_info": {
+                "network_id": "a7d05a2d-2cab-4b4b-8cd1-ff5089860e27", 
+                "enable_snat": true, 
+                "external_fixed_ips": [
+                    {
+                        "subnet_id": "7b2dff09-dcde-4cb5-b34a-f588c234c36b", 
+                        "ip_address": "172.23.105.151"
+                    }
+                ]
+            }, 
+            "availability_zone_hints": [], 
+            "availability_zones": [
+                "nova"
+            ], 
+            "description": "", 
+            "admin_state_up": true, 
+            "tenant_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "created_at": "2018-11-19T16:11:08Z", 
+            "distributed": false, 
+            "updated_at": "2018-11-19T16:11:43Z", 
+            "project_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "flavor_id": null, 
+            "revision_number": 13, 
+            "routes": [], 
+            "ha": true, 
+            "id": "13e87314-0c1d-487b-b21d-1e1c745ef3f9", 
+            "name": "Router1"
+        }
+    ], 
+    "nova_url_host": "172.25.34.89", 
+    "services": [
+        {
+            "status": "enabled", 
+            "binary": "nova-conductor", 
+            "zone": "internal", 
+            "host": "nfvi-micropod-node-3", 
+            "updated_at": "2018-11-30T20:23:01.000000", 
+            "state": "up", 
+            "disabled_reason": null, 
+            "id": 3
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "nova-conductor", 
+            "zone": "internal", 
+            "host": "nfvi-micropod-node-2", 
+            "updated_at": "2018-11-30T20:22:58.000000", 
+            "state": "up", 
+            "disabled_reason": null, 
+            "id": 6
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "nova-conductor", 
+            "zone": "internal", 
+            "host": "nfvi-micropod-node-1", 
+            "updated_at": "2018-11-30T20:22:58.000000", 
+            "state": "up", 
+            "disabled_reason": null, 
+            "id": 15
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "nova-scheduler", 
+            "zone": "internal", 
+            "host": "nfvi-micropod-node-2", 
+            "updated_at": "2018-11-30T20:22:57.000000", 
+            "state": "up", 
+            "disabled_reason": null, 
+            "id": 21
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "nova-scheduler", 
+            "zone": "internal", 
+            "host": "nfvi-micropod-node-3", 
+            "updated_at": "2018-11-30T20:23:02.000000", 
+            "state": "up", 
+            "disabled_reason": null, 
+            "id": 24
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "nova-scheduler", 
+            "zone": "internal", 
+            "host": "nfvi-micropod-node-1", 
+            "updated_at": "2018-11-30T20:22:59.000000", 
+            "state": "up", 
+            "disabled_reason": null, 
+            "id": 27
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "nova-compute", 
+            "zone": "nova", 
+            "host": "nfvi-micropod-new-compute-1", 
+            "updated_at": "2018-11-30T20:22:58.000000", 
+            "state": "up", 
+            "disabled_reason": null, 
+            "id": 51
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "nova-compute", 
+            "zone": "nova", 
+            "host": "nfvi-micropod-new-compute-2", 
+            "updated_at": "2018-11-30T20:23:05.000000", 
+            "state": "up", 
+            "disabled_reason": null, 
+            "id": 54
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "nova-compute", 
+            "zone": "nova", 
+            "host": "nfvi-micropod-node-2", 
+            "updated_at": "2018-11-30T20:22:58.000000", 
+            "state": "up", 
+            "disabled_reason": null, 
+            "id": 57
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "nova-compute", 
+            "zone": "nova", 
+            "host": "nfvi-micropod-node-3", 
+            "updated_at": "2018-11-30T20:22:58.000000", 
+            "state": "up", 
+            "disabled_reason": null, 
+            "id": 60
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "nova-compute", 
+            "zone": "nova", 
+            "host": "nfvi-micropod-node-1", 
+            "updated_at": "2018-11-30T20:22:58.000000", 
+            "state": "up", 
+            "disabled_reason": null, 
+            "id": 63
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "nova-consoleauth", 
+            "zone": "internal", 
+            "host": "nfvi-micropod-node-2", 
+            "updated_at": "2018-11-30T20:22:58.000000", 
+            "state": "up", 
+            "disabled_reason": null, 
+            "id": 66
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "nova-consoleauth", 
+            "zone": "internal", 
+            "host": "nfvi-micropod-node-3", 
+            "updated_at": "2018-11-30T20:23:02.000000", 
+            "state": "up", 
+            "disabled_reason": null, 
+            "id": 69
+        }, 
+        {
+            "status": "enabled", 
+            "binary": "nova-consoleauth", 
+            "zone": "internal", 
+            "host": "nfvi-micropod-node-1", 
+            "updated_at": "2018-11-30T20:23:04.000000", 
+            "state": "up", 
+            "disabled_reason": null, 
+            "id": 72
+        }
+    ], 
+    "zOpenStackExtraHosts": [], 
+    "volumetypes": [], 
+    "volumes": [
+        {
+            "migration_status": null, 
+            "attachments": [], 
+            "links": [
+                {
+                    "href": "http://172.25.34.89:8776/v2/a11e16faa31e4b698be8bc3af0a7ae57/volumes/99426129-acdc-4c53-b993-c0128b092505", 
+                    "rel": "self"
+                }, 
+                {
+                    "href": "http://172.25.34.89:8776/a11e16faa31e4b698be8bc3af0a7ae57/volumes/99426129-acdc-4c53-b993-c0128b092505", 
+                    "rel": "bookmark"
+                }
+            ], 
+            "availability_zone": "nova", 
+            "os-vol-host-attr:host": "ceph@ceph#ceph", 
+            "encrypted": false, 
+            "updated_at": "2018-11-29T17:53:47.000000", 
+            "replication_status": "disabled", 
+            "snapshot_id": null, 
+            "id": "99426129-acdc-4c53-b993-c0128b092505", 
+            "size": 2, 
+            "user_id": "170316590b6e4a019149a68250e9f8e0", 
+            "os-vol-tenant-attr:tenant_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "os-vol-mig-status-attr:migstat": null, 
+            "metadata": {}, 
+            "status": "available", 
+            "description": "Just a Test", 
+            "multiattach": false, 
+            "source_volid": null, 
+            "consistencygroup_id": null, 
+            "os-vol-mig-status-attr:name_id": null, 
+            "name": "TestVol411", 
+            "bootable": "false", 
+            "created_at": "2018-11-29T17:53:44.000000", 
+            "volume_type": null
+        }
+    ], 
+    "tenants": [
+        {
+            "id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "enabled": true, 
+            "description": "Bootstrap project for initializing the cloud.", 
+            "name": "admin"
+        }, 
+        {
+            "id": "b2b1a48714a641fcaa82c4d48aa444c9", 
+            "enabled": true, 
+            "description": null, 
+            "name": "service"
+        }
+    ], 
+    "ports": [
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-11-20T02:07:02Z", 
+            "device_owner": "network:router_ha_interface", 
+            "revision_number": 8, 
+            "port_security_enabled": false, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "5afbf92c-b723-4401-9df8-df1cd2c9ce18", 
+                    "ip_address": "169.254.192.7"
+                }
+            ], 
+            "id": "0b5bed0d-635a-4257-b804-497295264385", 
+            "security_groups": [], 
+            "binding:vif_details": {}, 
+            "binding:vif_type": "tap", 
+            "mac_address": "fa:16:3e:f4:77:8e", 
+            "project_id": "", 
+            "status": "ACTIVE", 
+            "binding:host_id": "NFVI-MICROPOD-node-1", 
+            "description": "", 
+            "device_id": "13e87314-0c1d-487b-b21d-1e1c745ef3f9", 
+            "name": "HA port tenant a11e16faa31e4b698be8bc3af0a7ae57", 
+            "admin_state_up": true, 
+            "network_id": "1fe866ac-45f4-4549-a2fd-0fc468c00b1d", 
+            "tenant_id": "", 
+            "created_at": "2018-11-19T16:11:10Z", 
+            "binding:vnic_type": "normal"
+        }, 
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-11-20T02:17:20Z", 
+            "device_owner": "network:ha_router_replicated_interface", 
+            "revision_number": 17, 
+            "port_security_enabled": false, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "d6d88a19-e836-4773-8b17-678aa738a05c", 
+                    "ip_address": "20.20.20.1"
+                }
+            ], 
+            "id": "0f5985d2-7310-45e0-a484-661660a13851", 
+            "security_groups": [], 
+            "binding:vif_details": {}, 
+            "binding:vif_type": "tap", 
+            "mac_address": "fa:16:3e:36:a7:14", 
+            "project_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "status": "ACTIVE", 
+            "binding:host_id": "NFVI-MICROPOD-node-3", 
+            "description": "", 
+            "device_id": "13e87314-0c1d-487b-b21d-1e1c745ef3f9", 
+            "name": "", 
+            "admin_state_up": true, 
+            "network_id": "18ed9913-25ba-453a-a798-db1b1d0d2db8", 
+            "tenant_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "created_at": "2018-11-19T16:11:31Z", 
+            "binding:vnic_type": "normal"
+        }, 
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-11-20T02:17:18Z", 
+            "device_owner": "network:ha_router_replicated_interface", 
+            "revision_number": 18, 
+            "port_security_enabled": false, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "f1bd3abd-a64a-4626-b1e2-c5ecf770ebf0", 
+                    "ip_address": "30.30.30.1"
+                }
+            ], 
+            "id": "1fd0be5c-c5a7-45b9-afbc-72e951b01015", 
+            "security_groups": [], 
+            "binding:vif_details": {}, 
+            "binding:vif_type": "tap", 
+            "mac_address": "fa:16:3e:7c:48:b8", 
+            "project_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "status": "ACTIVE", 
+            "binding:host_id": "NFVI-MICROPOD-node-3", 
+            "description": "", 
+            "device_id": "13e87314-0c1d-487b-b21d-1e1c745ef3f9", 
+            "name": "", 
+            "admin_state_up": true, 
+            "network_id": "8d14cd44-145c-4e39-ad55-d44afe95d3c8", 
+            "tenant_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "created_at": "2018-11-19T16:11:43Z", 
+            "binding:vnic_type": "normal"
+        }, 
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-11-20T02:08:02Z", 
+            "device_owner": "network:router_ha_interface", 
+            "revision_number": 8, 
+            "port_security_enabled": false, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "5afbf92c-b723-4401-9df8-df1cd2c9ce18", 
+                    "ip_address": "169.254.192.5"
+                }
+            ], 
+            "id": "21de332b-53f4-4a4a-a07a-0be3f409abfa", 
+            "security_groups": [], 
+            "binding:vif_details": {}, 
+            "binding:vif_type": "tap", 
+            "mac_address": "fa:16:3e:e7:ef:f0", 
+            "project_id": "", 
+            "status": "ACTIVE", 
+            "binding:host_id": "NFVI-MICROPOD-node-2", 
+            "description": "", 
+            "device_id": "13e87314-0c1d-487b-b21d-1e1c745ef3f9", 
+            "name": "HA port tenant a11e16faa31e4b698be8bc3af0a7ae57", 
+            "admin_state_up": true, 
+            "network_id": "1fe866ac-45f4-4549-a2fd-0fc468c00b1d", 
+            "tenant_id": "", 
+            "created_at": "2018-11-19T16:11:11Z", 
+            "binding:vnic_type": "normal"
+        }, 
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-11-20T02:17:25Z", 
+            "device_owner": "network:router_gateway", 
+            "revision_number": 18, 
+            "port_security_enabled": false, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "7b2dff09-dcde-4cb5-b34a-f588c234c36b", 
+                    "ip_address": "172.23.105.151"
+                }
+            ], 
+            "id": "3cd674d5-c842-4fee-93bb-bafd71e09e44", 
+            "security_groups": [], 
+            "binding:vif_details": {}, 
+            "binding:vif_type": "tap", 
+            "mac_address": "fa:16:3e:71:f1:34", 
+            "project_id": "", 
+            "status": "ACTIVE", 
+            "binding:host_id": "NFVI-MICROPOD-node-3", 
+            "description": "", 
+            "device_id": "13e87314-0c1d-487b-b21d-1e1c745ef3f9", 
+            "name": "", 
+            "admin_state_up": true, 
+            "network_id": "a7d05a2d-2cab-4b4b-8cd1-ff5089860e27", 
+            "tenant_id": "", 
+            "created_at": "2018-11-19T16:11:09Z", 
+            "binding:vnic_type": "normal"
+        }, 
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-11-19T16:10:52Z", 
+            "device_owner": "network:dhcp", 
+            "revision_number": 6, 
+            "port_security_enabled": false, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "f1bd3abd-a64a-4626-b1e2-c5ecf770ebf0", 
+                    "ip_address": "30.30.30.2"
+                }
+            ], 
+            "id": "6ab91201-50fd-4e7c-86df-2617d26cc02e", 
+            "security_groups": [], 
+            "binding:vif_details": {}, 
+            "binding:vif_type": "tap", 
+            "mac_address": "fa:16:3e:10:dd:7f", 
+            "project_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "status": "ACTIVE", 
+            "binding:host_id": "NFVI-MICROPOD-node-1", 
+            "description": "", 
+            "device_id": "dhcp59026b1b-2d54-5252-b408-787a0bfdca38-8d14cd44-145c-4e39-ad55-d44afe95d3c8", 
+            "name": "", 
+            "admin_state_up": true, 
+            "network_id": "8d14cd44-145c-4e39-ad55-d44afe95d3c8", 
+            "tenant_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "created_at": "2018-11-19T16:10:45Z", 
+            "binding:vnic_type": "normal"
+        }, 
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-11-20T02:08:03Z", 
+            "device_owner": "network:router_ha_interface", 
+            "revision_number": 8, 
+            "port_security_enabled": false, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "5afbf92c-b723-4401-9df8-df1cd2c9ce18", 
+                    "ip_address": "169.254.192.3"
+                }
+            ], 
+            "id": "8bc346b2-d6c4-4111-a30a-5aaf6ae44ae0", 
+            "security_groups": [], 
+            "binding:vif_details": {}, 
+            "binding:vif_type": "tap", 
+            "mac_address": "fa:16:3e:18:08:f0", 
+            "project_id": "", 
+            "status": "ACTIVE", 
+            "binding:host_id": "NFVI-MICROPOD-node-3", 
+            "description": "", 
+            "device_id": "13e87314-0c1d-487b-b21d-1e1c745ef3f9", 
+            "name": "HA port tenant a11e16faa31e4b698be8bc3af0a7ae57", 
+            "admin_state_up": true, 
+            "network_id": "1fe866ac-45f4-4549-a2fd-0fc468c00b1d", 
+            "tenant_id": "", 
+            "created_at": "2018-11-19T16:11:11Z", 
+            "binding:vnic_type": "normal"
+        }, 
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-11-29T18:05:31Z", 
+            "device_owner": "network:dhcp", 
+            "revision_number": 7, 
+            "port_security_enabled": false, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "d6d88a19-e836-4773-8b17-678aa738a05c", 
+                    "ip_address": "20.20.20.3"
+                }
+            ], 
+            "id": "a133cb5f-cb44-4e48-8225-e5da6ac65f44", 
+            "security_groups": [], 
+            "binding:vif_details": {}, 
+            "binding:vif_type": "tap", 
+            "mac_address": "fa:16:3e:23:ef:4b", 
+            "project_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "status": "ACTIVE", 
+            "binding:host_id": "NFVI-MICROPOD-node-1", 
+            "description": "", 
+            "device_id": "dhcp59026b1b-2d54-5252-b408-787a0bfdca38-18ed9913-25ba-453a-a798-db1b1d0d2db8", 
+            "name": "", 
+            "admin_state_up": true, 
+            "network_id": "18ed9913-25ba-453a-a798-db1b1d0d2db8", 
+            "tenant_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "created_at": "2018-11-19T16:10:20Z", 
+            "binding:vnic_type": "normal"
+        }, 
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-11-29T18:24:31Z", 
+            "device_owner": "network:floatingip", 
+            "revision_number": 4, 
+            "port_security_enabled": false, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "7b2dff09-dcde-4cb5-b34a-f588c234c36b", 
+                    "ip_address": "172.23.105.157"
+                }
+            ], 
+            "id": "a2148f2f-e523-4578-afa8-8088bc6b5395", 
+            "security_groups": [], 
+            "binding:vif_details": {}, 
+            "binding:vif_type": "unbound", 
+            "mac_address": "fa:16:3e:92:b3:d8", 
+            "project_id": "", 
+            "status": "N/A", 
+            "binding:host_id": "", 
+            "description": "", 
+            "device_id": "1d7020d1-2377-48ba-ab6c-8ba90cd6564b", 
+            "name": "", 
+            "admin_state_up": true, 
+            "network_id": "a7d05a2d-2cab-4b4b-8cd1-ff5089860e27", 
+            "tenant_id": "", 
+            "created_at": "2018-11-29T18:24:30Z", 
+            "binding:vnic_type": "normal"
+        }, 
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-11-19T16:10:28Z", 
+            "device_owner": "network:dhcp", 
+            "revision_number": 6, 
+            "port_security_enabled": false, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "d6d88a19-e836-4773-8b17-678aa738a05c", 
+                    "ip_address": "20.20.20.2"
+                }
+            ], 
+            "id": "b32542d6-4b24-483d-b92b-d055c96ec75e", 
+            "security_groups": [], 
+            "binding:vif_details": {}, 
+            "binding:vif_type": "tap", 
+            "mac_address": "fa:16:3e:ab:81:7f", 
+            "project_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "status": "ACTIVE", 
+            "binding:host_id": "NFVI-MICROPOD-node-3", 
+            "description": "", 
+            "device_id": "dhcpf69822ac-1310-5f06-8fff-dc18503bf3d7-18ed9913-25ba-453a-a798-db1b1d0d2db8", 
+            "name": "", 
+            "admin_state_up": true, 
+            "network_id": "18ed9913-25ba-453a-a798-db1b1d0d2db8", 
+            "tenant_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "created_at": "2018-11-19T16:10:20Z", 
+            "binding:vnic_type": "normal"
+        }, 
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-11-19T16:25:32Z", 
+            "device_owner": "compute:nova", 
+            "revision_number": 8, 
+            "port_security_enabled": true, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "d6d88a19-e836-4773-8b17-678aa738a05c", 
+                    "ip_address": "20.20.20.7"
+                }
+            ], 
+            "id": "c8c2114b-0bee-420b-a522-7849537574a6", 
+            "security_groups": [
+                "eb61c3fb-2963-4f43-bbf7-d4fff883f9b2"
+            ], 
+            "binding:vif_details": {
+                "vhostuser_socket": "/tmp/c8c2114b-0bee-420b-a522-7849537574a6", 
+                "vhostuser_mode": "server"
+            }, 
+            "binding:vif_type": "vhostuser", 
+            "mac_address": "fa:16:3e:1c:a6:3e", 
+            "project_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "status": "ACTIVE", 
+            "binding:host_id": "NFVI-MICROPOD-New-compute-2", 
+            "description": "", 
+            "device_id": "5228f94a-75c8-4dec-9024-47fabca12af0", 
+            "name": "", 
+            "admin_state_up": true, 
+            "network_id": "18ed9913-25ba-453a-a798-db1b1d0d2db8", 
+            "tenant_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "created_at": "2018-11-19T16:24:57Z", 
+            "binding:vnic_type": "normal"
+        }, 
+        {
+            "allowed_address_pairs": [], 
+            "extra_dhcp_opts": [], 
+            "updated_at": "2018-11-19T16:10:58Z", 
+            "device_owner": "network:dhcp", 
+            "revision_number": 6, 
+            "port_security_enabled": false, 
+            "binding:profile": {}, 
+            "fixed_ips": [
+                {
+                    "subnet_id": "f1bd3abd-a64a-4626-b1e2-c5ecf770ebf0", 
+                    "ip_address": "30.30.30.3"
+                }
+            ], 
+            "id": "cbf10c2a-726e-4f25-a64f-59306ae76994", 
+            "security_groups": [], 
+            "binding:vif_details": {}, 
+            "binding:vif_type": "tap", 
+            "mac_address": "fa:16:3e:db:41:29", 
+            "project_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "status": "ACTIVE", 
+            "binding:host_id": "NFVI-MICROPOD-node-2", 
+            "description": "", 
+            "device_id": "dhcp3be1ac46-3efa-5112-b752-f3f004abe22c-8d14cd44-145c-4e39-ad55-d44afe95d3c8", 
+            "name": "", 
+            "admin_state_up": true, 
+            "network_id": "8d14cd44-145c-4e39-ad55-d44afe95d3c8", 
+            "tenant_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "created_at": "2018-11-19T16:10:45Z", 
+            "binding:vnic_type": "normal"
+        }
+    ], 
+    "volsnapshots": [
+        {
+            "status": "available", 
+            "os-extended-snapshot-attributes:progress": "100%", 
+            "description": "Test of a Snapshot", 
+            "os-extended-snapshot-attributes:project_id": "a11e16faa31e4b698be8bc3af0a7ae57", 
+            "size": 2, 
+            "updated_at": "2018-11-29T17:54:17.000000", 
+            "id": "2e5750c5-f6a1-471d-b6a8-368a0c56226b", 
+            "volume_id": "99426129-acdc-4c53-b993-c0128b092505", 
+            "metadata": {}, 
+            "created_at": "2018-11-29T17:54:16.000000", 
+            "name": "TestVol411Snap"
+        }
+    ]
+}

@@ -24,15 +24,29 @@ Ext.onReady(function() {
         box.removeField('hwModel');
     });
 
+    var DEVICE_OVERVIEW_SYSTEMSUMMARY = 'deviceoverviewpanel_systemsummary';
+    Ext.ComponentMgr.onAvailable(DEVICE_OVERVIEW_SYSTEMSUMMARY, function(){
+        var box = Ext.getCmp(DEVICE_OVERVIEW_SYSTEMSUMMARY);
+
+        box.addField({
+            id: 'ceilometer_url_samples-view',
+            xtype: 'displayfield',
+            name: 'ceilometer_url_samples',
+            fieldLabel: _t('Ceilometer Publisher URL (for pipeline.yaml)'),
+            permission: 'Manage Device'
+        })
+        box.addField({
+            id: 'ceilometer_url_events-view',
+            xtype: 'displayfield',
+            name: 'ceilometer_url_events',
+            fieldLabel: _t('Ceilometer Publisher URL (for event_pipeline.yaml)'),
+            permission: 'Manage Device'
+        })
+    });
+
     var DEVICE_OVERVIEW_SNMP = 'deviceoverviewpanel_snmpsummary';
     Ext.ComponentMgr.onAvailable(DEVICE_OVERVIEW_SNMP, function(){
-        var box = Ext.getCmp(DEVICE_OVERVIEW_SNMP);
-        box.removeField('snmpSysName');
-        box.removeField('snmpLocation');
-        box.removeField('snmpContact');
-        box.removeField('snmpDescr');
-        box.removeField('snmpCommunity');
-        box.removeField('snmpVersion');
+      this.hide();
     });
 
     /* Hide Software component, as it always empty */

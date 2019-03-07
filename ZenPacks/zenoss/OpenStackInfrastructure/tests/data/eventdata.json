@@ -1,7 +1,7 @@
 {
     "scheduler.run_instance.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|scheduler.run_instance.end",
+        "eventClassKey": "openstack-scheduler.run_instance.end",
         "eventKey": "07180940-d533-43ee-b5a7-930108e6238f",
         "severity": 2,
         "summary": "",
@@ -11,7 +11,7 @@
     },
     "compute.instance.create.start": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.create.start",
+        "eventClassKey": "openstack-compute.instance.create.start",
         "eventKey": "bc58885b-7677-4a10-9f4a-133a696dc6ab",
         "severity": 2,
         "summary": "",
@@ -33,7 +33,7 @@
     },
     "compute.instance.create.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.create.end",
+        "eventClassKey": "openstack-compute.instance.create.end",
         "eventKey": "d207460b-2e8a-48e0-917a-cebb07b063a5",
         "severity": 2,
         "summary": "",
@@ -66,7 +66,7 @@
     },
     "compute.instance.power_off.start": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.power_off.start",
+        "eventClassKey": "openstack-compute.instance.power_off.start",
         "eventKey": "e7be253c-7e5a-445a-aed7-15e09f56c7ac",
         "severity": 2,
         "summary": "",
@@ -89,7 +89,7 @@
     },
     "compute.instance.power_off.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.power_off.end",
+        "eventClassKey": "openstack-compute.instance.power_off.end",
         "eventKey": "c8f2f937-0737-4f2c-b5b1-6b14b162e3e7",
         "severity": 2,
         "summary": "",
@@ -112,7 +112,7 @@
     },
     "compute.instance.power_on.start": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.power_on.start",
+        "eventClassKey": "openstack-compute.instance.power_on.start",
         "eventKey": "66a24089-185b-4df2-ae3c-29854f1c783d",
         "severity": 2,
         "summary": "",
@@ -134,7 +134,7 @@
     },
     "compute.instance.power_on.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.power_on.end",
+        "eventClassKey": "openstack-compute.instance.power_on.end",
         "eventKey": "05a0aecb-0bbd-4799-b3bc-2db3e89b5654",
         "severity": 2,
         "summary": "",
@@ -156,7 +156,7 @@
     },
     "compute.instance.reboot.start": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.reboot.start",
+        "eventClassKey": "openstack-compute.instance.reboot.start",
         "eventKey": "ab29f32e-125f-4e89-8702-11a734042d4b",
         "severity": 2,
         "summary": "",
@@ -179,7 +179,7 @@
     },
     "compute.instance.reboot.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.reboot.end",
+        "eventClassKey": "openstack-compute.instance.reboot.end",
         "eventKey": "94485eb4-763e-40e5-8e97-1c61129e2430",
         "severity": 2,
         "summary": "",
@@ -202,7 +202,7 @@
     },
     "compute.instance.rebuild.start": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.rebuild.start",
+        "eventClassKey": "openstack-compute.instance.rebuild.start",
         "eventKey": "598a5770-bab0-4de3-ac13-4839c6d9e6e3",
         "severity": 2,
         "summary": "",
@@ -226,7 +226,7 @@
     },
     "compute.instance.power_off.start": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.power_off.start",
+        "eventClassKey": "openstack-compute.instance.power_off.start",
         "eventKey": "f3016ce9-bfb9-40fa-b7c2-05a9d15312bd",
         "severity": 2,
         "summary": "",
@@ -249,7 +249,7 @@
     },
     "compute.instance.power_off.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.power_off.end",
+        "eventClassKey": "openstack-compute.instance.power_off.end",
         "eventKey": "189946bf-5727-4800-9d48-1003b5f99a96",
         "severity": 2,
         "summary": "",
@@ -272,7 +272,7 @@
     },
     "compute.instance.rebuild.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.rebuild.end",
+        "eventClassKey": "openstack-compute.instance.rebuild.end",
         "eventKey": "d6846392-bd1d-4860-87c2-07cb66e7787a",
         "severity": 2,
         "summary": "",
@@ -297,7 +297,7 @@
     },
     "compute.instance.suspend": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.suspend",
+        "eventClassKey": "openstack-compute.instance.suspend",
         "eventKey": "252a9e83-cc66-42ab-838a-832f2f49f4bd",
         "severity": 2,
         "summary": "",
@@ -320,7 +320,7 @@
     },
     "compute.instance.resume": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.resume",
+        "eventClassKey": "openstack-compute.instance.resume",
         "eventKey": "d46b69a0-e9bb-4201-83e7-8c46d3172fe9",
         "severity": 2,
         "summary": "",
@@ -343,7 +343,7 @@
     },
     "compute.instance.delete.start": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.delete.start",
+        "eventClassKey": "openstack-compute.instance.delete.start",
         "eventKey": "a7a5b4d3-d1d3-438c-b973-381eed5e4109",
         "severity": 2,
         "summary": "",
@@ -367,7 +367,7 @@
     },
     "compute.instance.shutdown.start": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.shutdown.start",
+        "eventClassKey": "openstack-compute.instance.shutdown.start",
         "eventKey": "6b6f59e1-7420-4472-b1ac-32b0455e0d73",
         "severity": 2,
         "summary": "",
@@ -391,7 +391,7 @@
     },
     "compute.instance.shutdown.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.shutdown.end",
+        "eventClassKey": "openstack-compute.instance.shutdown.end",
         "eventKey": "c822e4dd-3071-4bc0-b67a-386757475163",
         "severity": 2,
         "summary": "",
@@ -415,7 +415,7 @@
     },
     "compute.instance.delete.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.delete.end",
+        "eventClassKey": "openstack-compute.instance.delete.end",
         "eventKey": "dc5e13b1-ff07-4db9-9100-4aaf29b5aaa5",
         "severity": 2,
         "summary": "",
@@ -440,7 +440,7 @@
     },
     "compute.instance.rescue.start": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.rescue.start",
+        "eventClassKey": "openstack-compute.instance.rescue.start",
         "eventKey": "5c84b158-6539-4025-9ca2-f7a9b2f68ed5",
         "severity": 2,
         "summary": "",
@@ -465,7 +465,7 @@
     },
     "compute.instance.exists": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.exists",
+        "eventClassKey": "openstack-compute.instance.exists",
         "eventKey": "89e3ee5d-eaca-4fa8-97df-090047dcd98a",
         "severity": 2,
         "summary": "",
@@ -491,7 +491,7 @@
     },
     "compute.instance.rescue.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.rescue.end",
+        "eventClassKey": "openstack-compute.instance.rescue.end",
         "eventKey": "621d4147-45f7-482c-9c67-4a2fb5d77449",
         "severity": 2,
         "summary": "",
@@ -516,7 +516,7 @@
     },
     "compute.instance.unrescue.start": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.unrescue.start",
+        "eventClassKey": "openstack-compute.instance.unrescue.start",
         "eventKey": "bc85c40c-ea3c-4c8b-b37c-7086a6b55bbb",
         "severity": 2,
         "summary": "",
@@ -541,7 +541,7 @@
     },
     "compute.instance.unrescue.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|compute.instance.unrescue.end",
+        "eventClassKey": "openstack-compute.instance.unrescue.end",
         "eventKey": "f27cd55d-8f19-4630-922c-682a772b63a2",
         "severity": 2,
         "summary": "",
@@ -566,7 +566,7 @@
     },
     "network.create.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|network.create.end",
+        "eventClassKey": "openstack-network.create.end",
         "eventKey": "7ccdf8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -579,7 +579,7 @@
     },
     "network.delete.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|network.delete.end",
+        "eventClassKey": "openstack-network.delete.end",
         "eventKey": "7dcdf8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -587,7 +587,7 @@
     },
     "subnet.create.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|subnet.create.end",
+        "eventClassKey": "openstack-subnet.create.end",
         "eventKey": "8ccdf8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -601,7 +601,7 @@
     },
     "subnet.delete.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|subnet.delete.end",
+        "eventClassKey": "openstack-subnet.delete.end",
         "eventKey": "8dcdf8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -609,7 +609,7 @@
     },
     "port.create.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|port.create.end",
+        "eventClassKey": "openstack-port.create.end",
         "eventKey": "9ccdf8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -625,7 +625,7 @@
     },
     "port.delete.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|port.delete.end",
+        "eventClassKey": "openstack-port.delete.end",
         "eventKey": "9dcdf8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -633,7 +633,7 @@
     },
     "router.create.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|router.create.end",
+        "eventClassKey": "openstack-router.create.end",
         "eventKey": "9ccdf8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -648,7 +648,7 @@
     },
     "router.delete.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|router.delete.end",
+        "eventClassKey": "openstack-router.delete.end",
         "eventKey": "9dddf8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -656,7 +656,7 @@
     },
     "floatingip.create.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|floatingip.create.end",
+        "eventClassKey": "openstack-floatingip.create.end",
         "eventKey": "01cdf8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -671,7 +671,7 @@
     },
     "floatingip.delete.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|floatingip.delete.end",
+        "eventClassKey": "openstack-floatingip.delete.end",
         "eventKey": "0dddf8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -679,7 +679,7 @@
     },
     "security_group.create.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|security_group.create.end",
+        "eventClassKey": "openstack-security_group.create.end",
         "eventKey": "bccdf8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -689,7 +689,7 @@
     },
     "security_group.delete.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|security_group.delete.end",
+        "eventClassKey": "openstack-security_group.delete.end",
         "eventKey": "0dddf8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -697,7 +697,7 @@
     },
     "volume.create.start": {
         "device": "endpoint",
-        "eventClassKey": "openstack|volume.create.start",
+        "eventClassKey": "openstack-volume.create.start",
         "eventKey": "0eeef8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -705,7 +705,7 @@
     },
     "volume.create.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|volume.create.end",
+        "eventClassKey": "openstack-volume.create.end",
         "eventKey": "0ee1f8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -714,7 +714,7 @@
     },
     "volume.update.start": {
         "device": "endpoint",
-        "eventClassKey": "openstack|volume.update.start",
+        "eventClassKey": "openstack-volume.update.start",
         "eventKey": "0ffff8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -722,7 +722,7 @@
     },
     "volume.update.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|volume.update.end",
+        "eventClassKey": "openstack-volume.update.end",
         "eventKey": "0ff1f8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -731,7 +731,7 @@
     },
     "volume.attach.start": {
         "device": "endpoint",
-        "eventClassKey": "openstack|volume.attach.start",
+        "eventClassKey": "openstack-volume.attach.start",
         "eventKey": "0ff2f8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -741,7 +741,7 @@
     },
     "volume.attach.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|volume.attach.end",
+        "eventClassKey": "openstack-volume.attach.end",
         "eventKey": "0ff3f8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -752,7 +752,7 @@
     },
     "volume.detach.start": {
         "device": "endpoint",
-        "eventClassKey": "openstack|volume.detach.start",
+        "eventClassKey": "openstack-volume.detach.start",
         "eventKey": "0ff4f8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -762,7 +762,7 @@
     },
     "volume.detach.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|volume.detach.end",
+        "eventClassKey": "openstack-volume.detach.end",
         "eventKey": "0ff5f8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -773,7 +773,7 @@
     },
     "volume.delete.start": {
         "device": "endpoint",
-        "eventClassKey": "openstack|volume.delete.start",
+        "eventClassKey": "openstack-volume.delete.start",
         "eventKey": "0ee3f8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -781,7 +781,7 @@
     },
     "volume.delete.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|volume.delete.end",
+        "eventClassKey": "openstack-volume.delete.end",
         "eventKey": "0ee4f8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -790,7 +790,7 @@
     },
     "volsnapshot.create.start": {
         "device": "endpoint",
-        "eventClassKey": "openstack|snapshot.create.start",
+        "eventClassKey": "openstack-snapshot.create.start",
         "eventKey": "0ee5f8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -799,7 +799,7 @@
     },
     "volsnapshot.create.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|snapshot.create.end",
+        "eventClassKey": "openstack-snapshot.create.end",
         "eventKey": "0ee6f8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -808,7 +808,7 @@
     },
     "volsnapshot.delete.start": {
         "device": "endpoint",
-        "eventClassKey": "openstack|snapshot.delete.start",
+        "eventClassKey": "openstack-snapshot.delete.start",
         "eventKey": "0ee7f8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
@@ -817,65 +817,11 @@
     },
     "volsnapshot.delete.end": {
         "device": "endpoint",
-        "eventClassKey": "openstack|snapshot.delete.end",
+        "eventClassKey": "openstack-snapshot.delete.end",
         "eventKey": "0ee8f8c7-9d7d-4b0e-bc10-65aafa37f52c",
         "severity": 2,
         "summary": "",
         "trait_volume_id": "test",
         "trait_snapshot_id": "test"
-    },
-
-    "ZPS1750_port.update.start": {
-        "device": "endpoint",
-        "eventClassKey": "openstack|port.update.start",
-        "eventKey": "07158dbb-c80b-42b3-b51a-f3802af63736",
-        "severity": 2,
-        "summary": "OpenStackInfrastructure: port.update.start",
-        "trait_service": "network.Skuzmych-Newton.zenoss.lab",
-        "trait_project_id": "81085bda253e4c3a9e433777e7190aec", 
-        "trait_priority": "info",
-        "trait_request_id": "req-9508ff57-3252-4a66-9abd-6ff0958bf418",
-        "trait_user_id": "4cef3adb12ed4c71833bf43c9fb3bcb9", 
-        "trait_event_type": "port.update.start"
-    },
-
-    "ZPS1750_volume.detach.start": {
-        "device": "endpoint",
-        "eventClassKey": "openstack|volume.detach.start",
-        "eventKey": "67f44c77-5e95-462e-bf96-2908ee23d1ed",
-        "severity": 2,        
-        "summary": "OpenStackInfrastructure: volume.detach.start",
-        "trait_availability_zone": "nova",
-        "trait_tenant_id": "bf3882ec083d451a9c5290a513e40ee7",
-        "trait_resource_id": "90dbb214-41a5-4901-999b-3f2c455853c2",
-        "trait_service": "volume.ocata.zenoss.lab@lvm",
-        "trait_type": "9b4e0fa7-2fe2-4f84-bcab-0d37c776b847",
-        "trait_host": "ocata.zenoss.lab@lvm#lvm",
-        "trait_project_id": "bf3882ec083d451a9c5290a513e40ee7",
-        "trait_display_name": "",
-        "trait_request_id": "req-e8a5b00b-2cdd-428b-8bbe-92e5ef8bab9e",
-        "trait_user_id": "ca5f328dcab9472fbd4d8bf5396f1063",
-        "trait_size": "1",
-        "trait_created_at": "2017-08-07T11:38:16+00:00",
-        "trait_status": "in-use"
-    },
-
-    "ZPS1750_snapshot.create.end": {
-        "device": "endpoint",
-        "eventClassKey": "openstack|snapshot.create.end",
-        "eventKey": "442208cf-0a86-4cf1-a9e5-b895c99a336a",
-        "severity": 2,        
-        "summary": "OpenStackInfrastructure: snapshot.create.end",
-        "trait_availability_zone": "nova",
-        "trait_tenant_id": "bf3882ec083d451a9c5290a513e40ee7",
-        "trait_resource_id": "5b29a167-7d05-41a9-9271-00367d20fc4a",
-        "trait_service": "snapshot.ocata.zenoss.lab@lvm",
-        "trait_volume_id": "a76db4e7-3695-4855-aee1-1b67cd31b939",
-        "trait_project_id": "bf3882ec083d451a9c5290a513e40ee7",
-        "trait_display_name": "snapshot for Snpsh for tb3",
-        "trait_request_id": "req-50257604-212a-4351-a19b-40e2257ae933",
-        "trait_user_id": "ca5f328dcab9472fbd4d8bf5396f1063",
-        "trait_created_at": "2017-08-08 10:15:31+00:00",
-        "trait_status": "available"
     }
 }

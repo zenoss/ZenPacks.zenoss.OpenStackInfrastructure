@@ -1,7 +1,7 @@
 ###########################################################################
 #
 # This program is part of Zenoss Core, an open source monitoring platform.
-# Copyright (C) 2013-2017, Zenoss Inc.
+# Copyright (C) 2013-2019, Zenoss Inc.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 or (at your
@@ -193,7 +193,7 @@ def amqp_timestamp_to_int(timestamp_string):
     # dateutil.parser.parse() figure them out.
     dt = dateutil.parser.parse(timestamp_string)
     if dt.tzinfo is None:
-        LOG.debug("Timestamp string (%s) does not contain a timezone- assuming it is UTC." % timestamp_string)
+        # Does not contain a timezone- assume it is UTC.
         dt = pytz.utc.localize(dt)
 
     return (dt - _EPOCH).total_seconds()
@@ -401,3 +401,13 @@ def filter_FQDNs(dnlist):
             goodlist.append(dn)
 
     return goodlist, host_errors
+
+
+def addVirtualRoot(path):
+    try:
+        # If our RM supports IVirtualRoot, use that.
+        from zope.component import getUtility
+        from Products.ZenUtils.virtual_root import IVirtualRoot
+        return getUtility(IVirtualRoot).ensure_virtual_root(path)
+    except Exception:
+        return path

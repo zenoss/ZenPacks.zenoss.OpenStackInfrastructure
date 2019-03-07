@@ -45,8 +45,8 @@ class APIClient(object):
 
     session_manager = None
 
-    def __init__(self, username, password, auth_url, project_id, region_name):
-        self.session_manager = SessionManager(username, password, auth_url, project_id, region_name)
+    def __init__(self, username, password, auth_url, project_id, user_domain_name, project_domain_name, region_name):
+        self.session_manager = SessionManager(username, password, auth_url, project_id, user_domain_name, project_domain_name, region_name)
 
     @inlineCallbacks
     def authenticated_get(self, url):
@@ -121,6 +121,9 @@ class ApiEndpointStatusDataSource(PythonDataSource):
         'ApiEndpointStatusDataSource.ApiEndpointStatusDataSourcePlugin'
 
     # ApiEndpointStatusDataSource
+    auth_required = False
+    ok_result = ''
+    sample_url = ''
 
     _properties = PythonDataSource._properties + (
         {'id': 'auth_required', 'type': 'boolean'},
@@ -209,6 +212,8 @@ class ApiEndpointStatusDataSourcePlugin(PythonDataSourcePlugin):
             'password': context.zCommandPassword,
             'project_id': context.zOpenStackProjectId,
             'auth_url': context.zOpenStackAuthUrl,
+            'user_domain_name': context.zOpenStackUserDomainName,
+            'project_domain_name': context.zOpenStackProjectDomainName,
             'region_name': context.zOpenStackRegionName,
             'auth_required': datasource.auth_required,
             'ok_result': datasource.ok_result
@@ -244,6 +249,8 @@ class ApiEndpointStatusDataSourcePlugin(PythonDataSourcePlugin):
             ds0.params['password'],
             ds0.params['auth_url'],
             ds0.params['project_id'],
+            ds0.params.get('user_domain_name', 'default'),
+            ds0.params.get('project_domain_name', 'default'),
             ds0.params['region_name']
         )
 
@@ -294,7 +301,7 @@ class ApiEndpointStatusDataSourcePlugin(PythonDataSourcePlugin):
 
 @inlineCallbacks
 def main():
-    client = APIClient('admin', 'adminpassword', 'http://192.168.2.15:5000/v2.0', 'admin', 'RegionOne')
+    client = APIClient('admin', 'adminpassword', 'http://192.168.2.15:5000/v2.0', 'admin', 'default', 'default', 'RegionOne')
 
     @inlineCallbacks
     def _check_unauthenticated(name, url):

@@ -1,0 +1,21 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Note: Ensure that vagrant is version 1.6.5 or newer for centos 7 support.
+# It is also recommended that you install the vagrant-vbguest plugin, if using
+# virtualbox.
+
+Vagrant.configure('2') do |config|
+
+  config.vm.hostname = "rdo-newton"
+  config.vm.box = "centos-7.0-x86_64"
+  config.vm.box_url = "https://f0fff3908f081cb6461b407be80daf97f07ac418.googledrive.com/host/0BwtuV7VyVTSkUG1PM3pCeDJ4dVE/centos7.box"
+
+  config.vm.network :private_network, ip: "192.168.2.15"
+
+  config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "5120"]
+  end
+
+  config.vm.provision :shell, :path => 'bootstrap.sh'
+end

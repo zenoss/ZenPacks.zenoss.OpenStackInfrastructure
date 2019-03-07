@@ -20,12 +20,13 @@ from zope.interface import implements
 
 from Products.DataCollector.plugins.DataMaps import ObjectMap
 from Products.ZenEvents import ZenEventClasses
+from Products.ZenUtils.Utils import prepId
 
 from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import (
     PythonDataSource, PythonDataSourcePlugin, PythonDataSourceInfo,
     IPythonDataSourceInfo)
 
-from Products.ZenUtils.Utils import prepId
+from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.exceptions import APIClientError
 from ZenPacks.zenoss.OpenStackInfrastructure.hostmap import HostMap
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import result_errmsg, add_local_lib_path
 add_local_lib_path()
@@ -81,6 +82,8 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
         'zCommandUsername',
         'zCommandPassword',
         'zOpenStackProjectId',
+        'zOpenStackUserDomainName',
+        'zOpenStackProjectDomainName',
         'zOpenStackAuthUrl',
         'zOpenStackHostMapToId',
         'zOpenStackHostMapSame',
@@ -116,17 +119,33 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
             ds0.zCommandPassword,
             ds0.zOpenStackAuthUrl,
             ds0.zOpenStackProjectId,
+            getattr(ds0, 'zOpenStackUserDomainName', 'default'),
+            getattr(ds0, 'zOpenStackProjectDomainName', 'default'),
             ds0.zOpenStackRegionName)
 
         results = {}
 
         log.debug('Requesting services')
-        result = yield nova.services()
-        results['services'] = result['services']
-
-        yield self.preprocess_hosts(config, results)
-
-        defer.returnValue(results)
+        # ---------------------------------------------------------------------
+        # ZPS-5043
+        # Skip over API errors if user has restricted access, else raise.
+        # ---------------------------------------------------------------------
+        try:
+            result = yield nova.services()
+        except APIClientError as ex:
+            if "403 Forbidden" in ex.message:
+                log.debug("OpenStack API: user lacks access to call: nova.services.")
+                defer.returnValue(results)
+            else:
+                log.warning("OpenStack API: access issue: {}".format(ex))
+                raise
+        except Exception as ex:
+            log.error("OpenStack API Error: {}".format(ex))
+            raise
+        else:
+            results['services'] = result['services']
+            yield self.preprocess_hosts(config, results)
+            defer.returnValue(results)
 
     @inlineCallbacks
     def preprocess_hosts(self, config, results):
@@ -177,11 +196,10 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
         # so their IDs don't especially matter.  The new full model run
         # will establish and store their proper IDs.
 
-
     def onSuccess(self, result, config):
         data = self.new_data()
 
-        for service in result['services']:
+        for service in result.get('services', {}):
             host_id = service['host']
             hostname = result['hostmap'].get_hostname_for_hostid(host_id)
             host_base_id = re.sub(r'^host-', '', host_id)
@@ -212,7 +230,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
                 data['events'].append({
                     'device': config.id,
                     'component': service_id,
-                    'summary': 'Service %s on host %s (Availabilty Zone %s) is now DISABLED' %
+                    'summary': 'Service %s on host %s (Availability Zone %s) is now DISABLED' %
                                (service['binary'], hostname, service['zone']),
                     'severity': ZenEventClasses.Clear,
                     'eventClassKey': 'openStackNovaServiceStatus',
@@ -222,7 +240,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
                 data['events'].append({
                     'device': config.id,
                     'component': service_id,
-                    'summary': 'Service %s on host %s (Availabilty Zone %s) is now UP' %
+                    'summary': 'Service %s on host %s (Availability Zone %s) is now UP' %
                                (service['binary'], hostname, service['zone']),
                     'severity': ZenEventClasses.Clear,
                     'eventClassKey': 'openStackNovaServiceStatus',
@@ -232,7 +250,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
                 data['events'].append({
                     'device': config.id,
                     'component': service_id,
-                    'summary': 'Service %s on host %s (Availabilty Zone %s) is now DOWN' %
+                    'summary': 'Service %s on host %s (Availability Zone %s) is now DOWN' %
                                (service['binary'], hostname, service['zone']),
                     'severity': ZenEventClasses.Error,
                     'eventClassKey': 'openStackNovaServiceStatus',
@@ -245,7 +263,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
             'summary': 'Nova Status Collector: successful collection',
             'severity': ZenEventClasses.Clear,
             'eventKey': 'openStackNovaServiceCollectionError',
-            'eventClassKey': 'openStackFailure',
+            'eventClassKey': 'openStackNovaServiceStatus',
             })
 
         return data
@@ -263,7 +281,7 @@ class NovaServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
             'summary': errmsg,
             'severity': ZenEventClasses.Error,
             'eventKey': 'openStackNovaServiceCollectionError',
-            'eventClassKey': 'openStackFailure',
+            'eventClassKey': 'openStackNovaServiceStatus',
             })
 
         return data

@@ -44,6 +44,9 @@ def get_productKey(version):
         ('14',    'Newton'),
         ('15',    'Ocata'),
         ('16',    'Pike'),
+        ('17',    'Queens'),
+        ('18',    'Rocky'),
+
     ]
 
     for prefix, productKey in VERSION_MAP:

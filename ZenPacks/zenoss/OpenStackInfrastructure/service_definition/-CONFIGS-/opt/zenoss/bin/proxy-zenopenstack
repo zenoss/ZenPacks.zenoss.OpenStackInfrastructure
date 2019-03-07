@@ -1,0 +1,79 @@
+#!/bin/sh
+
+. /opt/zenoss/etc/proxy-zenopenstack-env
+ZPROXY_HOME=/opt/zenoss/zproxy
+
+CERT_FILE=/home/zenoss/.zenopenstack-certs/${COLLECTOR_LOCATION}_nginx.crt
+KEY_FILE=/home/zenoss/.zenopenstack-certs/${COLLECTOR_LOCATION}_nginx.key
+
+new_self_signed_cert() {
+    if -f $CERT_FILE;
+    then
+        mv $CERT_FILE $CERT_FILE.bak
+        mv $KEY_FILE $KEY_FILE.bak
+    fi
+
+    openssl req -nodes -x509 -newkey rsa:2048 -keyout ${KEY_FILE} -out ${CERT_FILE} -days 1000 -subj "/C=US/ST=Texas/L=Austin/O=Zenoss"
+}
+
+verify_cert() {
+    if [ ! -f /home/zenoss/.zenopenstack-certs/${COLLECTOR_LOCATION}_nginx.key ];
+    then
+        # generate a self-signed cert
+        new_self_signed_cert
+    fi
+
+    if ! openssl x509 -checkend 86400 -noout -in /home/zenoss/.zenopenstack-certs/${COLLECTOR_LOCATION}_nginx.crt;
+    then
+        # certificate has expired, or will in the next 24 hours, so generate a new one.
+        new_self_signed_cert
+    fi
+}
+
+verify_cert_loop() {
+    while true; do
+        # check the cert for expiration once a day.
+        verify_cert
+        sleep 86400
+    done
+}
+
+rotate_logs() {
+    while true; do
+	if [ -s ${ZPROXY_HOME}/logs/access.log ]; then
+	    if [ $(du -m ${ZPROXY_HOME}/logs/access.log | cut -f 1) -ge 30 ]; then
+		mv ${ZPROXY_HOME}/logs/access.log ${ZPROXY_HOME}/logs/access.log.0
+		kill -USR1 $(cat ${ZPROXY_HOME}/logs/nginx.pid)
+	    fi
+	fi
+	sleep 3600
+    done
+}
+
+
+update_upstreams() {
+    while true; do
+        ${ZPROXY_HOME}/scripts/update_upstreams 8242 /opt/zenoss/etc/zenopenstack-upstreams.conf
+        if [ $? -eq 2 ]; then
+            echo "$(date) Reloading nginx config due to upstream Zope servers change"
+            LD_LIBRARY_PATH=${ZPROXY_HOME}/lib ${ZPROXY_HOME}/sbin/nginx -s reload -c /opt/zenoss/etc/proxy-zenopenstack.conf
+        fi
+        sleep 30
+    done
+}
+
+# mkdir -p /var/run
+
+# Update the certificate and upstream configuration once
+verify_cert
+${ZPROXY_HOME}/scripts/update_upstreams 8242 /opt/zenoss/etc/zenopenstack-upstreams.conf
+
+# And start background loops to keep them up to date.
+rotate_logs &
+update_upstreams &
+verify_cert_loop &
+
+LD_LIBRARY_PATH=${ZPROXY_HOME}/lib ${ZPROXY_HOME}/sbin/nginx -c /opt/zenoss/etc/proxy-zenopenstack.conf
+
+# clean up the background jobs
+kill %1 %2 %3

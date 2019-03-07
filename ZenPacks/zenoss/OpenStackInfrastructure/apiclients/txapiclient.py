@@ -22,7 +22,7 @@ from Products.ZenUtils.Utils import unused
 unused(Globals)
 
 from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.session import SessionManager
-from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.exceptions import *
+from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.exceptions import APIClientError
 from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.base import BaseClient, api
 
 from twisted.internet import reactor
@@ -65,7 +65,7 @@ class KeystoneClient(BaseClient):
             returnValue(result)
 
         elif api_version.startswith('v3'):
-            result = yield self.get_json_collection('/projects')
+            result = yield self.get_json('/projects')
             # Convert into the familiar v2 format expected by our modeler.
             v2_result = {'tenants': [], 'tenants_links': []}
             for project in result['projects']:
@@ -100,6 +100,7 @@ class NovaClient(BaseClient):
     hypervisor_detail_id = api('/os-hypervisors/{param[hypervisor_id]}')
     images = api('/images/detail')
     servers = api('/servers/detail?all_tenants=1')
+    servers_single = api('/servers/detail')
     services = api('/os-services')
 
 
@@ -121,9 +122,12 @@ class CinderClient(BaseClient):
     keystone_service_type = 'volumev2'
 
     volumes = api('/volumes/detail?all_tenants=1')
+    volumes_single = api('/volumes/detail')
     volumetypes = api('/types')
     volumebackups = api('/backups/detail?all_tenants=1')
+    volumebackups_single = api('/backups/detail')
     volumesnapshots = api('/snapshots/detail?all_tenants=1')
+    volumesnapshots_single = api('/snapshots/detail')
     pools = api('/scheduler-stats/get_pools?detail=True')
     quotas = api('/os-quota-sets/{param[tenant]}')
     services = api('/os-services')
@@ -137,7 +141,7 @@ def main():
     # sm = SessionManager('admin', '0ed3ab06fb234024', 'http://192.168.2.12:5000/v2.0/', 'admin', 'RegionOne')
     # sm = SessionManager('admin', '0ed3ab06fb234024', 'http://192.168.2.12:5000/v3/', 'admin', 'RegionOne')
     # sm = SessionManager('admin', '0ed3ab06fb234024', 'http://192.168.2.12:5000/', 'admin', 'RegionOne')
-    sm = SessionManager('admin', '354f6fc8937c47f7', 'http://192.168.2.15:5000/v3/', 'admin', 'RegionOne')
+    sm = SessionManager('admin', '354f6fc8937c47f7', 'http://192.168.2.15:5000/v3/', 'admin', 'default', 'default', 'RegionOne')
     version = yield sm.get_api_version()
     print "Identity API %s" % version
 
@@ -243,6 +247,7 @@ def main():
 
     if reactor.running:
         reactor.stop()
+
 
 if __name__ == '__main__':
     main()
