@@ -1171,7 +1171,7 @@ Changes
 - Use publicURL if adminURL not working: (ZEN-24546)
 - Upgrade ZenPackLib to 1.1.0 to fix Liberty/Mitaka status: (ZEN-24464)
 
-2.2.0f
+2.2.0
 
 - Added Cinder block storage components.
 - Added LVM, Ceph block storage integration via LinuxMonitor and Ceph ZenPacks.
