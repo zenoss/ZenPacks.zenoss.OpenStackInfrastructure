@@ -1118,6 +1118,7 @@ Changes
 - Refactor Ceilometer introducing zenopenstack service to simplify collection
 - Allow temporary legacy metrics for 'Disk IO Rate' and 'Disk Requests' (ZPS-5205)
 - The HeartBeat datasource was removed as heartbeats are no longer supported by OpenStack (ZPS-1984)
+- Tested with Zenoss Cloud, Zenoss Resource Manager 6.3.2 and Service Impact 5.3.4
 
 2.4.2
 
