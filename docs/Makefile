@@ -15,6 +15,7 @@ docs:
 	make -C kb
 
 test: docs
-	cp $(LOCAL_OUTPUT_HTML) /tmp/osi.html
+	echo "<meta charset=\"utf-8\"/>" > /tmp/osi.html
+	cat $(LOCAL_OUTPUT_HTML) >> /tmp/osi.html
 	cp -a images /tmp/
 	perl -p -i -e 's@../docs/images/@images/@g' /tmp/osi.html
