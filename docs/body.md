@@ -569,7 +569,7 @@ You can setup the device using *zenbatchload* as follows:
 zenbatchload <filename>
 ```
 
-where <filename> should have the form:
+where `<filename>` should have the form:
 
         /Devices/OpenStack/Infrastructure loader='openstackinfrastructure',\
             loader_arg_keys=['deviceName', 'username', 'api_key', 'project_id, 'user_domain_name', 'project_domain_name', 'auth_url', 'region_name', 'collector']
