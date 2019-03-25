@@ -461,13 +461,24 @@ If this is the first time you are upgrading to 3.0.0+ from a version of the
 zenpack 2.4.0 or earlier, there are no special steps required,
 nor any changes required on the OpenStack side.
 
-When upgrading from 2.4.x on a system with multiple collectors, you may see warnings such as "ERRO[0000] Could not update proxy", as described in [ZPS-4689](#known-issues).  These can be safely ignored.
+When upgrading from 2.4.x on a system with multiple collectors, you may see warnings
+such as "ERRO[0000] Could not update proxy", as described in
+[ZPS-4689](#known-issues).  These can be safely ignored.
 
-If you are using the *ceilometer_zenoss* dispatcher mechanism (with RabbitMQ) for integrating older versions of openstack with zenoss, this will still function with 3.0.0.  Note that this is only supported as a bridge for old openstack environment which have not yet been upgraded to a supproted version of OpenStack.  All currently supported versions use the *http publisher* mechanism to integrate with zenoss, rather than RabbitMQ.
+If you are using the *ceilometer_zenoss* dispatcher mechanism (with RabbitMQ)
+for integrating older versions of openstack with zenoss, this will still
+function with 3.0.0.  Note that this is only supported as a bridge for old
+openstack environment which have not yet been upgraded to a supproted version
+of OpenStack.  All currently supported versions use the *http publisher* 
+mechanism to integrate with zenoss, rather than RabbitMQ.
 
 ### Post-ZenPack Installation
 
-Because the zenopenstack and RabbitMQ-Ceilometer services run on each collector, in order for openstack ceilometer to send messages to them, they need to be assigned a specific IP address.   These services will be unable to start until IP assignment is completed.  (The error 'service is missing an address assignment' will be displayed if you try to start the service)
+Because the zenopenstack and RabbitMQ-Ceilometer services run on each
+collector, in order for openstack ceilometer to send messages to them, they
+need to be assigned a specific IP address.   These services will be unable to
+start until IP assignment is completed.  (The error 'service is missing an
+address assignment' will be displayed if you try to start the service)
 
 The IP assignment may be performed via the Control Center UI or command-line.
 
@@ -475,7 +486,8 @@ To use the UI:
 
 * Log into the Control Center UI.
 * Click the Zenoss.resmgr name to display the Applications/Zenoss.resmgr page.
-* Scroll down the page to the IP Assignments section and click 'Assign' next to each line for the proxy-openstack and RabbitMQ-Ceilometer services:
+* Scroll down the page to the IP Assignments section and click 'Assign' next
+* to each line for the proxy-openstack and RabbitMQ-Ceilometer services:
 
 ![][ip_assignment.png] 
 
@@ -485,7 +497,8 @@ serviced service assign-ip RabbitMQ-Ceilometer
 serviced service assign-ip proxy-zenopenstack
 ```
 
-If you have multiple collectors, specify the collector name for each service and repeat for each collector:
+If you have multiple collectors, specify the collector name for each service
+and repeat for each collector:
 ``` {.bash}
 serviced service assign-ip collector1/RabbitMQ-Ceilometer
 serviced service assign-ip collector1/proxy-zenopenstack
@@ -494,9 +507,12 @@ serviced service assign-ip collector2/proxy-zenopenstack
 ```
 
 
-Once the zenpack is installed, provide SSH credentials to the Linux devices in your OpenStack environment before adding any devices.
-    * Configure the zCommandUsername/zCommandPassword/zKeyPath properties on the /Devices/Server/SSH/Linux/NovaHost device class.
-    * If your OpenStack nodes are already managed under Zenoss, move them into /Devices/Server/SSH/Linux/NovaHost
+Once the zenpack is installed, provide SSH credentials to the Linux devices 
+in your OpenStack environment before adding any devices.
+    * Configure the zCommandUsername/zCommandPassword/zKeyPath properties
+      on the /Devices/Server/SSH/Linux/NovaHost device class.
+    * If your OpenStack nodes are already managed under Zenoss, move them
+      into /Devices/Server/SSH/Linux/NovaHost
 
 
 Device Setup
@@ -640,7 +656,8 @@ succeed.
 
 * zOpenStackRunNovaManageInContainer:  Container to run "nova-manage" in
 * zOpenStackRunVirshQemuInContainer: Container to run "virsh" in
-* zOpenStackRunNeutronCommonInContainer: Container to access neutron configuration files in.
+* zOpenStackRunNeutronCommonInContainer: Container to access neutron
+  configuration files in.
 
 These should be set to container names or substrings of the container names.
 These can be set on the /Server/SSH/Linux/NovaHost device class or
@@ -653,29 +670,49 @@ OpenStack Configuration
 -----------------------
 
 Before event and performance data can be collected, the following
-steps must be performed.   That these steps are only tested with currently-supported versions of OpenStack  (Pike and higher).
+steps must be performed.   That these steps are only tested with
+currently-supported versions of OpenStack  (Pike and higher).
 
 ### OpenStack Ceilometer Configuration
 
-Ceilometer is a component of openstack which, through a combination of polling and notifications from the openstack message bus, collects a variety of metric and event data from the openstack environment and forwards it to external services, including Zenoss, for processing. 
+Ceilometer is a component of openstack which, through a combination
+of polling and notifications from the openstack message bus, collect
+a variety of metric and event data from the openstack environment and
+forwards it to external services, including Zenoss, for processing. 
 
 ![][ceilometer_arch.png]
 
-Ceilometer's polling agent and other openstack services (nova-api, for instance) send notifications through an internal notification bus, which are received by the ceilometer notification agent.  It then passes these notifications through configurable "pipelines", which ultimately deliver the data through publishers. 
+Ceilometer's polling agent and other openstack services (nova-api, 
+for instance) send notifications through an internal notification bus,
+which are received by the ceilometer notification agent.  It then
+passes these notifications through configurable "pipelines", which
+ultimately deliver the data through publishers. 
 
-In 2.4.x of this ZenPack, a custom ceilometer plugin called 'ceilometer_zenoss' was used to send the data to zenoss through the RabbitMQ-Ceilometer service.
+In 2.4.x of this ZenPack, a custom ceilometer plugin called 'ceilometer_zenoss'
+was used to send the data to zenoss through the RabbitMQ-Ceilometer service.
 
-This approach was no longer practical with current versions of OpenStack, so the collection mechanism was changed to use ceilometer's built-in http publisher, rather than AMQP.   Since the http publisher is part of ceilometer, there is no need to install additional software on the OpenStack environment to use this mechanism.  It is only necessary to configure it correctly, as described below.
+This approach was no longer practical with current versions of OpenStack,
+so the collection mechanism was changed to use ceilometer's built-in http
+publisher, rather than AMQP.   Since the http publisher is part of
+ceilometer, there is no need to install additional software on the
+OpenStack environment to use this mechanism.  It is only necessary
+to configure it correctly, as described below.
 
-Ceilometer must be configured to send data to the correct Zenoss collector, using a device-specific URL.
+Ceilometer must be configured to send data to the correct Zenoss collector,
+using a device-specific URL.
 
-The OpenStack environment will therefore need https access to the zenoss collector, and the Zenoss collector IP must be configured as described in the [Post-ZenPack-Installation Notes](#post-zenpack-installation).
+The OpenStack environment will therefore need https access to the zenoss
+collector, and the Zenoss collector IP must be configured as described
+in the [Post-ZenPack-Installation Notes](#post-zenpack-installation).
 
-Once the device is added, and its collector's proxy-zenopenstack service has an assigned IP, the following two URLs will be displayed at the bottom of the device's overview page:
+Once the device is added, and its collector's proxy-zenopenstack service
+has an assigned IP, the following two URLs will be displayed at the bottom
+of the device's overview page:
 
 ![][ceilometer_urls.png]
 
-These URLs will be required to configure ceilometer on the OpenStack environment to send data to Zenoss.   There are two ways to configure ceilometer:
+These URLs will be required to configure ceilometer on the OpenStack environment
+to send data to Zenoss.   There are two ways to configure ceilometer:
 
 #### RHOSP Configuration using TripleO (RedHat OpenStack Platform Director)
 
@@ -694,7 +731,8 @@ This is the best way to configure the Redhat OpenStack Platform.
               - <other_event_pipeline_publishers>
 ```
 
-Where the publisher URLs are device-specific, and copied from the device overview page shown above.   For example:
+Where the publisher URLs are device-specific, and copied from the device
+overview page shown above.  For example:
 
 ```
             ManagePipeline: true
@@ -705,7 +743,12 @@ Where the publisher URLs are device-specific, and copied from the device overvie
               - https://1.2.3.4:8342/ceilometer/v1/events/myopenstack?verify_ssl=False
 ```
 
-If desired, multiple publisher URLs may be specified, for instance to publish to more than one zenoss instance, or to other openstack systems such as gnocchi or panko.  Note, however, that ceilometer will publish data to every publisher sequentially, so if one of the URLs is timing out, it will block ceilometer and slow down the publishing of data to Zenoss.  Therefore, it is advisable to make sure that the URLs specified are valid and functioning.
+If desired, multiple publisher URLs may be specified, for instance to publish to
+more than one zenoss instance, or to other openstack systems such as gnocchi or
+panko.  Note, however, that ceilometer will publish data to every publisher
+sequentially, so if one of the URLs is timing out, it will block ceilometer
+and slow down the publishing of data to Zenoss.  Therefore, it is advisable
+to make sure that the URLs specified are valid and functioning.
 
 *   This template must be ***rendered*** into your templates before you initiate a deployment from
     Undercloud.<br>
@@ -732,7 +775,9 @@ If desired, multiple publisher URLs may be specified, for instance to publish to
 
 #### Manual Configuration
 
-When RedHat OpenStack Platform is not being used, you will need to update the affected configuration files directly.   The following modifications are required on every controller node where ceilometer is running:
+When RedHat OpenStack Platform is not being used, you will need to update
+the affected configuration files directly.   The following modifications
+are required on every controller node where ceilometer is running:
 
 * Add Zenoss specific extensions to the Ceilometer event definitions:
 
@@ -829,7 +874,9 @@ When RedHat OpenStack Platform is not being used, you will need to update the af
 * Make sure you restart ceilometer-notification service whenever you change
   `pipeline.yaml` or `event_pipeline.yaml`.
 
-* Configure nova to send events to ceilometer when instance state changes occur.  (This step is optional, but recommended.)  Add the following settings to `/etc/nova/nova.conf` on all compute nodes:
+* Configure nova to send events to ceilometer when instance state changes occur.
+  (This step is optional, but recommended.)  Add the following settings to
+  `/etc/nova/nova.conf` on all compute nodes:
 
       [notifications]
       notify_on_state_change=vm_and_task_state
@@ -851,16 +898,24 @@ The errors would be found in `/var/log/ceilometer/agent-notification.log` on the
 
 * Connection Refused
 
-  ERROR ceilometer.pipeline.sample ConnectionError: HTTPSConnectionPool(host='1.2.3.4', port=8342): Max retries exceeded with url: /ceilometer/v1/samples/myopenstack (Caused by NewConnectionError('<requests.packages.urllib3.connection.VerifiedHTTPSConnection object at 0x7f80d1e89590>: Failed to establish a new connection: [Errno 111] Connection refused',))
+  ```
+  ERROR ceilometer.pipeline.sample ConnectionError: HTTPSConnectionPool(host='1.2.3.4', port=8342): Max retries exceeded with
+        url: /ceilometer/v1/samples/myopenstack (Caused by NewConnectionError('<requests.packages.urllib3.connection.VerifiedHTTPSConnection
+        object at 0x7f80d1e89590>: Failed to establish a new connection: [Errno 111] Connection refused',))
+  ```
 
   Verify that the IP address is correct and that the proxy-zenopenstack service is running.
 
 * Network Connectivity
 
   ```
-  ERROR ceilometer.pipeline.event ConnectTimeout: HTTPSConnectionPool(host='1.2.3.4', port=8342): Max retries exceeded with url: /ceilometer/v1/events/myopenstack (Caused by ConnectTimeoutError(<requests.packages.urllib3.connection.VerifiedHTTPSConnection object at 0x7f4307dc94d0>, 'Connection to 1.2.3.4 timed out. (connect timeout=5)'))
+  ERROR ceilometer.pipeline.event ConnectTimeout: HTTPSConnectionPool(host='1.2.3.4', port=8342): Max retries exceeded with
+        url: /ceilometer/v1/events/myopenstack (Caused by ConnectTimeoutError(<requests.packages.urllib3.connection.VerifiedHTTPSConnection
+        object at 0x7f4307dc94d0>, 'Connection to 1.2.3.4 timed out. (connect timeout=5)'))
 
-  ERROR ceilometer.pipeline.event ConnectionError: HTTPSConnectionPool(host='1.2.3.4', port=8342): Max retries exceeded with url: /ceilometer/v1/events/myopenstack (Caused by NewConnectionError('<requests.packages.urllib3.connection.VerifiedHTTPSConnection object at 0x7f0b78e686d0>: Failed to establish a new connection: [Errno 113] No route to host',))
+  ERROR ceilometer.pipeline.event ConnectionError: HTTPSConnectionPool(host='1.2.3.4', port=8342): Max retries exceeded with
+        url: /ceilometer/v1/events/myopenstack (Caused by NewConnectionError('<requests.packages.urllib3.connection.VerifiedHTTPSConnection
+        object at 0x7f0b78e686d0>: Failed to establish a new connection: [Errno 113] No route to host',))
   ```
 
   Ensure that the correct IP was specified and that it is reachable from the OpenStack hosts.
@@ -871,7 +926,9 @@ The errors would be found in `/var/log/ceilometer/agent-notification.log` on the
   ERROR ceilometer.publisher.http HTTPError: 502 Server Error: Bad Gateway for url: https://1.2.3.4:8342/ceilometer/v1/samples/myopenstack
   ```
 
-  In general, this indicates that proxy-zenopenstack is running, but zenopenstack is not.  This can be normal during a zenoss restart, but if it does not resolve, check the status of the zenopenstack service.
+  In general, this indicates that proxy-zenopenstack is running, but zenopenstack is not.  
+  This can be normal during a zenoss restart, but if it does not resolve, check the 
+  status of the zenopenstack service.
  
 * 404 Errors (Not Found)
 
@@ -879,9 +936,12 @@ The errors would be found in `/var/log/ceilometer/agent-notification.log` on the
   ERROR ceilometer.publisher.http HTTPError: 404 Client Error: Not Found for url: https://1.2.3.4:8342/ceilometer/v1/samples/myopenstack
   ```
 
-  This usually indicates that the device ID found in the url is not recognized.   Check the URL and make sure the device ID is correct.
+  This usually indicates that the device ID found in the url is not recognized.   Check the
+  URL and make sure the device ID is correct.
 
-  This can be normal during zenopenstack restarts, since it will not know about devices to be monitored until it lots the configuration from zenhub.  If this is the case, it will resolve in a few minutes.
+  This can be normal during zenopenstack restarts, since it will not know about devices to
+  be monitored until it lots the configuration from zenhub.  If this is the case, it will
+  resolve in a few minutes.
 
   It is also possible to get a 404 error because of a typo in the URL unrelated to the device ID.  
 
@@ -891,16 +951,34 @@ The errors would be found in `/var/log/ceilometer/agent-notification.log` on the
   ERROR ceilometer.publisher.http HTTPError: 422 Client Error: Unknown Status for url: https://1.2.3.4:8342/ceilometer/v1/samples/myopenstack
   ```
 
-  This error indicates that the payload of the http request sent to zenoss was not in the expected format.  The most common cause for this is putting the samples url in event_pipeline.json, or the events url in pipeline.json.  Ensure that the correct URL was put in the right file.
+  This error indicates that the payload of the http request sent to zenoss was
+  not in the expected format.  The most common cause for this is putting the
+  samples url in event_pipeline.json, or the events url in pipeline.json.  
+  Ensure that the correct URL was put in the right file.
 
 
-Additional zenopenstack debugging is possible through the "zenopenstack diagnostics" link under "show links" on the device's detail page.  This link connects your browser directly to zenopensatck and provides detailed debugging information, including request rates and a log of all recently received http messages.   Note that this option requires that your browser have https connectivity to the Zenoss collector.
+Additional zenopenstack debugging is possible through the "zenopenstack diagnostics"
+link under "show links" on the device's detail page.  This link connects your browser
+directly to zenopensatck and provides detailed debugging information, including
+request rates and a log of all recently received http messages.   Note that this
+option requires that your browser have https connectivity to the Zenoss collector.
 
 
 #### General Notes
 
 *   In prior versions of this zenpack, all events from ceilometer were
-    forwarded to zenoss under /OpenStack.   Since most events were not actionable, they were used to update the model (for instance, a new instance is created), but were immedaitely archived.    In version 3.0.0, these events are still used for incremental model updates, but are not stored in zenoss as events any more  (since they placed additional load on zenoss for no benefit).   If there is a ceilometer event type which is actually useful to track in zenoss as an event, that capability still exists, however.   The list of event types to be exposed to zenoss are configurable in `zOpenStackProcessEventTypes`.   By default, this only contains `compute.instance.create.error`, but other types may be added if desired.
+    forwarded to zenoss under /OpenStack.   Since most events were not actionable,
+    they were used to update the model (for instance, a new instance is created),
+    but were immedaitely archived.    In version 3.0.0, these events are still
+    used for incremental model updates, but are not stored in zenoss as events
+    any more  (since they placed additional load on zenoss for no benefit).   
+
+    If there is a ceilometer event type which is actually useful to track in
+    zenoss as an event, that capability still exists, however.   The list of event
+    types to be exposed to zenoss are configurable in `zOpenStackProcessEventTypes`.
+
+    By default, this only contains `compute.instance.create.error`, but other types
+    may be added if desired.
 
 *   The Instance metrics for *Disk IO Rate* are deprecated in OpenStack version
     Queens and later. Collection for those metrics will be missing.
@@ -915,13 +993,18 @@ Additional zenopenstack debugging is possible through the "zenopenstack diagnost
             - disk.write.bytes
             - disk.write.requests
 
-    After editing this file, ensure the resulting YAML syntax is valid and restart the ceilometer-polling service.
+    After editing this file, ensure the resulting YAML syntax is valid and restart
+    the ceilometer-polling service.
 
     Finally, note that these metrics ARE deprecated and will be removed in
     future releases of OpenStack itself.
 
 *   The OpenStack ZenPack relies upon standard zenoss Linux Monitoring for
-    some functions, including process monitoring and the modeling of vNICs.   This means that the Zenoss collectors require SSH access to the NovaHost devices.  In some OpenStack deployments (including RHOSP's overcloud), external SSH access may not be available by default, and additional configuration may be required to achieve it.
+    some functions, including process monitoring and the modeling of vNICs.
+    This means that the Zenoss collectors require SSH access to the NovaHost
+    devices.  In some OpenStack deployments (including RHOSP's overcloud),
+    external SSH access may not be available by default, and additional
+    configuration may be required to achieve it.
 
 
 Zenoss Analytics
