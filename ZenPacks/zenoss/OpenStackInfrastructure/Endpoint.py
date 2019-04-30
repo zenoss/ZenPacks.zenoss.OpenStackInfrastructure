@@ -138,7 +138,7 @@ class Endpoint(schema.Endpoint):
             return None
 
         if statusclass is None:
-            statusclass = getattr(self, 'zStatusEventClass', '/Status')
+            statusclass = getattr(self, 'zStatusEventClass', '/Status/*')
 
         zep = getFacade("zep", self.dmd)
         try:
