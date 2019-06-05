@@ -357,7 +357,7 @@ The following daemons are installed:
  -   All `OpenStack Ceilometer Perf AMQP` datasources' *cycletime* parameter
      will not work in Pike+ . Cycletime must be regulated in
      OpenStack itself. The *cycletime* setting is still present for backward
-     compatibility with Ocata and prior versions.
+     compatibility with Ocata and prior versions, but has no effect.
 
 ### Monitoring Templates
 - /OpenStack/Infrastructure/
@@ -450,45 +450,69 @@ The following daemons are installed:
 Zenpack Installation
 -----------------------
 
-### Zenoss Configuration Steps - First-Time Installation
+### First-Time Installation
 
 If you are installing the ZenPack for the first time, install as per
-usual ZenPack installation.
+usual ZenPack installation, and continue to *Post-ZenPack Installation*.
 
-### Zenoss Configuration Steps - ZenPack Upgrades
+### Upgrades from 2.4.x
 
 If this is the first time you are upgrading to 3.0.0+ from a version of the
 zenpack 2.4.0 or earlier, there are no special steps required,
 nor any changes required on the OpenStack side.
 
-If upgrading to 2.4.0, from a prior version, please consult the old
-documentation, *old_ceilometer.md*, located in the docs folder of this
-[git repo](https://github.com/zenoss/ZenPacks.zenoss.OpenStackInfrastructure/tree/master/docs).
+When upgrading from 2.4.x on a system with multiple collectors, you may see warnings
+such as "ERRO[0000] Could not update proxy", as described in
+[ZPS-4689](#known-issues).  These can be safely ignored.
 
+If you are using the *ceilometer_zenoss* dispatcher mechanism (with RabbitMQ)
+for integrating older versions of openstack with zenoss, this will still
+function with 3.0.0.  Note that this is only supported as a bridge for old
+openstack environment which have not yet been upgraded to a supproted version
+of OpenStack.  All currently supported versions use the *http publisher* 
+mechanism to integrate with zenoss, rather than RabbitMQ.
 
 ### Post-ZenPack Installation
 
-*   Make sure to restart the Zproxy service to see the new UI elements
-    *User Domain Name* and *Project Domain Name* in the *Add OpenStack Endpoint*
-    Dialog.
+Because the zenopenstack and RabbitMQ-Ceilometer services run on each
+collector, in order for openstack ceilometer to send messages to them, they
+need to be assigned a specific IP address.   These services will be unable to
+start until IP assignment is completed.  (The error 'service is missing an
+address assignment' will be displayed if you try to start the service)
 
-*   Zenoss doesn't assign IP addresses for services proxy-zenopenstack and
-    RabbitMQ-Ceilometer, you must assign the correct collectors' host to those
-    services. Then you must restart those services in ControlCenter.
+The IP assignment may be performed via the Control Center UI or command-line.
 
-    Once [CC-4195](https://jira.zenoss.com/browse/CC-4195) is completed,
-    this assignment will automatic. Note, this step must be done before
-    configuring Ceilometer on OpenStack.
+To use the UI:
 
-*   Make sure you restart ceilometer-notification service whenever you change
-    `pipeline.yaml` or `event_pipeline.yaml`.
+* Log into the Control Center UI.
+* Click the Zenoss.resmgr name to display the Applications/Zenoss.resmgr page.
+* Scroll down the page to the IP Assignments section and click 'Assign' next
+* to each line for the proxy-openstack and RabbitMQ-Ceilometer services:
 
-*   For Queens and Rocky devices, make sure to restart ceilometer-polling service
-    if you have updated `/etc/ceilometer/polling.yaml`
+![][ip_assignment.png] 
 
-*   Once the zenpack is installed, provide SSH credentials to the Linux devices in your OpenStack environment before adding any devices.
-        - Configure the zCommandUsername/zCommandPassword/zKeyPath properties on the /Devices/Server/SSH/Linux/NovaHost device class.
-        - If your OpenStack nodes are already managed under Zenoss, move them into /Devices/Server/SSH/Linux/NovaHost
+To use the command-line:
+``` {.bash}
+serviced service assign-ip RabbitMQ-Ceilometer
+serviced service assign-ip proxy-zenopenstack
+```
+
+If you have multiple collectors, specify the collector name for each service
+and repeat for each collector:
+``` {.bash}
+serviced service assign-ip collector1/RabbitMQ-Ceilometer
+serviced service assign-ip collector1/proxy-zenopenstack
+serviced service assign-ip collector2/RabbitMQ-Ceilometer
+serviced service assign-ip collector2/proxy-zenopenstack
+```
+
+
+Once the zenpack is installed, provide SSH credentials to the Linux devices 
+in your OpenStack environment before adding any devices.
+    * Configure the zCommandUsername/zCommandPassword/zKeyPath properties
+      on the /Devices/Server/SSH/Linux/NovaHost device class.
+    * If your OpenStack nodes are already managed under Zenoss, move them
+      into /Devices/Server/SSH/Linux/NovaHost
 
 
 Device Setup
@@ -507,10 +531,10 @@ following inputs.
 * Device To Create - non-empty, non-ip, non-dns, unique name to use for this
   device in Zenoss. ''See note below''.
 * Auth URL - A keystone URL.  For Keystone's v3 API, it should look like
-  `http://\<hostname\>:5000/v3/`.
-  <br>For Keystone's v2 API, it should look like `http://\<hostname\>:5000/v2.0/`.
+  `http://<hostname>:5000/v3/`.
+  <br>For Keystone's v2 API, it should look like `http://<hostname>:5000/v2.0/`.
   To have the ZenPack choose the newest supported API version, leave the path
-  off, like `http://\<hostname\>:5000/` (sets zOpenStackAuthUrl).
+  off, like `http://<hostname>:5000/` (sets zOpenStackAuthUrl).
 * Username: Enter your OS_USERNAME (sets zCommandUsername).
 * Password: Enter your OS_PASSWORD (sets zCommandPassword).
 * User Domain Name: Enter the user domain name per OS_USER_DOMAIN_NAME
@@ -527,7 +551,7 @@ device in the OpenStack device class with the same name as the hostname
 or IP you entered into the dialog. Click into this new device to see
 everything that was discovered.
 
-{{note|'''Device Name'''}} The '''Device name''' should be a non-empty,
+NOTE: The 'Device name' should be a non-empty,
 non-hostname, non-IP, since that name will be used when the host is
 registered as a Linux device. The name should be unique within the
 Zenoss environment. This is especially important if you are adding
@@ -545,7 +569,7 @@ You can setup the device using *zenbatchload* as follows:
 zenbatchload <filename>
 ```
 
-where <filename> should have the form:
+where `<filename>` should have the form:
 
         /Devices/OpenStack/Infrastructure loader='openstackinfrastructure',\
             loader_arg_keys=['deviceName', 'username', 'api_key', 'project_id, 'user_domain_name', 'project_domain_name', 'auth_url', 'region_name', 'collector']
@@ -632,7 +656,8 @@ succeed.
 
 * zOpenStackRunNovaManageInContainer:  Container to run "nova-manage" in
 * zOpenStackRunVirshQemuInContainer: Container to run "virsh" in
-* zOpenStackRunNeutronCommonInContainer: Container to access neutron configuration files in.
+* zOpenStackRunNeutronCommonInContainer: Container to access neutron
+  configuration files in.
 
 These should be set to container names or substrings of the container names.
 These can be set on the /Server/SSH/Linux/NovaHost device class or
@@ -645,40 +670,119 @@ OpenStack Configuration
 -----------------------
 
 Before event and performance data can be collected, the following
-steps must be  performed.
+steps must be performed.   That these steps are only tested with
+currently-supported versions of OpenStack  (Pike and higher).
 
-### OpenStack Ceilometer Configuration (Pike+)
+### OpenStack Ceilometer Configuration
 
-Ceilometer must be configured to send data to each Zenoss collector.
-This ZenPack supports configuration of multiple Zenoss instances via Ceilometer.
-Each collector must direct network access to each OpenStack instance it monitors.
+Ceilometer is a component of openstack which, through a combination
+of polling and notifications from the openstack message bus, collect
+a variety of metric and event data from the openstack environment and
+forwards it to external services, including Zenoss, for processing. 
 
-First you must assign IP's to the zenopenstack service:
+![][ceilometer_arch.png]
 
-    serviced service assign-ip proxy-zenopenstack
-    serviced service start /zenopenstack /proxy-zenopenstack
+Ceilometer's polling agent and other openstack services (nova-api, 
+for instance) send notifications through an internal notification bus,
+which are received by the ceilometer notification agent.  It then
+passes these notifications through configurable "pipelines", which
+ultimately deliver the data through publishers. 
 
-Once you do that, you will find 2 URLs on the device overview page: Once for
-events and one for sample (metrics). For example:
+In 2.4.x of this ZenPack, a custom ceilometer plugin called 'ceilometer_zenoss'
+was used to send the data to zenoss through the RabbitMQ-Ceilometer service.
 
-For Zenoss instance 10.0.0.10
+This approach was no longer practical with current versions of OpenStack,
+so the collection mechanism was changed to use ceilometer's built-in http
+publisher, rather than AMQP.   Since the http publisher is part of
+ceilometer, there is no need to install additional software on the
+OpenStack environment to use this mechanism.  It is only necessary
+to configure it correctly, as described below.
 
-    Samples: https://10.0.0.10:8342/ceilometer/v1/samples/myopenstack?verify_ssl=False
-    Events:  https://10.0.0.10:8342/ceilometer/v1/events/myopenstack?verify_ssl=False
+Ceilometer must be configured to send data to the correct Zenoss collector,
+using a device-specific URL.
 
-For Zenoss instance 10.0.0.12
+The OpenStack environment will therefore need https access to the zenoss
+collector, and the Zenoss collector IP must be configured as described
+in the [Post-ZenPack-Installation Notes](#post-zenpack-installation).
 
-    Samples: https://10.0.0.12:8342/ceilometer/v1/samples/myopenstack?verify_ssl=False
-    Events:  https://10.0.0.12:8342/ceilometer/v1/events/myopenstack?verify_ssl=False
+Once the device is added, and its collector's proxy-zenopenstack service
+has an assigned IP, the following two URLs will be displayed at the bottom
+of the device's overview page:
 
-#### Manual Configuration
+![][ceilometer_urls.png]
 
-For manual configuration, you must modify every Ceilometer node as follows:
+These URLs will be required to configure ceilometer on the OpenStack environment
+to send data to Zenoss.   There are two ways to configure ceilometer:
+
+#### RHOSP Configuration using TripleO (RedHat OpenStack Platform Director)
+
+This is the best way to configure the Redhat OpenStack Platform.
+
+*   Add the following to your environment template:
+
+```
+            ManagePipeline: true
+            PipelinePublishers:
+              - *Zenoss Samples Publisher URL*
+              - <other_pipeline_publishers>
+            ManageEventPipeline: true
+            EventPipelinePublishers:
+              - *Zenoss Events Publisher URL*
+              - <other_event_pipeline_publishers>
+```
+
+Where the publisher URLs are device-specific, and copied from the device
+overview page shown above.  For example:
+
+```
+            ManagePipeline: true
+            PipelinePublishers:
+              - https://1.2.3.4:8342/ceilometer/v1/samples/myopenstack?verify_ssl=False
+            ManageEventPipeline: true
+            EventPipelinePublishers:
+              - https://1.2.3.4:8342/ceilometer/v1/events/myopenstack?verify_ssl=False
+```
+
+If desired, multiple publisher URLs may be specified, for instance to publish to
+more than one zenoss instance, or to other openstack systems such as gnocchi or
+panko.  Note, however, that ceilometer will publish data to every publisher
+sequentially, so if one of the URLs is timing out, it will block ceilometer
+and slow down the publishing of data to Zenoss.  Therefore, it is advisable
+to make sure that the URLs specified are valid and functioning.
+
+*   This template must be ***rendered*** into your templates before you initiate a deployment from
+    Undercloud.<br>
+    For more information on RHOSP template management, see RedHat's
+    [Including Environment Files in Overcloud Creation](https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html-single/advanced_overcloud_customization/index#sect-Including_Environment_Files_in_Overcloud_Creation).
+
+*   After deployment is complete, go to the undercloud, SSH into controller and go
+    to `/etc/ceilometer` in ceilometer_agent_notification container to check if
+    `pipeline.yaml` and `event_pipeline.yaml` file is updated:
+
+            ssh heat-admin@<controller ip>
+            sudo su -
+            sudo docker exec --user 0 -it ceilometer_agent_notification /bin/bash
+            # Ensure your configuration had the right publishers
+
 
 * Add Zenoss specific extensions to the Ceilometer event definitions:
 
   Edit `/etc/ceilometer/event_definitions.yaml` and add the contents of
-  [zenoss_additions.yaml](https://raw.githubusercontent.com/zenoss/ZenPacks.zenoss.OpenStackInfrastructure/develop/event_definitions/zenoss_additions.yaml)
+  [zenoss_additions.yaml](https://raw.githubusercontent.com/zenoss/ZenPacks.zenoss.OpenStackInfrastructure/master/event_definitions/zenoss_additions.yaml)
+  to the bottom of the file.
+
+* Restart the ceilometer-notification service on all controller nodes.
+
+#### Manual Configuration
+
+When RedHat OpenStack Platform is not being used, you will need to update
+the affected configuration files directly.   The following modifications
+are required on every controller node where ceilometer is running:
+
+* Add Zenoss specific extensions to the Ceilometer event definitions:
+
+  Edit `/etc/ceilometer/event_definitions.yaml` and add the contents of
+  [zenoss_additions.yaml](https://raw.githubusercontent.com/zenoss/ZenPacks.zenoss.OpenStackInfrastructure/master/event_definitions/zenoss_additions.yaml)
   to the bottom of the file.
 
 *   The /etc/ceilometer/event_pipeline.yaml file contains one sink, named
@@ -698,8 +802,7 @@ For manual configuration, you must modify every Ceilometer node as follows:
               transformers:
               triggers:
               publishers:
-                  - https://10.0.0.10:8342/ceilometer/v1/events/myopenstack?verify_ssl=False
-                  - https://10.0.0.12:8342/ceilometer/v1/events/myopenstack?verify_ssl=False
+                  - https://1.2.3.4:8342/ceilometer/v1/events/myopenstack?verify_ssl=False
                   - <some_other_publisher>
 
 
@@ -720,8 +823,7 @@ For manual configuration, you must modify every Ceilometer node as follows:
             - name: meter_sink
               transformers:
               publishers:
-                  - https://10.0.0.10:8342/ceilometer/v1/samples/myopenstack?verify_ssl=False
-                  - https://10.0.0.12:8342/ceilometer/v1/samples/myopenstack?verify_ssl=False
+                  - https://1.2.3.4:8342/ceilometer/v1/samples/myopenstack?verify_ssl=False
                   - <some_other_publisher>
             - name: cpu_sink
               transformers:
@@ -734,8 +836,7 @@ For manual configuration, you must modify every Ceilometer node as follows:
                             max: 100
                             scale: "100.0 / (10**9 * (resource_metadata.cpu_number or 1))"
               publishers:
-                  - https://10.0.0.10:8342/ceilometer/v1/samples/myopenstack?verify_ssl=False
-                  - https://10.0.0.12:8342/ceilometer/v1/samples/myopenstack?verify_ssl=False
+                  - https://1.2.3.4:8342/ceilometer/v1/samples/myopenstack?verify_ssl=False
                   - <some_other_publisher>
             - name: disk_sink
               transformers:
@@ -751,8 +852,7 @@ For manual configuration, you must modify every Ceilometer node as follows:
                                 unit: "\\1/s"
                             type: "gauge"
               publishers:
-                  - https://10.0.0.10:8342/ceilometer/v1/samples/myopenstack?verify_ssl=False
-                  - https://10.0.0.12:8342/ceilometer/v1/samples/myopenstack?verify_ssl=False
+                  - https://1.2.3.4:8342/ceilometer/v1/samples/myopenstack?verify_ssl=False
                   - <some_other_publisher>
             - name: network_sink
               transformers:
@@ -768,108 +868,117 @@ For manual configuration, you must modify every Ceilometer node as follows:
                                 unit: "\\1/s"
                             type: "gauge"
               publishers:
-                  - https://10.0.0.10:8342/ceilometer/v1/samples/myopenstack?verify_ssl=False
-                  - https://10.0.0.12:8342/ceilometer/v1/samples/myopenstack?verify_ssl=False
+                  - https://1.2.3.4:8342/ceilometer/v1/samples/myopenstack?verify_ssl=False
                   - <some_other_publisher>
 
 * Make sure you restart ceilometer-notification service whenever you change
   `pipeline.yaml` or `event_pipeline.yaml`.
 
-#### RHOSP Overcloud Configuration from Undercloud (Director)
-
-*   When configuring Overcloud using templates, you need to add the
-    following to your environment template:
-
-            ManagePipeline: true
-            PipelinePublishers:
-              - https://<zenoss_ip>:8342/ceilometer/v1/samples/<zenoss_devicename>?verify_ssl=False
-              - <other_pipeline_publishers>
-            ManageEventPipeline: true
-            EventPipelinePublishers:
-              - https://<zenoss_ip>:8342/ceilometer/v1/events/<zenoss_devicename>?verify_ssl=False
-              - <other_event_pipeline_publishers>
-
-    For example:
-
-            ManagePipeline: true
-            PipelinePublishers:
-              - https://10.0.0.10:8342/ceilometer/v1/samples/myopenstack?verify_ssl=False
-              - https://10.0.0.12:8342/ceilometer/v1/samples/myopenstack?verify_ssl=False
-            ManageEventPipeline: true
-            EventPipelinePublishers:
-              - https://10.0.0.10:8342/ceilometer/v1/events/myopenstack?verify_ssl=False
-              - https://10.0.0.12:8342/ceilometer/v1/events/myopenstack?verify_ssl=False
-
-*   This template must be ***rendered*** into your templates before you initiate a deployment from
-    Undercloud.<br>
-    For more information on RHOSP template management, see RedHat's
-    [Including Environment Files in Overcloud Creation](https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html-single/advanced_overcloud_customization/index#sect-Including_Environment_Files_in_Overcloud_Creation).
-
-*   After deployment is complete, go to the undercloud, SSH into controller and go
-    to `/etc/ceilometer` in ceilometer_agent_notification container to check if
-    `pipeline.yaml` and `event_pipeline.yaml` file is updated:
-
-            ssh heat-admin@<controller ip>
-            sudo su -
-            sudo docker exec --user 0 -it ceilometer_agent_notification /bin/bash
-            # Ensure your configuration had the right publishers
-
-#### VM State Changes
-
-By default, instance state changes will be captured by Zenoss when
-certain events occur, for example, when an instance is shut down, the
-state change to SHUTDOWN will be reflected in Zenoss.
-
-However, certain state changes that don't correspond to another defined
-event may not be picked up until the next time Zenoss models the
-environment.
-
-If you would like to reduce the likelihood of this occurring, you can
-configure OpenStack Nova to send an event (through Ceilometer) to Zenoss
-whenever any VM state change occurs by adding the following to
-/etc/nova/nova.conf on all Nova hosts:
+* Configure nova to send events to ceilometer when instance state changes occur.
+  (This step is optional, but recommended.)  Add the following settings to
+  `/etc/nova/nova.conf` on all compute nodes:
 
       [notifications]
       notify_on_state_change=vm_and_task_state
 
-      ...
-
       [oslo_messaging_notifications]
       driver = messagingv2
 
-Save /etc/nova/nova.conf and restart nova services.
+* Configure neutron to send events for ceilometer to forward to zenoss.  Add the following settings to `/etc/neutron/neutron.conf`:
 
-Note that notify_on_state_change will cause increased event load,
-both on OpenStack and Zenoss, and additional processing within the event
-transforms in Zenoss to keep the model consistent. Since most instance
-changes will still be caught without this option enabled, it is
-recommended to leave notify_on_state_change disabled if your
-OpenStack environment is very large.
+      [oslo_messaging_notifications]
+      driver = messagingv2
+      topics = notifications
+
+#### Ceilometer Troubleshooting
+
+A variety of errors can be returned by zenopenstack to ceilometer.  Here are the most common ones.
+
+The errors would be found in `/var/log/ceilometer/agent-notification.log` on the OpenStack controller nodes.
+
+* Connection Refused
+
+  ```
+  ERROR ceilometer.pipeline.sample ConnectionError: HTTPSConnectionPool(host='1.2.3.4', port=8342): Max retries exceeded with
+        url: /ceilometer/v1/samples/myopenstack (Caused by NewConnectionError('<requests.packages.urllib3.connection.VerifiedHTTPSConnection
+        object at 0x7f80d1e89590>: Failed to establish a new connection: [Errno 111] Connection refused',))
+  ```
+
+  Verify that the IP address is correct and that the proxy-zenopenstack service is running.
+
+* Network Connectivity
+
+  ```
+  ERROR ceilometer.pipeline.event ConnectTimeout: HTTPSConnectionPool(host='1.2.3.4', port=8342): Max retries exceeded with
+        url: /ceilometer/v1/events/myopenstack (Caused by ConnectTimeoutError(<requests.packages.urllib3.connection.VerifiedHTTPSConnection
+        object at 0x7f4307dc94d0>, 'Connection to 1.2.3.4 timed out. (connect timeout=5)'))
+
+  ERROR ceilometer.pipeline.event ConnectionError: HTTPSConnectionPool(host='1.2.3.4', port=8342): Max retries exceeded with
+        url: /ceilometer/v1/events/myopenstack (Caused by NewConnectionError('<requests.packages.urllib3.connection.VerifiedHTTPSConnection
+        object at 0x7f0b78e686d0>: Failed to establish a new connection: [Errno 113] No route to host',))
+  ```
+
+  Ensure that the correct IP was specified and that it is reachable from the OpenStack hosts.
+
+* Bad Gateway
+
+  ```
+  ERROR ceilometer.publisher.http HTTPError: 502 Server Error: Bad Gateway for url: https://1.2.3.4:8342/ceilometer/v1/samples/myopenstack
+  ```
+
+  In general, this indicates that proxy-zenopenstack is running, but zenopenstack is not.  
+  This can be normal during a zenoss restart, but if it does not resolve, check the 
+  status of the zenopenstack service.
+ 
+* 404 Errors (Not Found)
+
+  ```
+  ERROR ceilometer.publisher.http HTTPError: 404 Client Error: Not Found for url: https://1.2.3.4:8342/ceilometer/v1/samples/myopenstack
+  ```
+
+  This usually indicates that the device ID found in the url is not recognized.   Check the
+  URL and make sure the device ID is correct.
+
+  This can be normal during zenopenstack restarts, since it will not know about devices to
+  be monitored until it lots the configuration from zenhub.  If this is the case, it will
+  resolve in a few minutes.
+
+  It is also possible to get a 404 error because of a typo in the URL unrelated to the device ID.  
+
+* 422 Errors (Unprocessable Entity)
+
+  ```
+  ERROR ceilometer.publisher.http HTTPError: 422 Client Error: Unknown Status for url: https://1.2.3.4:8342/ceilometer/v1/samples/myopenstack
+  ```
+
+  This error indicates that the payload of the http request sent to zenoss was
+  not in the expected format.  The most common cause for this is putting the
+  samples url in event_pipeline.json, or the events url in pipeline.json.  
+  Ensure that the correct URL was put in the right file.
 
 
-#### Network Events
+Additional zenopenstack debugging is possible through the "zenopenstack diagnostics"
+link under "show links" on the device's detail page.  This link connects your browser
+directly to zenopensatck and provides detailed debugging information, including
+request rates and a log of all recently received http messages.   Note that this
+option requires that your browser have https connectivity to the Zenoss collector.
 
-The OpenStack Infrastructure ZP pulls neutron events for Networks and Routers. However,
-if Neutron is not configured properly to send those events, they cannot be retrieved.
-If you are missing events, checks your OpenStack environment's
-/etc/neutron/neutron.conf.
 
-It should have the following for traditional deployments:
+#### General Notes
 
-```
-[oslo_messaging_notifications]
-driver = messagingv2
-topics = notifications
-```
+*   In prior versions of this zenpack, all events from ceilometer were
+    forwarded to zenoss under /OpenStack.   Since most events were not actionable,
+    they were used to update the model (for instance, a new instance is created),
+    but were immedaitely archived.    In version 3.0.0, these events are still
+    used for incremental model updates, but are not stored in zenoss as events
+    any more  (since they placed additional load on zenoss for no benefit).   
 
-#### Notes:
+    If there is a ceilometer event type which is actually useful to track in
+    zenoss as an event, that capability still exists, however.   The list of event
+    types to be exposed to zenoss are configurable in `zOpenStackProcessEventTypes`.
 
-*   Events exposed by Ceilometer are listed in zOpenStackProcessEventTypes.
-    By default, this is set to the single *compute.instance.create.error* .
-
-*   Proxy warnings in [ZPS-4689](#known-issues) may be displayed during the
-    upgrade to 3.0.0 if you have multiple collectors. These can be safely
-    ignored.
+    By default, this only contains `compute.instance.create.error`, but other types
+    may be added if desired.
 
 *   The Instance metrics for *Disk IO Rate* are deprecated in OpenStack version
     Queens and later. Collection for those metrics will be missing.
@@ -884,35 +993,18 @@ topics = notifications
             - disk.write.bytes
             - disk.write.requests
 
-    - Ensure the resulting YAML syntax is valid restart the ceilometer-polling service
+    After editing this file, ensure the resulting YAML syntax is valid and restart
+    the ceilometer-polling service.
 
-    Finally note that these metrics ARE deprecated and will be removed in
+    Finally, note that these metrics ARE deprecated and will be removed in
     future releases of OpenStack itself.
 
-    Note: **There is no known template configuration for this for RHOSP
-          templates at this time and are unsupported.**
-
-*   Make sure you restart ceilometer-notification service whenever you change
-    `pipeline.yaml` or `event_pipeline.yaml`.
-
-*   For Queens and Rocky devices, make sure to restart ceilometer-polling service
-    if you have updated `/etc/ceilometer/polling.yaml`
-
-*   The RabbitMQ-Ceilometer service
-
-    Version 2.4.0 of this zenpack introduces a new service, `RabbitMQ-Ceilometer`.
-    This is a dedicated instance of RabbitMQ on each collector which is used solely
-    for integration with Ceilometer, rather than using the standard `RabbitMQ`
-    service that is used by Zenoss itself. This better distributes any load as
-    well as providing better support for distributed collector scenarios where the
-    target OpenStack environment might not have network access to the central
-    Zenoss servers.
-
-*   Zenoss collectors need direct access to the NovaHost devices in order to
-    model them. In some setups like RHOSP's overcloud, where direct
-    access to the overcloud network is not accessible by default, this can be a
-    challenge. Discussion of how to achieve connectivity to overcloud is
-    out of scope.
+*   The OpenStack ZenPack relies upon standard zenoss Linux Monitoring for
+    some functions, including process monitoring and the modeling of vNICs.
+    This means that the Zenoss collectors require SSH access to the NovaHost
+    devices.  In some OpenStack deployments (including RHOSP's overcloud),
+    external SSH access may not be available by default, and additional
+    configuration may be required to achieve it.
 
 
 Zenoss Analytics
@@ -1102,18 +1194,11 @@ Changes
 3.0.0
 
 - Add support for Keystone Domains (ZPS-3850)
-  As of version 3.0.0 support for domains was added. Before the only domain supported
-  was the default domain. To use domain specify the domain of your user in the
-  zOpenStackUserDomainName property and the domain of your chosen project in
-  zOpenStackProjectDomainName. The domain does not limit the components modeled. If
-  the user has access to the resource it will be modeled.
 - Add support for Pike, Rocky, Queens, RHOSP 13-14 versions of OpenStack
 - Add support for multiple Zenoss instances (ZPS-1598)
-- Add support for  restricted (non-administrator) users limited modeling ability (ZPS-3851)
-- Add support for  restricted (non-administrator) users limited monitoring ability (ZPS-5043)
+- Add support for  restricted (non-administrator) users (ZPS-3851, ZPS-5043)
 - Exclude erroneous 'hostgroup' host components (ZPS-4914)
 - Fix KeyError in PerfAMQPDataSource vNIC discovery (ZPS-4661)
-- Fix vNIC detection in zenopenstack (ZPS-5232)
 - Guard against missing tenant quota. (ZPS-4627)
 - Refactor Ceilometer introducing zenopenstack service to simplify collection
 - Allow temporary legacy metrics for 'Disk IO Rate' and 'Disk Requests' (ZPS-5205)
@@ -1232,3 +1317,6 @@ Changes
 [cinderservices.png]: ../docs/images/cinderservices.png "Cinder Service" {.gallerythumbnail}
 [volumes.png]: ../docs/images/volumes.png "Volume" {.gallerythumbnail}
 [volsnapshots.png]: ../docs/images/volsnapshots.png "Volume Snapshot" {.gallerythumbnail}
+[ip_assignment.png]: ../docs/images/ip_assignment.png "IP Assignment"
+[ceilometer_urls.png]: ../docs/images/ceilometer_urls.png "Ceilometer URLs"
+[ceilometer_arch.png]: ../docs/images/ceilometer_arch.png "Ceilometer Architecture"

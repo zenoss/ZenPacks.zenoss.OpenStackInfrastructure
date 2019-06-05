@@ -215,7 +215,7 @@ class DeviceProxyComponent(schema.DeviceProxyComponent):
             # had been in the right device class
             device = self.find_claimable_device(device_class=self.dmd.Devices)
             if device:
-                LOG.info(
+                LOG.debug(
                     "No claimable device found for %s, but %s was found "
                     "in another device class.  Moving it to %s will make "
                     "it eligible.", self.id, device.id, self.proxy_deviceclass().getOrganizerName())
