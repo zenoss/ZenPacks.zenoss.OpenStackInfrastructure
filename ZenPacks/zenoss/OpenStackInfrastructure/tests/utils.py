@@ -294,7 +294,7 @@ def create_model_data(dmd):
     # Linux guest devices (Virtual)
     # make sure that the interfaces line up.
     guest_dc = dmd.Devices.createOrganizer('/Server/SSH/Linux')
-    guest_dc.setZenProperty('zPythonClass', 'Products.ZenModel.Device')
+    guest_dc.setZenProperty('zPythonClass', 'ZenPacks.zenoss.LinuxMonitor.LinuxDevice')
     guest_instance1 = guest_dc.createInstance("g-instance1")
     guest_instance2 = guest_dc.createInstance("g-instance2")
     guest_instance3 = guest_dc.createInstance("g-instance3")
@@ -320,7 +320,7 @@ def create_model_data(dmd):
     # Linux devices (Physical)
     # (link to host1 and host2)
     phys_dc = dmd.Devices.createOrganizer('/Server/SSH/Linux/NovaHost')
-    phys_dc.setZenProperty('zPythonClass', 'Products.ZenModel.Device')
+    phys_dc.setZenProperty('zPythonClass', 'ZenPacks.zenoss.LinuxMonitor.LinuxDevice')
     phys_computehost1 = phys_dc.createInstance("p-computehost1")
     phys_computehost2 = phys_dc.createInstance("p-computehost2")
     phys_controllerhost = phys_dc.createInstance("p-controllerhost")
@@ -345,6 +345,7 @@ def create_model_data(dmd):
 
             process_class = re.sub(r'\d+$', '', binary)
             process.setOSProcessClass("Processes/OpenStack/osProcessClasses/%s" % process_class)
+            process.index_object()
 
     # Cinder
     from ZenPacks.zenoss.OpenStackInfrastructure.Volume import Volume
