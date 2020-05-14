@@ -27,13 +27,13 @@ import json
 from metrology import Metrology
 from metrology.registry import registry as metrology_registry
 from metrology.instruments import Meter
+import optparse
 import re
 import time
 from pprint import pformat
 import socket
 
 from twisted.internet import reactor, defer, task
-import twisted.manhole.telnet
 from twisted.python import log as twisted_log
 from twisted.spread import pb
 from twisted.web.http import combinedLogFormatter, datetimeToLogString
@@ -68,8 +68,14 @@ from ZenPacks.zenoss.OpenStackInfrastructure.events import event_is_mapped, map_
 from ZenPacks.zenoss.OpenStackInfrastructure.datamaps import ConsolidatingObjectMapQueue
 from ZenPacks.zenoss.OpenStackInfrastructure.utils import amqp_timestamp_to_int
 from ZenPacks.zenoss.OpenStackInfrastructure.services.OpenStackConfig import OpenStackDataSourceConfig
+from ZenPacks.zenoss.OpenStackInfrastructure import manhole
 
 pb.setUnjellyableForClass(OpenStackDataSourceConfig, OpenStackDataSourceConfig)
+
+# Twisted manhole defaults.
+DEFAULT_MANHOLE_PORT = 7777
+DEFAULT_MANHOLE_USERNAME = 'zenoss'
+DEFAULT_MANHOLE_PASSWORD = 'zenoss'
 
 
 class HTTPDebugLogBuffer(object):
@@ -1040,6 +1046,32 @@ class Preferences(object):
             default=100,
             help="Size of HTTP request debug log buffer")
 
+        # Twisted manhole options. Disabled by default for security reasons.
+        manhole_group = optparse.OptionGroup(parser, "Manhole Options")
+        parser.add_option_group(manhole_group)
+
+        manhole_group.add_option(
+            '--manhole',
+            action='store_true',
+            default=False,
+            help='Enable Twisted manhole')
+
+        manhole_group.add_option(
+            '--manhole-port',
+            type='int',
+            default=DEFAULT_MANHOLE_PORT,
+            help='Twisted manhole port on which to listen (default %default)')
+
+        manhole_group.add_option(
+            '--manhole-username',
+            default=DEFAULT_MANHOLE_USERNAME,
+            help='Twisted manhole username (default %default)')
+
+        manhole_group.add_option(
+            '--manhole-password',
+            default=DEFAULT_MANHOLE_PASSWORD,
+            help='Twisted manhole password (default %default)')
+
     def postStartup(self):
         pass
 
@@ -1083,22 +1115,25 @@ def main():
         task_splitter,
         initializationCallback=webserver.initialize)
 
-    port = get_manhole_port(7777)
-    log.debug("Starting manhole on port %d", port)
-
-    f = twisted.manhole.telnet.ShellFactory()
-    f.username, f.password = ('zenoss', 'zenoss')
-    reactor.listenTCP(port, f)
-    f.namespace.update(
-        preferences=preferences,
-        webserver=webserver,
-        collectordaemon=collectordaemon,
-        REGISTRY=REGISTRY,
-        METRIC_QUEUE=METRIC_QUEUE,
-        EVENT_QUEUE=EVENT_QUEUE,
-        MAP_QUEUE=MAP_QUEUE,
-        VNICS=VNICS
-    )
+    config = preferences.options
+    if config.manhole:
+        namespace = dict(
+            preferences=preferences,
+            webserver=webserver,
+            collectordaemon=collectordaemon,
+            REGISTRY=REGISTRY,
+            METRIC_QUEUE=METRIC_QUEUE,
+            EVENT_QUEUE=EVENT_QUEUE,
+            MAP_QUEUE=MAP_QUEUE,
+            VNICS=VNICS
+        )
+        
+        manhole.setup(
+            config.manhole_port,
+            config.manhole_username,
+            config.manhole_password,
+            namespace
+        )
     collectordaemon.run()
 
 
