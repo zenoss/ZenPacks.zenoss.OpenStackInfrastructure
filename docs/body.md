@@ -1191,6 +1191,11 @@ Known Issues
 Changes
 -------
 
+3.0.1
+
+- Add support for Twisted library update (ZPS-6975)
+- Tested with Zenoss Resource Manager 6.4.1, Zenoss Cloud and Service Impact 5.5.1
+
 3.0.0
 
 - Add support for Keystone Domains (ZPS-3850)

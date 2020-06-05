@@ -1323,7 +1323,7 @@ classes:
     dynamicview_group: Nova Services
     dynamicview_weight: 263
     dynamicview_relations:
-      impacted_by: [hostedOn, osprocess_component]
+      impacted_by: [hostedOn, osprocess_components]
       impacts: [orgComponent]
   NovaApi:
     base: [SoftwareComponent]
@@ -1339,7 +1339,7 @@ classes:
     dynamicview_group: Nova APIs
     dynamicview_weight: 262
     dynamicview_relations:
-      impacted_by: [hostedOn, osprocess_component]
+      impacted_by: [hostedOn, osprocess_components]
       impacts: [orgComponent]
   NovaDatabase:
     base: [SoftwareComponent]
@@ -1351,7 +1351,7 @@ classes:
     dynamicview_group: Nova Databases
     dynamicview_weight: 264
     dynamicview_relations:
-      impacted_by: [hostedOn, osprocess_component]
+      impacted_by: [hostedOn, osprocess_components]
       impacts: [orgComponent]
   ApiEndpoint:
     # If the string $(tenant_id) or %(tenant_id) is in the URL, it will be
@@ -1496,8 +1496,8 @@ classes:
     dynamicview_group: Neutron Agents
     dynamicview_weight: 261
     dynamicview_relations:
-      impacted_by: [hostedOn, osprocess_component]
-      impacts: [networks, subnets, routers]
+      impacted_by: [hostedOn, osprocess_components]
+      impacts: [networks, subnets, routers, orgComponent]
   Network:
     base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, LogicalComponent]
     meta_type: OpenStackInfrastructureNetwork
@@ -1812,7 +1812,7 @@ classes:
     dynamicview_group: Cinder Services
     dynamicview_weight: 266
     dynamicview_relations:
-      impacted_by: [hostedOn, osprocess_component]
+      impacted_by: [hostedOn, osprocess_components]
       impacts: [orgComponent]
   CinderApi:
     base: [SoftwareComponent]
@@ -1828,7 +1828,7 @@ classes:
     dynamicview_group: Cinder APIs
     dynamicview_weight: 265
     dynamicview_relations:
-      impacted_by: [hostedOn, osprocess_component]
+      impacted_by: [hostedOn, osprocess_components]
       impacts: [orgComponent]
   Volume:
     base: [ZenPacks.zenoss.OpenStackInfrastructure.CinderIntegrationComponent.CinderIntegrationComponent, LogicalComponent]
