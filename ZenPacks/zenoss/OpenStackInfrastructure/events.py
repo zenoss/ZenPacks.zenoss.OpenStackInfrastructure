@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2014-2019, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2014-2020, all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -19,10 +19,38 @@ from ZenPacks.zenoss.OpenStackInfrastructure.utils import (get_subnets_from_fixe
                                                            get_port_fixedips,
                                                            is_uuid,
                                                            )
+
 import ast
 
 import logging
 LOG = logging.getLogger('zen.OpenStack.events')
+
+# Starting from zenoss 6.4.0 ADM code were reworked without full compatibility 
+# with legacy directives provided by PythonCollector zenpack, add some tweaks here 
+# to make directives work with old and new ADM
+
+try:
+    import Products.DataCollector.ApplyDataMap
+except ImportError:
+    def addUpdateDirective(objmap):
+        objmap._add = False
+        return objmap
+
+    def addRemoveDirective(objmap):
+        objmap._remove = True
+        return objmap
+else:
+    def addUpdateDirective(objmap):
+        objmap._update = True
+        return objmap
+
+    def addRemoveDirective(objmap):
+        # remove update directive if we add new one as it won't work correctly
+        # with a new ADM code
+        if hasattr(objmap, '_update'):
+            del objmap._update
+        objmap._remove = True
+        return objmap
 
 
 # -----------------------------------------------------------------------------
@@ -294,15 +322,14 @@ def _apply_cinder_traits(evt, objmap):
 
 
 def instance_objmap(evt):
-    return ObjectMap(
+    return addUpdateDirective(ObjectMap(
         modname='ZenPacks.zenoss.OpenStackInfrastructure.Instance',
         compname='',
         data={
             'id': instance_id(evt),
-            'relname': 'components',
-            '_add': False
+            'relname': 'components'
         },
-    )
+    ))
 
 
 def neutron_objmap(evt, Name):
@@ -315,15 +342,14 @@ def neutron_objmap(evt, Name):
     id_func = eval(Name.lower() + '_id')
     _id = id_func(evt)
 
-    return ObjectMap(
+    return addUpdateDirective(ObjectMap(
         modname=module,
         compname='',
         data={
             'id': _id,
-            'relname': 'components',
-            '_add': False
+            'relname': 'components'
         },
-    )
+    ))
 
 
 def cinder_objmap(evt, Name):
@@ -333,15 +359,14 @@ def cinder_objmap(evt, Name):
     id_func = eval(Name.lower() + '_id')
     _id = id_func(evt)
 
-    return ObjectMap(
+    return addUpdateDirective(ObjectMap(
         modname=module,
         compname='',
         data={
             'id': _id,
-            'relname': 'components',
-            '_add': False
+            'relname': 'components'
         }
-    )
+    ))
 
 
 # -----------------------------------------------------------------------------
@@ -373,8 +398,7 @@ def instance_delete(evt):
         LOG.info("Unable to identify instance component from event: %s" % evt)
         return None
 
-    objmap = instance_objmap(evt)
-    objmap._remove = True
+    objmap = addRemoveDirective(instance_objmap(evt))
     return objmap
 
 
@@ -554,8 +578,7 @@ def floatingip_delete_end(evt):
         LOG.info("Unable to identify floatingip component from event: %s" % evt)
         return None
 
-    objmap = neutron_objmap(evt, 'FloatingIp')
-    objmap._remove = True
+    objmap = addRemoveDirective(neutron_objmap(evt, 'FloatingIp'))
     return objmap
 
 
@@ -597,8 +620,7 @@ def network_delete_end(evt):
         LOG.info("Unable to identify network component from event: %s" % evt)
         return None
 
-    objmap = neutron_objmap(evt, 'Network')
-    objmap._remove = True
+    objmap = addRemoveDirective(neutron_objmap(evt, 'Network'))
     return objmap
 
 
@@ -653,8 +675,7 @@ def port_update(evt):
 
 
 def port_delete_end(evt):
-    objmap = neutron_objmap(evt, 'Port')
-    objmap._remove = True
+    objmap = addRemoveDirective(neutron_objmap(evt, 'Port'))
     return objmap
 
 
@@ -693,8 +714,7 @@ def router_update(evt):
 
 
 def router_delete_end(evt):
-    objmap = neutron_objmap(evt, 'Router')
-    objmap._remove = True
+    objmap = addRemoveDirective(neutron_objmap(evt, 'Router'))
     return objmap
 
 
@@ -733,8 +753,7 @@ def subnet_update(evt):
 
 
 def subnet_delete_end(evt):
-    objmap = neutron_objmap(evt, 'Subnet')
-    objmap._remove = True
+    objmap = addRemoveDirective(neutron_objmap(evt, 'Subnet'))
     return objmap
 
 
@@ -783,8 +802,7 @@ def volume_delete_end(evt):
         LOG.info("Unable to identify volume component from event: %s" % evt)
         return None
 
-    objmap = cinder_objmap(evt, 'Volume')
-    objmap._remove = True
+    objmap = addRemoveDirective(cinder_objmap(evt, 'Volume'))
     return objmap
 
 
@@ -814,8 +832,7 @@ def volsnapshot_delete_end(evt):
         LOG.info("Unable to identify volsnapshotcomponent from event: %s" % evt)
         return None
 
-    objmap = cinder_objmap(evt, 'VolSnapshot')
-    objmap._remove = True
+    objmap = addRemoveDirective(cinder_objmap(evt, 'VolSnapshot'))
     return objmap
 
 
@@ -953,4 +970,5 @@ def map_event(evt):
 
     if event_type and event_type in MAPPERS:
         return MAPPERS[event_type](evt)
+
 

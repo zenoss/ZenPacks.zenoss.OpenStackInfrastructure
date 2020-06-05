@@ -16,17 +16,19 @@ LOG = logging.getLogger('zen.OpenStackSoftwareComponent')
 
 class SoftwareComponent(schema.SoftwareComponent):
 
-    def osprocess_component(self):
+    def osprocess_components(self):
         try:
             device = self.hostedOn().proxy_device()
             if device:
-                for osprocess in device.getDeviceComponents(type='OSProcess'):
-                    if osprocess.osProcessClass().id == self.binary:
-                        return osprocess
+                os_processes = filter(
+                    lambda x: x.osProcessClass().id == self.binary,
+                    device.getDeviceComponents(type='OSProcess')
+                )
+                return os_processes
         except Exception:
             pass
 
-        return None
+        return []
 
     def getDefaultGraphDefs(self, drange=None):
         """
@@ -34,9 +36,9 @@ class SoftwareComponent(schema.SoftwareComponent):
         any graphs from the associated OSProcess component.
         """
         graphs = super(SoftwareComponent, self).getDefaultGraphDefs(drange=drange)
-        osprocess = self.osprocess_component()
-        if osprocess:
-            for graph in osprocess.getDefaultGraphDefs(drange):
+        os_processes = self.osprocess_components()
+        for os_process in os_processes:
+            for graph in os_process.getDefaultGraphDefs(drange):
                 graphs.append(graph)
 
         return graphs
@@ -48,7 +50,8 @@ class SoftwareComponent(schema.SoftwareComponent):
         This method is for 5.x compatibility
         """
         graphs = super(SoftwareComponent, self).getGraphObjects()
-        osprocess = self.osprocess_component()
-        if osprocess:
-            graphs.extend(osprocess.getGraphObjects())
+        os_processes = self.osprocess_components()
+        for os_process in os_processes:
+            graphs.extend(os_process.getGraphObjects())
+
         return graphs

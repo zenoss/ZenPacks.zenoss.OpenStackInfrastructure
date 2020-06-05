@@ -28,9 +28,8 @@ from service_identity._common import (
 from twisted.python.failure import Failure
 from twisted.web.iweb import IPolicyForHTTPS
 from twisted.internet.ssl import CertificateOptions
-from twisted.internet._sslverify import (
-    ClientTLSOptions, _maybeSetHostNameIndication,
-    SSL_CB_HANDSHAKE_START, SSL_CB_HANDSHAKE_DONE)
+from twisted.internet._sslverify import ClientTLSOptions
+from OpenSSL.SSL import SSL_CB_HANDSHAKE_START, SSL_CB_HANDSHAKE_DONE
 from twisted.web.client import BrowserLikePolicyForHTTPS
 
 from zope.interface.declarations import implementer
@@ -200,7 +199,7 @@ class PermissiveClientTLSOptions(ClientTLSOptions):
     # rather than service_identity.pyopenssl.verify_hostname.
     def _identityVerifyingInfoCallback(self, connection, where, ret):
         if where & SSL_CB_HANDSHAKE_START:
-            _maybeSetHostNameIndication(connection, self._hostnameBytes)
+            connection.set_tlsext_host_name(self._hostnameBytes)
         elif where & SSL_CB_HANDSHAKE_DONE:
             try:
                 verifyHostname(connection, self._hostnameASCII)

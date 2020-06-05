@@ -896,6 +896,7 @@ classes:
     dynamicview_group: OpenStack Endpoints
     dynamicview_weight: 280
     dynamicview_relations:
+      impacted_by: []
       impacts: [hosts]
       openstack_link: [region]
   #-----------------------------------------------------------------------------
@@ -1035,6 +1036,7 @@ classes:
     dynamicview_weight: 15
     dynamicview_relations:
       impacted_by: [instances, volumes, networks, subnets, implementation_components]
+      impacts: []
   Flavor:
     base: [LogicalComponent]
     meta_type: OpenStackInfrastructureFlavor
@@ -1235,6 +1237,7 @@ classes:
     dynamicview_group: vNICs
     dynamicview_weight: 216
     dynamicview_relations:
+      impacted_by: []
       impacts: [instance]
   Region:
     base: [OrgComponent]
@@ -1316,43 +1319,27 @@ classes:
     meta_type: OpenStackInfrastructureNovaService
     label: Nova Service
     order: 7
-    # --------------------------------------------------------------------------
-    # We must define that we're impacted_by osprocess_component both in the
-    # Impact and DynamicView style. This is because OSProcess is not registered
-    # into DynamicView's service_view, but we do want to see the impact both in
-    # Impact, and DynamicView's Dependency View.
-    # (ZEN-14579)
-    # --------------------------------------------------------------------------
-    impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
     dynamicview_group: Nova Services
     dynamicview_weight: 263
     dynamicview_relations:
-      impacted_by: [hostedOn, osprocess_component]
+      impacted_by: [hostedOn, osprocess_components]
       impacts: [orgComponent]
   NovaApi:
     base: [SoftwareComponent]
     meta_type: OpenStackInfrastructureNovaApi
     label: Nova API
     order: 7.1
-    # --------------------------------------------------------------------------
-    # We must define that we're impacted_by osprocess_component both in the
-    # Impact and DynamicView style. This is because OSProcess is not registered
-    # into DynamicView's service_view, but we do want to see the impact both in
-    # Impact, and DynamicView's Dependency View.
-    # (ZEN-14579)
-    # --------------------------------------------------------------------------
     properties:
       enabled:
         grid_display: false
       operStatus:
         grid_display: false
-    impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
     dynamicview_group: Nova APIs
     dynamicview_weight: 262
     dynamicview_relations:
-      impacted_by: [hostedOn, osprocess_component]
+      impacted_by: [hostedOn, osprocess_components]
       impacts: [orgComponent]
   NovaDatabase:
     base: [SoftwareComponent]
@@ -1360,19 +1347,11 @@ classes:
     label: NovaDatabase
     order: 7.2
     filter_hide_from: [Region, Cell, AvailabilityZone, Host]
-    # --------------------------------------------------------------------------
-    # We must define that we're impacted_by osprocess_component both in the
-    # Impact and DynamicView style. This is because OSProcess is not registered
-    # into DynamicView's service_view, but we do want to see the impact both in
-    # Impact, and DynamicView's Dependency View.
-    # (ZEN-14579)
-    # --------------------------------------------------------------------------
-    impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
     dynamicview_group: Nova Databases
     dynamicview_weight: 264
     dynamicview_relations:
-      impacted_by: [hostedOn, osprocess_component]
+      impacted_by: [hostedOn, osprocess_components]
       impacts: [orgComponent]
   ApiEndpoint:
     # If the string $(tenant_id) or %(tenant_id) is in the URL, it will be
@@ -1402,6 +1381,7 @@ classes:
     dynamicview_views: [service_view, openstack_view]
     dynamicview_group: OpenStack Endpoints
     dynamicview_relations:
+      impacted_by: []
       impacts: [region_if_public_keystone]
       openstack_link: [region_if_public_keystone]
   Hypervisor:
@@ -1512,20 +1492,12 @@ classes:
       subnets:
         label_width: 40
         order: 1.2
-    # --------------------------------------------------------------------------
-    # We must define that we're impacted_by osprocess_component both in the
-    # Impact and DynamicView style. This is because OSProcess is not registered
-    # into DynamicView's service_view, but we do want to see the impact both in
-    # Impact, and DynamicView's Dependency View.
-    # (ZEN-14579)
-    # --------------------------------------------------------------------------
-    impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
     dynamicview_group: Neutron Agents
     dynamicview_weight: 261
     dynamicview_relations:
-      impacted_by: [hostedOn, osprocess_component]
-      impacts: [networks, subnets, routers]
+      impacted_by: [hostedOn, osprocess_components]
+      impacts: [networks, subnets, routers, orgComponent]
   Network:
     base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, LogicalComponent]
     meta_type: OpenStackInfrastructureNetwork
@@ -1584,15 +1556,8 @@ classes:
     dynamicview_group: Networks
     dynamicview_weight: 254
     dynamicview_relations:
-      impacted_by: [neutronAgents]
+      impacted_by: [neutronAgents, implementation_components]
       impacts: [subnets, tenant]
-    # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for implementation_components, rather than
-    # dynamicview impacts adaptor, because the implementation zenpack might not
-    # use dynamic view (and therefore not be in service_view) and so will not be
-    # exported from DV to impact currently (ZEN-14579).
-    # --------------------------------------------------------------------------
-    impacted_by: [implementation_components]
   Subnet:
     base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, LogicalComponent]
     meta_type: OpenStackInfrastructureSubnet
@@ -1641,15 +1606,8 @@ classes:
     dynamicview_group: Subnets
     dynamicview_weight: 252
     dynamicview_relations:
-      impacted_by: [network, routers, neutronAgents]
+      impacted_by: [network, routers, neutronAgents, implementation_components]
       impacts: [ports, tenant]
-    # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for implementation_components, rather than
-    # dynamicview impacts adaptor, because the implementation zenpack might not
-    # use dynamic view (and therefore not be in service_view) and so will not be
-    # exported from DV to impact currently (ZEN-14579).
-    # --------------------------------------------------------------------------
-    impacted_by: [implementation_components]
   Router:
     base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, LogicalComponent]
     meta_type: OpenStackInfrastructureRouter
@@ -1716,15 +1674,8 @@ classes:
     dynamicview_group: Routers
     dynamicview_weight: 253
     dynamicview_relations:
-      impacted_by: [neutronAgents]
+      impacted_by: [neutronAgents, implementation_components]
       impacts: [subnets, floatingIps, ports]
-    # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for implementation_components, rather than
-    # dynamicview impacts adaptor, because the implementation zenpack might not
-    # use dynamic view (and therefore not be in service_view) and so will not be
-    # exported from DV to impact currently (ZEN-14579).
-    # --------------------------------------------------------------------------
-    impacted_by: [implementation_components]
   Port:
     base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, LogicalComponent]
     meta_type: OpenStackInfrastructurePort
@@ -1803,15 +1754,8 @@ classes:
     dynamicview_group: Ports
     dynamicview_weight: 251
     dynamicview_relations:
-      impacted_by: [subnets, floatingIps, router]
+      impacted_by: [subnets, floatingIps, router, implementation_components]
       impacts: [instance]
-    # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for implementation_components, rather than
-    # dynamicview impacts adaptor, because the implementation zenpack might not
-    # use dynamic view (and therefore not be in service_view) and so will not be
-    # exported from DV to impact currently (ZEN-14579).
-    # --------------------------------------------------------------------------
-    impacted_by: [implementation_components]
   FloatingIp:
     base: [ZenPacks.zenoss.OpenStackInfrastructure.NeutronIntegrationComponent.NeutronIntegrationComponent, LogicalComponent]
     meta_type: OpenStackInfrastructureFloatingIp
@@ -1857,55 +1801,34 @@ classes:
     dynamicview_group: Floating IPs
     dynamicview_weight: 215
     dynamicview_relations:
-      impacted_by: [router]
+      impacted_by: [router, implementation_components]
       impacts: [port]
-    # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for implementation_components, rather than
-    # dynamicview impacts adaptor, because the implementation zenpack might not
-    # use dynamic view (and therefore not be in service_view) and so will not be
-    # exported from DV to impact currently (ZEN-14579).
-    # --------------------------------------------------------------------------
-    impacted_by: [implementation_components]
   CinderService:
     base: [SoftwareComponent]
     meta_type: OpenStackInfrastructureCinderService
     label: Cinder Service
     order: 20.1
-    # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for osprocess_component, rather than
-    # dynamicview impacts adaptor, because OSProcess is not part of
-    # service_view, and so will not be exported from DV to impact  currently
-    # (ZEN-14579).
-    # --------------------------------------------------------------------------
-    impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
     dynamicview_group: Cinder Services
     dynamicview_weight: 266
     dynamicview_relations:
-      impacted_by: [hostedOn]
+      impacted_by: [hostedOn, osprocess_components]
       impacts: [orgComponent]
   CinderApi:
     base: [SoftwareComponent]
     meta_type: OpenStackInfrastructureCinderApi
     label: Cinder API
     order: 20.1
-    # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for osprocess_component, rather than
-    # dynamicview impacts adaptor, because OSProcess is not part of
-    # service_view, and so will not be exported from DV to impact  currently
-    # (ZEN-14579).
-    # --------------------------------------------------------------------------
     properties:
       enabled:
         grid_display: false
       operStatus:
         grid_display: false
-    impacted_by: [osprocess_component]
     dynamicview_views: [service_view, openstack_view]
     dynamicview_group: Cinder APIs
     dynamicview_weight: 265
     dynamicview_relations:
-      impacted_by: [hostedOn]
+      impacted_by: [hostedOn, osprocess_components]
       impacts: [orgComponent]
   Volume:
     base: [ZenPacks.zenoss.OpenStackInfrastructure.CinderIntegrationComponent.CinderIntegrationComponent, LogicalComponent]
@@ -1981,14 +1904,8 @@ classes:
     dynamicview_group: Volumes
     dynamicview_weight: 242
     dynamicview_relations:
+      impacted_by: [implementation_components]
       impacts: [instance, volSnapshots, tenant]
-    # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for implementation_components, rather than
-    # dynamicview impacts adaptor, because the implementation zenpack might not
-    # use dynamic view (and therefore not be in service_view) and so will not be
-    # exported from DV to impact currently (ZEN-14579).
-    # --------------------------------------------------------------------------
-    impacted_by: [implementation_components]
   VolType:
     base: [LogicalComponent]
     meta_type: OpenStackInfrastructureVolType
@@ -2045,14 +1962,8 @@ classes:
     dynamicview_group: Snapshots
     dynamicview_weight: 241
     dynamicview_relations:
-      impacted_by: [volume]
-    # --------------------------------------------------------------------------
-    # We use a normal impact adaptor for implementation_components, rather than
-    # dynamicview impacts adaptor, because the implementation zenpack might not
-    # use dynamic view (and therefore not be in service_view) and so will not be
-    # exported from DV to impact currently (ZEN-14579).
-    # --------------------------------------------------------------------------
-    impacted_by: [implementation_components]
+      impacted_by: [volume, implementation_components]
+      impacts: []
   Backup:
     base: [LogicalComponent]
     meta_type: OpenStackInfrastructureBackup
