@@ -14,6 +14,7 @@ import logging
 LOG = logging.getLogger('zen.OpenStackInfrastructureHost')
 
 from Products.ZenEvents.ZenEventClasses import Clear, Warning
+from Products.ZenUtils.ZenTales import talesEvalStr
 from DateTime import DateTime
 import re
 
@@ -114,7 +115,12 @@ class Host(schema.Host):
             flags=re.IGNORECASE)
         
         if self.zOpenStackHostMapPrefix:
-            device_name = "{}-{}".format(self.zOpenStackHostMapPrefix, device_name)
+            device_name = "{}-{}".format(
+                talesEvalStr(
+                    self.zOpenStackHostMapPrefix,
+                    self,
+                    {'device': self.device(), 'dev': self.device()}),
+                device_name)
 
         return device_name
 

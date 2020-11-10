@@ -192,7 +192,8 @@ class TestHostMap(BaseTestCase):
         os_a = dc.createInstance('zenoss.OpenStackInfrastructure.testDevice-a')
         os_a.setZenProperty('zOpenStackHostMapPrefix', 'qa')
         os_b = dc.createInstance('zenoss.OpenStackInfrastructure.testDevice-b')
-        os_b.setZenProperty('zOpenStackHostMapPrefix', 'qb')
+        os_b.hw.serialNumber = '532'
+        os_b.setZenProperty('zOpenStackHostMapPrefix', '${device/hw/serialNumber}')
 
         hosts_a = [
             addContained(os_a, 'components', Host('host-linuxdev1')),
@@ -207,7 +208,7 @@ class TestHostMap(BaseTestCase):
         for host in hosts_a:
             self.assertIn('qa-', host.suggested_device_name())
         for host in hosts_b:
-            self.assertIn('qb-', host.suggested_device_name())
+            self.assertIn('532-', host.suggested_device_name())
 
 
 def test_suite():
