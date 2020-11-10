@@ -117,6 +117,7 @@ class TestModel(BaseTestCase):
         dc.setZenProperty('zOpenStackHostMapSame', [])
         dc.setZenProperty('zOpenStackHostLocalDomain', '')
         dc.setZenProperty('zOpenStackExtraApiEndpoints', [])
+        dc.setZenProperty('zOpenStackHostMapPrefix', '')
 
         self.d = dc.createInstance('zenoss.OpenStackInfrastructure.testDevice')
         self.d.setPerformanceMonitor('localhost')

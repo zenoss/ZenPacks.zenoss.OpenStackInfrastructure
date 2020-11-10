@@ -42,6 +42,7 @@ class TestCVIM(BaseTestCase):
         dc.setZenProperty('zPythonClass', 'ZenPacks.zenoss.OpenStackInfrastructure.Endpoint')
         dc.setZenProperty('zOpenStackHostDeviceClass', '/Server/SSH/Linux/NovaHost')
         dc.setZenProperty('zOpenStackHostLocalDomain', '')
+        dc.setZenProperty('zOpenStackHostMapPrefix', '')
 
         self.d = dc.createInstance('zenoss.OpenStackInfrastructure.testDevice')
         self.linux_dc = self.dmd.Devices.createOrganizer('/Server/SSH/Linux/NovaHost')
