@@ -295,6 +295,8 @@ The following daemons are installed:
 - zOpenStackHostMapSame: A list of \<name1\>=\<name2\>,
   used to inform the modeler that the same host may be referred to with an
   alternate name by some part of OpenStack. (this is not commonly used)
+- zOpenStackHostMapPrefix: Prefix to use when adding OpenStack Host as a Linux Device. Primary use-case,
+  identically configured OpenStacks.
 - zOpenStackNeutronConfigDir: Path to directory that contains Neutron configuration files. Default is /etc/neutron.
 - zOpenStackProjectId: Corresponds to tenant name, project to work on.
 - zOpenStackRegionName: The name of the OpenStack Region to use. Regions are
