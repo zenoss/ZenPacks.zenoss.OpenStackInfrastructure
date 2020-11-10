@@ -52,6 +52,10 @@ zProperties:
       A list of <name1>=<name2>, used to inform the modeler
       that the same host may be referred to with an alternate
       name by some part of openstack. (this is not commonly used)
+  zOpenStackHostMapPrefix:
+    type: string
+    label: Linux Device ID prefix
+    description: Prefix to use when adding OpenStack Host as a Linux Device
   zOpenStackNeutronConfigDir:
     type: string
     default: /etc/neutron

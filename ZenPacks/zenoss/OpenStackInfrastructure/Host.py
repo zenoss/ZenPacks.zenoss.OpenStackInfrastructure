@@ -112,6 +112,10 @@ class Host(schema.Host):
             localdomain,
             device_name,
             flags=re.IGNORECASE)
+        
+        if self.zOpenStackHostMapPrefix:
+            device_name = "{}-{}".format(self.zOpenStackHostMapPrefix, device_name)
+
         return device_name
 
     def suggested_host_ip(self):
