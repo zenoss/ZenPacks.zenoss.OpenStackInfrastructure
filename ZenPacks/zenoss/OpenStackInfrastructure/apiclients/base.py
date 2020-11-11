@@ -45,11 +45,13 @@ class BaseClient(object):
         follow the 'next' links, building up a merged result, and
         then return the whole thing.
         """
-
+        result = {}
         base_url = yield self.session_manager.get_service_url(self.keystone_service_type, interface)
+        if not base_url:
+            returnValue(result)
+
         full_url = base_url + url_path
 
-        result = {}
         while True:
             body, headers = yield self.session_manager.authenticated_GET_request(full_url, params=kwargs)
             # will raise an exception if there was an error, so we can assume
