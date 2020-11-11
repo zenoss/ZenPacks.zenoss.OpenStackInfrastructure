@@ -46,7 +46,7 @@ MAX_PARALLEL = 250
 
 def base_url(url):
     # strip trailing /
-    if url.endswith('/'):
+    if url and url.endswith('/'):
         url = url[:-1]
     return url
 
