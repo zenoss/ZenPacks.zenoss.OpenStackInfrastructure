@@ -114,10 +114,10 @@ class Host(schema.Host):
             device_name,
             flags=re.IGNORECASE)
         
-        if self.zOpenStackHostMapPrefix:
+        if self.zOpenStackHostDevicePrefix:
             device_name = "{}-{}".format(
                 talesEvalStr(
-                    self.zOpenStackHostMapPrefix,
+                    self.zOpenStackHostDevicePrefix,
                     self,
                     {'device': self.device(), 'dev': self.device()}),
                 device_name)

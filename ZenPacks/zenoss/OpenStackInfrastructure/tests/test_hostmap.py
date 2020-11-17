@@ -187,13 +187,13 @@ class TestHostMap(BaseTestCase):
         dc.setZenProperty('zPythonClass', 'ZenPacks.zenoss.OpenStackInfrastructure.Endpoint')
         dc.setZenProperty('zOpenStackHostDeviceClass', '/Server/SSH/Linux/NovaHost')
         dc.setZenProperty('zOpenStackHostLocalDomain', '')
-        dc.setZenProperty('zOpenStackHostMapPrefix', '')
+        dc.setZenProperty('zOpenStackHostDevicePrefix', '')
 
         os_a = dc.createInstance('zenoss.OpenStackInfrastructure.testDevice-a')
-        os_a.setZenProperty('zOpenStackHostMapPrefix', 'qa')
+        os_a.setZenProperty('zOpenStackHostDevicePrefix', 'qa')
         os_b = dc.createInstance('zenoss.OpenStackInfrastructure.testDevice-b')
         os_b.hw.serialNumber = '532'
-        os_b.setZenProperty('zOpenStackHostMapPrefix', '${device/hw/serialNumber}')
+        os_b.setZenProperty('zOpenStackHostDevicePrefix', '${device/hw/serialNumber}')
 
         hosts_a = [
             addContained(os_a, 'components', Host('host-linuxdev1')),
