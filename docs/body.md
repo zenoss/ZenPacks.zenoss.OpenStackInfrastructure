@@ -295,7 +295,7 @@ The following daemons are installed:
 - zOpenStackHostMapSame: A list of \<name1\>=\<name2\>,
   used to inform the modeler that the same host may be referred to with an
   alternate name by some part of OpenStack. (this is not commonly used)
-- zOpenStackHostMapPrefix: Prefix to use when adding OpenStack Host as a Linux Device. Primary use-case,
+- zOpenStackHostDevicePrefix: Prefix to use when adding OpenStack Host as a Linux Device. Primary use-case,
   identically configured OpenStacks. To avoid setting a value for each OpenStack instance, a TALES
   expression can be set at the DeviceClass level, using the host's OpenStack Device attribute for the
   host's Linux Device ID prefix. ex: `${device/hw/serialNumber}`
