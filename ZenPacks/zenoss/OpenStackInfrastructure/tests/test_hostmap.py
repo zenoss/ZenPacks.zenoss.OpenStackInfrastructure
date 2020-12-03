@@ -23,7 +23,8 @@ from Products.ZenUtils.Utils import unused
 
 from ZenPacks.zenoss.OpenStackInfrastructure import hostmap
 from ZenPacks.zenoss.OpenStackInfrastructure.hostmap import HostMap
-from ZenPacks.zenoss.OpenStackInfrastructure.tests.utils import setup_crochet
+from ZenPacks.zenoss.OpenStackInfrastructure.Host import Host
+from ZenPacks.zenoss.OpenStackInfrastructure.tests.utils import setup_crochet, addContained
 
 from twisted.internet import defer
 
@@ -177,6 +178,37 @@ class TestHostMap(BaseTestCase):
         self.perform_mapping(hostmap)
         self.assertEquals(hostmap.get_hostid("test1"), "host-test1-forcedid")
         self.assertEquals(hostmap.get_hostid("Test1"), "host-test1-forcedid")
+
+
+    def test_prefixed_hostmap(self):
+
+        dc = self.dmd.Devices.createOrganizer('/Devices/OpenStack/Infrastructure')
+
+        dc.setZenProperty('zPythonClass', 'ZenPacks.zenoss.OpenStackInfrastructure.Endpoint')
+        dc.setZenProperty('zOpenStackHostDeviceClass', '/Server/SSH/Linux/NovaHost')
+        dc.setZenProperty('zOpenStackHostLocalDomain', '')
+        dc.setZenProperty('zOpenStackHostDevicePrefix', '')
+
+        os_a = dc.createInstance('zenoss.OpenStackInfrastructure.testDevice-a')
+        os_a.setZenProperty('zOpenStackHostDevicePrefix', 'qa')
+        os_b = dc.createInstance('zenoss.OpenStackInfrastructure.testDevice-b')
+        os_b.hw.serialNumber = '532'
+        os_b.setZenProperty('zOpenStackHostDevicePrefix', '${device/hw/serialNumber}')
+
+        hosts_a = [
+            addContained(os_a, 'components', Host('host-linuxdev1')),
+            addContained(os_a, 'components', Host('host-linuxdev2'))
+        ]
+        hosts_b = [
+            addContained(os_b, 'components', Host('host-linuxdev3')),
+            addContained(os_b, 'components', Host('host-linuxdev4')),
+            addContained(os_b, 'components', Host('host-linuxdev5'))
+        ]
+
+        for host in hosts_a:
+            self.assertIn('qa-', host.suggested_device_name())
+        for host in hosts_b:
+            self.assertIn('532-', host.suggested_device_name())
 
 
 def test_suite():

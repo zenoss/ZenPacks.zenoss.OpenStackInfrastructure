@@ -295,6 +295,10 @@ The following daemons are installed:
 - zOpenStackHostMapSame: A list of \<name1\>=\<name2\>,
   used to inform the modeler that the same host may be referred to with an
   alternate name by some part of OpenStack. (this is not commonly used)
+- zOpenStackHostDevicePrefix: Prefix to use when adding OpenStack Host as a Linux Device. Primary use-case,
+  identically configured OpenStacks. To avoid setting a value for each OpenStack instance, a TALES
+  expression can be set at the DeviceClass level, using the host's OpenStack Device attribute for the
+  host's Linux Device ID prefix. ex: `${device/hw/serialNumber}`
 - zOpenStackNeutronConfigDir: Path to directory that contains Neutron configuration files. Default is /etc/neutron.
 - zOpenStackProjectId: Corresponds to tenant name, project to work on.
 - zOpenStackRegionName: The name of the OpenStack Region to use. Regions are
@@ -1208,6 +1212,7 @@ Changes
 - Refactor Ceilometer introducing zenopenstack service to simplify collection
 - Allow temporary legacy metrics for 'Disk IO Rate' and 'Disk Requests' (ZPS-5205)
 - The HeartBeat datasource was removed as heartbeats are no longer supported by OpenStack (ZPS-1984)
+- Tested with Zenoss Cloud, Zenoss Resource Manager 6.3.2 and Service Impact 5.3.4
 
 2.4.2
 

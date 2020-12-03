@@ -113,7 +113,7 @@ class Endpoint(schema.Endpoint):
                "Mappings=" + \
                json.dumps(self.get_host_mappings(), indent=4)
 
-    def getStatus(self, statusclass="/Status", **kwargs):
+    def getStatus(self, statusclass=None, **kwargs):
         """Return status number for this device.
 
         The status number is the number of critical events associated
@@ -125,21 +125,20 @@ class Endpoint(schema.Endpoint):
         isn't being monitored, or because there was an error retrieving
         its events.
 
-        This method is overridden here to provide a simpler default
-        meaning for "down". By default any critical severity event that
-        is in either the new or acknowledged state in the /Status event
-        class and is tagged with the device's UUID indicates that the
+        By default any critical severity event that is in either the new or
+        acknowledged state in the event class that set in zStatusEventClass
+        (if we don't have this property, use /Status class instead)
+        property and is tagged with the device's UUID indicates that the
         device is down. An alternate event class (statusclass) can be
         provided, which is what would be done by the device's
         getPingStatus and getSnmpStatus methods.
 
-        A key different between this methods behavior vs. that of the
-        Device.getStatus method it overrides is that warning and error
-        events are not considered as affecting the device's status.
-
         """
         if not self.monitorDevice():
             return None
+
+        if statusclass is None:
+            statusclass = getattr(self, 'zStatusEventClass', '/Status/*')
 
         zep = getFacade("zep", self.dmd)
         try:

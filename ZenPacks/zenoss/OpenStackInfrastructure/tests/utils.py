@@ -528,6 +528,7 @@ class SharedModelTestLayer(ZenossTestCaseLayer):
         dc.setZenProperty('zOpenStackHostMapSame', [])
         dc.setZenProperty('zOpenStackHostLocalDomain', '')
         dc.setZenProperty('zOpenStackExtraApiEndpoints', [])
+        dc.setZenProperty('zOpenStackHostDevicePrefix', '')
 
         # Create catalog
         try:
