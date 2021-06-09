@@ -22,7 +22,11 @@ def get_version(filename):
 requires = [
     'twisted',
     'pyasn1',
-    'PyCrypto'
+    'PyCrypto',
+]
+install_requires = [
+    'idna<=2.10,>=2.4',
+    'twisted<21',
 ]
 
 setup(
@@ -52,7 +56,6 @@ setup(
     url='http://github.com/zenoss/txsshclient',
     license='All Rights Reserved',
     requires=requires,
-    setup_requires=requires,
-    install_requires=requires,
+    install_requires=install_requires,
 )
 

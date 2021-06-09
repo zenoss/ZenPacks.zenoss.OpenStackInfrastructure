@@ -503,7 +503,7 @@ class Health(Resource):
                 body += "  <td>None</td>"
             body += "  <td><a href=\"/health/logs/%s%s\">request log</a></td>" % (client_ip, uri)
             body += "</tr>"
-
+            
         return body + """
     </table>
 
