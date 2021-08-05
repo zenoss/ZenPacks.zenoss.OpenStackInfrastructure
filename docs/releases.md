@@ -1,5 +1,10 @@
 Releases
 --------
+Version 4.0.0- <a rel="nofollow" class="external" href="http://wiki.zenoss.org/download/zenpacks/ZenPacks.zenoss.OpenStackInfrastructure/4.0.0/ZenPacks.zenoss.OpenStackInfrastructure-4.0.0.egg">Download</a>
+: Released on 2021/06/04
+: Requires PythonCollector ZenPack,OpenStack (Tenant View) ZenPack,Linux Monitor ZenPack
+: Requires <a href="/product/zenpacks/pythoncollector" title="ZenPack:PythonCollector">PythonCollector ZenPack</a>,<a href="/product/zenpacks/openstack-tenant-view" title="ZenPack:OpenStack (Tenant View)">OpenStack (Tenant View) ZenPack</a>,<a href="/product/zenpacks/linux-monitor" title="ZenPack:Linux Monitor">Linux Monitor ZenPack</a>
+: Tested with Zenoss Resource Manager 6.6.0, Zenoss Cloud and Service Impact 5.5.3
 
 Version 3.0.1- <a rel="nofollow" class="external" href="http://wiki.zenoss.org/download/zenpacks/ZenPacks.zenoss.OpenStackInfrastructure/3.0.1/ZenPacks.zenoss.OpenStackInfrastructure-3.0.1.egg">Download</a>
 : Released on 2020/06/05
