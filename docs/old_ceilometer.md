@@ -112,7 +112,7 @@ match any known host.
 - zOpenStackHostMapToId: A list of \<name\>=\<id\>,
 used to force a host referred to by openstack with the given name to be
 represented in Zenoss as a host component with the given ID. (this is
-not commonly used)
+not commonly used) [ Note : \<id\> would be represented in format of host-id  ]
 - zOpenStackHostMapSame: A list of \<name1\>=\<name2\>,
 used to inform the modeler that the same host may be referred to with an
 alternate name by some part of openstack. (this is not commonly used)
