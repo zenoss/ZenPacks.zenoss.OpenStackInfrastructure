@@ -143,7 +143,7 @@ class CinderServiceStatusDataSourcePlugin(PythonDataSourcePlugin):
             log.error("OpenStack API Error: {}".format(ex))
             raise
         else:
-            results['services'] = result['services']
+            results['services'] = result.get('services', [])
             yield self.preprocess_hosts(config, results)
             defer.returnValue(results)
 

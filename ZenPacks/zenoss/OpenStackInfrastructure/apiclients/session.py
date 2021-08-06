@@ -38,15 +38,15 @@ from .exceptions import APIClientError, UnauthorizedError, BadRequestError, NotF
 from .ssl import PermissiveBrowserLikePolicyForHTTPS, CertificateError
 
 
-CONNECT_TIMEOUT = 30
-READ_TIMEOUT = 30
+CONNECT_TIMEOUT = 60
+READ_TIMEOUT = 60
 MAX_POOL_CONNECTIONS = 10
 MAX_PARALLEL = 250
 
 
 def base_url(url):
     # strip trailing /
-    if url.endswith('/'):
+    if url and url.endswith('/'):
         url = url[:-1]
     return url
 

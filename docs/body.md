@@ -58,6 +58,12 @@ Gallery
 |                                               |                                           |                                                               |
 | Cinder Services                               | Volumes                                   | Volume Snapshots                                              |
 +-----------------------------------------------+-------------------------------------------+---------------------------------------------------------------+
++-----------------------------------------------+-------------------------------------------+---------------------------------------------------------------+
+| [![][openstackVictoria.png]][openstackVictoria.png] |                                                                                                     |
+|                                                     |                                     |                                                               |
+| Openstack Victoria Overview                         |                                     |                                                               |
++-----------------------------------------------+-------------------------------------------+---------------------------------------------------------------+
+
 
 
 Prerequisites
@@ -75,8 +81,9 @@ Prerequisites
 * 2.3.x supports Mitaka
 * 2.4.x supports Mitaka, Newton, and Ocata
 * 3.0.0 supports Pike, Queens, Rocky, and Red Hat OpenStack Platform (RHOSP) version 13 and 14
+* 4.0.0 supports Pike,Queens,Rocky,Train,Victoria and Red Hat Openstack (RHOSP) version 13,14 and 16(includes 16.1 and 16.2) 
 
-Note: We denote Pike, Queens, and Rocky, RHOSP 13 and 14 as **Pike+**
+Note: We denote Pike, Queens,Train,Victoria and Rocky, RHOSP 13 and 14,16 as **Pike+** 
 
 
 Restricted Users
@@ -295,6 +302,10 @@ The following daemons are installed:
 - zOpenStackHostMapSame: A list of \<name1\>=\<name2\>,
   used to inform the modeler that the same host may be referred to with an
   alternate name by some part of OpenStack. (this is not commonly used)
+- zOpenStackHostDevicePrefix: Prefix to use when adding OpenStack Host as a Linux Device. Primary use-case,
+  identically configured OpenStacks. To avoid setting a value for each OpenStack instance, a TALES
+  expression can be set at the DeviceClass level, using the host's OpenStack Device attribute for the
+  host's Linux Device ID prefix. ex: `${device/hw/serialNumber}`
 - zOpenStackNeutronConfigDir: Path to directory that contains Neutron configuration files. Default is /etc/neutron.
 - zOpenStackProjectId: Corresponds to tenant name, project to work on.
 - zOpenStackRegionName: The name of the OpenStack Region to use. Regions are
@@ -981,7 +992,7 @@ option requires that your browser have https connectivity to the Zenoss collecto
     may be added if desired.
 
 *   The Instance metrics for *Disk IO Rate* are deprecated in OpenStack version
-    Queens and later. Collection for those metrics will be missing.
+    Queens ,Train , Victoria and later. Collection for those metrics will be missing.
     Future OpenStack releases will remove these metrics and graphs completely.
 
     In the meantime, if you still require these metrics, you can edit the
@@ -998,6 +1009,7 @@ option requires that your browser have https connectivity to the Zenoss collecto
 
     Finally, note that these metrics ARE deprecated and will be removed in
     future releases of OpenStack itself.
+    Note : ** ALL graphs at instance level will not load any data due to ceilometer limitation and show as NA ( Not applicable ) in graphs . Only Gauge data will be visible under details tab of instance level.
 
 *   The OpenStack ZenPack relies upon standard zenoss Linux Monitoring for
     some functions, including process monitoring and the modeling of vNICs.
@@ -1208,6 +1220,7 @@ Changes
 - Refactor Ceilometer introducing zenopenstack service to simplify collection
 - Allow temporary legacy metrics for 'Disk IO Rate' and 'Disk Requests' (ZPS-5205)
 - The HeartBeat datasource was removed as heartbeats are no longer supported by OpenStack (ZPS-1984)
+- Tested with Zenoss Cloud, Zenoss Resource Manager 6.3.2 and Service Impact 5.3.4
 
 2.4.2
 

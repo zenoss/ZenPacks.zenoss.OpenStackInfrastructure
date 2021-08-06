@@ -14,6 +14,7 @@ import logging
 LOG = logging.getLogger('zen.OpenStackInfrastructureHost')
 
 from Products.ZenEvents.ZenEventClasses import Clear, Warning
+from Products.ZenUtils.ZenTales import talesEvalStr
 from DateTime import DateTime
 import re
 
@@ -112,6 +113,15 @@ class Host(schema.Host):
             localdomain,
             device_name,
             flags=re.IGNORECASE)
+        
+        if self.zOpenStackHostDevicePrefix:
+            device_name = "{}-{}".format(
+                talesEvalStr(
+                    self.zOpenStackHostDevicePrefix,
+                    self,
+                    {'device': self.device(), 'dev': self.device()}),
+                device_name)
+
         return device_name
 
     def suggested_host_ip(self):
