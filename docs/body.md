@@ -59,7 +59,7 @@ Gallery
 | Cinder Services                               | Volumes                                   | Volume Snapshots                                              |
 +-----------------------------------------------+-------------------------------------------+---------------------------------------------------------------+
 +-----------------------------------------------+-------------------------------------------+---------------------------------------------------------------+
-| [![][openstackVictoria.png]][openstackVictoria.png] |                                                                                                     |
+| [![][openstackVictoria.png]][openstackVictoria.png] |                                     |                                                                |
 |                                                     |                                     |                                                               |
 | Openstack Victoria Overview                         |                                     |                                                               |
 +-----------------------------------------------+-------------------------------------------+---------------------------------------------------------------+
@@ -298,7 +298,7 @@ The following daemons are installed:
 - zOpenStackHostMapToId: A list of \<name\>=\<id\>,
   used to force a host referred to by OpenStack with the given name to be
   represented in Zenoss as a host component with the given ID. (this is
-  not commonly used)
+  not commonly used) [Note: name=id ,here id part begins as "host-"]
 - zOpenStackHostMapSame: A list of \<name1\>=\<name2\>,
   used to inform the modeler that the same host may be referred to with an
   alternate name by some part of OpenStack. (this is not commonly used)
