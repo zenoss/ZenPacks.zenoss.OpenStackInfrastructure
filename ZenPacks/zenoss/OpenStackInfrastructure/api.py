@@ -38,7 +38,7 @@ add_local_lib_path()
 
 OPENSTACK_DEVICE_PATH = "/Devices/OpenStack/Infrastructure"
 
-_helper = zenpack_path('openstack_helper.py')
+_helper = zenpack_path('libexec/openstack_helper.py')
 
 cmd_regex = re.compile('(--api_key=)(?P<password>[\wa-zA-Z0-9_.-]+)')
 
