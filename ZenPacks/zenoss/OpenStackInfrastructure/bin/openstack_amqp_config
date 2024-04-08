@@ -4,4 +4,4 @@ CURRENTDIR="$(dirname "$(which "$0")")"
 PARENTDIR=$(dirname $CURRENTDIR)
 
 # Create any required exchanges
-$PARENTDIR/openstack_amqp_init.py
+$PARENTDIR/libexec/openstack_amqp_init.py
