@@ -243,7 +243,7 @@ device_classes:
             cycletime: 300
           openstack:
             type: COMMAND
-            commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/poll_openstack.py
+            commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/libexec/poll_openstack.py
               '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}'
               '${here/zOpenStackUserDomainName}' '${here/zOpenStackProjectDomainName}' '${here/zOpenStackAuthUrl}' '${here/zOpenStackRegionName}'
             datapoints:

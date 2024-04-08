@@ -70,10 +70,6 @@ class ZenPack(schema.ZenPack):
             # the config is updated if the script has changed.
             force_update_configs(self, "proxy-zenopenstack", ["opt/zenoss/bin/proxy-zenopenstack"])
 
-
-
-        self.chmodScripts()
-
     def getServiceDefinitionFiles(self):
         # The default version of this is only called during initial installation,
         # and returns all services.   This version can be called during upgrades
@@ -136,11 +132,6 @@ class ZenPack(schema.ZenPack):
 
         remove_migrate_zenpython()
 
-    def chmodScripts(self):
-        for script in ('poll_openstack.py',
-                       'openstack_amqp_init.py',
-                       'openstack_helper.py'):
-            os.system('chmod 0755 {0}'.format(self.path(script)))
 
 # Patch last to avoid import recursion problems.
 from ZenPacks.zenoss.OpenStackInfrastructure import patches
