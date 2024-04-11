@@ -30,7 +30,7 @@ egg:
 build:
 # Now build all the build dependencies for this zenpack.
 	rm -rf $(TXSSHCLIENT_DIR)/build
-	cd $(TXSSHCLIENT_DIR); python setup.py build
+	cd $(TXSSHCLIENT_DIR); python setup.py build --build-lib build/lib
 	mkdir -p $(ZP_DIR)/lib/sshclient
 	cp -r $(TXSSHCLIENT_DIR)/build/lib/sshclient/* $(ZP_DIR)/lib/sshclient/
 
