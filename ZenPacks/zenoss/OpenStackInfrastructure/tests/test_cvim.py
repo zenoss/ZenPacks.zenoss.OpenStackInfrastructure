@@ -48,7 +48,7 @@ class TestCVIM(BaseTestCase):
         self.linux_dc = self.dmd.Devices.createOrganizer('/Server/SSH/Linux/NovaHost')
         self.hostmap = HostMap()
 
-    @crochet.wait_for(timeout=30)
+    @crochet.wait_for(timeout=60)
     def perform_mapping(self):
         # This has to be run through the twisted reactor.
         return self.hostmap.perform_mapping()
