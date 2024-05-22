@@ -69,6 +69,10 @@ class ZenPack(schema.ZenPack):
             # We ship a shell script as a "config" file- make sure that
             # the config is updated if the script has changed.
             force_update_configs(self, "proxy-zenopenstack", ["opt/zenoss/bin/proxy-zenopenstack"])
+            # Starting from CZ 7.2.0/ZSD 6.8.0 we have to replace the old rabbitmq-env.conf
+            # because of OS and RabbitMQ version changes. These changes are backward
+            # compatible with pre CZ 7.2.0/ZSD 6.8.0 platform versions.
+            force_update_configs(self, "RabbitMQ-Ceilometer", ["etc/rabbitmq/rabbitmq-env.conf"])
 
     def getServiceDefinitionFiles(self):
         # The default version of this is only called during initial installation,
