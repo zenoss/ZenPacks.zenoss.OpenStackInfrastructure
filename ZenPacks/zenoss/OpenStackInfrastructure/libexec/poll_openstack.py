@@ -17,9 +17,9 @@ import sys
 
 from twisted.internet.defer import inlineCallbacks, returnValue
 
-from apiclients.exceptions import APIClientError
-from apiclients.session import SessionManager
-from apiclients.txapiclient import NovaClient, NeutronClient, CinderClient
+from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.exceptions import APIClientError
+from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.session import SessionManager
+from ZenPacks.zenoss.OpenStackInfrastructure.apiclients.txapiclient import NovaClient, NeutronClient, CinderClient
 
 
 class OpenStackPoller(object):
