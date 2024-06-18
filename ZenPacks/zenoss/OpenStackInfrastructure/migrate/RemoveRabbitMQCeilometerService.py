@@ -38,6 +38,12 @@ class RemoveRabbitMQCeilometerService(ZenPackMigration):
     version = Version(4, 0, 1)
 
     def migrate(self, pack):
+        if pack.prevZenPackVersion is None:
+            # Do nothing if this is a fresh install of self.version.
+            return
+        if not CONTROL_CENTER:
+            return
+
         self.migrate_service(pack)
         self.migrate_templates(pack.dmd)
         self.migrate_zprops(pack.dmd)
@@ -95,12 +101,6 @@ class RemoveRabbitMQCeilometerService(ZenPackMigration):
         
         
     def migrate_service(self, pack):
-        if pack.prevZenPackVersion is None:
-            # Do nothing if this is a fresh install of self.version.
-            return
-        if not CONTROL_CENTER:
-            return
-          
         sm.require("1.0.0")
         try:
             ctx = sm.ServiceContext()
