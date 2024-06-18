@@ -22,30 +22,6 @@ except ImportError:
 import copy
 import os
 
-def fix_service_healthcheck_path():
-    # When the zenpack is installed or upgraded, the path to the healthcheck
-    # script will need to be updated to reflect the current zenpack path.
-
-    if not VERSION5:
-        return
-
-    try:
-        ctx = sm.ServiceContext()
-    except sm.ServiceMigrationError:
-        log.info("Couldn't generate service context, skipping.")
-        return
-
-    for svc in ctx.services:
-        if svc.name != 'RabbitMQ-Ceilometer':
-            continue
-
-        for check in svc.healthChecks:
-            if check.name == 'ceilometer-setup':
-                log.info("Enabling %s healthcheck for %s", check.name, ctx.getServicePath(svc))
-                script_path = zenpack_path('libexec/init_rabbitmq-ceil.sh')
-                check.script = script_path + ' {{(getContext . "global.conf.amqpuser")}} {{(getContext . "global.conf.amqppassword")}}'
-    ctx.commit()
-
 
 def force_update_configs(zenpack, service_name, config_filenames):
     # update the specified config filenames to match those provided in the
@@ -74,97 +50,6 @@ def force_update_configs(zenpack, service_name, config_filenames):
                     cfile.content = content
 
     ctx.commit()
-
-
-def install_migrate_zenpython():
-    if not VERSION5:
-        return
-
-    try:
-        ctx = sm.ServiceContext()
-    except sm.ServiceMigrationError:
-        log.info("Couldn't generate service context, skipping.")
-        return
-
-    # Create the endpoints we're importing.
-    mgmt_endpoint = {
-        "ApplicationTemplate": "openstack_rabbitmq_{{(parent .).Name}}_admin",
-        "Name": "rabbitmqadmins_ceil",
-        "PortNumber": 45672,
-        "PortTemplate": "{{plus .InstanceID 45672}}",
-        "Protocol": "tcp",
-        "Purpose": "import_all"
-    }
-    mgmt_endpoint_lc = {key.lower(): value for (key, value) in mgmt_endpoint.iteritems()}
-    try:
-        rabbit_mgmt = sm.Endpoint(**mgmt_endpoint_lc)
-    except TypeError:
-        mgmt_endpoint_lc = {key.lower(): value for (key, value) in mgmt_endpoint.iteritems() if key != "PortTemplate"}
-    amqp_endpoint = {
-        "ApplicationTemplate": "openstack_rabbitmq_{{(parent .).Name}}",
-        "Name": "rabbitmqs_ceil",
-        "PortNumber": 55672,
-        "PortTemplate": "{{plus .InstanceID 55672}}",
-        "Protocol": "tcp",
-        "Purpose": "import_all"
-    }
-    amqp_endpoint_lc = {key.lower(): value for (key, value) in amqp_endpoint.iteritems()}
-    try:
-        rabbit_amqp = sm.Endpoint(**amqp_endpoint_lc)
-    except TypeError:
-        amqp_endpoint_lc = {key.lower(): value for (key, value) in amqp_endpoint.iteritems() if key != "PortTemplate"}
-
-    commit = False
-    zpythons = filter(lambda s: s.name == "zenpython", ctx.services)
-    log.info("Found %i services named 'zenpython'" % len(zpythons))
-    for zpython in zpythons:
-        collector = ctx.getServiceParent(zpython).name
-        rbtamqp_imports = filter(lambda ep: ep.name == "rabbitmqs_ceil" and ep.purpose == "import_all", zpython.endpoints)
-        if len(rbtamqp_imports) > 0:
-            log.info("Service %s already has a rabbitmqs_ceil endpoint." % ctx.getServicePath(zpython))
-        else:
-            log.info("Adding a rabbitmqs_ceil import endpoint to service '%s'." % ctx.getServicePath(zpython))
-            rabbit_amqp = sm.Endpoint(**amqp_endpoint_lc)
-            rabbit_amqp.__data = copy.deepcopy(amqp_endpoint)
-            rabbit_amqp.application = "openstack_rabbitmq_{}".format(collector)
-            zpython.endpoints.append(rabbit_amqp)
-            commit = True
-        rbtmgmt_imports = filter(lambda ep: ep.name == "rabbitmqadmins_ceil" and ep.purpose == "import_all", zpython.endpoints)
-        if len(rbtmgmt_imports) > 0:
-            log.info("Service %s already has a rabbitmqadmins_ceil endpoint." % ctx.getServicePath(zpython))
-        else:
-            log.info("Adding a rabbitmqadmins_ceil import endpoint to service '%s'." % ctx.getServicePath(zpython))
-            rabbit_mgmt = sm.Endpoint(**mgmt_endpoint_lc)
-            rabbit_mgmt.__data = copy.deepcopy(mgmt_endpoint)
-            rabbit_mgmt.application = "openstack_rabbitmq_{}_admin".format(collector)
-            zpython.endpoints.append(rabbit_mgmt)
-            commit = True
-
-    # Fix application names for existing rabbitmq-ceilometer and zenpython endpoints
-    # naming convention.
-    services = filter(lambda s: s.name == "zenpython" or s.name == "RabbitMQ-Ceilometer", ctx.services)
-    change_count = 0
-    for service in services:
-        collector = ctx.getServiceParent(service).name
-        for endpoint in service.endpoints:
-            if endpoint.application.startswith("rabbitmq_"):
-                new_application_name = endpoint.application.replace("rabbitmq_", "openstack_rabbitmq_")
-                log.debug("%s/%s: Changing endpoint from %s to %s", collector, service.name, endpoint.application, new_application_name)
-                endpoint.application = new_application_name
-                commit = True
-                change_count += 1
-            if endpoint.applicationtemplate.startswith("rabbitmq_"):
-                new_application_template = endpoint.applicationtemplate.replace("rabbitmq_", "openstack_rabbitmq_")
-                log.debug("%s/%s: Changing endpoint template from %s to %s", collector, service.name, endpoint.applicationtemplate, new_application_template)
-                endpoint.applicationtemplate = new_application_template
-                commit = True
-                change_count += 1
-
-    if change_count:
-        log.info("Upgraded %d endpoint names and templates to new naming convention.", change_count)
-
-    if commit:
-        ctx.commit()
 
 
 def remove_migrate_zenpython():
