@@ -66,7 +66,8 @@ class RemoveRabbitMQCeilometerService(ZenPackMigration):
         ds_types_to_delete = [
             "OpenStack Ceilometer AMQP",
             "OpenStack Ceilometer Events AMQP",
-            "OpenStack Ceilometer Heartbeats AMQP"
+            "OpenStack Ceilometer Heartbeats AMQP",
+            "OpenStack AMQP Queue Size"
         ]
         ds_names_to_delete = [
             "rabbitmq-credentials"

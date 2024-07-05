@@ -89,15 +89,6 @@ zProperties:
       containers. Provide the container names (or a pattern to match
       them) here, or leave blank in a non-containerized openstack
       environment.
-  zOpenStackAMQPUsername:
-    type: string
-    default: openstack
-    label: Username for ceilometer AMQP integration
-    description: See documentation for details.
-  zOpenStackAMQPPassword:
-    type: password
-    label: Password for ceilometer AMQP integration
-    description: See documentation for details.
   zOpenStackHostLocalDomain:
     type: string
     default: ''
@@ -377,12 +368,6 @@ device_classes:
               poolQoSSupportCount:
                 aliases: {pool_qos_support__count: null}
             parser: ZenPacks.zenoss.OpenStackInfrastructure.parsers.endpoint
-          openstackQueues:
-            type: OpenStack AMQP Queue Size
-            cycletime: 300
-            datapoints:
-              eventQueueCount: {}
-              perfQueueCount: {}
           serviceStatus:
             type: OpenStack Nova Service Status
             cycletime: 30
@@ -505,17 +490,6 @@ device_classes:
               Total:
                 dpName: openstack_networkTotalCount
                 format: '%7.0lf'
-          Queues:
-            units: count
-            miny: 0
-            graphpoints:
-              Event:
-                dpName: openstackQueues_eventQueueCount
-                format: '%7.0lf'
-              Performance:
-                dpName: openstackQueues_perfQueueCount
-                format: '%7.0lf'
-                color: 98df8a
           Routers:
             units: count
             miny: 0
