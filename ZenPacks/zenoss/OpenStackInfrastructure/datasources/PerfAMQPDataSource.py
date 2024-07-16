@@ -18,12 +18,14 @@ from Products.Zuul.form import schema
 from Products.Zuul.infos import ProxyProperty
 from Products.Zuul.utils import ZuulMessageFactory as _t
 
-from ZenPacks.zenoss.OpenStackInfrastructure.datasources.AMQPDataSource import (
-    AMQPDataSource, AMQPDataSourceInfo,
-    IAMQPDataSourceInfo)
+from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource import (
+    PythonDataSource, PythonDataSourcePlugin )
+
+from Products.Zuul.infos.template import RRDDataSourceInfo
+from Products.Zuul.interfaces import IRRDDataSourceInfo
 
 
-class PerfAMQPDataSource(AMQPDataSource):
+class PerfAMQPDataSource(PythonDataSource):
     '''
     Datasource used to capture data and events shipped to us from OpenStack
     Ceilometer via AMQP.
@@ -38,15 +40,19 @@ class PerfAMQPDataSource(AMQPDataSource):
     component = '${here/id}'
     cycletime = 300
 
+    # PythonDataSource
+    plugin_classname = 'ZenPacks.zenoss.OpenStackInfrastructure.datasources.'\
+        'PerfAMQPDataSource.PerfAMQPDataSourcePlugin'
+
     # PerfAMQPDataSource
     meter = ''
 
-    _properties = AMQPDataSource._properties + (
+    _properties = PythonDataSource._properties + (
         {'id': 'meter', 'type': 'string'},
     )
 
 
-class IPerfAMQPDataSourceInfo(IAMQPDataSourceInfo):
+class IPerfAMQPDataSourceInfo(IRRDDataSourceInfo):
     '''
     API Info interface for IPerfAMQPDataSource.
     '''
@@ -60,7 +66,7 @@ class IPerfAMQPDataSourceInfo(IAMQPDataSourceInfo):
         title=_t('Cycletime')
     )
 
-class PerfAMQPDataSourceInfo(AMQPDataSourceInfo):
+class PerfAMQPDataSourceInfo(RRDDataSourceInfo):
     '''
     API Info adapter factory for PerfAMQPDataSource.
     '''
@@ -73,3 +79,20 @@ class PerfAMQPDataSourceInfo(AMQPDataSourceInfo):
     testable = False
 
     meter = ProxyProperty('meter')
+
+
+class PerfAMQPDataSourcePlugin(PythonDataSourcePlugin):
+    """
+    Deprecated. Needed to avoid errors in the log until zenopenstack migrates to its custom datasources.
+    """
+    proxy_attributes = ('resourceId')
+    queue_name = "$OpenStackInboundPerf"
+    failure_eventClassKey = 'PerfFailure'
+
+    @classmethod
+    def params(cls, datasource, context):
+        return {
+            'meter': datasource.talesEval(datasource.meter, context),
+            'resourceId': context.resourceId,
+            'component_meta_type': context.meta_type
+        }
