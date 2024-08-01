@@ -10,12 +10,19 @@
 """Remove RabbitMQ-Ceilometer service"""
 
 import logging
-
+import Globals
+from Acquisition import aq_base
+# Platform imports
 from Products.ZenModel.migrate.Migrate import Version
 from Products.ZenModel.ZenPack import ZenPackMigration
-from service_migration import remove_migrate_zenpython
 from Products.Zuul.interfaces import ICatalogTool
 from Products.ZenModel.RRDTemplate import RRDTemplate
+from Products.ZenRelations.RelationshipBase import RelationshipBase
+# ZenPack imports
+from ZenPacks.zenoss.OpenStackInfrastructure.Instance import Instance
+from ZenPacks.zenoss.OpenStackInfrastructure.Endpoint import Endpoint
+from ZenPacks.zenoss.OpenStackInfrastructure.Vnic import Vnic
+from service_migration import remove_migrate_zenpython
 
 try:
     import servicemigration as sm
@@ -46,8 +53,40 @@ class RemoveRabbitMQCeilometerService(ZenPackMigration):
 
         self.migrate_service(pack)
         self.migrate_templates(pack.dmd)
+        self.rebuild_relations(pack)
         self.migrate_zprops(pack.dmd)
-        
+
+    def rebuild_relations(self, pack):
+        results = ICatalogTool(pack.dmd.Devices.OpenStack.Infrastructure).search([Instance, Vnic, Endpoint])
+        LOG.info("starting: %s total objects", results.total)
+        objects_migrated = 0
+
+        for brain in results:
+            try:
+                if self.updateRelations(brain.getObject()):
+                    objects_migrated += 1
+            except Exception:
+                LOG.exception(
+                    "error updating relationships for %s",
+                    brain.id)
+
+        LOG.info("finished: %s of %s objects required migration", objects_migrated, results.total)
+
+    def updateRelations(self, comp):
+        if isinstance(comp, Instance):
+            relations = Instance._relations
+        elif isinstance(comp, Endpoint):
+            relations = Endpoint._relations
+        elif isinstance(comp, Vnic):
+            relations = Vnic._relations
+        for relname in (x[0] for x in relations):
+            rel = getattr(aq_base(comp), relname, None)
+            if not rel or not isinstance(rel, RelationshipBase):
+                comp.buildRelations()
+                return True
+
+        return False
+
     def migrate_zprops(self, dmd):
         zprops_to_remove = ["zOpenStackAMQPUsername", "zOpenStackAMQPPassword"]
         for zprop in zprops_to_remove:
@@ -70,7 +109,8 @@ class RemoveRabbitMQCeilometerService(ZenPackMigration):
             "OpenStack AMQP Queue Size"
         ]
         ds_names_to_delete = [
-            "rabbitmq-credentials"
+            "rabbitmq-credentials",
+            "openstackQueues"
         ]
         templates = []
         results = ICatalogTool(dmd.Devices.OpenStack.Infrastructure).search(RRDTemplate)
