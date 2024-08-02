@@ -1,19 +1,14 @@
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2014-2017, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2014-2024, all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
 #
 ##############################################################################
-
-import logging
-log = logging.getLogger('zen.OpenStack.PerfAMQP')
-
 from zope.component import adapts
 from zope.interface import implements
 
-from Products.DataCollector.plugins.DataMaps import ObjectMap
 from Products.Zuul.form import schema
 from Products.Zuul.infos import ProxyProperty
 from Products.Zuul.utils import ZuulMessageFactory as _t
