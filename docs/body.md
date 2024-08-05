@@ -1018,6 +1018,18 @@ option requires that your browser have https connectivity to the Zenoss collecto
     external SSH access may not be available by default, and additional
     configuration may be required to achieve it.
 
+*   Starting from OpenStackInfrastructure version 4.0.1, the RabbitMQ-ceilometer
+    service has been removed from the ZenPack. As a result, events and performance
+    data are no longer collected from OpenStack Ceilometer via AMQM. OpenStack
+    Ceilometer collection have been fully migrated to the zenopenstack service.
+    The following OpenStackInfrastructure AMQP data source types are deleted
+    during the upgrade:
+
+            - OpenStack Ceilometer AMQP
+            - OpenStack Ceilometer Events AMQP
+            - OpenStack Ceilometer Heartbeats AMQP
+            - OpenStack AMQP Queue Size"
+
 
 Zenoss Analytics
 ----------------
@@ -1202,6 +1214,21 @@ Known Issues
 
 Changes
 -------
+
+4.0.1
+
+- Removed RabbitMQ-ceilometer service from the ZenPack (ZPS-8941)
+- Fixed execute permission for OSI devices (ZPS-8939)
+- Tested with Zenoss Resource Manager 6.7.0, Zenoss Cloud and Service Impact 5.7.0
+
+4.0.0
+
+- Added support for OSP 16.x
+- Increased Read timeout (ZPS-7352)
+- Modeling needs to succeed when cinder service is not available. (ZPS-7362)
+- Host name is constructed with informative string unique to the endpoint and host combination (ZPS-7318)
+- Added support for Queens, Rocky, Ussuri, Train, Victoria and Red Hat OpenStack Platform (RHOSP) version 13, 14 and 16
+- Tested with Zenoss Resource Manager 6.5.0, 6.6.0, Zenoss Cloud and Service Impact 5.5.3
 
 3.0.1
 

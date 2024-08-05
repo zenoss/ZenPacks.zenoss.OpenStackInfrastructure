@@ -89,15 +89,6 @@ zProperties:
       containers. Provide the container names (or a pattern to match
       them) here, or leave blank in a non-containerized openstack
       environment.
-  zOpenStackAMQPUsername:
-    type: string
-    default: openstack
-    label: Username for ceilometer AMQP integration
-    description: See documentation for details.
-  zOpenStackAMQPPassword:
-    type: password
-    label: Password for ceilometer AMQP integration
-    description: See documentation for details.
   zOpenStackHostLocalDomain:
     type: string
     default: ''
@@ -227,9 +218,6 @@ device_classes:
         description: 'OpenStackInfrastructure: Endpoint Monitoring'
         targetPythonClass: ZenPacks.zenoss.OpenStackInfrastructure.Endpoint
         datasources:
-          events:
-            type: OpenStack Ceilometer Events AMQP
-            cycletime: 30
           neutronAgentStatus:
             type: OpenStack Neutron Agent Status
             cycletime: 30
@@ -237,13 +225,9 @@ device_classes:
             type: Python
             plugin_classname: ZenPacks.zenoss.OpenStackInfrastructure.dsplugins.MaintenanceDataSourcePlugin
             cycletime: 7200
-          rabbitmq-credentials:
-            type: Python
-            plugin_classname: ZenPacks.zenoss.OpenStackInfrastructure.dsplugins.RabbitMQCeilometerCredentialsDataSourcePlugin
-            cycletime: 300
           openstack:
             type: COMMAND
-            commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/poll_openstack.py
+            commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.OpenStackInfrastructure/path}/libexec/poll_openstack.py
               '${here/zCommandUsername}' '${here/zCommandPassword}' '${here/zOpenStackProjectId}'
               '${here/zOpenStackUserDomainName}' '${here/zOpenStackProjectDomainName}' '${here/zOpenStackAuthUrl}' '${here/zOpenStackRegionName}'
             datapoints:
@@ -384,12 +368,6 @@ device_classes:
               poolQoSSupportCount:
                 aliases: {pool_qos_support__count: null}
             parser: ZenPacks.zenoss.OpenStackInfrastructure.parsers.endpoint
-          openstackQueues:
-            type: OpenStack AMQP Queue Size
-            cycletime: 300
-            datapoints:
-              eventQueueCount: {}
-              perfQueueCount: {}
           serviceStatus:
             type: OpenStack Nova Service Status
             cycletime: 30
@@ -512,17 +490,6 @@ device_classes:
               Total:
                 dpName: openstack_networkTotalCount
                 format: '%7.0lf'
-          Queues:
-            units: count
-            miny: 0
-            graphpoints:
-              Event:
-                dpName: openstackQueues_eventQueueCount
-                format: '%7.0lf'
-              Performance:
-                dpName: openstackQueues_perfQueueCount
-                format: '%7.0lf'
-                color: 98df8a
           Routers:
             units: count
             miny: 0
